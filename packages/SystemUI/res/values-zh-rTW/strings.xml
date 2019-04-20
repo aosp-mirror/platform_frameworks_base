@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"掃描臉孔"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"傳送"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"管理通知"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"解除鎖定"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"開啟語音小幫手"</string>
     <string name="camera_label" msgid="7261107956054836961">"開啟攝影機"</string>
@@ -368,6 +367,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"於日出時關閉"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> 關閉"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"深色主題"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 已啟用"</string>
@@ -403,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"完全\n靜音"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"僅允許\n優先通知"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"僅允許\n鬧鐘"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 無線充電 (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充飽)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中 (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充飽)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 快速充電中 (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充飽)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 慢速充電中 (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>後充飽)"</string>
@@ -506,8 +507,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"由於你已連結至「<xliff:g id="APPLICATION">%1$s</xliff:g>」，你的個人網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"你的工作資料夾是由「<xliff:g id="ORGANIZATION">%1$s</xliff:g>」所管理。由於該設定檔已連結至「<xliff:g id="APPLICATION">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。\n\n如要瞭解詳情，請與你的管理員聯絡。"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"你的工作資料夾是由「<xliff:g id="ORGANIZATION">%1$s</xliff:g>」所管理。由於該設定檔已連結至「<xliff:g id="APPLICATION_WORK">%2$s</xliff:g>」，因此你的網路活動 (包括收發電子郵件、使用應用程式和瀏覽網站) 可能會受到這個應用程式監控。\n\n此外，你還與「<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>」建立了連結，因此你的個人網路活動也可能會受到該應用程式監控。"</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"已為<xliff:g id="USER_NAME">%1$s</xliff:g>解鎖"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"「<xliff:g id="TRUST_AGENT">%1$s</xliff:g>」執行中"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"在你手動解鎖前，裝置將保持鎖定狀態"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"更快取得通知"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"解鎖前顯示"</string>
@@ -520,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"自動產生媒體字幕"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"關閉字幕提示"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"切換輸出裝置"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>

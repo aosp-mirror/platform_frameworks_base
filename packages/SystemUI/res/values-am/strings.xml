@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"የቅኝት ፊት"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ላክ"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"ማሳወቂያዎችን ያቀናብሩ"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"ክፈት"</string>
     <string name="phone_label" msgid="2320074140205331708">"ስልክ ክፈት"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"የድምጽ ረዳትን ክፈት"</string>
     <string name="camera_label" msgid="7261107956054836961">"ካሜራ ክፈት"</string>
@@ -368,6 +367,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ጸሐይ እስክትወጣ ድረስ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ላይ ይበራል"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"እስከ <xliff:g id="TIME">%s</xliff:g> ድረስ"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ጨለማ ገጽታ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"ኤንኤፍሲ"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"ኤንኤፍሲ ተሰናክሏል"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"ኤንኤፍሲ ነቅቷል"</string>
@@ -403,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ሙሉ ለሙሉ\nጸጥታ"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ቅድሚያ ተሰጪ\nብቻ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ማንቂያዎች\nብቻ"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • በገመድ አልባ ኃይል በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> እስከሚሞላ ድረስ)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ኃይል በመሙላት ላይ (እስኪሞላ ድረስ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • በፍጥነት ኃይልን በመሙላት ላይ (እስኪሞላ ድረስ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • በዝግታ ኃይልን በመሙላት ላይ (እስኪሞላ ድረስ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -506,8 +507,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"እርስዎ ኢሜይሎችን፣ መተግበሪያዎችን እና ድር ጣቢያዎችንም ጨምሮ የግል የአውታረ መረብ እንቅስቃሴዎን ከሚከታተለው ከ<xliff:g id="APPLICATION">%1$s</xliff:g> ጋር ተገናኝተዋል።"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nለተጨማሪ መረጃ የእርስዎን አስተዳዳሪ ያነጋግሩ።"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"የእርስዎ የሥራ መገለጫ በ<xliff:g id="ORGANIZATION">%1$s</xliff:g> የሚተዳደር ነው። መገለጫው ኢሜይሎችን፣ መተግበሪያዎችን፣ እና የድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴን መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ጋር ተገናኝቷል።\n\nበተጨማሪ የእርስዎን የግል የአውታረ መረብ እንቅስቃሴ መቆጣጠር ከሚችለው ከ<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ጋር ተገናኝተዋል።"</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"ለ<xliff:g id="USER_NAME">%1$s</xliff:g> ተከፍቷል"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> እያሄደ ነው"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"እራስዎ እስኪከፍቱት ድረስ መሣሪያ እንደተቆለፈ ይቆያል"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ማሳወቂያዎችን ፈጥነው ያግኙ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ከመክፈትዎ በፊት ይመልከቷቸው"</string>
@@ -520,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ሰብስብ"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ራስሰር የሥዕል መግለጫ ጽሑፍን ሚዲያ"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"የሥዕል መግለጫ ጽሑፎችን ጠቃሚ ምክር ዝጋ"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"የውጽዓት መሣሪያን ይቀይሩ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ማያ ገጽ ተሰክቷል"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል ተመለስ እና አጠቃላይ ዕይታ የሚለውን ይጫኑ እና ይያዙ።"</string>

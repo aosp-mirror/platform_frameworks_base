@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"ການສະແກນໜ້າ"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ສົ່ງ"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"ຈັດການການແຈ້ງເຕືອນ"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"ປົດລັອກ"</string>
     <string name="phone_label" msgid="2320074140205331708">"​ເປີດ​​ແປ້ນ​ໂທ​ລະ​ສັບ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ຊ່ວ​ເຫຼືອ​ເປີດ​ສຽງ"</string>
     <string name="camera_label" msgid="7261107956054836961">"ເປີດ​ກ້ອງ"</string>
@@ -368,6 +367,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ຈົນກວ່າຕາເວັນຂຶ້ນ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"ເປີດຕອນ <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"ຈົນກວ່າຈະຮອດ <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ຮູບແບບສີສັນມືດ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC is disabled"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC is enabled"</string>
@@ -403,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ຄວາມ​ງຽບ\nທັງ​ໝົດ"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ບຸ​ລິ​ມະ​ສິດ\nເທົ່າ​ນັ້ນ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ໂມງ​ປຸກ\nເທົ່າ​ນັ້ນ"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກໄຟແບບໄຮ້ສາຍ (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ຈົນກວ່າຈະເຕັມ)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກ (ອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ຈຶ່ງຈະເຕັມ)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກແບບດ່ວນ (ອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ຈຶ່ງຈະເຕັມ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ກຳລັງສາກແບບຊ້າ (ອີກ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ຈຶ່ງຈະເຕັມ)"</string>
@@ -506,8 +507,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"ທ່ານເຊື່ອມຕໍ່ກັບ <xliff:g id="APPLICATION">%1$s</xliff:g> ແລ້ວ, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານ ຮວມທັງອີເມວ, ​ແອັບ ແລະເວັບໄຊໄດ້."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກດັ່ງກ່າວເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊໄດ້.\nສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ຕິດຕໍ່ຫາຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານ\n."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານແມ່ນຖືກຈັດການໂດຍ <xliff:g id="ORGANIZATION">%1$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກດັ່ງກ່າວເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ, ແອັບ ແລະ ເວັບໄຊໄດ້.\n\nນອກຈາກນັ້ນ, ທ່ານຍັງເຊື່ອມຕໍ່ຫາ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ເຊິ່ງສາມາດຕິດຕາມການເຄື່ອນໄຫວເຄືອຂ່າຍສ່ວນຕົວຂອງທ່ານໄດ້."</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"ປົດລັອກສຳລັບ <xliff:g id="USER_NAME">%1$s</xliff:g> ແລ້ວ"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> ກຳລັງເຮັດວຽກຢູ່"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Device will stay locked until you manually unlock"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ຮັບເອົາການ​ແຈ້ງເຕືອນ​ໄວຂຶ້ນ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ເບິ່ງພວກ​ມັນກ່ອນ​ທ່ານຈະ​ປົດລັອກ"</string>
@@ -520,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ຫຍໍ້ລົງ"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ສ້າງຄຳບັນຍາຍມີເດຍໂດຍອັດຕະໂນມັດ"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"ປິດເຄັດລັບຄຳບັນຍາຍ"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"ສະຫຼັບອຸປະກອນສົ່ງສຽງອອກ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>

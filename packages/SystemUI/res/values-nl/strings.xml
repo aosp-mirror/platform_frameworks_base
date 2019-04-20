@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Gezicht scannen"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Verzenden"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Meldingen beheren"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"ontgrendelen"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefoon openen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"spraakassistent openen"</string>
     <string name="camera_label" msgid="7261107956054836961">"camera openen"</string>
@@ -368,6 +367,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Tot zonsopgang"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Donker thema"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC is uitgeschakeld"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC is ingeschakeld"</string>
@@ -403,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Totale\nstilte"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Alleen\nprioriteit"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alleen\nalarmen"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Draadloos opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Snel opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Langzaam opladen (vol over <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -506,13 +507,13 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Je bent verbonden met <xliff:g id="APPLICATION">%1$s</xliff:g>, waarmee je persoonlijke netwerkactiviteit kan worden gecontroleerd, inclusief e-mails, apps en websites."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Het profiel is verbonden met <xliff:g id="APPLICATION">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden.\n\nNeem contact op met je beheerder voor meer informatie."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Je werkprofiel wordt beheerd door <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Het profiel is verbonden met <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, waarmee je werkgerelateerde netwerkactiviteit (waaronder e-mails, apps en websites) kan worden bijgehouden.\n\nJe bent ook verbonden met <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, waarmee je persoonlijke netwerkactiviteit kan worden bijgehouden."</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"Ontgrendeld voor <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> is actief"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Het apparaat blijft vergrendeld totdat u het handmatig ontgrendelt"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Sneller meldingen ontvangen"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Weergeven voordat u ontgrendelt"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nee, bedankt"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"Configureren"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"Instellen"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Nu uitschakelen"</string>
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Geluidsinstellingen"</string>
@@ -520,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Samenvouwen"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Automatisch ondertitelen"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Ondertitelingstip sluiten"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Naar een ander uitvoerapparaat schakelen"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Scherm is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>

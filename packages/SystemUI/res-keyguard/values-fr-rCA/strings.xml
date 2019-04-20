@@ -34,7 +34,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"NIP erroné."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Cette carte n\'est pas valide."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Complètement chargé"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • En recharge sans fil"</string>
+    <!-- no translation found for keyguard_plugged_in_wireless (8404159927155454732) -->
+    <skip />
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"En recharge : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"En recharge rapide : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"En recharge lente : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
@@ -151,84 +152,4 @@
       <item quantity="one">La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM devienne définitivement inutilisable. Pour obtenir plus de détails, communiquez avec votre fournisseur de services.</item>
       <item quantity="other">La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste <xliff:g id="_NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM devienne définitivement inutilisable. Pour obtenir plus de détails, communiquez avec votre fournisseur de services.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"Il est"</annotation>\n"^1\n^2</item>
-      <item quantity="other">"<annotation name="color">"Il est"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"douze h."</item>
-    <item msgid="7389464214252023751">"Une h."</item>
-    <item msgid="8803180377002008046">"Deux h."</item>
-    <item msgid="8614897059944644719">"Trois h."</item>
-    <item msgid="2293058674782619556">"Quatre h."</item>
-    <item msgid="4815402358455041664">"Cinq h."</item>
-    <item msgid="3325754778509665687">"Six h."</item>
-    <item msgid="5805551341866280575">"Sept h."</item>
-    <item msgid="203334816668238610">"Huit h."</item>
-    <item msgid="4828052671464488923">"Neuf h."</item>
-    <item msgid="2233497913571137419">"Dix h."</item>
-    <item msgid="5621554266768657830">"Onze h."</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"heures"</item>
-    <item msgid="2091812961809760681">"et un"</item>
-    <item msgid="1496435384877290709">"et deux"</item>
-    <item msgid="881846472976674129">"et trois"</item>
-    <item msgid="2784477043911540584">"et quatre"</item>
-    <item msgid="1610928853656700614">"et cinq"</item>
-    <item msgid="2317806244043886658">"et six"</item>
-    <item msgid="3318687539120971327">"et sept"</item>
-    <item msgid="5701600693712102348">"et huit"</item>
-    <item msgid="3247381605947372495">"et neuf"</item>
-    <item msgid="3508406095411245038">"dix"</item>
-    <item msgid="7161996337755311711">"onze"</item>
-    <item msgid="4044549963329624197">"douze"</item>
-    <item msgid="333373157917379088">"treize"</item>
-    <item msgid="2631202907124819385">"quatorze"</item>
-    <item msgid="6472396076858033453">"quinze"</item>
-    <item msgid="8656981856181581643">"seize"</item>
-    <item msgid="7289026608562030619">"dix-sept"</item>
-    <item msgid="3881477602692646573">"dix-huit"</item>
-    <item msgid="3358129827772984226">"dix-neuf"</item>
-    <item msgid="3308575407402865807">"vingt"</item>
-    <item msgid="5346560955382229629">"vingt\n-et-un"</item>
-    <item msgid="226750304761473436">"vingt\n-deux"</item>
-    <item msgid="616811325336838734">"vingt\n-trois"</item>
-    <item msgid="616346116869053440">"vingt\n-quatre"</item>
-    <item msgid="4642996410384042830">"vingt\n-cinq"</item>
-    <item msgid="7506092849993571465">"vingt\n-six"</item>
-    <item msgid="1915078191101042031">"vingt\n-sept"</item>
-    <item msgid="4292378641900520252">"vingt\n-huit"</item>
-    <item msgid="5339513901773103696">"vingt\n-neuf"</item>
-    <item msgid="3574673250891657607">"trente"</item>
-    <item msgid="5796923836589110940">"trente\n-et-un"</item>
-    <item msgid="5859323597571702052">"trente\n-deux"</item>
-    <item msgid="5133326723148876507">"trente\n-trois"</item>
-    <item msgid="2693999494655663096">"trente\n-quatre"</item>
-    <item msgid="3316754944962836197">"trente\n-cinq"</item>
-    <item msgid="816891008836796723">"trente\n-six"</item>
-    <item msgid="9158890488666520078">"trente\n-sept"</item>
-    <item msgid="1894769703213894011">"trente\n-huit"</item>
-    <item msgid="5638820345598572399">"trente\n-neuf"</item>
-    <item msgid="8838304023017895439">"quarante"</item>
-    <item msgid="1834742948932559597">"quarante\n-et-un"</item>
-    <item msgid="6573707308847773944">"quarante\n-deux"</item>
-    <item msgid="2450149950652678001">"quarante\n-trois"</item>
-    <item msgid="2874667401318178036">"quarante\n-quatre"</item>
-    <item msgid="3391101532763048862">"quarante\n-cinq"</item>
-    <item msgid="1671489330863254362">"quarante\n-six"</item>
-    <item msgid="5916017359554531038">"quarante\n-sept"</item>
-    <item msgid="8205413177993059967">"quarante\n-huit"</item>
-    <item msgid="6607867415142171302">"quarante\n-neuf"</item>
-    <item msgid="8358850748472089162">"cinquante"</item>
-    <item msgid="3551313125255080234">"cinquante\n-et-un"</item>
-    <item msgid="1559678130725716542">"cinquante\n-deux"</item>
-    <item msgid="431441994725492377">"cinquante\n-trois"</item>
-    <item msgid="6345774640539623024">"cinquante\n-quatre"</item>
-    <item msgid="8018192990793931120">"cinquante\n-cinq"</item>
-    <item msgid="6187650843754604534">"cinquante\n-six"</item>
-    <item msgid="8727240174015993259">"cinquante\n-sept"</item>
-    <item msgid="848339003778952950">"cinquante\n-huit"</item>
-    <item msgid="5798985802835423618">"cinquante\n-neuf"</item>
-  </string-array>
 </resources>

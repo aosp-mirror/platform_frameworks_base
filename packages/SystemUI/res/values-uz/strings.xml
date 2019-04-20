@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Yuzni skanerlash"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Yuborish"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Bildirishnomalarni boshqarish"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"qulfdan chiqarish"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonni ochish"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ovozli yordamni yoqish"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamerani ochish"</string>
@@ -188,7 +187,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth modem"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN yoniq."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM karta yo‘q."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM karta solinmagan."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Quvvat sarfi tafsilotlari"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
@@ -368,6 +367,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Quyosh chiqqunicha"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> da yoqish"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> gacha"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tungi mavzu"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC o‘chiq"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC yoniq"</string>
@@ -403,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Tinchlik\nsaqlansin"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Faqat\nmuhimlar"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Faqat\nsignallar"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Simsiz quvvat olmoqda (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Quvvat olmoqda (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Tez quvvat olmoqda (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sekin quvvat olmoqda (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi)"</string>
@@ -418,7 +419,7 @@
     <string name="guest_exit_guest" msgid="7187359342030096885">"Mehmon rejimini o‘chirish"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"O‘chirish"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Olib tashlash"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Xush kelibsiz, mehmon!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Seansni davom ettirmoqchimisiz?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Boshidan boshlansin"</string>
@@ -497,17 +498,17 @@
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN sozlamalarini ochish"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Ishonchli sertifikatlarni ochish"</string>
-    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi.\n\nBatafsil ma’lumot olish uchun administratoringizga murojaat qiling."</string>
+    <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yoqdi.\n\nBatafsil axborot olish uchun administratoringizga murojaat qiling."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"Siz ilovaga VPN tarmog‘iga ulanishga ruxsat bergansiz.\n\nUshbu ilova qurilmangiz va internetdagi harakatlaringizni, jumladan, e-pochta, ilovalar va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Sizning ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministrator internetdagi harakatlaringizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlar bilan ishlashingizni kuzatishi mumkin.\n\nBatafsil ma’lumot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz VPN tarmog‘iga ham ulangansiz. U internetdagi harakatlaringizni kuzatishi mumkin."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"Sizning ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi.\n\nAdministrator internetdagi harakatlaringizni, jumladan, e-pochta, ilova va xavfsiz veb-saytlar bilan ishlashingizni kuzatishi mumkin.\n\nBatafsil axborot olish uchun administrator bilan bog‘laning.\n\nShuningdek, siz VPN tarmog‘iga ham ulangansiz. U internetdagi harakatlaringizni kuzatishi mumkin."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi ishga tushirilgan. U tarmoqdagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi ishga tushirilgan. U internetdagi harakatlaringiz, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi ishga tushirilgan. U internetdagi harakatlaringiz, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi. <xliff:g id="APPLICATION">%2$s</xliff:g> ilovasi ish tarmog‘idagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin.\n\nBatafsil axborot olish uchun administrator bilan bog‘laning."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ilovasi ish tarmog‘idagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin.\n\nShuningdek, <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ilovasi ham shaxsiy tarmoqdagi harakatlaringizni kuzatishi mumkin."</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> uchun qulfdan chiqarilgan"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> ishlamoqda"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Qurilma qo‘lda qulfdan chiqarilmaguncha qulflangan holatda qoladi"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirishnomalarni tezroq oling"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ularni qulfdan chiqarishdan oldin ko‘ring"</string>
@@ -520,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Avtomatik taglavha mediasi"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Taglavhalar maslahatini yopish"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Audiochiqish qurilmasini almashtirish"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
@@ -682,7 +689,7 @@
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"O‘ngga qaragan ko‘rsatkichli chiziq"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Markaziy ko‘rsatkichli chiziq"</string>
     <string name="keyboard_key_tab" msgid="3871485650463164476">"Tab"</string>
-    <string name="keyboard_key_space" msgid="2499861316311153293">"Bo‘sh joy"</string>
+    <string name="keyboard_key_space" msgid="2499861316311153293">"Probel"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Ijro/Pauza"</string>
@@ -705,12 +712,12 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Orqaga"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Bildirishnomalar"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Tezkor tugmalar"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Klaviatura sxemasini almashtirish"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Klaviatura terilmasini almashtirish"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Ilovalar"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Yordamchi"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Brauzer"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"Kontaktlar"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"E-pochta"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"Email"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Musiqa"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
@@ -731,7 +738,7 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Yoniq"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Yoqilmagan"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatsiya paneli"</string>
-    <string name="nav_bar_layout" msgid="3664072994198772020">"Sxema"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Tugmalar joylashuvi"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Qo‘shimcha Chapga tugmasi turi"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Qo‘shimcha O‘ngga tugmasi turi"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(standart)"</string>
@@ -789,7 +796,7 @@
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"<xliff:g id="POSITION">%1$d</xliff:g>-joy, “<xliff:g id="TILE_NAME">%2$s</xliff:g>” tugmasi. Tahrirlash uchun ustiga ikki marta bosing."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi. Qo‘shish uchun ustiga ikki marta bosing."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasini ko‘chirish"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasini o‘chirish"</string>
+    <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> tugmasini olib tashlash"</string>
     <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"<xliff:g id="POSITION">%2$d</xliff:g>-joyga buni qo‘shish: <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"<xliff:g id="POSITION">%2$d</xliff:g>-joyga buni ko‘chirish: <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Tezkor sozlamalar muharriri"</string>
@@ -871,7 +878,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Almashtirish"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Fonda ishlayotgan ilovalar"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya va trafik sarfi tafsilotlari uchun ustiga bosing"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Mobil internet faolsizlantirilsinmi?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Mobil internet uzilsinmi?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> orqali internetdan foydalana olmaysiz. Internet faqat Wi-Fi orqali ishlaydi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"aloqa operatoringiz"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Ilova ruxsatnoma so‘roviga xalaqit qilayotgani tufayli, “Sozlamalar” ilovasi javobingizni tekshira olmaydi."</string>
