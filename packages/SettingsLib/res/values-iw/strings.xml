@@ -104,13 +104,13 @@
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"השתמש עבור גישה לאינטרנט"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"שימוש עבור מפה"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"‏השתמש לגישה של SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"השתמש עבור אודיו של מדיה"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"שימוש לאודיו של מדיה"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"השתמש עבור האודיו של הטלפון"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"השתמש להעברת קבצים"</string>
-    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"השתמש לקלט"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"לצורך העברת קבצים"</string>
+    <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"שימוש כקלט"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"שימוש בשביל מכשירי שמיעה"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"התאם"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"התאם"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"התאמה"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"התאמה"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ביטול"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"לאחר החיבור, התאמה מספקת גישה לאנשי הקשר ולהיסטוריית השיחות שלך."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"לא ניתן לבצע התאמה עם <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -161,10 +161,10 @@
     <string name="tts_lang_use_system" msgid="2679252467416513208">"שימוש בשפת המערכת"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"לא נבחרה שפה"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"מגדיר קול ספציפי לשפה עבור הטקסט הנאמר"</string>
-    <string name="tts_play_example_title" msgid="7094780383253097230">"האזן לדוגמה"</string>
-    <string name="tts_play_example_summary" msgid="8029071615047894486">"הפעל הדגמה קצרה של סינתזת דיבור"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"התקן נתוני קול"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"התקן את הנתונים הקוליים הדרושים לסינתזת דיבור"</string>
+    <string name="tts_play_example_title" msgid="7094780383253097230">"דוגמה"</string>
+    <string name="tts_play_example_summary" msgid="8029071615047894486">"הפעלת הדגמה קצרה של סינתזת דיבור"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"התקנת נתוני קול"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"התקנת הנתונים הקוליים הדרושים לסינתזת דיבור"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"ייתכן שמנוע סינתזת דיבור זה יכול לאסוף את כל הטקסט המדובר, כולל נתונים אישיים כגון סיסמאות ומספרי כרטיסי אשראי. הוא מגיע מהמנוע <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. להפוך את השימוש במנוע סינתזת דיבור זה לפעיל?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"שפה זו דורשת חיבור רשת פעיל עבור פלט טקסט לדיבור."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"זוהי דוגמה לסינתזת דיבור"</string>
@@ -205,7 +205,7 @@
     <string name="clear_adb_keys" msgid="4038889221503122743">"‏ביטול הרשאות לניפוי ב-USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"קיצור של דוח באגים"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"כדי ליצור דוח באגים, הצג לחצן בתפריט לניהול צריכת החשמל"</string>
-    <string name="keep_screen_on" msgid="1146389631208760344">"השאר פועל"</string>
+    <string name="keep_screen_on" msgid="1146389631208760344">"שיישאר פועל"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"המסך לעולם לא יהיה במצב שינה במהלך טעינה"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"‏הפעלת Snoop Log של Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"‏איחוד חבילות Bluetooth. (יש להחליף מצב Bluetooth לאחר שינוי הגדרה זו)"</string>
@@ -218,7 +218,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"אפליקציה של מיקום מדומה: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"תקשורת רשתות"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"‏אישור של תצוגת WiFi"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏הפעל רישום מפורט של Wi‑Fi ביומן"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏הפעלת רישום מפורט של Wi‑Fi ביומן"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
@@ -237,7 +237,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"‏הפעלת Codec אודיו LDAC ל-Bluetooth\nבחירה: איכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"‏DNS פרטי"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"‏צריך לבחור במצב DNS פרטי"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"‏יש לבחור במצב DNS פרטי"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"מושבת"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"באופן אוטומטי"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"‏שם מארח של ספק DNS פרטי"</string>
@@ -255,8 +255,8 @@
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"בחר מאגר נתונים זמני ליומן לשם אחסון מתמיד במכשיר"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"‏בחר תצורת USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"‏בחר תצורת USB"</string>
-    <string name="allow_mock_location" msgid="2787962564578664888">"אפשר מיקומים מדומים"</string>
-    <string name="allow_mock_location_summary" msgid="317615105156345626">"אפשר מיקומים מדומים"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"אפשרות של מיקומים מדומים"</string>
+    <string name="allow_mock_location_summary" msgid="317615105156345626">"אפשרות של מיקומים מדומים"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"אפשר בדיקת תכונת תצוגה"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏השאר את חבילת הגלישה פעילה תמיד, גם כש-Wi‑Fi פעיל (למעבר מהיר בין רשתות)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"אם השירות זמין, יש להשתמש בשיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
@@ -301,7 +301,7 @@
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"‏חריגה בניפוי באגים ב-GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"‏השבת שכבות על של HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"‏השתמש תמיד ב-GPU להרכבת מסך"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"צור הדמיה של מרחב צבעים"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"יצירת הדמיה של מרחב צבעים"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"‏הפעל מעקבי OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"‏השבת ניתוב אודיו ב-USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏השבת ניתוב אוטומטי אל התקני אודיו חיצוניים ב-USB"</string>
@@ -355,7 +355,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"אפליקציה פעילה. הקש כדי להחליף מצב."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"אפליקציה במצב המתנה:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"שירותים פועלים"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"הצג ושלוט בשירותים הפועלים כעת"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"הצגת השירותים הפועלים כעת ושליטה בהם"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏יישום WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏הגדרת יישום WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"אפשרות זו כבר אינה תקפה. נסה שוב."</string>

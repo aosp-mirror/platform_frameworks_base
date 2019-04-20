@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ້​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"​ໃຊ້​ສຳ​ລັບການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ການແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"ຂໍ້ຄວາມ"</string>
@@ -315,7 +315,7 @@
     <string name="track_frame_time" msgid="6094365083096851167">"ການປະມວນຜົນໂປຣໄຟລ໌ HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"ເປີດໃຊ້ຊັ້ນຂໍ້ມູນດີບັກ GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ອະນຸຍາດການໂຫລດຊັ້ນຂໍ້ມູນດີບັກ GPU ສຳລັບແອັບດີບັກ"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"ຂະໜາດອະນິເມຊັນ"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ຂະໜາດອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"ໄລຍະເວລາອະນິເມຊັນ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>

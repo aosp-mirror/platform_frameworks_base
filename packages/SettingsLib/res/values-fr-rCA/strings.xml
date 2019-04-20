@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accès Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contact"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contacts"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Utiliser pour le partage de contacts"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Messages texte"</string>
@@ -245,7 +245,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Impossible de se connecter"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Mesuré"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Non mesuré"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tailles des mémoires tampons d\'enregistreur"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Tailles enreg. par tampon journal"</string>
@@ -292,7 +292,7 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"Superposition écran indiquant données actuelles"</string>
     <string name="show_touches" msgid="2642976305235070316">"Afficher éléments sélect."</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Afficher repère visuel pour éléments sélectionnés"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Affich. mise à jour surface"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Afficher mises à jour surface"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Faire clignoter les surfaces à chaque mise à jour"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Afficher m. à j. affichage"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Faire clignoter éléments dessinés dans les fenêtres"</string>
@@ -301,7 +301,7 @@
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Déboguer les conflits GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Désact. superpos. matér."</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Toujours utiliser le GPU pour la composition écran"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"Simuler esp. colorimétrique"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Simuler espace colorimétrique"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Enable OpenGL traces"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Désact. routage audio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Désactiver routage automatique appareils audio USB"</string>
@@ -313,17 +313,17 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Déboguer opérations de découpage non rectangulaire"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Rendu HWUI du profil"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activ. couches débog. GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Autor. couches débog. GPU pour applis de débogage"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activer couches débogage GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Autoriser couches débogage GPU pour applis de débogage"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Échelle animation fenêtres"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Échelle anim. transitions"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Échelle animination transitions"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Échelle durée animation"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simul. affich. secondaires"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Applications"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ne pas conserver activités"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Supprimer immédiatement les activités abandonnées"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Limite processus arr.-plan"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Affich. ANR arrière-plan"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Afficher ANR arrière-plan"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Afficher le message « L\'application ne répond plus » pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Affich. avertiss. canal notification"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Afficher avertiss. à l\'écran quand une app présente une notific. sans canal valide"</string>

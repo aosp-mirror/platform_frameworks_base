@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència de fitxers"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispositiu d\'entrada"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accés a Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartir contactes"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartició de contactes"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"S\'utilitza per compartir contactes."</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Connexió compartida a Internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Missatges de text"</string>
@@ -245,8 +245,8 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Augmenta nivell de registre Wi‑Fi, mostra\'l per SSID RSSI al selector de Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Amb límit de dades"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sense límit de dades"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"D\'ús mesurat"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Mides de la mem. intermèdia del registrador"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Selecciona la mida de la memòria intermèdia del registre"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
@@ -287,15 +287,15 @@
     <string name="media_category" msgid="4388305075496848353">"Multimèdia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisió"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Mode estricte activat"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Centelleja si les aplicacions tarden molt al procés principal"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Il·lumina si les aplicacions tarden molt al procés principal"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Ubicació del punter"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Superposa les dades dels tocs a la pantalla"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostra els tocs"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostra la ubicació visual dels tocs"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Canvis de superfície"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Actualitza superfícies de finestres en actualitzar-se"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Il·lumina superfícies de finestres en actualitzar-se"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Mostra actualitzacions"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Actualitza visualitzacions de finestres creades"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Il·lumina visualitzacions de finestres creades"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Mostra actualitzacions de capes de maquinari"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Il·lumina capes de maquinari en verd en actualitzar-se"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depura sobredibuix de GPU"</string>
@@ -322,12 +322,12 @@
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplicacions"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"No desis les activitats"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Destrueix activitats quan l\'usuari deixi d\'utilitzar-les"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Límita processos en segon pla"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Límit de processos en segon pla"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostra ANR en segon pla"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Informa que una aplicació en segon pla no respon"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostra el quadre de diàleg L\'aplicació no respon per a aplicacions en segon pla"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Mostra avisos del canal de notificacions"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Mostra un avís a la pantalla quan una aplicació publica una notificació sense un canal vàlid"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Força permís d\'aplicacions a l\'emmagatzem. extern"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Força permetre aplicacions de manera externa"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Força l\'ajust de la mida de les activitats"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits."</string>

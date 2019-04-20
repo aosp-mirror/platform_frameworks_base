@@ -279,7 +279,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"Програма для налагодження: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Вибір додатка"</string>
     <string name="no_application" msgid="2813387563129153880">"Нічого"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Зачекайте на налагоджувач"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Очікування налагоджувача"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Додаток очікує підключення налагоджувача"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ввід"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Рисування"</string>
@@ -354,8 +354,8 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивний додаток. Торкніться, щоб активувати."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активний додаток. Торкніться, щоб дезактивувати."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Режим очікування: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені служби"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Перегляд і керування запущеними службами"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені сервіси"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Переглянути й налаштувати запущені сервіси"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Налаштувати застосування WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ця опція більше не дійсна. Повторіть спробу."</string>

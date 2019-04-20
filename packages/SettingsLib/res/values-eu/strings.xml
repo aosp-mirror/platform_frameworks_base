@@ -163,8 +163,8 @@
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Esandako testuaren ahotsa hizkuntzaren arabera ezartzen du"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Entzun adibide bat"</string>
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Erreproduzitu hizketa-sintesiaren demostrazio laburra"</string>
-    <string name="tts_install_data_title" msgid="4264378440508149986">"Instalatu ahotsaren datuak"</string>
-    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalatu hizketaren sintesirako behar diren ahotsaren datuak"</string>
+    <string name="tts_install_data_title" msgid="4264378440508149986">"Instalatu ahots-datuak"</string>
+    <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalatu hizketaren sintesirako behar diren ahots-datuak"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Hizketaren sintesi-motorrak idazten duzun testu guztia bil dezake, pasahitzak eta kreditu-txarteleko zenbakiak bezalako datu pertsonalak barne. <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> motorrak egin du eskaera. Hizketaren sintesi-motor hori erabili nahi duzu?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Testua ahots bihurtzeko eginbidea erabiltzeko, hizkuntza honek sareko konexioa behar du."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Hizketa-sintesiaren adibide bat da hau"</string>
@@ -193,7 +193,7 @@
     <string name="choose_profile" msgid="6921016979430278661">"Aukeratu profila"</string>
     <string name="category_personal" msgid="1299663247844969448">"Pertsonalak"</string>
     <string name="category_work" msgid="8699184680584175622">"Lanekoak"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Garatzaileen aukerak"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Garatzaileentzako aukerak"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Gaitu garatzaileen aukerak"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Ezarri aplikazioak garatzeko aukerak"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Erabiltzaile honek ez ditu garatzaileen aukerak"</string>
@@ -217,8 +217,8 @@
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Ez da ezarri kokapen faltsuen aplikaziorik"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Kokapen faltsuen aplikazioa: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Sareak"</string>
-    <string name="wifi_display_certification" msgid="8611569543791307533">"Hari gabeko bistaratze-egiaztapena"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Gaitu Wi-Fi sareetan saioa hasteko modu xehatua"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"Hari gabe bistaratzeko ziurtagiria"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Erakutsi Bluetooth gailuak izenik gabe"</string>
@@ -243,8 +243,8 @@
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"DNS hornitzaile pribatuaren ostalari-izena"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Idatzi DNS hornitzailearen ostalari-izena"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ezin izan da konektatu"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabeko bistaratze-egiaztapenaren aukerak"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago Wi-Fi sareetan saioa hasterakoan. Erakutsi sarearen identifikatzailea eta seinalearen indarra Wi‑Fi sareen hautagailuan."</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautagailuan."</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Sare mugatua"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sare ez-mugatua"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Erregistroen buffer-tamainak"</string>
@@ -258,7 +258,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Onartu kokapen faltsuak"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Onartu kokapen faltsuak"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Gaitu ikuspegiaren atributuak ikuskatzeko aukera"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantendu mugikorreko datuak beti aktibo, baita Wi-Fi konexioa aktibo dagoenean ere (sarez bizkor aldatu ahal izateko)"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantendu mugikorreko datuak beti aktibo, baita wifi-konexioa aktibo dagoenean ere (sarez bizkor aldatu ahal izateko)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Erabilgarri badago, erabili konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB arazketa onartu?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB arazketa garapen-xedeetarako soilik dago diseinatuta. Erabil ezazu ordenagailuaren eta gailuaren artean datuak kopiatzeko, aplikazioak gailuan jakinarazi gabe instalatzeko eta erregistro-datuak irakurtzeko."</string>
@@ -268,7 +268,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Egiaztatu USBko aplikazioak"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak antzemateko."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP egiaztapena"</string>
@@ -287,7 +287,7 @@
     <string name="media_category" msgid="4388305075496848353">"Multimedia-edukia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Kontrola"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modu zorrotza gaituta"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Distira hari nagusian eragiketa luzeak egitean"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Egin distira hari nagusian eragiketa luzeak egitean"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Erakuslearen kokapena"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Ukipen-datuak erakusteko pantaila-gainjartzea"</string>
     <string name="show_touches" msgid="2642976305235070316">"Erakutsi sakatutakoa"</string>
@@ -308,7 +308,7 @@
     <string name="debug_layout" msgid="5981361776594526155">"Erakutsi diseinu-mugak"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Behartu eskuin-ezker norabidea"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera eskualdeko ezarpen guztiekin."</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera eskualdeko ezarpen guztiekin"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Behartu 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Araztu angeluzuzenak ez diren klip-eragiketak"</string>
@@ -332,8 +332,8 @@
     <string name="force_resizable_activities" msgid="8615764378147824985">"Behartu jardueren tamaina doitu ahal izatea"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Eman aukera jarduera guztien tamaina doitzeko, hainbat leihotan erabili ahal izan daitezen, manifestuan jartzen duena jartzen duela ere."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Gaitu estilo libreko leihoak"</string>
-    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Onartu estilo libreko leiho esperimentalak."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Babesk. pasahitz lokala"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Onartu estilo libreko leiho esperimentalak"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Babeskopien pasahitz lokala"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Une honetan, ordenagailuko babeskopia osoak ez daude babestuta"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Ordenagailuko eduki guztiaren babeskopia egiteko erabiltzen den pasahitza aldatzeko edo kentzeko, sakatu hau"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Babeskopiaren pasahitz berria ezarri da"</string>

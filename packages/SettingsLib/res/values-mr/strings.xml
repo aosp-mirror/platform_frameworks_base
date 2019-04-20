@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"फाइल स्थानांतरण"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"इनपुट डिव्हाइस"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"इंटरनेट अॅक्सेस"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क सामायिकरण"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"संपर्क शेअरिंग"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"संपर्क सामायिकरणासाठी वापरा"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"इंटरनेट कनेक्शन शेअररण"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"मजकूर मेसेज"</string>

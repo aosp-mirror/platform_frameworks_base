@@ -321,13 +321,13 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"I-simulate, ika-2 display"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Mga App"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Huwag magtago ng mga aktibidad"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Sirain ang bawat aktibidad sa sandaling iwan ito ng user"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Burahin ang aktibidad kapag iniwan na ito ng user"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Limitasyon ng proseso sa background"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Ipakita ang mga ANR sa background"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Ipakita ang dialog na Hindi Tumutugon ang App para sa mga app sa background"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ipakita ang mga babala sa notification channel"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Nagpapakita ng babala sa screen kapag nag-post ang app ng notification nang walang wastong channel"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Pwersahang payagan ang mga app sa external"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Puwersahang payagan ang mga app sa external"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Sapilitang gawing resizable ang mga aktibidad"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Gawing nare-resize ang lahat ng aktibidad para sa multi-window, anuman ang mga value ng manifest."</string>

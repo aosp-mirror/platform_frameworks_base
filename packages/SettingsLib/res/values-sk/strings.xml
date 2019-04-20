@@ -82,7 +82,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonické hovory"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos súborov"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Vstupné zariadenie"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prístup na Internet"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prístup na internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Zdieľanie kontaktov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Použiť na zdieľanie kontaktov"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Zdieľanie pripojenia na Internet"</string>
@@ -178,7 +178,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Preferovaný nástroj"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Všeobecné"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Obnoviť výšku hlasu"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Obnovte predvolenú výšku hlasu vyslovujúceho text."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Resetuje výšku hlasu čítajúceho text na predvolenú hodnotu."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Veľmi pomaly"</item>
     <item msgid="4795095314303559268">"Pomaly"</item>
@@ -245,7 +245,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nepodarilo sa pripojiť"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"S meraním dát"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávacia pamäť nástroja denníkov"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veľkosť vyrovnávacej pamäte nástroja denníkov"</string>
