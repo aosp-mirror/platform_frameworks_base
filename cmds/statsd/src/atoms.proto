@@ -156,7 +156,7 @@ message Atom {
         KeyValuePairsAtom key_value_pairs_atom = 83 [(allow_from_any_uid) = true];
         VibratorStateChanged vibrator_state_changed = 84;
         DeferredJobStatsReported deferred_job_stats_reported = 85;
-        ThermalThrottlingStateChanged thermal_throttling = 86;
+        ThermalThrottlingStateChanged thermal_throttling = 86 [deprecated=true];
         BiometricAcquired biometric_acquired = 87;
         BiometricAuthenticated biometric_authenticated = 88;
         BiometricErrorOccurred biometric_error_occurred = 89;
@@ -270,7 +270,7 @@ message Atom {
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted =
-	    180 [(log_from_module) = "permissioncontroller"];
+            180 [(log_from_module) = "permissioncontroller"];
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
         AppMovedStorageReported app_moved_storage_reported = 183;
@@ -280,6 +280,7 @@ message Atom {
         BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
         IntelligenceEventReported intelligence_event_reported =
             188 [(log_from_module) = "intelligence"];
+        ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
     }
 
     // Pulled events will start at field 10000.
@@ -409,6 +410,7 @@ message KeyValuePairsAtom {
  */
 
 /**
+ * This atom is deprecated starting in Q. Please use ThermalThrottlingSeverityStateChanged.
  * Logs when the Thermal service HAL notifies the throttling start/stop events.
  *
  * Logged from:
@@ -426,14 +428,7 @@ message ThermalThrottlingStateChanged {
     }
     optional State state = 2;
 
-    // Temperature in deci degrees celsius
     optional float temperature = 3;
-
-    // Severity of throttling
-    optional android.os.ThrottlingSeverityEnum severity = 4;
-
-    // Thermistor name
-    optional string sensor_name = 5;
 }
 
 /**
@@ -2361,6 +2356,27 @@ message SlowIo {
 message BatteryCausedShutdown {
     // The last recorded battery voltage prior to shutdown.
     optional int32 last_recorded_micro_volt = 1;
+}
+
+/**
+ * Logs when ThermalService receives throttling events.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message ThermalThrottlingSeverityStateChanged {
+    // The type of temperature being reported (CPU, GPU, SKIN, etc)
+    optional android.os.TemperatureTypeEnum sensor_type = 1;
+
+    // The name of the temperature source. Eg. CPU0
+    optional string sensor_name = 2;
+
+    // Temperature in tenths of a degree C.
+    // For BCL, it is decimillivolt, decimilliamps, and percentage * 10.
+    optional int32 temperature_deci_celsius = 3;
+
+    // Relative severity of the throttling, see enum definition.
+    optional android.os.ThrottlingSeverityEnum severity = 4;
 }
 
 /**
