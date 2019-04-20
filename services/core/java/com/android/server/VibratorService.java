@@ -236,6 +236,7 @@ public class VibratorService extends IVibratorService.Stub
                     case VibrationEffect.EFFECT_CLICK:
                     case VibrationEffect.EFFECT_DOUBLE_CLICK:
                     case VibrationEffect.EFFECT_HEAVY_CLICK:
+                    case VibrationEffect.EFFECT_TEXTURE_TICK:
                     case VibrationEffect.EFFECT_TICK:
                     case VibrationEffect.EFFECT_POP:
                     case VibrationEffect.EFFECT_THUD:
@@ -378,6 +379,9 @@ public class VibratorService extends IVibratorService.Stub
         mFallbackEffects.put(VibrationEffect.EFFECT_DOUBLE_CLICK, doubleClickEffect);
         mFallbackEffects.put(VibrationEffect.EFFECT_TICK, tickEffect);
         mFallbackEffects.put(VibrationEffect.EFFECT_HEAVY_CLICK, heavyClickEffect);
+
+        mFallbackEffects.put(VibrationEffect.EFFECT_TEXTURE_TICK,
+                VibrationEffect.get(VibrationEffect.EFFECT_TICK, false));
 
         mScaleLevels = new SparseArray<>();
         mScaleLevels.put(SCALE_VERY_LOW,

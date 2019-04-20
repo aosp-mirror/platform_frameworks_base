@@ -30,6 +30,7 @@ import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_LEFT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -166,6 +167,7 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.Snoo
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -3582,6 +3584,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mBouncerShowing) {
             updatePanelExpansionForKeyguard();
         }
+
+        // Notify overview proxy service of the new states
+        Dependency.get(OverviewProxyService.class).setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING,
+                isBouncerShowing());
     }
 
     /**
@@ -3920,6 +3926,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mScrimController.setWakeLockScreenSensorActive(true);
             }
 
+            if (reason == DozeLog.PULSE_REASON_DOCKING && mStatusBarWindow != null) {
+                mStatusBarWindow.suppressWakeUpGesture(true);
+            }
+
             boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION;
             // Set the state to pulsing, so ScrimController will know what to do once we ask it to
             // execute the transition. The pulse callback will then be invoked when the scrims
@@ -3939,6 +3949,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     callback.onPulseFinished();
                     updateNotificationPanelTouchState();
                     mScrimController.setWakeLockScreenSensorActive(false);
+                    if (mStatusBarWindow != null) {
+                        mStatusBarWindow.suppressWakeUpGesture(false);
+                    }
                     setPulsing(false);
                 }
 

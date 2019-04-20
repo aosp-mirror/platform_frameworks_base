@@ -1,5 +1,7 @@
 package com.android.systemui.power;
 
+import com.android.settingslib.fuelgauge.Estimate;
+
 public interface EnhancedEstimates {
 
     /**

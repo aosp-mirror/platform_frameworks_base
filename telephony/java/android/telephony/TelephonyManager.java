@@ -10343,11 +10343,12 @@ public class TelephonyManager {
     }
 
     /**
-     * Determine whether the emergency assistance feature is available on the device.
+     * Returns whether {@link TelephonyManager#ACTION_EMERGENCY_ASSISTANCE emergency assistance} is
+     * available on the device.
      * <p>
      * Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
      *
-     * @return whether the emergency assistance feature is available on the device
+     * @return {@code true} if emergency assistance is available, {@code false} otherwise
      *
      * @hide
      */

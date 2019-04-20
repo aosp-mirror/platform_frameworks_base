@@ -128,6 +128,24 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         addView(mDivider);
     }
 
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // We want all the logic of LinearLayout#onMeasure, and for it to assign the excess space
+        // not used by the other children to PagedTileLayout. However, in this case, LinearLayout
+        // assumes that PagedTileLayout would use all the excess space. This is not the case as
+        // PagedTileLayout height is quantized (because it shows a certain number of rows).
+        // Therefore, after everything is measured, we need to make sure that we add up the correct
+        // total height
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int height = getPaddingBottom() + getPaddingTop();
+        int numChildren = getChildCount();
+        for (int i = 0; i < numChildren; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE) height += child.getMeasuredHeight();
+        }
+        setMeasuredDimension(getMeasuredWidth(), height);
+    }
+
     public View getDivider() {
         return mDivider;
     }
@@ -282,6 +300,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mFooter.onConfigurationChanged();
+        updateResources();
 
         updateBrightnessMirror();
     }

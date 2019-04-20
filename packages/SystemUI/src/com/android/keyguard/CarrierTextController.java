@@ -383,7 +383,7 @@ public class CarrierTextController {
         }
 
         if (TextUtils.isEmpty(displayText) && !airplaneMode) {
-            displayText = TextUtils.join(mSeparator, carrierNames);
+            displayText = joinNotEmpty(mSeparator, carrierNames);
         }
         final CarrierTextCallbackInfo info = new CarrierTextCallbackInfo(
                 displayText,
@@ -544,6 +544,25 @@ public class CarrierTextController {
         } else {
             return "";
         }
+    }
+
+    /**
+     * Joins the strings in a sequence using a separator. Empty strings are discarded with no extra
+     * separator added so there are no extra separators that are not needed.
+     */
+    private static CharSequence joinNotEmpty(CharSequence separator, CharSequence[] sequences) {
+        int length = sequences.length;
+        if (length == 0) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            if (!TextUtils.isEmpty(sequences[i])) {
+                if (!TextUtils.isEmpty(sb)) {
+                    sb.append(separator);
+                }
+                sb.append(sequences[i]);
+            }
+        }
+        return sb.toString();
     }
 
     private static List<CharSequence> append(List<CharSequence> list, CharSequence string) {

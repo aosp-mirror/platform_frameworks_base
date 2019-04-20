@@ -3165,8 +3165,8 @@ public class Notification implements Parcelable
     /**
      * Gets the {@link LocusId} associated with this notification.
      *
-     * <p>Used by the device's intelligence services to correlate objects (such as
-     * {@link ShortcutInfo} and {@link ContentCaptureContext}) that are correlated.
+     * <p>Used by the Android system to correlate objects (such as
+     * {@link ShortcutInfo} and {@link ContentCaptureContext}).
      */
     @Nullable
     public LocusId getLocusId() {
@@ -3534,8 +3534,8 @@ public class Notification implements Parcelable
          * Sets the {@link LocusId} associated with this notification.
          *
          * <p>This method should be called when the {@link LocusId} is used in other places (such
-         * as {@link ShortcutInfo} and {@link ContentCaptureContext}) so the device's intelligence
-         * services can correlate them.
+         * as {@link ShortcutInfo} and {@link ContentCaptureContext}) so the Android system can
+         * correlate them.
          */
         @NonNull
         public Builder setLocusId(@Nullable LocusId locusId) {

@@ -63,6 +63,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mLayoutDirection;
     private int mHorizontalClipBound;
     private final Rect mClippingRect;
+    private int mLastMaxHeight = -1;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -303,8 +304,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         final int nTiles = mTiles.size();
-        if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
+        // If we have no reason to recalculate the number of rows, skip this step. In particular,
+        // if the height passed by its parent is the same as the last time, we try not to remeasure.
+        if (mDistributeTiles || mLastMaxHeight != MeasureSpec.getSize(heightMeasureSpec)) {
 
+            mLastMaxHeight = MeasureSpec.getSize(heightMeasureSpec);
             // Only change the pages if the number of rows or columns (from updateResources) has
             // changed or the tiles have changed
             if (mPages.get(0).updateMaxRows(heightMeasureSpec, nTiles) || mDistributeTiles) {

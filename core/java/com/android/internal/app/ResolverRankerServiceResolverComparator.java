@@ -126,7 +126,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
                             Log.e(TAG, "Receiving null prediction results.");
                         }
                         mHandler.removeMessages(RESOLVER_RANKER_RESULT_TIMEOUT);
-                        mAfterCompute.afterCompute();
+                        afterCompute();
                     }
                     break;
 
@@ -135,7 +135,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
                         Log.d(TAG, "RESOLVER_RANKER_RESULT_TIMEOUT; unbinding services");
                     }
                     mHandler.removeMessages(RESOLVER_RANKER_SERVICE_RESULT);
-                    mAfterCompute.afterCompute();
+                    afterCompute();
                     break;
 
                 default:
@@ -149,7 +149,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         super(context, intent);
         mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
         mReferrerPackage = referrerPackage;
-        mAfterCompute = afterCompute;
         mContext = context;
 
         mCurrentTime = System.currentTimeMillis();
@@ -157,6 +156,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         mStats = mUsm.queryAndAggregateUsageStats(mSinceTime, mCurrentTime);
         mAction = intent.getAction();
         mRankerServiceName = new ComponentName(mContext, this.getClass());
+        setCallBack(afterCompute);
     }
 
     // compute features for each target according to usage stats of targets.
@@ -328,9 +328,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
             mContext.unbindService(mConnection);
             mConnection.destroy();
         }
-        if (mAfterCompute != null) {
-            mAfterCompute.afterCompute();
-        }
+        afterCompute();
         if (DEBUG) {
             Log.d(TAG, "Unbinded Resolver Ranker.");
         }
@@ -513,9 +511,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
                 Log.e(TAG, "Error in Predict: " + e);
             }
         }
-        if (mAfterCompute != null) {
-            mAfterCompute.afterCompute();
-        }
+        afterCompute();
     }
 
     // adds select prob as the default values, according to a pre-trained Logistic Regression model.

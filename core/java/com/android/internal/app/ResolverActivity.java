@@ -108,7 +108,7 @@ public class ResolverActivity extends Activity {
     private Button mAlwaysButton;
     private Button mOnceButton;
     private Button mSettingsButton;
-    private View mProfileView;
+    protected View mProfileView;
     private int mIconDpi;
     private int mLastSelected = AbsListView.INVALID_POSITION;
     private boolean mResolvingHome = false;
@@ -142,9 +142,7 @@ public class ResolverActivity extends Activity {
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
             mAdapter.handlePackagesChanged();
-            if (mProfileView != null) {
-                bindProfileView();
-            }
+            bindProfileView();
         }
 
         @Override
@@ -336,21 +334,7 @@ public class ResolverActivity extends Activity {
 
         mProfileView = findViewById(R.id.profile_button);
         if (mProfileView != null) {
-            mProfileView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    final DisplayResolveInfo dri = mAdapter.getOtherProfile();
-                    if (dri == null) {
-                        return;
-                    }
-
-                    // Do not show the profile switch message anymore.
-                    mProfileSwitchMessageId = -1;
-
-                    onTargetSelected(dri, false);
-                    finish();
-                }
-            });
+            mProfileView.setOnClickListener(this::onProfileClick);
             bindProfileView();
         }
 
@@ -365,6 +349,19 @@ public class ResolverActivity extends Activity {
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
+    }
+
+    protected void onProfileClick(View v) {
+        final DisplayResolveInfo dri = mAdapter.getOtherProfile();
+        if (dri == null) {
+            return;
+        }
+
+        // Do not show the profile switch message anymore.
+        mProfileSwitchMessageId = -1;
+
+        onTargetSelected(dri, false);
+        finish();
     }
 
     @Override
@@ -445,7 +442,11 @@ public class ResolverActivity extends Activity {
         return R.layout.resolver_list;
     }
 
-    void bindProfileView() {
+    protected void bindProfileView() {
+        if (mProfileView == null) {
+            return;
+        }
+
         final DisplayResolveInfo dri = mAdapter.getOtherProfile();
         if (dri != null) {
             mProfileView.setVisibility(View.VISIBLE);
@@ -709,9 +710,7 @@ public class ResolverActivity extends Activity {
             mRegistered = true;
         }
         mAdapter.handlePackagesChanged();
-        if (mProfileView != null) {
-            bindProfileView();
-        }
+        bindProfileView();
     }
 
     @Override
@@ -1737,9 +1736,7 @@ public class ResolverActivity extends Activity {
                         @Override
                         protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
                             processSortedList(sortedComponents);
-                            if (mProfileView != null) {
-                                bindProfileView();
-                            }
+                            bindProfileView();
                             notifyDataSetChanged();
                         }
                     };
@@ -2148,7 +2145,7 @@ public class ResolverActivity extends Activity {
 
         @Override
         protected void onPostExecute(Drawable d) {
-            if (mProfileView != null && mAdapter.getOtherProfile() == mDisplayResolveInfo) {
+            if (mAdapter.getOtherProfile() == mDisplayResolveInfo) {
                 bindProfileView();
             } else {
                 mDisplayResolveInfo.setDisplayIcon(d);

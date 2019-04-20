@@ -940,13 +940,34 @@ public class ZenModeHelper {
         }
     }
 
+    private void applyCustomPolicy(ZenPolicy policy, ZenRule rule) {
+        if (rule.zenMode == NotificationManager.INTERRUPTION_FILTER_NONE) {
+            policy.apply(new ZenPolicy.Builder()
+                    .disallowAllSounds()
+                    .build());
+        } else if (rule.zenMode
+                == NotificationManager.INTERRUPTION_FILTER_ALARMS) {
+            policy.apply(new ZenPolicy.Builder()
+                    .disallowAllSounds()
+                    .allowAlarms(true)
+                    .allowMedia(true)
+                    .build());
+        } else {
+            policy.apply(rule.zenPolicy);
+        }
+    }
+
     private void updateConsolidatedPolicy(String reason) {
         if (mConfig == null) return;
         synchronized (mConfig) {
             ZenPolicy policy = new ZenPolicy();
+            if (mConfig.manualRule != null) {
+                applyCustomPolicy(policy, mConfig.manualRule);
+            }
+
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
                 if (automaticRule.isAutomaticActive()) {
-                    policy.apply(automaticRule.zenPolicy);
+                    applyCustomPolicy(policy, automaticRule);
                 }
             }
             Policy newPolicy = mConfig.toNotificationPolicy(policy);

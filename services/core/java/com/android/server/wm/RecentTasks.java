@@ -653,9 +653,11 @@ class RecentTasks {
     }
 
     void removeAllVisibleTasks(int userId) {
+        Set<Integer> profileIds = getProfileIds(userId);
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final TaskRecord tr = mTasks.get(i);
-            if (tr.userId == userId && isVisibleRecentTask(tr)) {
+            if (!profileIds.contains(tr.userId)) continue;
+            if (isVisibleRecentTask(tr)) {
                 mTasks.remove(i);
                 notifyTaskRemoved(tr, true /* wasTrimmed */, true /* killProcess */);
             }
