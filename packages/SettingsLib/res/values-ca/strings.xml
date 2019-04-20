@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència de fitxers"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispositiu d\'entrada"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accés a Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartir contactes"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartició de contactes"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"S\'utilitza per compartir contactes."</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Connexió compartida a Internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Missatges de text"</string>

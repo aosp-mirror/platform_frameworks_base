@@ -82,7 +82,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Հեռախոսազանգեր"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Ֆայլերի փոխանցում"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Ներմուծման սարք"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ինտերնետի մուտք"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ինտերնետի հասանելիություն"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Կոնտակտի համօգտագործում"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Օգտագործել կոնտակտի համօգտագործման համար"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ինտերնետ կապի տարածում"</string>

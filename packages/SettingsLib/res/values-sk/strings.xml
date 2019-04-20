@@ -82,7 +82,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonické hovory"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos súborov"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Vstupné zariadenie"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prístup na Internet"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prístup na internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Zdieľanie kontaktov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Použiť na zdieľanie kontaktov"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Zdieľanie pripojenia na Internet"</string>
