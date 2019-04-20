@@ -22,7 +22,7 @@
     <color name="notification_primary_text_color_dark">#ddffffff</color>
 
     <!-- The secondary text color if the text is on top of a dark background. -->
-    <color name="notification_secondary_text_color_dark">#ddffffff</color>
+    <color name="notification_secondary_text_color_dark">#b2ffffff</color>
 
     <color name="notification_default_color_dark">#ddffffff</color>
 
