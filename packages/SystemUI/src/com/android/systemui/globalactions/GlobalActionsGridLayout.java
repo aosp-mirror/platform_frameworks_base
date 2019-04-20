@@ -117,6 +117,7 @@ public class GlobalActionsGridLayout extends MultiListLayout {
             } else {
                 parent.addView(v);
             }
+            parent.setVisibility(View.VISIBLE);
         }
         updateSnapPosition();
         updateSeparatedButtonSize();

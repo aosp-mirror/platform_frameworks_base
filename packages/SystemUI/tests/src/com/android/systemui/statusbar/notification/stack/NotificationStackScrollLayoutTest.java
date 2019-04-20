@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -144,7 +145,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // member variables, not the spy's member variables.
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null,
                 true /* allowLongPress */, mNotificationRoundnessManager,
-                new AmbientPulseManager(mContext));
+                new AmbientPulseManager(mContext),
+                mock(DynamicPrivacyController.class));
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);

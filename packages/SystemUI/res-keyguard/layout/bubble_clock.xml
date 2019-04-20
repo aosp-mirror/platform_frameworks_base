@@ -19,22 +19,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
   >
-  <TextClock
-      android:id="@+id/digital_clock"
-      android:paddingStart="20dp"
-      android:layout_marginTop="72dp"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_gravity="top|left"
-      android:textSize="44dp"
-      android:letterSpacing="0.05"
-      android:textColor="?attr/wallpaperTextColor"
-      android:singleLine="true"
-      style="@style/widget_big"
-      android:format12Hour="@string/keyguard_widget_12_hours_format"
-      android:format24Hour="@string/keyguard_widget_24_hours_format"
-      android:elegantTextHeight="false"
-  />
   <com.android.keyguard.clock.ImageClock
       android:id="@+id/analog_clock"
       android:layout_width="wrap_content"
@@ -42,15 +26,15 @@
   >
     <ImageView
         android:id="@+id/minute_hand"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:src="@drawable/bubble_minute_hand"
         android:tint="@color/bubbleMinuteHandColor"
     />
     <ImageView
         android:id="@+id/hour_hand"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:src="@drawable/bubble_hour_hand"
         android:tint="@color/bubbleHourHandColor"
     />

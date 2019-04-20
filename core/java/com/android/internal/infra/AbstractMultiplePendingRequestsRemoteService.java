@@ -75,6 +75,20 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
     }
 
     @Override // from AbstractRemoteService
+    final void handleBindFailure() {
+        if (mPendingRequests != null) {
+            final int size = mPendingRequests.size();
+            if (mVerbose) Slog.v(mTag, "Sending failure to " + size + " pending requests");
+            for (int i = 0; i < size; i++) {
+                final BasePendingRequest<S, I> request = mPendingRequests.get(i);
+                request.onFailed();
+                request.finish();
+            }
+            mPendingRequests = null;
+        }
+    }
+
+    @Override // from AbstractRemoteService
     public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
         super.dump(prefix, pw);
 

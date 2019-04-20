@@ -529,6 +529,8 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   OverlayableItem overlayable_item_boz(std::make_shared<Overlayable>(
       "IconPack", "overlay://theme"));
   overlayable_item_boz.policies |= OverlayableItem::Policy::kSignature;
+  overlayable_item_boz.policies |= OverlayableItem::Policy::kOdm;
+  overlayable_item_boz.policies |= OverlayableItem::Policy::kOem;
 
   OverlayableItem overlayable_item_biz(std::make_shared<Overlayable>(
       "Other", "overlay://customization"));
@@ -587,7 +589,9 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
   overlayable_item = search_result.value().entry->overlayable_item.value();
   EXPECT_THAT(overlayable_item.overlayable->name, Eq("IconPack"));
   EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
-  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature
+                                            | OverlayableItem::Policy::kOdm
+                                            | OverlayableItem::Policy::kOem));
 
   search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
   ASSERT_TRUE(search_result);

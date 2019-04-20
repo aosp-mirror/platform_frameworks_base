@@ -322,6 +322,7 @@ public class Build {
         /**
          * @hide
          */
+        @TestApi
         @UnsupportedAppUsage
         public static final String[] ACTIVE_CODENAMES = "REL".equals(ALL_CODENAMES[0])
                 ? new String[0] : ALL_CODENAMES;

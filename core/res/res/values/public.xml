@@ -2922,7 +2922,7 @@
         <public name="settingsSliceUri" />
         <public name="shell" />
         <public name="interactiveUiTimeout" />
-        <public name="importantForContentCapture" />
+        <public name="__removed6" />
         <public name="supportsMultipleDisplays" />
         <public name="useAppZygote" />
         <public name="__removed1" />
@@ -2943,8 +2943,8 @@
         <public name="allowAudioPlaybackCapture"/>
         <public name="secureElementName" />
         <public name="requestLegacyExternalStorage"/>
-        <public name="ensuringStatusBarContrastWhenTransparent" />
-        <public name="ensuringNavigationBarContrastWhenTransparent" />
+        <public name="enforceStatusBarContrast" />
+        <public name="enforceNavigationBarContrast" />
         <public name="identifier" />
     </public-group>
 

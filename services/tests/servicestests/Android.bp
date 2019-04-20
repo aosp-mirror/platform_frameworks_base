@@ -69,6 +69,7 @@ android_test {
         "liblog",
         "liblzma",
         "libnativehelper",
+        "libpsi",
         "libui",
         "libunwindstack",
         "libutils",

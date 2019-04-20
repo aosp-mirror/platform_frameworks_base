@@ -1073,9 +1073,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public void updateHttpProxy() {
-            final ConnectivityManager cm = ConnectivityManager.from(
+            ActivityThread.updateHttpProxy(
                     getApplication() != null ? getApplication() : getSystemContext());
-            Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
         }
 
         public void processInBackground() {
@@ -4027,7 +4026,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.persistentState = null;
             r.setState(ON_RESUME);
 
-            reportTopResumedActivityChanged(r, r.isTopResumedActivity);
+            reportTopResumedActivityChanged(r, r.isTopResumedActivity, "topWhenResuming");
         } catch (Exception e) {
             if (!mInstrumentation.onException(r.activity, e)) {
                 throw new RuntimeException("Unable to resume activity "
@@ -4202,7 +4201,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.isTopResumedActivity = onTop;
 
         if (r.getLifecycleState() == ON_RESUME) {
-            reportTopResumedActivityChanged(r, onTop);
+            reportTopResumedActivityChanged(r, onTop, "topStateChangedWhenResumed");
         } else {
             if (DEBUG_ORDER) {
                 Slog.d(TAG, "Won't deliver top position change in state=" + r.getLifecycleState());
@@ -4214,10 +4213,11 @@ public final class ActivityThread extends ClientTransactionHandler {
      * Call {@link Activity#onTopResumedActivityChanged(boolean)} if its top resumed state changed
      * since the last report.
      */
-    private void reportTopResumedActivityChanged(ActivityClientRecord r, boolean onTop) {
+    private void reportTopResumedActivityChanged(ActivityClientRecord r, boolean onTop,
+            String reason) {
         if (r.lastReportedTopResumedState != onTop) {
             r.lastReportedTopResumedState = onTop;
-            r.activity.onTopResumedActivityChanged(onTop);
+            r.activity.performTopResumedActivityChanged(onTop, reason);
         }
     }
 
@@ -4314,7 +4314,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Always reporting top resumed position loss when pausing an activity. If necessary, it
         // will be restored in performResumeActivity().
-        reportTopResumedActivityChanged(r, false /* onTop */);
+        reportTopResumedActivityChanged(r, false /* onTop */, "pausing");
 
         try {
             r.activity.mCalled = false;
@@ -5719,14 +5719,18 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (packages == null) {
                     break;
                 }
+
+                List<String> packagesHandled = new ArrayList<>();
+
                 synchronized (mResourcesManager) {
                     for (int i = packages.length - 1; i >= 0; i--) {
-                        WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
+                        String packageName = packages[i];
+                        WeakReference<LoadedApk> ref = mPackages.get(packageName);
                         LoadedApk pkgInfo = ref != null ? ref.get() : null;
                         if (pkgInfo != null) {
                             hasPkgInfo = true;
                         } else {
-                            ref = mResourcePackages.get(packages[i]);
+                            ref = mResourcePackages.get(packageName);
                             pkgInfo = ref != null ? ref.get() : null;
                             if (pkgInfo != null) {
                                 hasPkgInfo = true;
@@ -5737,8 +5741,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                         // Adjust it's internal references to the application info and
                         // resources.
                         if (pkgInfo != null) {
+                            packagesHandled.add(packageName);
                             try {
-                                final String packageName = packages[i];
                                 final ApplicationInfo aInfo =
                                         sPackageManager.getApplicationInfo(
                                                 packageName,
@@ -5770,6 +5774,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                         }
                     }
                 }
+
+                try {
+                    getPackageManager().notifyPackagesReplacedReceived(
+                            packagesHandled.toArray(new String[0]));
+                } catch (RemoteException ignored) {
+                }
+
                 break;
             }
         }
@@ -6946,6 +6957,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         ActivityThread thread = new ActivityThread();
         thread.attach(true, 0);
         return thread;
+    }
+
+    public static void updateHttpProxy(@NonNull Context context) {
+        final ConnectivityManager cm = ConnectivityManager.from(context);
+        Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
     }
 
     @UnsupportedAppUsage

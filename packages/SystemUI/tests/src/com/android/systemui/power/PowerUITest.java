@@ -40,6 +40,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 
+import com.android.settingslib.fuelgauge.Estimate;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.power.PowerUI.WarningsUI;
@@ -358,7 +359,7 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testRefreshEstimateIfNeeded_onlyQueriesEstimateOnBatteryLevelChangeOrNull() {
         mPowerUI.start();
-        Estimate estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true);
+        Estimate estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true, 0);
         when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
         when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
         when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
@@ -371,21 +372,21 @@ public class PowerUITest extends SysuiTestCase {
         assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_HYBRID_THRESHOLD);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(
                 BATTERY_LEVEL_10, false, false, 0, BatteryManager.BATTERY_HEALTH_GOOD,
-                0, 0, -1, 0, 0, false, true);
+                0, 0, -1, 0, 0, 0, false, true);
         mPowerUI.mLastBatteryStateSnapshot = snapshot;
 
         // query again since the estimate was -1
-        estimate = new Estimate(BELOW_SEVERE_HYBRID_THRESHOLD, true);
+        estimate = new Estimate(BELOW_SEVERE_HYBRID_THRESHOLD, true, 0);
         when(mEnhancedEstimates.getEstimate()).thenReturn(estimate);
         refreshedEstimate = mPowerUI.refreshEstimateIfNeeded();
         assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_SEVERE_HYBRID_THRESHOLD);
         snapshot = new BatteryStateSnapshot(
                 BATTERY_LEVEL_10, false, false, 0, BatteryManager.BATTERY_HEALTH_GOOD, 0,
-                0, BELOW_SEVERE_HYBRID_THRESHOLD, 0, 0, false, true);
+                0, BELOW_SEVERE_HYBRID_THRESHOLD, 0, 0, 0, false, true);
         mPowerUI.mLastBatteryStateSnapshot = snapshot;
 
         // Battery level hasn't changed, so we don't query again
-        estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true);
+        estimate = new Estimate(BELOW_HYBRID_THRESHOLD, true, 0);
         when(mEnhancedEstimates.getEstimate()).thenReturn(estimate);
         refreshedEstimate = mPowerUI.refreshEstimateIfNeeded();
         assertThat(refreshedEstimate.getEstimateMillis()).isEqualTo(BELOW_SEVERE_HYBRID_THRESHOLD);
@@ -543,13 +544,14 @@ public class PowerUITest extends SysuiTestCase {
         public boolean mIsBasedOnUsage = true;
         public boolean mIsHybrid = true;
         public boolean mIsLowLevelWarningEnabled = true;
+        private long mAverageTimeToDischargeMillis = Duration.ofHours(24).toMillis();
 
         public BatteryStateSnapshot get() {
             if (mIsHybrid) {
                 return new BatteryStateSnapshot(mBatteryLevel, mIsPowerSaver, mPlugged, mBucket,
                         mBatteryStatus, mSevereLevelThreshold, mLowLevelThreshold,
-                        mTimeRemainingMillis, mSevereThresholdMillis, mLowThresholdMillis,
-                        mIsBasedOnUsage, mIsLowLevelWarningEnabled);
+                        mTimeRemainingMillis, mAverageTimeToDischargeMillis, mSevereThresholdMillis,
+                        mLowThresholdMillis, mIsBasedOnUsage, mIsLowLevelWarningEnabled);
             } else {
                 return new BatteryStateSnapshot(mBatteryLevel, mIsPowerSaver, mPlugged, mBucket,
                         mBatteryStatus, mSevereLevelThreshold, mLowLevelThreshold);

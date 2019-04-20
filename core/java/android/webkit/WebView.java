@@ -2798,6 +2798,7 @@ public class WebView extends AbsoluteLayout
         mProvider.getViewDelegate().onProvideAutofillVirtualStructure(structure, flags);
     }
 
+    /** @hide */
     @Override
     public void onProvideContentCaptureStructure(ViewStructure structure, int flags) {
         mProvider.getViewDelegate().onProvideContentCaptureStructure(structure, flags);

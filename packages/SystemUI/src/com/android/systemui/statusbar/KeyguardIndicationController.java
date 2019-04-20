@@ -41,6 +41,8 @@ import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
@@ -51,6 +53,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
@@ -80,11 +83,13 @@ public class KeyguardIndicationController implements StateListener {
     private final UserManager mUserManager;
     private final IBatteryStats mBatteryInfo;
     private final SettableWakeLock mWakeLock;
+    private final LockPatternUtils mLockPatternUtils;
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
     private final LockIcon mLockIcon;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
 
     private String mRestingIndication;
     private CharSequence mTransientIndication;
@@ -104,14 +109,13 @@ public class KeyguardIndicationController implements StateListener {
 
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
-    private float mDarkAmount;
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
      */
     public KeyguardIndicationController(Context context, ViewGroup indicationArea,
             LockIcon lockIcon) {
-        this(context, indicationArea, lockIcon,
+        this(context, indicationArea, lockIcon, new LockPatternUtils(context),
                 WakeLock.createPartial(context, "Doze:KeyguardIndication"));
 
         registerCallbacks(KeyguardUpdateMonitor.getInstance(context));
@@ -122,7 +126,7 @@ public class KeyguardIndicationController implements StateListener {
      */
     @VisibleForTesting
     KeyguardIndicationController(Context context, ViewGroup indicationArea, LockIcon lockIcon,
-                WakeLock wakeLock) {
+            LockPatternUtils lockPatternUtils, WakeLock wakeLock) {
         mContext = context;
         mIndicationArea = indicationArea;
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
@@ -130,7 +134,12 @@ public class KeyguardIndicationController implements StateListener {
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
+        // lock icon is not used on all form factors.
+        if (mLockIcon != null) {
+            mLockIcon.setOnLongClickListener(this::handleTrustCircleClick);
+        }
         mWakeLock = new SettableWakeLock(wakeLock, TAG);
+        mLockPatternUtils = lockPatternUtils;
 
         Resources res = context.getResources();
         mSlowThreshold = res.getInteger(R.integer.config_chargingSlowlyThreshold);
@@ -162,6 +171,15 @@ public class KeyguardIndicationController implements StateListener {
     public void destroy() {
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mTickReceiver);
         Dependency.get(StatusBarStateController.class).removeCallback(this);
+    }
+
+    private boolean handleTrustCircleClick(View view) {
+        mLockscreenGestureLogger.write(MetricsProto.MetricsEvent.ACTION_LS_LOCK,
+                0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+        showTransientIndication(R.string.keyguard_indication_trust_disabled);
+        mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
+
+        return true;
     }
 
     /**
@@ -236,8 +254,8 @@ public class KeyguardIndicationController implements StateListener {
      *
      * @return {@code null} or an empty string if a trust indication text should not be shown.
      */
-    protected String getTrustGrantedIndication() {
-        return null;
+    private String getTrustGrantedIndication() {
+        return mContext.getString(R.string.keyguard_indication_trust_unlocked);
     }
 
     /**
@@ -245,7 +263,7 @@ public class KeyguardIndicationController implements StateListener {
      *
      * @return {@code null} or an empty string if a trust managed text should not be shown.
      */
-    protected String getTrustManagedIndication() {
+    private String getTrustManagedIndication() {
         return null;
     }
 

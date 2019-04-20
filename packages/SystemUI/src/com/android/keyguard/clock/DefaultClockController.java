@@ -145,6 +145,11 @@ public class DefaultClockController implements ClockPlugin {
     }
 
     @Override
+    public int getPreferredY(int totalHeight) {
+        return totalHeight / 2;
+    }
+
+    @Override
     public void setStyle(Style style) {}
 
     @Override

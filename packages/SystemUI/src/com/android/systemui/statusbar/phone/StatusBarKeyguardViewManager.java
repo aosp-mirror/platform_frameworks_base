@@ -25,6 +25,8 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.transition.Fade;
+import android.transition.TransitionManager;
 import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.View;
@@ -32,14 +34,16 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.settingslib.animation.AppearAnimationUtils;
+import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dock.DockManager;
@@ -49,6 +53,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -65,7 +70,8 @@ import java.util.ArrayList;
  * {@link com.android.keyguard.KeyguardViewBase}.
  */
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
-        StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener {
+        StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
+        NotificationPanelView.PanelExpansionListener {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -90,7 +96,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onFullyShown() {
             updateStates();
             mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
-            mNotificationPanelView.updateLockIcon();
+            updateLockIcon();
         }
 
         @Override
@@ -99,14 +105,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         @Override
-        public void onFullyHidden() {
-            updateStates();
-            mNotificationPanelView.updateLockIcon();
+        public void onStartingToShow() {
+            updateLockIcon();
         }
 
         @Override
-        public void onLayout() {
-            mNotificationPanelView.updateLockIcon();
+        public void onFullyHidden() {
+            updateStates();
+            updateLockIcon();
         }
     };
     private final DockManager.DockEventListener mDockEventListener =
@@ -129,6 +135,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private BiometricUnlockController mBiometricUnlockController;
 
     private ViewGroup mContainer;
+    private ViewGroup mLockIconContainer;
 
     protected KeyguardBouncer mBouncer;
     protected boolean mShowing;
@@ -151,6 +158,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastPulsing;
     private int mLastBiometricMode;
     private boolean mGoingToSleepVisibleNotOccluded;
+    private int mLastLockVisibility = -1;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
@@ -161,6 +169,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
+    private final StatusBarStateController mStatusBarStateController =
+            Dependency.get(StatusBarStateController.class);
     private final DockManager mDockManager;
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
@@ -184,7 +194,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
         mGesturalNav = QuickStepContract.isGesturalMode(context);
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+        mStatusBarStateController.addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
         mDockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
         if (mDockManager != null) {
@@ -197,19 +207,21 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             ViewGroup container,
             NotificationPanelView notificationPanelView,
             BiometricUnlockController biometricUnlockController,
-            DismissCallbackRegistry dismissCallbackRegistry) {
+            DismissCallbackRegistry dismissCallbackRegistry,
+            ViewGroup lockIconContainer) {
         mStatusBar = statusBar;
         mContainer = container;
+        mLockIconContainer = lockIconContainer;
         mBiometricUnlockController = biometricUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
                 mExpansionCallback);
         mNotificationPanelView = notificationPanelView;
-        notificationPanelView.setExpansionListener(this::onPanelExpansionChanged);
+        notificationPanelView.setExpansionListener(this);
     }
 
-    @VisibleForTesting
-    void onPanelExpansionChanged(float expansion, boolean tracking) {
+    @Override
+    public void onPanelExpansionChanged(float expansion, boolean tracking) {
         // We don't want to translate the bounce when:
         // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
         //   conserve the original animation.
@@ -229,8 +241,41 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     && !mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
             }
+        } else if (mPulsing && expansion == KeyguardBouncer.EXPANSION_VISIBLE) {
+            // Panel expanded while pulsing but didn't translate the bouncer (because we are
+            // unlocked.) Let's simply wake-up to dismiss the lock screen.
+            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
         }
-        mNotificationPanelView.updateLockIcon();
+    }
+
+    @Override
+    public void onQsExpansionChanged(float expansion) {
+        updateLockIcon();
+    }
+
+    private void updateLockIcon() {
+        // Not all form factors have a lock icon
+        if (mLockIconContainer == null) {
+            return;
+        }
+        boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                && !mNotificationPanelView.isQsExpanded();
+        int lockVisibility = (mBouncer.isShowing() || keyguardWithoutQs)
+                && !mBouncer.isAnimatingAway() ? View.VISIBLE : View.INVISIBLE;
+
+        if (mLastLockVisibility != lockVisibility) {
+            mLastLockVisibility = lockVisibility;
+
+            Fade transition = new Fade();
+            boolean appearing = lockVisibility == View.VISIBLE;
+            transition.setDuration(appearing ? AppearAnimationUtils.DEFAULT_APPEAR_DURATION
+                    : DisappearAnimationUtils.DEFAULT_APPEAR_DURATION / 2);
+            transition.setInterpolator(appearing ? Interpolators.ALPHA_IN
+                    : Interpolators.ALPHA_OUT);
+            TransitionManager.beginDelayedTransition((ViewGroup) mLockIconContainer.getParent(),
+                    transition);
+            mLockIconContainer.setVisibility(lockVisibility);
+        }
     }
 
     /**
@@ -463,6 +508,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             finishRunnable.run();
         }
         mNotificationPanelView.blockExpansionForCurrentTouch();
+        updateLockIcon();
     }
 
     /**
@@ -849,7 +895,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStateChanged(int newState) {
-        // Nothing
+        updateLockIcon();
     }
 
     @Override

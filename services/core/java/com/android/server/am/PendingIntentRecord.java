@@ -236,6 +236,13 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
     }
 
+    void clearAllowBgActivityStarts(IBinder token) {
+        if (token == null) return;
+        mAllowBgActivityStartsForActivitySender.remove(token);
+        mAllowBgActivityStartsForBroadcastSender.remove(token);
+        mAllowBgActivityStartsForServiceSender.remove(token);
+    }
+
     public void registerCancelListenerLocked(IResultReceiver receiver) {
         if (mCancelCallbacks == null) {
             mCancelCallbacks = new RemoteCallbackList<>();

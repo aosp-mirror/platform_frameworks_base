@@ -22,8 +22,8 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
-import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
+import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/a2dp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/hci/enums.proto";
@@ -42,10 +42,11 @@ import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
-import "frameworks/base/core/proto/android/stats/enums.proto";
-import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
+import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
+import "frameworks/base/core/proto/android/stats/enums.proto";
+import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
@@ -155,7 +156,7 @@ message Atom {
         KeyValuePairsAtom key_value_pairs_atom = 83 [(allow_from_any_uid) = true];
         VibratorStateChanged vibrator_state_changed = 84;
         DeferredJobStatsReported deferred_job_stats_reported = 85;
-        ThermalThrottlingStateChanged thermal_throttling = 86;
+        ThermalThrottlingStateChanged thermal_throttling = 86 [deprecated=true];
         BiometricAcquired biometric_acquired = 87;
         BiometricAuthenticated biometric_authenticated = 88;
         BiometricErrorOccurred biometric_error_occurred = 89;
@@ -269,7 +270,7 @@ message Atom {
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted =
-	    180 [(log_from_module) = "permissioncontroller"];
+            180 [(log_from_module) = "permissioncontroller"];
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
         NetworkStackReported network_stack_reported = 182 [(log_from_module) = "network_stack"];
         AppMovedStorageReported app_moved_storage_reported = 183;
@@ -277,6 +278,9 @@ message Atom {
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
         TombStoneOccurred tomb_stone_occurred = 186;
         BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
+        IntelligenceEventReported intelligence_event_reported =
+            188 [(log_from_module) = "intelligence"];
+        ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
     }
 
     // Pulled events will start at field 10000.
@@ -406,6 +410,7 @@ message KeyValuePairsAtom {
  */
 
 /**
+ * This atom is deprecated starting in Q. Please use ThermalThrottlingSeverityStateChanged.
  * Logs when the Thermal service HAL notifies the throttling start/stop events.
  *
  * Logged from:
@@ -423,14 +428,7 @@ message ThermalThrottlingStateChanged {
     }
     optional State state = 2;
 
-    // Temperature in deci degrees celsius
     optional float temperature = 3;
-
-    // Severity of throttling
-    optional android.os.ThrottlingSeverityEnum severity = 4;
-
-    // Thermistor name
-    optional string sensor_name = 5;
 }
 
 /**
@@ -2358,6 +2356,27 @@ message SlowIo {
 message BatteryCausedShutdown {
     // The last recorded battery voltage prior to shutdown.
     optional int32 last_recorded_micro_volt = 1;
+}
+
+/**
+ * Logs when ThermalService receives throttling events.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/stats/StatsCompanionService.java
+ */
+message ThermalThrottlingSeverityStateChanged {
+    // The type of temperature being reported (CPU, GPU, SKIN, etc)
+    optional android.os.TemperatureTypeEnum sensor_type = 1;
+
+    // The name of the temperature source. Eg. CPU0
+    optional string sensor_name = 2;
+
+    // Temperature in tenths of a degree C.
+    // For BCL, it is decimillivolt, decimilliamps, and percentage * 10.
+    optional int32 temperature_deci_celsius = 3;
+
+    // Relative severity of the throttling, see enum definition.
+    optional android.os.ThrottlingSeverityEnum severity = 4;
 }
 
 /**
@@ -5471,9 +5490,11 @@ message AttentionManagerServiceResultReported {
         UNKNOWN = 20;
         ATTENTION_SUCCESS_ABSENT = 0;
         ATTENTION_SUCCESS_PRESENT = 1;
-        ATTENTION_FAILURE_PREEMPTED = 2;
-        ATTENTION_FAILURE_TIMED_OUT = 3;
-        ATTENTION_FAILURE_UNKNOWN = 4;
+        ATTENTION_FAILURE_UNKNOWN = 2;
+        ATTENTION_FAILURE_CANCELLED = 3;
+        ATTENTION_FAILURE_PREEMPTED = 4;
+        ATTENTION_FAILURE_TIMED_OUT = 5;
+        ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6;
     }
     optional AttentionCheckResult attention_check_result = 1 [default = UNKNOWN];
 }
@@ -5978,4 +5999,16 @@ message CoolingDevice {
     // integer between 0 and max_state defined in its driver. 0 means device is
     // not in throttling, higher value means deeper throttling.
     optional int32 state = 3;
+}
+
+/**
+ * Intelligence has several counter-type events that don't warrant a
+ * full separate atom. These are primarily API call counters but also include
+ * counters for feature usage and specific failure modes.
+ *
+ * Logged from the Intelligence mainline module.
+ */
+message IntelligenceEventReported {
+  optional android.stats.intelligence.EventType event_id = 1;
+  optional android.stats.intelligence.Status status = 2;
 }

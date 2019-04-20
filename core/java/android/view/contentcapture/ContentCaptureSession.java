@@ -358,7 +358,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      *
      * <p>Typically called "manually" by views that handle their own virtual view hierarchy, or
      * automatically by the Android System for views that return {@code true} on
-     * {@link View#onProvideContentCaptureStructure(ViewStructure, int)}.
+     * {@code View#onProvideContentCaptureStructure(ViewStructure, int)}.
      *
      * @param node node that has been added.
      */

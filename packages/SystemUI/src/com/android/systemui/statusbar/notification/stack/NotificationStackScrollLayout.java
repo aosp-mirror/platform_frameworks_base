@@ -101,6 +101,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -153,7 +154,8 @@ import javax.inject.Named;
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
 public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter,
-        NotificationListContainer, ConfigurationListener, Dumpable {
+        NotificationListContainer, ConfigurationListener, Dumpable,
+        DynamicPrivacyController.Listener {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -498,6 +500,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * If the {@link NotificationShelf} should be visible when dark.
      */
     private boolean mShowDarkShelf;
+    private boolean mAnimateBottomOnLayout;
 
     @Inject
     public NotificationStackScrollLayout(
@@ -505,7 +508,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             AttributeSet attrs,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationRoundnessManager notificationRoundnessManager,
-            AmbientPulseManager ambientPulseManager) {
+            AmbientPulseManager ambientPulseManager,
+            DynamicPrivacyController dynamicPrivacyController) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -576,6 +580,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
             }
         });
+        dynamicPrivacyController.addListener(this);
     }
 
     private void updateDismissRtlSetting(boolean dismissRtl) {
@@ -2479,9 +2484,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateBackgroundBounds() {
-        getLocationInWindow(mTempInt2);
-        int left = mTempInt2[0] + mSidePaddings;
-        int right = mTempInt2[0] + getWidth() - mSidePaddings;
+        int left = mSidePaddings;
+        int right = getWidth() - mSidePaddings;
         for (NotificationSection section : mSections) {
             section.getBounds().left = left;
             section.getBounds().right = right;
@@ -3165,7 +3169,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         if (mAnimationsEnabled && mIsExpanded) {
             mAnimateNextBackgroundTop = firstChild != previousFirstChild;
-            mAnimateNextBackgroundBottom = lastChild != previousLastChild;
+            mAnimateNextBackgroundBottom = lastChild != previousLastChild || mAnimateBottomOnLayout;
             mAnimateNextSectionBoundsChange = sectionViewsChanged;
         } else {
             mAnimateNextBackgroundTop = false;
@@ -3174,6 +3178,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
         mRoundnessManager.updateRoundedChildren(mSections);
+        mAnimateBottomOnLayout = false;
         invalidate();
     }
 
@@ -4842,8 +4847,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      * If the shelf should be visible when the device is in ambient mode (dozing.)
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setShowDarkShelf(boolean showDarkShelf) {
-        mShowDarkShelf = showDarkShelf;
+    public void showDarkShelf() {
+        mShowDarkShelf = true;
     }
 
     private void updateDarkShelfVisibility() {
@@ -5711,6 +5716,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             } else if (!firstVisibleView) {
                 view.setTranslationY(wakeUplocation);
             }
+        }
+    }
+
+    @Override
+    public void onDynamicPrivacyChanged() {
+        if (mIsExpanded) {
+            // The bottom might change because we're using the final actual height of the view
+            mAnimateBottomOnLayout = true;
         }
     }
 

@@ -437,7 +437,7 @@
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">0dp</dimen>
-    <dimen name="qs_panel_padding_top">30dp</dimen>
+    <dimen name="qs_panel_padding_top">@dimen/qs_header_tooltip_height</dimen>
     <dimen name="qs_detail_header_height">56dp</dimen>
     <dimen name="qs_detail_header_padding">0dp</dimen>
     <dimen name="qs_detail_image_width">56dp</dimen>
@@ -461,8 +461,8 @@
     <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
-    <dimen name="qs_header_tooltip_height">18dp</dimen>
-    <dimen name="qs_header_alarm_icon_size">18dp</dimen>
+    <dimen name="qs_header_tooltip_height">48dp</dimen>
+    <dimen name="qs_header_alarm_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
     <dimen name="qs_header_separator_width">8dp</dimen>
@@ -473,7 +473,7 @@
     <dimen name="qs_footer_padding_end">16dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
     <dimen name="qs_paged_tile_layout_padding_bottom">0dp</dimen>
-    <dimen name="qs_header_top_margin">12dp</dimen>
+    <dimen name="qs_header_top_margin">15dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
@@ -717,9 +717,9 @@
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
     <dimen name="keyguard_lock_width">42dp</dimen>
-    <dimen name="keyguard_lock_padding">19dp</dimen>
+    <dimen name="keyguard_lock_padding">20dp</dimen>
 
-    <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom">44dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -1031,8 +1031,6 @@
     <dimen name="ongoing_appops_dialog_title_size">20sp</dimen>
     <!-- Text size for Ongoing App Ops dialog items -->
     <dimen name="ongoing_appops_dialog_item_size">16sp</dimen>
-    <!-- Side margins around the Ongoing App Ops chip-->
-    <dimen name="ongoing_appops_chip_margin">0dp</dimen>
     <!-- Height of the Ongoing App Ops chip -->
     <dimen name="ongoing_appops_chip_height">32dp</dimen>
     <!-- Padding between background of Ongoing App Ops chip and content -->

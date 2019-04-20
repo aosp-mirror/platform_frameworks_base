@@ -41,6 +41,21 @@ public class ListGridLayout extends LinearLayout {
     private static final String TAG = "ListGridLayout";
     private int mExpectedCount;
 
+    // number of rows and columns to use for different numbers of items
+    private final int[][] mConfigs = {
+            // {rows, columns}
+            {0, 0}, // 0 items
+            {1, 1}, // 1 item
+            {1, 2}, // 2 items
+            {1, 3}, // 3 items
+            {2, 2}, // 4 items
+            {2, 3}, // 5 items
+            {2, 3}, // 6 items
+            {3, 3}, // 7 items
+            {3, 3}, // 8 items
+            {3, 3}  // 9 items
+    };
+
     public ListGridLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -53,19 +68,28 @@ public class ListGridLayout extends LinearLayout {
             ViewGroup subList = (ViewGroup) getChildAt(i);
             if (subList != null) {
                 subList.removeAllViews();
+                subList.setVisibility(View.GONE);
             }
         }
     }
 
     /**
      * Get the parent view associated with the item which should be placed at the given position.
+     * @param index The index of the item.
+     * @param reverseSublists Reverse the order of sublists. Ordinarily, sublists fill from first to
+     *                        last, whereas setting this to true will fill them last to first.
+     * @param swapRowsAndColumns Swap the order in which rows and columns are filled. By default,
+     *                           columns fill first, adding one item to each row. Setting this to
+     *                           true will cause rows to fill first, adding one item to each column.
+     * @return
      */
     public ViewGroup getParentView(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
-        if (getRowCount() == 0) {
+        if (getRowCount() == 0 || index < 0) {
             return null;
         }
-        int column = getParentViewIndex(index, reverseSublists, swapRowsAndColumns);
-        return (ViewGroup) getChildAt(column);
+        int targetIndex = Math.min(index, getMaxElementCount() - 1);
+        int row = getParentViewIndex(targetIndex, reverseSublists, swapRowsAndColumns);
+        return (ViewGroup) getChildAt(row);
     }
 
     private int reverseSublistIndex(int index) {
@@ -74,7 +98,6 @@ public class ListGridLayout extends LinearLayout {
 
     private int getParentViewIndex(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
         int sublistIndex;
-        ViewGroup row;
         int rows = getRowCount();
         if (swapRowsAndColumns) {
             sublistIndex = (int) Math.floor(index / rows);
@@ -92,42 +115,31 @@ public class ListGridLayout extends LinearLayout {
      */
     public void setExpectedCount(int count) {
         mExpectedCount = count;
-
-        for (int i = 0; i < getChildCount(); i++) {
-            if (i <= getColumnCount()) {
-                setSublistVisibility(i, true);
-            } else {
-                setSublistVisibility(i, false);
-            }
-        }
     }
 
-    private void setSublistVisibility(int index, boolean visible) {
-        View subList = getChildAt(index);
-        if (subList != null) {
-            subList.setVisibility(visible ? View.VISIBLE : View.GONE);
+    private int getMaxElementCount() {
+        return mConfigs.length - 1;
+    }
+
+    private int[] getConfig() {
+        if (mExpectedCount < 0) {
+            return mConfigs[0];
         }
+        int targetElements = Math.min(getMaxElementCount(), mExpectedCount);
+        return mConfigs[targetElements];
     }
 
     /**
      * Get the number of rows which will be used to render children.
      */
     public int getRowCount() {
-        // special case for 3 to use a single row
-        if (mExpectedCount == 3) {
-            return 1;
-        }
-        return (int) Math.round(Math.sqrt(mExpectedCount));
+        return getConfig()[0];
     }
 
     /**
      * Get the number of columns which will be used to render children.
      */
     public int getColumnCount() {
-        // special case for 3 to use a single row
-        if (mExpectedCount == 3) {
-            return 3;
-        }
-        return (int) Math.ceil(Math.sqrt(mExpectedCount));
+        return getConfig()[1];
     }
 }

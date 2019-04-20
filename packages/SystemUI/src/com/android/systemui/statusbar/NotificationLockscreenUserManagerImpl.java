@@ -77,6 +77,7 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private final DevicePolicyManager mDevicePolicyManager;
     private final SparseBooleanArray mLockscreenPublicMode = new SparseBooleanArray();
+    private final SparseBooleanArray mUsersWithSeperateWorkChallenge = new SparseBooleanArray();
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
     private final UserManager mUserManager;
@@ -394,6 +395,11 @@ public class NotificationLockscreenUserManagerImpl implements
         return mLockscreenPublicMode.get(userId, false);
     }
 
+    @Override
+    public boolean needsSeparateWorkChallenge(int userId) {
+        return mUsersWithSeperateWorkChallenge.get(userId, false);
+    }
+
     /**
      * Has the given user chosen to allow notifications to be shown even when the lockscreen is in
      * "public" (secure & locked) mode?
@@ -493,20 +499,23 @@ public class NotificationLockscreenUserManagerImpl implements
         //   - device keyguard is shown in secure mode;
         //   - profile is locked with a work challenge.
         SparseArray<UserInfo> currentProfiles = getCurrentProfiles();
+        mUsersWithSeperateWorkChallenge.clear();
         for (int i = currentProfiles.size() - 1; i >= 0; i--) {
             final int userId = currentProfiles.valueAt(i).id;
             boolean isProfilePublic = devicePublic;
+            boolean needsSeparateChallenge = mLockPatternUtils.isSeparateProfileChallengeEnabled(
+                    userId);
             if (!devicePublic && userId != getCurrentUserId()) {
                 // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
                 // due to a race condition where this code could be called before
                 // TrustManagerService updates its internal records, resulting in an incorrect
                 // state being cached in mLockscreenPublicMode. (b/35951989)
-                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)
-                        && isSecure(userId)) {
+                if (needsSeparateChallenge && isSecure(userId)) {
                     isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
                 }
             }
             setLockscreenPublicMode(isProfilePublic, userId);
+            mUsersWithSeperateWorkChallenge.put(userId, needsSeparateChallenge);
         }
     }
 

@@ -149,6 +149,13 @@ public class KeyguardAffordanceView extends ImageView {
         updateIconColor();
     }
 
+    /**
+     * If current drawable should be tinted.
+     */
+    public boolean shouldTint() {
+        return mShouldTint;
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -168,6 +175,9 @@ public class KeyguardAffordanceView extends ImageView {
     }
 
     public void setPreviewView(View v) {
+        if (mPreviewView == v) {
+            return;
+        }
         View oldPreviewView = mPreviewView;
         mPreviewView = v;
         if (mPreviewView != null) {

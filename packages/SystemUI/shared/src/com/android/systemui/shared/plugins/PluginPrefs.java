@@ -42,12 +42,12 @@ public class PluginPrefs {
     }
 
     public Set<String> getPluginList() {
-        return mPluginActions;
+        return new ArraySet<>(mPluginActions);
     }
 
     public synchronized void addAction(String action) {
         if (mPluginActions.add(action)){
-            mSharedPrefs.edit().putStringSet(PLUGIN_ACTIONS, mPluginActions).commit();
+            mSharedPrefs.edit().putStringSet(PLUGIN_ACTIONS, mPluginActions).apply();
         }
     }
 
@@ -56,6 +56,6 @@ public class PluginPrefs {
     }
 
     public static void setHasPlugins(Context context) {
-        context.getSharedPreferences(PREFS, 0).edit().putBoolean(HAS_PLUGINS, true).commit();
+        context.getSharedPreferences(PREFS, 0).edit().putBoolean(HAS_PLUGINS, true).apply();
     }
 }

@@ -107,6 +107,7 @@ package android.app {
     ctor public ActivityView(android.content.Context, android.util.AttributeSet);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
     ctor public ActivityView(android.content.Context, android.util.AttributeSet, int, boolean);
+    method public int getVirtualDisplayId();
     method public void onLayout(boolean, int, int, int, int);
     method public void onLocationChanged();
     method public void performBackPress();
@@ -343,6 +344,20 @@ package android.app {
     method public java.util.List<android.app.RemoteAction> getActions();
     method public float getAspectRatio();
     method public android.graphics.Rect getSourceRectHint();
+  }
+
+  public class StatusBarManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
+  }
+
+  public static final class StatusBarManager.DisableInfo {
+    method public boolean areAllComponentsEnabled();
+    method public boolean isNavigateToHomeDisabled();
+    method public boolean isNotificationPeekingDisabled();
+    method public boolean isRecentsDisabled();
+    method public boolean isSearchDisabled();
+    method public boolean isStatusBarExpansionDisabled();
   }
 
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
@@ -631,6 +646,7 @@ package android.content {
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String ROLLBACK_SERVICE = "rollback";
+    field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
@@ -1678,6 +1694,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
+    field public static final String[] ACTIVE_CODENAMES;
     field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
   }
@@ -3164,9 +3181,12 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method @android.view.ViewDebug.ExportedProperty(mapping={@android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, to="auto"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_YES, to="yes"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_NO, to="no"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS, to="yesExcludeDescendants"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS, to="noExcludeDescendants")}) public int getImportantForContentCapture();
     method public android.view.View getTooltipView();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method public final boolean isImportantForContentCapture();
+    method public void onProvideContentCaptureStructure(@NonNull android.view.ViewStructure, int);
     method protected void resetResolvedDrawables();
     method public void resetResolvedLayoutDirection();
     method public void resetResolvedPadding();
@@ -3177,7 +3197,13 @@ package android.view {
     method public boolean restoreFocusNotInCluster();
     method public void setAutofilled(boolean);
     method public final void setFocusedInCluster();
+    method public void setImportantForContentCapture(int);
     method public void setIsRootNamespace(boolean);
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_AUTO = 0; // 0x0
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO = 2; // 0x2
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS = 8; // 0x8
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_YES = 1; // 0x1
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS = 4; // 0x4
   }
 
   public class ViewConfiguration {

@@ -3830,8 +3830,11 @@ public final class ActiveServices {
 
     void serviceTimeout(ProcessRecord proc) {
         String anrMessage = null;
-
         synchronized(mAm) {
+            if (proc.isDebugging()) {
+                // The app's being debugged, ignore timeout.
+                return;
+            }
             if (proc.executingServices.size() == 0 || proc.thread == null) {
                 return;
             }

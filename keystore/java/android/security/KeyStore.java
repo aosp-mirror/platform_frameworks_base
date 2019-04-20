@@ -764,12 +764,11 @@ public class KeyStore {
         KeyCharacteristicsPromise promise = new KeyCharacteristicsPromise();
         mBinder.asBinder().linkToDeath(promise, 0);
         try {
-            KeyCharacteristicsCallbackResult result = null;
             int error = mBinder.importWrappedKey(promise, wrappedKeyAlias, wrappedKey,
                     wrappingKeyAlias, maskingKey, args, rootSid, fingerprintSid);
             if (error != NO_ERROR) return error;
 
-            KeyCharacteristicsCallbackResult esult = promise.getFuture().get();
+            KeyCharacteristicsCallbackResult result = promise.getFuture().get();
 
             error = result.getKeystoreResponse().getErrorCode();
             if (error != NO_ERROR) return error;

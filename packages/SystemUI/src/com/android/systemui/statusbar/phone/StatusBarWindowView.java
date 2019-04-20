@@ -87,6 +87,7 @@ public class StatusBarWindowView extends FrameLayout {
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
     private View mBrightnessMirror;
+    private LockIcon mLockIcon;
     private PhoneStatusBarView mStatusBarView;
 
     private int mRightInset = 0;
@@ -106,12 +107,13 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mTouchActive;
     private boolean mExpandAnimationRunning;
     private boolean mExpandAnimationPending;
+    private boolean mSuppressingWakeUpGesture;
 
     private final GestureDetector.SimpleOnGestureListener mGestureListener =
             new GestureDetector.SimpleOnGestureListener() {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
-            if (mSingleTapEnabled) {
+            if (mSingleTapEnabled && !mSuppressingWakeUpGesture) {
                 mService.wakeUpIfDozing(SystemClock.uptimeMillis(), StatusBarWindowView.this,
                         "SINGLE_TAP");
                 return true;
@@ -241,10 +243,10 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mStackScrollLayout = (NotificationStackScrollLayout) findViewById(
-                R.id.notification_stack_scroller);
-        mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
+        mStackScrollLayout = findViewById(R.id.notification_stack_scroller);
+        mNotificationPanel = findViewById(R.id.notification_panel);
         mBrightnessMirror = findViewById(R.id.brightness_mirror);
+        mLockIcon = findViewById(R.id.lock_icon);
     }
 
     @Override
@@ -253,6 +255,13 @@ public class StatusBarWindowView extends FrameLayout {
         if (child.getId() == R.id.brightness_mirror) {
             mBrightnessMirror = child;
         }
+    }
+
+    /**
+     * Propagate {@link StatusBar} pulsing state.
+     */
+    public void setPulsing(boolean pulsing) {
+        mLockIcon.setPulsing(pulsing);
     }
 
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
@@ -317,6 +326,10 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setTouchActive(boolean touchActive) {
         mTouchActive = touchActive;
+    }
+
+    void suppressWakeUpGesture(boolean suppress) {
+        mSuppressingWakeUpGesture = suppress;
     }
 
     @Override

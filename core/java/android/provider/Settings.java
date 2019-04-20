@@ -955,16 +955,18 @@ public final class Settings {
             "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
 
     /**
-     * Activity Action: Open the battery details page of an associated app.
+     * Activity Action: Open the advanced power usage details page of an associated app.
      * <p>
      * Input: Intent's data URI set with an application name, using the
      * "package" schema (like "package:com.my.app")
      * <p>
      * Output: Nothing.
+     *
+     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_APP_BATTERY_SETTINGS =
-            "android.settings.APP_BATTERY_SETTINGS";
+    public static final String ACTION_VIEW_ADVANCED_POWER_USAGE_DETAIL =
+            "android.settings.VIEW_ADVANCED_POWER_USAGE_DETAIL";
 
     /**
      * Activity Action: Show screen for controlling background data
@@ -12659,6 +12661,45 @@ public final class Settings {
         public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
 
         /**
+         * A long value indicating how much longer the system battery is estimated to last in
+         * millis. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value
+         * was updated.
+         *
+         * @hide
+         */
+        public static final String TIME_REMAINING_ESTIMATE_MILLIS =
+                "time_remaining_estimate_millis";
+
+        /**
+         * A boolean indicating whether {@link #TIME_REMAINING_ESTIMATE_MILLIS} is based customized
+         * to the devices usage or using global models. See
+         * {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME} for the last time this value was updated.
+         *
+         * @hide
+         */
+        public static final String TIME_REMAINING_ESTIMATE_BASED_ON_USAGE =
+                "time_remaining_estimate_based_on_usage";
+
+        /**
+         * A long value indicating how long the system battery takes to deplete from 100% to 0% on
+         * average based on historical drain rates. See {@link #BATTERY_ESTIMATES_LAST_UPDATE_TIME}
+         * for the last time this value was updated.
+         *
+         * @hide
+         */
+        public static final String AVERAGE_TIME_TO_DISCHARGE = "average_time_to_discharge";
+
+        /**
+         * A long indicating the epoch time in milliseconds when
+         * {@link #TIME_REMAINING_ESTIMATE_MILLIS}, {@link #TIME_REMAINING_ESTIMATE_BASED_ON_USAGE},
+         * and {@link #AVERAGE_TIME_TO_DISCHARGE} were last updated.
+         *
+         * @hide
+         */
+        public static final String BATTERY_ESTIMATES_LAST_UPDATE_TIME =
+                "battery_estimates_last_update_time";
+
+        /**
          * The max value for {@link #LOW_POWER_MODE_TRIGGER_LEVEL}. If this setting is not set
          * or the value is 0, the default max will be used.
          *
@@ -13524,6 +13565,28 @@ public final class Settings {
         private static final Validator AWARE_ALLOWED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Overrides internal R.integer.config_longPressOnPowerBehavior.
+         * Allowable values detailed in frameworks/base/core/res/res/values/config.xml.
+         * Used by PhoneWindowManager.
+         * @hide
+         */
+        public static final String POWER_BUTTON_LONG_PRESS =
+                "power_button_long_press";
+        private static final Validator POWER_BUTTON_LONG_PRESS_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
+
+        /**
+         * Overrides internal R.integer.config_veryLongPressOnPowerBehavior.
+         * Allowable values detailed in frameworks/base/core/res/res/values/config.xml.
+         * Used by PhoneWindowManager.
+         * @hide
+         */
+        public static final String POWER_BUTTON_VERY_LONG_PRESS =
+                "power_button_very_long_press";
+        private static final Validator POWER_BUTTON_VERY_LONG_PRESS_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 1);
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -13636,6 +13699,8 @@ public final class Settings {
                     WIFI_PNO_RECENCY_SORTING_ENABLED_VALIDATOR);
             VALIDATORS.put(WIFI_LINK_PROBING_ENABLED, WIFI_LINK_PROBING_ENABLED_VALIDATOR);
             VALIDATORS.put(AWARE_ALLOWED, AWARE_ALLOWED_VALIDATOR);
+            VALIDATORS.put(POWER_BUTTON_LONG_PRESS, POWER_BUTTON_LONG_PRESS_VALIDATOR);
+            VALIDATORS.put(POWER_BUTTON_VERY_LONG_PRESS, POWER_BUTTON_VERY_LONG_PRESS_VALIDATOR);
         }
 
         /**
@@ -14641,6 +14706,7 @@ public final class Settings {
          */
         public static final String TEXT_CLASSIFIER_ACTION_MODEL_PARAMS =
                 "text_classifier_action_model_params";
+
     }
 
     /**

@@ -167,11 +167,12 @@ public class ThermalManagerServiceTest {
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).notifyThrottling(any(Temperature.class));
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(0)).onStatusChange(anyInt());
+                .times(1)).onStatusChange(anyInt());
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).notifyThrottling(any(Temperature.class));
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(0)).onStatusChange(anyInt());
+                .times(1)).onStatusChange(anyInt());
+        resetListenerMock();
         mService.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
         ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
@@ -202,11 +203,6 @@ public class ThermalManagerServiceTest {
 
     @Test
     public void testRegister() throws RemoteException {
-        // Unregister all
-        assertTrue(mService.mService.unregisterThermalEventListener(mEventListener1));
-        assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener1));
-        assertTrue(mService.mService.unregisterThermalEventListener(mEventListener2));
-        assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener2));
         resetListenerMock();
         // Register callbacks and verify they are called
         assertTrue(mService.mService.registerThermalEventListener(mEventListener1));

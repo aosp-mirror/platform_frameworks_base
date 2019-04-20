@@ -745,6 +745,10 @@
 
     <!-- XXXXXX END OF RESOURCES USING WRONG NAMING CONVENTION -->
 
+    <!-- If this is true, notification effects will be played by the notification server.
+         When false, car notification effects will be handled elsewhere. -->
+    <bool name="config_enableServerNotificationEffectsForAutomotive">false</bool>
+
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">false</bool>
 
@@ -1094,6 +1098,7 @@
             2 - Power off (with confirmation)
             3 - Power off (without confirmation)
             4 - Go to voice assist
+            5 - Go to assistant (Settings.Secure.ASSISTANT)
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 

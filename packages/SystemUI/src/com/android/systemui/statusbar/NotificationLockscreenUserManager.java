@@ -33,6 +33,14 @@ public interface NotificationLockscreenUserManager {
      */
     boolean isLockscreenPublicMode(int userId);
 
+    /**
+     * Does a user require a separate work challenge? If so, the unlock mechanism is decoupled from
+     * the current user and has to be solved separately.
+     */
+    default boolean needsSeparateWorkChallenge(int userId) {
+        return false;
+    }
+
     void setUpWithPresenter(NotificationPresenter presenter);
 
     int getCurrentUserId();

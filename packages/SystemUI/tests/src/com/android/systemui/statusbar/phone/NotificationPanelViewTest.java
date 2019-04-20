@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -117,7 +119,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
         InOrder inOrder = inOrder(mNotificationStackScrollLayout, mStatusBarStateController);
         inOrder.verify(mNotificationStackScrollLayout).setDark(eq(true), eq(true), eq(null));
-        inOrder.verify(mNotificationStackScrollLayout).setShowDarkShelf(eq(true));
+        inOrder.verify(mNotificationStackScrollLayout).showDarkShelf();
         inOrder.verify(mStatusBarStateController).setDozeAmount(eq(1f), eq(true));
     }
 
@@ -125,14 +127,14 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     public void testSetDozing_showsDarkShelfWithDefaultClock() {
         when(mKeyguardStatusView.hasCustomClock()).thenReturn(false);
         mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
-        verify(mNotificationStackScrollLayout).setShowDarkShelf(eq(true));
+        verify(mNotificationStackScrollLayout).showDarkShelf();
     }
 
     @Test
-    public void testSetDozing_hidesDarkShelfWhenCustomClock() {
+    public void testSetDozing_showsDarkShelfWhenCustomClock() {
         when(mKeyguardStatusView.hasCustomClock()).thenReturn(true);
         mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
-        verify(mNotificationStackScrollLayout).setShowDarkShelf(eq(false));
+        verify(mNotificationStackScrollLayout).showDarkShelf();
     }
 
     @Test
@@ -172,7 +174,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
             super(NotificationPanelViewTest.this.mContext, null,
                     new InjectionInflationController(
                             SystemUIFactory.getInstance().getRootComponent()),
-                    coordinator, expansionHandler);
+                    coordinator, expansionHandler, mock(DynamicPrivacyController.class));
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

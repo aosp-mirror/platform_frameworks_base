@@ -33,6 +33,14 @@
         <item type="string" name="policy_product" />
     </policy>
 
+    <policy type="odm">
+        <item type="string" name="policy_odm" />
+    </policy>
+
+    <policy type="oem">
+        <item type="string" name="policy_oem" />
+    </policy>
+
     <!-- Resources publicly overlayable -->
     <policy type="public">
         <item type="string" name="policy_public" />

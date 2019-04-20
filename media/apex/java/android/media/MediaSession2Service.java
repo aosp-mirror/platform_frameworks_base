@@ -195,15 +195,15 @@ public abstract class MediaSession2Service extends Service {
             throw new IllegalArgumentException("session is already closed");
         }
         synchronized (mLock) {
-            MediaSession2 previousSession = mSessions.get(session.getSessionId());
+            MediaSession2 previousSession = mSessions.get(session.getId());
             if (previousSession != null) {
                 if (previousSession != session) {
-                    Log.w(TAG, "Session ID should be unique, ID=" + session.getSessionId()
+                    Log.w(TAG, "Session ID should be unique, ID=" + session.getId()
                             + ", previous=" + previousSession + ", session=" + session);
                 }
                 return;
             }
-            mSessions.put(session.getSessionId(), session);
+            mSessions.put(session.getId(), session);
             session.setForegroundServiceEventCallback(mForegroundServiceEventCallback);
         }
     }
@@ -220,11 +220,11 @@ public abstract class MediaSession2Service extends Service {
         }
         MediaNotification notification;
         synchronized (mLock) {
-            if (mSessions.get(session.getSessionId()) != session) {
+            if (mSessions.get(session.getId()) != session) {
                 // Session isn't added or removed already.
                 return;
             }
-            mSessions.remove(session.getSessionId());
+            mSessions.remove(session.getId());
             notification = mNotifications.remove(session);
         }
         session.setForegroundServiceEventCallback(null);
@@ -370,10 +370,6 @@ public abstract class MediaSession2Service extends Service {
                             }
                             return;
                         }
-                        if (DEBUG) {
-                            Log.d(TAG, "Handling incoming connection request from the"
-                                    + " controller, controller=" + caller + ", uid=" + uid);
-                        }
 
                         String callingPkg = connectionRequest.getString(KEY_PACKAGE_NAME);
                         // The Binder.getCallingPid() can be 0 for an oneway call from the
@@ -389,13 +385,18 @@ public abstract class MediaSession2Service extends Service {
                                 caller,
                                 connectionRequest.getBundle(KEY_CONNECTION_HINTS));
 
+                        if (DEBUG) {
+                            Log.d(TAG, "Handling incoming connection request from the"
+                                    + " controller=" + controllerInfo);
+                        }
+
                         final MediaSession2 session;
                         session = service.onGetSession(controllerInfo);
 
                         if (session == null) {
                             if (DEBUG) {
                                 Log.d(TAG, "Rejecting incoming connection request from the"
-                                        + " controller, controller=" + caller + ", uid=" + uid);
+                                        + " controller=" + controllerInfo);
                             }
                             // Note: Trusted controllers also can be rejected according to the
                             // service implementation.

@@ -170,6 +170,8 @@ public class StatusBarTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
+    @Mock
+    private StatusBarWindowView mStatusBarWindowView;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -261,7 +263,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
                 mock(BubbleController.class), mock(NavigationBarController.class),
-                mock(AutoHideController.class), mKeyguardUpdateMonitor);
+                mock(AutoHideController.class), mKeyguardUpdateMonitor, mStatusBarWindowView);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -679,6 +681,25 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulseWhileDozingWithDockingReason_suppressWakeUpGesture() {
+        // Keep track of callback to be able to stop the pulse
+        final DozeHost.PulseCallback[] pulseCallback = new DozeHost.PulseCallback[1];
+        doAnswer(invocation -> {
+            pulseCallback[0] = invocation.getArgument(0);
+            return null;
+        }).when(mDozeScrimController).pulse(any(), anyInt());
+
+        // Starting a pulse while docking should suppress wakeup gesture
+        mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class),
+                DozeLog.PULSE_REASON_DOCKING);
+        verify(mStatusBarWindowView).suppressWakeUpGesture(eq(true));
+
+        // Ending a pulse should restore wakeup gesture
+        pulseCallback[0].onPulseFinished();
+        verify(mStatusBarWindowView).suppressWakeUpGesture(eq(false));
+    }
+
+    @Test
     public void testSetState_changesIsFullScreenUserSwitcherState() {
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
         assertFalse(mStatusBar.isFullScreenUserSwitcherState());
@@ -767,7 +788,8 @@ public class StatusBarTest extends SysuiTestCase {
                 BubbleController bubbleController,
                 NavigationBarController navBarController,
                 AutoHideController autoHideController,
-                KeyguardUpdateMonitor keyguardUpdateMonitor) {
+                KeyguardUpdateMonitor keyguardUpdateMonitor,
+                StatusBarWindowView statusBarWindow) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -801,6 +823,7 @@ public class StatusBarTest extends SysuiTestCase {
             mNavigationBarController = navBarController;
             mAutoHideController = autoHideController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+            mStatusBarWindow = statusBarWindow;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

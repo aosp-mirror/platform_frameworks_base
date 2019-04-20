@@ -770,4 +770,6 @@ interface IPackageManager {
     int getRuntimePermissionsVersion(int userId);
 
     void setRuntimePermissionsVersion(int version, int userId);
+
+    void notifyPackagesReplacedReceived(in String[] packages);
 }

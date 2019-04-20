@@ -130,8 +130,10 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
                     Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
+                    Settings.Global.AVERAGE_TIME_TO_DISCHARGE,
                     Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
+                    Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
                     Settings.Global.BROADCAST_BG_CONSTANTS,
                     Settings.Global.BROADCAST_FG_CONSTANTS,
                     Settings.Global.BROADCAST_OFFLOAD_CONSTANTS,
@@ -462,6 +464,8 @@ public class SettingsBackupTest {
                     Settings.Global.TEXT_CLASSIFIER_ACTION_MODEL_PARAMS,
                     Settings.Global.THEATER_MODE_ON,
                     Settings.Global.TIME_ONLY_MODE_CONSTANTS,
+                    Settings.Global.TIME_REMAINING_ESTIMATE_MILLIS,
+                    Settings.Global.TIME_REMAINING_ESTIMATE_BASED_ON_USAGE,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
                     Settings.Global.TRUSTED_SOUND,
                     Settings.Global.TZINFO_UPDATE_CONTENT_URL,
@@ -573,7 +577,10 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_BUG_WAKELOCK_TIMEOUT_COUNT_THRESHOLD,
                     Settings.Global.RADIO_BUG_SYSTEM_ERROR_COUNT_THRESHOLD,
                     Settings.Global.ENABLED_SUBSCRIPTION_FOR_SLOT,
-                    Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT);
+                    Settings.Global.MODEM_STACK_ENABLED_FOR_SLOT,
+                    Settings.Global.POWER_BUTTON_LONG_PRESS,
+                    Settings.Global.POWER_BUTTON_VERY_LONG_PRESS);
+
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,

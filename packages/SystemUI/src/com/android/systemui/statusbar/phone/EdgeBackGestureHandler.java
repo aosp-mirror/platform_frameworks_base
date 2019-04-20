@@ -15,6 +15,12 @@
  */
 package com.android.systemui.statusbar.phone;
 
+import static android.view.Display.INVALID_DISPLAY;
+
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
@@ -46,7 +52,9 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -123,7 +131,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
     private final PointF mDownPoint = new PointF();
     private boolean mThresholdCrossed = false;
-    private boolean mIgnoreThisGesture = false;
+    private boolean mAllowGesture = false;
     private boolean mIsOnLeftEdge;
 
     private int mImeHeight = 0;
@@ -281,9 +289,14 @@ public class EdgeBackGestureHandler implements DisplayListener {
 
     private void onMotionEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            // Verify if this is in within the touch region
-            mIgnoreThisGesture = !isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
-            if (!mIgnoreThisGesture) {
+            // Verify if this is in within the touch region and we aren't in immersive mode, and
+            // either the bouncer is showing or the notification panel is hidden
+            int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
+            mAllowGesture = (stateFlags & SYSUI_STATE_NAV_BAR_HIDDEN) == 0
+                    && ((stateFlags & SYSUI_STATE_BOUNCER_SHOWING) == SYSUI_STATE_BOUNCER_SHOWING
+                            || (stateFlags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) == 0)
+                    && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
+            if (mAllowGesture) {
                 mIsOnLeftEdge = ev.getX() < mEdgeWidth;
                 mEdgePanelLp.gravity = mIsOnLeftEdge
                         ? (Gravity.LEFT | Gravity.TOP)
@@ -298,13 +311,13 @@ public class EdgeBackGestureHandler implements DisplayListener {
                 mThresholdCrossed = false;
                 mEdgePanel.handleTouch(ev);
             }
-        } else if (!mIgnoreThisGesture) {
+        } else if (mAllowGesture) {
             if (!mThresholdCrossed && ev.getAction() == MotionEvent.ACTION_MOVE) {
                 float dx = Math.abs(ev.getX() - mDownPoint.x);
                 float dy = Math.abs(ev.getY() - mDownPoint.y);
                 if (dy > dx && dy > mTouchSlop) {
                     // Send action cancel to reset all the touch events
-                    mIgnoreThisGesture = true;
+                    mAllowGesture = false;
                     MotionEvent cancelEv = MotionEvent.obtain(ev);
                     cancelEv.setAction(MotionEvent.ACTION_CANCEL);
                     mEdgePanel.handleTouch(cancelEv);
@@ -363,6 +376,13 @@ public class EdgeBackGestureHandler implements DisplayListener {
                 0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
+
+        // Bubble controller will give us a valid display id if it should get the back event
+        BubbleController bubbleController = Dependency.get(BubbleController.class);
+        int bubbleDisplayId = bubbleController.getExpandedDisplayId(mContext);
+        if (code == KeyEvent.KEYCODE_BACK && bubbleDisplayId != INVALID_DISPLAY) {
+            ev.setDisplayId(bubbleDisplayId);
+        }
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 }
