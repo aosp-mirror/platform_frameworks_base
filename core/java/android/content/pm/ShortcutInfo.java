@@ -991,8 +991,8 @@ public final class ShortcutInfo implements Parcelable {
          * Sets the {@link LocusId} associated with this shortcut.
          *
          * <p>This method should be called when the {@link LocusId} is used in other places (such
-         * as {@link Notification} and {@link ContentCaptureContext}) so the device's intelligence
-         * services can correlate them.
+         * as {@link Notification} and {@link ContentCaptureContext}) so the Android system can
+         * correlate them.
          */
         @NonNull
         public Builder setLocusId(@NonNull LocusId locusId) {
@@ -1325,8 +1325,8 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Gets the {@link LocusId} associated with this shortcut.
      *
-     * <p>Used by the device's intelligence services to correlate objects (such as
-     * {@link Notification} and {@link ContentCaptureContext}) that are correlated.
+     * <p>Used by the Android system to correlate objects (such as
+     * {@link Notification} and {@link ContentCaptureContext}).
      */
     @Nullable
     public LocusId getLocusId() {
