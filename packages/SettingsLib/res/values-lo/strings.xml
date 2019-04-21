@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ້​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"​ໃຊ້​ສຳ​ລັບການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ການແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"ຂໍ້ຄວາມ"</string>
