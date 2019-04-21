@@ -34,7 +34,8 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Nesprávny kód PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Neplatná karta."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Úplne nabité"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Prebieha bezdrôtové nabíjanie"</string>
+    <!-- no translation found for keyguard_plugged_in_wireless (8404159927155454732) -->
+    <skip />
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa rýchlo"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíja sa pomaly"</string>
@@ -167,86 +168,4 @@
       <item quantity="other">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám <xliff:g id="_NUMBER_1">%d</xliff:g> pokusov, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
       <item quantity="one">SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám <xliff:g id="_NUMBER_0">%d</xliff:g> pokus, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="few">"<annotation name="color">"Je"</annotation>\n"^1\n^2</item>
-      <item quantity="many">"<annotation name="color">"Je"</annotation>\n"^1\n^2</item>
-      <item quantity="other">"<annotation name="color">"Je"</annotation>\n"^1\n^2</item>
-      <item quantity="one">"<annotation name="color">"Je"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Dvanásť"</item>
-    <item msgid="7389464214252023751">"Jedna"</item>
-    <item msgid="8803180377002008046">"Dve"</item>
-    <item msgid="8614897059944644719">"Tri"</item>
-    <item msgid="2293058674782619556">"Štyri"</item>
-    <item msgid="4815402358455041664">"Päť"</item>
-    <item msgid="3325754778509665687">"Šesť"</item>
-    <item msgid="5805551341866280575">"Sedem"</item>
-    <item msgid="203334816668238610">"Osem"</item>
-    <item msgid="4828052671464488923">"Deväť"</item>
-    <item msgid="2233497913571137419">"Desať"</item>
-    <item msgid="5621554266768657830">"Jedenásť"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"hod."</item>
-    <item msgid="2091812961809760681">"Nula jeden"</item>
-    <item msgid="1496435384877290709">"Nula dva"</item>
-    <item msgid="881846472976674129">"Nula tri"</item>
-    <item msgid="2784477043911540584">"Nula štyri"</item>
-    <item msgid="1610928853656700614">"Nula päť"</item>
-    <item msgid="2317806244043886658">"Nula šesť"</item>
-    <item msgid="3318687539120971327">"Nula sedem"</item>
-    <item msgid="5701600693712102348">"Nula osem"</item>
-    <item msgid="3247381605947372495">"Nula deväť"</item>
-    <item msgid="3508406095411245038">"Desať"</item>
-    <item msgid="7161996337755311711">"Jedenásť"</item>
-    <item msgid="4044549963329624197">"Dvanásť"</item>
-    <item msgid="333373157917379088">"Trinásť"</item>
-    <item msgid="2631202907124819385">"Štrnásť"</item>
-    <item msgid="6472396076858033453">"Päťnásť"</item>
-    <item msgid="8656981856181581643">"Šesťnásť"</item>
-    <item msgid="7289026608562030619">"Sedemnásť"</item>
-    <item msgid="3881477602692646573">"Osemnásť"</item>
-    <item msgid="3358129827772984226">"Deväťnásť"</item>
-    <item msgid="3308575407402865807">"Dvadsať"</item>
-    <item msgid="5346560955382229629">"Dvadsaťjeden\n"</item>
-    <item msgid="226750304761473436">"Dvadsaťdva\n"</item>
-    <item msgid="616811325336838734">"Dvadsaťtri\n"</item>
-    <item msgid="616346116869053440">"Dvadsaťštyri\n"</item>
-    <item msgid="4642996410384042830">"Dvadsaťpäť\n"</item>
-    <item msgid="7506092849993571465">"Dvadsaťšesť\n"</item>
-    <item msgid="1915078191101042031">"Dvadsaťsedem\n"</item>
-    <item msgid="4292378641900520252">"Dvadsaťosem\n"</item>
-    <item msgid="5339513901773103696">"Dvadsaťdeväť\n"</item>
-    <item msgid="3574673250891657607">"Tridsať"</item>
-    <item msgid="5796923836589110940">"Tridsaťjeden\n"</item>
-    <item msgid="5859323597571702052">"Tridsaťdva\n"</item>
-    <item msgid="5133326723148876507">"Tridsaťtri\n"</item>
-    <item msgid="2693999494655663096">"Tridsaťštyri\n"</item>
-    <item msgid="3316754944962836197">"Tridsaťpäť\n"</item>
-    <item msgid="816891008836796723">"Tridsaťšesť\n"</item>
-    <item msgid="9158890488666520078">"Tridsaťsedem\n"</item>
-    <item msgid="1894769703213894011">"Tridsaťosem\n"</item>
-    <item msgid="5638820345598572399">"Tridsaťdeväť\n"</item>
-    <item msgid="8838304023017895439">"Štyridsať"</item>
-    <item msgid="1834742948932559597">"Štyridsaťjeden\n"</item>
-    <item msgid="6573707308847773944">"Štyridsaťdva\n"</item>
-    <item msgid="2450149950652678001">"Štyridsaťtri\n"</item>
-    <item msgid="2874667401318178036">"Štyridsaťštyri\n"</item>
-    <item msgid="3391101532763048862">"Štyridsaťpäť\n"</item>
-    <item msgid="1671489330863254362">"Štyridsaťšesť\n"</item>
-    <item msgid="5916017359554531038">"Štyridsaťsedem\n"</item>
-    <item msgid="8205413177993059967">"Štyridsaťosem\n"</item>
-    <item msgid="6607867415142171302">"Štyridsaťdeväť\n"</item>
-    <item msgid="8358850748472089162">"Päťdesiať"</item>
-    <item msgid="3551313125255080234">"Päťdesiatjeden\n"</item>
-    <item msgid="1559678130725716542">"Päťdesiatdva\n"</item>
-    <item msgid="431441994725492377">"Päťdesiattri\n"</item>
-    <item msgid="6345774640539623024">"Päťdesiatštyri\n"</item>
-    <item msgid="8018192990793931120">"Päťdesiaťpäť\n"</item>
-    <item msgid="6187650843754604534">"Päťdesiatšesť\n"</item>
-    <item msgid="8727240174015993259">"Päťdesiatsedem\n"</item>
-    <item msgid="848339003778952950">"Päťdesiatosem\n"</item>
-    <item msgid="5798985802835423618">"Päťdesiatdeväť\n"</item>
-  </string-array>
 </resources>
