@@ -228,10 +228,10 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Možnosti telefónu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Vypnúť"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Tiesňové volanie"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Tieseň"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ukončiť reláciu"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Snímka obrazovky"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Snímka"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Hlásenie chyby"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktívne nahlásenie"</string>
@@ -1507,7 +1507,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Zmeniť sieť alebo nastavenia VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Zvoliť súbor"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nie je vybratý žiadny súbor"</string>
-    <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
+    <string name="reset" msgid="2448168080964209908">"Resetovať"</string>
     <string name="submit" msgid="1602335572089911941">"Odoslať"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikácia na šoférovanie je spustená"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Klepnutím ukončíte aplikáciu na šoférovanie"</string>

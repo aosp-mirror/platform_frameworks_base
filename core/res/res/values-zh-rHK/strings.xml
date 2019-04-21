@@ -401,7 +401,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話記錄，包括來電和撥出電話的相關資料。惡意應用程式可能會藉此清除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取身體感應器 (例如心跳監測器)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取人體感應器 (例如心跳監測器)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感應器所收集的資料 (這類感應器可監測您的體能狀態，例如您的心率)。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"讀取日曆活動和詳情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"此應用程式可以讀取所有儲存在您的平板電腦的日曆活動，並分享或儲存您的日曆資料。"</string>
@@ -1919,8 +1919,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"生產力應用程式"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 偵錯"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"小時"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"分鐘"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"時"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"分"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"設定時間"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"請輸入有效的時間"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>
