@@ -471,7 +471,7 @@ public class CarStatusBar extends StatusBar implements
                     handled = closeGestureDetector.onTouchEvent(event);
                 }
                 boolean isTracking = mIsTracking;
-                Rect rect = mNotificationView.getClipBounds();
+                Rect rect = mNotificationList.getClipBounds();
                 float clippedHeight = rect.bottom;
                 if (!handled && event.getActionMasked() == MotionEvent.ACTION_UP
                         && mIsSwipingVerticallyToClose) {
@@ -540,11 +540,11 @@ public class CarStatusBar extends StatusBar implements
 
     /**
      * Animates the notification shade from one position to other. This is used to either open or
-     * close the notification shade completely with a velocity. Id the animation is to close the
+     * close the notification shade completely with a velocity. If the animation is to close the
      * notification shade this method also makes the view invisible after animation ends.
      */
     private void animateNotificationPanel(float velocity, boolean isClosing) {
-        Rect rect = mNotificationView.getClipBounds();
+        Rect rect = mNotificationList.getClipBounds();
         if (rect == null) {
             return;
         }
@@ -575,7 +575,7 @@ public class CarStatusBar extends StatusBar implements
                 if (isClosing) {
                     mStatusBarWindowController.setPanelVisible(false);
                     mNotificationView.setVisibility(View.INVISIBLE);
-                    mNotificationView.setClipBounds(null);
+                    mNotificationList.setClipBounds(null);
                     // let the status bar know that the panel is closed
                     setPanelExpanded(false);
                 } else {
@@ -933,7 +933,18 @@ public class CarStatusBar extends StatusBar implements
     private void setNotificationViewClipBounds(int height) {
         Rect clipBounds = new Rect();
         clipBounds.set(0, 0, mNotificationView.getWidth(), height);
-        mNotificationView.setClipBounds(clipBounds);
+        // Sets the clip region on the notification list view.
+        mNotificationList.setClipBounds(clipBounds);
+
+        if (mNotificationView.getHeight() > 0) {
+            // Calculates the alpha value for the background based on how much of the notification
+            // shade is visible to the user. When the notification shade is completely open then
+            // alpha value will be 1.
+            float alpha = (float) height / mNotificationView.getHeight();
+            Drawable background = mNotificationView.getBackground();
+
+            background.setAlpha((int) (alpha * 255));
+        }
     }
 
     private void calculatePercentageFromBottom(float height) {
