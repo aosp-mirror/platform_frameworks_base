@@ -112,7 +112,6 @@
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Aurpegia eskaneatzen"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Bidali"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Kudeatu jakinarazpenak"</string>
-    <string name="unlock_label" msgid="8779712358041029439">"desblokeatu"</string>
     <string name="phone_label" msgid="2320074140205331708">"ireki telefonoan"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ireki ahots-laguntza"</string>
     <string name="camera_label" msgid="7261107956054836961">"ireki kamera"</string>
@@ -178,7 +177,7 @@
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Ibiltaritza"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi konexioa"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wifia"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ez dago SIM txartelik."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datu-konexioa"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Datu-konexioa aktibatuta"</string>
@@ -323,7 +322,7 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Ni"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"Erabiltzailea"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"Erabiltzaile berria"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi konexioa"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wifia"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Konektatu gabe"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ez dago sarerik"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi konexioa desaktibatuta"</string>
@@ -368,6 +367,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Ilunabarrera arte"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aktibatze-ordua: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> arte"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Gai iluna"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Desgaituta dago NFC"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Gaituta dago NFC"</string>
@@ -403,7 +403,8 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Isiltasun\nosoa"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Lehentasunezkoak\nsoilik"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmak\nsoilik"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hari gabe kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatzeko)"</string>
+    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
+    <skip />
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatzeko)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Bizkor kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatzeko)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mantso kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatzeko)"</string>
@@ -506,8 +507,8 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikaziora konektatuta zaude. Aplikazio horrek sarean egiten dituzun jarduera pertsonalak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen dizu laneko profila. <xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora dago konektatuta profila, eta aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen dizu laneko profila. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> aplikaziora dago konektatuta profila, eta aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne. \n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> aplikaziora ere zaude konektatuta, eta hark sare pertsonalean egiten dituzun jarduerak kontrola ditzake."</string>
-    <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"<xliff:g id="USER_NAME">%1$s</xliff:g> erabiltzailearentzat desblokeatu da"</string>
-    <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> abian da"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
+    <skip />
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Gailua blokeatuta egongo da eskuz desblokeatu arte"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Eskuratu jakinarazpenak azkarrago"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ikusi desblokeatu baino lehen"</string>
@@ -520,6 +521,12 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Tolestu"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Ezarri azpitituluak automatikoki"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Azpitituluei buruzko aholkua"</string>
+    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
+    <skip />
+    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Aldatu irteerako gailua"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantaila ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
@@ -565,7 +572,7 @@
     <string name="output_none_found" msgid="5544982839808921091">"Ez da aurkitu gailurik"</string>
     <string name="output_none_found_service_off" msgid="8631969668659757069">"Ez da aurkitu gailurik. Aktibatu <xliff:g id="SERVICE">%1$s</xliff:g>."</string>
     <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth-a"</string>
-    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi konexioa"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wifia"</string>
     <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth eta Wi-Fi konexioak"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Erakutsi txertatutako bateriaren ehunekoa"</string>
@@ -875,7 +882,7 @@
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wi-Fi sare baten bidez soilik konektatu ahal izango zara Internetera."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"Uneko operadorea"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
-    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioari <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakustea baimendu nahi diozu?"</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioari <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakusteko baimena eman nahi diozu?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioaren informazioa irakur dezake."</string>
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioan ekintzak gauza ditzake."</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Baimendu <xliff:g id="APP">%1$s</xliff:g> aplikazioari edozein aplikazioren zatiak erakustea"</string>
@@ -901,8 +908,8 @@
     <string name="music_controls_no_title" msgid="5236895307087002011">"Ez du izenik"</string>
     <string name="restart_button_description" msgid="2035077840254950187">"Berrabiarazi aplikazio hau eta ezarri pantaila osoko modua."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Ireki <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren ezarpenen globoak"</string>
-    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren globoak onartu nahi dituzu?"</string>
+    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren ezarpenen burbuilak"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren burbuilak erabiltzeko baimena eman nahi duzu?"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Ukatu"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Onartu"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Galdetu geroago"</string>

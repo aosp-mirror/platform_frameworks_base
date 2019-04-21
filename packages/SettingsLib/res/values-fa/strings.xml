@@ -140,11 +140,11 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"برنامه‌های حذف شده"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"برنامه‌ها و کاربران حذف شده"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"به‌روزرسانی‌های سیستم"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏اتصال داده با سیم USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏اشتراک‌گذاری اینترنت با USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"نقطه اتصال قابل حمل"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"اتصال اینترنت با تلفن همراه بلوتوث"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"اتصال به اینترنت با تلفن همراه"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"تترینگ و نقطه اتصال قابل حمل"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"اشتراک‌گذاری اینترنت با بلوتوث"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"اشتراک‌گذاری اینترنت"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"اشتراک‌گذاری اینترنت و نقطه اتصال قابل‌حمل"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"همه برنامه‌های کاری"</string>
     <string name="user_guest" msgid="8475274842845401871">"مهمان"</string>
     <string name="unknown" msgid="1592123443519355854">"ناشناس"</string>
@@ -198,7 +198,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"گزینه‌های برنامه‌نویس برای این کاربر موجود نیست"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏تنظیمات VPN برای این کاربر در دسترس نیست"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"تنظیمات تترینگ برای این کاربر در دسترس نیست"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"تنظیمات اشتراک‌گذاری اینترنت برای این کاربر در دسترس نیست"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"تنظیمات نام تقطه دسترسی برای این کاربر در دسترس نیست"</string>
     <string name="enable_adb" msgid="7982306934419797485">"‏اشکال‌زدایی USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"‏با اتصال USB، حالت اشکال‌زدایی فعال شود"</string>
@@ -245,8 +245,8 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"متصل نشد"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"کنتوردار"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون کنتور"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"محدودشده"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"محدودنشده"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"اندازه‌های حافظه موقت ثبت‌کننده"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"انتخاب اندازه‌ ثبت‌کننده در حافظه موقت ثبت"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"حافظه دائم ثبت‌کننده پاک شود؟"</string>
@@ -259,7 +259,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"مکان‌های کاذب مجاز هستند"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"فعال کردن نمایش بازبینی ویژگی"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏داده سلولی همیشه فعال نگه داشته می‌شود، حتی وقتی Wi-Fi فعال است (برای جابه‌جایی سریع شبکه)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استفاده از شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه درصورت دردسترس بودن"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استفاده از شتاب سخت‌افزاری اشتراک‌گذاری اینترنت درصورت دردسترس بودن"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏اشکال‌زدایی USB انجام شود؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏اشکال‌زدایی USB فقط برای اهداف برنامه‌نویسی در نظر گرفته شده است. از آن برای رونوشت‌برداری داده بین رایانه و دستگاهتان، نصب برنامه‌ها در دستگاهتان بدون اعلان و خواندن داده‌های گزارش استفاده کنید."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏دسترسی به اشکال‌زدایی USB از تمام رایانه‌هایی که قبلاً مجاز دانسته‌اید لغو شود؟"</string>

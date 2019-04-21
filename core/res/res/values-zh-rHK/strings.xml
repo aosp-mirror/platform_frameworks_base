@@ -296,9 +296,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"錄音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;錄音嗎？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"運動"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"存取運動"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取您的運動嗎？"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"體能活動"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"存取體能活動"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取您的體能活動嗎？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍照和錄製影片"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;拍照和錄製影片嗎？"</string>
@@ -401,7 +401,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話記錄，包括來電和撥出電話的相關資料。惡意應用程式可能會藉此清除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取身體感應器 (例如心跳監測器)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取人體感應器 (例如心跳監測器)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感應器所收集的資料 (這類感應器可監測您的體能狀態，例如您的心率)。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"讀取日曆活動和詳情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"此應用程式可以讀取所有儲存在您的平板電腦的日曆活動，並分享或儲存您的日曆資料。"</string>
@@ -427,8 +427,8 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"此應用程式可以隨時使用麥克風錄音。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"發送指令至 SIM 卡"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"允許應用程式傳送指令到 SIM 卡。這項操作具有高危險性。"</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"識別運動"</string>
-    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此應用程式可識別您的運動。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"識別體能活動"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此應用程式可識別您的體能活動。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍照和拍攝影片"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"此應用程式可以隨時使用相機拍照和攝錄。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制震動"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"請將手機移近一點。"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"請將手機向上移。"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"請將手機向下移。"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"請將手機向右移。"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"請將手機向左移。"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移。"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移。"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"請睜開眼睛並直視螢幕。"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不到您的臉。請看著手機。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"裝置不夠穩定。請拿穩手機。"</string>
@@ -1919,8 +1919,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"生產力應用程式"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 偵錯"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"小時"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"分鐘"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"時"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"分"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"設定時間"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"請輸入有效的時間"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>

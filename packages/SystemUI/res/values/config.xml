@@ -469,6 +469,10 @@
          -->
     <integer name="config_smart_replies_in_notifications_max_num_actions">-1</integer>
 
+    <!-- Smart replies in notifications: Delay (ms) before smart suggestions are clickable, since
+         they were added. -->
+    <integer name="config_smart_replies_in_notifications_onclick_init_delay">200</integer>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->

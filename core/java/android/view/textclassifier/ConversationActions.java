@@ -401,7 +401,7 @@ public final class ConversationActions implements Parcelable {
         }
 
         /** Returns an immutable list of hints */
-        @Nullable
+        @NonNull
         @Hint
         public List<String> getHints() {
             return mHints;

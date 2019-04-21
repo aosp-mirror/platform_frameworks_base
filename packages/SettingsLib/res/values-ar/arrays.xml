@@ -59,7 +59,7 @@
     <item msgid="45075631231212732">"‏استخدام التحقق من HDCP دومًا"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="3966341281672645384">"موقوف"</item>
+    <item msgid="3966341281672645384">"غير مفعّل"</item>
     <item msgid="1969681323976948639">"تمّ تفعيل التصفية"</item>
     <item msgid="8719029132154020716">"مفعّل"</item>
   </string-array>

@@ -227,7 +227,7 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth-AVRCP-versie selecteren"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-audiocodec"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Codec voor Bluetooth-audio activeren\nSelectie"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bemonsteringsfrequentie (sample rate) van Bluetooth-audio"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Sample rate van Bluetooth-audio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Codec voor Bluetooth-audio activeren\nSelectie: Bemonsteringsfrequentie"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits per sample voor Bluetooth-audio"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Codec voor Bluetooth-audio activeren\nSelectie: Bits per sample"</string>
@@ -282,7 +282,7 @@
     <string name="wait_for_debugger" msgid="1202370874528893091">"Wachten op debugger"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Gedebugde app wacht op koppelen van debugger vóór uitvoering"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Invoer"</string>
-    <string name="debug_drawing_category" msgid="6755716469267367852">"Tekening"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"Tekenen"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Rendering met hardwareversnelling"</string>
     <string name="media_category" msgid="4388305075496848353">"Media"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Controle"</string>
@@ -295,8 +295,8 @@
     <string name="show_screen_updates" msgid="5470814345876056420">"Oppervlakupdates weergeven"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Volledige vensteroppervlakken flashen bij updates"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Weergave-updates tonen"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Flikkerende weergave in vensters bij update"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Updaten hardwarelgn wrgvn"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Flash-weergave in vensters bij update"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Hardwarelayer-upd. tonen"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardwarelagen knipperen groen bij updates"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Foutopsporing GPU-overbelasting"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW-overlays uitschakelen"</string>
@@ -305,13 +305,13 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL-sporen inschakelen"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB-audiorouting uitsch."</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Autom. routing naar USB-randapparatuur uitsch."</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Indelingsgrenzen weerg."</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Indelingsgrenzen weergeven"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Clipgrenzen, marges en meer weergeven"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"V.r.n.l.-indelingsrichting afdwingen"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Schermindelingsrichting geforceerd instellen op v.r.n.l. voor alle talen"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA forceren"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"4x MSAA inschakelen in OpenGL ES 2.0-apps"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Fouten met niet-rechthoekige bijsnijdbewerkingen opsporen"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Foutopsporing niet-rechthoekig bijsnijden"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"HWUI-weergave van profiel"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU-foutopsporingslagen inschakelen"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Laden van GPU-foutopsporingslagen toestaan voor foutopsporingsapps"</string>

@@ -202,7 +202,7 @@
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Los ajustes del nombre de punto de acceso no están disponibles para este usuario"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Depuración por USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Activar el modo de depuración cuando el dispositivo esté conectado por USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Revocar autozaciones de depuración USB"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Revocar autorizaciones de depuración USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Atajo a informe de errores"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Mostrar un botón en el menú de encendido para crear un informe de errores"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Pantalla siempre encendida al cargar"</string>
@@ -324,15 +324,15 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Destruir actividades cuando el usuario deje de usarlas"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Límitar procesos en segundo plano"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANR en segundo plano"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Informar de que una aplicación en segundo plano no responde"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar el diálogo La aplicación no responde para aplicaciones en segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ver advertencias del canal de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Mostrar una advertencia en pantalla cuando una aplicación publica una notificación sin un canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permitir aplicaciones de forma externa"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Hacer que cualquier aplicación se pueda escribir en un dispositivo de almacenamiento externo, independientemente de los valores definidos"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar el ajuste de tamaño de las actividades"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permitir que se pueda ajustar el tamaño de todas las actividades para el modo multiventana, independientemente de los valores definidos."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Hacer que el tamaño de todas las actividades se pueda ajustar para el modo multiventana, independientemente de los valores definidos"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Habilitar ventanas de forma libre"</string>
-    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Habilita la opción para utilizar ventanas de forma libre experimentales."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Habilitar la opción para utilizar ventanas de forma libre experimentales"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Contraseña para copias de ordenador"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Las copias de seguridad completas de ordenador no están protegidas"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Toca para cambiar o quitar la contraseña de las copias de seguridad completas del escritorio"</string>

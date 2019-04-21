@@ -43,6 +43,8 @@ import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.InflatedSmartReplies.SmartRepliesAndActions;
+import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions;
+import com.android.systemui.statusbar.policy.SmartReplyView.SmartReplies;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +53,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @SmallTest
@@ -320,6 +323,72 @@ public class InflatedSmartRepliesTest extends SysuiTestCase {
                 mEntry.systemGeneratedSmartReplies);
         assertThat(repliesAndActions.smartActions.actions).isEqualTo(
                 mEntry.systemGeneratedSmartActions);
+    }
+
+    @Test
+    public void areSuggestionsSimilar_trueForSimilar() {
+        CharSequence[] leftReplies = new CharSequence[] { "first reply", "second reply"};
+        CharSequence[] rightReplies = new CharSequence[] { "first reply", "second reply"};
+        List<Notification.Action> leftActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Notification.Action> rightActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+
+        SmartRepliesAndActions leftRepliesAndActions = new SmartRepliesAndActions(
+                new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
+                new SmartActions(leftActions, false /* fromAssistant */));
+        SmartRepliesAndActions rightRepliesAndActions = new SmartRepliesAndActions(
+                new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
+                new SmartActions(rightActions, false /* fromAssistant */));
+
+        assertThat(InflatedSmartReplies.areSuggestionsSimilar(
+                leftRepliesAndActions, rightRepliesAndActions)).isTrue();
+    }
+
+    @Test
+    public void areSuggestionsSimilar_falseForDifferentReplies() {
+        CharSequence[] leftReplies = new CharSequence[] { "first reply"};
+        CharSequence[] rightReplies = new CharSequence[] { "first reply", "second reply"};
+        List<Notification.Action> leftActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Notification.Action> rightActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+
+        SmartRepliesAndActions leftRepliesAndActions = new SmartRepliesAndActions(
+                new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
+                new SmartActions(leftActions, false /* fromAssistant */));
+        SmartRepliesAndActions rightRepliesAndActions = new SmartRepliesAndActions(
+                new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
+                new SmartActions(rightActions, false /* fromAssistant */));
+
+        assertThat(InflatedSmartReplies.areSuggestionsSimilar(
+                leftRepliesAndActions, rightRepliesAndActions)).isFalse();
+    }
+
+    @Test
+    public void areSuggestionsSimilar_falseForDifferentActions() {
+        CharSequence[] leftReplies = new CharSequence[] { "first reply", "second reply"};
+        CharSequence[] rightReplies = new CharSequence[] { "first reply", "second reply"};
+        List<Notification.Action> leftActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("secondAction"));
+        List<Notification.Action> rightActions = Arrays.asList(
+                createAction("firstAction"),
+                createAction("not secondAction"));
+
+        SmartRepliesAndActions leftRepliesAndActions = new SmartRepliesAndActions(
+                new SmartReplies(leftReplies, null, null, false /* fromAssistant */),
+                new SmartActions(leftActions, false /* fromAssistant */));
+        SmartRepliesAndActions rightRepliesAndActions = new SmartRepliesAndActions(
+                new SmartReplies(rightReplies, null, null, false /* fromAssistant */),
+                new SmartActions(rightActions, false /* fromAssistant */));
+
+        assertThat(InflatedSmartReplies.areSuggestionsSimilar(
+                leftRepliesAndActions, rightRepliesAndActions)).isFalse();
     }
 
     private void setupAppGeneratedReplies(CharSequence[] smartReplies) {

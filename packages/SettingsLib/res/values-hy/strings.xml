@@ -82,7 +82,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Հեռախոսազանգեր"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Ֆայլերի փոխանցում"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Ներմուծման սարք"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ինտերնետի մուտք"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ինտերնետի հասանելիություն"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Կոնտակտի համօգտագործում"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Օգտագործել կոնտակտի համօգտագործման համար"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Ինտերնետ կապի տարածում"</string>
@@ -288,7 +288,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Մշտադիտարկում"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Խիստ ռեժիմն ակտիվացված է"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Լուսավորել էկրանը` ծրագրի գլխավոր շղթայի վրա երկար աշխատելիս"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Նշիչի տեղադրություն"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Նշորդի տեղադրությունը"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Էկրանի վերադրումը ցույց է տալիս ընթացիկ հպման տվյալները"</string>
     <string name="show_touches" msgid="2642976305235070316">"Ցույց տալ հպումները"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Ցույց տալ հպումների տեսանելի արձագանքը"</string>
@@ -305,10 +305,10 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ակտիվացնել OpenGL հետքերը"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Անջատել USB աուդիո երթուղումը"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Անջատել ավտոմատ երթուղումը դեպի USB աուդիո սարքեր"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Ցույց տալ տարրերի չափսերը"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Ցույց տալ տարրերի չափերը"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Ցույց տալ կտրվածքի սահմանները, լուսանցքները և այլն"</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Փոխել RTL-ի դասավորության ուղղությունը"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Դարձնել էկրանի դասավորության ուղղությունը դեպի RTL բոլոր լեզուների համար"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Ուղղությունը դարձնել RTL"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Բոլոր լեզուների համար էկրանի տեքստի ուղղությունը դարձնել աջից ձախ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Ստիպել  4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Միացնել 4x MSAA-ը  OpenGL ES 2.0 հավելվածներում"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Վրիպազերծել ոչ ուղղանկյուն կտրումների գործողությունները"</string>
@@ -427,7 +427,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Ամենամեծ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Հատուկ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Ընտրացանկ"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"Մուտքագրեք գաղտնաբառը՝ ցուցադրական ռեժիմում գործարանային վերակայում կատարելու համար"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Մուտքագրեք գաղտնաբառը՝ ցուցադրական ռեժիմում գործարանային կարգավորումների վերականգնում կատարելու համար"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Հաջորդը"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Պահանջվում է գաղտնաբառ"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Մուտքագրման ակտիվ տարբերակներ"</string>

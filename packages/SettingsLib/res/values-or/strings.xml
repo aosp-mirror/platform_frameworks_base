@@ -83,11 +83,11 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ଇନ୍‌ପୁଟ୍‌ ଡିଭାଇସ୍"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ଇଣ୍ଟର୍‌ନେଟ୍‌ ଆକ୍ସେସ୍"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ଯୋଗାଯୋଗ ଶେୟାରିଙ୍ଗ"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"ଯୋଗାଯୋଗ ଶେୟାର୍‌ କରିବା ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ଯୋଗାଯୋଗ ସେୟାରିଙ୍ଗ୍"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"ଯୋଗାଯୋଗ ସେୟାର୍‌ କରିବା ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ଇଣ୍ଟର୍‌ନେଟ୍‌ ସଂଯୋଗ ଶେୟାରିଙ୍ଗ"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"ଟେକ୍ସଟ୍ ମେସେଜ୍"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ସିମ୍‌ ଆକ୍ସେସ୍‌"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM ଆକ୍ସେସ୍‌"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ଅଡିଓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ଅଡିଓ"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"ଶ୍ରବଣ ଯନ୍ତ୍ର"</string>
@@ -100,7 +100,7 @@
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍ ସର୍ଭର୍‍ ସହ ସଂଯୁକ୍ତ ହୋଇନାହିଁ"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ଇନ୍‌ପୁଟ୍‌ ଡିଇଭାସ୍‌ ସହ ସଂଯୁକ୍ତ"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"ଆଭ୍ୟନ୍ତରୀଣ ଆକ୍ସେସ୍ ପାଇଁ ଡିଭାଇସ୍‌ ସହିତ ସଂଯୁକ୍ତ"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"ଡିଭାଇସ୍‌‌ ସହ ସ୍ଥାନୀୟ ଇଣ୍ଟରନେଟ୍‌ ସଂଯୋଗ ଶେୟାର୍‌ କରାଯାଉଛି"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"ଡିଭାଇସ୍‌‌ ସହ ସ୍ଥାନୀୟ ଇଣ୍ଟରନେଟ୍‌ ସଂଯୋଗ ସେୟାର୍‌ କରାଯାଉଛି"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"ଇଣ୍ଟର୍‌ନେଟ୍‌ ଆକ୍ସେସ୍‌ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"ମାନଚିତ୍ର ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM ଆକସେସ୍‌ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -123,7 +123,7 @@
     <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"ଇମେଜିଙ୍ଗ"</string>
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"ହେଡ୍‌ଫୋନ୍‌"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ଇନ୍‌ପୁଟ୍‌ ଉପକରଣ"</string>
-    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ବ୍ଲୁ-ଟୂଥ୍‍‌"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ବ୍ଲୁଟୂଥ୍‍‌"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"ବାମ ଶ୍ରବଣ ଯନ୍ତ୍ର ପେୟାର୍ କରାଯାଉଛି…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"ଡାହାଣ ଶ୍ରବଣ ଯନ୍ତ୍ର ପେୟାର୍ କରାଯାଉଛି…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"ବାମ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବ୍ୟାଟେରୀ"</string>
@@ -207,33 +207,33 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ତ୍ରୁଟି ରିପୋର୍ଟ ଦେବାପାଇଁ ପାୱର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖନ୍ତୁ"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ଜାଗ୍ରତ ରଖନ୍ତୁ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରୀନ୍‌ ଆଦୌ ବନ୍ଦ ହେବନାହିଁ"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ବ୍ଲୁ-ଟୂଥ୍‍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ବ୍ଲୁଟୂଥ୍‍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"ବ୍ଲୁଟୁଥ୍‌ ପ୍ୟାକେଟ୍ କ୍ୟାପଚର୍ କରନ୍ତୁ (ଏହି ସେଟିଂ ବଦଳାଇବା ପରେ ବ୍ଲୁଟୁଥ୍‍‌କୁ ଟୋଗଲ୍ କରନ୍ତୁ)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ଅନଲକ୍‌ କରିବା"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"bootloaderକୁ ଅନ୍‌ଲକ୍‌ ହେବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ଅନଲକ୍‌ କରିବା ଅନୁମତି ଦେବେ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ଚେତାବନୀ: ଏହି ସେଟିଙ୍ଗ ଚାଲୁ ଥିବାବେଳେ ଡିଭାଇସ୍‌ର ସୁରକ୍ଷା ବୈଶିଷ୍ଟ୍ୟ କାମ କରିବ ନାହିଁ"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"ନକଲି ଲୋକେଶନ୍‌ ଆପ୍‌ର ଚୟନ କରନ୍ତୁ"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"ମକ୍ ଲୋକେସନ୍‌ ଆପ୍‌ର ଚୟନ କରନ୍ତୁ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"କୌଣସି ନକଲି ଲୋକେଶନ ଆପ୍ ସେଟ୍ କରାଯାଇନାହିଁ"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"ନକଲି ଲୋକେଶନ୍‌ ଆପ୍‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"ନକଲି ଲୋକେସନ୍‌ ଆପ୍‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ନେଟ୍‌ୱର୍କିଙ୍ଗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ୱାୟରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସର୍ଟିଫିକେଶନ୍‌"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ୱାଇ-ଫାଇ ଭର୍ବୋସ୍‌ ଲଗିଙ୍ଗ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ମୋବାଇଲ୍‌ ଡାଟା ସର୍ବଦା ସକ୍ରିୟ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ବେଗ"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ବ୍ଲୁଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍‌ ଅକ୍ଷମ କରନ୍ତୁ"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ବ୍ଲୁ-ଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ବ୍ଲୁ-ଟୂଥ୍‍‌ AVRCP ଭର୍ସନ୍‌"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ କୋଡେକ୍‌"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ ସାମ୍ପଲ୍‌ ରେଟ୍‌"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ସାମ୍ପଲ୍ ରେଟ୍"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ନମୁନା ପିଛା ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ ବିଟ୍ସ"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ନମୁନା ପିଛା ବିଟ୍ସ"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ ଚ୍ୟାନେଲ୍‌ ମୋଡ୍"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ବ୍ଲୁ-ଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ଚ୍ୟାନେଲ୍ ମୋଡ୍"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ବ୍ଲୁ-ଟୂଥ୍‍‌ ଅଡିଓ LDAC କୋଡେକ୍‌: ପ୍ଲେବ୍ୟାକ୍‌ ଗୁଣବତ୍ତା"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ବ୍ଲୁଟୂଥ୍‍‌ AVRCP ଭର୍ସନ୍‌"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ କୋଡେକ୍‌"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ବ୍ଲୁଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ବ୍ଲୁଟୂଥ୍‌ ଅଡିଓ ସାମ୍ପଲ୍‌ ରେଟ୍‌"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ବ୍ଲୁଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ସାମ୍ପଲ୍ ରେଟ୍"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ନମୁନା ପିଛା ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ ବିଟ୍ସ"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ବ୍ଲୁଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ନମୁନା ପିଛା ବିଟ୍ସ"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ ଚ୍ୟାନେଲ୍‌ ମୋଡ୍"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ବ୍ଲୁଟୂଥ୍‍ ଅଡିଓ କୋଡେକ୍\nସିଲେକ୍ସନ୍‌କୁ ଗତିଶୀଳ କରନ୍ତୁ: ଚ୍ୟାନେଲ୍ ମୋଡ୍"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଡିଓ LDAC କୋଡେକ୍‌: ପ୍ଲେବ୍ୟାକ୍‌ ଗୁଣବତ୍ତା"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"ବ୍ଲୁ-ଟୁଥ୍‌ ଅଡିଓ LDAC\nକୋଡେକ୍‌ ଚୟନକୁ ଗତିଶୀଳ କରନ୍ତୁ: ପ୍ଲେବ୍ୟାକ୍‌ କ୍ୱାଲିଟୀ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ଷ୍ଟ୍ରିମ୍ କରୁଛି: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ବ୍ୟକ୍ତିଗତ DNS"</string>
@@ -268,7 +268,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ଜରିଆରେ ଆପ୍‌ଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT ମାଧ୍ୟମରେ ଇନଷ୍ଟଲ ହୋଇଥିବା ଆପ୍‌ଗୁଡ଼ିକ ହାନିକାରକ କାର୍ଯ୍ୟକଳାପ କରୁଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"(କେବଳ MAC ଠିକଣା ଥାଇ) ନାମ ବିନା ବ୍ଲୁଟୂଥ ଡିଭାଇସଗୁଡ଼ିକ ପ୍ରଦର୍ଶିତ ହେବ"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ରିମୋଟ୍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକରେ ଯଦି ଅସ୍ୱୀକାର୍ଯ୍ୟ ଭାବେ ଉଚ୍ଚ ଭଲ୍ୟୁମ୍ କିମ୍ବା ନିୟନ୍ତ୍ରଣର ଅଭାବ ପରି ଭଲ୍ୟୁମ୍ ସମସ୍ୟା ଥାଏ, ବ୍ଲୁ-ଟୂଥ୍‌ ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍ ଫିଚର୍ ଅକ୍ଷମ କରିଥାଏ।"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ରିମୋଟ୍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକରେ ଯଦି ଅସ୍ୱୀକାର୍ଯ୍ୟ ଭାବେ ଉଚ୍ଚ ଭଲ୍ୟୁମ୍ କିମ୍ବା ନିୟନ୍ତ୍ରଣର ଅଭାବ ପରି ଭଲ୍ୟୁମ୍ ସମସ୍ୟା ଥାଏ, ବ୍ଲୁଟୂଥ୍‌ ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍ ଫିଚର୍ ଅକ୍ଷମ କରିଥାଏ।"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ଯାଞ୍ଚ କରୁଛି"</string>
@@ -288,7 +288,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"ମନିଟରିଙ୍ଗ"</string>
     <string name="strict_mode" msgid="1938795874357830695">"କଡ଼ା ମୋଡ୍ ସକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"ମୁଖ୍ୟ ଥ୍ରେଡ୍‌ରେ ଆପ୍‌ ଦୀର୍ଘ ସମୟ କାର୍ଯ୍ୟ କଲେ ସ୍କ୍ରୀନ୍‌ ଫ୍ଲାଶ୍ କରନ୍ତୁ"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"ପଏଣ୍ଟର୍‌ ଲୋକେଶନ୍‌"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"ପଏଣ୍ଟର୍‌ ଲୋକେସନ୍‌"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ଏବେର ଟଚ୍‌ ଡାଟା ଦେଖାଉଥିବା ସ୍କ୍ରୀନ୍‌ ଓଭର୍‌ଲେ"</string>
     <string name="show_touches" msgid="2642976305235070316">"ଟାପ୍‌ ଦେଖାନ୍ତୁ"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"ଟାପ୍ ପାଇଁ ଭିଜୁଆଲ୍ ମତାମତ ଦେଖାନ୍ତୁ"</string>

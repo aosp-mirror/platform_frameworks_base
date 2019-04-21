@@ -196,7 +196,7 @@
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Chaguo za runinga"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Machaguo ya simu"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Hali ya kimya"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandao-hewa"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandaopepe"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Zima pasiwaya"</string>
     <string name="screen_lock" msgid="799094655496098153">"Funga skrini"</string>
     <string name="power_off" msgid="4266614107412865048">"Zima"</string>
@@ -227,7 +227,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Dharura"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ripoti ya hitilafu"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Maliza kipindi"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Picha ya skrini"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Pichaskrini"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Ripoti ya hitilafu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali ya kifaa chako kwa sasa, na itume kama barua pepe. Itachukua muda mfupi tangu ripoti ya hitilafu ianze kuzalishwa hadi iwe tayari kutumwa; vumilia."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ripoti ya kushirikiana"</string>
@@ -301,7 +301,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie shughuli zako za kimwili?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipige picha na kurekodi video"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige picha na kurekodi video?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; kupiga picha na kurekodi video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Rekodi ya nambari za simu"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"kusoma na kuandika rekodi ya nambari za simu"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie rekodi zako za nambari za simu?"</string>
@@ -526,7 +526,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"Imeghairi uthibitishaji"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Hujaweka pin, mchoro au nenosiri"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Haikuweza kuchakata kitambulisho. Tafadhali jaribu tena."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Imeshindwa kuchakata alama ya kidole. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kitambuzi alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ulisogeza kidole kwa kasi mno. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Kidole kilisogezwa polepole zaidi. Tafadhali jaribu tena."</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Sogeza simu karibu."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Sogeza simu juu zaidi."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Sogeza simu chini."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Sogeza simu upande wa kulia."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Sogeza simu upande wa kushoto."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Sogeza simu upande wa kushoto."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Sogeza simu upande wa kulia."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Angalia skrini ukiwa umefungua macho yako."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Imeshindwa kuona uso wako. Angalia simu."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Inatikisika sana. Ishike simu iwe thabiti."</string>
@@ -654,14 +654,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge kompyuta kibao au ufute data yote ya mtumiaji huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayoingizwa wakati wa kufungua skrini, na ufunge televisheni au ufute data yote ya mtumiaji kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge simu au ufute data yote ya mtumiaji  huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Kubadilisha nenosiri la kufunga skrini"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Kubadilisha nenosiri la kufunga skrini."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Kubadilisha mbinu ya kufunga skrini"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Kubadilisha mbinu ya kufunga skrini."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kufunga skrini"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kufuta data yote"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Futa data ya kompyuta kibao bila ilani kwa kurejesha mipangilio ambayo kompyuta ilitoka nayo kiwandani."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Futa data ya runinga bila onyo kwa kurejesha katika hali iliyotoka nayo kiwandani."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kufuta data ya simu bila ilani kwa kurejesha data ambayo kifaa kilitoka nayo kiwandani"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kufuta data ya simu bila ilani kwa kurejesha mipangilio iliyotoka nayo kiwandani."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Futa data yote ya mtumiaji"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Futa data ya mtumiaji huyu iliyo kwenye kompyuta kibao hii bila ilani."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Futa data ya mtumiaji huyu iliyo kwenye televisheni hii bila ilani."</string>
@@ -1278,15 +1278,15 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"aina ya mtandao isiyojulikana"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Haikuweza kuunganisha kwa Mtandao-Hewa"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Imeshindwa kuunganisha Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" inao muunganisho duni wa wavuti."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Ungepenga kuruhusu muunganisho?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Programu ya %1$s ingependa kuunganisha kwenye Mtandao wa Wifi wa %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Programu"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Mtandao hewa Moja kwa moja"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Anzisha Wi-Fi Moja kwa Moja. Hii itazima mteja/mtandao-hewa wa Wi-Fi."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Moja kwa Moja"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Anzisha Wi-Fi Moja kwa Moja. Hii itazima kiteja cha Wi-Fi/mtandaopepe."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Haikuweza kuanzisha Wi-Fi Moja kwa Moja."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi ya Moja kwa Moja imewashwa"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Moja kwa Moja imewashwa"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Gusa ili uweke mipangilio"</string>
     <string name="accept" msgid="1645267259272829559">"Kubali"</string>
     <string name="decline" msgid="2112225451706137894">"Kataa"</string>
@@ -1445,7 +1445,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Unatumia programu hii kwenye wasifu wako wa kazini"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mbinu ya uingizaji"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sawazisha"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Ufikiaji"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Ufikivu"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Mandhari"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Badilisha mandhari"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Kisikilizi cha arifa"</string>
@@ -1798,7 +1798,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"Sawa"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Kiokoa betri huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vinavyotumia nishati nyingi ili kuongeza muda wa matumizi ya betri. "<annotation id="url">"Pata maelezo zaidi"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Kiokoa betri huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vinavyotumia nishati nyingi ili kuongeza muda wa matumizi ya betri."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chini chini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Washa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

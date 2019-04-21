@@ -290,7 +290,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ផ្ញើ និងមើលសារ SMS"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ផ្ញើ និង​មើលសារ SMS ?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"ការ​ផ្ទុក"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"ទំហំ​ផ្ទុក"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ចូលដំណើការរូបភាព មេឌៀ និងឯកសារនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​រូបថត មេឌៀ និងឯកសារនៅលើ​ឧបករណ៍របស់អ្នក?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"មីក្រូ​ហ្វូន"</string>
@@ -527,7 +527,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"គ្មាន​ការកំណត់​កូដ pin លំនាំ ឬពាក្យសម្ងាត់​ទេ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រលាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រឡាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ម្រាមដៃផ្លាស់ទីលឿនពេក។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ផ្លាស់ទី​ទូរសព្ទ​ឱ្យ​ជិត​ជាង​មុន។"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ផ្លាស់ទីទូរសព្ទឱ្យខ្ពស់ជាងមុន។"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ផ្លាស់ទីទូរសព្ទឱ្យទាបជាងមុន។"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"ផ្លាស់ទីទូរសព្ទទៅខាងស្ដាំ។"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"ផ្លាស់ទី​ទូរសព្ទទៅខាងឆ្វេង។"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ផ្លាស់ទី​ទូរសព្ទទៅខាងឆ្វេង។"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ផ្លាស់ទីទូរសព្ទទៅខាងស្ដាំ។"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"បើកភ្នែក ហើយមើលអេក្រង់។"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"មើលមិនឃើញ​មុខងារ​របស់អ្នកទេ។ សូមសម្លឹងមើល​ទូរសព្ទ។"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"មាន​ចលនា​ខ្លាំងពេក។ សូមកាន់​ទូរសព្ទ​ឱ្យនឹង។"</string>
@@ -661,7 +661,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"លុប​ទិន្នន័យ​ទាំង​អស់"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"លុប​ទិន្នន័យ​កុំព្យូទ័រ​បន្ទះ​ដោយ​មិន​​ព្រមាន​ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ។"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"លុបទិន្នន័យរបស់ទូរទស្សន៍ដោយមិនចាំបាច់ព្រមានដោយការប្រតិបត្តិការកំណត់ឡើងវិញទាំងស្រុង។"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"លុប​ទិន្នន័យ​ទូរស័ព្ទ​ដោយ​មិន​ព្រមាន ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ ។"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"លុប​ទិន្នន័យ​ទូរសព្ទ​ដោយ​មិន​មានការព្រមានជាមុន ដោយ​អនុវត្ត​ការ​កំណត់​ទិន្នន័យ​ដូច​ចេញ​ពី​រោងចក្រ ។"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"លុបទិន្នន័យរបស់អ្នកប្រើ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"លុបទិន្នន័យរបស់អ្នកប្រើនេះនៅលើថេប្លេតនេះដោយគ្មានការព្រមាន។"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"លុបទិន្នន័យរបស់អ្នកប្រើនេះនៅលើទូរទស្សន៍នេះដោយគ្មានការព្រមាន។"</string>
@@ -675,7 +675,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"បិទ​ម៉ាស៊ីន​ថត"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ការពារ​ការ​ប្រើ​ម៉ាស៊ីន​ថត​ឧបករណ៍​ទាំងអស់។"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"បិទមុខងារចាក់សោអេក្រង់មួយចំនួន"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"រារាំងការប្រើលក្ខណៈពិសេសនៃការចាក់សោអេក្រង់មួយចំនួន។"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ទប់ស្កាត់ការប្រើមុខងារចាក់សោអេក្រង់មួយចំនួន។"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ផ្ទះ"</item>
     <item msgid="869923650527136615">"​ចល័ត"</item>

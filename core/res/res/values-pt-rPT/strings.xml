@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Aproxime o telemóvel."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Mova o telemóvel mais para cima."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mova o telemóvel mais para baixo."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Mova o telemóvel para a direita."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Mova o telemóvel para a esquerda."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Mova o telemóvel para a esquerda."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Mova o telemóvel para a direita."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Olhe para o ecrã com os olhos abertos."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Não é possível ver o seu rosto. Olhe p/ telemóvel."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Demasiado movimento. Mantenha o telemóvel firme."</string>
@@ -1609,7 +1609,7 @@
     <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"Este início da atividade em segundo plano do pacote <xliff:g id="PACKAGENAME">%1$s</xliff:g> será bloqueado em compilações futuras do Q. Aceda a g.co/dev/bgblock."</string>
     <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"Início da atividade em segundo plano do pacote <xliff:g id="PACKAGENAME">%1$s</xliff:g> bloqueado. Aceda a g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Esqueceu-se da Sequência"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Sequência Incorreta"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Padrão Incorreto"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Palavra-passe Incorreta"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN Incorreto"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">

@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Flytt telefonen nærmere."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Flytt telefonen høyere."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Flytt telefonen lavere."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Flytt telefonen til høyre."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Flytt telefonen til venstre."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Flytt telefonen til venstre."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Flytt telefonen til høyre."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Se på skjermen med åpne øyne."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Kan ikke se ansiktet ditt. Se på telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"For mye bevegelse. Hold telefonen stødig."</string>
@@ -1789,7 +1789,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Andre <xliff:g id="LABEL">%1$s</xliff:g> for jobben"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Tredje <xliff:g id="LABEL">%1$s</xliff:g> for jobben"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Krev PIN-kode for å løsne app"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev opplåsingsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installert av administratoren din"</string>
@@ -1798,7 +1798,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Batterisparing slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner med høyt strømforbruk for å forlenge batterilevetiden. "<annotation id="url">"Finn ut mer"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Batterisparing slår av eller begrenser bakgrunnsaktivitet, enkelte visuelle effekter og andre funksjoner med høyt strømforbruk for å forlenge batterilevetiden."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer at apper kan sende og motta data i bakgrunnen. Apper du bruker i øyeblikket, bruker ikke data i like stor grad – for eksempel vises ikke bilder før du trykker på dem."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer noen apper fra å sende og motta data i bakgrunnen, for å redusere dataforbruket. Aktive apper kan bruke data, men kanskje ikke så mye som ellers – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå på"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

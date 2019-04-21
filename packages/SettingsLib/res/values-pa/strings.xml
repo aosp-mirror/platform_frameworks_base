@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ਇਨਪੁੱਟ ਡੀਵਾਈਸ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ਸੰਪਰਕ ਸ਼ੇਅਰਿੰਗ"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ਸੰਪਰਕ ਸਾਂਝਾਕਰਨ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"ਸੰਪਰਕ ਸ਼ੇਅਰਿੰਗ ਲਈ ਵਰਤੋ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਸਾਂਝਾਕਰਨ"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"ਲਿਖਤ ਸੁਨੇਹੇ"</string>

@@ -289,7 +289,7 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"التبديل إلى الملف الشخصي للعمل"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى جهات الاتصال؟"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى جهات الاتصال؟"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموقع الجغرافي لهذا الجهاز؟"</string>
@@ -313,10 +313,10 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى بيانات نشاطك البدني؟"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لخدمة &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"سجلّ المكالمات"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى سجلات مكالماتك الهاتفية؟"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى سجلّ مكالماتك الهاتفية؟"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بإجراء المكالمات الهاتفية وإدارتها؟"</string>
@@ -539,8 +539,8 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"لم يتم ضبط رقم تعريف شخصي أو نقش أو كلمة مرور."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"تم اكتشاف بصمة الإصبع بشكل جزئي؛ يرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"جهاز استشعار بصمات الأصابع متسخ، يرجى تنظيفه وإعادة المحاولة."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"تحرك الإصبع بسرعة كبيرة جدًا؛ يُرجى إعادة المحاولة."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"زر استشعار بصمات الأصابع متّسخ. يُرجى تنظيفه وإعادة المحاولة."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"لقد حرّكت إصبعك بسرعة، يُرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"تم تحريك الإصبع ببطء شديد. يُرجى إعادة المحاولة."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -572,8 +572,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"انقل الهاتف إلى مكان قريب."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"يُرجى رفع الهاتف للأعلى."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"يُرجى خفض الهاتف للأسفل."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"يُرجى نقل الهاتف إلى اليسار."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"يُرجى نقل الهاتف إلى اليمين."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"يُرجى نقل الهاتف إلى اليمين."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"يُرجى نقل الهاتف إلى اليسار."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"يُرجى النظر إلى الشاشة مع فتح عينيك."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"يتعذّر رؤية وجهك. يُرجى النظر إلى الهاتف."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
@@ -667,13 +667,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين التلفزيون ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"تغيير قفل الشاشة"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"لتغيير قفل الشاشة."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"إمكانية تغيير قفل الشاشة"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"قفل الشاشة"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"يمكنك التحكم في كيفية ووقت تأمين الشاشة."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"مسح جميع البيانات"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"التحكّم في طريقة ووقت قفل الشاشة"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"محو جميع البيانات"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط بحسب بيانات المصنع."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"محو بيانات التلفزيون بدون تحذير من خلال إجراء إعادة ضبط البيانات على إعدادات المصنع."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"يمكنك محو بيانات الهاتف بدون تحذير، وذلك عبر إجراء إعادة الضبط بحسب بيانات المصنع."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"محو بيانات الهاتف بدون تحذير، وذلك من خلال إعادة ضبط البيانات على الإعدادات الأصلية"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"محو بيانات المستخدم"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"لمحو بيانات هذا المستخدم على هذا الجهاز اللوحي بدون تحذير."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"لمحو بيانات هذا المستخدم على هذا التلفزيون بدون تحذير."</string>
@@ -687,10 +687,10 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"إيقاف الكاميرات"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منع استخدام جميع كاميرات الجهاز."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"إيقاف بعض ميزات قفل الشاشة"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"المنزل"</item>
-    <item msgid="869923650527136615">"الجوال"</item>
+    <item msgid="869923650527136615">"الجوّال"</item>
     <item msgid="7897544654242874543">"العمل"</item>
     <item msgid="1103601433382158155">"فاكس العمل"</item>
     <item msgid="1735177144948329370">"فاكس المنزل"</item>
@@ -733,7 +733,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"مخصص"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"المنزل"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"الجوال"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"الجوّال"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"العمل"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"فاكس العمل"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"فاكس المنزل"</string>
@@ -760,7 +760,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"المنزل"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"عمل"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"آخر"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"الجوال"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"الجوّال"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"مخصص"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"المنزل"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"عمل"</string>
@@ -839,7 +839,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"إيقاف"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"إرجاع"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"تقديم سريع"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"مكالمات طوارئ فقط"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"مكالمات الطوارئ فقط"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"الشبكة مؤمّنة"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"‏شريحة SIM مؤمّنة بكود PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"راجع دليل المستخدم أو اتصل بخدمة العملاء."</string>
@@ -1216,7 +1216,7 @@
     <string name="whichSendToApplication" msgid="8272422260066642057">"إرسال باستخدام"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"‏إرسال باستخدام %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"إرسال"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"تحديد تطبيق صفحة رئيسية"</string>
+    <string name="whichHomeApplication" msgid="4307587691506919691">"تحديد تطبيق شاشة رئيسية"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"‏استخدام %1$s كصفحة رئيسية"</string>
     <string name="whichHomeApplicationLabel" msgid="809529747002918649">"التقاط صورة"</string>
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"التقاط صورة باستخدام"</string>
@@ -1383,7 +1383,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"من:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"إلى:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"‏اكتب رمز PIN المطلوب:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"‏رمز PIN:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"رقم التعريف الشخصي:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"‏سيتم قطع اتصال الجهاز اللوحي مؤقتًا بشبكة Wi-Fi في الوقت الذي يكون فيه متصلاً بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"‏سيتم إلغاء اتصال التلفزيون بشبكة Wi-Fi مؤقتًا أثناء اتصاله بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"‏سيتم قطع اتصال الهاتف مؤقتًا بشبكة Wi-Fi في الوقت الذي يكون فيه متصلاً بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
@@ -1413,7 +1413,7 @@
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"تنزيل التطبيق"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"‏تم إدخال شريحة SIM جديدة."</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"انقر لإعداده."</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"تعيين الوقت"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"ضبط الوقت"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تعيين التاريخ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ضبط"</string>
     <string name="date_time_done" msgid="2507683751759308828">"تم"</string>
@@ -1701,7 +1701,7 @@
     <string name="activity_starter_block_bg_activity_starts_permissive" msgid="6995473033438879646">"‏سيتم حظر بدء نشاط الخلفية هذا من <xliff:g id="PACKAGENAME">%1$s</xliff:g> في إصدارات Q القادمة. اطّلع على g.co/dev/bgblock."</string>
     <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="3317816771072146229">"‏تم حظر بدء نشاط الخلفية من <xliff:g id="PACKAGENAME">%1$s</xliff:g>. اطّلع على g.co/dev/bgblock."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"نسيت النقش"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"نقش خاطئ"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"النقش غير صحيح"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"كلمة مرور خاطئة"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"رقم تعريف شخصي خاطئ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
@@ -1889,7 +1889,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"العمل الثاني <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"طلب إدخال رقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"طلب إدخال النقش الخاص بإلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"تم التثبيت بواسطة المشرف"</string>
@@ -1898,7 +1898,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"موافق"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية. "<annotation id="url">"مزيد من المعلومات"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، يمنع توفير البيانات بعض التطبيقات من إرسال البيانات وتلقيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور على سبيل المثال لا تظهر حتى تنقر عليها."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -2017,7 +2017,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"المقترحة"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"اللغات المقترحة"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
@@ -2057,7 +2057,7 @@
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏تصحيح أخطاء USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ساعة"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"دقيقة"</string>
-    <string name="time_picker_header_text" msgid="143536825321922567">"تعيين الوقت"</string>
+    <string name="time_picker_header_text" msgid="143536825321922567">"ضبط الوقت"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"يُرجى إدخال وقت صالح"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"يُرجى تحديد الوقت"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"يُرجى التبديل إلى وضع إدخال النص لإدخال الوقت."</string>

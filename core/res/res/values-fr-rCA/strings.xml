@@ -292,7 +292,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;  à envoyer et à afficher des messages texte?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder aux photos, aux contenus multimédias et aux fichiers sur votre appareil"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder aux photos, aux médias et aux fichiers de votre appareil?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux photos, aux médias et aux fichiers de votre appareil?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gt à enregistrer l\'audio?"</string>
@@ -519,7 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Autorise l\'application à modifier votre collection de photos."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"lire les positions issues de votre collection multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Autorise l\'application à lire les positions indiquées dans votre collection multimédia."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Confirmez que c\'est bien vous"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Confirmer que c\'est bien vous"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Authentification annulée"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Données biométriques non reconnues"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Rapprochez le téléphone."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Déplacez le téléphone plus haut."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Déplacez le téléphone plus bas."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Déplacez le téléphone vers la droite."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Déplacez le téléphone vers la gauche."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Déplacez le téléphone vers la gauche."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Déplacez le téléphone vers la droite."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Regardez l\'écran avec les yeux ouverts."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Impossible de voir votre visage. Regardez le tél."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Trop de mouvement. Tenez le téléphone immobile."</string>
