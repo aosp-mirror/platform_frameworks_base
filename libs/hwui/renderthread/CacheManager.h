@@ -59,14 +59,17 @@ private:
 
     void reset(sk_sp<GrContext> grContext);
     void destroy();
-    void updateContextCacheSizes();
 
     const size_t mMaxSurfaceArea;
     sk_sp<GrContext> mGrContext;
 
     int mMaxResources = 0;
-    size_t mMaxResourceBytes = 0;
-    size_t mBackgroundResourceBytes = 0;
+    const size_t mMaxResourceBytes;
+    const size_t mBackgroundResourceBytes;
+
+    const size_t mMaxGpuFontAtlasBytes;
+    const size_t mMaxCpuFontCacheBytes;
+    const size_t mBackgroundCpuFontCacheBytes;
 
     struct PipelineProps {
         const void* pipelineKey = nullptr;
