@@ -2412,6 +2412,15 @@ message LinkProbeStats {
     optional int32 count = 2;
   }
 
+  // Counts the number of link probes for each experiment.
+  message ExperimentProbeCounts {
+    // The experiment ID.
+    optional string experiment_id = 1;
+
+    // The number of link probes triggered for this experiment.
+    optional int32 probe_count = 2;
+  }
+
   // Counts the occurrences of RSSI values when a link probe succeeds.
   repeated Int32Count success_rssi_counts = 1;
 
@@ -2435,6 +2444,9 @@ message LinkProbeStats {
 
   // Counts the occurrences of error codes for failed link probes.
   repeated LinkProbeFailureReasonCount failure_reason_counts = 8;
+
+  // Counts the number of link probes for each experiment.
+  repeated ExperimentProbeCounts experiment_probe_counts = 9;
 }
 
 // Stores the decisions that were made by a experiment when compared against another experiment
