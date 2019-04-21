@@ -158,7 +158,7 @@
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina glasa"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Utječe na ton sintetiziranog govora"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Jezik"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"upotrijebi jezik sustava"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Upotrijebi jezik sustava"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Jezik nije odabran"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Postavlja jezik govora"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Poslušajte primjer"</string>
@@ -237,7 +237,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Pokreni odabir kodeka za Bluetooth Audio\nLDAC: kvaliteta reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strujanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privatni DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Odaberite način privatnog DNS-a"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Odaberi načina privatnog DNS-a"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Isključeno"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatski"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Naziv hosta davatelja usluge privatnog DNS-a"</string>
@@ -258,7 +258,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Dopusti probne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dopusti probne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući pregled atributa prikaza"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Neka mobilni podaci uvijek budu aktivni, čak i kada je Wi‑Fi aktivan (za brzo prebacivanje s jedne na drugu mrežu)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Neka mobilni podaci uvijek budu aktivni, čak i kada je Wi‑Fi aktivan (za brzo prebacivanje s jedne na drugu mrežu)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Upotreba hardverskog ubrzanja za modemsko povezivanje ako je dostupno"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti otklanjanje pogrešaka putem USB-a?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje pogrešaka putem USB-a namijenjeno je samo u razvojne svrhe. Može se upotrijebiti za kopiranje podataka s računala na uređaj i obrnuto, instalaciju aplikacija na uređaju bez obavijesti i za čitanje dnevničkih zapisa."</string>
@@ -266,9 +266,9 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Dopustiti postavke razvojnih programera?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ove su postavke namijenjene samo razvojnim programerima. One mogu uzrokovati kvar ili neželjeno ponašanje vašeg uređaja i aplikacija na njemu."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Potvrdi aplikacije putem USB-a"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerite uzrokuju li aplikacije instalirane putem ADB-a/ADT-a poteškoće."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerite uzrokuju li aplikacije instalirane putem ADB-a/ADT-a poteškoće"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Prikazivat će se Bluetooth uređaji bez naziva (samo MAC adrese)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, kao što su, primjerice, neprihvatljiva glasnoća ili nepostojanje kontrole."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućuje Bluetoothovu značajku apsolutne glasnoće ako udaljeni uređaji imaju poteškoća sa zvukom, kao što su neprihvatljiva glasnoća ili nepostojanje kontrole"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući aplikaciju terminala koja nudi pristup lokalnoj ovojnici"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provjera"</string>

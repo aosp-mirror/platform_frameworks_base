@@ -245,8 +245,8 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"연결할 수 없음"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"종량제"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"종량제 네트워크"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"로거 영구 저장소를 삭제하시겠습니까?"</string>

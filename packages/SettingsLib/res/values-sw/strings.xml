@@ -146,7 +146,7 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Inazuia"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Kushiriki na kusambaza intaneti"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Programu zote za kazini"</string>
-    <string name="user_guest" msgid="8475274842845401871">"Aliyealikwa"</string>
+    <string name="user_guest" msgid="8475274842845401871">"Mgeni"</string>
     <string name="unknown" msgid="1592123443519355854">"Haijulikani"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguomsingi zimewekwa"</string>

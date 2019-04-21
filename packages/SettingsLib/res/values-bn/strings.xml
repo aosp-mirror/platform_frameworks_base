@@ -87,7 +87,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"পরিচিতি শেয়ার করার কাজে ব্যবহার করুন"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ইন্টারনেট কানেকশন শেয়ার করা হচ্ছে"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"এসএমএস"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"সিম -এর অ্যাক্সেস"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"সিম অ্যাক্সেস"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD অডিও: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD অডিও"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"হিয়ারিং এড"</string>
@@ -245,7 +245,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"কানেক্ট করা যায়নি"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"পরিমাপ করা"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"মিটার্ড"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"পরিমাপ করা নয়"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির বেছে নিন"</string>

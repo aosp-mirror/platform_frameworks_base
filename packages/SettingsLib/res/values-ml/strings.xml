@@ -82,7 +82,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ഫോണ്‍‌ കോളുകൾ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ഫയൽ കൈമാറൽ"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ഇൻപുട്ട് ഉപകരണം"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ഇന്റർനെറ്റ് ആക്‌സസ്സ്"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ഇന്‍റർനെറ്റ് ആക്‌സസ്"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"കോൺടാക്‌റ്റ് പങ്കിടൽ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"കോൺടാക്‌റ്റ് പങ്കിടലിനായി ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
@@ -411,7 +411,7 @@
     <string name="disabled" msgid="9206776641295849915">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"അനുവദനീയം"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"അനുവദിച്ചിട്ടില്ല"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"അറിയാത്ത ആപ്‌സ് ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"പരിചയമില്ലാത്ത ആപ്പുകൾ ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
     <string name="home" msgid="3256884684164448244">"ക്രമീകരണ ഹോം"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>

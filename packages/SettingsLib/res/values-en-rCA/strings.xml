@@ -229,7 +229,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Trigger Bluetooth Audio Codec\nSelection"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth audio sample rate"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Trigger Bluetooth Audio Codec\nSelection: Sample Rate"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth Audio Bits Per Sample"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth audio bits per sample"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Trigger Bluetooth Audio Codec\nSelection: Bits Per Sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth audio channel mode"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Trigger Bluetooth Audio Codec\nSelection: Channel Mode"</string>
@@ -329,8 +329,8 @@
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Force allow apps on external"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Makes any app eligible to be written to external storage, regardless of manifest values"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Force activities to be re-sizable"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Make all activities resizable for multi-window, regardless of manifest values."</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Force activities to be resizeable"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Make all activities resizeable for multi-window, regardless of manifest values."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Enable freeform windows"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Enable support for experimental freeform windows."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Desktop backup password"</string>

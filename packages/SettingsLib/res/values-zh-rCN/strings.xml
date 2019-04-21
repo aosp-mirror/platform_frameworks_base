@@ -265,8 +265,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"是否针对您之前授权的所有计算机撤消 USB 调试的访问权限？"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"允许开发设置？"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"这些设置仅适用于开发工作。一旦启用，会导致您的设备以及设备上的应用崩溃或出现异常。"</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过USB验证应用"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"通过 ADB/ADT 检查安装的应用是否存在有害行为。"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"通过 USB 验证应用"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"检查通过 ADB/ADT 安装的应用是否存在有害行为。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"系统将显示没有名称（只有 MAC 地址）的蓝牙设备"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本地终端"</string>
