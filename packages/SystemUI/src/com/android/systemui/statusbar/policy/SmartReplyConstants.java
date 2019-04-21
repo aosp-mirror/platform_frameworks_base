@@ -47,6 +47,7 @@ public final class SmartReplyConstants {
     private final boolean mDefaultShowInHeadsUp;
     private final int mDefaultMinNumSystemGeneratedReplies;
     private final int mDefaultMaxNumActions;
+    private final int mDefaultOnClickInitDelay;
 
     // These fields are updated on the UI thread but can be accessed on both the UI thread and
     // background threads. We use the volatile keyword here instead of synchronization blocks since
@@ -59,6 +60,7 @@ public final class SmartReplyConstants {
     private volatile boolean mShowInHeadsUp;
     private volatile int mMinNumSystemGeneratedReplies;
     private volatile int mMaxNumActions;
+    private volatile long mOnClickInitDelay;
 
     private final Handler mHandler;
     private final Context mContext;
@@ -83,6 +85,8 @@ public final class SmartReplyConstants {
                 R.integer.config_smart_replies_in_notifications_min_num_system_generated_replies);
         mDefaultMaxNumActions = resources.getInteger(
                 R.integer.config_smart_replies_in_notifications_max_num_actions);
+        mDefaultOnClickInitDelay = resources.getInteger(
+                R.integer.config_smart_replies_in_notifications_onclick_init_delay);
 
         registerDeviceConfigListener();
         updateConstants();
@@ -136,6 +140,10 @@ public final class SmartReplyConstants {
                     DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS,
                     mDefaultMaxNumActions);
+            mOnClickInitDelay = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.SSIN_ONCLICK_INIT_DELAY,
+                    mDefaultOnClickInitDelay);
         }
     }
 
@@ -217,5 +225,13 @@ public final class SmartReplyConstants {
      */
     public int getMaxNumActions() {
         return mMaxNumActions;
+    }
+
+    /**
+     * Returns the amount of time (ms) before smart suggestions are clickable, since the suggestions
+     * were added.
+     */
+    public long getOnClickInitDelay() {
+        return mOnClickInitDelay;
     }
 }

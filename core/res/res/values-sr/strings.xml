@@ -293,9 +293,9 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"шаље и прегледа SMS поруке"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; шаље и прегледа SMS-ове?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Меморија"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Меморијски простор"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"приступа сликама, медијима и датотекама на уређају"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;приступа сликама, медијским датотекама и датотекама на уређају?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа сликама, медијским датотекама и датотекама на уређају?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима звук"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снима звук?"</string>

@@ -295,7 +295,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына құрылғыдағы суреттерге, медиафайлдарға және басқа файлдарға кіруге рұқсат берілсін бе?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"аудио жазу"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына аудиомазмұн жазуға рұқсат берілсін бе?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына дыбыс жазуға рұқсат берілсін бе?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Физикалық әрекет"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"физикалық әрекет дерегін алу"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына физикалық әрекет дерегін алуға рұқсат етілсін бе?"</string>
@@ -560,10 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Телефонды жақынырақ ұстаңыз."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Телефонды жоғарырақ ұстаңыз."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Телефонды төменірек ұстаңыз."</string>
-    <!-- no translation found for face_acquired_too_right (3667075962661863218) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (3148242963894703424) -->
-    <skip />
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Телефонды солға жылжытыңыз."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Телефонды оңға жылжытыңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Экранға көзіңізді ашып қараңыз."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Бетіңіз көрінбейді. Телефонға қараңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
@@ -829,7 +827,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Тоқтату"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Кері айналдыру"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Жылдам алға айналдыру"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Төтенше қоңыраулар ғана"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Құтқару қызметіне ғана қоңырау шалынады"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Желі бекітілген"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM картасы PUK арқылы бекітілген."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Пайдаланушы нұсқаулығын қараңыз немесе тұтынушыларды қолдау орталығына хабарласыңыз."</string>
@@ -1466,7 +1464,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Желіні не VPN параметрлерін өзгерту"</string>
     <string name="upload_file" msgid="2897957172366730416">"Файлды таңдау"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ешқандай файл таңдалмаған"</string>
-    <string name="reset" msgid="2448168080964209908">"Қайта реттеу"</string>
+    <string name="reset" msgid="2448168080964209908">"Бастапқы күйге қайтару"</string>
     <string name="submit" msgid="1602335572089911941">"Жіберу"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Көлік жүргізу қолданбасы қосулы"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Көлік жүргізу қолданбасынан шығу үшін түртіңіз."</string>

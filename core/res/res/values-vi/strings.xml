@@ -227,7 +227,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Khẩn cấp"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Báo cáo lỗi"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Kết thúc phiên"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp ảnh màn hình"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Chụp màn hình"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Báo cáo lỗi"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Báo cáo này sẽ thu thập thông tin về tình trạng thiết bị hiện tại của bạn, để gửi dưới dạng thông báo qua email. Sẽ mất một chút thời gian kể từ khi bắt đầu báo cáo lỗi cho tới khi báo cáo sẵn sàng để gửi; xin vui lòng kiên nhẫn."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Báo cáo tương tác"</string>
@@ -281,7 +281,7 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vị trí"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"truy cập vị trí của thiết bị này"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào vị trí của thiết bị này?"</string>
-    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Ứng dụng này sẽ chỉ có quyền truy cập vào vị trí trong khi bạn sử dụng"</string>
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Ứng dụng này sẽ chỉ có quyền truy cập vào vị trí khi bạn đang sử dụng ứng dụng này"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Bạn muốn cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào vị trí của thiết bị này &lt;b&gt;trong mọi trường hợp&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Hiện tại, ứng dụng này chỉ có thể truy cập vào vị trí trong khi bạn dùng"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Lịch"</string>

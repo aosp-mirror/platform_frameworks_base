@@ -560,10 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"ຍ້າຍໂທລະສັບເຂົ້າໄປໃກ້ຂຶ້ນ."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"ຍົກໂທລະສັບໃຫ້ສູງຂຶ້ນ."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"ເລື່ອນໂທລະສັບຕ່ຳລົງ."</string>
-    <!-- no translation found for face_acquired_too_right (3667075962661863218) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (3148242963894703424) -->
-    <skip />
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"ຍ້າຍໂທລະສັບໄປທາງຊ້າຍ."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"ຍ້າຍໂທລະສັບໄປທາງຂວາ."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ກະລຸນາເບິ່ງໜ້າຈໍພ້ອມກັບເປີດຕາທ່ານ."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ບໍ່ສາມາດເບິ່ງເຫັນໜ້າຂອງທ່ານໄດ້. ກະລຸນາເບິ່ງໂທລະສັບ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ເຄື່ອນໄຫວຫຼາຍເກີນໄປ. ກະລຸນາຖືໂທລະສັບໄວ້ຊື່ໆ."</string>

@@ -289,7 +289,7 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"التبديل إلى الملف الشخصي للعمل"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"الوصول إلى جهات اتصالك"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى جهات الاتصال؟"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى جهات الاتصال؟"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموقع الجغرافي لهذا الجهاز؟"</string>
@@ -316,7 +316,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لخدمة &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"سجلّ المكالمات"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى سجلات مكالماتك الهاتفية؟"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى سجلّ مكالماتك الهاتفية؟"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"الهاتف"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"إجراء مكالمات هاتفية وإدارتها"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بإجراء المكالمات الهاتفية وإدارتها؟"</string>
@@ -839,7 +839,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"إيقاف"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"إرجاع"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"تقديم سريع"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"مكالمات طوارئ فقط"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"مكالمات الطوارئ فقط"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"الشبكة مؤمّنة"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"‏شريحة SIM مؤمّنة بكود PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"راجع دليل المستخدم أو اتصل بخدمة العملاء."</string>

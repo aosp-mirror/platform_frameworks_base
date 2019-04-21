@@ -290,7 +290,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS-boodskappe te stuur en te bekyk"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Laat &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om SMS\'e te stuur en te bekyk?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Stoor"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Berging"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang te verkry tot foto\'s, media en lêers op jou toestel"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot jou foto\'s, media en lêers op jou toestel?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoon"</string>

@@ -283,40 +283,40 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Preklopi na delovni profil"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Stiki"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"dostop do stikov"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do stikov?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do stikov?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostop do lokacije te naprave"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do lokacije te naprave?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do lokacije te naprave?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Aplikacija bo imela dostop do lokacije samo, ko aplikacijo uporabljate"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti, da &lt;b&gt;ves čas&lt;/b&gt; dostopa do lokacije te naprave?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, da &lt;b&gt;ves čas&lt;/b&gt; dostopa do lokacije te naprave?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Trenutno lahko aplikacija dostopa do lokacije samo, ko aplikacijo uporabljate"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Koledar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostop do koledarja"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do koledarja?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do koledarja?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"pošiljanje in ogled sporočil SMS"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti pošiljanje in ogled sporočil SMS?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pošiljanje in ogled sporočil SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Shramba"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostop do fotografij, predstavnosti in datotek v napravi"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do fotografij, predstavnosti in datotek v svoji napravi?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do fotografij, predstavnosti in datotek v svoji napravi?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snemanje zvoka"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti snemanje zvoka?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snemanje zvoka?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Telesna dejavnost"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"dostop do vaše telesne dejavnosti"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do svoje telesne dejavnosti?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do svoje telesne dejavnosti?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparat"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiranje in snemanje videoposnetkov"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti fotografiranje in snemanje videoposnetkov?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; fotografiranje in snemanje videoposnetkov?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Dnevniki klicev"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"branje in zapisovanje dnevnika klicev v telefonu"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do dnevnikov klicev v telefonu?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do dnevnikov klicev v telefonu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"opravljanje in upravljanje telefonskih klicev"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti opravljanje in upravljanje telefonskih klicev?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; opravljanje in upravljanje telefonskih klicev?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Tipala telesnih funkcij"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"dostop do podatkov tipala o vaših vitalnih znakih"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do podatkov tipala o vitalnih znakih?"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Dovolite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; dostop do podatkov tipala o vitalnih znakih?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobiti vsebino okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>
@@ -1970,7 +1970,7 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Dotaknite se za odkl. del. pr."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Vzpostavljena povezava z napravo <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dotaknite se, če si želite ogledati datoteke"</string>
-    <string name="app_info" msgid="6856026610594615344">"Podatki o aplikaciji"</string>
+    <string name="app_info" msgid="6856026610594615344">"Podatki o aplikacijah"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Začenjanje predstavitve …"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Ponastavljanje naprave …"</string>
