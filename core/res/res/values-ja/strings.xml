@@ -277,40 +277,40 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"仕事用プロファイルに切り替える"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"連絡先へのアクセス"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"連絡先へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"連絡先へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置情報"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"このデバイスの位置情報へのアクセス"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"このデバイスの位置情報へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
-    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"このアプリは、ユーザーがアプリを使用している場合のみ位置情報にアクセスできます"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"このデバイスの位置情報へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"このアプリは、ユーザーがアプリを使用している間のみ位置情報にアクセスできます"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"このデバイスの位置情報に&lt;b&gt;常に&lt;/b&gt;?アクセスすることを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可します"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"現在、アプリは、ユーザーがアプリを使用している場合のみ位置情報にアクセスできます"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"カレンダー"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"カレンダーへのアクセス"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"カレンダーへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"カレンダーへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMSメッセージの送信と表示"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS メッセージの送信と表示を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS メッセージの送信と表示を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ストレージ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"デバイス内の写真、メディア、ファイルへのアクセス"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"デバイス内の写真、メディア、ファイルへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"運動データ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"運動データにアクセス"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"通話履歴"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"通話履歴の読み取りと書き込み"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"通話履歴へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"通話履歴へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"電話の発信と管理"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"電話の発信と管理を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"電話の発信と管理を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"ボディセンサー"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"バイタルサインに関するセンサーデータへのアクセス"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"バイタルサインに関するセンサーデータへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"バイタルサインに関するセンサーデータへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"スマートフォンをもっと近づけてください。"</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"スマートフォンをもっと高い位置に上げてください。"</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"スマートフォンをもっと低い位置に下げてください。"</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"スマートフォンを右に動かしてください。"</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"スマートフォンを左に動かしてください。"</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"スマートフォンを左に動かしてください。"</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"画面に顔を向けて目を閉じないようにしてください。"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"顔を確認できません。スマートフォンを見てください。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"あまり動かさないでください。安定させてください。"</string>

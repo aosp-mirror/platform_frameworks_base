@@ -277,10 +277,10 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Alternar para o perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"acesse seus contatos"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seus contatos?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seus contatos?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Local"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"acesse o local do dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse a localização deste dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse o local deste dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"O app só terá acesso ao local enquanto estiver sendo usado"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Permitir que o &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse o local do dispositivo &lt;b&gt;o tempo todo&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"No momento, o app só pode acessar o local enquanto estiver sendo usado"</string>
@@ -292,10 +292,10 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse e envie mensagens SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acesse fotos, mídia e arquivos do dispositivo"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse fotos, mídia e arquivos no seu dispositivo?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse fotos, mídia e arquivos no seu dispositivo?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"grave áudio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave áudio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave áudio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Atividade física"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"acessar sua atividade física"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse sua atividade física?"</string>
@@ -307,7 +307,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seu registro de chamadas telefônicas?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faça e gerencie chamadas telefônicas"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gerencie e faça chamadas telefônicas?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gerencie e faça chamadas telefônicas?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acesse dados do sensor sobre seus sinais vitais"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse os dados do sensor sobre seus sinais vitais?"</string>
@@ -560,8 +560,8 @@
     <string name="face_acquired_too_far" msgid="1210969240069012510">"Aproxime o smartphone."</string>
     <string name="face_acquired_too_high" msgid="3362395713403348013">"Mova o smartphone para cima."</string>
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mova o smartphone para baixo."</string>
-    <string name="face_acquired_too_right" msgid="941726879175375970">"Mova o smartphone para a direita."</string>
-    <string name="face_acquired_too_left" msgid="5873592047381190672">"Mova o smartphone para a esquerda."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Mova o smartphone para a esquerda."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Mova o smartphone para a direita."</string>
     <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Olhe para a tela com os olhos abertos."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Não é possível ver o rosto. Olhe para o telefone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Muito movimento. Não mova o smartphone."</string>
@@ -661,7 +661,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Apaga dados da TV sem aviso, fazendo uma redefinição para configuração original."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados do telefone sem aviso redefinindo a configuração original."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Limpar dados do usuário"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Limpa os dados do usuário neste tablet sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Limpa os dados do usuário nesta TV sem aviso prévio."</string>
