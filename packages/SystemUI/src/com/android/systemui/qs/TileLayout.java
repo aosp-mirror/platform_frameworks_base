@@ -137,7 +137,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
      * @param tilesCount Upper limit on the number of tiles to show. to prevent empty rows.
      */
     public boolean updateMaxRows(int heightMeasureSpec, int tilesCount) {
-        final int availableHeight = MeasureSpec.getSize(heightMeasureSpec) - mCellMarginTop;
+        final int availableHeight = MeasureSpec.getSize(heightMeasureSpec) - mCellMarginTop
+                + mCellMarginVertical;
         final int previousRows = mRows;
         mRows = availableHeight / (mCellHeight + mCellMarginVertical);
         if (mRows >= mMaxAllowedRows) {

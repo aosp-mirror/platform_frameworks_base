@@ -241,6 +241,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     && !mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
             }
+        } else if (mPulsing && expansion == KeyguardBouncer.EXPANSION_VISIBLE) {
+            // Panel expanded while pulsing but didn't translate the bouncer (because we are
+            // unlocked.) Let's simply wake-up to dismiss the lock screen.
+            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
         }
     }
 
@@ -250,6 +254,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void updateLockIcon() {
+        // Not all form factors have a lock icon
+        if (mLockIconContainer == null) {
+            return;
+        }
         boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mNotificationPanelView.isQsExpanded();
         int lockVisibility = (mBouncer.isShowing() || keyguardWithoutQs)

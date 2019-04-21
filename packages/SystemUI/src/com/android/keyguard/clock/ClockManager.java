@@ -30,6 +30,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.lifecycle.Observer;
 
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -37,13 +38,14 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.CurrentUserObservable;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -64,7 +66,7 @@ public final class ClockManager {
     private final ContentResolver mContentResolver;
     private final SettingsWrapper mSettingsWrapper;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
-    private final CurrentUserTracker mCurrentUserTracker;
+    private final CurrentUserObservable mCurrentUserObservable;
 
     /**
      * Observe settings changes to know when to switch the clock face.
@@ -74,11 +76,17 @@ public final class ClockManager {
                 @Override
                 public void onChange(boolean selfChange, Uri uri, int userId) {
                     super.onChange(selfChange, uri, userId);
-                    if (userId == mCurrentUserTracker.getCurrentUserId()) {
+                    if (Objects.equals(userId,
+                            mCurrentUserObservable.getCurrentUser().getValue())) {
                         reload();
                     }
                 }
             };
+
+    /**
+     * Observe user changes and react by potentially loading the custom clock for the new user.
+     */
+    private final Observer<Integer> mCurrentUserObserver = (newUserId) -> reload();
 
     private final PluginManager mPluginManager;
 
@@ -119,22 +127,19 @@ public final class ClockManager {
     public ClockManager(Context context, InjectionInflationController injectionInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor) {
         this(context, injectionInflater, pluginManager, colorExtractor,
-                context.getContentResolver(), new SettingsWrapper(context.getContentResolver()));
+                context.getContentResolver(), new CurrentUserObservable(context),
+                new SettingsWrapper(context.getContentResolver()));
     }
 
     ClockManager(Context context, InjectionInflationController injectionInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor,
-            ContentResolver contentResolver, SettingsWrapper settingsWrapper) {
+            ContentResolver contentResolver, CurrentUserObservable currentUserObservable,
+            SettingsWrapper settingsWrapper) {
         mContext = context;
         mPluginManager = pluginManager;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
-        mCurrentUserTracker = new CurrentUserTracker(context) {
-            @Override
-            public void onUserSwitched(int newUserId) {
-                reload();
-            }
-        };
+        mCurrentUserObservable = currentUserObservable;
         mPreviewClocks = new AvailableClocks();
 
         Resources res = context.getResources();
@@ -217,7 +222,7 @@ public final class ClockManager {
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.DOCKED_CLOCK_FACE),
                 false, mContentObserver, UserHandle.USER_ALL);
-        mCurrentUserTracker.startTracking();
+        mCurrentUserObservable.getCurrentUser().observeForever(mCurrentUserObserver);
         if (mDockManager == null) {
             mDockManager = SysUiServiceProvider.getComponent(mContext, DockManager.class);
         }
@@ -229,7 +234,7 @@ public final class ClockManager {
     private void unregister() {
         mPluginManager.removePluginListener(mPreviewClocks);
         mContentResolver.unregisterContentObserver(mContentObserver);
-        mCurrentUserTracker.stopTracking();
+        mCurrentUserObservable.getCurrentUser().removeObserver(mCurrentUserObserver);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
         }
@@ -347,7 +352,7 @@ public final class ClockManager {
             ClockPlugin plugin = null;
             if (ClockManager.this.isDocked()) {
                 final String name = mSettingsWrapper.getDockedClockFace(
-                        mCurrentUserTracker.getCurrentUserId());
+                        mCurrentUserObservable.getCurrentUser().getValue());
                 if (name != null) {
                     plugin = mClocks.get(name);
                     if (plugin != null) {
@@ -356,7 +361,7 @@ public final class ClockManager {
                 }
             }
             final String name = mSettingsWrapper.getLockScreenCustomClockFace(
-                    mCurrentUserTracker.getCurrentUserId());
+                    mCurrentUserObservable.getCurrentUser().getValue());
             if (name != null) {
                 plugin = mClocks.get(name);
             }

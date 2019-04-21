@@ -123,7 +123,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mAccessibilityController = accessibilityController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
-        onThemeChanged();
     }
 
     @Override
@@ -133,6 +132,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mConfigurationController.addCallback(this);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.addListener(this);
+        onThemeChanged();
     }
 
     @Override

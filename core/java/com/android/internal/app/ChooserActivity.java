@@ -150,6 +150,7 @@ public class ChooserActivity extends ResolverActivity {
      */
     // TODO(b/123089490): Replace with system flag
     private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = false;
+    private static final boolean USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES = false;
     // TODO(b/123088566) Share these in a better way.
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
     public static final String LAUNCH_LOCATON_DIRECT_SHARE = "direct_share";
@@ -199,7 +200,6 @@ public class ChooserActivity extends ResolverActivity {
 
     private ChooserListAdapter mChooserListAdapter;
     private ChooserRowAdapter mChooserRowAdapter;
-    private Drawable mChooserRowLayer;
     private int mChooserRowServiceSpacing;
 
     /** {@link ChooserActivity#getBaseScore} */
@@ -217,6 +217,8 @@ public class ChooserActivity extends ResolverActivity {
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT = 3;
     private static final int SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED = 4;
     private static final int LIST_VIEW_UPDATE_MESSAGE = 5;
+
+    private static final int MAX_LOG_RANK_POSITION = 12;
 
     @VisibleForTesting
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
@@ -465,7 +467,6 @@ public class ChooserActivity extends ResolverActivity {
                 .registerPredictionUpdates(this.getMainExecutor(), mAppPredictorCallback);
         }
 
-        mChooserRowLayer = getResources().getDrawable(R.drawable.chooser_row_layer_list, null);
         mChooserRowServiceSpacing = getResources()
                                         .getDimensionPixelSize(R.dimen.chooser_service_spacing);
 
@@ -1014,6 +1015,7 @@ public class ChooserActivity extends ResolverActivity {
             // Lower values mean the ranking was better.
             int cat = 0;
             int value = which;
+            int directTargetAlsoRanked = -1;
             HashedStringCache.HashResult directTargetHashed = null;
             switch (mChooserListAdapter.getPositionTargetType(which)) {
                 case ChooserListAdapter.TARGET_CALLER:
@@ -1033,6 +1035,7 @@ public class ChooserActivity extends ResolverActivity {
                             target.getComponentName().getPackageName()
                                     + target.getTitle().toString(),
                             mMaxHashSaltDays);
+                    directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
                     break;
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
@@ -1055,6 +1058,8 @@ public class ChooserActivity extends ResolverActivity {
                     targetLogMaker.addTaggedData(
                                     MetricsEvent.FIELD_HASHED_TARGET_SALT_GEN,
                                     directTargetHashed.saltGeneration);
+                    targetLogMaker.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION,
+                                    directTargetAlsoRanked);
                 }
                 getMetricsLogger().write(targetLogMaker);
                 MetricsLogger.action(this, cat, value);
@@ -1071,6 +1076,21 @@ public class ChooserActivity extends ResolverActivity {
                 MetricsLogger.histogram(null, "app_position_for_smart_sharing", value);
             }
         }
+    }
+
+    private int getRankedPosition(SelectableTargetInfo targetInfo) {
+        String targetPackageName =
+                targetInfo.getChooserTarget().getComponentName().getPackageName();
+        int maxRankedResults = Math.min(mChooserListAdapter.mDisplayList.size(),
+                        MAX_LOG_RANK_POSITION);
+
+        for (int i = 0; i < maxRankedResults; i++) {
+            if (mChooserListAdapter.mDisplayList.get(i)
+                    .getResolveInfo().activityInfo.packageName.equals(targetPackageName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     void queryTargetServices(ChooserListAdapter adapter) {
@@ -1387,6 +1407,15 @@ public class ChooserActivity extends ResolverActivity {
         return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS ? getAppPredictor() : null;
     }
 
+    /**
+     * This will return an app predictor if it is enabled for share activity sorting
+     * and if one exists. Otherwise, it returns null.
+     */
+    @Nullable
+    private AppPredictor getAppPredictorForShareActivitesIfEnabled() {
+        return USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES ? getAppPredictor() : null;
+    }
+
     void onRefinementResult(TargetInfo selectedTarget, Intent matchingIntent) {
         if (mRefinementResultReceiver != null) {
             mRefinementResultReceiver.destroy();
@@ -1491,8 +1520,10 @@ public class ChooserActivity extends ResolverActivity {
                 PackageManager pm,
                 Intent targetIntent,
                 String referrerPackageName,
-                int launchedFromUid) {
-            super(context, pm, targetIntent, referrerPackageName, launchedFromUid);
+                int launchedFromUid,
+                AbstractResolverComparator resolverComparator) {
+            super(context, pm, targetIntent, referrerPackageName, launchedFromUid,
+                    resolverComparator);
         }
 
         @Override
@@ -1520,13 +1551,24 @@ public class ChooserActivity extends ResolverActivity {
 
     @VisibleForTesting
     protected ResolverListController createListController() {
+        AppPredictor appPredictor = getAppPredictorForShareActivitesIfEnabled();
+        AbstractResolverComparator resolverComparator;
+        if (appPredictor != null) {
+            resolverComparator = new AppPredictionServiceResolverComparator(this, getTargetIntent(),
+                    appPredictor, getUser());
+        } else {
+            resolverComparator =
+                    new ResolverRankerServiceResolverComparator(this, getTargetIntent(),
+                        getReferrerPackageName(), null);
+        }
+
         return new ChooserListController(
                 this,
                 mPm,
                 getTargetIntent(),
                 getReferrerPackageName(),
-                mLaunchedFromUid
-                );
+                mLaunchedFromUid,
+                resolverComparator);
     }
 
     @VisibleForTesting
@@ -1908,6 +1950,7 @@ public class ChooserActivity extends ResolverActivity {
 
                 int offset = 0;
                 int rowsToShow = mChooserRowAdapter.getContentPreviewRowCount()
+                        + mChooserRowAdapter.getProfileRowCount()
                         + mChooserRowAdapter.getServiceTargetRowCount()
                         + mChooserRowAdapter.getCallerAndRankedTargetRowCount();
 
@@ -1927,7 +1970,7 @@ public class ChooserActivity extends ResolverActivity {
                 }
 
                 int lastHeight = 0;
-                rowsToShow = Math.max(3, rowsToShow);
+                rowsToShow = Math.min(4, rowsToShow);
                 for (int i = 0; i < Math.min(rowsToShow, mAdapterView.getChildCount()); i++) {
                     lastHeight = mAdapterView.getChildAt(i).getHeight();
                     offset += lastHeight;
@@ -2403,6 +2446,7 @@ public class ChooserActivity extends ResolverActivity {
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
+        private static final int VIEW_TYPE_PROFILE = 3;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
@@ -2458,9 +2502,9 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getCount() {
-
             return (int) (
                     getContentPreviewRowCount()
+                            + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
                             + Math.ceil(
@@ -2479,6 +2523,10 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             return 1;
+        }
+
+        public int getProfileRowCount() {
+            return mChooserListAdapter.getOtherProfile() == null ? 0 : 1;
         }
 
         public int getCallerAndRankedTargetRowCount() {
@@ -2516,6 +2564,10 @@ public class ChooserActivity extends ResolverActivity {
                 return createContentPreviewView(convertView, parent);
             }
 
+            if (viewType == VIEW_TYPE_PROFILE) {
+                return createProfileView(convertView, parent);
+            }
+
             if (convertView == null) {
                 holder = createViewHolder(viewType, parent);
             } else {
@@ -2533,6 +2585,10 @@ public class ChooserActivity extends ResolverActivity {
                 return VIEW_TYPE_CONTENT_PREVIEW;
             }
 
+            if (getProfileRowCount() == 1 && position == getContentPreviewRowCount()) {
+                return VIEW_TYPE_PROFILE;
+            }
+
             final int start = getFirstRowPosition(position);
             final int startType = mChooserListAdapter.getPositionTargetType(start);
 
@@ -2545,7 +2601,7 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getViewTypeCount() {
-            return 3;
+            return 4;
         }
 
         private ViewGroup createContentPreviewView(View convertView, ViewGroup parent) {
@@ -2559,6 +2615,17 @@ public class ChooserActivity extends ResolverActivity {
 
             return displayContentPreview(previewType, targetIntent, mLayoutInflater,
                     (ViewGroup) convertView, parent);
+        }
+
+        private View createProfileView(View convertView, ViewGroup parent) {
+            View profileRow = convertView != null ? convertView : mLayoutInflater.inflate(
+                    R.layout.chooser_profile_row, parent, false);
+            profileRow.setBackground(
+                    getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
+            mProfileView = profileRow.findViewById(R.id.profile_button);
+            mProfileView.setOnClickListener(ChooserActivity.this::onProfileClick);
+            bindProfileView();
+            return profileRow;
         }
 
         private RowViewHolder loadViewsIntoRow(RowViewHolder holder) {
@@ -2679,8 +2746,10 @@ public class ChooserActivity extends ResolverActivity {
 
             final ViewGroup row = holder.getViewGroup();
 
-            if (startType != lastStartType || rowPosition == getContentPreviewRowCount()) {
-                row.setBackground(mChooserRowLayer);
+            if (startType != lastStartType
+                    || rowPosition == getContentPreviewRowCount() + getProfileRowCount()) {
+                row.setBackground(
+                        getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             } else {
                 row.setBackground(null);
             }
@@ -2730,7 +2799,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         int getFirstRowPosition(int row) {
-            row -= getContentPreviewRowCount();
+            row -= getContentPreviewRowCount() + getProfileRowCount();
 
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount

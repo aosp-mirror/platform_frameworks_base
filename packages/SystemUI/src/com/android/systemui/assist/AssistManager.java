@@ -204,6 +204,11 @@ public class AssistManager implements ConfigurationChangedReceiver {
         return false;
     }
 
+    /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */
+    public void onInvocationProgress(int type, float progress) {
+        // intentional no-op, vendor's AssistManager implementation should override if needed.
+    }
+
     public void hideAssist() {
         mAssistUtils.hideCurrentSession();
     }

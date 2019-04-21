@@ -19,8 +19,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.android.networkstack"
   android:sharedUserId="android.uid.networkstack"
-  android:versionCode="210000500"
-  android:versionName="Year 2021 Week 00 Build 50 on api-level 0"
+  android:versionCode="210000600"
+  android:versionName="Year 2021 Week 00 Build 60 on api-level 0"
 >
 
     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />

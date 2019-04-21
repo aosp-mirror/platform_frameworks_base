@@ -1159,6 +1159,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(memoryStat.rssInBytes);
             e.writeLong(0);  // unused
             e.writeLong(memoryStat.startTimeNanos);
+            e.writeLong(memoryStat.swapInBytes);
             pulledData.add(e);
         }
     }
@@ -2562,9 +2563,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final class ThermalEventListener extends IThermalEventListener.Stub {
         @Override
         public void notifyThrottling(Temperature temp) {
-            StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
-                    StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__UNKNOWN,
-                    temp.getValue(), temp.getStatus(), temp.getName());
+            StatsLog.write(StatsLog.THERMAL_THROTTLING_SEVERITY_STATE_CHANGED, temp.getType(),
+                    temp.getName(), (int) (temp.getValue() * 10), temp.getStatus());
         }
     }
 

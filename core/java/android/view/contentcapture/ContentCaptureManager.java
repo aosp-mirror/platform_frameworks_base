@@ -29,7 +29,6 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -51,61 +50,61 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * <p>The {@link ContentCaptureManager} provides additional ways for for apps to
- * integrate with the content capture subsystem.
+ * Content capture is mechanism used to let apps notify the Android system of events associated with
+ * views.
  *
- * <p>Content capture provides real-time, continuous capture of application activity, display and
- * events to an intelligence service that is provided by the Android system. The intelligence
- * service then uses that info to mediate and speed user journey through different apps. For
- * example, when the user receives a restaurant address in a chat app and switchs to a map app
- * to search for that restaurant, the intelligence service could offer an autofill dialog to
- * let the user automatically select its address.
- *
- * <p>Content capture was designed with two major concerns in mind: privacy and performance.
- *
- * <ul>
- *   <li><b>Privacy:</b> the intelligence service is a trusted component provided that is provided
- *   by the device manufacturer and that cannot be changed by the user (although the user can
- *   globaly disable content capture using the Android Settings app). This service can only use the
- *   data for in-device machine learning, which is enforced both by process isolation and
- *   <a href="https://source.android.com/compatibility/cdd">CDD requirements</a>.
- *   <li><b>Performance:</b> content capture is highly optimized to minimize its impact in the app
- *   jankiness and overall device system health. For example, its only enabled on apps (or even
- *   specific activities from an app) that were explicitly whitelisted by the intelligence service,
- *   and it buffers the events so they are sent in a batch to the service (see
- *   {@link #isContentCaptureEnabled()} for other cases when its disabled).
- * </ul>
- *
- * <p>In fact, before using this manager, the app developer should check if it's available. Example:
- *  <code>
+ * <p>Before using this manager, you should check if it's available. Example:
+ * <pre><code>
  *  ContentCaptureManager mgr = context.getSystemService(ContentCaptureManager.class);
  *  if (mgr != null && mgr.isContentCaptureEnabled()) {
  *    // ...
  *  }
- *  </code>
+ *  </code></pre>
  *
- * <p>App developers usually don't need to explicitly interact with content capture, except when the
- * app:
+ * <p>To support content capture, you must notifiy the Android system of the following events:
  *
  * <ul>
- *   <li>Can define a contextual {@link android.content.LocusId} to identify unique state (such as a
- *   conversation between 2 chat users).
- *   <li>Can have multiple view hierarchies with different contextual meaning (for example, a
- *   browser app with multiple tabs, each representing a different URL).
- *   <li>Contains custom views (that extend View directly and are not provided by the standard
- *   Android SDK.
- *   <li>Contains views that provide their own virtual hierarchy (like a web browser that render the
- *   HTML elements using a Canvas).
+ *   <li>When a visible view is laid out, call
+ *   {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)}.
+ *   <li>When a view becomes invisible or is removed from the view hierarchy, call
+ *   {@link ContentCaptureSession#notifyViewDisappeared(android.view.autofill.AutofillId)}.
+ *   <li>When the view represents text and the text value changed, call {@link
+ *   ContentCaptureSession#notifyViewTextChanged(android.view.autofill.AutofillId, CharSequence)}.
  * </ul>
  *
+ * <p>You can get a blank content capture structure using
+ * {@link ContentCaptureSession#newViewStructure(View)}, then populate its relevant fields.
+ * Here's an example of the relevant methods for an {@code EditText}-like view:
+ *
+ * <pre><code>
+ * public class MyEditText extends View {
+ *
+ * private void populateContentCaptureStructure(@NonNull ViewStructure structure) {
+ *   structure.setText(getText(), getSelectionStart(), getSelectionEnd());
+ *   structure.setHint(getHint());
+ *   structure.setInputType(getInputType());
+ *   // set other properties like setTextIdEntry(), setTextLines(), setTextStyle(),
+ *   // setMinTextEms(), setMaxTextEms(), setMaxTextLength()
+ * }
+ *
+ * private void onTextChanged() {
+ *   if (isLaidOut() && isTextEditable()) {
+ *     ContentCaptureManager mgr = mContext.getSystemService(ContentCaptureManager.class);
+ *     if (cm != null && cm.isContentCaptureEnabled()) {
+ *        ContentCaptureSession session = getContentCaptureSession();
+ *        if (session != null) {
+ *          session.notifyViewTextChanged(getAutofillId(), getText());
+ *        }
+ *   }
+ * }
+ * </code></pre>
+ *
  * <p>The main integration point with content capture is the {@link ContentCaptureSession}. A "main"
- * session is automatically created by the Android System when content capture is enabled for the
- * activity and its used by the standard Android views to notify the content capture service of
- * events such as views being added, views been removed, and text changed by user input. The session
- * could have a {@link ContentCaptureContext} to provide more contextual info about it, such as
- * the locus associated with the view hierarchy (see {@link android.content.LocusId} for more info
- * about locus). By default, the main session doesn't have a {@code ContentCaptureContext}, but you
- * can change it after its created. Example:
+ * session is automatically created by the Android system when content capture is enabled for the
+ * activity. The session could have a {@link ContentCaptureContext} to provide more contextual info
+ * about it, such as the locus associated with the view hierarchy
+ * (see {@link android.content.LocusId} for more info about locus). By default, the main session
+ * doesn't have a {@code ContentCaptureContext}, but you can change it after its created. Example:
  *
  * <pre><code>
  * protected void onCreate(Bundle savedInstanceState) {
@@ -145,54 +144,6 @@ import java.util.Set;
  * }
  * </code></pre>
  *
- * <p>If your activity has custom views (i.e., views that extend {@link View} directly and provide
- * just one logical view, not a virtual tree hiearchy) and it provides content that's relevant for
- * content capture (as of {@link android.os.Build.VERSION_CODES#Q Android Q}, the only relevant
- * content is text), then your view implementation should:
- *
- * <ul>
- *   <li>Set it as important for content capture.
- *   <li>Fill {@link ViewStructure} used for content capture.
- *   <li>Notify the {@link ContentCaptureSession} when the text is changed by user input.
- * </ul>
- *
- * <p>Here's an example of the relevant methods for an {@code EditText}-like view:
- *
- * <pre><code>
- * public class MyEditText extends View {
- *
- * public MyEditText(...) {
- *   if (getImportantForContentCapture() == IMPORTANT_FOR_CONTENT_CAPTURE_AUTO) {
- *     setImportantForContentCapture(IMPORTANT_FOR_CONTENT_CAPTURE_YES);
- *   }
- * }
- *
- * public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
- *   super.onProvideContentCaptureStructure(structure, flags);
- *
- *   structure.setText(getText(), getSelectionStart(), getSelectionEnd());
- *   structure.setHint(getHint());
- *   structure.setInputType(getInputType());
- *   // set other properties like setTextIdEntry(), setTextLines(), setTextStyle(),
- *   // setMinTextEms(), setMaxTextEms(), setMaxTextLength()
- * }
- *
- * private void onTextChanged() {
- *   if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
- *     ContentCaptureManager mgr = mContext.getSystemService(ContentCaptureManager.class);
- *     if (cm != null && cm.isContentCaptureEnabled()) {
- *        ContentCaptureSession session = getContentCaptureSession();
- *        if (session != null) {
- *          session.notifyViewTextChanged(getAutofillId(), getText());
- *        }
- *   }
- * }
- * </code></pre>
- *
- * <p>If your view provides its own virtual hierarchy (for example, if it's a browser that draws
- * the HTML using {@link Canvas} or native libraries in a different render process), then the view
- * is also responsible to notify the session when the virtual elements appear and disappear -
- * see {@link ContentCaptureSession#newViewStructure(View)} for more info.
  */
 @SystemService(Context.CONTENT_CAPTURE_MANAGER_SERVICE)
 public final class ContentCaptureManager {
@@ -473,17 +424,6 @@ public final class ContentCaptureManager {
 
     /**
      * Checks whether content capture is enabled for this activity.
-     *
-     * <p>There are many reasons it could be disabled, such as:
-     * <ul>
-     *   <li>App itself disabled content capture through {@link #setContentCaptureEnabled(boolean)}.
-     *   <li>Intelligence service did not whitelist content capture for this activity's package.
-     *   <li>Intelligence service did not whitelist content capture for this specific activity.
-     *   <li>Intelligence service disabled content capture globally.
-     *   <li>User disabled content capture globally through the Android Settings app.
-     *   <li>Device manufacturer (OEM) disabled content capture globally.
-     *   <li>Transient errors, such as intelligence service package being updated.
-     * </ul>
      */
     public boolean isContentCaptureEnabled() {
         if (mOptions.lite) return false;
@@ -503,9 +443,9 @@ public final class ContentCaptureManager {
      * Gets the list of conditions for when content capture should be allowed.
      *
      * <p>This method is typically used by web browsers so they don't generate unnecessary content
-     * capture events for websites the content capture service is not interested on.
+     * capture events for some websites.
      *
-     * @return list of conditions, or {@code null} if the service didn't set any restriction
+     * @return list of conditions, or {@code null} if there isn't any restriction
      * (in which case content capture events should always be generated). If the list is empty,
      * then it should not generate any event at all.
      */

@@ -187,8 +187,10 @@ interface IWindowSession {
 
     /**
      * Cancel the current drag operation.
+     * skipAnimation is 'true' when it should skip the drag cancel animation which brings the drag
+     * shadow image back to the drag start position.
      */
-    void cancelDragAndDrop(IBinder dragToken);
+    void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation);
 
     /**
      * Tell the OS that we've just dragged into a View that is willing to accept the drop

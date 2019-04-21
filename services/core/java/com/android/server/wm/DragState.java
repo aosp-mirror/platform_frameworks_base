@@ -475,15 +475,16 @@ class DragState {
         closeLocked();
     }
 
-    void cancelDragLocked() {
+    void cancelDragLocked(boolean skipAnimation) {
         if (mAnimator != null) {
             return;
         }
-        if (!mDragInProgress) {
-            // This can happen if an app invokes Session#cancelDragAndDrop before
+        if (!mDragInProgress || skipAnimation) {
+            // mDragInProgress is false if an app invokes Session#cancelDragAndDrop before
             // Session#performDrag. Reset the drag state without playing the cancel animation
             // because H.DRAG_START_TIMEOUT may be sent to WindowManagerService, which will cause
             // DragState#reset() while playing the cancel animation.
+            // skipAnimation is true when a caller requests to skip the drag cancel animation.
             closeLocked();
             return;
         }
