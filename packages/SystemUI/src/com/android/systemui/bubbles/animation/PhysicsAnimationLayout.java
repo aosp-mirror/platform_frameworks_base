@@ -290,6 +290,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
         final Runnable checkIfAllFinished = () -> {
             if (!arePropertiesAnimating(properties)) {
                 action.run();
+
+                for (DynamicAnimation.ViewProperty property : properties) {
+                    removeEndActionForProperty(property);
+                }
             }
         };
 
@@ -379,10 +383,21 @@ public class PhysicsAnimationLayout extends FrameLayout {
     /** Checks whether any animations of the given properties are still running. */
     public boolean arePropertiesAnimating(DynamicAnimation.ViewProperty... properties) {
         for (int i = 0; i < getChildCount(); i++) {
-            for (DynamicAnimation.ViewProperty property : properties) {
-                if (getAnimationAtIndex(property, i).isRunning()) {
-                    return true;
-                }
+            if (arePropertiesAnimatingOnView(getChildAt(i), properties)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Checks whether any animations of the given properties are running on the given view. */
+    public boolean arePropertiesAnimatingOnView(
+            View view, DynamicAnimation.ViewProperty... properties) {
+        for (DynamicAnimation.ViewProperty property : properties) {
+            final SpringAnimation animation = getAnimationFromView(property, view);
+            if (animation != null && animation.isRunning()) {
+                return true;
             }
         }
 
@@ -556,7 +571,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 DynamicAnimation anim, boolean canceled, float value, float velocity) {
             if (!arePropertiesAnimating(mProperty)) {
                 if (mEndActionForProperty.containsKey(mProperty)) {
-                    mEndActionForProperty.get(mProperty).run();
+                    final Runnable callback = mEndActionForProperty.get(mProperty);
+
+                    if (callback != null) {
+                        callback.run();
+                    }
                 }
             }
         }
@@ -577,6 +596,12 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Start delay to use when start is called. */
         private long mStartDelay = 0;
+
+        /** Damping ratio to use for the animations. */
+        private float mDampingRatio = -1;
+
+        /** Stiffness to use for the animations. */
+        private float mStiffness = -1;
 
         /** End actions to call when animations for the given property complete. */
         private Map<DynamicAnimation.ViewProperty, Runnable[]> mEndActionsForProperty =
@@ -687,6 +712,24 @@ public class PhysicsAnimationLayout extends FrameLayout {
         }
 
         /**
+         * Set the damping ratio to use for this animation. If not supplied, will default to the
+         * value from {@link PhysicsAnimationController#getSpringForce}.
+         */
+        public PhysicsPropertyAnimator withDampingRatio(float dampingRatio) {
+            mDampingRatio = dampingRatio;
+            return this;
+        }
+
+        /**
+         * Set the stiffness to use for this animation. If not supplied, will default to the
+         * value from {@link PhysicsAnimationController#getSpringForce}.
+         */
+        public PhysicsPropertyAnimator withStiffness(float stiffness) {
+            mStiffness = stiffness;
+            return this;
+        }
+
+        /**
          * Set the start velocities to use for TRANSLATION_X and TRANSLATION_Y animations. This
          * overrides any value set via {@link #withStartVelocity(float)} for those properties.
          */
@@ -711,12 +754,14 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             // If there are end actions, set an end listener on the layout for all the properties
             // we're about to animate.
-            if (after != null) {
+            if (after != null && after.length > 0) {
                 final DynamicAnimation.ViewProperty[] propertiesArray =
                         properties.toArray(new DynamicAnimation.ViewProperty[0]);
-                for (Runnable callback : after) {
-                    setEndActionForMultipleProperties(callback, propertiesArray);
-                }
+                setEndActionForMultipleProperties(() -> {
+                    for (Runnable callback : after) {
+                        callback.run();
+                    }
+                }, propertiesArray);
             }
 
             // If we used position-specific end actions, we'll need to listen for both TRANSLATION_X
@@ -746,12 +791,15 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             // Actually start the animations.
             for (DynamicAnimation.ViewProperty property : properties) {
+                final SpringForce defaultSpringForce = mController.getSpringForce(property, mView);
                 animateValueForChild(
                         property,
                         mView,
                         mAnimatedProperties.get(property),
                         mPositionStartVelocities.getOrDefault(property, mDefaultStartVelocity),
                         mStartDelay,
+                        mStiffness >= 0 ? mStiffness : defaultSpringForce.getStiffness(),
+                        mDampingRatio >= 0 ? mDampingRatio : defaultSpringForce.getDampingRatio(),
                         mEndActionsForProperty.get(property));
             }
 
@@ -760,6 +808,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
             mPositionStartVelocities.clear();
             mDefaultStartVelocity = 0;
             mStartDelay = 0;
+            mStiffness = -1;
+            mDampingRatio = -1;
             mEndActionsForProperty.clear();
         }
 
@@ -778,6 +828,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 float value,
                 float startVel,
                 long startDelay,
+                float stiffness,
+                float dampingRatio,
                 Runnable[] afterCallbacks) {
             if (view != null) {
                 final SpringAnimation animation =
@@ -794,6 +846,9 @@ public class PhysicsAnimationLayout extends FrameLayout {
                         }
                     });
                 }
+
+                animation.getSpring().setStiffness(stiffness);
+                animation.getSpring().setDampingRatio(dampingRatio);
 
                 if (startVel > 0) {
                     animation.setStartVelocity(startVel);
