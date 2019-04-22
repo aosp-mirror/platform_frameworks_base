@@ -33,7 +33,7 @@ static size_t getCacheUsage(GrContext* grContext) {
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
-    DisplayInfo displayInfo = renderThread.mainDisplayInfo();
+    DisplayInfo displayInfo = DeviceInfo::get()->displayInfo();
     GrContext* grContext = renderThread.getGrContext();
     ASSERT_TRUE(grContext != nullptr);
 
