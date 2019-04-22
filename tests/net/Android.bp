@@ -6,6 +6,7 @@ java_defaults {
     static_libs: [
         "FrameworksNetCommonTests",
         "frameworks-base-testutils",
+        "frameworks-net-testutils",
         "framework-protos",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
