@@ -935,6 +935,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mGnssMeasurementsProvider.onGpsEnabledChanged();
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
             mGnssBatchingProvider.enable();
+            if (mGnssVisibilityControl != null) {
+                mGnssVisibilityControl.onGpsEnabledChanged(mEnabled);
+            }
         } else {
             mEnabled = false;
             Log.w(TAG, "Failed to enable location provider");
@@ -951,6 +954,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mAlarmManager.cancel(mWakeupIntent);
         mAlarmManager.cancel(mTimeoutIntent);
 
+        if (mGnssVisibilityControl != null) {
+            mGnssVisibilityControl.onGpsEnabledChanged(mEnabled);
+        }
         mGnssBatchingProvider.disable();
         // do this before releasing wakelock
         native_cleanup();
