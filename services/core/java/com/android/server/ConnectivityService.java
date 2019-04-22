@@ -634,7 +634,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *    the first network for a given type changes, or if the default network
      *    changes.
      */
-    private class LegacyTypeTracker {
+    @VisibleForTesting
+    static class LegacyTypeTracker {
 
         private static final boolean DBG = true;
         private static final boolean VDBG = false;
@@ -660,10 +661,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
          *  - dump is thread-safe with respect to concurrent add and remove calls.
          */
         private final ArrayList<NetworkAgentInfo> mTypeLists[];
+        @NonNull
+        private final ConnectivityService mService;
 
-        public LegacyTypeTracker() {
-            mTypeLists = (ArrayList<NetworkAgentInfo>[])
-                    new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE + 1];
+        LegacyTypeTracker(@NonNull ConnectivityService service) {
+            mService = service;
+            mTypeLists = new ArrayList[ConnectivityManager.MAX_NETWORK_TYPE + 1];
         }
 
         public void addSupportedType(int type) {
@@ -712,10 +715,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             // Send a broadcast if this is the first network of its type or if it's the default.
-            final boolean isDefaultNetwork = isDefaultNetwork(nai);
+            final boolean isDefaultNetwork = mService.isDefaultNetwork(nai);
             if ((list.size() == 1) || isDefaultNetwork) {
                 maybeLogBroadcast(nai, DetailedState.CONNECTED, type, isDefaultNetwork);
-                sendLegacyNetworkBroadcast(nai, DetailedState.CONNECTED, type);
+                mService.sendLegacyNetworkBroadcast(nai, DetailedState.CONNECTED, type);
             }
         }
 
@@ -737,15 +740,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             if (wasFirstNetwork || wasDefault) {
                 maybeLogBroadcast(nai, state, type, wasDefault);
-                sendLegacyNetworkBroadcast(nai, state, type);
+                mService.sendLegacyNetworkBroadcast(nai, state, type);
             }
 
             if (!list.isEmpty() && wasFirstNetwork) {
                 if (DBG) log("Other network available for type " + type +
                               ", sending connected broadcast");
                 final NetworkAgentInfo replacement = list.get(0);
-                maybeLogBroadcast(replacement, state, type, isDefaultNetwork(replacement));
-                sendLegacyNetworkBroadcast(replacement, state, type);
+                maybeLogBroadcast(replacement, state, type, mService.isDefaultNetwork(replacement));
+                mService.sendLegacyNetworkBroadcast(replacement, state, type);
             }
         }
 
@@ -760,7 +763,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // send out another legacy broadcast - currently only used for suspend/unsuspend
         // toggle
         public void update(NetworkAgentInfo nai) {
-            final boolean isDefault = isDefaultNetwork(nai);
+            final boolean isDefault = mService.isDefaultNetwork(nai);
             final DetailedState state = nai.networkInfo.getDetailedState();
             for (int type = 0; type < mTypeLists.length; type++) {
                 final ArrayList<NetworkAgentInfo> list = mTypeLists[type];
@@ -768,7 +771,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final boolean isFirst = contains && (nai == list.get(0));
                 if (isFirst || contains && isDefault) {
                     maybeLogBroadcast(nai, state, type, isDefault);
-                    sendLegacyNetworkBroadcast(nai, state, type);
+                    mService.sendLegacyNetworkBroadcast(nai, state, type);
                 }
             }
         }
@@ -804,7 +807,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println();
         }
     }
-    private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
+    private final LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker(this);
 
     /**
      * Helper class which parses out priority arguments and dumps sections according to their
@@ -5371,7 +5374,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private boolean isDefaultNetwork(NetworkAgentInfo nai) {
+    @VisibleForTesting
+    protected boolean isDefaultNetwork(NetworkAgentInfo nai) {
         return nai == getDefaultNetwork();
     }
 
@@ -6671,7 +6675,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, DetailedState state, int type) {
+    @VisibleForTesting
+    protected void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, DetailedState state, int type) {
         // The NetworkInfo we actually send out has no bearing on the real
         // state of affairs. For example, if the default connection is mobile,
         // and a request for HIPRI has just gone away, we need to pretend that
