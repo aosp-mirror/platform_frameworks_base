@@ -105,13 +105,13 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mGenerationID(0)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mJankTracker(&thread.globalProfileData(), thread.mainDisplayInfo())
+        , mJankTracker(&thread.globalProfileData(), DeviceInfo::get()->displayInfo())
         , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
-    mProfiler.setDensity(mRenderThread.mainDisplayInfo().density);
+    mProfiler.setDensity(DeviceInfo::get()->displayInfo().density);
     setRenderAheadDepth(Properties::defaultRenderAhead);
 }
 
@@ -153,16 +153,23 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
         mNativeSurface = nullptr;
     }
 
+    if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
+        mFixedRenderAhead = false;
+        mRenderAheadCapacity = 1;
+    } else {
+        mFixedRenderAhead = true;
+        mRenderAheadCapacity = mRenderAheadDepth;
+    }
+
     ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
     bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode,
-                                                  mRenderAheadDepth);
+                                                  mRenderAheadCapacity);
 
     mFrameNumber = -1;
 
     if (hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
-        applyRenderAheadSettings();
     } else {
         mRenderThread.removeFrameCallback(this);
         mGenerationID++;
@@ -403,6 +410,23 @@ void CanvasContext::notifyFramePending() {
     mRenderThread.pushBackFrameCallback(this);
 }
 
+void CanvasContext::setPresentTime() {
+    int64_t presentTime = NATIVE_WINDOW_TIMESTAMP_AUTO;
+    int renderAhead = 0;
+    const auto frameIntervalNanos = mRenderThread.timeLord().frameIntervalNanos();
+    if (mFixedRenderAhead) {
+        renderAhead = std::min(mRenderAheadDepth, mRenderAheadCapacity);
+    } else if (frameIntervalNanos < 15_ms) {
+        renderAhead = std::min(1, static_cast<int>(mRenderAheadCapacity));
+    }
+
+    if (renderAhead) {
+        presentTime = mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
+                (frameIntervalNanos * (renderAhead + 1));
+    }
+    native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
+}
+
 void CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
@@ -415,14 +439,9 @@ void CanvasContext::draw() {
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     Frame frame = mRenderPipeline->getFrame();
+    setPresentTime();
 
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
-    if (mRenderAheadDepth) {
-        auto presentTime =
-                mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
-                (mRenderThread.timeLord().frameIntervalNanos() * (mRenderAheadDepth + 1));
-        native_window_set_buffers_timestamp(mNativeSurface.get(), presentTime);
-    }
 
     bool drew = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry, &mLayerUpdateQueue,
                                       mContentDrawBounds, mOpaque, mLightInfo, mRenderNodes,
@@ -656,18 +675,12 @@ bool CanvasContext::surfaceRequiresRedraw() {
     return width == mLastFrameWidth && height == mLastFrameHeight;
 }
 
-void CanvasContext::applyRenderAheadSettings() {
-    if (mNativeSurface && !mRenderAheadDepth) {
-        native_window_set_buffers_timestamp(mNativeSurface.get(), NATIVE_WINDOW_TIMESTAMP_AUTO);
-    }
-}
-
-void CanvasContext::setRenderAheadDepth(uint32_t renderAhead) {
-    if (renderAhead > 2 || renderAhead == mRenderAheadDepth || mNativeSurface) {
+void CanvasContext::setRenderAheadDepth(int renderAhead) {
+    if (renderAhead > 2 || renderAhead < 0 || mNativeSurface) {
         return;
     }
-    mRenderAheadDepth = renderAhead;
-    applyRenderAheadSettings();
+    mFixedRenderAhead = true;
+    mRenderAheadDepth = static_cast<uint32_t>(renderAhead);
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
