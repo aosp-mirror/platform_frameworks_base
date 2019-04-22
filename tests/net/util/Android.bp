@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-// Tests in this folder are included both in unit tests and CTS.
-// They must be fast and stable, and exercise public or test APIs.
+// Common utilities for network tests.
 java_library {
-    name: "FrameworksNetCommonTests",
+    name: "frameworks-net-testutils",
     srcs: ["java/**/*.java"],
+    // test_current to be also appropriate for CTS tests
+    sdk_version: "test_current",
     static_libs: [
-        "androidx.test.rules",
-        "frameworks-net-testutils",
+        "androidx.annotation_annotation",
         "junit",
     ],
     libs: [
