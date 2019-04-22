@@ -453,14 +453,22 @@ public class GraphicsEnvironment {
         final boolean appIsProfileable = isProfileable(context);
         final boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
         if (appIsDebuggable || appIsProfileable || deviceIsDebuggable) {
+            String debugPackage;
 
-            String debugPackage =
-                    coreSettings.getString(Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+            if (coreSettings != null) {
+                debugPackage =
+                        coreSettings.getString(Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+            } else {
+                ContentResolver contentResolver = context.getContentResolver();
+                debugPackage = Settings.Global.getString(contentResolver,
+                        Settings.Global.GLOBAL_SETTINGS_ANGLE_DEBUG_PACKAGE);
+            }
 
             if ((debugPackage != null) && (!debugPackage.isEmpty())) {
                 return debugPackage;
             }
         }
+
         return "";
     }
 
