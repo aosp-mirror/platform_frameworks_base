@@ -118,6 +118,7 @@ public class IpSecServiceTest {
     INetd mMockNetd;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
+    int mUid = Os.getuid();
 
     @Before
     public void setUp() throws Exception {
@@ -664,5 +665,100 @@ public class IpSecServiceTest {
                 mIpSecService.TUN_INTF_NETID_START + mIpSecService.TUN_INTF_NETID_RANGE / 2;
         mIpSecService.releaseNetId(releasedNetId);
         assertEquals(releasedNetId, mIpSecService.reserveNetId());
+    }
+
+    @Test
+    public void testLockEncapSocketForNattKeepalive() throws Exception {
+        IpSecUdpEncapResponse udpEncapResp =
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(udpEncapResp);
+        assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
+
+        // Verify no NATT keepalive records upon startup
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
+        assertEquals(0, userRecord.mNattKeepaliveRecords.size());
+
+        int nattKeepaliveResourceId =
+                mIpSecService.lockEncapSocketForNattKeepalive(udpEncapResp.resourceId, mUid);
+
+        // Validate response, and record was added
+        assertNotEquals(IpSecManager.INVALID_RESOURCE_ID, nattKeepaliveResourceId);
+        assertEquals(1, userRecord.mNattKeepaliveRecords.size());
+
+        // Validate keepalive can be released and removed.
+        mIpSecService.releaseNattKeepalive(nattKeepaliveResourceId, mUid);
+        assertEquals(0, userRecord.mNattKeepaliveRecords.size());
+
+        mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
+    }
+
+    @Test
+    public void testLockEncapSocketForNattKeepaliveInvalidUid() throws Exception {
+        IpSecUdpEncapResponse udpEncapResp =
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(udpEncapResp);
+        assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
+
+        // Verify no NATT keepalive records upon startup
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
+        assertEquals(0, userRecord.mNattKeepaliveRecords.size());
+
+        try {
+            int nattKeepaliveResourceId =
+                    mIpSecService.lockEncapSocketForNattKeepalive(
+                            udpEncapResp.resourceId, mUid + 1);
+            fail("Expected SecurityException for invalid user");
+        } catch (SecurityException expected) {
+        }
+
+        // Validate keepalive was not added to lists
+        assertEquals(0, userRecord.mNattKeepaliveRecords.size());
+    }
+
+    @Test
+    public void testLockEncapSocketForNattKeepaliveInvalidResourceId() throws Exception {
+        // Verify no NATT keepalive records upon startup
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
+        assertEquals(0, userRecord.mNattKeepaliveRecords.size());
+
+        try {
+            int nattKeepaliveResourceId =
+                    mIpSecService.lockEncapSocketForNattKeepalive(12345, mUid);
+            fail("Expected IllegalArgumentException for invalid resource ID");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        // Validate keepalive was not added to lists
+        assertEquals(0, userRecord.mNattKeepaliveRecords.size());
+    }
+
+    @Test
+    public void testEncapSocketReleasedBeforeKeepaliveReleased() throws Exception {
+        IpSecUdpEncapResponse udpEncapResp =
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(udpEncapResp);
+        assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
+
+        // Get encap socket record, verify initial starting refcount.
+        IpSecService.UserRecord userRecord = mIpSecService.mUserResourceTracker.getUserRecord(mUid);
+        IpSecService.RefcountedResource encapSocketRefcountedRecord =
+                userRecord.mEncapSocketRecords.getRefcountedResourceOrThrow(
+                        udpEncapResp.resourceId);
+        assertEquals(1, encapSocketRefcountedRecord.mRefCount);
+
+        // Verify that the reference was added
+        int nattKeepaliveResourceId =
+                mIpSecService.lockEncapSocketForNattKeepalive(udpEncapResp.resourceId, mUid);
+        assertNotEquals(IpSecManager.INVALID_RESOURCE_ID, nattKeepaliveResourceId);
+        assertEquals(2, encapSocketRefcountedRecord.mRefCount);
+
+        // Close UDP encap socket, but expect the refcountedRecord to still have a reference.
+        mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
+        assertEquals(1, encapSocketRefcountedRecord.mRefCount);
+
+        // Verify UDP encap socket cleaned up once reference is removed. Expect -1 if cleanup
+        // was properly completed.
+        mIpSecService.releaseNattKeepalive(nattKeepaliveResourceId, mUid);
+        assertEquals(-1, encapSocketRefcountedRecord.mRefCount);
     }
 }
