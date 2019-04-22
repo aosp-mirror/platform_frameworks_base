@@ -28,7 +28,8 @@
     android:clipToPadding="false"
     android:minHeight="20dp"
     android:clickable="false"
-    android:focusable="true">
+    android:focusable="true"
+    android:theme="@style/QSHeaderTheme">
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"

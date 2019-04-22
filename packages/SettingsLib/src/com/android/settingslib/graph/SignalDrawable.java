@@ -203,8 +203,11 @@ public class SignalDrawable extends Drawable {
     }
 
     public void setColors(int background, int foreground) {
+        int colorBackground = mPaint.getColor();
+        int colorForeground = mForegroundPaint.getColor();
         mPaint.setColor(background);
         mForegroundPaint.setColor(foreground);
+        if (colorBackground != background || colorForeground != foreground) invalidateSelf();
     }
 
     public void setDarkIntensity(float darkIntensity) {

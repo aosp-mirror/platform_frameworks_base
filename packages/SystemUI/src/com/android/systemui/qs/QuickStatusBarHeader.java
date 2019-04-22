@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -39,6 +40,7 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.StatsLog;
+import android.view.ContextThemeWrapper;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
@@ -53,6 +55,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
+import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -115,6 +118,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private TouchAnimator mStatusIconsAlphaAnimator;
     private TouchAnimator mHeaderTextContainerAlphaAnimator;
     private TouchAnimator mPrivacyChipAlphaAnimator;
+    private DualToneHandler mDualToneHandler;
 
     private View mSystemIconsView;
     private View mQuickQsStatusIcons;
@@ -168,6 +172,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mStatusBarIconController = statusBarIconController;
         mActivityStarter = activityStarter;
         mPrivacyItemController = privacyItemController;
+        mDualToneHandler = new DualToneHandler(
+                new ContextThemeWrapper(context, R.style.QSHeaderTheme));
     }
 
     @Override
@@ -205,13 +211,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.colorForeground);
         float intensity = getColorIntensity(colorForeground);
-        int fillColor = fillColorForIntensity(intensity, getContext());
+        int fillColor = mDualToneHandler.getSingleColor(intensity);
 
         // Set light text on the header icons because they will always be on a black background
         applyDarkness(R.id.clock, tintArea, 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
 
         // Set the correct tint for the status icons so they contrast
         mIconManager.setTint(fillColor);
+        mNextAlarmIcon.setImageTintList(ColorStateList.valueOf(fillColor));
+        mRingerModeIcon.setImageTintList(ColorStateList.valueOf(fillColor));
 
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
@@ -312,13 +320,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (v instanceof DarkReceiver) {
             ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
         }
-    }
-
-    private int fillColorForIntensity(float intensity, Context context) {
-        if (intensity == 0) {
-            return context.getColor(R.color.light_mode_icon_color_single_tone);
-        }
-        return context.getColor(R.color.dark_mode_icon_color_single_tone);
     }
 
     @Override
@@ -576,8 +577,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
                 android.R.attr.colorForeground);
         float intensity = getColorIntensity(colorForeground);
-        int fillColor = fillColorForIntensity(intensity, getContext());
-        mBatteryRemainingIcon.setColorsFromContext(mHost.getContext());
+        int fillColor = mDualToneHandler.getSingleColor(intensity);
         mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
     }
 
