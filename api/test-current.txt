@@ -369,6 +369,7 @@ package android.app {
     method public android.os.ParcelFileDescriptor[] executeShellCommandRw(String);
     method @Deprecated public boolean grantRuntimePermission(String, String, android.os.UserHandle);
     method @Deprecated public boolean revokeRuntimePermission(String, String, android.os.UserHandle);
+    method public void syncInputTransactions();
   }
 
   public class UiModeManager {
