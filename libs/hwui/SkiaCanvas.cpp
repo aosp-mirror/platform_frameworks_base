@@ -26,6 +26,7 @@
 
 #include <SkAndroidFrameworkUtils.h>
 #include <SkAnimatedImage.h>
+#include <SkCanvasPriv.h>
 #include <SkCanvasStateUtils.h>
 #include <SkColorFilter.h>
 #include <SkDeque.h>
@@ -189,6 +190,18 @@ int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
 int SkiaCanvas::saveUnclippedLayer(int left, int top, int right, int bottom) {
     SkRect bounds = SkRect::MakeLTRB(left, top, right, bottom);
     return SkAndroidFrameworkUtils::SaveBehind(mCanvas, &bounds);
+}
+
+void SkiaCanvas::restoreUnclippedLayer(int restoreCount, const SkPaint& paint) {
+
+    while (mCanvas->getSaveCount() > restoreCount + 1) {
+        this->restore();
+    }
+
+    if (mCanvas->getSaveCount() == restoreCount + 1) {
+        SkCanvasPriv::DrawBehind(mCanvas, *filterPaint(paint));
+        this->restore();
+    }
 }
 
 class SkiaCanvas::Clip {
