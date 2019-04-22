@@ -41,6 +41,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private static final float ZERO_DRAG = 0.f;
     private static final float OPAQUE = 1.f;
     private static final float TRANSPARENT = 0.f;
+    private static final boolean HAS_CUSTOM_CLOCK = false;
+    private static final boolean HAS_VISIBLE_NOTIFS = false;
 
     private KeyguardClockPositionAlgorithm mClockPositionAlgorithm;
     private KeyguardClockPositionAlgorithm.Result mClockPosition;
@@ -48,11 +50,18 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private float mPanelExpansion;
     private int mKeyguardStatusHeight;
     private float mDark;
+    private int mPreferredClockY;
+    private boolean mHasCustomClock;
+    private boolean mHasVisibleNotifs;
 
     @Before
     public void setUp() {
         mClockPositionAlgorithm = new KeyguardClockPositionAlgorithm();
         mClockPosition = new KeyguardClockPositionAlgorithm.Result();
+
+        mPreferredClockY = PREFERRED_CLOCK_Y;
+        mHasCustomClock = HAS_CUSTOM_CLOCK;
+        mHasVisibleNotifs = HAS_VISIBLE_NOTIFS;
     }
 
     @Test
@@ -293,6 +302,71 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         assertThat(mClockPosition.stackScrollerPadding).isEqualTo(0);
     }
 
+    @Test
+    public void preferredCustomClockPositionNoNotifications() {
+        // GIVEN on the lock screen with a custom clock and no visible notifications
+        givenLockScreen();
+        mPreferredClockY = 100;
+        mHasCustomClock = true;
+        mHasVisibleNotifs = false;
+        // AND given empty height for clock and stack scroller
+        mNotificationStackHeight = EMPTY_HEIGHT;
+        mKeyguardStatusHeight = EMPTY_HEIGHT;
+        // WHEN the clock position algorithm is run
+        positionClock();
+        // THEN the clock Y position is the preferred Y position.
+        assertThat(mClockPosition.clockY).isEqualTo(100);
+    }
+
+    @Test
+    public void preferredDefaultClockPositionNoNotifications() {
+        // GIVEN on the lock screen with a custom clock and no visible notifications
+        givenLockScreen();
+        mPreferredClockY = 100;
+        mHasCustomClock = false;
+        mHasVisibleNotifs = false;
+        // AND given empty height for clock and stack scroller
+        mNotificationStackHeight = EMPTY_HEIGHT;
+        mKeyguardStatusHeight = EMPTY_HEIGHT;
+        // WHEN the clock position algorithm is run
+        positionClock();
+        // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2) and not
+        // preferred.
+        assertThat(mClockPosition.clockY).isEqualTo(1000);
+    }
+
+    @Test
+    public void preferredCustomClockPositionWithVisibleNotifications() {
+        // GIVEN on the lock screen with a custom clock and visible notifications
+        givenLockScreen();
+        mPreferredClockY = 100;
+        mHasCustomClock = true;
+        mHasVisibleNotifs = true;
+        // AND given empty height for clock and stack scroller
+        mNotificationStackHeight = EMPTY_HEIGHT;
+        mKeyguardStatusHeight = EMPTY_HEIGHT;
+        // WHEN the clock position algorithm is run
+        positionClock();
+        // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2).
+        assertThat(mClockPosition.clockY).isEqualTo(1000);
+    }
+
+    @Test
+    public void preferredCustomClockPositionWithVisibleNotificationsOnAod() {
+        // GIVEN on the lock screen with a custom clock and visible notifications
+        givenAOD();
+        mPreferredClockY = 100;
+        mHasCustomClock = true;
+        mHasVisibleNotifs = true;
+        // AND given empty height for clock and stack scroller
+        mNotificationStackHeight = EMPTY_HEIGHT;
+        mKeyguardStatusHeight = EMPTY_HEIGHT;
+        // WHEN the clock position algorithm is run
+        positionClock();
+        // THEN the clock Y position is the preferred Y position.
+        assertThat(mClockPosition.clockY).isEqualTo(100);
+    }
+
     private void givenAOD() {
         mPanelExpansion = 1.f;
         mDark = 1.f;
@@ -305,8 +379,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
 
     private void positionClock() {
         mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
-                mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, PREFERRED_CLOCK_Y, mDark,
-                ZERO_DRAG);
+                mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, mPreferredClockY,
+                mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }
