@@ -1970,7 +1970,7 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Торкніться, щоб розблокувати"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Під’єднано до пристрою <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Торкніться, щоб переглянути файли"</string>
-    <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
+    <string name="app_info" msgid="6856026610594615344">"Про додатки"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Запуск демонстрації…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Скидання налаштувань пристрою…"</string>

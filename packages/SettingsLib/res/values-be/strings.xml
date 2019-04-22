@@ -83,8 +83,8 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Перадача файлаў"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Прылада ўводу"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Доступ у інтэрнэт"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Абагуленне кантактаў"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Выкарыстоўваць для абагулення кантактаў"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Абагульванне кантактаў"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Выкарыстоўваць для абагульвання кантактаў"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Прадастаўленне доступу да Інтэрнэту"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Тэкставыя паведамленні"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Доступ да SIM-карты"</string>
@@ -462,6 +462,6 @@
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Працягласць"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Заўсёды пытацца"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Пакуль не выключыце"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Зараз"</string>
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Толькі што"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Гэта прылада"</string>
 </resources>

@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accès Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contact"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contacts"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Utiliser pour le partage de contacts"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Partage de connexion Internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Messages texte"</string>

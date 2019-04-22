@@ -87,7 +87,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Brug til deling af kontakter"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deling af internetforbindelse"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Sms-beskeder"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-adgang"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Adgang til SIM-kort"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-lyd"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Høreapparater"</string>
@@ -418,7 +418,7 @@
     <item msgid="8934126114226089439">"50 %"</item>
     <item msgid="1286113608943010849">"100 %"</item>
   </string-array>
-    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> siden"</string>
+    <string name="charge_length_format" msgid="8978516217024434156">"For <xliff:g id="ID_1">%1$s</xliff:g> siden"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> tilbage"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Lille"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Standard"</string>

@@ -199,7 +199,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"უსადენო კავშირის ჩართვა"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"უსადენო ინტერნეტის გამორთვა"</string>
     <string name="screen_lock" msgid="799094655496098153">"ეკრანის დაბლოკვა"</string>
-    <string name="power_off" msgid="4266614107412865048">"გამორთვა"</string>
+    <string name="power_off" msgid="4266614107412865048">"გამორთვ."</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"მრეკავი გათიშულია"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ვიბრაციის რეჟიმი"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ზარი ჩართულია"</string>
@@ -223,7 +223,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"ტელევიზორის პარამეტრები"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ტელეფონის პარამეტრები"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ეკრანის დაბლოკვა"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"კვების გამორთვა"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"გამორთვ."</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"საგანგებო სამსახურები"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ხარვეზის შესახებ ანგარიში"</string>
     <string name="global_action_logout" msgid="935179188218826050">"სესიის დასრულება"</string>

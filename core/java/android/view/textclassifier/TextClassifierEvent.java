@@ -35,8 +35,8 @@ import java.util.Arrays;
  * something of note that relates to a feature powered by the TextClassifier. The TextClassifier may
  * log these events or use them to improve future responses to queries.
  * <p>
- * Each categories of the events have their own subclass. Events of each types has an associated
- * set of related properties. You can find the specification of them in the subclasses.
+ * Each category of events has its their own subclass. Events of each type have an associated
+ * set of related properties. You can find their specification in the subclasses.
  */
 public abstract class TextClassifierEvent implements Parcelable {
 
@@ -146,6 +146,8 @@ public abstract class TextClassifierEvent implements Parcelable {
     @Nullable
     private final String mModelName;
     private final int[] mActionIndices;
+    @Nullable
+    private final ULocale mLocale;
     private final Bundle mExtras;
 
     private TextClassifierEvent(Builder builder) {
@@ -158,6 +160,7 @@ public abstract class TextClassifierEvent implements Parcelable {
         mScores = builder.mScores;
         mModelName = builder.mModelName;
         mActionIndices = builder.mActionIndices;
+        mLocale = builder.mLocale;
         mExtras = builder.mExtras == null ? Bundle.EMPTY : builder.mExtras;
     }
 
@@ -173,6 +176,8 @@ public abstract class TextClassifierEvent implements Parcelable {
         in.readFloatArray(mScores);
         mModelName = in.readString();
         mActionIndices = in.createIntArray();
+        final String languageTag = in.readString();
+        mLocale = languageTag == null ? null : ULocale.forLanguageTag(languageTag);
         mExtras = in.readBundle();
     }
 
@@ -220,6 +225,7 @@ public abstract class TextClassifierEvent implements Parcelable {
         dest.writeFloatArray(mScores);
         dest.writeString(mModelName);
         dest.writeIntArray(mActionIndices);
+        dest.writeString(mLocale == null ? null : mLocale.toLanguageTag());
         dest.writeBundle(mExtras);
     }
 
@@ -318,6 +324,14 @@ public abstract class TextClassifierEvent implements Parcelable {
     }
 
     /**
+     * Returns the detected locale.
+     */
+    @Nullable
+    public ULocale getLocale() {
+        return mLocale;
+    }
+
+    /**
      * Returns a bundle containing non-structured extra information about this event.
      *
      * <p><b>NOTE: </b>Do not modify this bundle.
@@ -364,6 +378,8 @@ public abstract class TextClassifierEvent implements Parcelable {
         @Nullable
         private String mModelName;
         private int[] mActionIndices = new int[0];
+        @Nullable
+        private ULocale mLocale;
         @Nullable
         private Bundle mExtras;
 
@@ -469,6 +485,15 @@ public abstract class TextClassifierEvent implements Parcelable {
         public T setActionIndices(@NonNull int... actionIndices) {
             mActionIndices = new int[actionIndices.length];
             System.arraycopy(actionIndices, 0, mActionIndices, 0, actionIndices.length);
+            return self();
+        }
+
+        /**
+         * Sets the detected locale.
+         */
+        @NonNull
+        public T setLocale(@Nullable ULocale locale) {
+            mLocale = locale;
             return self();
         }
 
@@ -858,26 +883,12 @@ public abstract class TextClassifierEvent implements Parcelable {
                     }
                 };
 
-        @Nullable
-        private final ULocale mLocale;
-
         private LanguageDetectionEvent(Parcel in) {
             super(in);
-            final String languageTag = in.readString();
-            mLocale = languageTag == null ? null : ULocale.forLanguageTag(languageTag);
         }
 
         private LanguageDetectionEvent(LanguageDetectionEvent.Builder builder) {
             super(builder);
-            mLocale = builder.mLocale;
-        }
-
-        /**
-         * Returns the detected locale.
-         */
-        @Nullable
-        public ULocale getLocale() {
-            return mLocale;
         }
 
         /**
@@ -885,8 +896,6 @@ public abstract class TextClassifierEvent implements Parcelable {
          */
         public static final class Builder
                 extends TextClassifierEvent.Builder<LanguageDetectionEvent.Builder> {
-            @Nullable
-            private ULocale mLocale;
 
             /**
              * Creates a builder for building {@link TextSelectionEvent}s.
@@ -895,15 +904,6 @@ public abstract class TextClassifierEvent implements Parcelable {
              */
             public Builder(@Type int eventType) {
                 super(TextClassifierEvent.CATEGORY_LANGUAGE_DETECTION, eventType);
-            }
-
-            /**
-             * Sets the detected locale.
-             */
-            @NonNull
-            public Builder setLocale(@Nullable ULocale locale) {
-                mLocale = locale;
-                return this;
             }
 
             @Override
@@ -918,12 +918,6 @@ public abstract class TextClassifierEvent implements Parcelable {
             public LanguageDetectionEvent build() {
                 return new LanguageDetectionEvent(this);
             }
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeString(mLocale == null ? null : mLocale.toLanguageTag());
         }
     }
 
