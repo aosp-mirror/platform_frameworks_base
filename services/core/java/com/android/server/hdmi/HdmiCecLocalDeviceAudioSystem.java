@@ -923,8 +923,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // Since some TVs don't request ARC on with System Audio Mode on request
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv()) {
-            if (newSystemAudioMode && !isArcEnabled()
-                    && !hasAction(ArcInitiationActionFromAvr.class)) {
+            if (!hasAction(ArcInitiationActionFromAvr.class)) {
                 addAndStartAction(new ArcInitiationActionFromAvr(this));
             } else if (!newSystemAudioMode && isArcEnabled()) {
                 removeAction(ArcTerminationActionFromAvr.class);
@@ -1101,6 +1100,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     private void initArcOnFromAvr() {
+        removeAction(ArcTerminationActionFromAvr.class);
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv() && !isArcEnabled()) {
             removeAction(ArcInitiationActionFromAvr.class);
