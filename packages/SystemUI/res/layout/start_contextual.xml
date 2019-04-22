@@ -13,10 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:systemui="http://schemas.android.com/apk/res-auto"
-             android:id="@+id/menu_container"
+             android:id="@+id/start_menu_container"
              android:layout_width="@dimen/navigation_key_width"
              android:layout_height="match_parent"
              android:importantForAccessibility="no"
@@ -24,38 +23,14 @@
              android:clipChildren="false"
              android:clipToPadding="false"
              >
-    <com.android.systemui.statusbar.policy.KeyButtonView
-        android:id="@+id/menu"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:layout_weight="0"
-        android:scaleType="center"
-        systemui:keyCode="82"
-        systemui:playSound="false"
-        android:visibility="invisible"
-        android:contentDescription="@string/accessibility_menu"
-        android:paddingStart="@dimen/navigation_key_padding"
-        android:paddingEnd="@dimen/navigation_key_padding"
-    />
-    <include layout="@layout/ime_switcher"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-    />
     <include layout="@layout/rotate_suggestion"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:visibility="invisible"
     />
-    <com.android.systemui.statusbar.policy.KeyButtonView
-        android:id="@+id/accessibility_button"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:scaleType="center"
-        android:visibility="invisible"
-        android:contentDescription="@string/accessibility_accessibility_button"
-        android:paddingStart="@dimen/navigation_key_padding"
-        android:paddingEnd="@dimen/navigation_key_padding"
+    <include layout="@layout/back"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:visibility="invisible"
     />
 </FrameLayout>
