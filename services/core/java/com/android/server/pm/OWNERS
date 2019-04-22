@@ -34,10 +34,10 @@ per-file UserManagerService.java = omakoto@google.com, yamasani@google.com
 per-file UserRestrictionsUtils.java = omakoto@google.com, rubinxu@google.com, sandness@google.com, yamasani@google.com
 
 # security
-per-file KeySetHandle.java = cbrubaker@google.com
-per-file KeySetManagerService.java = cbrubaker@google.com
-per-file PackageKeySetData.java = cbrubaker@google.com
-per-file PackageSignatures.java = cbrubaker@google.com
+per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com
+per-file KeySetManagerService.java = cbrubaker@google.com, nnk@google.com
+per-file PackageKeySetData.java = cbrubaker@google.com, nnk@google.com
+per-file PackageSignatures.java = cbrubaker@google.com, nnk@google.com
 per-file SELinuxMMAC.java = cbrubaker@google.com, jeffv@google.com, jgalenson@google.com, nnk@google.com
 
 # shortcuts
