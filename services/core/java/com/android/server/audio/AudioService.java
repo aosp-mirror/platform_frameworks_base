@@ -519,6 +519,10 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_AUX_LINE;
     // Devices for which the volume is always max, no volume panel
     int mFullVolumeDevices = 0;
+    // Devices for the which use the "absolute volume" concept (framework sends audio signal
+    // full scale, and volume control separately) and can be used for multiple use cases reflected
+    // by the audio mode (e.g. media playback in MODE_NORMAL, and phone calls in MODE_IN_CALL).
+    int mAbsVolumeMultiModeCaseDevices = AudioSystem.DEVICE_OUT_HEARING_AID;
 
     private final boolean mMonitorRotation;
 
@@ -2050,6 +2054,49 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * Manage an audio mode change for audio devices that use an "absolute volume" model,
+     * i.e. the framework sends the full scale signal, and the actual volume for the use case
+     * is communicated separately.
+     */
+    void updateAbsVolumeMultiModeDevices(int oldMode, int newMode) {
+        if (oldMode == newMode) {
+            return;
+        }
+        int streamType = AudioSystem.STREAM_MUSIC;
+        switch (newMode) {
+            case AudioSystem.MODE_IN_COMMUNICATION:
+            case AudioSystem.MODE_IN_CALL:
+                streamType = AudioSystem.STREAM_VOICE_CALL;
+                break;
+            case AudioSystem.MODE_NORMAL:
+                streamType = AudioSystem.STREAM_MUSIC;
+                break;
+            case AudioSystem.MODE_RINGTONE:
+                // not changing anything for ringtone
+                return;
+            case AudioSystem.MODE_CURRENT:
+            case AudioSystem.MODE_INVALID:
+            default:
+                // don't know what to do in this case, better bail
+                return;
+        }
+        final int device = AudioSystem.getDevicesForStream(streamType);
+        if ((device & mAbsVolumeMultiModeCaseDevices) == 0) {
+            return;
+        }
+
+        // handling of specific interfaces goes here:
+        if ((device & mAbsVolumeMultiModeCaseDevices) == AudioSystem.DEVICE_OUT_HEARING_AID) {
+            final int index = getStreamVolume(streamType);
+            mModeLogger.log(new AudioEventLogger.StringEvent("setMode to "
+                    + AudioSystem.modeToString(newMode)
+                    + " causes setting HEARING_AID volume to idx:" + index
+                    + " stream:" + AudioSystem.streamToString(streamType)));
+            mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        }
+    }
+
     private void setStreamVolume(int streamType, int index, int flags, String callingPackage,
             String caller, int uid) {
         if (DEBUG_VOL) {
@@ -3039,9 +3086,9 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    // must be called synchronized on mSetModeLock
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
+    @GuardedBy("mDeviceBroker.mSetModeLock")
     private int setModeInt(int mode, IBinder cb, int pid, String caller) {
         if (DEBUG_MODE) { Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid + ", caller="
                 + caller + ")"); }
@@ -3063,6 +3110,7 @@ public class AudioService extends IAudioService.Stub
                 break;
             }
         }
+        final int oldMode = mMode;
         int status = AudioSystem.AUDIO_STATUS_OK;
         int actualMode;
         do {
@@ -3134,6 +3182,9 @@ public class AudioService extends IAudioService.Stub
             setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, true, caller);
 
             updateStreamVolumeAlias(true /*updateVolumes*/, caller);
+
+            // change of mode may require volume to be re-applied on some devices
+            updateAbsVolumeMultiModeDevices(oldMode, actualMode);
         }
         return newModeOwnerPid;
     }
