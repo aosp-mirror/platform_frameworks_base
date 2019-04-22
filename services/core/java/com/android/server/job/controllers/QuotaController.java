@@ -29,6 +29,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
@@ -49,6 +50,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseSetArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -277,9 +279,9 @@ public final class QuotaController extends StateController {
                     .append(", ")
                     .append("bgJobCountInMaxPeriod=").append(bgJobCountInMaxPeriod).append(", ")
                     .append("quotaCutoffTime=").append(quotaCutoffTimeElapsed).append(", ")
-                    .append("jobCountExpirationTime").append(jobCountExpirationTimeElapsed)
+                    .append("jobCountExpirationTime=").append(jobCountExpirationTimeElapsed)
                     .append(", ")
-                    .append("jobCountInAllowedTime").append(jobCountInAllowedTime)
+                    .append("jobCountInAllowedTime=").append(jobCountInAllowedTime)
                     .toString();
         }
 
@@ -337,6 +339,9 @@ public final class QuotaController extends StateController {
 
     /** List of UIDs currently in the foreground. */
     private final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
+
+    /** Cached mapping of UIDs (for all users) to a list of packages in the UID. */
+    private final SparseSetArray<String> mUidToPackageCache = new SparseSetArray<>();
 
     /**
      * List of jobs that started while the UID was in the TOP state. There will be no more than
@@ -421,6 +426,22 @@ public final class QuotaController extends StateController {
         }
     };
 
+    private final BroadcastReceiver mPackageAddedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null) {
+                return;
+            }
+            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                return;
+            }
+            final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+            synchronized (mLock) {
+                mUidToPackageCache.remove(uid);
+            }
+        }
+    };
+
     /**
      * The rolling window size for each standby bucket. Within each window, an app will have 10
      * minutes to run its jobs.
@@ -469,6 +490,9 @@ public final class QuotaController extends StateController {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        mContext.registerReceiverAsUser(mPackageAddedReceiver, UserHandle.ALL, filter, null, null);
+
         // Set up the app standby bucketing tracker
         UsageStatsManagerInternal usageStats = LocalServices.getService(
                 UsageStatsManagerInternal.class);
@@ -502,10 +526,15 @@ public final class QuotaController extends StateController {
 
     @Override
     public void prepareForExecutionLocked(JobStatus jobStatus) {
-        if (DEBUG) Slog.d(TAG, "Prepping for " + jobStatus.toShortString());
+        if (DEBUG) {
+            Slog.d(TAG, "Prepping for " + jobStatus.toShortString());
+        }
 
         final int uid = jobStatus.getSourceUid();
         if (mActivityManagerInternal.getUidProcessState(uid) <= ActivityManager.PROCESS_STATE_TOP) {
+            if (DEBUG) {
+                Slog.d(TAG, jobStatus.toShortString() + " is top started job");
+            }
             mTopStartedJobs.add(jobStatus);
             // Top jobs won't count towards quota so there's no need to involve the Timer.
             return;
@@ -518,7 +547,7 @@ public final class QuotaController extends StateController {
             timer = new Timer(uid, userId, packageName);
             mPkgTimers.add(userId, packageName, timer);
         }
-        timer.startTrackingJob(jobStatus);
+        timer.startTrackingJobLocked(jobStatus);
     }
 
     @Override
@@ -645,7 +674,7 @@ public final class QuotaController extends StateController {
         if (timer != null) {
             if (timer.isActive()) {
                 Slog.wtf(TAG, "onAppRemovedLocked called before Timer turned off.");
-                timer.dropEverything();
+                timer.dropEverythingLocked();
             }
             mPkgTimers.delete(userId, packageName);
         }
@@ -657,6 +686,7 @@ public final class QuotaController extends StateController {
         }
         mExecutionStatsCache.delete(userId, packageName);
         mForegroundUids.delete(uid);
+        mUidToPackageCache.remove(uid);
     }
 
     @Override
@@ -666,6 +696,7 @@ public final class QuotaController extends StateController {
         mTimingSessions.delete(userId);
         mInQuotaAlarmListeners.delete(userId);
         mExecutionStatsCache.delete(userId);
+        mUidToPackageCache.clear();
     }
 
     private boolean isUidInForeground(int uid) {
@@ -678,7 +709,7 @@ public final class QuotaController extends StateController {
     }
 
     /** @return true if the job was started while the app was in the TOP state. */
-    private boolean isTopStartedJob(@NonNull final JobStatus jobStatus) {
+    private boolean isTopStartedJobLocked(@NonNull final JobStatus jobStatus) {
         return mTopStartedJobs.contains(jobStatus);
     }
 
@@ -695,14 +726,14 @@ public final class QuotaController extends StateController {
         return jobStatus.getStandbyBucket();
     }
 
-    private boolean isWithinQuotaLocked(@NonNull final JobStatus jobStatus) {
+    @VisibleForTesting
+    boolean isWithinQuotaLocked(@NonNull final JobStatus jobStatus) {
         final int standbyBucket = getEffectiveStandbyBucket(jobStatus);
-        Timer timer = mPkgTimers.get(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName());
         // A job is within quota if one of the following is true:
         //   1. it was started while the app was in the TOP state
         //   2. the app is currently in the foreground
         //   3. the app overall is within its quota
-        return isTopStartedJob(jobStatus)
+        return isTopStartedJobLocked(jobStatus)
                 || isUidInForeground(jobStatus.getSourceUid())
                 || isWithinQuotaLocked(
                 jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), standbyBucket);
@@ -1081,7 +1112,9 @@ public final class QuotaController extends StateController {
         if (earliestEndElapsed == Long.MAX_VALUE) {
             // Couldn't find a good time to clean up. Maybe this was called after we deleted all
             // timing sessions.
-            if (DEBUG) Slog.d(TAG, "Didn't find a time to schedule cleanup");
+            if (DEBUG) {
+                Slog.d(TAG, "Didn't find a time to schedule cleanup");
+            }
             return;
         }
         // Need to keep sessions for all apps up to the max period, regardless of their current
@@ -1095,15 +1128,19 @@ public final class QuotaController extends StateController {
         mNextCleanupTimeElapsed = nextCleanupElapsed;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, nextCleanupElapsed, ALARM_TAG_CLEANUP,
                 mSessionCleanupAlarmListener, mHandler);
-        if (DEBUG) Slog.d(TAG, "Scheduled next cleanup for " + mNextCleanupTimeElapsed);
+        if (DEBUG) {
+            Slog.d(TAG, "Scheduled next cleanup for " + mNextCleanupTimeElapsed);
+        }
     }
 
     private void handleNewChargingStateLocked() {
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final boolean isCharging = mChargeTracker.isCharging();
-        if (DEBUG) Slog.d(TAG, "handleNewChargingStateLocked: " + isCharging);
+        if (DEBUG) {
+            Slog.d(TAG, "handleNewChargingStateLocked: " + isCharging);
+        }
         // Deal with Timers first.
-        mPkgTimers.forEach((t) -> t.onStateChanged(nowElapsed, isCharging));
+        mPkgTimers.forEach((t) -> t.onStateChangedLocked(nowElapsed, isCharging));
         // Now update jobs.
         maybeUpdateAllConstraintsLocked();
     }
@@ -1140,7 +1177,7 @@ public final class QuotaController extends StateController {
         boolean changed = false;
         for (int i = jobs.size() - 1; i >= 0; --i) {
             final JobStatus js = jobs.valueAt(i);
-            if (isTopStartedJob(js)) {
+            if (isTopStartedJobLocked(js)) {
                 // Job was started while the app was in the TOP state so we should allow it to
                 // finish.
                 changed |= js.setQuotaConstraintSatisfied(true);
@@ -1282,7 +1319,9 @@ public final class QuotaController extends StateController {
         if (!alarmListener.isWaiting()
                 || inQuotaTimeElapsed < alarmListener.getTriggerTimeElapsed() - 3 * MINUTE_IN_MILLIS
                 || alarmListener.getTriggerTimeElapsed() < inQuotaTimeElapsed) {
-            if (DEBUG) Slog.d(TAG, "Scheduling start alarm for " + pkgString);
+            if (DEBUG) {
+                Slog.d(TAG, "Scheduling start alarm for " + pkgString);
+            }
             // If the next time this app will have quota is at least 3 minutes before the
             // alarm is supposed to go off, reschedule the alarm.
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, inQuotaTimeElapsed,
@@ -1430,8 +1469,8 @@ public final class QuotaController extends StateController {
             mUid = uid;
         }
 
-        void startTrackingJob(@NonNull JobStatus jobStatus) {
-            if (isTopStartedJob(jobStatus)) {
+        void startTrackingJobLocked(@NonNull JobStatus jobStatus) {
+            if (isTopStartedJobLocked(jobStatus)) {
                 // We intentionally don't pay attention to fg state changes after a TOP job has
                 // started.
                 if (DEBUG) {
@@ -1440,27 +1479,28 @@ public final class QuotaController extends StateController {
                 }
                 return;
             }
-            if (DEBUG) Slog.v(TAG, "Starting to track " + jobStatus.toShortString());
-            synchronized (mLock) {
-                // Always track jobs, even when charging.
-                mRunningBgJobs.add(jobStatus);
-                if (shouldTrackLocked()) {
-                    mBgJobCount++;
-                    incrementJobCount(mPkg.userId, mPkg.packageName, 1);
-                    if (mRunningBgJobs.size() == 1) {
-                        // Started tracking the first job.
-                        mStartTimeElapsed = sElapsedRealtimeClock.millis();
-                        // Starting the timer means that all cached execution stats are now
-                        // incorrect.
-                        invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
-                        scheduleCutoff();
-                    }
+            if (DEBUG) {
+                Slog.v(TAG, "Starting to track " + jobStatus.toShortString());
+            }
+            // Always track jobs, even when charging.
+            mRunningBgJobs.add(jobStatus);
+            if (shouldTrackLocked()) {
+                mBgJobCount++;
+                incrementJobCount(mPkg.userId, mPkg.packageName, 1);
+                if (mRunningBgJobs.size() == 1) {
+                    // Started tracking the first job.
+                    mStartTimeElapsed = sElapsedRealtimeClock.millis();
+                    // Starting the timer means that all cached execution stats are now incorrect.
+                    invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
+                    scheduleCutoff();
                 }
             }
         }
 
         void stopTrackingJob(@NonNull JobStatus jobStatus) {
-            if (DEBUG) Slog.v(TAG, "Stopping tracking of " + jobStatus.toShortString());
+            if (DEBUG) {
+                Slog.v(TAG, "Stopping tracking of " + jobStatus.toShortString());
+            }
             synchronized (mLock) {
                 if (mRunningBgJobs.size() == 0) {
                     // maybeStopTrackingJobLocked can be called when an app cancels a job, so a
@@ -1482,7 +1522,7 @@ public final class QuotaController extends StateController {
          * Stops tracking all jobs and cancels any pending alarms. This should only be called if
          * the Timer is not going to be used anymore.
          */
-        void dropEverything() {
+        void dropEverythingLocked() {
             mRunningBgJobs.clear();
             cancelCutoff();
         }
@@ -1531,25 +1571,23 @@ public final class QuotaController extends StateController {
             return !mChargeTracker.isCharging() && !mForegroundUids.get(mUid);
         }
 
-        void onStateChanged(long nowElapsed, boolean isQuotaFree) {
-            synchronized (mLock) {
-                if (isQuotaFree) {
-                    emitSessionLocked(nowElapsed);
-                } else if (shouldTrackLocked()) {
-                    // Start timing from unplug.
-                    if (mRunningBgJobs.size() > 0) {
-                        mStartTimeElapsed = nowElapsed;
-                        // NOTE: this does have the unfortunate consequence that if the device is
-                        // repeatedly plugged in and unplugged, or an app changes foreground state
-                        // very frequently, the job count for a package may be artificially high.
-                        mBgJobCount = mRunningBgJobs.size();
-                        incrementJobCount(mPkg.userId, mPkg.packageName, mBgJobCount);
-                        // Starting the timer means that all cached execution stats are now
-                        // incorrect.
-                        invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
-                        // Schedule cutoff since we're now actively tracking for quotas again.
-                        scheduleCutoff();
-                    }
+        void onStateChangedLocked(long nowElapsed, boolean isQuotaFree) {
+            if (isQuotaFree) {
+                emitSessionLocked(nowElapsed);
+            } else if (!isActive() && shouldTrackLocked()) {
+                // Start timing from unplug.
+                if (mRunningBgJobs.size() > 0) {
+                    mStartTimeElapsed = nowElapsed;
+                    // NOTE: this does have the unfortunate consequence that if the device is
+                    // repeatedly plugged in and unplugged, or an app changes foreground state
+                    // very frequently, the job count for a package may be artificially high.
+                    mBgJobCount = mRunningBgJobs.size();
+                    incrementJobCount(mPkg.userId, mPkg.packageName, mBgJobCount);
+                    // Starting the timer means that all cached execution stats are now
+                    // incorrect.
+                    invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
+                    // Schedule cutoff since we're now actively tracking for quotas again.
+                    scheduleCutoff();
                 }
             }
         }
@@ -1604,7 +1642,6 @@ public final class QuotaController extends StateController {
                     pw.println(js.toShortString());
                 }
             }
-
             pw.decreaseIndent();
         }
 
@@ -1667,7 +1704,9 @@ public final class QuotaController extends StateController {
         @Override
         public void onParoleStateChanged(final boolean isParoleOn) {
             mInParole = isParoleOn;
-            if (DEBUG) Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
+            if (DEBUG) {
+                Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
+            }
             // Update job bookkeeping out of band.
             BackgroundThread.getHandler().post(() -> {
                 synchronized (mLock) {
@@ -1712,7 +1751,9 @@ public final class QuotaController extends StateController {
                 switch (msg.what) {
                     case MSG_REACHED_QUOTA: {
                         Package pkg = (Package) msg.obj;
-                        if (DEBUG) Slog.d(TAG, "Checking if " + pkg + " has reached its quota.");
+                        if (DEBUG) {
+                            Slog.d(TAG, "Checking if " + pkg + " has reached its quota.");
+                        }
 
                         long timeRemainingMs = getRemainingExecutionTimeLocked(pkg.userId,
                                 pkg.packageName);
@@ -1737,7 +1778,9 @@ public final class QuotaController extends StateController {
                         break;
                     }
                     case MSG_CLEAN_UP_SESSIONS:
-                        if (DEBUG) Slog.d(TAG, "Cleaning up timing sessions.");
+                        if (DEBUG) {
+                            Slog.d(TAG, "Cleaning up timing sessions.");
+                        }
                         deleteObsoleteSessionsLocked();
                         maybeScheduleCleanupAlarmLocked();
 
@@ -1745,7 +1788,9 @@ public final class QuotaController extends StateController {
                     case MSG_CHECK_PACKAGE: {
                         String packageName = (String) msg.obj;
                         int userId = msg.arg1;
-                        if (DEBUG) Slog.d(TAG, "Checking pkg " + string(userId, packageName));
+                        if (DEBUG) {
+                            Slog.d(TAG, "Checking pkg " + string(userId, packageName));
+                        }
                         if (maybeUpdateConstraintForPkgLocked(userId, packageName)) {
                             mStateChangedListener.onControllerStateChanged();
                         }
@@ -1767,13 +1812,28 @@ public final class QuotaController extends StateController {
                                 isQuotaFree = false;
                             }
                             // Update Timers first.
-                            final int userIndex = mPkgTimers.indexOfKey(userId);
-                            if (userIndex != -1) {
-                                final int numPkgs = mPkgTimers.numPackagesForUser(userId);
-                                for (int p = 0; p < numPkgs; ++p) {
-                                    Timer t = mPkgTimers.valueAt(userIndex, p);
-                                    if (t != null) {
-                                        t.onStateChanged(nowElapsed, isQuotaFree);
+                            if (mPkgTimers.indexOfKey(userId) >= 0) {
+                                ArraySet<String> packages = mUidToPackageCache.get(uid);
+                                if (packages == null) {
+                                    try {
+                                        String[] pkgs = AppGlobals.getPackageManager()
+                                                .getPackagesForUid(uid);
+                                        if (pkgs != null) {
+                                            for (String pkg : pkgs) {
+                                                mUidToPackageCache.add(uid, pkg);
+                                            }
+                                            packages = mUidToPackageCache.get(uid);
+                                        }
+                                    } catch (RemoteException e) {
+                                        Slog.wtf(TAG, "Failed to get package list", e);
+                                    }
+                                }
+                                if (packages != null) {
+                                    for (int i = packages.size() - 1; i >= 0; --i) {
+                                        Timer t = mPkgTimers.get(userId, packages.valueAt(i));
+                                        if (t != null) {
+                                            t.onStateChangedLocked(nowElapsed, isQuotaFree);
+                                        }
                                     }
                                 }
                             }
@@ -1883,6 +1943,17 @@ public final class QuotaController extends StateController {
         pw.println(mForegroundUids.toString());
         pw.println();
 
+        pw.println("Cached UID->package map:");
+        pw.increaseIndent();
+        for (int i = 0; i < mUidToPackageCache.size(); ++i) {
+            final int uid = mUidToPackageCache.keyAt(i);
+            pw.print(uid);
+            pw.print(": ");
+            pw.println(mUidToPackageCache.get(uid));
+        }
+        pw.decreaseIndent();
+        pw.println();
+
         mTrackedJobs.forEach((jobs) -> {
             for (int j = 0; j < jobs.size(); j++) {
                 final JobStatus js = jobs.valueAt(j);
@@ -1936,6 +2007,29 @@ public final class QuotaController extends StateController {
                 }
             }
         }
+
+        pw.println("Cached execution stats:");
+        pw.increaseIndent();
+        for (int u = 0; u < mExecutionStatsCache.numUsers(); ++u) {
+            final int userId = mExecutionStatsCache.keyAt(u);
+            for (int p = 0; p < mExecutionStatsCache.numPackagesForUser(userId); ++p) {
+                final String pkgName = mExecutionStatsCache.keyAt(u, p);
+                ExecutionStats[] stats = mExecutionStatsCache.valueAt(u, p);
+
+                pw.println(string(userId, pkgName));
+                pw.increaseIndent();
+                for (int i = 0; i < stats.length; ++i) {
+                    ExecutionStats executionStats = stats[i];
+                    if (executionStats != null) {
+                        pw.print(JobStatus.bucketName(i));
+                        pw.print(": ");
+                        pw.println(executionStats);
+                    }
+                }
+                pw.decreaseIndent();
+            }
+        }
+        pw.decreaseIndent();
     }
 
     @Override
@@ -1992,6 +2086,49 @@ public final class QuotaController extends StateController {
                         TimingSession session = sessions.get(j);
                         session.dump(proto,
                                 StateControllerProto.QuotaController.PackageStats.SAVED_SESSIONS);
+                    }
+                }
+
+                ExecutionStats[] stats = mExecutionStatsCache.get(userId, pkgName);
+                if (stats != null) {
+                    for (int bucketIndex = 0; bucketIndex < stats.length; ++bucketIndex) {
+                        ExecutionStats es = stats[bucketIndex];
+                        if (es == null) {
+                            continue;
+                        }
+                        final long esToken = proto.start(
+                                StateControllerProto.QuotaController.PackageStats.EXECUTION_STATS);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.STANDBY_BUCKET,
+                                bucketIndex);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.EXPIRATION_TIME_ELAPSED,
+                                es.expirationTimeElapsed);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.WINDOW_SIZE_MS,
+                                es.windowSizeMs);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.EXECUTION_TIME_IN_WINDOW_MS,
+                                es.executionTimeInWindowMs);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.BG_JOB_COUNT_IN_WINDOW,
+                                es.bgJobCountInWindow);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.EXECUTION_TIME_IN_MAX_PERIOD_MS,
+                                es.executionTimeInMaxPeriodMs);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.BG_JOB_COUNT_IN_MAX_PERIOD,
+                                es.bgJobCountInMaxPeriod);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.QUOTA_CUTOFF_TIME_ELAPSED,
+                                es.quotaCutoffTimeElapsed);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.JOB_COUNT_EXPIRATION_TIME_ELAPSED,
+                                es.jobCountExpirationTimeElapsed);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.JOB_COUNT_IN_ALLOWED_TIME,
+                                es.jobCountInAllowedTime);
+                        proto.end(esToken);
                     }
                 }
 
