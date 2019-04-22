@@ -35,13 +35,11 @@ import android.app.ActivityManagerInternal;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
-import android.content.ContentCaptureOptions;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -60,7 +58,6 @@ import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.infra.WhitelistHelper;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.LocalServices;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
@@ -97,12 +94,6 @@ final class ContentCapturePerUserService
             new ContentCaptureServiceRemoteCallback();
 
     /**
-     * List of packages that are whitelisted to be content captured.
-     */
-    @GuardedBy("mLock")
-    private final WhitelistHelper mWhitelistHelper = new WhitelistHelper();
-
-    /**
      * List of conditions keyed by package.
      */
     @GuardedBy("mLock")
@@ -131,6 +122,7 @@ final class ContentCapturePerUserService
      * Updates the reference to the remote service.
      */
     private void updateRemoteServiceLocked(boolean disabled) {
+        if (mMaster.verbose) Slog.v(TAG, "updateRemoteService(disabled=" + disabled + ")");
         if (mRemoteService != null) {
             if (mMaster.debug) Slog.d(TAG, "updateRemoteService(): destroying old remote service");
             mRemoteService.destroy();
@@ -247,7 +239,8 @@ final class ContentCapturePerUserService
         final int displayId = activityPresentationInfo.displayId;
         final ComponentName componentName = activityPresentationInfo.componentName;
         final boolean whiteListed = mMaster.mGlobalContentCaptureOptions.isWhitelisted(mUserId,
-                componentName);
+                componentName) || mMaster.mGlobalContentCaptureOptions.isWhitelisted(mUserId,
+                        componentName.getPackageName());
         final ComponentName serviceComponentName = getServiceComponentName();
         final boolean enabled = isEnabledLocked();
         if (mMaster.mRequestsHistory != null) {
@@ -458,40 +451,6 @@ final class ContentCapturePerUserService
             final ContentCaptureServerSession session = mSessions.valueAt(i);
             output.add(session.toShortString());
         }
-    }
-
-    @GuardedBy("mLock")
-    @Nullable
-    ContentCaptureOptions getOptionsForPackageLocked(@NonNull String packageName) {
-        if (!mWhitelistHelper.isWhitelisted(packageName)) {
-            if (packageName.equals(getServicePackageName())) {
-                if (mMaster.verbose) Slog.v(mTag, "getOptionsForPackage() lite for " + packageName);
-                return new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel);
-            }
-            if (mMaster.verbose) {
-                Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
-            }
-            return null;
-        }
-
-        final ArraySet<ComponentName> whitelistedComponents = mWhitelistHelper
-                .getWhitelistedComponents(packageName);
-        if (Build.IS_USER && isTemporaryServiceSetLocked()) {
-            final String servicePackageName = getServicePackageName();
-            if (!packageName.equals(servicePackageName)) {
-                Slog.w(mTag, "Ignoring package " + packageName
-                        + " while using temporary service " + servicePackageName);
-                return null;
-            }
-        }
-        final ContentCaptureOptions options = new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel,
-                mMaster.mDevCfgMaxBufferSize, mMaster.mDevCfgIdleFlushingFrequencyMs,
-                mMaster.mDevCfgTextChangeFlushingFrequencyMs, mMaster.mDevCfgLogHistorySize,
-                whitelistedComponents);
-        if (mMaster.verbose) {
-            Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
-        }
-        return options;
     }
 
     @GuardedBy("mLock")
