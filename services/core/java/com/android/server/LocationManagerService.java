@@ -88,6 +88,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
@@ -3567,6 +3568,10 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return;
             }
             pw.println("Current Location Manager state:");
+            pw.print("  Current System Time: "
+                    + TimeUtils.logTimeOfDay(System.currentTimeMillis()));
+            pw.println(", Current Elapsed Time: "
+                    + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
             pw.println("  Current user: " + mCurrentUserId + " " + Arrays.toString(
                     mCurrentUserProfiles));
             pw.println("  Location mode: " + isLocationEnabled());
