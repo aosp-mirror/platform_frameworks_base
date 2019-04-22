@@ -58,6 +58,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
@@ -224,50 +225,55 @@ public class QuotaControllerTest {
     }
 
     private void setProcessState(int procState) {
+        setProcessState(procState, mSourceUid);
+    }
+
+    private void setProcessState(int procState, int uid) {
         try {
-            doReturn(procState).when(mActivityMangerInternal).getUidProcessState(mSourceUid);
+            doReturn(procState).when(mActivityMangerInternal).getUidProcessState(uid);
             SparseBooleanArray foregroundUids = mQuotaController.getForegroundUids();
             spyOn(foregroundUids);
-            mUidObserver.onUidStateChanged(mSourceUid, procState, 0);
+            mUidObserver.onUidStateChanged(uid, procState, 0);
             if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-                verify(foregroundUids, timeout(SECOND_IN_MILLIS).times(1))
-                        .put(eq(mSourceUid), eq(true));
-                assertTrue(foregroundUids.get(mSourceUid));
+                verify(foregroundUids, timeout(2 * SECOND_IN_MILLIS).times(1))
+                        .put(eq(uid), eq(true));
+                assertTrue(foregroundUids.get(uid));
             } else {
-                verify(foregroundUids, timeout(SECOND_IN_MILLIS).times(1)).delete(eq(mSourceUid));
-                assertFalse(foregroundUids.get(mSourceUid));
+                verify(foregroundUids, timeout(2 * SECOND_IN_MILLIS).times(1)).delete(eq(uid));
+                assertFalse(foregroundUids.get(uid));
             }
         } catch (RemoteException e) {
             fail("registerUidObserver threw exception: " + e.getMessage());
         }
     }
 
-    private void setStandbyBucket(int bucketIndex) {
-        int bucket;
+    private int bucketIndexToUsageStatsBucket(int bucketIndex) {
         switch (bucketIndex) {
             case ACTIVE_INDEX:
-                bucket = UsageStatsManager.STANDBY_BUCKET_ACTIVE;
-                break;
+                return UsageStatsManager.STANDBY_BUCKET_ACTIVE;
             case WORKING_INDEX:
-                bucket = UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
-                break;
+                return UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
             case FREQUENT_INDEX:
-                bucket = UsageStatsManager.STANDBY_BUCKET_FREQUENT;
-                break;
+                return UsageStatsManager.STANDBY_BUCKET_FREQUENT;
             case RARE_INDEX:
-                bucket = UsageStatsManager.STANDBY_BUCKET_RARE;
-                break;
+                return UsageStatsManager.STANDBY_BUCKET_RARE;
             default:
-                bucket = UsageStatsManager.STANDBY_BUCKET_NEVER;
+                return UsageStatsManager.STANDBY_BUCKET_NEVER;
         }
+    }
+
+    private void setStandbyBucket(int bucketIndex) {
         when(mUsageStatsManager.getAppStandbyBucket(eq(SOURCE_PACKAGE), eq(SOURCE_USER_ID),
-                anyLong())).thenReturn(bucket);
+                anyLong())).thenReturn(bucketIndexToUsageStatsBucket(bucketIndex));
     }
 
     private void setStandbyBucket(int bucketIndex, JobStatus... jobs) {
         setStandbyBucket(bucketIndex);
         for (JobStatus job : jobs) {
             job.setStandbyBucket(bucketIndex);
+            when(mUsageStatsManager.getAppStandbyBucket(
+                    eq(job.getSourcePackageName()), eq(job.getSourceUserId()), anyLong()))
+                    .thenReturn(bucketIndexToUsageStatsBucket(bucketIndex));
         }
     }
 
@@ -283,8 +289,13 @@ public class QuotaControllerTest {
                 new ComponentName(mContext, "TestQuotaJobService"))
                 .setMinimumLatency(Math.abs(jobId) + 1)
                 .build();
+        return createJobStatus(testTag, SOURCE_PACKAGE, CALLING_UID, jobInfo);
+    }
+
+    private JobStatus createJobStatus(String testTag, String packageName, int callingUid,
+            JobInfo jobInfo) {
         JobStatus js = JobStatus.createFromJobInfo(
-                jobInfo, CALLING_UID, SOURCE_PACKAGE, SOURCE_USER_ID, testTag);
+                jobInfo, callingUid, packageName, SOURCE_USER_ID, testTag);
         // Make sure tests aren't passing just because the default bucket is likely ACTIVE.
         js.setStandbyBucket(FREQUENT_INDEX);
         return js;
@@ -932,6 +943,115 @@ public class QuotaControllerTest {
                 createTimingSession(now - (5 * MINUTE_IN_MILLIS), 3 * MINUTE_IN_MILLIS, jobCount));
         mQuotaController.incrementJobCount(0, "com.android.test", jobCount);
         assertFalse(mQuotaController.isWithinQuotaLocked(0, "com.android.test", WORKING_INDEX));
+    }
+
+    @Test
+    public void testIsWithinQuotaLocked_UnderDuration_UnderJobCount_MultiStateChange_BelowFGS() {
+        setDischarging();
+
+        JobStatus jobStatus = createJobStatus(
+                "testIsWithinQuotaLocked_UnderDuration_UnderJobCount_MultiStateChange_BelowFGS", 1);
+        setStandbyBucket(ACTIVE_INDEX, jobStatus);
+        setProcessState(ActivityManager.PROCESS_STATE_BACKUP);
+
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        for (int i = 0; i < 20; ++i) {
+            advanceElapsedClock(SECOND_IN_MILLIS);
+            setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+            setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+        }
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus, null, false);
+
+        advanceElapsedClock(15 * SECOND_IN_MILLIS);
+
+        mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        mQuotaController.prepareForExecutionLocked(jobStatus);
+        for (int i = 0; i < 20; ++i) {
+            advanceElapsedClock(SECOND_IN_MILLIS);
+            setProcessState(ActivityManager.PROCESS_STATE_SERVICE);
+            setProcessState(ActivityManager.PROCESS_STATE_RECEIVER);
+        }
+        mQuotaController.maybeStopTrackingJobLocked(jobStatus, null, false);
+
+        advanceElapsedClock(10 * MINUTE_IN_MILLIS + 30 * SECOND_IN_MILLIS);
+
+        assertEquals(2, mQuotaController.getExecutionStatsLocked(
+                SOURCE_USER_ID, SOURCE_PACKAGE, ACTIVE_INDEX).jobCountInAllowedTime);
+        assertTrue(mQuotaController.isWithinQuotaLocked(jobStatus));
+    }
+
+    @Test
+    public void testIsWithinQuotaLocked_UnderDuration_UnderJobCount_MultiStateChange_SeparateApps()
+            throws Exception {
+        setDischarging();
+
+        final String unaffectedPkgName = "com.android.unaffected";
+        final int unaffectedUid = 10987;
+        JobInfo unaffectedJobInfo = new JobInfo.Builder(1,
+                new ComponentName(unaffectedPkgName, "foo"))
+                .build();
+        JobStatus unaffected = createJobStatus(
+                "testIsWithinQuotaLocked_UnderDuration_UnderJobCount_MultiStateChange_SeparateApps",
+                unaffectedPkgName, unaffectedUid, unaffectedJobInfo);
+        setStandbyBucket(FREQUENT_INDEX, unaffected);
+        setProcessState(ActivityManager.PROCESS_STATE_SERVICE, unaffectedUid);
+
+        final String fgChangerPkgName = "com.android.foreground.changer";
+        final int fgChangerUid = 10234;
+        JobInfo fgChangerJobInfo = new JobInfo.Builder(2,
+                new ComponentName(fgChangerPkgName, "foo"))
+                .build();
+        JobStatus fgStateChanger = createJobStatus(
+                "testIsWithinQuotaLocked_UnderDuration_UnderJobCount_MultiStateChange_SeparateApps",
+                fgChangerPkgName, fgChangerUid, fgChangerJobInfo);
+        setStandbyBucket(ACTIVE_INDEX, fgStateChanger);
+        setProcessState(ActivityManager.PROCESS_STATE_BACKUP, fgChangerUid);
+
+        IPackageManager packageManager = AppGlobals.getPackageManager();
+        spyOn(packageManager);
+        doReturn(new String[]{unaffectedPkgName})
+                .when(packageManager).getPackagesForUid(unaffectedUid);
+        doReturn(new String[]{fgChangerPkgName})
+                .when(packageManager).getPackagesForUid(fgChangerUid);
+
+        mQuotaController.maybeStartTrackingJobLocked(unaffected, null);
+        mQuotaController.prepareForExecutionLocked(unaffected);
+
+        mQuotaController.maybeStartTrackingJobLocked(fgStateChanger, null);
+        mQuotaController.prepareForExecutionLocked(fgStateChanger);
+        for (int i = 0; i < 20; ++i) {
+            advanceElapsedClock(SECOND_IN_MILLIS);
+            setProcessState(ActivityManager.PROCESS_STATE_TOP, fgChangerUid);
+            setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING, fgChangerUid);
+        }
+        mQuotaController.maybeStopTrackingJobLocked(fgStateChanger, null, false);
+
+        advanceElapsedClock(15 * SECOND_IN_MILLIS);
+
+        mQuotaController.maybeStartTrackingJobLocked(fgStateChanger, null);
+        mQuotaController.prepareForExecutionLocked(fgStateChanger);
+        for (int i = 0; i < 20; ++i) {
+            advanceElapsedClock(SECOND_IN_MILLIS);
+            setProcessState(ActivityManager.PROCESS_STATE_TOP, fgChangerUid);
+            setProcessState(ActivityManager.PROCESS_STATE_TOP_SLEEPING, fgChangerUid);
+        }
+        mQuotaController.maybeStopTrackingJobLocked(fgStateChanger, null, false);
+
+        mQuotaController.maybeStopTrackingJobLocked(unaffected, null, false);
+
+        assertTrue(mQuotaController.isWithinQuotaLocked(unaffected));
+        assertFalse(mQuotaController.isWithinQuotaLocked(fgStateChanger));
+        assertEquals(1,
+                mQuotaController.getTimingSessions(SOURCE_USER_ID, unaffectedPkgName).size());
+        assertEquals(42,
+                mQuotaController.getTimingSessions(SOURCE_USER_ID, fgChangerPkgName).size());
+        for (int i = ACTIVE_INDEX; i < RARE_INDEX; ++i) {
+            assertEquals(42, mQuotaController.getExecutionStatsLocked(
+                    SOURCE_USER_ID, fgChangerPkgName, i).jobCountInAllowedTime);
+            assertEquals(1, mQuotaController.getExecutionStatsLocked(
+                    SOURCE_USER_ID, unaffectedPkgName, i).jobCountInAllowedTime);
+        }
     }
 
     @Test
