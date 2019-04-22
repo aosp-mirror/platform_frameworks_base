@@ -77,12 +77,12 @@ import java.util.Set;
  * </ul>
  *
  * <p>In fact, before using this manager, the app developer should check if it's available. Example:
- *  <code>
+ * <pre><code>
  *  ContentCaptureManager mgr = context.getSystemService(ContentCaptureManager.class);
  *  if (mgr != null && mgr.isContentCaptureEnabled()) {
  *    // ...
  *  }
- *  </code>
+ *  </code></pre>
  *
  * <p>App developers usually don't need to explicitly interact with content capture, except when the
  * app:

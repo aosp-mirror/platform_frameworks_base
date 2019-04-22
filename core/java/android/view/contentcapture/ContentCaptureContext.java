@@ -261,6 +261,7 @@ public final class ContentCaptureContext implements Parcelable {
          *   example).
          *   <li>A unique identifier of the application state (for example, a conversation between
          *   2 users in a chat app).
+         * </ul>
          *
          * <p>See {@link ContentCaptureManager} for more info about the content capture context.
          *
