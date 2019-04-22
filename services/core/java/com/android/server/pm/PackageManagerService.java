@@ -952,6 +952,9 @@ public class PackageManagerService extends IPackageManager.Stub
     ActivityInfo mInstantAppInstallerActivity;
     final ResolveInfo mInstantAppInstallerInfo = new ResolveInfo();
 
+    private final Map<String, Pair<PackageInstalledInfo, IPackageInstallObserver2>>
+            mNoKillInstallObservers = Collections.synchronizedMap(new HashMap<>());
+
     final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
             = new SparseArray<>();
 
@@ -1319,6 +1322,11 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
     static final int ENABLE_ROLLBACK_STATUS = 21;
     static final int ENABLE_ROLLBACK_TIMEOUT = 22;
+    static final int DEFERRED_NO_KILL_POST_DELETE = 23;
+    static final int DEFERRED_NO_KILL_INSTALL_OBSERVER = 24;
+
+    static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
+    static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1524,6 +1532,20 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
+                } break;
+                case DEFERRED_NO_KILL_POST_DELETE: {
+                    synchronized (mInstallLock) {
+                        InstallArgs args = (InstallArgs) msg.obj;
+                        if (args != null) {
+                            args.doPostDeleteLI(true);
+                        }
+                    }
+                } break;
+                case DEFERRED_NO_KILL_INSTALL_OBSERVER: {
+                    String packageName = (String) msg.obj;
+                    if (packageName != null) {
+                        notifyInstallObserver(packageName);
+                    }
                 } break;
                 case WRITE_SETTINGS: {
                     Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
@@ -1791,7 +1813,10 @@ public class PackageManagerService extends IPackageManager.Stub
             String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
             boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver) {
-        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+        final boolean succeeded = res.returnCode == PackageManager.INSTALL_SUCCEEDED;
+        final boolean update = res.removedInfo != null && res.removedInfo.removedPackage != null;
+
+        if (succeeded) {
             // Send the removed broadcasts
             if (res.removedInfo != null) {
                 res.removedInfo.sendPackageRemovedBroadcasts(killApp);
@@ -1819,8 +1844,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         mPermissionCallback);
             }
 
-            final boolean update = res.removedInfo != null
-                    && res.removedInfo.removedPackage != null;
             final String installerPackageName =
                     res.installerPackageName != null
                             ? res.installerPackageName
@@ -2029,11 +2052,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     getUnknownSourcesSettings());
 
             // Remove the replaced package's older resources safely now
-            // We delete after a gc for applications  on sdcard.
-            if (res.removedInfo != null && res.removedInfo.args != null) {
-                Runtime.getRuntime().gc();
-                synchronized (mInstallLock) {
-                    res.removedInfo.args.doPostDeleteLI(true);
+            InstallArgs args = res.removedInfo != null ? res.removedInfo.args : null;
+            if (args != null) {
+                if (!killApp) {
+                    // If we didn't kill the app, defer the deletion of code/resource files, since
+                    // they may still be in use by the running application. This mitigates problems
+                    // in cases where resources or code is loaded by a new Activity before
+                    // ApplicationInfo changes have propagated to all application threads.
+                    scheduleDeferredNoKillPostDelete(args);
+                } else {
+                    synchronized (mInstallLock) {
+                        args.doPostDeleteLI(true);
+                    }
                 }
             } else {
                 // Force a gc to clear up things. Ask for a background one, it's fine to go on
@@ -2056,16 +2086,60 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        // If someone is watching installs - notify them
+        final boolean deferInstallObserver = succeeded && update && !killApp;
+        if (deferInstallObserver) {
+            scheduleDeferredNoKillInstallObserver(res, installObserver);
+        } else {
+            notifyInstallObserver(res, installObserver);
+        }
+    }
+
+    @Override
+    public void notifyPackagesReplacedReceived(String[] packages) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+
+        for (String packageName : packages) {
+            PackageSetting setting = mSettings.mPackages.get(packageName);
+            if (setting != null && filterAppAccessLPr(setting, callingUid, callingUserId)) {
+                notifyInstallObserver(packageName);
+            }
+        }
+    }
+
+    private void notifyInstallObserver(String packageName) {
+        Pair<PackageInstalledInfo, IPackageInstallObserver2> pair =
+                mNoKillInstallObservers.remove(packageName);
+
+        if (pair != null) {
+            notifyInstallObserver(pair.first, pair.second);
+        }
+    }
+
+    private void notifyInstallObserver(PackageInstalledInfo info,
+            IPackageInstallObserver2 installObserver) {
         if (installObserver != null) {
             try {
-                Bundle extras = extrasForInstallResult(res);
-                installObserver.onPackageInstalled(res.name, res.returnCode,
-                        res.returnMsg, extras);
+                Bundle extras = extrasForInstallResult(info);
+                installObserver.onPackageInstalled(info.name, info.returnCode,
+                        info.returnMsg, extras);
             } catch (RemoteException e) {
                 Slog.i(TAG, "Observer no longer exists.");
             }
         }
+    }
+
+    private void scheduleDeferredNoKillPostDelete(InstallArgs args) {
+        Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_POST_DELETE, args);
+        mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_POST_DELETE_DELAY_MS);
+    }
+
+    private void scheduleDeferredNoKillInstallObserver(PackageInstalledInfo info,
+            IPackageInstallObserver2 observer) {
+        String packageName = info.pkg.packageName;
+        mNoKillInstallObservers.put(packageName, Pair.create(info, observer));
+        Message message = mHandler.obtainMessage(DEFERRED_NO_KILL_INSTALL_OBSERVER, packageName);
+        mHandler.sendMessageDelayed(message, DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS);
     }
 
     /**
