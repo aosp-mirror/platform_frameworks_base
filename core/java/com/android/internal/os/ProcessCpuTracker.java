@@ -19,10 +19,10 @@ package com.android.internal.os;
 import static android.os.Process.*;
 
 import android.annotation.UnsupportedAppUsage;
-import android.os.FileUtils;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Slog;
@@ -247,6 +247,7 @@ public class ProcessCpuTracker {
             pid = _pid;
             if (parentPid < 0) {
                 final File procDir = new File("/proc", Integer.toString(pid));
+                uid = getUid(procDir.toString());
                 statFile = new File(procDir, "stat").toString();
                 cmdlineFile = new File(procDir, "cmdline").toString();
                 threadsDir = (new File(procDir, "task")).toString();
@@ -262,13 +263,22 @@ public class ProcessCpuTracker {
                         parentPid));
                 final File taskDir = new File(
                         new File(procDir, "task"), Integer.toString(pid));
+                uid = getUid(taskDir.toString());
                 statFile = new File(taskDir, "stat").toString();
                 cmdlineFile = null;
                 threadsDir = null;
                 threadStats = null;
                 workingThreads = null;
             }
-            uid = FileUtils.getUid(statFile.toString());
+        }
+
+        private static int getUid(String path) {
+            try {
+                return Os.stat(path).st_uid;
+            } catch (ErrnoException e) {
+                Slog.w(TAG, "Failed to stat(" + path + "): " + e);
+                return -1;
+            }
         }
     }
 
