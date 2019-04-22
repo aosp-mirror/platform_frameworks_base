@@ -106,6 +106,11 @@ static jint saveUnclippedLayer(jlong canvasHandle, jint l, jint t, jint r, jint 
     return reinterpret_cast<jint>(get_canvas(canvasHandle)->saveUnclippedLayer(l, t, r, b));
 }
 
+static void restoreUnclippedLayer(jlong canvasHandle, jint saveCount, jlong paintHandle) {
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    get_canvas(canvasHandle)->restoreUnclippedLayer(saveCount, *paint);
+}
+
 static bool restore(jlong canvasHandle) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (canvas->getSaveCount() <= 1) {
@@ -668,6 +673,7 @@ static const JNINativeMethod gMethods[] = {
     {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
     {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
     {"nSaveUnclippedLayer","(JIIII)I", (void*) CanvasJNI::saveUnclippedLayer},
+    {"nRestoreUnclippedLayer","(JIJ)V", (void*) CanvasJNI::restoreUnclippedLayer},
     {"nGetSaveCount","(J)I", (void*) CanvasJNI::getSaveCount},
     {"nRestore","(J)Z", (void*) CanvasJNI::restore},
     {"nRestoreToCount","(JI)V", (void*) CanvasJNI::restoreToCount},
