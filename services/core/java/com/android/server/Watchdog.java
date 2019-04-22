@@ -96,6 +96,7 @@ public class Watchdog extends Thread {
         "media.extractor", // system/bin/mediaextractor
         "media.metrics", // system/bin/mediametrics
         "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
+        "media.swcodec", // /apex/com.android.media.swcodec/bin/mediaswcodec
         "com.android.bluetooth",  // Bluetooth service
         "/system/bin/statsd",  // Stats daemon
     };
@@ -108,6 +109,7 @@ public class Watchdog extends Thread {
             "android.hardware.graphics.allocator@2.0::IAllocator",
             "android.hardware.graphics.composer@2.1::IComposer",
             "android.hardware.health@2.0::IHealth",
+            "android.hardware.media.c2@1.0::IComponentStore",
             "android.hardware.media.omx@1.0::IOmx",
             "android.hardware.media.omx@1.0::IOmxStore",
             "android.hardware.sensors@1.0::ISensors",
