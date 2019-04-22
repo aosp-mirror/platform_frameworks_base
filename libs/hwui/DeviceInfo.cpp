@@ -45,12 +45,12 @@ static constexpr android::DisplayInfo sDummyDisplay{
         1920,   // viewportH
 };
 
-const DeviceInfo* DeviceInfo::get() {
+DeviceInfo* DeviceInfo::get() {
         static DeviceInfo sDeviceInfo;
         return &sDeviceInfo;
 }
 
-DisplayInfo QueryDisplayInfo() {
+static DisplayInfo QueryDisplayInfo() {
     if (Properties::isolatedProcess) {
         return sDummyDisplay;
     }
@@ -63,6 +63,27 @@ DisplayInfo QueryDisplayInfo() {
     status_t status = SurfaceComposerClient::getDisplayInfo(token, &displayInfo);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
     return displayInfo;
+}
+
+static float QueryMaxRefreshRate() {
+    if (Properties::isolatedProcess) {
+        return sDummyDisplay.fps;
+    }
+
+    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
+    LOG_ALWAYS_FATAL_IF(token == nullptr,
+                        "Failed to get display info because internal display is disconnected");
+
+    Vector<DisplayInfo> configs;
+    configs.reserve(10);
+    status_t status = SurfaceComposerClient::getDisplayConfigs(token, &configs);
+    LOG_ALWAYS_FATAL_IF(status, "Failed to getDisplayConfigs, error %d", status);
+    LOG_ALWAYS_FATAL_IF(configs.size() == 0, "getDisplayConfigs returned 0 configs?");
+    float max = 0.0f;
+    for (auto& info : configs) {
+        max = std::max(max, info.fps);
+    }
+    return max;
 }
 
 static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
@@ -103,7 +124,7 @@ static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkCol
     }
 }
 
-DeviceInfo::DeviceInfo() {
+DeviceInfo::DeviceInfo() : mMaxRefreshRate(QueryMaxRefreshRate()) {
 #if HWUI_NULL_GPU
         mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
 #else
@@ -119,7 +140,11 @@ int DeviceInfo::maxTextureSize() const {
 }
 
 void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
-    const_cast<DeviceInfo*>(DeviceInfo::get())->mMaxTextureSize = maxTextureSize;
+    DeviceInfo::get()->mMaxTextureSize = maxTextureSize;
+}
+
+void DeviceInfo::onDisplayConfigChanged() {
+    mDisplayInfo = QueryDisplayInfo();
 }
 
 } /* namespace uirenderer */
