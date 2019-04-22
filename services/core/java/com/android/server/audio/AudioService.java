@@ -258,6 +258,8 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_AUDIO_SERVER_STATE = 23;
     private static final int MSG_ENABLE_SURROUND_FORMATS = 24;
     private static final int MSG_UPDATE_RINGER_MODE = 25;
+    private static final int MSG_SET_DEVICE_STREAM_VOLUME = 26;
+    private static final int MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS = 27;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -274,8 +276,8 @@ public class AudioService extends IAudioService.Stub
     /** @see VolumeStreamState */
     private VolumeStreamState[] mStreamStates;
 
-    /*package*/ VolumeStreamState getStreamState(int stream) {
-        return mStreamStates[stream];
+    /*package*/ int getVssVolumeForDevice(int stream, int device) {
+        return mStreamStates[stream].getIndex(device);
     }
 
     private SettingsObserver mSettingsObserver;
@@ -2936,7 +2938,21 @@ public class AudioService extends IAudioService.Stub
 
     }
 
-    /*package*/ class SetModeDeathHandler implements IBinder.DeathRecipient {
+    /**
+     * Return the pid of the current audio mode owner
+     * @return 0 if nobody owns the mode
+     */
+    /*package*/ int getModeOwnerPid() {
+        int modeOwnerPid = 0;
+        try {
+            modeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
+        } catch (Exception e) {
+            // nothing to do, modeOwnerPid is not modified
+        }
+        return modeOwnerPid;
+    }
+
+    private class SetModeDeathHandler implements IBinder.DeathRecipient {
         private IBinder mCb; // To be notified of client's death
         private int mPid;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
@@ -4096,8 +4112,14 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /*package*/ void postObserveDevicesForAllStreams() {
+        sendMsg(mAudioHandler,
+                MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS,
+                SENDMSG_QUEUE, 0 /*arg1*/, 0 /*arg2*/, null /*obj*/,
+                0 /*delay*/);
+    }
 
-    /*package*/ void observeDevicesForAllStreams() {
+    private void onObserveDevicesForAllStreams() {
         observeDevicesForStreams(-1);
     }
 
@@ -4270,7 +4292,7 @@ public class AudioService extends IAudioService.Stub
     //  2   mSetModeLock
     //  3     mSettingsLock
     //  4       VolumeStreamState.class
-    public class VolumeStreamState {
+    private class VolumeStreamState {
         private final int mStreamType;
         private int mIndexMin;
         private int mIndexMax;
@@ -4740,6 +4762,74 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    private static final class DeviceVolumeUpdate {
+        final int mStreamType;
+        final int mDevice;
+        final @NonNull String mCaller;
+        private static final int NO_NEW_INDEX = -2049;
+        private final int mVssVolIndex;
+
+        // Constructor with volume index, meant to cause this volume to be set and applied for the
+        // given stream type on the given device
+        DeviceVolumeUpdate(int streamType, int vssVolIndex, int device, @NonNull String caller) {
+            mStreamType = streamType;
+            mVssVolIndex = vssVolIndex;
+            mDevice = device;
+            mCaller = caller;
+        }
+
+        // Constructor with no volume index, meant to cause re-apply of volume for the given
+        // stream type on the given device
+        DeviceVolumeUpdate(int streamType, int device, @NonNull String caller) {
+            mStreamType = streamType;
+            mVssVolIndex = NO_NEW_INDEX;
+            mDevice = device;
+            mCaller = caller;
+        }
+
+        boolean hasVolumeIndex() {
+            return mVssVolIndex != NO_NEW_INDEX;
+        }
+
+        int getVolumeIndex() throws IllegalStateException {
+            Preconditions.checkState(mVssVolIndex != NO_NEW_INDEX);
+            return mVssVolIndex;
+        }
+    }
+
+    /*package*/ void postSetVolumeIndexOnDevice(int streamType, int vssVolIndex, int device,
+                                                String caller) {
+        sendMsg(mAudioHandler,
+                MSG_SET_DEVICE_STREAM_VOLUME,
+                SENDMSG_QUEUE, 0 /*arg1*/, 0 /*arg2*/,
+                new DeviceVolumeUpdate(streamType, vssVolIndex, device, caller),
+                0 /*delay*/);
+    }
+
+    /*package*/ void postApplyVolumeOnDevice(int streamType, int device, @NonNull String caller) {
+        sendMsg(mAudioHandler,
+                MSG_SET_DEVICE_STREAM_VOLUME,
+                SENDMSG_QUEUE, 0 /*arg1*/, 0 /*arg2*/,
+                new DeviceVolumeUpdate(streamType, device, caller),
+                0 /*delay*/);
+    }
+
+    private void onSetVolumeIndexOnDevice(@NonNull DeviceVolumeUpdate update) {
+        synchronized (VolumeStreamState.class) {
+            final VolumeStreamState streamState = mStreamStates[update.mStreamType];
+            if (update.hasVolumeIndex()) {
+                final int index = update.getVolumeIndex();
+                streamState.setIndex(index, update.mDevice, update.mCaller);
+                sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller + " dev:0x"
+                        + Integer.toHexString(update.mDevice) + " volIdx:" + index));
+            } else {
+                sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller
+                        + " update vol on dev:0x" + Integer.toHexString(update.mDevice)));
+            }
+            setDeviceVolume(streamState, update.mDevice);
+        }
+    }
+
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
 
         final boolean isAvrcpAbsVolSupported = mDeviceBroker.isAvrcpAbsoluteVolumeSupported();
@@ -5179,6 +5269,14 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_UPDATE_RINGER_MODE:
                     onUpdateRingerModeServiceInt();
+                    break;
+
+                case MSG_SET_DEVICE_STREAM_VOLUME:
+                    onSetVolumeIndexOnDevice((DeviceVolumeUpdate) msg.obj);
+                    break;
+
+                case MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS:
+                    onObserveDevicesForAllStreams();
                     break;
             }
         }
