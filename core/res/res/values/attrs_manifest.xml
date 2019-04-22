@@ -346,13 +346,21 @@
          By setting this value on two or more packages, each of these packages
          will be given a single shared user ID, so they can for example run
          in the same process.  Note that for them to actually get the same
-         user ID, they must also be signed with the same signature. -->
+         user ID, they must also be signed with the same signature.
+         @deprecated Shared user id's cause non-deterministic behaviour within the
+         package manager. As such, it's use is discouraged, deprecated, and will
+         be removed altogether in a future version of Android. Instead, proper
+         communication mechanisms such as services and providers should be used
+         to facilitate interoperability between shared components. -->
     <attr name="sharedUserId" format="string" />
 
     <!-- Specify a label for the shared user UID of this package.  This is
          only used if you have also used android:sharedUserId.  This must
          be a reference to a string resource; it can not be an explicit
-         string. -->
+         string.
+         @deprecated There is no replacement for this attribute.
+         {@link android.R.attr#sharedUserId} has been deprecated making
+         this attribute unnecessary. -->
     <attr name="sharedUserLabel" format="reference" />
 
     <!-- Internal version code.  This is the number used to determine whether
