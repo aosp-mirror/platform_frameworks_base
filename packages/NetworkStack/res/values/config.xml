@@ -7,6 +7,9 @@
     values are meant to be the default when no other configuration is specified.
     -->
 
+    <!-- DNS probe timeout for network validation. Enough for 3 DNS queries 5 seconds apart. -->
+    <integer name="default_captive_portal_dns_probe_timeout">12500</integer>
+
     <!-- HTTP URL for network validation, to use for detecting captive portals. -->
     <string name="default_captive_portal_http_url" translatable="false">http://connectivitycheck.gstatic.com/generate_204</string>
 
@@ -27,6 +30,7 @@
 
     <!-- Configuration hooks for the above settings.
          Empty by default but may be overridden by RROs. -->
+    <integer name="config_captive_portal_dns_probe_timeout"></integer>
     <!--suppress CheckTagEmptyBody: overlayable resource to use as configuration hook -->
     <string name="config_captive_portal_http_url" translatable="false"></string>
     <!--suppress CheckTagEmptyBody: overlayable resource to use as configuration hook -->
