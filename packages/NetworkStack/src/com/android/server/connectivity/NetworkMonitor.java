@@ -59,6 +59,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.DnsResolver;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.LinkProperties;
@@ -122,6 +123,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
@@ -136,8 +138,16 @@ public class NetworkMonitor extends StateMachine {
                                                       + "AppleWebKit/537.36 (KHTML, like Gecko) "
                                                       + "Chrome/60.0.3112.32 Safari/537.36";
 
+    @VisibleForTesting
+    static final String CONFIG_CAPTIVE_PORTAL_DNS_PROBE_TIMEOUT =
+            "captive_portal_dns_probe_timeout";
+
     private static final int SOCKET_TIMEOUT_MS = 10000;
     private static final int PROBE_TIMEOUT_MS  = 3000;
+    // Enough for 3 DNS queries 5 seconds apart.
+    // TODO: get this from resources and DeviceConfig instead.
+    private static final int DNS_TIMEOUT_MS = 12500;
+
     enum EvaluationResult {
         VALIDATED(true),
         CAPTIVE_PORTAL(false);
@@ -1185,6 +1195,33 @@ public class NetworkMonitor extends StateMachine {
                 Settings.Global.CAPTIVE_PORTAL_HTTPS_URL);
     }
 
+    private int getDnsProbeTimeout() {
+        return getIntSetting(mContext, R.integer.config_captive_portal_dns_probe_timeout,
+                CONFIG_CAPTIVE_PORTAL_DNS_PROBE_TIMEOUT,
+                R.integer.default_captive_portal_dns_probe_timeout);
+    }
+
+    /**
+     * Gets an integer setting from resources or device config
+     *
+     * configResource is used if set, followed by device config if set, followed by defaultResource.
+     * If none of these are set then an exception is thrown.
+     *
+     * TODO: move to a common location such as a ConfigUtils class.
+     * TODO(b/130324939): test that the resources can be overlayed by an RRO package.
+     */
+    @VisibleForTesting
+    int getIntSetting(@NonNull final Context context, @StringRes int configResource,
+            @NonNull String symbol, @StringRes int defaultResource) {
+        final Resources res = context.getResources();
+        try {
+            return res.getInteger(configResource);
+        } catch (Resources.NotFoundException e) {
+            return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                    symbol, res.getInteger(defaultResource));
+        }
+    }
+
     /**
      * Get the captive portal server HTTP URL that is configured on the device.
      *
@@ -1446,6 +1483,45 @@ public class NetworkMonitor extends StateMachine {
         return sendHttpProbe(url, probeType, null);
     }
 
+    /** Do a DNS lookup for the given server, or throw UnknownHostException after timeoutMs */
+    @VisibleForTesting
+    protected InetAddress[] sendDnsProbeWithTimeout(String host, int timeoutMs)
+                throws UnknownHostException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<List<InetAddress>> resultRef = new AtomicReference<>();
+        final DnsResolver.Callback<List<InetAddress>> callback =
+                    new DnsResolver.Callback<List<InetAddress>>() {
+            public void onAnswer(List<InetAddress> answer, int rcode) {
+                if (rcode == 0) {
+                    resultRef.set(answer);
+                }
+                latch.countDown();
+            }
+            public void onError(@NonNull DnsResolver.DnsException e) {
+                validationLog("DNS error resolving " + host + ": " + e.getMessage());
+                latch.countDown();
+            }
+        };
+
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                TrafficStatsConstants.TAG_SYSTEM_PROBE);
+        mDependencies.getDnsResolver().query(mNetwork, host, DnsResolver.FLAG_EMPTY,
+                r -> r.run() /* executor */, null /* cancellationSignal */, callback);
+        TrafficStats.setThreadStatsTag(oldTag);
+
+        try {
+            latch.await(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+        }
+
+        List<InetAddress> result = resultRef.get();
+        if (result == null || result.size() == 0) {
+            throw new UnknownHostException(host);
+        }
+
+        return result.toArray(new InetAddress[0]);
+    }
+
     /** Do a DNS resolution of the given server. */
     private void sendDnsProbe(String host) {
         if (TextUtils.isEmpty(host)) {
@@ -1457,7 +1533,7 @@ public class NetworkMonitor extends StateMachine {
         int result;
         String connectInfo;
         try {
-            InetAddress[] addresses = mNetwork.getAllByName(host);
+            InetAddress[] addresses = sendDnsProbeWithTimeout(host, getDnsProbeTimeout());
             StringBuffer buffer = new StringBuffer();
             for (InetAddress address : addresses) {
                 buffer.append(',').append(address.getHostAddress());
@@ -1780,6 +1856,10 @@ public class NetworkMonitor extends StateMachine {
     static class Dependencies {
         public Network getPrivateDnsBypassNetwork(Network network) {
             return new OneAddressPerFamilyNetwork(network);
+        }
+
+        public DnsResolver getDnsResolver() {
+            return DnsResolver.getInstance();
         }
 
         public Random getRandom() {
