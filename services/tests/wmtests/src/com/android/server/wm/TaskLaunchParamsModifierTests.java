@@ -52,6 +52,8 @@ import com.android.server.wm.LaunchParamsController.LaunchParams;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -1204,6 +1206,23 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 mActivity, /* source */ null, /* options */ null, mCurrent, mResult));
 
         assertEquals(new Rect(120, 0, 320, 100), mResult.mBounds);
+    }
+
+    @Test
+    public void testAdjustBoundsToAvoidConflictAlwaysExits() {
+        Rect displayBounds = new Rect(0, 0, 40, 40);
+        List<Rect> existingTaskBounds = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                int left = i * 5;
+                int top = j * 5;
+                existingTaskBounds.add(new Rect(left, top, left + 20, top + 20));
+            }
+        }
+        Rect startingBounds = new Rect(0, 0, 20, 20);
+        Rect adjustedBounds = new Rect(startingBounds);
+        mTarget.adjustBoundsToAvoidConflict(displayBounds, existingTaskBounds, adjustedBounds);
+        assertEquals(startingBounds, adjustedBounds);
     }
 
     private TestActivityDisplay createNewActivityDisplay(int windowingMode) {
