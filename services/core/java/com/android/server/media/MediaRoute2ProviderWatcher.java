@@ -120,7 +120,7 @@ final class MediaRoute2ProviderWatcher {
                             mUserId);
                     provider.start();
                     mProviders.add(targetIndex++, provider);
-                    mCallback.addProvider(provider);
+                    mCallback.onAddProvider(provider);
                 } else if (sourceIndex >= targetIndex) {
                     MediaRoute2ProviderProxy provider = mProviders.get(sourceIndex);
                     provider.start(); // restart the provider if needed
@@ -134,7 +134,7 @@ final class MediaRoute2ProviderWatcher {
         if (targetIndex < mProviders.size()) {
             for (int i = mProviders.size() - 1; i >= targetIndex; i--) {
                 MediaRoute2ProviderProxy provider = mProviders.get(i);
-                mCallback.removeProvider(provider);
+                mCallback.onRemoveProvider(provider);
                 mProviders.remove(provider);
                 provider.stop();
             }
@@ -170,7 +170,7 @@ final class MediaRoute2ProviderWatcher {
     };
 
     public interface Callback {
-        void addProvider(MediaRoute2ProviderProxy provider);
-        void removeProvider(MediaRoute2ProviderProxy provider);
+        void onAddProvider(MediaRoute2ProviderProxy provider);
+        void onRemoveProvider(MediaRoute2ProviderProxy provider);
     }
 }

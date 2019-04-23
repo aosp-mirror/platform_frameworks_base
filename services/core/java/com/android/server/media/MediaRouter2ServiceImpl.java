@@ -18,8 +18,9 @@ package com.android.server.media;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.media.IMediaRouter2ManagerClient;
+import android.media.IMediaRouter2Manager;
 import android.media.IMediaRouterClient;
+import android.media.MediaRoute2ProviderInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -54,7 +55,7 @@ class MediaRouter2ServiceImpl {
         mContext = context;
     }
 
-    public void registerManagerAsUser(IMediaRouter2ManagerClient client,
+    public void registerManagerAsUser(IMediaRouter2Manager client,
             String packageName, int userId) {
         if (client == null) {
             throw new IllegalArgumentException("client must not be null");
@@ -76,7 +77,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void unregisterManager(IMediaRouter2ManagerClient client) {
+    public void unregisterManager(IMediaRouter2Manager client) {
         if (client == null) {
             throw new IllegalArgumentException("client must not be null");
         }
@@ -105,7 +106,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    public void setRemoteRoute(IMediaRouter2ManagerClient client,
+    public void setRemoteRoute(IMediaRouter2Manager client,
             int uid, String routeId, boolean explicit) {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -123,7 +124,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void registerManagerLocked(IMediaRouter2ManagerClient client,
+    private void registerManagerLocked(IMediaRouter2Manager client,
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
@@ -149,11 +150,13 @@ class MediaRouter2ServiceImpl {
             userRecord.mManagerRecords.add(managerRecord);
             mAllManagerRecords.put(binder, managerRecord);
 
-            //TODO: send client's info to manager
+            //TODO: remove this when it's unnecessary
+            // Sends published routes to newly added manager
+            userRecord.mHandler.scheduleUpdateManagerState();
         }
     }
 
-    private void unregisterManagerLocked(IMediaRouter2ManagerClient client, boolean died) {
+    private void unregisterManagerLocked(IMediaRouter2Manager client, boolean died) {
         ManagerRecord clientRecord = mAllManagerRecords.remove(client.asBinder());
         if (clientRecord != null) {
             UserRecord userRecord = clientRecord.mUserRecord;
@@ -163,7 +166,7 @@ class MediaRouter2ServiceImpl {
         }
     }
 
-    private void setRemoteRouteLocked(IMediaRouter2ManagerClient client,
+    private void setRemoteRouteLocked(IMediaRouter2Manager client,
             int uid, String routeId, boolean explicit) {
         ManagerRecord managerRecord = mAllManagerRecords.get(client.asBinder());
         if (managerRecord != null) {
@@ -224,13 +227,13 @@ class MediaRouter2ServiceImpl {
 
     final class ManagerRecord implements IBinder.DeathRecipient {
         public final UserRecord mUserRecord;
-        public final IMediaRouter2ManagerClient mClient;
+        public final IMediaRouter2Manager mClient;
         public final int mUid;
         public final int mPid;
         public final String mPackageName;
         public final boolean mTrusted;
 
-        ManagerRecord(UserRecord userRecord, IMediaRouter2ManagerClient client,
+        ManagerRecord(UserRecord userRecord, IMediaRouter2Manager client,
                 int uid, int pid, String packageName, boolean trusted) {
             mUserRecord = userRecord;
             mClient = client;
@@ -270,21 +273,20 @@ class MediaRouter2ServiceImpl {
         public static final int MSG_START = 1;
         public static final int MSG_STOP = 2;
 
-        private static final int MSG_UPDATE_CLIENT_STATE = 8;
-
         private static final int MSG_SELECT_REMOTE_ROUTE = 10;
         private static final int MSG_UPDATE_CLIENT_USAGE = 11;
+        private static final int MSG_UPDATE_MANAGER_STATE = 12;
 
         private final WeakReference<MediaRouter2ServiceImpl> mServiceRef;
         private final UserRecord mUserRecord;
         private final MediaRoute2ProviderWatcher mWatcher;
-        private final ArrayList<IMediaRouter2ManagerClient> mTempManagers = new ArrayList<>();
+        private final ArrayList<IMediaRouter2Manager> mTempManagers = new ArrayList<>();
 
         private final ArrayList<MediaRoute2ProviderProxy> mMediaProviders =
                 new ArrayList<>();
 
         private boolean mRunning;
-        private boolean mClientStateUpdateScheduled;
+        private boolean mManagerStateUpdateScheduled;
 
         UserHandler(MediaRouter2ServiceImpl service, UserRecord userRecord) {
             mServiceRef = new WeakReference<>(service);
@@ -304,10 +306,6 @@ class MediaRouter2ServiceImpl {
                     stop();
                     break;
                 }
-                case MSG_UPDATE_CLIENT_STATE: {
-                    updateClientState();
-                    break;
-                }
                 case MSG_SELECT_REMOTE_ROUTE: {
                     Pair<Integer, String> obj = (Pair<Integer, String>) msg.obj;
                     selectRemoteRoute(obj.first, obj.second);
@@ -315,6 +313,10 @@ class MediaRouter2ServiceImpl {
                 }
                 case MSG_UPDATE_CLIENT_USAGE: {
                     updateClientUsage();
+                    break;
+                }
+                case MSG_UPDATE_MANAGER_STATE: {
+                    updateManagerState();
                     break;
                 }
             }
@@ -336,13 +338,13 @@ class MediaRouter2ServiceImpl {
         }
 
         @Override
-        public void addProvider(MediaRoute2ProviderProxy provider) {
+        public void onAddProvider(MediaRoute2ProviderProxy provider) {
             provider.setCallback(this);
             mMediaProviders.add(provider);
         }
 
         @Override
-        public void removeProvider(MediaRoute2ProviderProxy provider) {
+        public void onRemoveProvider(MediaRoute2ProviderProxy provider) {
             mMediaProviders.remove(provider);
         }
 
@@ -352,7 +354,7 @@ class MediaRouter2ServiceImpl {
         }
 
         private void updateProvider(MediaRoute2ProviderProxy provider) {
-            scheduleUpdateClientState();
+            scheduleUpdateManagerState();
         }
 
 
@@ -367,15 +369,15 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void scheduleUpdateClientState() {
-            if (!mClientStateUpdateScheduled) {
-                mClientStateUpdateScheduled = true;
-                sendEmptyMessage(MSG_UPDATE_CLIENT_STATE);
+        private void scheduleUpdateManagerState() {
+            if (!mManagerStateUpdateScheduled) {
+                mManagerStateUpdateScheduled = true;
+                sendEmptyMessage(MSG_UPDATE_MANAGER_STATE);
             }
         }
 
-        private void updateClientState() {
-            mClientStateUpdateScheduled = false;
+        private void updateManagerState() {
+            mManagerStateUpdateScheduled = false;
 
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
@@ -383,12 +385,12 @@ class MediaRouter2ServiceImpl {
             }
 
             //TODO: send provider info
+            MediaRoute2ProviderInfo providerInfo = null;
             int selectedUid = 0;
             String selectedRouteId = null;
             final int mediaCount = mMediaProviders.size();
             for (int i = 0; i < mediaCount; i++) {
-                selectedUid = mMediaProviders.get(i).mSelectedUid;
-                selectedRouteId = mMediaProviders.get(i).mSelectedRouteId;
+                providerInfo = mMediaProviders.get(i).getProviderInfo();
             }
 
             try {
@@ -400,15 +402,19 @@ class MediaRouter2ServiceImpl {
                 }
 
                 //TODO: Call proper callbacks when provider descriptor is implemented.
-                final int count = mTempManagers.size();
-                for (int i = 0; i < count; i++) {
-                    try {
-                        mTempManagers.get(i).onRouteSelected(selectedUid, selectedRouteId);
-                    } catch (RemoteException ex) {
-                        Slog.w(TAG, "Failed to call onStateChanged. Manager probably died.", ex);
+                if (providerInfo != null) {
+                    final int count = mTempManagers.size();
+                    for (int i = 0; i < count; i++) {
+                        try {
+                            mTempManagers.get(i).notifyProviderInfoUpdated(providerInfo);
+                        } catch (RemoteException ex) {
+                            Slog.w(TAG, "Failed to call onStateChanged. Manager probably died.",
+                                    ex);
+                        }
                     }
                 }
             } finally {
+                // Clear the list in preparation for the next time.
                 mTempManagers.clear();
             }
         }
@@ -416,7 +422,7 @@ class MediaRouter2ServiceImpl {
         private void updateClientUsage() {
             //TODO: merge these code to updateClientState()
 
-//            List<IMediaRouter2ManagerClient> managers = new ArrayList<>();
+//            List<IMediaRouter2Manager> managers = new ArrayList<>();
 //            synchronized (mService.mLock) {
 //                final int count = mUserRecord.mManagerRecords.size();
 //                for (int i = 0; i < count; i++) {

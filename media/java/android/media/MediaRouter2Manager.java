@@ -183,6 +183,13 @@ public class MediaRouter2Manager {
         }
     }
 
+    void notifyProviderUpdated(MediaRoute2ProviderInfo info) {
+        //TODO: should call back properly
+        for (CallbackRecord record : mCallbacks) {
+            record.mExecutor.execute(() -> record.mCallback.onProviderInfoUpdated(info));
+        }
+    }
+
     void notifyRouteSelected(int uid, String routeId) {
         for (CallbackRecord record : mCallbacks) {
             record.mExecutor.execute(() -> record.mCallback.onRouteSelected(uid, routeId));
@@ -213,6 +220,12 @@ public class MediaRouter2Manager {
          * @param categories the changed categories
          */
         public abstract void onControlCategoriesChanged(int uid, List<String> categories);
+
+        /**
+         * Called when the provider updates its information
+         * @param info the changed provider information
+         */
+        public void onProviderInfoUpdated(MediaRoute2ProviderInfo info) {}
     }
 
     final class CallbackRecord {
@@ -225,17 +238,23 @@ public class MediaRouter2Manager {
         }
     }
 
-    class Client extends IMediaRouter2ManagerClient.Stub {
+    class Client extends IMediaRouter2Manager.Stub {
         @Override
-        public void onRouteSelected(int uid, String routeId) {
+        public void notifyRouteSelected(int uid, String routeId) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyRouteSelected,
                     MediaRouter2Manager.this, uid, routeId));
         }
 
         @Override
-        public void onControlCategoriesChanged(int uid, List<String> categories) {
+        public void notifyControlCategoriesChanged(int uid, List<String> categories) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyControlCategoriesChanged,
                     MediaRouter2Manager.this, uid, categories));
+        }
+
+        @Override
+        public void notifyProviderInfoUpdated(MediaRoute2ProviderInfo info) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyProviderUpdated,
+                    MediaRouter2Manager.this, info));
         }
     }
 }
