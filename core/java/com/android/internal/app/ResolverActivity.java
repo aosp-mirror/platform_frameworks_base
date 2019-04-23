@@ -551,11 +551,11 @@ public class ResolverActivity extends Activity {
                     mAi.packageName);
         }
 
-        public Drawable getIcon() {
-            return new BitmapDrawable(mCtx.getResources(), getIconBitmap());
+        public Drawable getIcon(UserHandle userHandle) {
+            return new BitmapDrawable(mCtx.getResources(), getIconBitmap(userHandle));
         }
 
-        public Bitmap getIconBitmap() {
+        public Bitmap getIconBitmap(UserHandle userHandle) {
             Drawable dr = null;
             if (mHasSubstitutePermission) {
                 dr = getIconSubstituteInternal();
@@ -576,7 +576,7 @@ public class ResolverActivity extends Activity {
             }
 
             SimpleIconFactory sif = SimpleIconFactory.obtain(mCtx);
-            Bitmap icon = sif.createUserBadgedIconBitmap(dr, Process.myUserHandle());
+            Bitmap icon = sif.createUserBadgedIconBitmap(dr, userHandle);
             sif.recycle();
 
             return icon;
@@ -699,7 +699,8 @@ public class ResolverActivity extends Activity {
     }
 
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        return makePresentationGetter(ri).getIcon();
+        // Load icons based on the current process. If in work profile icons should be badged.
+        return makePresentationGetter(ri).getIcon(Process.myUserHandle());
     }
 
     @Override
