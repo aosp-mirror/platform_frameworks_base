@@ -133,6 +133,11 @@ public class DhcpServerTest {
         public void onStatusAvailable(int statusCode) {
             assertEquals(STATUS_SUCCESS, statusCode);
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
     };
 
     @Before

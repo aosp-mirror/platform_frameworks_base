@@ -41,6 +41,11 @@ public class IpMemoryStore extends IpMemoryStoreClient {
                     public void onIpMemoryStoreFetched(final IIpMemoryStore memoryStore) {
                         mService.complete(memoryStore);
                     }
+
+                    @Override
+                    public int getInterfaceVersion() {
+                        return this.VERSION;
+                    }
                 });
     }
 
