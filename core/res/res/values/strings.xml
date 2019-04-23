@@ -1507,6 +1507,13 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
     <string name="permdesc_useFaceAuthentication">Allows the app to use face authentication hardware for authentication</string>
 
+    <!-- Notification name shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_recalibrate_notification_name">Face Authentication</string>
+    <!-- Notification title shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_recalibrate_notification_title">Re-enroll your face</string>
+    <!-- Notification content shown when the system requires the user to re-enroll their face. [CHAR LIMIT=NONE] -->
+    <string name="face_recalibrate_notification_content">To improve recognition, please re-enroll your face</string>
+
     <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
     <string name="face_acquired_insufficient">Couldn\u2019t capture accurate face data. Try again.</string>
     <!-- Message shown during face acquisition when the image is too bright [CHAR LIMIT=50] -->
