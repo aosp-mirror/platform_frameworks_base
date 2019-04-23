@@ -4228,6 +4228,25 @@ public class ConnectivityServiceTest {
             callback.expectStarted();
             ka.stop();
             callback.expectStopped();
+
+            // Check that the same NATT socket cannot be used by 2 keepalives.
+            try (SocketKeepalive ka2 = mCm.createSocketKeepalive(
+                    myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
+                // Check that second keepalive cannot be started if the first one is running.
+                ka.start(validKaInterval);
+                callback.expectStarted();
+                ka2.start(validKaInterval);
+                callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+                ka.stop();
+                callback.expectStopped();
+
+                // Check that second keepalive can be started/stopped normally if the first one is
+                // stopped.
+                ka2.start(validKaInterval);
+                callback.expectStarted();
+                ka2.stop();
+                callback.expectStopped();
+            }
         }
 
         // Check that deleting the IP address stops the keepalive.
@@ -4291,6 +4310,10 @@ public class ConnectivityServiceTest {
                 testSocket.close();
                 testSocket2.close();
             }
+
+            // Check that the closed socket cannot be used to start keepalive.
+            ka.start(validKaInterval);
+            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
         }
 
         // Check that there is no port leaked after all keepalives and sockets are closed.
