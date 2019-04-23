@@ -76,6 +76,7 @@ interface IStatusBarService
             in int notificationLocation, boolean modifiedBeforeSending);
     void onNotificationSettingsViewed(String key);
     void setSystemUiVisibility(int displayId, int vis, int mask, String cause);
+    void onNotificationBubbleChanged(String key, boolean isBubble);
 
     void onGlobalActionsShown();
     void onGlobalActionsHidden();
