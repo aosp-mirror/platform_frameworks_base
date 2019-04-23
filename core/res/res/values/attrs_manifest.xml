@@ -1682,14 +1682,14 @@
         <attr name="usesNonSdkApi" />
 
         <!-- If {@code true} the user is prompted to keep the app's data on uninstall -->
-        <attr name="hasFragileUserData" />
+        <attr name="hasFragileUserData" format="boolean"/>
 
         <attr name="zygotePreloadName" />
 
         <!-- If {@code true} the system will clear app's data if a restore operation fails.
              This flag is turned on by default. <em>This attribute is usable only by system apps.
              </em> -->
-        <attr name="allowClearUserDataOnFailedRestore"/>
+        <attr name="allowClearUserDataOnFailedRestore" format="boolean"/>
         <!-- If {@code true} the app's non sensitive audio can be captured by other apps with
              {@link android.media.AudioPlaybackCaptureConfiguration} and a
              {@link android.media.projection.MediaProjection}.
@@ -1747,7 +1747,7 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permissionGroup" />
-        <attr name="backgroundPermission" />
+        <attr name="backgroundPermission" format="string"/>
         <attr name="description" />
         <attr name="request" />
         <attr name="protectionLevel" />
@@ -1777,10 +1777,10 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
-        <attr name="request" />
-        <attr name="requestDetail" />
-        <attr name="backgroundRequest" />
-        <attr name="backgroundRequestDetail" />
+        <attr name="request" format="string"/>
+        <attr name="requestDetail" format="string"/>
+        <attr name="backgroundRequest" format="string"/>
+        <attr name="backgroundRequestDetail" format="string"/>
         <attr name="permissionGroupFlags" />
         <attr name="priority" />
     </declare-styleable>
@@ -2246,7 +2246,7 @@
         <attr name="path" />
         <attr name="pathPrefix" />
         <attr name="pathPattern" />
-        <attr name="pathAdvancedPattern" />
+        <attr name="pathAdvancedPattern" format="string"/>
         <attr name="permission" />
         <attr name="readPermission" />
         <attr name="writePermission" />
