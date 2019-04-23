@@ -16,11 +16,7 @@
 
 package android.location;
 
-import android.annotation.IntDef;
 import android.annotation.SystemApi;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * A container of supported GNSS chipset capabilities.
@@ -29,53 +25,61 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public final class GnssCapabilities {
-    /** The GNSS chipset supports low power mode. */
-    public static final int LOW_POWER_MODE                                              = 0;
-
-    /** The GNSS chipset supports blacklisting satellites. */
-    public static final int SATELLITE_BLACKLIST                                         = 1;
-
-    /** The GNSS chipset supports geofencing. */
-    public static final int GEOFENCING                                                  = 2;
-
-    /** The GNSS chipset supports measurements.*/
-    public static final int MEASUREMENTS                                                = 3;
-
-    /** The GNSS chipset supports navigation messages. */
-    public static final int NAV_MESSAGES                                                = 4;
-
-    /** The GNSS chipset supports measurement corrections. */
-    public static final int MEASUREMENT_CORRECTIONS                                     = 5;
-
-    /** The GNSS chipset supports line-of-sight satellite identification measurement corrections. */
-    public static final int MEASUREMENT_CORRECTIONS_LOS_SATS                            = 6;
-
-    /** The GNSS chipset supports per satellite excess-path-length measurement corrections. */
-    public static final int MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH                  = 7;
-
-    /** The GNSS chipset supports reflecting planes measurement corrections. */
-    public static final int MEASUREMENT_CORRECTIONS_REFLECTING_PLANE                    = 8;
-
-    private static final int MIN_CAPABILITY = 0;
-    private static final int MAX_CAPABILITY = MEASUREMENT_CORRECTIONS_REFLECTING_PLANE;
-
     /**
-     * GNSS capability.
+     * Bit mask indicating GNSS chipset supports low power mode.
      * @hide
      */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-            LOW_POWER_MODE,
-            SATELLITE_BLACKLIST,
-            GEOFENCING,
-            MEASUREMENTS,
-            NAV_MESSAGES,
-            MEASUREMENT_CORRECTIONS,
-            MEASUREMENT_CORRECTIONS_LOS_SATS,
-            MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH,
-            MEASUREMENT_CORRECTIONS_REFLECTING_PLANE
-    })
-    public @interface Capability {}
+    public static final long LOW_POWER_MODE                                     = 1L << 0;
+
+    /**
+     * Bit mask indicating GNSS chipset supports blacklisting satellites.
+     * @hide
+     */
+    public static final long SATELLITE_BLACKLIST                                = 1L << 1;
+
+    /**
+     * Bit mask indicating GNSS chipset supports geofencing.
+     * @hide
+     */
+    public static final long GEOFENCING                                         = 1L << 2;
+
+    /**
+     * Bit mask indicating GNSS chipset supports measurements.
+     * @hide
+     */
+    public static final long MEASUREMENTS                                       = 1L << 3;
+
+    /**
+     * Bit mask indicating GNSS chipset supports navigation messages.
+     * @hide
+     */
+    public static final long NAV_MESSAGES                                       = 1L << 4;
+
+    /**
+     * Bit mask indicating GNSS chipset supports measurement corrections.
+     * @hide
+     */
+    public static final long MEASUREMENT_CORRECTIONS                            = 1L << 5;
+
+    /**
+     * Bit mask indicating GNSS chipset supports line-of-sight satellite identification
+     * measurement corrections.
+     * @hide
+     */
+    public static final long MEASUREMENT_CORRECTIONS_LOS_SATS                   = 1L << 6;
+
+    /**
+     * Bit mask indicating GNSS chipset supports per satellite excess-path-length
+     * measurement corrections.
+     * @hide
+     */
+    public static final long MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH         = 1L << 7;
+
+    /**
+     * Bit mask indicating GNSS chipset supports reflecting planes measurement corrections.
+     * @hide
+     */
+    public static final long MEASUREMENT_CORRECTIONS_REFLECTING_PLANE           = 1L << 8;
 
     /** @hide */
     public static final long INVALID_CAPABILITIES = -1;
@@ -93,60 +97,94 @@ public final class GnssCapabilities {
     }
 
     /**
-     * Returns {@code true} if the {@code capability} is supported by the GNSS implementation.
+     * Returns {@code true} if GNSS chipset supports low power mode, {@code false} otherwise.
      */
-    public boolean hasCapability(@Capability int capability) {
-        return isValidCapability(capability) && (mGnssCapabilities & (1 << capability)) != 0;
+    public boolean hasLowPowerMode() {
+        return hasCapability(LOW_POWER_MODE);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports blacklisting satellites, {@code false}
+     * otherwise.
+     */
+    public boolean hasSatelliteBlacklist() {
+        return hasCapability(SATELLITE_BLACKLIST);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports geofencing, {@code false} otherwise.
+     */
+    public boolean hasGeofencing() {
+        return hasCapability(GEOFENCING);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports measurements, {@code false} otherwise.
+     */
+    public boolean hasMeasurements() {
+        return hasCapability(MEASUREMENTS);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports navigation messages, {@code false} otherwise.
+     */
+    public boolean hasNavMessages() {
+        return hasCapability(NAV_MESSAGES);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports measurement corrections, {@code false}
+     * otherwise.
+     */
+    public boolean hasMeasurementCorrections() {
+        return hasCapability(MEASUREMENT_CORRECTIONS);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports line-of-sight satellite identification
+     * measurement corrections, {@code false} otherwise.
+     */
+    public boolean hasMeasurementCorrectionsLosSats() {
+        return hasCapability(MEASUREMENT_CORRECTIONS_LOS_SATS);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports per satellite excess-path-length measurement
+     * corrections, {@code false} otherwise.
+     */
+    public boolean hasMeasurementCorrectionsExcessPathLength() {
+        return hasCapability(MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH);
+    }
+
+    /**
+     * Returns {@code true} if GNSS chipset supports reflecting planes measurement corrections,
+     * {@code false} otherwise.
+     */
+    public boolean hasMeasurementCorrectionsReflectingPane() {
+        return hasCapability(MEASUREMENT_CORRECTIONS_REFLECTING_PLANE);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("GnssCapabilities: (");
-        int capability = 0;
-        boolean addSeparator = false;
-        long gnssCapabilities = mGnssCapabilities;
-        while (gnssCapabilities != 0) {
-            if ((gnssCapabilities & 1) != 0) {
-                if (addSeparator) {
-                    sb.append(' ');
-                } else {
-                    addSeparator = true;
-                }
-                sb.append(toStringCapability(capability));
-            }
-            gnssCapabilities >>= 1;
-            ++capability;
+        StringBuilder sb = new StringBuilder("GnssCapabilities: ( ");
+        if (hasLowPowerMode()) sb.append("LOW_POWER_MODE ");
+        if (hasSatelliteBlacklist()) sb.append("SATELLITE_BLACKLIST ");
+        if (hasGeofencing()) sb.append("GEOFENCING ");
+        if (hasMeasurements()) sb.append("MEASUREMENTS ");
+        if (hasNavMessages()) sb.append("NAV_MESSAGES ");
+        if (hasMeasurementCorrections()) sb.append("MEASUREMENT_CORRECTIONS ");
+        if (hasMeasurementCorrectionsLosSats()) sb.append("MEASUREMENT_CORRECTIONS_LOS_SATS ");
+        if (hasMeasurementCorrectionsExcessPathLength()) {
+            sb.append("MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH ");
+        }
+        if (hasMeasurementCorrectionsReflectingPane()) {
+            sb.append("MEASUREMENT_CORRECTIONS_REFLECTING_PLANE ");
         }
         sb.append(")");
         return sb.toString();
     }
 
-    private boolean isValidCapability(@Capability int capability) {
-        return capability >= MIN_CAPABILITY && capability <= MAX_CAPABILITY;
-    }
-
-    private static String toStringCapability(@Capability int capability) {
-        switch (capability) {
-            case LOW_POWER_MODE:
-                return "LOW_POWER_MODE";
-            case SATELLITE_BLACKLIST:
-                return "SATELLITE_BLACKLIST";
-            case GEOFENCING:
-                return "GEOFENCING";
-            case MEASUREMENTS:
-                return "MEASUREMENTS";
-            case NAV_MESSAGES:
-                return "NAV_MESSAGES";
-            case MEASUREMENT_CORRECTIONS:
-                return "MEASUREMENT_CORRECTIONS";
-            case MEASUREMENT_CORRECTIONS_LOS_SATS:
-                return "MEASUREMENT_CORRECTIONS_LOS_SATS";
-            case MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH:
-                return "MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH";
-            case MEASUREMENT_CORRECTIONS_REFLECTING_PLANE:
-                return "MEASUREMENT_CORRECTIONS_REFLECTING_PLANE";
-            default:
-                return "Unknown(" + capability + ")";
-        }
+    private boolean hasCapability(long capability) {
+        return (mGnssCapabilities & capability) == capability;
     }
 }
