@@ -251,6 +251,11 @@ public class NetworkStackService extends Service {
                 }
             }
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
     }
 
     private static class NetworkMonitorImpl extends INetworkMonitor.Stub {
@@ -324,6 +329,11 @@ public class NetworkStackService extends Service {
         public void notifyNetworkCapabilitiesChanged(NetworkCapabilities nc) {
             checkNetworkStackCallingPermission();
             mNm.notifyNetworkCapabilitiesChanged(nc);
+        }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
         }
     }
 }
