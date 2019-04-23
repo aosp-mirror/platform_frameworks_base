@@ -44,6 +44,11 @@ public interface OnNetworkAttributesRetrievedListener {
                             new NetworkAttributes(networkAttributesParcelable));
                 }
             }
+
+            @Override
+            public int getInterfaceVersion() {
+                return this.VERSION;
+            }
         };
     }
 }
