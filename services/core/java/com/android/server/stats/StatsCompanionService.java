@@ -455,8 +455,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
             List<PackageInfo> pi =
-                    pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES
-                            | PackageManager.MATCH_APEX, profile.id);
+                    pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES, profile.id);
             for (int j = 0; j < pi.size(); j++) {
                 if (pi.get(j).applicationInfo != null) {
                     String installer;
