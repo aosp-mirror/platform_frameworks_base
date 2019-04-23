@@ -33,6 +33,7 @@ aidl_interface {
         "java/android/net/INetworkStackConnector.aidl",
         "java/android/net/INetworkStackStatusCallback.aidl",
         "java/android/net/InitialConfigurationParcelable.aidl",
+        "java/android/net/NattKeepalivePacketDataParcelable.aidl",
         "java/android/net/PrivateDnsConfigParcel.aidl",
         "java/android/net/ProvisioningConfigurationParcelable.aidl",
         "java/android/net/TcpKeepalivePacketDataParcelable.aidl",
