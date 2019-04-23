@@ -46,21 +46,7 @@
   ],
   "postsubmit": [
     {
-      "name": "CtsActivityManagerDeviceTestCases"
-    },
-    {
-      "name": "CtsActivityManagerDeviceSdk25TestCases"
-    },
-    {
       "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.am."
-        }
-      ]
-    },
-    {
-      "name": "WmTests",
       "options": [
         {
           "include-filter": "com.android.server.am."
