@@ -101,7 +101,7 @@ public class VpnTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick() {
-        if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
+        if (mKeyguard.isSecure()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 showConnectDialogOrDisconnect();
             });

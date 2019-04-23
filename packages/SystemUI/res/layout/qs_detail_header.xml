@@ -19,16 +19,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="@dimen/qs_detail_header_padding"
-    android:paddingTop="@dimen/qs_detail_header_padding"
+    android:paddingTop="@dimen/qs_detail_items_padding_top"
     android:paddingBottom="@dimen/qs_detail_items_padding_top"
     android:paddingEnd="@dimen/qs_panel_padding"
-    android:background="@drawable/btn_borderless_rect"
+    android:background="@drawable/qs_detail_toolbar"
     android:orientation="vertical"
     android:gravity="center">
-
-    <com.android.systemui.ResizingSpace
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/qs_detail_margin_top" />
 
     <LinearLayout
         android:layout_width="match_parent"

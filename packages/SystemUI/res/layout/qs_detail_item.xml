@@ -30,7 +30,7 @@
         android:layout_height="@dimen/qs_detail_item_icon_size"
         android:layout_marginStart="@dimen/qs_detail_item_icon_marginStart"
         android:layout_marginEnd="@dimen/qs_detail_item_icon_marginEnd"
-        android:tint="?android:attr/textColorPrimary"/>
+        android:tint="?android:attr/textColorSecondary"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -65,6 +65,6 @@
         android:focusable="true"
         android:scaleType="center"
         android:contentDescription="@*android:string/media_route_controller_disconnect"
-        android:tint="?android:attr/textColorPrimary" />
+        android:tint="?android:attr/textColorSecondary" />
 
 </LinearLayout>

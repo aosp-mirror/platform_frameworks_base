@@ -495,7 +495,7 @@
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
     <dimen name="qs_battery_padding">2dp</dimen>
     <dimen name="qs_detail_padding_start">16dp</dimen>
-    <dimen name="qs_detail_items_padding_top">4dp</dimen>
+    <dimen name="qs_detail_items_padding_top">16dp</dimen>
     <dimen name="qs_detail_item_icon_size">24dp</dimen>
     <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>

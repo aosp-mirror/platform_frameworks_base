@@ -20,8 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <dimen name="qs_detail_items_padding_top">16dp</dimen>
-
     <!-- Global actions grid -->
     <dimen name="global_actions_grid_vertical_padding">8dp</dimen>
     <dimen name="global_actions_grid_horizontal_padding">4dp</dimen>
