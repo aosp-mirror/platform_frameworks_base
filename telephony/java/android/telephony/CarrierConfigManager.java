@@ -1202,7 +1202,7 @@ public class CarrierConfigManager {
      * Override the SPN Display Condition 2 integer bits (lsb). B2, B1 is the last two bits of the
      * spn display condition coding.
      *
-     * The default value -1 mean this field is not config.
+     * The default value -1 mean this field is not set.
      *
      * B1 = 0: display of registered PLMN name not required when registered PLMN is either HPLMN
      * or a PLMN in the service provider PLMN list (see EF_SPDI).
@@ -1241,7 +1241,7 @@ public class CarrierConfigManager {
 
     /**
      * Override the PNN - a string array of comma-separated alpha long and short names:
-     * "alpha_long1, alpha_short1".
+     * "alpha_long1,alpha_short1".
      *
      * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.58 EF_PNN.
      * @hide
@@ -1259,6 +1259,8 @@ public class CarrierConfigManager {
 
     /**
      * Allow ERI rules to select a carrier name display string when using 3gpp2 access technologies.
+     * If this bit is not set, the carrier name display string will be selected from the carrier
+     * display name resolver which doesn't apply the ERI rules.
      *
      * @hide
      */
