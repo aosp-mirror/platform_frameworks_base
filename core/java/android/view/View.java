@@ -28015,6 +28015,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mHandlingPointerEvent;
 
         /**
+         * The offset of this view's window when it's on an embedded display that is re-parented
+         * to another window.
+         */
+        final Point mLocationInParentDisplay = new Point();
+
+        /**
          * Global to the view hierarchy used as a temporary for dealing with
          * x/y points in the transparent region computations.
          */

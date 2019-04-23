@@ -1065,8 +1065,6 @@ final class AccessibilityController {
 
         private final long mRecurringAccessibilityEventsIntervalMillis;
 
-        private int mTempLayer = 0;
-
         public WindowsForAccessibilityObserver(WindowManagerService windowManagerService,
                 WindowsForAccessibilityCallback callback) {
             mContext = windowManagerService.mContext;
@@ -1091,7 +1089,7 @@ final class AccessibilityController {
         }
 
         /**
-         * Check if windows have changed, and send them to the accessibilty subsystem if they have.
+         * Check if windows have changed, and send them to the accessibility subsystem if they have.
          *
          * @param forceSend Send the windows the accessibility even if they haven't changed.
          */
@@ -1108,8 +1106,7 @@ final class AccessibilityController {
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
                 // TODO(b/112273690): Support multiple displays
-                // TODO(b/129098348): Support embedded displays
-                if (mService.getDefaultDisplayContentLocked().mCurrentFocus == null) {
+                if (!isCurrentFocusWindowOnDefaultDisplay()) {
                     return;
                 }
 
@@ -1395,21 +1392,35 @@ final class AccessibilityController {
         }
 
         private void populateVisibleWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
+            final List<WindowState> tempWindowStatesList = new ArrayList<>();
             final DisplayContent dc = mService.getDefaultDisplayContentLocked();
-            mTempLayer = 0;
             dc.forAllWindows((w) -> {
                 if (w.isVisibleLw()) {
-                    outWindows.put(mTempLayer++, w);
+                    tempWindowStatesList.add(w);
                 }
             }, false /* traverseTopToBottom */);
+            // Insert the re-parented windows in another display on top of their parents in
+            // default display.
             mService.mRoot.forAllWindows(w -> {
-                final WindowState win = findRootDisplayParentWindow(w);
-                if (win != null && win.getDisplayContent().isDefaultDisplay && w.isVisibleLw()) {
-                    // TODO(b/129098348): insert windows on child displays into outWindows based on
-                    // root-display-parent window.
-                    outWindows.put(mTempLayer++, w);
+                final WindowState parentWindow = findRootDisplayParentWindow(w);
+                if (parentWindow == null) {
+                    return;
                 }
-            }, false /* traverseTopToBottom */);
+
+                // TODO: Use Region instead to get rid of this complicated logic.
+                // Check the tap exclude region of the parent window. If the tap exclude region
+                // is empty, it means there is another can-receive-pointer-event view on top of
+                // the region. Hence, we don't count the window as visible.
+                if (w.isVisibleLw() && parentWindow.getDisplayContent().isDefaultDisplay
+                        && parentWindow.hasTapExcludeRegion()
+                        && tempWindowStatesList.contains(parentWindow)) {
+                    tempWindowStatesList.add(
+                            tempWindowStatesList.lastIndexOf(parentWindow) + 1, w);
+                }
+            }, true /* traverseTopToBottom */);
+            for (int i = 0; i < tempWindowStatesList.size(); i++) {
+                outWindows.put(i, tempWindowStatesList.get(i));
+            }
         }
 
         private WindowState findRootDisplayParentWindow(WindowState win) {
@@ -1423,6 +1434,23 @@ final class AccessibilityController {
                 candidate = displayParentWindow.getDisplayContent().getParentWindow();
             }
             return displayParentWindow;
+        }
+
+        private boolean isCurrentFocusWindowOnDefaultDisplay() {
+            final WindowState focusedWindow =
+                    mService.mRoot.getTopFocusedDisplayContent().mCurrentFocus;
+            if (focusedWindow == null) {
+                return false;
+            }
+
+            final WindowState rootDisplayParentWindow = findRootDisplayParentWindow(focusedWindow);
+            if (!focusedWindow.isDefaultDisplay()
+                    && (rootDisplayParentWindow == null
+                    || !rootDisplayParentWindow.isDefaultDisplay())) {
+                return false;
+            }
+
+            return true;
         }
 
         private class MyHandler extends Handler {
