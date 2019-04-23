@@ -472,7 +472,10 @@ public class CarStatusBar extends StatusBar implements
                 }
                 boolean isTracking = mIsTracking;
                 Rect rect = mNotificationList.getClipBounds();
-                float clippedHeight = rect.bottom;
+                float clippedHeight = 0;
+                if (rect != null) {
+                    clippedHeight = rect.bottom;
+                }
                 if (!handled && event.getActionMasked() == MotionEvent.ACTION_UP
                         && mIsSwipingVerticallyToClose) {
                     if (mSettleClosePercentage < mPercentageFromBottom && isTracking) {
