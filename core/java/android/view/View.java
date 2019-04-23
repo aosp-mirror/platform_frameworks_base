@@ -15608,8 +15608,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     void setFlags(int flags, int mask) {
-        final boolean accessibilityEnabled =
-                AccessibilityManager.getInstance(mContext).isEnabled();
+        final boolean accessibilityEnabled = AccessibilityManager.getInstance(mContext).isEnabled();
         final boolean oldIncludeForAccessibility = accessibilityEnabled && includeForAccessibility();
 
         int old = mViewFlags;
@@ -15824,19 +15823,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (accessibilityEnabled) {
             // If we're an accessibility pane and the visibility changed, we already have sent
             // a state change, so we really don't need to report other changes.
-            if (isAccessibilityPane()) {
-                changed &= ~VISIBILITY_MASK;
-            }
-            if ((changed & FOCUSABLE) != 0 || (changed & VISIBILITY_MASK) != 0
+            // Accessibility Services aren't concerned with changes between GONE and INVISIBLE.
+            boolean visibilityChanged = !isAccessibilityPane() && ((changed & VISIBILITY_MASK) != 0)
+                    && ((old & VISIBILITY_MASK) == VISIBLE || newVisibility == VISIBLE);
+            if (oldIncludeForAccessibility != includeForAccessibility() || visibilityChanged) {
+                notifySubtreeAccessibilityStateChangedIfNeeded();
+            } else if ((changed & ENABLED_MASK) != 0 || (changed & FOCUSABLE) != 0
                     || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
                     || (changed & CONTEXT_CLICKABLE) != 0) {
-                if (oldIncludeForAccessibility != includeForAccessibility()) {
-                    notifySubtreeAccessibilityStateChangedIfNeeded();
-                } else {
-                    notifyViewAccessibilityStateChangedIfNeeded(
-                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
-                }
-            } else if ((changed & ENABLED_MASK) != 0) {
                 notifyViewAccessibilityStateChangedIfNeeded(
                         AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
