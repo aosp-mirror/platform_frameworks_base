@@ -23,6 +23,8 @@
     <bool name="config_useRoundIcon">false</bool>
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">0dp</dimen>
-
+    <!-- Corner radius for bottom sheet system dialogs -->
+    <dimen name="config_bottomDialogCornerRadius">0dp</dimen>
+  
 </resources>
 
