@@ -771,7 +771,7 @@ import com.android.internal.annotations.GuardedBy;
                 case MSG_L_SCOCLIENT_DIED:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            mBtHelper.scoClientDied(msg.arg1);
+                            mBtHelper.scoClientDied(msg.obj);
                         }
                     }
                     break;
