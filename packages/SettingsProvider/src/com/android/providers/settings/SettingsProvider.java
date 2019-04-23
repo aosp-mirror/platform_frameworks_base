@@ -4350,15 +4350,20 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     if (navBarMode != -1) {
+                        String overlayPackage = "";
                         try {
-                            overlayManager.setEnabled(NAV_BAR_MODE_3BUTTON_OVERLAY,
-                                    navBarMode == NAV_BAR_MODE_3BUTTON,
-                                    UserHandle.USER_CURRENT);
-                            overlayManager.setEnabled(NAV_BAR_MODE_2BUTTON_OVERLAY,
-                                    navBarMode == NAV_BAR_MODE_2BUTTON,
-                                    UserHandle.USER_CURRENT);
-                            overlayManager.setEnabled(NAV_BAR_MODE_GESTURAL_OVERLAY,
-                                    navBarMode == NAV_BAR_MODE_GESTURAL,
+                            switch (navBarMode) {
+                                case NAV_BAR_MODE_3BUTTON:
+                                    overlayPackage = NAV_BAR_MODE_3BUTTON_OVERLAY;
+                                    break;
+                                case NAV_BAR_MODE_2BUTTON:
+                                    overlayPackage = NAV_BAR_MODE_2BUTTON_OVERLAY;
+                                    break;
+                                case NAV_BAR_MODE_GESTURAL:
+                                    overlayPackage = NAV_BAR_MODE_GESTURAL_OVERLAY;
+                                    break;
+                            }
+                            overlayManager.setEnabledExclusiveInCategory(overlayPackage,
                                     UserHandle.USER_CURRENT);
                         } catch (RemoteException e) {
                             throw new IllegalStateException(
