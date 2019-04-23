@@ -44,6 +44,12 @@ import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_MIN_EVALUATE_TI
 import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS;
 import static android.net.util.DataStallUtils.DEFAULT_DNS_LOG_SIZE;
 import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_FALLBACK_URL;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_HTTPS_URL;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_HTTP_URL;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_MODE;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_MODE_IGNORE;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_MODE_PROMPT;
 import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS;
 import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USER_AGENT;
 import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USE_HTTPS;
@@ -1168,10 +1174,10 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private boolean getIsCaptivePortalCheckEnabled() {
-        String symbol = Settings.Global.CAPTIVE_PORTAL_MODE;
-        int defaultValue = Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT;
+        String symbol = CAPTIVE_PORTAL_MODE;
+        int defaultValue = CAPTIVE_PORTAL_MODE_PROMPT;
         int mode = mDependencies.getSetting(mContext, symbol, defaultValue);
-        return mode != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
+        return mode != CAPTIVE_PORTAL_MODE_IGNORE;
     }
 
     private boolean getUseHttpsValidation() {
@@ -1181,8 +1187,7 @@ public class NetworkMonitor extends StateMachine {
 
     private String getCaptivePortalServerHttpsUrl() {
         return getSettingFromResource(mContext, R.string.config_captive_portal_https_url,
-                R.string.default_captive_portal_https_url,
-                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL);
+                R.string.default_captive_portal_https_url, CAPTIVE_PORTAL_HTTPS_URL);
     }
 
     /**
@@ -1194,8 +1199,7 @@ public class NetworkMonitor extends StateMachine {
      */
     public String getCaptivePortalServerHttpUrl() {
         return getSettingFromResource(mContext, R.string.config_captive_portal_http_url,
-                R.string.default_captive_portal_http_url,
-                Settings.Global.CAPTIVE_PORTAL_HTTP_URL);
+                R.string.default_captive_portal_http_url, CAPTIVE_PORTAL_HTTP_URL);
     }
 
     private int getConsecutiveDnsTimeoutThreshold() {
@@ -1224,8 +1228,8 @@ public class NetworkMonitor extends StateMachine {
 
     private URL[] makeCaptivePortalFallbackUrls() {
         try {
-            final String firstUrl = mDependencies.getSetting(mContext,
-                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, null);
+            final String firstUrl = mDependencies.getSetting(mContext, CAPTIVE_PORTAL_FALLBACK_URL,
+                    null);
 
             final URL[] settingProviderUrls;
             if (!TextUtils.isEmpty(firstUrl)) {
