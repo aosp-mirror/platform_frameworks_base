@@ -1015,7 +1015,7 @@ public final class AccessibilityManager {
      * @hide
      */
     @SystemApi
-    public int getAccessibilityWindowId(IBinder windowToken) {
+    public int getAccessibilityWindowId(@Nullable IBinder windowToken) {
         if (windowToken == null) {
             return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
         }
