@@ -23,6 +23,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -1265,9 +1266,13 @@ public class NotificationUsageStats {
                 sNumWrites = 0;
                 sLastPruneMs = nowMs;
                 long horizonStartMs = nowMs - HORIZON_MS;
-                int deletedRows = db.delete(TAB_LOG, COL_EVENT_TIME + " < ?",
-                        new String[] { String.valueOf(horizonStartMs) });
-                Log.d(TAG, "Pruned event entries: " + deletedRows);
+                try {
+                    int deletedRows = db.delete(TAB_LOG, COL_EVENT_TIME + " < ?",
+                            new String[]{String.valueOf(horizonStartMs)});
+                    Log.d(TAG, "Pruned event entries: " + deletedRows);
+                } catch (SQLiteFullException e) {
+                    Log.e(TAG, String.format("%s: %s", e.toString(), e.getMessage()));
+                }
             }
         }
 
