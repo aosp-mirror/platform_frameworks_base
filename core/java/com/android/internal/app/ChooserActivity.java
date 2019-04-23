@@ -1802,7 +1802,8 @@ public class ChooserActivity extends ResolverActivity {
             if (info == null) return null;
 
             // Now fetch app icon and raster with no badging even in work profile
-            Bitmap appIcon = makePresentationGetter(info).getIconBitmap();
+            Bitmap appIcon = makePresentationGetter(info).getIconBitmap(
+                    UserHandle.getUserHandleForUid(UserHandle.myUserId()));
 
             // Raster target drawable with appIcon as a badge
             SimpleIconFactory sif = SimpleIconFactory.obtain(ChooserActivity.this);
