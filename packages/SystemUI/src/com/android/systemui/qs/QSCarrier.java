@@ -132,15 +132,18 @@ public class QSCarrier extends LinearLayout {
         }
 
         @Override
+        protected void onFinishInflate() {
+            setSelected(true);
+        }
+
+        @Override
         protected void onVisibilityChanged(View changedView, int visibility) {
             super.onVisibilityChanged(changedView, visibility);
             // Only show marquee when visible
             if (visibility == VISIBLE) {
                 setEllipsize(TextUtils.TruncateAt.MARQUEE);
-                setSelected(true);
             } else {
                 setEllipsize(TextUtils.TruncateAt.END);
-                setSelected(false);
             }
         }
     }
