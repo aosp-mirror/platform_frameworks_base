@@ -46,6 +46,7 @@ public interface NotificationDelegate {
             int notificationLocation);
     void onNotificationDirectReplied(String key);
     void onNotificationSettingsViewed(String key);
+    void onNotificationBubbleChanged(String key, boolean isBubble);
 
     /**
      * Notifies that smart replies and actions have been added to the UI.
