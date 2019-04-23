@@ -98,9 +98,9 @@ public final class WhitelistHelper {
             @Nullable List<ComponentName> components) {
         final ArraySet<String> packageNamesSet = packageNames == null ? null
                 : new ArraySet<>(packageNames);
-        final ArraySet<ComponentName> componentssSet = components == null ? null
+        final ArraySet<ComponentName> componentsSet = components == null ? null
                 : new ArraySet<>(components);
-        setWhitelist(packageNamesSet, componentssSet);
+        setWhitelist(packageNamesSet, componentsSet);
     }
 
     /**
@@ -170,7 +170,7 @@ public final class WhitelistHelper {
 
             pw.print("["); pw.print(components.valueAt(0));
             for (int j = 1; j < components.size(); j++) {
-                pw.print(", "); pw.print(components.valueAt(i));
+                pw.print(", "); pw.print(components.valueAt(j));
             }
             pw.println("]");
         }

@@ -28,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
+        android:elevation="1dp"
         android:background="@drawable/bottomsheet_background">
 
         <ImageView
@@ -66,6 +67,7 @@
         android:listSelector="@color/transparent"
         android:divider="@null"
         android:scrollIndicators="top"
+        android:elevation="1dp"
         android:nestedScrollingEnabled="true"/>
 
     <TextView android:id="@+id/empty"
@@ -76,6 +78,7 @@
               android:text="@string/noApplications"
               android:padding="@dimen/chooser_edge_margin_normal"
               android:gravity="center"
+              android:elevation="1dp"
               android:visibility="gone"/>
 
 </com.android.internal.widget.ResolverDrawerLayout>

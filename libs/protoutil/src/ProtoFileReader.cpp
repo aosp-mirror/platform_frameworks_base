@@ -127,7 +127,8 @@ ProtoFileReader::move(size_t amt)
         if (!ensure_data()) {
             return;
         }
-        const size_t chunk = mMaxOffset - mOffset < amt ? amt : mMaxOffset - mOffset;
+        const size_t chunk =
+                mMaxOffset - mOffset > amt ? amt : mMaxOffset - mOffset;
         mOffset += chunk;
         amt -= chunk;
     }

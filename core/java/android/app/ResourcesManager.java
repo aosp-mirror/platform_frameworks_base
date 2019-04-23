@@ -236,7 +236,7 @@ public class ResourcesManager {
             config.screenLayout = Configuration.reduceScreenLayout(sl,
                     config.screenHeightDp, config.screenWidthDp);
         }
-        config.smallestScreenWidthDp = config.screenWidthDp; // assume screen does not rotate
+        config.smallestScreenWidthDp = Math.min(config.screenWidthDp, config.screenHeightDp);
         config.compatScreenWidthDp = config.screenWidthDp;
         config.compatScreenHeightDp = config.screenHeightDp;
         config.compatSmallestScreenWidthDp = config.smallestScreenWidthDp;

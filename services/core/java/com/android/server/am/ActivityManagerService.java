@@ -7894,8 +7894,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
             if (!isDebuggable) {
-                if ((app.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                    throw new SecurityException("Process not debuggable: " + app.packageName);
+                if (!app.isProfileableByShell()) {
+                    throw new SecurityException("Process not debuggable, "
+                            + "and not profileable by shell: " + app.packageName);
                 }
             }
             mProfileData.setProfileApp(processName);

@@ -354,16 +354,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final ServiceConnection mOverviewServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mHandler.removeCallbacks(mDeferredConnectionCallback);
-            mCurrentBoundedUserId = mDeviceProvisionedController.getCurrentUser();
             mConnectionBackoffAttempts = 0;
-            mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
-            // Listen for launcher's death
+            mHandler.removeCallbacks(mDeferredConnectionCallback);
             try {
                 service.linkToDeath(mOverviewServiceDeathRcpt, 0);
             } catch (RemoteException e) {
+                // Failed to link to death (process may have died between binding and connecting),
+                // just unbind the service for now and retry again
                 Log.e(TAG_OPS, "Lost connection to launcher service", e);
+                disconnectFromLauncherService();
+                retryConnectionWithBackoff();
+                return;
             }
+
+            mCurrentBoundedUserId = mDeviceProvisionedController.getCurrentUser();
+            mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
 
             Bundle params = new Bundle();
             params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
@@ -550,7 +555,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mHandler.post(()-> {
                 StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                 if (bar != null) {
-                    System.out.println("MERONG dispatchNotificationPanelTouchEvent");
                     mStatusBarGestureDownEvent.setAction(MotionEvent.ACTION_CANCEL);
                     bar.dispatchNotificationsPanelTouchEvent(mStatusBarGestureDownEvent);
                     mStatusBarGestureDownEvent.recycle();

@@ -32,7 +32,7 @@ class DeviceInfo {
     PREVENT_COPY_AND_ASSIGN(DeviceInfo);
 
 public:
-    static const DeviceInfo* get();
+    static DeviceInfo* get();
 
     // this value is only valid after the GPU has been initialized and there is a valid graphics
     // context or if you are using the HWUI_NULL_GPU
@@ -40,6 +40,9 @@ public:
     const DisplayInfo& displayInfo() const { return mDisplayInfo; }
     sk_sp<SkColorSpace> getWideColorSpace() const { return mWideColorSpace; }
     SkColorType getWideColorType() const { return mWideColorType; }
+    float getMaxRefreshRate() const { return mMaxRefreshRate; }
+
+    void onDisplayConfigChanged();
 
 private:
     friend class renderthread::RenderThread;
@@ -51,6 +54,7 @@ private:
     DisplayInfo mDisplayInfo;
     sk_sp<SkColorSpace> mWideColorSpace;
     SkColorType mWideColorType;
+    const float mMaxRefreshRate;
 };
 
 } /* namespace uirenderer */
