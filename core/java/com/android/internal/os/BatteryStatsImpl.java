@@ -609,9 +609,7 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_RADIO = 0x04;
         int UPDATE_BT = 0x08;
         int UPDATE_RPM = 0x10; // 16
-        int UPDATE_RAIL = 0x20; // 32
-        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM
-                | UPDATE_RAIL;
+        int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM;
 
         Future<?> scheduleSync(String reason, int flags);
         Future<?> scheduleCpuSyncDueToRemovedUid(int uid);

@@ -407,6 +407,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         SynchronousResultReceiver wifiReceiver = null;
         SynchronousResultReceiver bluetoothReceiver = null;
         SynchronousResultReceiver modemReceiver = null;
+        boolean railUpdated = false;
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
@@ -426,6 +427,10 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     // Oh well.
                 }
             }
+            synchronized (mStats) {
+                mStats.updateRailStatsLocked();
+            }
+            railUpdated = true;
         }
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_BT) != 0) {
@@ -446,6 +451,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (mTelephony != null) {
                 modemReceiver = new SynchronousResultReceiver("telephony");
                 mTelephony.requestModemActivityInfo(modemReceiver);
+            }
+            if (!railUpdated) {
+                synchronized (mStats) {
+                    mStats.updateRailStatsLocked();
+                }
             }
         }
 
@@ -475,10 +485,6 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
             if ((updateFlags & UPDATE_RPM) != 0) {
                 mStats.updateRpmStatsLocked();
-            }
-
-            if ((updateFlags & UPDATE_RAIL) != 0) {
-                mStats.updateRailStatsLocked();
             }
 
             if (bluetoothInfo != null) {
