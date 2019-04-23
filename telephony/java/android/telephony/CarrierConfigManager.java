@@ -1199,6 +1199,80 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * Override the SPN Display Condition 2 integer bits (lsb). B2, B1 is the last two bits of the
+     * spn display condition coding.
+     *
+     * The default value -1 mean this field is not config.
+     *
+     * B1 = 0: display of registered PLMN name not required when registered PLMN is either HPLMN
+     * or a PLMN in the service provider PLMN list (see EF_SPDI).
+     * B1 = 1: display of registered PLMN name required when registered PLMN is either HPLMN or a
+     * PLMN in the service provider PLMN list(see EF_SPDI).
+     * B2 = 0: display of the service provider name is required when registered PLMN is neither
+     * HPLMN nor a PLMN in the service provider PLMN list(see EF_SPDI).
+     * B2 = 1: display of the service provider name is not required when registered PLMN is neither
+     * HPLMN nor a PLMN in the service provider PLMN list(see EF_SPDI).
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.12 EF_SPN.
+     * @hide
+     */
+    public static final String KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT =
+            "spn_display_condition_override_int";
+
+    /**
+     * Override the SPDI - an array of PLMN(MCC + MNC) strings.
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.66 EF_SPDI.
+     * @hide
+     */
+    public static final String KEY_SPDI_OVERRIDE_STRING_ARRAY = "spdi_override_string_array";
+
+    /**
+     * Override the EHPLMNs - an array of PLMN(MCC + MNC) strings.
+     *
+     * To allow provision for multiple HPLMN codes, PLMN codes that are present within this list
+     * shall replace the HPLMN code derived from the IMSI for PLMN selection purposes.
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.84 EF_EHPLMN
+     * Reference: 3GPP TS 23.122 v15.6.0 Section 1.2 Equivalent HPLMN list
+     * @hide
+     */
+    public static final String KEY_EHPLMN_OVERRIDE_STRING_ARRAY = "ehplmn_override_string_array";
+
+    /**
+     * Override the PNN - a string array of comma-separated alpha long and short names:
+     * "alpha_long1, alpha_short1".
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.58 EF_PNN.
+     * @hide
+     */
+    public static final String KEY_PNN_OVERRIDE_STRING_ARRAY = "pnn_override_string_array";
+
+    /**
+     * A string array of OPL records, each with comma-delimited data fields as follows:
+     * "plmn1,lactac_start,lactac_end,index".
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.59 EF_OPL.
+     * @hide
+     */
+    public static final String KEY_OPL_OVERRIDE_STRING_ARRAY = "opl_override_opl_string_array";
+
+    /**
+     * Allow ERI rules to select a carrier name display string when using 3gpp2 access technologies.
+     *
+     * @hide
+     */
+    public static final String KEY_ALLOW_ERI_BOOL = "allow_cdma_eri_bool";
+
+    /**
+     * If true, use the carrier display name(SPN and PLMN) from the carrier display name resolver.
+     *
+     * @hide
+     */
+    public static final String KEY_ENABLE_CARRIER_DISPLAY_NAME_RESOLVER_BOOL =
+            "enable_carrier_display_name_resolver_bool";
+
+    /**
      * String to override sim country iso.
      * Sim country iso is based on sim MCC which is coarse and doesn't work with dual IMSI SIM where
      * a SIM can have multiple MCC from different countries.
@@ -3022,6 +3096,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putInt(KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT, -1);
+        sDefaults.putStringArray(KEY_SPDI_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_PNN_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_OPL_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_EHPLMN_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_ALLOW_ERI_BOOL, false);
+        sDefaults.putBoolean(KEY_ENABLE_CARRIER_DISPLAY_NAME_RESOLVER_BOOL, false);
         sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
         sDefaults.putString(KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING, null);
