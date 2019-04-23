@@ -1986,17 +1986,19 @@ public class LocationManager {
     }
 
     /**
-     * Returns the supported capabilities of the GNSS chipset or {@code null} if there is an error
-     * in obtaining the capabilities.
+     * Returns the supported capabilities of the GNSS chipset.
+     *
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present.
      *
      * @hide
      */
     @SystemApi
-    public @Nullable GnssCapabilities getGnssCapabilities() {
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public @NonNull GnssCapabilities getGnssCapabilities() {
         try {
             long gnssCapabilities = mGnssMeasurementCallbackTransport.getGnssCapabilities();
             if (gnssCapabilities == GnssCapabilities.INVALID_CAPABILITIES) {
-                return null;
+                gnssCapabilities = 0L;
             }
             return GnssCapabilities.of(gnssCapabilities);
         } catch (RemoteException e) {
