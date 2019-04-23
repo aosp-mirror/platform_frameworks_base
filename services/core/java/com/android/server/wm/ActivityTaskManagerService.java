@@ -3372,6 +3372,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 if (stack.inFreeformWindowingMode()) {
                     stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                } else if (stack.getParent().inFreeformWindowingMode()) {
+                    // If the window is on a freeform display, set it to undefined. It will be
+                    // resolved to freeform and it can adjust windowing mode when the display mode
+                    // changes in runtime.
+                    stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                 } else {
                     stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
                 }
