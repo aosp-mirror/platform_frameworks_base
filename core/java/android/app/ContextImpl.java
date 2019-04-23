@@ -68,6 +68,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -98,6 +99,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -1828,11 +1830,17 @@ class ContextImpl extends Context {
             }
             Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
                     + permission);
+            PermissionManager.addPermissionDenialHint("Missing ActivityManager");
             return PackageManager.PERMISSION_DENIED;
         }
 
         try {
-            return am.checkPermission(permission, pid, uid);
+            List<String> hints = PermissionManager.getPermissionDenialHints();
+            if (hints == null) {
+                return am.checkPermission(permission, pid, uid);
+            } else {
+                return am.checkPermissionWithDenialHintForwarding(permission, pid, uid, hints);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1889,43 +1897,61 @@ class ContextImpl extends Context {
             String permission, int resultOfCheck,
             boolean selfToo, int uid, String message) {
         if (resultOfCheck != PackageManager.PERMISSION_GRANTED) {
+            List<String> hints = PermissionManager.getPermissionDenialHints();
             throw new SecurityException(
                     (message != null ? (message + ": ") : "") +
                     (selfToo
                      ? "Neither user " + uid + " nor current process has "
-                     : "uid " + uid + " does not have ") +
-                    permission +
-                    ".");
+                     : "uid " + uid + " does not have ")
+                            + permission + "."
+                            + (hints == null ? "" : " Hints: " + hints));
         }
     }
 
     @Override
     public void enforcePermission(
             String permission, int pid, int uid, String message) {
-        enforce(permission,
-                checkPermission(permission, pid, uid),
-                false,
-                uid,
-                message);
+        List<String> prev = PermissionManager.collectPermissionDenialHints(this, uid);
+        try {
+            enforce(permission,
+                    checkPermission(permission, pid, uid),
+                    false,
+                    uid,
+                    message);
+        } finally {
+            PermissionManager.resetPermissionDenialHints(prev);
+        }
     }
 
     @Override
     public void enforceCallingPermission(String permission, String message) {
-        enforce(permission,
-                checkCallingPermission(permission),
-                false,
-                Binder.getCallingUid(),
-                message);
+        List<String> prev = PermissionManager.collectPermissionDenialHints(this,
+                Binder.getCallingUid());
+        try {
+            enforce(permission,
+                    checkCallingPermission(permission),
+                    false,
+                    Binder.getCallingUid(),
+                    message);
+        } finally {
+            PermissionManager.resetPermissionDenialHints(prev);
+        }
     }
 
     @Override
     public void enforceCallingOrSelfPermission(
             String permission, String message) {
-        enforce(permission,
-                checkCallingOrSelfPermission(permission),
-                true,
-                Binder.getCallingUid(),
-                message);
+        List<String> prev = PermissionManager.collectPermissionDenialHints(this,
+                Binder.getCallingUid());
+        try {
+            enforce(permission,
+                    checkCallingOrSelfPermission(permission),
+                    true,
+                    Binder.getCallingUid(),
+                    message);
+        } finally {
+            PermissionManager.resetPermissionDenialHints(prev);
+        }
     }
 
     @Override
