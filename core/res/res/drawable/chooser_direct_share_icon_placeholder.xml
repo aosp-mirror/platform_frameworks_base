@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2019 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+                 xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:aapt="http://schemas.android.com/aapt"
+                android:width="36dp"
+                android:height="36dp"
+                android:viewportHeight="64"
+                android:viewportWidth="64">
+
+            <group android:name="background">
+                <path android:pathData="M0,0 L 64,0 64,64 0,64 z"
+                      android:fillColor="@color/chooser_gradient_background"/>
+            </group>
+
+            <!-- Gradient starts offscreen so it is not visible in the first frame before start -->
+            <group android:name="gradient" android:translateX="-128">
+                <path
+                    android:pathData="M0,0 L 128,0 128,128 0,128 z">
+                    <aapt:attr name="android:fillColor">
+                        <gradient
+                            android:type="linear"
+                            android:startX="0"
+                            android:endX="128"
+                            android:startY="0"
+                            android:endY="0">
+                            <item
+                                android:color="@android:color/transparent"
+                                android:offset="0.0" />
+                            <item
+                                android:color="@color/chooser_gradient_highlight"
+                                android:offset="0.5" />
+                            <item
+                                android:color="@android:color/transparent"
+                                android:offset="1.0" />
+                        </gradient>
+                    </aapt:attr>
+                </path>
+            </group>
+
+            <!-- Use a foregroud with a cutout shape matching direct share inset for appx applied
+                 shadow. Using clip-path is a more elegant solution but leaves awful jaggies around
+                 the path's shape. -->
+            <group android:name="cover">
+                <path android:fillColor="?attr/colorBackgroundFloating"
+                      android:pathData="M0,0 L64,0 L64,64 L0,64 L0,0 Z M59.0587325,42.453601 C60.3124932,39.2104785 61,35.6855272 61,32 C61,15.9837423 48.0162577,3 32,3 C15.9837423,3 3,15.9837423 3,32 C3,48.0162577 15.9837423,61 32,61 C35.6855272,61 39.2104785,60.3124932 42.453601,59.0587325 C44.3362195,60.2864794 46.5847839,61 49,61 C55.627417,61 61,55.627417 61,49 C61,46.5847839 60.2864794,44.3362195 59.0587325,42.453601 Z"/>
+            </group>
+        </vector>
+    </aapt:attr>
+
+    <!-- This AVD uses special properties so that once started it will loop infinitely with no
+         need for callbacks to restart. -->
+    <target android:name="gradient">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="1700"
+                android:pathData="M -128,0 L 192,0"
+                android:propertyXName="translateX"
+                android:repeatMode="restart"
+                android:repeatCount="infinite"
+                android:startOffset="0">
+                <aapt:attr name="android:interpolator">
+                    <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
+                </aapt:attr>
+            </objectAnimator>
+        </aapt:attr>
+    </target>
+</animated-vector>

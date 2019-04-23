@@ -48,4 +48,8 @@
 
     <color name="list_divider_color_light">#ffdadce0</color>
     <color name="list_divider_color_dark">#85ffffff</color>
+    <color name="loading_gradient_background_color_dark">#2D3033</color>
+    <color name="loading_gradient_background_color_light">#DADCE0</color>
+    <color name="loading_gradient_highlight_color_dark">#3C4043</color>
+    <color name="loading_gradient_highlight_color_light">#F1F3F4</color>
 </resources>

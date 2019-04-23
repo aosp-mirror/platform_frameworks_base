@@ -60,6 +60,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -1680,7 +1681,10 @@ public class ChooserActivity extends ResolverActivity {
 
     final class PlaceHolderTargetInfo extends NotSelectableTargetInfo {
         public Drawable getDisplayIcon() {
-            return getDrawable(R.drawable.resolver_icon_placeholder);
+            AnimatedVectorDrawable avd = (AnimatedVectorDrawable)
+                    getDrawable(R.drawable.chooser_direct_share_icon_placeholder);
+            avd.start(); // Start animation after generation
+            return avd;
         }
     }
 
