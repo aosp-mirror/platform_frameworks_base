@@ -203,4 +203,7 @@ public abstract class PowerManagerInternal {
 
     /** Returns whether there hasn't been a user activity event for the given number of ms. */
     public abstract boolean wasDeviceIdleFor(long ms);
+
+    /** Returns information about the last wakeup event. */
+    public abstract PowerManager.WakeData getLastWakeup();
 }
