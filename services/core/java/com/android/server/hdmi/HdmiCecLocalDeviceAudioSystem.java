@@ -353,6 +353,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildDeviceVendorIdCommand(mAddress, mService.getVendorId()));
         mService.registerTvInputCallback(mTvInputCallback);
+        // Some TVs, for example Mi TV, need ARC on before turning System Audio Mode on
+        // to request Short Audio Descriptor. Since ARC and SAM are independent,
+        // we can turn on ARC anyways when audio system device just boots up.
+        initArcOnFromAvr();
         int systemAudioControlOnPowerOnProp =
                 SystemProperties.getInt(
                         PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON,
@@ -919,8 +923,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // Since some TVs don't request ARC on with System Audio Mode on request
         if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
                 && isDirectConnectToTv()) {
-            if (newSystemAudioMode && !isArcEnabled()) {
-                removeAction(ArcInitiationActionFromAvr.class);
+            if (newSystemAudioMode && !isArcEnabled()
+                    && !hasAction(ArcInitiationActionFromAvr.class)) {
                 addAndStartAction(new ArcInitiationActionFromAvr(this));
             } else if (!newSystemAudioMode && isArcEnabled()) {
                 removeAction(ArcTerminationActionFromAvr.class);
@@ -1093,6 +1097,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     protected boolean isArcEnabled() {
         synchronized (mLock) {
             return mArcEstablished;
+        }
+    }
+
+    private void initArcOnFromAvr() {
+        if (SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)
+                && isDirectConnectToTv() && !isArcEnabled()) {
+            removeAction(ArcInitiationActionFromAvr.class);
+            addAndStartAction(new ArcInitiationActionFromAvr(this));
         }
     }
 
