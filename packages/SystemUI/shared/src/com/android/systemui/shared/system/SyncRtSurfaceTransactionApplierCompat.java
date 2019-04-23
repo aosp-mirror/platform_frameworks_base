@@ -19,6 +19,9 @@ package com.android.systemui.shared.system;
 import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.Message;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewRootImpl;
@@ -33,8 +36,15 @@ import java.util.function.Consumer;
  */
 public class SyncRtSurfaceTransactionApplierCompat {
 
+    private static final int MSG_UPDATE_SEQUENCE_NUMBER = 0;
+
     private final Surface mTargetSurface;
     private final ViewRootImpl mTargetViewRootImpl;
+    private final Handler mApplyHandler;
+
+    private int mSequenceNumber = 0;
+    private int mPendingSequenceNumber = 0;
+    private Runnable mAfterApplyCallback;
 
     /**
      * @param targetView The view in the surface that acts as synchronization anchor.
@@ -42,6 +52,26 @@ public class SyncRtSurfaceTransactionApplierCompat {
     public SyncRtSurfaceTransactionApplierCompat(View targetView) {
         mTargetViewRootImpl = targetView != null ? targetView.getViewRootImpl() : null;
         mTargetSurface = mTargetViewRootImpl != null ? mTargetViewRootImpl.mSurface : null;
+
+        mApplyHandler = new Handler(new Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                if (msg.what == MSG_UPDATE_SEQUENCE_NUMBER) {
+                    onApplyMessage(msg.arg1);
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void onApplyMessage(int seqNo) {
+        mSequenceNumber = seqNo;
+        if (mSequenceNumber == mPendingSequenceNumber && mAfterApplyCallback != null) {
+            Runnable r = mAfterApplyCallback;
+            mAfterApplyCallback = null;
+            r.run();
+        }
     }
 
     /**
@@ -54,10 +84,15 @@ public class SyncRtSurfaceTransactionApplierCompat {
         if (mTargetViewRootImpl == null || mTargetViewRootImpl.getView() == null) {
             return;
         }
+
+        mPendingSequenceNumber++;
+        final int toApplySeqNo = mPendingSequenceNumber;
         mTargetViewRootImpl.registerRtFrameCallback(new HardwareRenderer.FrameDrawingCallback() {
             @Override
             public void onFrameDraw(long frame) {
                 if (mTargetSurface == null || !mTargetSurface.isValid()) {
+                    Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
+                            .sendToTarget();
                     return;
                 }
                 TransactionCompat t = new TransactionCompat();
@@ -70,11 +105,34 @@ public class SyncRtSurfaceTransactionApplierCompat {
                 }
                 t.setEarlyWakeup();
                 t.apply();
+                mApplyHandler.sendEmptyMessage(toApplySeqNo);
             }
         });
 
         // Make sure a frame gets scheduled.
         mTargetViewRootImpl.getView().invalidate();
+    }
+
+    /**
+     * Calls the runnable when any pending apply calls have completed
+     */
+    public void addAfterApplyCallback(final Runnable afterApplyCallback) {
+        if (mSequenceNumber == mPendingSequenceNumber) {
+            afterApplyCallback.run();
+        } else {
+            if (mAfterApplyCallback == null) {
+                mAfterApplyCallback = afterApplyCallback;
+            } else {
+                final Runnable oldCallback = mAfterApplyCallback;
+                mAfterApplyCallback = new Runnable() {
+                    @Override
+                    public void run() {
+                        afterApplyCallback.run();
+                        oldCallback.run();
+                    }
+                };
+            }
+        }
     }
 
     public static void applyParams(TransactionCompat t,
