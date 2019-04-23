@@ -102,7 +102,9 @@ class Dimmer {
         }
 
         void removeSurface() {
-            getPendingTransaction().remove(mDimLayer);
+            if (mDimLayer != null && mDimLayer.isValid()) {
+                getPendingTransaction().remove(mDimLayer);
+            }
             mDimLayer = null;
         }
     }
@@ -305,7 +307,9 @@ class Dimmer {
 
         if (!mDimState.mDimming) {
             if (!mDimState.mAnimateExit) {
-                t.remove(mDimState.mDimLayer);
+                if (mDimState.mDimLayer.isValid()) {
+                    t.remove(mDimState.mDimLayer);
+                }
             } else {
                 startDimExit(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
             }
