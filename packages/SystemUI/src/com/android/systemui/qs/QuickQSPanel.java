@@ -181,6 +181,7 @@ public class QuickQSPanel extends QSPanel {
     private static class HeaderTileLayout extends TileLayout {
 
         private boolean mListening;
+        private Rect mClippingBounds = new Rect();
 
         public HeaderTileLayout(Context context) {
             super(context);
@@ -219,8 +220,8 @@ public class QuickQSPanel extends QSPanel {
         @Override
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             // We only care about clipping on the right side
-            Rect bounds = new Rect(0, 0, r - l, 10000);
-            setClipBounds(bounds);
+            mClippingBounds.set(0, 0, r - l, 10000);
+            setClipBounds(mClippingBounds);
 
             calculateColumns();
 
@@ -252,9 +253,9 @@ public class QuickQSPanel extends QSPanel {
             }
 
             final int availableWidth = getMeasuredWidth() - getPaddingStart() - getPaddingEnd();
-            final int leftoverWithespace = availableWidth - maxTiles * mCellWidth;
+            final int leftoverWhitespace = availableWidth - maxTiles * mCellWidth;
             final int smallestHorizontalMarginNeeded;
-            smallestHorizontalMarginNeeded = leftoverWithespace / Math.max(1, maxTiles - 1);
+            smallestHorizontalMarginNeeded = leftoverWhitespace / Math.max(1, maxTiles - 1);
 
             if (smallestHorizontalMarginNeeded > 0){
                 mCellMarginHorizontal = smallestHorizontalMarginNeeded;
