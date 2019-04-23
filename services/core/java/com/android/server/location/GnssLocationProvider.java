@@ -2215,7 +2215,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             s.append("MEASUREMENT_CORRECTIONS ");
         }
         s.append(")\n");
-        if (mGnssMeasurementCorrectionsProvider.isAvailableInPlatform()) {
+        if (hasCapability(GPS_CAPABILITY_MEASUREMENT_CORRECTIONS)) {
             s.append("  SubHal=MEASUREMENT_CORRECTIONS[");
             s.append(mGnssMeasurementCorrectionsProvider.toStringCapabilities());
             s.append("]\n");
