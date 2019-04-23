@@ -339,7 +339,7 @@ public class NetworkStatsHistory implements Parcelable {
         long operations = entry.operations;
 
         if (entry.isNegative()) {
-            throw new IllegalArgumentException("tried recording negative data");
+            return;
         }
         if (entry.isEmpty()) {
             return;
