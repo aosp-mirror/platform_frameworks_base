@@ -39,6 +39,11 @@ public interface OnStatusListener {
                     listener.onComplete(new Status(statusParcelable));
                 }
             }
+
+            @Override
+            public int getInterfaceVersion() {
+                return this.VERSION;
+            }
         };
     }
 }

@@ -647,4 +647,9 @@ public class DhcpServer extends IDhcpServer.Stub {
             }
         }
     }
+
+    @Override
+    public int getInterfaceVersion() {
+        return this.VERSION;
+    }
 }
