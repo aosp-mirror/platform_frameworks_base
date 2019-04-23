@@ -36,7 +36,7 @@ public class ApfCapabilitiesTest {
         final ApfCapabilities caps = new ApfCapabilities(123, 456, 789);
         ParcelableTestUtil.assertFieldCountEquals(3, ApfCapabilities.class);
 
-        TestUtils.assertParcelingIsLossless(caps, ApfCapabilities.CREATOR);
+        TestUtils.assertParcelingIsLossless(caps);
     }
 
     @Test
