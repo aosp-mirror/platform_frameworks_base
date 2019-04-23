@@ -53,20 +53,13 @@ private:
                 x, y, x + width, y + height,
                 [width, height](RenderProperties& props, Canvas& canvas) {
                     SkPaint paint;
-                    float matrix[20] = {0};
-
+                    
                     // Simple scale/translate case where R, G, and B are all treated equivalently
-                    matrix[SkColorMatrix::kR_Scale] = 1.1f;
-                    matrix[SkColorMatrix::kG_Scale] = 1.1f;
-                    matrix[SkColorMatrix::kB_Scale] = 1.1f;
-                    matrix[SkColorMatrix::kA_Scale] = 0.5f;
+                    SkColorMatrix cm;
+                    cm.setScale(1.1f, 1.1f, 1.1f, 0.5f);
+                    cm.postTranslate255(5.0f, 5.0f, 5.0f, 10.0f);
 
-                    matrix[SkColorMatrix::kR_Trans] = 5.0f;
-                    matrix[SkColorMatrix::kG_Trans] = 5.0f;
-                    matrix[SkColorMatrix::kB_Trans] = 5.0f;
-                    matrix[SkColorMatrix::kA_Trans] = 10.0f;
-
-                    paint.setColorFilter(SkColorFilters::MatrixRowMajor255(matrix));
+                    paint.setColorFilter(SkColorFilters::Matrix(cm));
 
                     // set a shader so it's not likely for the matrix to be optimized away (since a
                     // clever
