@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2015 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,13 +14,6 @@
      limitations under the License.
 -->
 
-<!-- Copy of progress_indeterminate_horizontal_material_trimmed in frameworks/base/core/res -->
-<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:drawable="@drawable/vector_drawable_progress_indeterminate_horizontal_trimmed" >
-    <target
-        android:name="rect2_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect2_copy" />
-    <target
-        android:name="rect1_grp"
-        android:animation="@anim/progress_indeterminate_horizontal_rect1_copy" />
-</animated-vector>
+<!-- Copy of progress_indeterminate_horizontal_rect2_scalex in frameworks/base/core/res -->
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:pathData="M 0,0 C 0.06834272400867,0.01992566661414 0.19220331656133,0.15855429260523 0.33333333333333,0.34926160892842 C 0.38410433133433,0.41477913453861 0.54945792615267,0.68136029463551 0.66666666666667,0.68279962777002 C 0.752586273196,0.68179620963216 0.737253971954,0.878896194318 1,1" />
