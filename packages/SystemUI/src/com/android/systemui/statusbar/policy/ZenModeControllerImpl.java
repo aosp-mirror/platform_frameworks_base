@@ -148,6 +148,12 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     }
 
     @Override
+    public boolean areAlarmsAllowedInPriority() {
+        return (mNoMan.getNotificationPolicy().priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) != 0;
+    }
+
+    @Override
     public boolean isZenAvailable() {
         return mSetupObserver.isDeviceProvisioned() && mSetupObserver.isUserSetup();
     }

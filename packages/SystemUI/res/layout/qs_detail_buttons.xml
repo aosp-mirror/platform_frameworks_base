@@ -17,17 +17,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingEnd="8dp"
-    android:gravity="end">
+    android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
+    android:gravity="end"
+    android:orientation="horizontal">
 
     <TextView
         android:id="@android:id/button2"
         style="@style/QSBorderlessButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:minHeight="48dp"
-        android:minWidth="132dp"
         android:textAppearance="@style/TextAppearance.QS.DetailButton"
         android:focusable="true" />
 
@@ -37,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minHeight="48dp"
-        android:minWidth="88dp"
+        android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
         android:textAppearance="@style/TextAppearance.QS.DetailButton"
         android:focusable="true"/>
 

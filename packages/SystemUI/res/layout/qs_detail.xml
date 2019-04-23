@@ -19,7 +19,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/qs_detail_background"
     android:clickable="true"
     android:orientation="vertical"
     android:paddingBottom="8dp"
@@ -27,35 +26,50 @@
     android:elevation="4dp"
     android:importantForAccessibility="no" >
 
-    <include
-        android:id="@+id/qs_detail_header"
-        layout="@layout/qs_detail_header"
+    <View
+        android:id="@+id/qs_detail_top_space"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="@*android:dimen/quick_qs_offset_height"
+        android:background="@android:color/transparent" />
 
-    <com.android.systemui.statusbar.AlphaOptimizedImageView
-        android:id="@+id/qs_detail_header_progress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:alpha="0"
-        android:background="@color/qs_detail_progress_track"
-        android:src="@drawable/indeterminate_anim"
-        android:scaleType="fitXY"
-        />
-
-    <com.android.systemui.qs.NonInterceptingScrollView
+    <com.android.keyguard.AlphaOptimizedLinearLayout
+        android:id="@+id/detail_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:orientation="vertical"
+        android:background="@drawable/qs_detail_background">
 
-        <FrameLayout
-            android:id="@android:id/content"
+        <include
+            android:id="@+id/qs_detail_header"
+            layout="@layout/qs_detail_header"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </com.android.systemui.qs.NonInterceptingScrollView>
+            android:layout_height="wrap_content"
+            />
 
-    <include layout="@layout/qs_detail_buttons" />
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
+            android:id="@+id/qs_detail_header_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            android:background="@color/qs_detail_progress_track"
+            android:src="@drawable/indeterminate_anim"
+            android:scaleType="fitXY"
+            />
+
+        <com.android.systemui.qs.NonInterceptingScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <FrameLayout
+                android:id="@android:id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.android.systemui.qs.NonInterceptingScrollView>
+
+        <include layout="@layout/qs_detail_buttons" />
+    </com.android.keyguard.AlphaOptimizedLinearLayout>
 
 </com.android.systemui.qs.QSDetail>

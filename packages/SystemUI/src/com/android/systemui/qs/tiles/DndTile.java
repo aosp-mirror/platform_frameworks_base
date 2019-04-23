@@ -66,6 +66,10 @@ import javax.inject.Inject;
 /** Quick settings tile: Do not disturb **/
 public class DndTile extends QSTileImpl<BooleanState> {
 
+    private static final int DONT_SHOW_DETAILS = 0;
+    private static final int SHOW_DETAILS_IF_DURATION_HAS_TO_BE_CHOSEN = 1;
+    private static final int SHOW_DETAILS = 2;
+
     private static final Intent ZEN_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 
@@ -142,12 +146,11 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            showDetail(true);
+            turnOnDND(SHOW_DETAILS_IF_DURATION_HAS_TO_BE_CHOSEN);
         }
     }
 
-    @Override
-    public void showDetail(boolean show) {
+    public void turnOnDND(int showDetails) {
         int zenDuration = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ZEN_DURATION, 0);
         boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -165,27 +168,51 @@ public class DndTile extends QSTileImpl<BooleanState> {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         } else {
+            // Not using FAVORITE_ZEN for consistency. Pie has always used this mode since now.
+            int zen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+
+            ZenModeController.Callback callback = new ZenModeController.Callback() {
+                @Override
+                public void onZenChanged(int zen) {
+                    mController.removeCallback(this);
+                    showDetail(true);
+                }
+            };
+
+            if (showDetails == SHOW_DETAILS) {
+                 mController.addCallback(callback);
+            }
+
             switch (zenDuration) {
                 case Settings.Secure.ZEN_DURATION_PROMPT:
-                    mUiHandler.post(() -> {
-                        Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
-                        mDialog.getWindow().setType(
-                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                        SystemUIDialog.setShowForAllUsers(mDialog, true);
-                        SystemUIDialog.registerDismissListener(mDialog);
-                        SystemUIDialog.setWindowOnTop(mDialog);
-                        mUiHandler.post(() -> mDialog.show());
-                        mHost.collapsePanels();
-                    });
+                    if (showDetails == SHOW_DETAILS_IF_DURATION_HAS_TO_BE_CHOSEN) {
+                        mController.addCallback(callback);
+                    }
+                    mController.setZen(zen, null, TAG);
+
+                    /**
+                     * ZenModePanel (details panel) has exact same time conditions with new
+                     * EnableZenModeDialog. So we open detail panel instead above.
+                     *
+                     * mUiHandler.post(() -> {
+                     *     Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
+                     *     mDialog.getWindow().setType(
+                     *             WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+                     *     SystemUIDialog.setShowForAllUsers(mDialog, true);
+                     *     SystemUIDialog.registerDismissListener(mDialog);
+                     *     SystemUIDialog.setWindowOnTop(mDialog);
+                     *     mUiHandler.post(() -> mDialog.show());
+                     *     mHost.collapsePanels();
+                     * });
+                     */
                     break;
                 case Settings.Secure.ZEN_DURATION_FOREVER:
-                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+                    mController.setZen(zen, null, TAG);
                     break;
                 default:
                     Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
                             ActivityManager.getCurrentUser(), true).id;
-                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
-                            conditionId, TAG);
+                    mController.setZen(zen, conditionId, TAG);
             }
         }
     }
@@ -201,16 +228,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
             return;
         }
         if (!mState.value) {
-            // Because of the complexity of the zen panel, it needs to be shown after
-            // we turn on zen below.
-            mController.addCallback(new ZenModeController.Callback() {
-                @Override
-                public void onZenChanged(int zen) {
-                    mController.removeCallback(this);
-                    showDetail(true);
-                }
-            });
-            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+            turnOnDND(SHOW_DETAILS);
         } else {
             showDetail(true);
         }
@@ -225,6 +243,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (mController == null) return;
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
+        final ZenModeConfig zenConfig = arg instanceof ZenModeConfig ?
+                (ZenModeConfig) arg : mController.getConfig();
         final boolean newValue = zen != ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;
         if (state.slash == null) state.slash = new SlashState();
@@ -234,7 +254,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.slash.isSlashed = !state.value;
         state.label = getTileLabel();
         state.secondaryLabel = TextUtils.emptyIfNull(ZenModeConfig.getDescription(mContext,
-                zen != Global.ZEN_MODE_OFF, mController.getConfig(), false));
+                zen != Global.ZEN_MODE_OFF, zenConfig, false));
         state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_dnd);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
@@ -320,6 +340,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
         @Override
         public void onConfigChanged(ZenModeConfig config) {
+            refreshState(config);
             if (isShowingDetail()) {
                 mDetailAdapter.updatePanel();
             }
@@ -362,7 +383,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 mController.setZen(ZEN_MODE_OFF, null, TAG);
                 mAuto = false;
             } else {
-                mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+                // We're already in details view
+                turnOnDND(DONT_SHOW_DETAILS);
             }
         }
 

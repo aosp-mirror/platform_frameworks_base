@@ -144,6 +144,7 @@
 
     <style name="TextAppearance.QS.DetailHeader">
         <item name="android:textSize">@dimen/qs_detail_header_text_size</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
     </style>
 
@@ -153,7 +154,7 @@
 
     <style name="TextAppearance.QS.DetailItemSecondary">
         <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
-        <item name="android:textColor">?android:attr/colorAccent</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.QS.Introduction">
@@ -168,10 +169,13 @@
 
     <style name="TextAppearance.QS.DetailButton">
         <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:gravity">center</item>
+        <item name="android:paddingTop">@dimen/notification_guts_button_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/notification_guts_button_vertical_padding</item>
+        <item name="android:paddingLeft">@dimen/notification_guts_button_horizontal_padding</item>
+        <item name="android:paddingRight">@dimen/notification_guts_button_horizontal_padding</item>
     </style>
 
     <style name="TextAppearance.QS.DetailButton.White">

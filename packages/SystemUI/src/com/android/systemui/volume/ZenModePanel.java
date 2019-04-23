@@ -476,13 +476,16 @@ public class ZenModePanel extends FrameLayout {
             mConfigurableTexts.update();
             mZenIntroductionCustomize.setVisibility(zenImportant ? VISIBLE : GONE);
         }
-        final String warning = computeAlarmWarningText(zenNone);
+        final boolean allowAlarms = !zenNone &&
+                !(zenImportant && !mController.areAlarmsAllowedInPriority());
+        final String warning = computeAlarmWarningText(allowAlarms);
         mZenAlarmWarning.setVisibility(warning != null ? VISIBLE : GONE);
         mZenAlarmWarning.setText(warning);
     }
 
-    private String computeAlarmWarningText(boolean zenNone) {
-        if (!zenNone) {
+    private String computeAlarmWarningText(boolean allowAlarms) {
+        // don't show alarm warning if alarms are allowed to bypass dnd
+        if (allowAlarms) {
             return null;
         }
         final long now = System.currentTimeMillis();

@@ -20,6 +20,7 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="8dp"
     android:paddingStart="@dimen/qs_detail_padding_start"
     android:paddingEnd="16dp">
 
