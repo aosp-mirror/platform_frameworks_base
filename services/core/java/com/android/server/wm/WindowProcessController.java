@@ -98,7 +98,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final ActivityTaskManagerService mAtm;
     // The actual proc...  may be null only if 'persistent' is true (in which case we are in the
     // process of launching the app)
-    private volatile IApplicationThread mThread;
+    private IApplicationThread mThread;
     // Currently desired scheduling class
     private volatile int mCurSchedGroup;
     // Currently computed process state
@@ -192,8 +192,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mPid;
     }
 
+    @HotPath(caller = HotPath.PROCESS_CHANGE)
     public void setThread(IApplicationThread thread) {
-        mThread = thread;
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
+            mThread = thread;
+        }
     }
 
     IApplicationThread getThread() {
