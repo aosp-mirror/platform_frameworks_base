@@ -479,6 +479,28 @@ public class ChooserActivity extends ResolverActivity {
             if (isSendAction(target)) {
                 mResolverDrawerLayout.setOnScrollChangeListener(this::handleScroll);
             }
+
+            final View chooserHeader = mResolverDrawerLayout.findViewById(R.id.chooser_header);
+            final float defaultElevation = chooserHeader.getElevation();
+            final float chooserHeaderScrollElevation =
+                    getResources().getDimensionPixelSize(R.dimen.chooser_header_scroll_elevation);
+
+            mAdapterView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                }
+
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                        int totalItemCount) {
+                    if (view.getChildCount() > 0) {
+                        if (firstVisibleItem > 0 || view.getChildAt(0).getTop() < 0) {
+                            chooserHeader.setElevation(chooserHeaderScrollElevation);
+                            return;
+                        }
+                    }
+
+                    chooserHeader.setElevation(defaultElevation);
+                }
+            });
         }
 
         if (DEBUG) {

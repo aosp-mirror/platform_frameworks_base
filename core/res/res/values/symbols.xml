@@ -2784,6 +2784,8 @@
   <java-symbol type="dimen" name="chooser_preview_image_border"/>
   <java-symbol type="dimen" name="chooser_max_collapsed_height" />
   <java-symbol type="layout" name="chooser_grid" />
+  <java-symbol type="id" name="chooser_header" />
+  <java-symbol type="dimen" name="chooser_header_scroll_elevation" />
   <java-symbol type="layout" name="chooser_grid_preview_text" />
   <java-symbol type="layout" name="chooser_grid_preview_image" />
   <java-symbol type="layout" name="chooser_grid_preview_file" />
