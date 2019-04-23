@@ -87,8 +87,8 @@ public abstract class PackageManager {
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
 
     /** {@hide} */
-    @SystemApi
     @TestApi
+    // STOPSHIP: Remove this once we get a Play prebuilt.
     public static boolean RESTRICTED_PERMISSIONS_ENABLED = false;
 
     /**
