@@ -22,17 +22,6 @@
     android:paddingStart="@dimen/status_bar_padding_start"
     android:paddingEnd="@dimen/status_bar_padding_end">
 
-    <TextView
-        android:id="@+id/long_press_tooltip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:alpha="0"
-        android:text="@string/quick_settings_header_onboarding_text"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:textColor="?android:attr/textColorSecondary"
-        android:visibility="invisible" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -45,8 +34,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
             android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:alpha="0" >
+            android:gravity="center_vertical" >
 
             <LinearLayout
                 android:id = "@+id/alarm_container"
