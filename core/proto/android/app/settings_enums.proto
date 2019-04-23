@@ -665,6 +665,15 @@ enum Action {
 
     //ACTION: Log result for each card's eligibility check
     ACTION_CONTEXTUAL_CARD_ELIGIBILITY = 1686;
+
+    // ACTION: Share a Wi-Fi network by generating a QR code
+    ACTION_SETTINGS_SHARE_WIFI_QR_CODE = 1710;
+
+    // ACTION: Connect to a Wi-Fi network by scanning a QR code
+    ACTION_SETTINGS_ENROLL_WIFI_QR_CODE = 1711;
+
+    // ACTION: Share Wi-Fi hotspot by generating a QR code
+    ACTION_SETTINGS_SHARE_WIFI_HOTSPOT_QR_CODE = 1712;
 }
 
 /**
