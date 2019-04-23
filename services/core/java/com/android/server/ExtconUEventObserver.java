@@ -159,7 +159,13 @@ public abstract class ExtconUEventObserver extends UEventObserver {
         }
     }
 
-    /** Does the {@link /sys/class/extcon} directory exist */
+    /** Does the {@code /sys/class/extcon/<name>} directory exist */
+    public static boolean namedExtconDirExists(String name) {
+        File extconDir = new File("/sys/class/extcon/" + name);
+        return extconDir.exists() && extconDir.isDirectory();
+    }
+
+    /** Does the {@code /sys/class/extcon} directory exist */
     public static boolean extconExists() {
         File extconDir = new File("/sys/class/extcon");
         return extconDir.exists() && extconDir.isDirectory();
