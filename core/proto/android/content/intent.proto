@@ -23,7 +23,7 @@ import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/os/patternmatcher.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
 
-// Next Tag: 13
+// Next Tag: 14
 message IntentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -62,6 +62,7 @@ message IntentProto {
     // UserHandle value (similar to user_id in other protos).
     optional int32 content_user_hint = 11;
     optional string selector = 12;
+    optional string identifier = 13 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 // Next Tag: 11
