@@ -22,6 +22,7 @@ import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_IC
 import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_LAUNCHER;
 import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_SETTINGS;
 import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_SYSUI;
+import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_ICON_THEME_PICKER;
 import static com.android.systemui.theme.ThemeOverlayManager.OVERLAY_CATEGORY_SHAPE;
 import static com.android.systemui.theme.ThemeOverlayManager.SETTINGS_PACKAGE;
 import static com.android.systemui.theme.ThemeOverlayManager.SYSTEM_USER_CATEGORIES;
@@ -74,6 +75,7 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
         }
     }
 
+    private static final String THEMEPICKER_PACKAGE = "com.android.wallpaper";
     private static final String LAUNCHER_PACKAGE = "com.android.launcher3";
     private static final UserHandle TEST_USER = UserHandle.of(5);
     private static final Set<UserHandle> TEST_USER_HANDLES = Sets.newHashSet(TEST_USER);
@@ -87,7 +89,7 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mManager = new ThemeOverlayManager(mOverlayManager, MoreExecutors.directExecutor(),
-                LAUNCHER_PACKAGE);
+                LAUNCHER_PACKAGE, THEMEPICKER_PACKAGE);
         when(mOverlayManager.getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM))
                 .thenReturn(Lists.newArrayList(
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_COLOR,
@@ -124,6 +126,12 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
                                 LAUNCHER_PACKAGE, OVERLAY_CATEGORY_ICON_LAUNCHER, false),
                         createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_LAUNCHER,
                                 LAUNCHER_PACKAGE, OVERLAY_CATEGORY_ICON_LAUNCHER, true)));
+        when(mOverlayManager.getOverlayInfosForTarget(THEMEPICKER_PACKAGE, UserHandle.SYSTEM))
+                .thenReturn(Lists.newArrayList(
+                        createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_ICON_THEME_PICKER,
+                                THEMEPICKER_PACKAGE, OVERLAY_CATEGORY_ICON_THEME_PICKER, false),
+                        createOverlayInfo(TEST_ENABLED_PREFIX + OVERLAY_CATEGORY_ICON_THEME_PICKER,
+                                THEMEPICKER_PACKAGE, OVERLAY_CATEGORY_ICON_THEME_PICKER, true)));
     }
 
     @Test
@@ -221,6 +229,8 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
                 UserHandle.SYSTEM);
         verify(mOverlayManager, never()).getOverlayInfosForTarget(SYSUI_PACKAGE, UserHandle.SYSTEM);
         verify(mOverlayManager, never()).getOverlayInfosForTarget(LAUNCHER_PACKAGE,
+                UserHandle.SYSTEM);
+        verify(mOverlayManager, never()).getOverlayInfosForTarget(THEMEPICKER_PACKAGE,
                 UserHandle.SYSTEM);
     }
 
