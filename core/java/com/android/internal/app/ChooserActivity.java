@@ -2116,6 +2116,24 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
+        protected void onBindView(View view, TargetInfo info) {
+            super.onBindView(view, info);
+
+            // If target is loading, show a special placeholder shape in the label
+            final ViewHolder holder = (ViewHolder) view.getTag();
+            if (info instanceof PlaceHolderTargetInfo) {
+                final int maxWidth = getResources().getDimensionPixelSize(
+                        R.dimen.chooser_direct_share_label_placeholder_max_width);
+                holder.text.setMaxWidth(maxWidth);
+                holder.text.setBackground(getResources().getDrawable(
+                        R.drawable.chooser_direct_share_label_placeholder, getTheme()));
+            } else {
+                holder.text.setMaxWidth(Integer.MAX_VALUE);
+                holder.text.setBackground(null);
+            }
+        }
+
+        @Override
         public void onListRebuilt() {
             // don't support direct share on low ram devices
             if (ActivityManager.isLowRamDeviceStatic()) {

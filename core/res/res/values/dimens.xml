@@ -735,4 +735,5 @@
     <dimen name="resolver_badge_size">18dp</dimen>
     <dimen name="chooser_target_width">90dp</dimen>
     <dimen name="chooser_max_collapsed_height">288dp</dimen>
+    <dimen name="chooser_direct_share_label_placeholder_max_width">72dp</dimen>
 </resources>
