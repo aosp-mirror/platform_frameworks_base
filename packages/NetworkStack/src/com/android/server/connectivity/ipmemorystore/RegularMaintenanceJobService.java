@@ -91,6 +91,11 @@ public final class RegularMaintenanceJobService extends JobService {
             }
 
             @Override
+            public int getInterfaceVersion() {
+                return this.VERSION;
+            }
+
+            @Override
             public IBinder asBinder() {
                 return null;
             }
