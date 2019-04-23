@@ -253,7 +253,7 @@ public:
 
     ANDROID_API static int contextPriority;
 
-    static uint32_t defaultRenderAhead;
+    static int defaultRenderAhead;
 
 private:
     static ProfileType sProfileType;

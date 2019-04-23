@@ -2336,4 +2336,13 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
+
+    // OPEN: Settings > Pick SIM dialog
+    DIALOG_SIM_LIST = 1707;
+
+    // OPEN: Settings > Pick SIM (that supports calling) dialog
+    DIALOG_CALL_SIM_LIST = 1708;
+
+    // OPEN: Settings > Pick preferred SIM dialog
+    DIALOG_PREFERRED_SIM_PICKER = 1709;
 }

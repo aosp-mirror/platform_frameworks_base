@@ -9479,7 +9479,7 @@ package android.view {
 package android.view.accessibility {
 
   public final class AccessibilityManager {
-    method public int getAccessibilityWindowId(android.os.IBinder);
+    method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
   }
 

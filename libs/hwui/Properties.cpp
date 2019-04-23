@@ -67,7 +67,7 @@ bool Properties::debuggingEnabled = false;
 bool Properties::isolatedProcess = false;
 
 int Properties::contextPriority = 0;
-uint32_t Properties::defaultRenderAhead = 0;
+int Properties::defaultRenderAhead = -1;
 
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {
@@ -130,9 +130,8 @@ bool Properties::load() {
 
     enableForceDarkSupport = property_get_bool(PROPERTY_ENABLE_FORCE_DARK, true);
 
-    defaultRenderAhead =
-            std::max(0u, std::min(2u, static_cast<uint32_t>(property_get_int(
-                                              PROPERTY_RENDERAHEAD, render_ahead().value_or(0)))));
+    defaultRenderAhead = std::max(-1, std::min(2, property_get_int(PROPERTY_RENDERAHEAD,
+            render_ahead().value_or(0))));
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }

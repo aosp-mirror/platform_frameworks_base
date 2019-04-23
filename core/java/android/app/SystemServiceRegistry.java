@@ -1143,7 +1143,7 @@ final class SystemServiceRegistry {
                 Context outerContext = ctx.getOuterContext();
                 ContentCaptureOptions options = outerContext.getContentCaptureOptions();
                 // Options is null when the service didn't whitelist the activity or package
-                if (options != null) {
+                if (options != null && (options.lite || options.isWhitelisted(outerContext))) {
                     IBinder b = ServiceManager
                             .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
                     IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(b);

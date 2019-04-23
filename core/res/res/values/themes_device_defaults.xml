@@ -802,6 +802,8 @@ easier.
         <item name="textAppearanceListItemSmall">@style/TextAppearance.DeviceDefault.ListItem</item>
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.DeviceDefault.ListItemSecondary</item>
 
+        <item name="backgroundDimAmount">0.7</item>
+
         <!-- Button styles -->
         <item name="buttonCornerRadius">@dimen/config_buttonCornerRadius</item>
         <item name="buttonStyle">@style/Widget.DeviceDefault.Light.Button</item>

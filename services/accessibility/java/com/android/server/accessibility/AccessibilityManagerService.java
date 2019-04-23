@@ -2504,7 +2504,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *   registered.
      */
     @Override
-    public int getAccessibilityWindowId(IBinder windowToken) {
+    public int getAccessibilityWindowId(@Nullable IBinder windowToken) {
         synchronized (mLock) {
             if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
                 throw new SecurityException("Only SYSTEM can call getAccessibilityWindowId");

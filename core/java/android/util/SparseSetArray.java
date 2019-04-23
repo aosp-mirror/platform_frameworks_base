@@ -44,6 +44,13 @@ public class SparseSetArray<T> {
     }
 
     /**
+     * Removes all mappings from this SparseSetArray.
+     */
+    public void clear() {
+        mData.clear();
+    }
+
+    /**
      * @return whether a value exists at index n.
      */
     public boolean contains(int n, T value) {

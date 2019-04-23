@@ -781,36 +781,46 @@ public final class ContentCaptureManagerService extends
         @GuardedBy("mGlobalWhitelistStateLock")
         public ContentCaptureOptions getOptions(@UserIdInt int userId,
                 @NonNull String packageName) {
+            boolean packageWhitelisted;
+            ArraySet<ComponentName> whitelistedComponents = null;
             synchronized (mGlobalWhitelistStateLock) {
-                if (!isWhitelisted(userId, packageName)) {
-                    if (packageName.equals(mServicePackages.get(userId))) {
+                packageWhitelisted = isWhitelisted(userId, packageName);
+                if (!packageWhitelisted) {
+                    // Full package is not whitelisted: check individual components first
+                    whitelistedComponents = getWhitelistedComponents(userId, packageName);
+                    if (whitelistedComponents == null
+                            && packageName.equals(mServicePackages.get(userId))) {
+                        // No components whitelisted either, but let it go because it's the
+                        // service's own package
                         if (verbose) Slog.v(mTag, "getOptionsForPackage() lite for " + packageName);
                         return new ContentCaptureOptions(mDevCfgLoggingLevel);
                     }
-                    if (verbose) {
-                        Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
-                    }
+                }
+            } // synchronized
+
+            // Restrict what temporary services can whitelist
+            if (Build.IS_USER && mServiceNameResolver.isTemporary(userId)) {
+                if (!packageName.equals(mServicePackages.get(userId))) {
+                    Slog.w(mTag, "Ignoring package " + packageName + " while using temporary "
+                            + "service " + mServicePackages.get(userId));
                     return null;
                 }
-
-                final ArraySet<ComponentName> whitelistedComponents =
-                        getWhitelistedComponents(userId, packageName);
-                if (Build.IS_USER && mServiceNameResolver.isTemporary(userId)) {
-                    if (!packageName.equals(mServicePackages.get(userId))) {
-                        Slog.w(mTag, "Ignoring package " + packageName
-                                + " while using temporary service " + mServicePackages.get(userId));
-                        return null;
-                    }
-                }
-                final ContentCaptureOptions options = new ContentCaptureOptions(mDevCfgLoggingLevel,
-                        mDevCfgMaxBufferSize, mDevCfgIdleFlushingFrequencyMs,
-                        mDevCfgTextChangeFlushingFrequencyMs, mDevCfgLogHistorySize,
-                        whitelistedComponents);
-                if (verbose) {
-                    Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
-                }
-                return options;
             }
+
+            if (!packageWhitelisted && whitelistedComponents == null) {
+                // No can do!
+                if (verbose) {
+                    Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
+                }
+                return null;
+            }
+
+            final ContentCaptureOptions options = new ContentCaptureOptions(mDevCfgLoggingLevel,
+                    mDevCfgMaxBufferSize, mDevCfgIdleFlushingFrequencyMs,
+                    mDevCfgTextChangeFlushingFrequencyMs, mDevCfgLogHistorySize,
+                    whitelistedComponents);
+            if (verbose) Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
+            return options;
         }
 
         @Override
