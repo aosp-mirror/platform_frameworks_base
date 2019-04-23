@@ -765,8 +765,7 @@ public class BtHelper {
                 broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTING);
                 // Accept SCO audio activation only in NORMAL audio mode or if the mode is
                 // currently controlled by the same client process.
-                int modeOwnerPid =  mDeviceBroker.getSetModeDeathHandlers().isEmpty()
-                        ? 0 : mDeviceBroker.getSetModeDeathHandlers().get(0).getPid();
+                final int modeOwnerPid =  mDeviceBroker.getModeOwnerPid();
                 if (modeOwnerPid != 0 && (modeOwnerPid != mCreatorPid)) {
                     Log.w(TAG, "requestScoState: audio mode is not NORMAL and modeOwnerPid "
                             + modeOwnerPid + " != creatorPid " + mCreatorPid);

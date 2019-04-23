@@ -2687,7 +2687,7 @@ public final class Settings {
 
     private void writePackageListLPrInternal(int creatingUserId) {
         // Only derive GIDs for active users (not dying)
-        final List<UserInfo> users = UserManagerService.getInstance().getUsers(true);
+        final List<UserInfo> users = getUsers(UserManagerService.getInstance(), true);
         int[] userIds = new int[users.size()];
         for (int i = 0; i < userIds.length; i++) {
             userIds[i] = users.get(i).id;
@@ -4357,10 +4357,26 @@ public final class Settings {
         return pkgSetting.getHarmfulAppWarning(userId);
     }
 
+    /**
+     * Return all users on the device, including partial or dying users.
+     * @param userManager UserManagerService instance
+     * @return the list of users
+     */
     private static List<UserInfo> getAllUsers(UserManagerService userManager) {
+        return getUsers(userManager, false);
+    }
+
+    /**
+     * Return the list of users on the device. Clear the calling identity before calling into
+     * UserManagerService.
+     * @param userManager UserManagerService instance
+     * @param excludeDying Indicates whether to exclude any users marked for deletion.
+     * @return the list of users
+     */
+    private static List<UserInfo> getUsers(UserManagerService userManager, boolean excludeDying) {
         long id = Binder.clearCallingIdentity();
         try {
-            return userManager.getUsers(false);
+            return userManager.getUsers(excludeDying);
         } catch (NullPointerException npe) {
             // packagemanager not yet initialized
         } finally {

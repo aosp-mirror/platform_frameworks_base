@@ -715,7 +715,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         mNavigationBarView.onNavigationButtonLongPress(v);
         mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
-        mAssistManager.startAssist(new Bundle() /* args */);
+        Bundle args  = new Bundle();
+        args.putInt(
+                AssistManager.INVOCATION_TYPE_KEY, AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS);
+        mAssistManager.startAssist(args);
         mStatusBar.awakenDreams();
 
         if (mNavigationBarView != null) {

@@ -3152,7 +3152,7 @@ class AlarmManagerService extends SystemService {
 
     void removeLocked(final int uid) {
         if (uid == Process.SYSTEM_UID) {
-            Slog.wtf(TAG, "removeLocked: Shouldn't for UID=" + uid);
+            // If a force-stop occurs for a system-uid package, ignore it.
             return;
         }
         boolean didRemove = false;
@@ -3247,7 +3247,7 @@ class AlarmManagerService extends SystemService {
     // Only called for ephemeral apps
     void removeForStoppedLocked(final int uid) {
         if (uid == Process.SYSTEM_UID) {
-            Slog.wtf(TAG, "removeForStoppedLocked: Shouldn't for UID=" + uid);
+            // If a force-stop occurs for a system-uid package, ignore it.
             return;
         }
         boolean didRemove = false;
@@ -3291,7 +3291,7 @@ class AlarmManagerService extends SystemService {
 
     void removeUserLocked(int userHandle) {
         if (userHandle == UserHandle.USER_SYSTEM) {
-            Slog.wtf(TAG, "removeForStoppedLocked: Shouldn't for user=" + userHandle);
+            // If we're told we're removing the system user, ignore it.
             return;
         }
         boolean didRemove = false;

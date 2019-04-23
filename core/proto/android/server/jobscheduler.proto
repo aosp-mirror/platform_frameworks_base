@@ -478,6 +478,54 @@ message StateControllerProto {
         }
         repeated TrackedJob tracked_jobs = 4;
 
+        message ExecutionStats {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusDumpProto.Bucket standby_bucket = 1;
+
+            // The time after which this record should be considered invalid (out of date), in the
+            // elapsed realtime timebase.
+            optional int64 expiration_time_elapsed = 2;
+            optional int64 window_size_ms = 3;
+
+            /** The total amount of time the app ran in its respective bucket window size. */
+            optional int64 execution_time_in_window_ms = 4;
+            optional int32 bg_job_count_in_window = 5;
+
+            /**
+             * The total amount of time the app ran in the last
+             * {@link QuotaController#MAX_PERIOD_MS}.
+             */
+            optional int64 execution_time_in_max_period_ms = 6;
+            optional int32 bg_job_count_in_max_period = 7;
+
+            /**
+             * The time after which the sum of all the app's sessions plus
+             * ConstantsProto.QuotaController.in_quota_buffer_ms equals the quota. This is only
+             * valid if
+             * execution_time_in_window_ms >=
+             *   ConstantsProto.QuotaController.allowed_time_per_period_ms
+             * or
+             * execution_time_in_max_period_ms >=
+             *   ConstantsProto.QuotaController.max_execution_time_ms.
+             */
+            optional int64 quota_cutoff_time_elapsed = 8;
+
+            /**
+             * The time after which job_count_in_allowed_time should be considered invalid, in the
+             * elapsed realtime timebase.
+             */
+            optional int64 job_count_expiration_time_elapsed = 9;
+
+            /**
+             * The number of jobs that ran in at least the last
+             * ConstantsProto.QuotaController.allowed_time_per_period_ms.
+             * It may contain a few stale entries since cleanup won't happen exactly every
+             * ConstantsProto.QuotaController.allowed_time_per_period_ms.
+             */
+            optional int32 job_count_in_allowed_time = 10;
+        }
+
         message Package {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -517,6 +565,8 @@ message StateControllerProto {
             optional Timer timer = 2;
 
             repeated TimingSession saved_sessions = 3;
+
+            repeated ExecutionStats execution_stats = 4;
         }
         repeated PackageStats package_stats = 5;
     }

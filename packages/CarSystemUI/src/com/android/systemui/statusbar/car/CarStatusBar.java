@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.car;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -55,6 +59,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.car.hvac.TemperatureView;
@@ -74,6 +79,15 @@ import java.util.Map;
 public class CarStatusBar extends StatusBar implements
         CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
+    // used to calculate how fast to open or close the window
+    private static final float DEFAULT_FLING_VELOCITY = 0;
+    // max time a fling animation takes
+    private static final float FLING_ANIMATION_MAX_TIME = 0.5f;
+    // acceleration rate for the fling animation
+    private static final float FLING_SPEED_UP_FACTOR = 0.6f;
+
+    private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
+    private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
 
     private TaskStackListenerImpl mTaskStackListener;
 
@@ -100,6 +114,7 @@ public class CarStatusBar extends StatusBar implements
     private boolean mDeviceIsProvisioned = true;
     private HvacController mHvacController;
     private DrivingStateHelper mDrivingStateHelper;
+    private static FlingAnimationUtils sFlingAnimationUtils;
     private SwitchToGuestTimer mSwitchToGuestTimer;
 
     // The container for the notifications.
@@ -113,6 +128,27 @@ public class CarStatusBar extends StatusBar implements
     // it's open.
     private View.OnTouchListener mNavBarNotificationTouchListener;
 
+    // Percentage from top of the screen after which the notification shade will open. This value
+    // will be used while opening the notification shade.
+    private int mSettleOpenPercentage;
+    // Percentage from top of the screen below which the notification shade will close. This
+    // value will be used while closing the notification shade.
+    private int mSettleClosePercentage;
+    // Percentage of notification shade open from top of the screen.
+    private int mPercentageFromBottom;
+    // If notification shade is animation to close or to open.
+    private boolean mIsNotificationAnimating;
+
+    // Tracks when the notification shade is being scrolled. This refers to the glass pane being
+    // scrolled not the recycler view.
+    private boolean mIsTracking;
+    private float mFirstTouchDownOnGlassPane;
+
+    // If the notification card inside the recycler view is being swiped.
+    private boolean mIsNotificationCardSwiping;
+    // If notification shade is being swiped vertically to close.
+    private boolean mIsSwipingVerticallyToClose;
+
     @Override
     public void start() {
         // get the provisioned state before calling the parent class since it's that flow that
@@ -125,6 +161,12 @@ public class CarStatusBar extends StatusBar implements
         mActivityManagerWrapper.registerTaskStackListener(mTaskStackListener);
 
         mNotificationPanel.setScrollingEnabled(true);
+        mSettleOpenPercentage = mContext.getResources().getInteger(
+                R.integer.notification_settle_open_percentage);
+        mSettleClosePercentage = mContext.getResources().getInteger(
+                R.integer.notification_settle_close_percentage);
+        sFlingAnimationUtils = new FlingAnimationUtils(mContext,
+                FLING_ANIMATION_MAX_TIME, FLING_SPEED_UP_FACTOR);
 
         createBatteryController();
         mCarBatteryController.startListening();
@@ -313,14 +355,46 @@ public class CarStatusBar extends StatusBar implements
                     }
                 });
         mNavBarNotificationTouchListener =
-                (v, event) -> navBarCloseNotificationGestureDetector.onTouchEvent(event);
+                (v, event) -> {
+                    boolean consumed = navBarCloseNotificationGestureDetector.onTouchEvent(event);
+                    if (consumed) {
+                        return true;
+                    }
+                    if (event.getActionMasked() == MotionEvent.ACTION_UP
+                            && mNotificationView.getVisibility() == View.VISIBLE) {
+                        if (mSettleClosePercentage < mPercentageFromBottom) {
+                            animateNotificationPanel(
+                                    DEFAULT_FLING_VELOCITY, false);
+                        } else {
+                            animateNotificationPanel(DEFAULT_FLING_VELOCITY,
+                                    true);
+                        }
+                    }
+                    return true;
+                };
 
         // The following are the ui elements that the user would call the status bar.
         // This will set the status bar so it they can make call backs.
         CarNavigationBarView topBar = mStatusBarWindow.findViewById(R.id.car_top_bar);
         topBar.setStatusBar(this);
-        topBar.setStatusBarWindowTouchListener((v1, event1) ->
-                openGestureDetector.onTouchEvent(event1));
+        topBar.setStatusBarWindowTouchListener((v1, event1) -> {
+
+                    boolean consumed = openGestureDetector.onTouchEvent(event1);
+                    if (consumed) {
+                        return true;
+                    }
+                    if (event1.getActionMasked() == MotionEvent.ACTION_UP
+                            && mNotificationView.getVisibility() == View.VISIBLE) {
+                        if (mSettleOpenPercentage > mPercentageFromBottom) {
+                            animateNotificationPanel(DEFAULT_FLING_VELOCITY, true);
+                        } else {
+                            animateNotificationPanel(
+                                    DEFAULT_FLING_VELOCITY, false);
+                        }
+                    }
+                    return true;
+                }
+        );
 
         NotificationClickHandlerFactory clickHandlerFactory = new NotificationClickHandlerFactory(
                 mBarService,
@@ -347,7 +421,10 @@ public class CarStatusBar extends StatusBar implements
                 mNotificationListAtBottomAtTimeOfTouch = false;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                mFirstTouchDownOnGlassPane = event.getRawX();
                 mNotificationListAtBottomAtTimeOfTouch = mNotificationListAtBottom;
+                // Reset the tracker when there is a touch down on the glass pane.
+                mIsTracking = false;
                 // Pass the down event to gesture detector so that it knows where the touch event
                 // started.
                 closeGestureDetector.onTouchEvent(event);
@@ -364,23 +441,56 @@ public class CarStatusBar extends StatusBar implements
                     return;
                 }
                 mNotificationListAtBottom = false;
+                mIsSwipingVerticallyToClose = false;
                 mNotificationListAtBottomAtTimeOfTouch = false;
             }
         });
         mNotificationList.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                mIsNotificationCardSwiping = Math.abs(mFirstTouchDownOnGlassPane - event.getRawX())
+                        > SWIPE_MAX_OFF_PATH;
+                if (mNotificationListAtBottomAtTimeOfTouch && mNotificationListAtBottom) {
+                    // We need to save the state here as if notification card is swiping we will
+                    // change the mNotificationListAtBottomAtTimeOfTouch. This is to protect
+                    // closing the notification shade while the notification card is being swiped.
+                    mIsSwipingVerticallyToClose = true;
+                }
+
+                // If the card is swiping we should not allow the notification shade to close.
+                // Hence setting mNotificationListAtBottomAtTimeOfTouch to false will stop that
+                // for us. We are also checking for mIsTracking because while swiping the
+                // notification shade to close if the user goes a bit horizontal while swiping
+                // upwards then also this should close.
+                if (mIsNotificationCardSwiping && !mIsTracking) {
+                    mNotificationListAtBottomAtTimeOfTouch = false;
+                }
+
                 boolean handled = false;
                 if (mNotificationListAtBottomAtTimeOfTouch && mNotificationListAtBottom) {
                     handled = closeGestureDetector.onTouchEvent(event);
                 }
+                boolean isTracking = mIsTracking;
+                Rect rect = mNotificationList.getClipBounds();
+                float clippedHeight = rect.bottom;
+                if (!handled && event.getActionMasked() == MotionEvent.ACTION_UP
+                        && mIsSwipingVerticallyToClose) {
+                    if (mSettleClosePercentage < mPercentageFromBottom && isTracking) {
+                        animateNotificationPanel(DEFAULT_FLING_VELOCITY, false);
+                    } else if (clippedHeight != mNotificationView.getHeight() && isTracking) {
+                        // this can be caused when user is at the end of the list and trying to
+                        // fling to top of the list by scrolling down.
+                        animateNotificationPanel(DEFAULT_FLING_VELOCITY, true);
+                    }
+                }
+
                 // Updating the mNotificationListAtBottomAtTimeOfTouch state has to be done after
                 // the event has been passed to the closeGestureDetector above, such that the
                 // closeGestureDetector sees the up event before the state has changed.
                 if (event.getActionMasked() == MotionEvent.ACTION_UP) {
                     mNotificationListAtBottomAtTimeOfTouch = false;
                 }
-                return handled;
+                return handled || isTracking;
             }
         });
 
@@ -401,7 +511,9 @@ public class CarStatusBar extends StatusBar implements
         mNotificationList.scrollToPosition(0);
         mStatusBarWindowController.setPanelVisible(true);
         mNotificationView.setVisibility(View.VISIBLE);
-        // let the status bar know that the panel is open
+
+        animateNotificationPanel(mOpeningVelocity, false);
+
         setPanelExpanded(true);
     }
 
@@ -415,12 +527,66 @@ public class CarStatusBar extends StatusBar implements
         mStatusBarWindowController.setStatusBarFocusable(false);
         mStatusBarWindow.cancelExpandHelper();
         mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
-        mStatusBarWindowController.setPanelVisible(false);
-        mNotificationView.setVisibility(View.INVISIBLE);
-        // let the status bar know that the panel is cloased
+
+        animateNotificationPanel(mClosingVelocity, true);
+
+        if (!mIsTracking) {
+            mStatusBarWindowController.setPanelVisible(false);
+            mNotificationView.setVisibility(View.INVISIBLE);
+        }
+
         setPanelExpanded(false);
     }
 
+    /**
+     * Animates the notification shade from one position to other. This is used to either open or
+     * close the notification shade completely with a velocity. If the animation is to close the
+     * notification shade this method also makes the view invisible after animation ends.
+     */
+    private void animateNotificationPanel(float velocity, boolean isClosing) {
+        Rect rect = mNotificationList.getClipBounds();
+        if (rect == null) {
+            return;
+        }
+        float from = rect.bottom;
+        float to = 0;
+        if (!isClosing) {
+            to = mNotificationView.getHeight();
+        }
+        if (mIsNotificationAnimating) {
+            return;
+        }
+        mIsNotificationAnimating = true;
+        mIsTracking = true;
+        ValueAnimator animator = ValueAnimator.ofFloat(from, to);
+        animator.addUpdateListener(
+                animation -> {
+                    float animatedValue = (Float) animation.getAnimatedValue();
+                    setNotificationViewClipBounds((int) animatedValue);
+                });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                mIsNotificationAnimating = false;
+                mIsTracking = false;
+                mOpeningVelocity = DEFAULT_FLING_VELOCITY;
+                mClosingVelocity = DEFAULT_FLING_VELOCITY;
+                if (isClosing) {
+                    mStatusBarWindowController.setPanelVisible(false);
+                    mNotificationView.setVisibility(View.INVISIBLE);
+                    mNotificationList.setClipBounds(null);
+                    // let the status bar know that the panel is closed
+                    setPanelExpanded(false);
+                } else {
+                    // let the status bar know that the panel is open
+                    setPanelExpanded(true);
+                }
+            }
+        });
+        sFlingAnimationUtils.apply(animator, from, to, Math.abs(velocity));
+        animator.start();
+    }
 
     @Override
     protected QS createDefaultQSFragment() {
@@ -576,7 +742,7 @@ public class CarStatusBar extends StatusBar implements
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        //When executing dump() funciton simultaneously, we need to serialize them
+        //When executing dump() function simultaneously, we need to serialize them
         //to get mStackScroller's position correctly.
         synchronized (mQueueLock) {
             pw.println("  mStackScroller: " + viewInfo(mStackScroller));
@@ -760,38 +926,80 @@ public class CarStatusBar extends StatusBar implements
     }
 
     /** Returns true if the current user makes it through the setup wizard, false otherwise. */
-    public boolean getIsUserSetup(){
+    private boolean getIsUserSetup() {
         return mUserSetup;
     }
 
+    private void setNotificationViewClipBounds(int height) {
+        Rect clipBounds = new Rect();
+        clipBounds.set(0, 0, mNotificationView.getWidth(), height);
+        // Sets the clip region on the notification list view.
+        mNotificationList.setClipBounds(clipBounds);
 
-    // TODO: add settle down/up logic
+        if (mNotificationView.getHeight() > 0) {
+            // Calculates the alpha value for the background based on how much of the notification
+            // shade is visible to the user. When the notification shade is completely open then
+            // alpha value will be 1.
+            float alpha = (float) height / mNotificationView.getHeight();
+            Drawable background = mNotificationView.getBackground();
+
+            background.setAlpha((int) (alpha * 255));
+        }
+    }
+
+    private void calculatePercentageFromBottom(float height) {
+        if (mNotificationView.getHeight() > 0) {
+            mPercentageFromBottom = (int) Math.abs(
+                    height / mNotificationView.getHeight() * 100);
+        }
+    }
+
     private static final int SWIPE_UP_MIN_DISTANCE = 75;
     private static final int SWIPE_DOWN_MIN_DISTANCE = 25;
     private static final int SWIPE_MAX_OFF_PATH = 75;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
     // Only responsible for open hooks. Since once the panel opens it covers all elements
     // there is no need to merge with close.
     private abstract class OpenNotificationGestureListener extends
             GestureDetector.SimpleOnGestureListener {
 
         @Override
+        public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+                float distanceY) {
+
+            if (mNotificationView.getVisibility() == View.INVISIBLE) {
+                // when the on-scroll is called for the first time to open.
+                mNotificationList.scrollToPosition(0);
+            }
+            mStatusBarWindowController.setPanelVisible(true);
+            mNotificationView.setVisibility(View.VISIBLE);
+
+            // clips the view for the notification shade when the user scrolls to open.
+            setNotificationViewClipBounds((int) event2.getRawY());
+
+            // Initially the scroll starts with height being zero. This checks protects from divide
+            // by zero error.
+            calculatePercentageFromBottom(event2.getRawY());
+
+            mIsTracking = true;
+            return true;
+        }
+
+
+        @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
-            if (Math.abs(event1.getX() - event2.getX()) > SWIPE_MAX_OFF_PATH
-                    || Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY) {
-                // swipe was not vertical or was not fast enough
-                return false;
-            }
-            boolean isDown = velocityY > 0;
-            float distanceDelta = Math.abs(event1.getY() - event2.getY());
-            if (isDown && distanceDelta > SWIPE_DOWN_MIN_DISTANCE) {
+            if (velocityY > SWIPE_THRESHOLD_VELOCITY) {
+                mOpeningVelocity = velocityY;
                 openNotification();
                 return true;
             }
+            animateNotificationPanel(DEFAULT_FLING_VELOCITY, true);
 
             return false;
         }
+
         protected abstract void openNotification();
     }
 
@@ -800,35 +1008,84 @@ public class CarStatusBar extends StatusBar implements
             GestureDetector.SimpleOnGestureListener {
 
         @Override
+        public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+                float distanceY) {
+            if (!mNotificationListAtBottomAtTimeOfTouch) {
+                return false;
+            }
+            float actualNotificationHeight =
+                    mNotificationView.getHeight() - (event1.getRawY() - event2.getRawY());
+            if (actualNotificationHeight > mNotificationView.getHeight()) {
+                actualNotificationHeight = mNotificationView.getHeight();
+            }
+            if (mNotificationView.getHeight() > 0) {
+                mPercentageFromBottom = (int) Math.abs(
+                        actualNotificationHeight / mNotificationView.getHeight() * 100);
+                boolean isUp = distanceY > 0;
+
+                // This check is to figure out if onScroll was called while swiping the card at
+                // bottom of the list. At that time we should not allow notification shade to
+                // close. We are also checking for the upwards swipe gesture here because it is
+                // possible if a user is closing the notification shade and while swiping starts
+                // to open again but does not fling. At that time we should allow the
+                // notification shade to close fully or else it would stuck in between.
+                if (Math.abs(mNotificationView.getHeight() - actualNotificationHeight)
+                        > SWIPE_DOWN_MIN_DISTANCE && isUp) {
+                    setNotificationViewClipBounds((int) actualNotificationHeight);
+                    mIsTracking = true;
+                } else if (!isUp) {
+                    setNotificationViewClipBounds((int) actualNotificationHeight);
+                }
+            }
+            // if we return true the the items in RV won't be scrollable.
+            return false;
+        }
+
+
+        @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
+
             if (Math.abs(event1.getX() - event2.getX()) > SWIPE_MAX_OFF_PATH
                     || Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY) {
                 // swipe was not vertical or was not fast enough
                 return false;
             }
             boolean isUp = velocityY < 0;
-            float distanceDelta = Math.abs(event1.getY() - event2.getY());
-            if (isUp && distanceDelta > SWIPE_UP_MIN_DISTANCE) {
+            if (isUp) {
                 close();
                 return true;
+            } else {
+                // we should close the shade
+                animateNotificationPanel(velocityY, false);
             }
             return false;
         }
+
         protected abstract void close();
     }
 
-    // to be installed on the nav bars
+    // To be installed on the nav bars.
     private abstract class NavBarCloseNotificationGestureListener extends
             CloseNotificationGestureListener {
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
+            mClosingVelocity = DEFAULT_FLING_VELOCITY;
             close();
             return super.onSingleTapUp(e);
         }
 
         @Override
+        public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+                float distanceY) {
+            calculatePercentageFromBottom(event2.getRawY());
+            setNotificationViewClipBounds((int) event2.getRawY());
+            return true;
+        }
+
+        @Override
         public void onLongPress(MotionEvent e) {
+            mClosingVelocity = DEFAULT_FLING_VELOCITY;
             close();
             super.onLongPress(e);
         }

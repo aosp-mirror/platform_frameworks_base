@@ -43,7 +43,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.ArrayList;
 
 /** @hide */
 /*package*/ final class AudioDeviceBroker {
@@ -376,24 +375,29 @@ import java.util.ArrayList;
         mAudioService.postAccessoryPlugMediaUnmute(device);
     }
 
-    /*package*/ AudioService.VolumeStreamState getStreamState(int streamType) {
-        return mAudioService.getStreamState(streamType);
+    /*package*/ int getVssVolumeForDevice(int streamType, int device) {
+        return mAudioService.getVssVolumeForDevice(streamType, device);
     }
 
-    /*package*/ ArrayList<AudioService.SetModeDeathHandler> getSetModeDeathHandlers() {
-        return mAudioService.mSetModeDeathHandlers;
+    /*package*/ int getModeOwnerPid() {
+        return mAudioService.getModeOwnerPid();
     }
 
     /*package*/ int getDeviceForStream(int streamType) {
         return mAudioService.getDeviceForStream(streamType);
     }
 
-    /*package*/ void setDeviceVolume(AudioService.VolumeStreamState streamState, int device) {
-        mAudioService.setDeviceVolume(streamState, device);
+    /*package*/ void postApplyVolumeOnDevice(int streamType, int device, String caller) {
+        mAudioService.postApplyVolumeOnDevice(streamType, device, caller);
     }
 
-    /*packages*/ void observeDevicesForAllStreams() {
-        mAudioService.observeDevicesForAllStreams();
+    /*package*/ void postSetVolumeIndexOnDevice(int streamType, int vssVolIndex, int device,
+                                                String caller) {
+        mAudioService.postSetVolumeIndexOnDevice(streamType, vssVolIndex, device, caller);
+    }
+
+    /*packages*/ void postObserveDevicesForAllStreams() {
+        mAudioService.postObserveDevicesForAllStreams();
     }
 
     /*package*/ boolean isInCommunication() {

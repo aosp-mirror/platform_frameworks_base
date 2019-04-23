@@ -102,8 +102,6 @@ public:
     ProfileDataContainer& globalProfileData() { return mGlobalProfileData; }
     Readback& readback();
 
-    const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
-
     GrContext* getGrContext() const { return mGrContext.get(); }
     void setGrContext(sk_sp<GrContext> cxt);
 
@@ -149,12 +147,11 @@ private:
 
     void initThreadLocals();
     void initializeDisplayEventReceiver();
+    void setupFrameInterval();
     static int displayEventReceiverCallback(int fd, int events, void* data);
     void drainDisplayEventQueue();
     void dispatchFrameCallbacks();
     void requestVsync();
-
-    DisplayInfo mDisplayInfo;
 
     VsyncSource* mVsyncSource;
     bool mVsyncRequested;

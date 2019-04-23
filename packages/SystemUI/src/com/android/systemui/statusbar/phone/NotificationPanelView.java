@@ -637,6 +637,8 @@ public class NotificationPanelView extends PanelView implements
                     totalHeight,
                     mKeyguardStatusView.getHeight(),
                     clockPreferredY,
+                    hasCustomClock(),
+                    mNotificationStackScroller.getVisibleNotificationCount() != 0,
                     mInterpolatedDarkAmount,
                     mEmptyDragAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);

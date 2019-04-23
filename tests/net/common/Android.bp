@@ -21,6 +21,7 @@ java_library {
     srcs: ["java/**/*.java"],
     static_libs: [
         "androidx.test.rules",
+        "frameworks-net-testutils",
         "junit",
     ],
     libs: [

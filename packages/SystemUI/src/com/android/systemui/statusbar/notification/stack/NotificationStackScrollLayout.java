@@ -1193,6 +1193,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
+    /**
+     * Returns best effort count of visible notifications.
+     */
+    public int getVisibleNotificationCount() {
+        int count = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean isCurrentlyAnimating() {
         return mStateAnimator.isRunning();
