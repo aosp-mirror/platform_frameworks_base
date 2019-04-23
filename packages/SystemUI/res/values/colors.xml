@@ -97,6 +97,8 @@
     <color name="notification_alert_color">#FFF87B2B</color>
     <color name="notification_guts_button_color">@color/GM2_blue_700</color>
 
+    <color name="notification_section_header_label_color">@color/GM2_grey_900</color>
+
     <color name="assist_orb_color">#ffffff</color>
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
