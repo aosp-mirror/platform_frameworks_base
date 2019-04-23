@@ -2276,12 +2276,15 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
+     * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
      * registered operator or the cell nearby, if available.
-     * .
+     * <p>
+     * The ISO-3166 country code is provided in lowercase 2 character format.
      * <p>
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
+     * <p>
+     * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
         return getNetworkCountryIsoForPhone(getPhoneId());
@@ -3140,7 +3143,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO country code equivalent for the SIM provider's country code.
+     * Returns the ISO-3166 country code equivalent for the SIM provider's country code.
+     * <p>
+     * The ISO-3166 country code is provided in lowercase 2 character format.
+     * @return the lowercase 2 character ISO-3166 country code, or empty string is not available.
      */
     public String getSimCountryIso() {
         return getSimCountryIsoForPhone(getPhoneId());
