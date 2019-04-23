@@ -126,6 +126,10 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
             SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
             break;
     }
+
+    // We must sync the cpu to make sure deletions of resources still queued up on the GPU actually
+    // happen.
+    mGrContext->flush(kSyncCpu_GrFlushFlag, 0, nullptr);
 }
 
 void CacheManager::trimStaleResources() {
