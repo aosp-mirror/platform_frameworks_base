@@ -54,7 +54,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -77,6 +79,8 @@ public class KeyguardIndicationController implements StateListener {
     private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
 
     private final Context mContext;
+    private final ShadeController mShadeController;
+    private final AccessibilityController mAccessibilityController;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTextView;
     private KeyguardIndicationTextView mDisclosure;
@@ -116,7 +120,9 @@ public class KeyguardIndicationController implements StateListener {
     public KeyguardIndicationController(Context context, ViewGroup indicationArea,
             LockIcon lockIcon) {
         this(context, indicationArea, lockIcon, new LockPatternUtils(context),
-                WakeLock.createPartial(context, "Doze:KeyguardIndication"));
+                WakeLock.createPartial(context, "Doze:KeyguardIndication"),
+                Dependency.get(ShadeController.class),
+                Dependency.get(AccessibilityController.class));
 
         registerCallbacks(KeyguardUpdateMonitor.getInstance(context));
     }
@@ -126,7 +132,8 @@ public class KeyguardIndicationController implements StateListener {
      */
     @VisibleForTesting
     KeyguardIndicationController(Context context, ViewGroup indicationArea, LockIcon lockIcon,
-            LockPatternUtils lockPatternUtils, WakeLock wakeLock) {
+            LockPatternUtils lockPatternUtils, WakeLock wakeLock, ShadeController shadeController,
+            AccessibilityController accessibilityController) {
         mContext = context;
         mIndicationArea = indicationArea;
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
@@ -134,9 +141,12 @@ public class KeyguardIndicationController implements StateListener {
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
+        mShadeController = shadeController;
+        mAccessibilityController = accessibilityController;
         // lock icon is not used on all form factors.
         if (mLockIcon != null) {
-            mLockIcon.setOnLongClickListener(this::handleTrustCircleClick);
+            mLockIcon.setOnLongClickListener(this::handleLockLongClick);
+            mLockIcon.setOnClickListener(this::handleLockClick);
         }
         mWakeLock = new SettableWakeLock(wakeLock, TAG);
         mLockPatternUtils = lockPatternUtils;
@@ -173,13 +183,20 @@ public class KeyguardIndicationController implements StateListener {
         Dependency.get(StatusBarStateController.class).removeCallback(this);
     }
 
-    private boolean handleTrustCircleClick(View view) {
+    private boolean handleLockLongClick(View view) {
         mLockscreenGestureLogger.write(MetricsProto.MetricsEvent.ACTION_LS_LOCK,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
         showTransientIndication(R.string.keyguard_indication_trust_disabled);
         mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
 
         return true;
+    }
+
+    private void handleLockClick(View view) {
+        if (!mAccessibilityController.isAccessibilityEnabled()) {
+            return;
+        }
+        mShadeController.showBouncer(false /* scrimmed */);
     }
 
     /**
