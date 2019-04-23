@@ -557,6 +557,11 @@ public class IpClient extends StateMachine {
             checkNetworkStackCallingPermission();
             IpClient.this.removeKeepalivePacketFilter(slot);
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
     }
 
     public String getInterfaceName() {
