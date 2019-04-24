@@ -893,6 +893,17 @@ public final class PendingIntent implements Parcelable {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
+
+            if (context != null && isActivity()) {
+                // Set the context display id as preferred for this activity launches, so that it
+                // can land on caller's display. Or just brought the task to front at the display
+                // where it was on since it has higher preference.
+                ActivityOptions activityOptions = options != null ? new ActivityOptions(options)
+                        : ActivityOptions.makeBasic();
+                activityOptions.setCallerDisplayId(context.getDisplayId());
+                options = activityOptions.toBundle();
+            }
+
             return ActivityManager.getService().sendIntentSender(
                     mTarget, mWhitelistToken, code, intent, resolvedType,
                     onFinished != null

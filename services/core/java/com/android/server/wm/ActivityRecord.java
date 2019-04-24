@@ -30,6 +30,7 @@ import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_UNDEFINED;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -2096,6 +2097,7 @@ final class ActivityRecord extends ConfigurationContainer {
                         pendingOptions.getRemoteAnimationAdapter());
                 break;
             case ANIM_NONE:
+            case ANIM_UNDEFINED:
                 break;
             default:
                 Slog.e(TAG_WM, "applyOptionsLocked: Unknown animationType=" + animationType);

@@ -321,6 +321,12 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             displayId = sourceDisplayId;
         }
 
+        if (displayId == INVALID_DISPLAY && options != null) {
+            final int callerDisplayId = options.getCallerDisplayId();
+            if (DEBUG) appendLog("display-from-caller=" + callerDisplayId);
+            displayId = callerDisplayId;
+        }
+
         if (displayId != INVALID_DISPLAY
                 && mSupervisor.mRootActivityContainer.getActivityDisplay(displayId) == null) {
             displayId = currentParams.mPreferredDisplayId;
