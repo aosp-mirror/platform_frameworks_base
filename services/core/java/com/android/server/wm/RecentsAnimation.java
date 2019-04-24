@@ -60,6 +60,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private final ActivityDisplay mDefaultDisplay;
     private final int mCallingPid;
 
+    /**
+     * The activity which has been launched behind. We need to remember the activity because the
+     * target stack may have other activities, then we are able to restore the launch-behind state
+     * for the exact activity.
+     */
+    private ActivityRecord mLaunchedTargetActivity;
     private int mTargetActivityType;
 
     // The stack to restore the target stack behind when the animation is finished
@@ -175,6 +181,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Mark the target activity as launch-behind to bump its visibility for the
             // duration of the gesture that is driven by the recents component
             targetActivity.mLaunchTaskBehind = true;
+            mLaunchedTargetActivity = targetActivity;
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started. Cancel any existing recents animation running synchronously (do not hold the
@@ -233,8 +240,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
                     final ActivityStack targetStack = mDefaultDisplay.getStack(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
+                    // Prefer to use the original target activity instead of top activity because
+                    // we may have moved another task to top (starting 3p launcher).
                     final ActivityRecord targetActivity = targetStack != null
-                            ? targetStack.getTopActivity()
+                            ? targetStack.isInStackLocked(mLaunchedTargetActivity)
                             : null;
                     if (DEBUG) Slog.d(TAG, "onAnimationFinished(): targetStack=" + targetStack
                             + " targetActivity=" + targetActivity
