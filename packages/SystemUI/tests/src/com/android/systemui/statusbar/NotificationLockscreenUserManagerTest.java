@@ -17,10 +17,13 @@
 package com.android.systemui.statusbar;
 
 import static android.content.Intent.ACTION_USER_SWITCHED;
+import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +38,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -152,7 +156,34 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         assertTrue(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUserId));
     }
 
-    private class TestNotificationLockscreenUserManager extends NotificationLockscreenUserManagerImpl {
+    @Test
+    public void testShowSilentNotifications_settingSaysShow() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
+        when(mNotificationData.isHighPriority(any())).thenReturn(false);
+
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(mock(StatusBarNotification.class)));
+    }
+
+    @Test
+    public void testShowSilentNotifications_settingSaysHide() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
+        when(mNotificationData.isHighPriority(any())).thenReturn(false);
+
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(mock(StatusBarNotification.class)));
+    }
+
+    private class TestNotificationLockscreenUserManager
+            extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
             super(context);
         }
