@@ -408,6 +408,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     public void showConfirmationButton(boolean show) {
         if (show) {
+            mHandler.removeMessages(MSG_CLEAR_MESSAGE);
             updateState(STATE_PENDING_CONFIRMATION);
             mPositiveButton.setVisibility(View.VISIBLE);
         } else {
