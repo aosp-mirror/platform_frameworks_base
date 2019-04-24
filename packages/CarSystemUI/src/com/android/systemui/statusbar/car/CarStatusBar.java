@@ -22,7 +22,9 @@ import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.car.Car;
 import android.car.drivingstate.CarDrivingStateEvent;
+import android.car.drivingstate.CarUxRestrictionsManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -408,9 +410,13 @@ public class CarStatusBar extends StatusBar implements
                         animateCollapsePanels();
                     }
                 });
+        Car car = Car.createCar(mContext);
+        CarUxRestrictionsManager carUxRestrictionsManager = (CarUxRestrictionsManager)
+                car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
         CarNotificationListener carNotificationListener = new CarNotificationListener();
         CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper =
                 new CarUxRestrictionManagerWrapper();
+        carUxRestrictionManagerWrapper.setCarUxRestrictionsManager(carUxRestrictionsManager);
         NotificationDataManager notificationDataManager = new NotificationDataManager();
         CarHeadsUpNotificationManager carHeadsUpNotificationManager =
                 new CarSystemUIHeadsUpNotificationManager(mContext, clickHandlerFactory,
