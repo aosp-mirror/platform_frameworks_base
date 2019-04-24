@@ -414,18 +414,25 @@ public final class MediaController {
     /**
      * Gets the additional session information which was set when the session was created.
      *
-     * @return The additional session information
+     * @return The additional session information, or {@link Bundle#EMPTY} if not set.
      */
-    @Nullable
+    @NonNull
     public Bundle getSessionInfo() {
-        if (mSessionInfo == null) {
-            try {
-                mSessionInfo = mSessionBinder.getSessionInfo();
-            } catch (RemoteException e) {
-                Log.d(TAG, "Dead object in getSessionInfo.", e);
-            }
+        if (mSessionInfo != null) {
+            return new Bundle(mSessionInfo);
         }
-        return mSessionInfo;
+
+        // Get info from the connected session.
+        try {
+            mSessionInfo = mSessionBinder.getSessionInfo();
+        } catch (RemoteException e) {
+            Log.d(TAG, "Dead object in getSessionInfo.", e);
+        }
+
+        if (mSessionInfo == null) {
+            mSessionInfo = Bundle.EMPTY;
+        }
+        return new Bundle(mSessionInfo);
     }
 
     /**
