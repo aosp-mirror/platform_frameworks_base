@@ -6012,17 +6012,6 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
     field public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
-    field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
-    field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
-    field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
-    field public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
-    field public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
-    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
-    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
-    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
-    field public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS = "captive_portal_other_fallback_urls";
-    field public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
-    field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
