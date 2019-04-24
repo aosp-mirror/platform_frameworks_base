@@ -21,8 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
-import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -1981,13 +1979,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
-            // Get the bounds of the "space-to-fill". We union the Task and the Stack bounds here
-            // to handle both split window (where task-bounds can be larger) and orientation
-            // letterbox (where the task is letterboxed within stack).
-            Rect spaceToFill = getTask().getBounds();
-            if (getStack() != null) {
-                spaceToFill.union(getStack().getBounds());
-            }
+            // Get the bounds of the "space-to-fill". In multi-window mode, the task-level
+            // represents this. In fullscreen-mode, the stack does (since the orientation letterbox
+            // is also applied to the task).
+            Rect spaceToFill = (inMultiWindowMode() || getStack() == null)
+                    ? getTask().getDisplayedBounds() : getStack().getDisplayedBounds();
             mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
