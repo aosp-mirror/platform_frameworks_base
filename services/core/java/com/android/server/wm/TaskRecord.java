@@ -2244,9 +2244,27 @@ class TaskRecord extends ConfigurationContainer {
             // by policy, make sure the window remains within parent somewhere
             final float density =
                     ((float) newParentConfig.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
-            fitWithinBounds(outOverrideBounds, newParentConfig.windowConfiguration.getBounds(),
+            final Rect parentBounds =
+                    new Rect(newParentConfig.windowConfiguration.getBounds());
+            final ActivityDisplay display = mStack.getDisplay();
+            if (display != null && display.mDisplayContent != null) {
+                // If a freeform window moves below system bar, there is no way to move it again
+                // by touch. Because its caption is covered by system bar. So we exclude them
+                // from stack bounds. and then caption will be shown inside stable area.
+                final Rect stableBounds = new Rect();
+                display.mDisplayContent.getStableRect(stableBounds);
+                parentBounds.intersect(stableBounds);
+            }
+
+            fitWithinBounds(outOverrideBounds, parentBounds,
                     (int) (density * WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP),
                     (int) (density * WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP));
+
+            // Prevent to overlap caption with stable insets.
+            final int offsetTop = parentBounds.top - outOverrideBounds.top;
+            if (offsetTop > 0) {
+                outOverrideBounds.offset(0, offsetTop);
+            }
         }
         computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
     }
