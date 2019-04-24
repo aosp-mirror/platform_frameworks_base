@@ -17,7 +17,9 @@
 package com.android.server.appprediction;
 
 import static android.Manifest.permission.MANAGE_APP_PREDICTIONS;
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 import static android.content.Context.APP_PREDICTION_SERVICE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,13 +31,15 @@ import android.app.prediction.IPredictionManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.util.Slog;
 
+import com.android.server.LocalServices;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.util.function.Consumer;
@@ -53,9 +57,12 @@ public class AppPredictionManagerService extends
 
     private static final int MAX_TEMP_SERVICE_DURATION_MS = 1_000 * 60 * 2; // 2 minutes
 
+    private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+
     public AppPredictionManagerService(Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
                 com.android.internal.R.string.config_defaultAppPredictionService), null);
+        mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
     @Override
@@ -83,20 +90,21 @@ public class AppPredictionManagerService extends
         @Override
         public void createPredictionSession(@NonNull AppPredictionContext context,
                 @NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked((service) ->
-                    service.onCreatePredictionSessionLocked(context, sessionId));
+            runForUserLocked("createPredictionSession",
+                    (service) -> service.onCreatePredictionSessionLocked(context, sessionId));
         }
 
         @Override
         public void notifyAppTargetEvent(@NonNull AppPredictionSessionId sessionId,
                 @NonNull AppTargetEvent event) {
-            runForUserLocked((service) -> service.notifyAppTargetEventLocked(sessionId, event));
+            runForUserLocked("notifyAppTargetEvent",
+                    (service) -> service.notifyAppTargetEventLocked(sessionId, event));
         }
 
         @Override
         public void notifyLaunchLocationShown(@NonNull AppPredictionSessionId sessionId,
                 @NonNull String launchLocation, @NonNull ParceledListSlice targetIds) {
-            runForUserLocked((service) ->
+            runForUserLocked("notifyLaunchLocationShown", (service) ->
                     service.notifyLaunchLocationShownLocked(sessionId, launchLocation, targetIds));
         }
 
@@ -104,44 +112,60 @@ public class AppPredictionManagerService extends
         public void sortAppTargets(@NonNull AppPredictionSessionId sessionId,
                 @NonNull ParceledListSlice targets,
                 IPredictionCallback callback) {
-            runForUserLocked((service) ->
-                    service.sortAppTargetsLocked(sessionId, targets, callback));
+            runForUserLocked("sortAppTargets",
+                    (service) -> service.sortAppTargetsLocked(sessionId, targets, callback));
         }
 
         @Override
         public void registerPredictionUpdates(@NonNull AppPredictionSessionId sessionId,
                 @NonNull IPredictionCallback callback) {
-            runForUserLocked((service) ->
-                    service.registerPredictionUpdatesLocked(sessionId, callback));
+            runForUserLocked("registerPredictionUpdates",
+                    (service) -> service.registerPredictionUpdatesLocked(sessionId, callback));
         }
 
         public void unregisterPredictionUpdates(@NonNull AppPredictionSessionId sessionId,
                 @NonNull IPredictionCallback callback) {
-            runForUserLocked((service) ->
-                    service.unregisterPredictionUpdatesLocked(sessionId, callback));
+            runForUserLocked("unregisterPredictionUpdates",
+                    (service) -> service.unregisterPredictionUpdatesLocked(sessionId, callback));
         }
 
         @Override
         public void requestPredictionUpdate(@NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked((service) -> service.requestPredictionUpdateLocked(sessionId));
+            runForUserLocked("requestPredictionUpdate",
+                    (service) -> service.requestPredictionUpdateLocked(sessionId));
         }
 
         @Override
         public void onDestroyPredictionSession(@NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked((service) -> service.onDestroyPredictionSessionLocked(sessionId));
+            runForUserLocked("onDestroyPredictionSession",
+                    (service) -> service.onDestroyPredictionSessionLocked(sessionId));
         }
 
         public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
                 @Nullable FileDescriptor err,
                 @NonNull String[] args, @Nullable ShellCallback callback,
-                @NonNull ResultReceiver resultReceiver) throws RemoteException {
+                @NonNull ResultReceiver resultReceiver) {
             new AppPredictionManagerServiceShellCommand(AppPredictionManagerService.this)
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
-        private void runForUserLocked(@NonNull Consumer<AppPredictionPerUserService> c) {
+        private void runForUserLocked(@NonNull String func,
+                @NonNull Consumer<AppPredictionPerUserService> c) {
             final int userId = UserHandle.getCallingUserId();
-            // TODO(b/111701043): Determine what permission model we want for this
+
+            Context ctx = getContext();
+            if (!(ctx.checkCallingPermission(PACKAGE_USAGE_STATS) == PERMISSION_GRANTED
+                    || mServiceNameResolver.isTemporary(userId)
+                    || mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid()))) {
+
+                String msg = "Permission Denial: " + func + " from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid()
+                        + " expected caller to hold PACKAGE_USAGE_STATS permission";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+
             long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
