@@ -47,6 +47,7 @@ public class QSIconViewImpl extends QSIconView {
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
+    private QSTile.Icon mLastIcon;
 
     public QSIconViewImpl(Context context) {
         super(context);
@@ -75,6 +76,16 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
+        sb.append("state=" + mState);
+        sb.append(", tint=" + mTint);
+        if (mLastIcon != null) sb.append(", lastIcon=" + mLastIcon.toString());
+        sb.append("]");
+        return sb.toString();
+    }
+
+    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         final int w = getMeasuredWidth();
         int top = 0;
@@ -91,6 +102,7 @@ public class QSIconViewImpl extends QSIconView {
         if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))
                 || !Objects.equals(state.slash, iv.getTag(R.id.qs_slash_tag))) {
             boolean shouldAnimate = allowAnimations && shouldAnimate(iv);
+            mLastIcon = icon;
             Drawable d = icon != null
                     ? shouldAnimate ? icon.getDrawable(mContext)
                     : icon.getInvisibleDrawable(mContext) : null;

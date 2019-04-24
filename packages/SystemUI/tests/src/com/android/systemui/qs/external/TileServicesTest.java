@@ -29,6 +29,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
@@ -67,7 +68,8 @@ public class TileServicesTest extends SysuiTestCase {
                 Looper.myLooper(),
                 mock(PluginManager.class),
                 mock(TunerService.class),
-                () -> mock(AutoTileManager.class));
+                () -> mock(AutoTileManager.class),
+                mock(DumpController.class));
         mTileService = new TestTileServices(host, Looper.getMainLooper());
     }
 
