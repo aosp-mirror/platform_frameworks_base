@@ -91,8 +91,8 @@ public class ArcInitiationActionFromAvr extends HdmiCecFeatureAction {
     }
 
     private void handleInitiateArcTimeout() {
+        // Keep ARC status as what it is when TV does not respond to ARC init
         HdmiLogger.debug("handleInitiateArcTimeout");
-        audioSystem().setArcStatus(false);
         finish();
     }
 }
