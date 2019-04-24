@@ -28,18 +28,19 @@ import static com.android.internal.util.Preconditions.checkCollectionElementsNot
 import static com.android.internal.util.Preconditions.checkFlagsArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager.PermissionGrantState;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -96,6 +97,7 @@ public abstract class PermissionControllerService extends Service {
      *
      * @return the actually removed permissions as {@code Map<packageName, List<permission>>}
      */
+    @WorkerThread
     public abstract @NonNull Map<String, List<String>> onRevokeRuntimePermissions(
             @NonNull Map<String, List<String>> requests, boolean doDryRun,
             @PermissionControllerManager.Reason int reason, @NonNull String callerPackageName);
@@ -106,6 +108,7 @@ public abstract class PermissionControllerService extends Service {
      * @param user The user to back up
      * @param backup The stream to write the backup to
      */
+    @WorkerThread
     public abstract void onGetRuntimePermissionsBackup(@NonNull UserHandle user,
             @NonNull OutputStream backup);
 
@@ -142,6 +145,7 @@ public abstract class PermissionControllerService extends Service {
      *
      * @return descriptions of the runtime permissions of the app
      */
+    @WorkerThread
     public abstract @NonNull List<RuntimePermissionPresentationInfo> onGetAppPermissions(
             @NonNull String packageName);
 
@@ -151,6 +155,7 @@ public abstract class PermissionControllerService extends Service {
      * @param packageName The package for which to revoke
      * @param permissionName The permission to revoke
      */
+    @WorkerThread
     public abstract void onRevokeRuntimePermission(@NonNull String packageName,
             @NonNull String permissionName);
 
@@ -163,6 +168,7 @@ public abstract class PermissionControllerService extends Service {
      *
      * @return the number of apps that have one of the permissions
      */
+    @WorkerThread
     public abstract int onCountPermissionApps(@NonNull List<String> permissionNames,
             @CountPermissionAppsFlag int flags);
 
@@ -174,6 +180,7 @@ public abstract class PermissionControllerService extends Service {
      *
      * @return descriptions of the users of permissions
      */
+    @WorkerThread
     public abstract @NonNull List<RuntimePermissionUsageInfo> onGetPermissionUsages(
             boolean countSystem, long numMillis);
 
@@ -186,6 +193,7 @@ public abstract class PermissionControllerService extends Service {
      * @see PermissionManager#getRuntimePermissionsVersion()
      * @see PermissionManager#setRuntimePermissionsVersion(int)
      */
+    @WorkerThread
     public abstract void onGrantOrUpgradeDefaultRuntimePermissions();
 
     /**
@@ -196,6 +204,7 @@ public abstract class PermissionControllerService extends Service {
      * @param permission Permission to change
      * @param grantState State to set the permission into
      */
+    @WorkerThread
     public abstract boolean onSetRuntimePermissionGrantStateByDeviceAdmin(
             @NonNull String callerPackageName, @NonNull String packageName,
             @NonNull String permission, @PermissionGrantState int grantState);
@@ -232,10 +241,9 @@ public abstract class PermissionControllerService extends Service {
                     throw new RuntimeException(e);
                 }
 
-                mHandler.sendMessage(obtainMessage(
-                        PermissionControllerService::revokeRuntimePermissions,
-                        PermissionControllerService.this, request, doDryRun, reason,
-                        callerPackageName, callback));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(() ->
+                        PermissionControllerService.this.revokeRuntimePermissions(request, doDryRun,
+                                reason, callerPackageName, callback));
             }
 
             @Override
@@ -245,9 +253,8 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                mHandler.sendMessage(obtainMessage(
-                        PermissionControllerService::getRuntimePermissionsBackup,
-                        PermissionControllerService.this, user, pipe));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(() ->
+                        PermissionControllerService.this.getRuntimePermissionsBackup(user, pipe));
             }
 
             @Override
@@ -287,9 +294,9 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                mHandler.sendMessage(
-                        obtainMessage(PermissionControllerService::getAppPermissions,
-                                PermissionControllerService.this, packageName, callback));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> PermissionControllerService.this.getAppPermissions(packageName,
+                                callback));
             }
 
             @Override
@@ -299,9 +306,9 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
 
-                mHandler.sendMessage(
-                        obtainMessage(PermissionControllerService::onRevokeRuntimePermission,
-                                PermissionControllerService.this, packageName, permissionName));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> PermissionControllerService.this.onRevokeRuntimePermission(
+                                packageName, permissionName));
             }
 
             @Override
@@ -313,10 +320,9 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                mHandler.sendMessage(
-                        obtainMessage(PermissionControllerService::countPermissionApps,
-                                PermissionControllerService.this, permissionNames, flags,
-                                callback));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> PermissionControllerService.this.countPermissionApps(permissionNames,
+                                flags, callback));
             }
 
             @Override
@@ -327,10 +333,9 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                mHandler.sendMessage(
-                        obtainMessage(PermissionControllerService::getPermissionUsages,
-                                PermissionControllerService.this, countSystem, numMillis,
-                                callback));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> PermissionControllerService.this.getPermissionUsages(countSystem,
+                                numMillis, callback));
             }
 
             @Override
@@ -356,10 +361,10 @@ public abstract class PermissionControllerService extends Service {
                 enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                         null);
 
-                mHandler.sendMessage(obtainMessage(
-                        PermissionControllerService::setRuntimePermissionGrantStateByDeviceAdmin,
-                        PermissionControllerService.this, callerPackageName, packageName,
-                        permission, grantState, callback));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> PermissionControllerService.this
+                                .setRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
+                                        packageName, permission, grantState, callback));
             }
 
             @Override
@@ -369,9 +374,9 @@ public abstract class PermissionControllerService extends Service {
                 enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                         null);
 
-                mHandler.sendMessage(obtainMessage(
-                        PermissionControllerService::grantOrUpgradeDefaultRuntimePermissions,
-                        PermissionControllerService.this, callback));
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(
+                        () -> PermissionControllerService.this
+                                .grantOrUpgradeDefaultRuntimePermissions(callback));
             }
         };
     }
