@@ -57,4 +57,6 @@ oneway interface IAccessibilityInteractionConnection {
         int interrogatingPid, long interrogatingTid);
 
     void clearAccessibilityFocus();
+
+    void notifyOutsideTouch();
 }

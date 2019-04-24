@@ -185,9 +185,6 @@
     <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_HIDE_TOOLTIP}. -->
     <item type="id" name="accessibilityActionHideTooltip" />
 
-  <!-- Accessibility action to notify a window there is an outside touch. -->
-  <item type="id" name="accessibilityActionOutsideTouch" />
-
   <!-- A tag used to save the view added to a transition overlay -->
   <item type="id" name="transition_overlay_view_tag" />
 

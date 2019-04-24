@@ -8819,6 +8819,15 @@ public final class ViewRootImpl implements ViewParent,
                         .clearAccessibilityFocusClientThread();
             }
         }
+
+        @Override
+        public void notifyOutsideTouch() {
+            ViewRootImpl viewRootImpl = mViewRootImpl.get();
+            if (viewRootImpl != null && viewRootImpl.mView != null) {
+                viewRootImpl.getAccessibilityInteractionController()
+                        .notifyOutsideTouchClientThread();
+            }
+        }
     }
 
     private class SendWindowContentChangedAccessibilityEvent implements Runnable {
