@@ -148,6 +148,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 trackMovement(event);
                 if (mInDismissTarget && isStack) {
                     mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
+                    mStack.onDragFinishAsDismiss();
                 } else if (isFlyout) {
                     // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
                     if (!mStack.isExpanded() && !mMovedEnough) {
