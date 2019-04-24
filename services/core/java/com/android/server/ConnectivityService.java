@@ -2861,7 +2861,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             nai.networkMonitor().notifyPrivateDnsChanged(cfg.toParcel());
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
 
         // With Private DNS bypass support, we can proceed to update the
@@ -3031,7 +3031,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             nai.networkMonitor().notifyNetworkDisconnected();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
         mNetworkAgentInfos.remove(nai.messenger);
         nai.clatd.update();
@@ -3420,7 +3420,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 nai.networkMonitor().setAcceptPartialConnectivity();
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
         }
     }
@@ -3456,7 +3456,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 nai.networkMonitor().launchCaptivePortalApp();
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
         });
     }
@@ -4084,7 +4084,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             nai.networkMonitor().forceReevaluation(uid);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -5464,7 +5464,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             networkMonitor.start();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
         nai.asyncChannel.connect(mContext, mTrackerHandler, nai.messenger);
         NetworkInfo networkInfo = nai.networkInfo;
@@ -5521,7 +5521,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 networkAgent.networkMonitor().notifyLinkPropertiesChanged(newLp);
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
             if (networkAgent.everConnected) {
                 notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
@@ -6527,7 +6527,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 networkAgent.networkMonitor().notifyNetworkConnected(
                         networkAgent.linkProperties, networkAgent.networkCapabilities);
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
             scheduleUnvalidatedPrompt(networkAgent);
 
