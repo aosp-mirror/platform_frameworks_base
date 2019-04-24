@@ -74,17 +74,21 @@
         android:layout_height="match_parent"
         android:layout="@layout/car_fullscreen_user_switcher"/>
 
-    <include layout="@layout/status_bar_expanded"
+    <include layout="@layout/notification_center_activity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/navigation_bar_height"
+        android:visibility="invisible"/>
+
+    <include layout="@layout/headsup_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="invisible"/>
 
-    <include layout="@layout/notification_center_activity"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:layout_marginBottom="112dp"
-             android:visibility="invisible"
-    />
+    <include layout="@layout/status_bar_expanded"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"/>
 
     <com.android.systemui.statusbar.ScrimView
         android:id="@+id/scrim_in_front"
