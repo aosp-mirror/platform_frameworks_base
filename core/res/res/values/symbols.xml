@@ -245,7 +245,6 @@
   <java-symbol type="id" name="selection_end_handle" />
   <java-symbol type="id" name="insertion_handle" />
   <java-symbol type="id" name="accessibilityActionClickOnClickableSpan" />
-  <java-symbol type="id" name="accessibilityActionOutsideTouch" />
   <java-symbol type="id" name="camera" />
   <java-symbol type="id" name="mic" />
   <java-symbol type="id" name="overlay" />
