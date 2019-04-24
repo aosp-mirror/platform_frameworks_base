@@ -195,6 +195,10 @@ public class QuickQSPanel extends QSPanel {
             super(context);
             setClipChildren(false);
             setClipToPadding(false);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT);
+            lp.gravity = Gravity.CENTER_HORIZONTAL;
+            setLayoutParams(lp);
         }
 
         @Override
@@ -206,13 +210,6 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public void onFinishInflate(){
             updateResources();
-        }
-
-        private void updateLayoutParams() {
-            int width = getResources().getDimensionPixelSize(R.dimen.qs_quick_layout_width);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(width, LayoutParams.MATCH_PARENT);
-            lp.gravity = Gravity.CENTER_HORIZONTAL;
-            setLayoutParams(lp);
         }
 
         private LayoutParams generateTileLayoutParams() {
@@ -245,8 +242,6 @@ public class QuickQSPanel extends QSPanel {
         public boolean updateResources() {
             mCellWidth = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
             mCellHeight = mCellWidth;
-
-            updateLayoutParams();
 
             return false;
         }
