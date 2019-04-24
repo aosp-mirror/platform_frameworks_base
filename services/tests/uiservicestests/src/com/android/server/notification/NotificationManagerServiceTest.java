@@ -71,7 +71,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -5046,5 +5045,113 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
         mBinderService.areBubblesAllowedForPackage(mContext.getPackageName(),
                 mUid + UserHandle.PER_USER_RANGE);
+    }
+
+    @Test
+    public void testNotificationBubbleChanged_false() throws Exception {
+        // Bubbles are allowed!
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
+        when(mPreferencesHelper.getNotificationChannel(
+                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                mTestNotificationChannel);
+        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
+                mTestNotificationChannel.getImportance());
+
+        // Notif with bubble metadata but not our other misc requirements
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                null /* tvExtender */, true /* isBubble */);
+
+        // Say we're foreground
+        when(mActivityManager.getPackageImportance(nr.sbn.getPackageName())).thenReturn(
+                IMPORTANCE_FOREGROUND);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // First we were a bubble
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+        assertTrue((notifsBefore[0].getNotification().flags & FLAG_BUBBLE) != 0);
+
+        // Notify we're not a bubble
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
+        waitForIdle();
+
+        // Now we are not a bubble
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+    }
+
+    @Test
+    public void testNotificationBubbleChanged_true() throws Exception {
+        // Bubbles are allowed!
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
+        when(mPreferencesHelper.getNotificationChannel(
+                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                mTestNotificationChannel);
+        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
+                mTestNotificationChannel.getImportance());
+
+        // Plain notification that has bubble metadata
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                null /* tvExtender */, true /* isBubble */);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // Would be a normal notification because wouldn't have met requirements to bubble
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+        assertEquals((notifsBefore[0].getNotification().flags & FLAG_BUBBLE), 0);
+
+        // Make the package foreground so that we're allowed to be a bubble
+        when(mActivityManager.getPackageImportance(nr.sbn.getPackageName())).thenReturn(
+                IMPORTANCE_FOREGROUND);
+
+        // Notify we are now a bubble
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
+        waitForIdle();
+
+        // Make sure we are a bubble
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertTrue((notifsAfter[0].getNotification().flags & FLAG_BUBBLE) != 0);
+    }
+
+    @Test
+    public void testNotificationBubbleChanged_true_notAllowed() throws Exception {
+        // Bubbles are allowed!
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
+        when(mPreferencesHelper.getNotificationChannel(
+                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                mTestNotificationChannel);
+        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
+                mTestNotificationChannel.getImportance());
+
+        // Notif that is not a bubble
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                null /* tvExtender */, true /* isBubble */);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // Would be a normal notification because wouldn't have met requirements to bubble
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+        assertEquals((notifsBefore[0].getNotification().flags & FLAG_BUBBLE), 0);
+
+        // Notify we are now a bubble
+        mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
+        waitForIdle();
+
+        // We still wouldn't be a bubble because the notification didn't meet requirements
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
     }
 }
