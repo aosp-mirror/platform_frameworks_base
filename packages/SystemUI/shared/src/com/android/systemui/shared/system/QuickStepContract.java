@@ -52,11 +52,16 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_NAV_BAR_HIDDEN = 1 << 1;
     public static final int SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED = 1 << 2;
     public static final int SYSUI_STATE_BOUNCER_SHOWING = 1 << 3;
+    public static final int SYSUI_STATE_A11Y_BUTTON_CLICKABLE = 1 << 4;
+    public static final int SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE = 1 << 5;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
             SYSUI_STATE_NAV_BAR_HIDDEN,
-            SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
+            SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
+            SYSUI_STATE_BOUNCER_SHOWING,
+            SYSUI_STATE_A11Y_BUTTON_CLICKABLE,
+            SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE
     })
     public @interface SystemUiStateFlags {}
 
