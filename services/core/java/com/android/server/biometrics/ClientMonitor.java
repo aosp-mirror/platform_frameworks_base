@@ -63,7 +63,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     private final int mCookie;
 
     protected final MetricsLogger mMetricsLogger;
-    protected final Metrics mMetrics;
+    protected final Constants mConstants;
 
     protected boolean mAlreadyCancelled;
     protected boolean mAlreadyDone;
@@ -80,12 +80,12 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * permission
      * @param owner name of the client that owns this
      */
-    public ClientMonitor(Context context, Metrics metrics,
+    public ClientMonitor(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             boolean restricted, String owner, int cookie) {
         mContext = context;
-        mMetrics = metrics;
+        mConstants = constants;
         mDaemon = daemon;
         mHalDeviceId = halDeviceId;
         mToken = token;
@@ -108,7 +108,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     }
 
     protected String getLogTag() {
-        return mMetrics.logTag();
+        return mConstants.logTag();
     }
 
     public int getCookie() {
@@ -145,6 +145,31 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     public abstract boolean onEnumerationResult(
             BiometricAuthenticator.Identifier identifier, int remaining);
 
+    public int[] getAcquireIgnorelist() {
+        return new int[0];
+    }
+    public int[] getAcquireVendorIgnorelist() {
+        return new int[0];
+    }
+
+    private boolean blacklistContains(int acquiredInfo, int vendorCode) {
+        if (acquiredInfo == mConstants.acquireVendorCode()) {
+            for (int i = 0; i < getAcquireVendorIgnorelist().length; i++) {
+                if (getAcquireVendorIgnorelist()[i] == vendorCode) {
+                    if (DEBUG) Slog.v(getLogTag(), "Ignoring vendor message: " + vendorCode);
+                    return true;
+                }
+            }
+        } else {
+            for (int i = 0; i < getAcquireIgnorelist().length; i++) {
+                if (getAcquireIgnorelist()[i] == acquiredInfo) {
+                    if (DEBUG) Slog.v(getLogTag(), "Ignoring message: " + acquiredInfo);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public boolean isAlreadyDone() {
         return mAlreadyDone;
@@ -160,7 +185,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
         super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
         if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode);
         try {
-            if (mListener != null) {
+            if (mListener != null && !blacklistContains(acquiredInfo, vendorCode)) {
                 mListener.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
             }
             return false; // acquisition continues...

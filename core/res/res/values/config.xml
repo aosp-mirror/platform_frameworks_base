@@ -4056,4 +4056,34 @@
 
     <!-- Which binder services to include in incident reports containing restricted images. -->
     <string-array name="config_restrictedImagesServices" translatable="false"/>
+
+    <!-- Messages that should not be shown to the user during face auth enrollment. This should be
+         used to hide messages that may be too chatty or messages that the user can't do much about.
+         Entries are defined in android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_enroll_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_enroll_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Messages that should not be shown to the user during face authentication, on keyguard.
+         This includes both lockscreen and bouncer. This should be used to hide messages that may be
+         too chatty or messages that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_keyguard_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_keyguard_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Messages that should not be shown to the user during face authentication, on
+     BiometricPrompt. This should be used to hide messages that may be too chatty or messages that
+     the user can't do much about. Entries are defined in
+     android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_biometricprompt_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
+    </integer-array>
+
 </resources>

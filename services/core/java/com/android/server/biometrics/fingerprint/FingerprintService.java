@@ -68,7 +68,7 @@ import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.EnumerateClient;
-import com.android.server.biometrics.Metrics;
+import com.android.server.biometrics.Constants;
 import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
@@ -284,7 +284,7 @@ public class FingerprintService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final RemovalClient client = new RemovalClient(getContext(), getMetrics(),
+            final RemovalClient client = new RemovalClient(getContext(), getConstants(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver),
                     fingerId, groupId, userId, restricted, token.toString(), getBiometricUtils()) {
                 @Override
@@ -301,7 +301,7 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(MANAGE_FINGERPRINT);
 
             final boolean restricted = isRestricted();
-            final EnumerateClient client = new EnumerateClient(getContext(), getMetrics(),
+            final EnumerateClient client = new EnumerateClient(getContext(), getConstants(),
                     mDaemonWrapper, mHalDeviceId, token, new ServiceListenerImpl(receiver), userId,
                     userId, restricted, getContext().getOpPackageName()) {
                 @Override
@@ -557,7 +557,7 @@ public class FingerprintService extends BiometricServiceBase {
         }
     }
 
-    private final FingerprintMetrics mFingerprintMetrics = new FingerprintMetrics();
+    private final FingerprintConstants mFingerprintConstants = new FingerprintConstants();
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
 
@@ -736,8 +736,8 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
-    protected Metrics getMetrics() {
-        return mFingerprintMetrics;
+    protected Constants getConstants() {
+        return mFingerprintConstants;
     }
 
     @Override
