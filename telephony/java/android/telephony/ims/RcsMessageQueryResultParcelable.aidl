@@ -17,4 +17,4 @@
 
 package android.telephony.ims;
 
-parcelable RcsMessageQueryResult;
+parcelable RcsMessageQueryResultParcelable;
