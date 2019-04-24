@@ -768,7 +768,7 @@ public final class Telephony {
             public static final String DEFAULT_SORT_ORDER = "date DESC";
 
             /**
-             * The first 45 characters of the body of the message.
+             * The first 45 characters of the body of the most recent message.
              * <P>Type: TEXT</P>
              */
             public static final String SNIPPET = "snippet";
