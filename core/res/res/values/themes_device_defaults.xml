@@ -1562,10 +1562,7 @@ easier.
         <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
-    <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.Material.Settings.Dialog">
-        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
-        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
-
+    <style name="Theme.DeviceDefault.Settings.DialogBase" parent="Theme.Material.Light.BaseDialog">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
@@ -1574,8 +1571,15 @@ easier.
         <item name="colorError">@color/error_color_device_default_light</item>
 
         <!-- Dialog attributes -->
-        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Light.Dialog.Alert</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.DeviceDefault.Settings.DialogBase">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
+        <!-- Dialog attributes -->
+        <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
 
         <!-- Text styles -->
         <item name="textAppearanceButton">@style/TextAppearance.DeviceDefault.Widget.Button</item>
