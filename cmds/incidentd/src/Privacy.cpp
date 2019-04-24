@@ -37,6 +37,8 @@ const Privacy* lookup(const Privacy* p, uint32_t fieldId) {
     return NULL;
 }
 
+bool sectionEncryption(int section_id) { return section_id == 3025 /*restricted image section*/; }
+
 static bool isAllowed(const uint8_t policy, const uint8_t check) {
     switch (check) {
         case PRIVACY_POLICY_LOCAL:
