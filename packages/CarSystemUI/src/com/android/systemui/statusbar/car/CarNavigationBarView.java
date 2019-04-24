@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,7 +35,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
  */
 class CarNavigationBarView extends LinearLayout {
     private View mNavButtons;
-    private CarFacetButton mNotificationsButton;
+    private View mNotificationsButton;
     private CarStatusBar mCarStatusBar;
     private Context mContext;
     private View mLockScreenButtons;
@@ -74,11 +75,37 @@ class CarNavigationBarView extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (mStatusBarWindowTouchListener != null) {
-            // forward touch events to the status bar window so it can add a drag down
+            boolean shouldConsumeEvent = shouldConsumeNotificationButtonEvent(ev);
+            // Forward touch events to the status bar window so it can drag
             // windows if required (Notification shade)
             mStatusBarWindowTouchListener.onTouch(this, ev);
+            // return true if child views should not receive this event.
+            if (shouldConsumeEvent) {
+                return true;
+            }
         }
         return super.onInterceptTouchEvent(ev);
+    }
+
+    /**
+     * If the motion event is over top of the notification button while the notification
+     * panel is open, we need the statusbar touch listeners handle the event instead of the button.
+     * Since the statusbar listener will trigger a close of the notification panel before the
+     * any button click events are fired this will prevent reopening the panel.
+     *
+     * Note: we can't use requestDisallowInterceptTouchEvent because the gesture detector will
+     * always receive the ACTION_DOWN and thus think a longpress happened if no other events are
+     * received
+     *
+     * @return true if the notification button should not receive the event
+     */
+    private boolean shouldConsumeNotificationButtonEvent(MotionEvent ev) {
+        if (mNotificationsButton == null || !mCarStatusBar.isNotificationPanelOpen()) {
+            return false;
+        }
+        Rect notificationButtonLocation = new Rect();
+        mNotificationsButton.getHitRect(notificationButtonLocation);
+        return notificationButtonLocation.contains((int) ev.getX(), (int) ev.getY());
     }
 
 
