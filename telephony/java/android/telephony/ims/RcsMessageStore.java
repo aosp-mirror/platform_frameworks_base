@@ -104,7 +104,8 @@ public class RcsMessageStore {
     @NonNull
     public RcsMessageQueryResult getRcsMessages(
             @Nullable RcsMessageQueryParams queryParameters) throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
+        return new RcsMessageQueryResult(
+                RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters)));
     }
 
     /**
@@ -118,7 +119,8 @@ public class RcsMessageStore {
     @NonNull
     public RcsMessageQueryResult getRcsMessages(
             @NonNull RcsQueryContinuationToken continuationToken) throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessagesWithToken(continuationToken));
+        return new RcsMessageQueryResult(
+                RcsControllerCall.call(iRcs -> iRcs.getMessagesWithToken(continuationToken)));
     }
 
     /**
