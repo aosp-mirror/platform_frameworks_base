@@ -17,6 +17,7 @@
     <overlayable name="NetworkStackConfig">
         <policy type="product|system|vendor">
             <!-- Configuration values for NetworkMonitor -->
+            <item type="integer" name="config_captive_portal_dns_probe_timeout"/>
             <item type="string" name="config_captive_portal_http_url"/>
             <item type="string" name="config_captive_portal_https_url"/>
             <item type="array" name="config_captive_portal_fallback_urls"/>
