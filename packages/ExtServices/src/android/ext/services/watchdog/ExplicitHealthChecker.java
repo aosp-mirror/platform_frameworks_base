@@ -16,8 +16,6 @@
 
 package android.ext.services.watchdog;
 
-import android.service.watchdog.PackageInfo;
-
 /**
  * A type of explicit health check that can be performed on a device, e.g network health check
  */
@@ -40,7 +38,7 @@ interface ExplicitHealthChecker {
     boolean isPending();
 
     /**
-     * Returns the {@link PackageInfo} object this checker can make requests for.
+     * Returns the name of the package this checker can make requests for.
      */
-    PackageInfo getSupportedPackage();
+    String getSupportedPackageName();
 }
