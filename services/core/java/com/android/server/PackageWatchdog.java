@@ -357,7 +357,7 @@ public class PackageWatchdog {
      * <p> If explicit health checks are disabled, pending explicit health check requests are
      * passed and the health check service is stopped.
      */
-    public void setExplicitHealthCheckEnabled(boolean enabled) {
+    private void setExplicitHealthCheckEnabled(boolean enabled) {
         synchronized (mLock) {
             mIsHealthCheckEnabled = enabled;
             mHealthCheckController.setEnabled(enabled);
