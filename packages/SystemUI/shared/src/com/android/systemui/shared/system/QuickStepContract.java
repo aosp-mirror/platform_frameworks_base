@@ -21,7 +21,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
 import android.annotation.IntDef;
-import android.content.Context;
 import android.content.res.Resources;
 import android.view.WindowManagerPolicyConstants;
 
@@ -90,13 +89,6 @@ public class QuickStepContract {
     }
 
     /**
-     * @return whether the current nav bar mode is gestural
-     */
-    public static boolean isGesturalMode(Context context) {
-        return isGesturalMode(getCurrentInteractionMode(context));
-    }
-
-    /**
      * @return whether this nav bar mode is swipe up
      */
     public static boolean isSwipeUpMode(int mode) {
@@ -104,48 +96,10 @@ public class QuickStepContract {
     }
 
     /**
-     * @return whether the current nav bar mode is swipe up
-     */
-    public static boolean isSwipeUpMode(Context context) {
-        return isSwipeUpMode(getCurrentInteractionMode(context));
-    }
-
-    /**
      * @return whether this nav bar mode is 3 button
      */
     public static boolean isLegacyMode(int mode) {
         return mode == NAV_BAR_MODE_3BUTTON;
-    }
-
-    /**
-     * @return whether this nav bar mode is 3 button
-     */
-    public static boolean isLegacyMode(Context context) {
-        return isLegacyMode(getCurrentInteractionMode(context));
-    }
-
-    /**
-     * @return the current nav bar interaction mode
-     */
-    public static int getCurrentInteractionMode(Context context) {
-        return context.getResources().getInteger(
-                com.android.internal.R.integer.config_navBarInteractionMode);
-    }
-
-    /**
-     * @return {@code true} if the navbar can be clicked through
-     */
-    public static boolean isNavBarClickThrough(Context context) {
-        return context.getResources().getBoolean(
-                com.android.internal.R.bool.config_navBarTapThrough);
-    }
-
-    /**
-     * @return the edge sensitivity width in px
-     */
-    public static int getEdgeSensitivityWidth(Context context) {
-        return context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.config_backGestureInset);
     }
 
     /**
