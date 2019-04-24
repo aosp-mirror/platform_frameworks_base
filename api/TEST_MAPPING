@@ -5,9 +5,11 @@
     },
     {
       "name": "CtsSystemApiSignatureTestCases"
-    },
+    }
+  ],
+  "imports": [
     {
-      "name": "GtsUnofficialApisUsageTestCases"
+      "path": "vendor/xts/gts-tests/hostsidetests/api"
     }
   ]
 }
