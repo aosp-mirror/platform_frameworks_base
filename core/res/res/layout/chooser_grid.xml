@@ -25,6 +25,7 @@
     android:id="@id/contentPanel">
 
     <RelativeLayout
+        android:id="@+id/chooser_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
@@ -62,11 +63,10 @@
         android:layout_height="match_parent"
         android:id="@+id/resolver_list"
         android:clipToPadding="false"
-        android:scrollbarStyle="outsideOverlay"
         android:background="?attr/colorBackgroundFloating"
+        android:scrollbars="none"
         android:listSelector="@color/transparent"
         android:divider="@null"
-        android:scrollIndicators="top"
         android:elevation="1dp"
         android:nestedScrollingEnabled="true"/>
 
