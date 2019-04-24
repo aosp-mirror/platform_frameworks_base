@@ -286,6 +286,22 @@ void ReportBatch::clearPersistedRequests() {
     mPersistedRequests.clear();
 }
 
+void ReportBatch::transferStreamingRequests(const sp<ReportBatch>& that) {
+    for (vector<sp<ReportRequest>>::iterator request = mStreamingRequests.begin();
+            request != mStreamingRequests.end(); request++) {
+        that->mStreamingRequests.push_back(*request);
+    }
+    mStreamingRequests.clear();
+}
+
+void ReportBatch::transferPersistedRequests(const sp<ReportBatch>& that) {
+    for (map<ComponentName, sp<ReportRequest>>::iterator it = mPersistedRequests.begin();
+            it != mPersistedRequests.end(); it++) {
+        that->mPersistedRequests[it->first] = it->second;
+    }
+    mPersistedRequests.clear();
+}
+
 void ReportBatch::getFailedRequests(vector<sp<ReportRequest>>* requests) {
     for (map<ComponentName, sp<ReportRequest>>::iterator it = mPersistedRequests.begin();
             it != mPersistedRequests.end(); it++) {

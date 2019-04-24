@@ -192,7 +192,7 @@ status_t FieldStripper::strip(const uint8_t privacyPolicy) {
         ProtoOutputStream proto;
 
         // Optimization when no strip happens.
-        if (mRestrictions == NULL || mRestrictions->children == NULL || spec.RequireAll()) {
+        if (mRestrictions == NULL || spec.RequireAll()) {
             if (spec.CheckPremission(mRestrictions)) {
                 mSize = mData->size();
             }
