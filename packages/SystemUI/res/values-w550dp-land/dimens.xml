@@ -19,6 +19,4 @@
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">544dp</dimen>
 
-    <!-- Maximum width of quick quick settings panel. -->
-    <dimen name="qs_quick_layout_width">478dp</dimen>
 </resources>
