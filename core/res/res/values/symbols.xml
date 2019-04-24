@@ -2533,6 +2533,9 @@
   <java-symbol type="bool" name="config_fingerprintSupportsGestures"/>
 
   <!-- Face authentication messages -->
+  <java-symbol type="string" name="face_recalibrate_notification_name" />
+  <java-symbol type="string" name="face_recalibrate_notification_title" />
+  <java-symbol type="string" name="face_recalibrate_notification_content" />
   <java-symbol type="string" name="face_error_unable_to_process" />
   <java-symbol type="string" name="face_error_hw_not_available" />
   <java-symbol type="string" name="face_error_no_space" />
