@@ -1041,12 +1041,9 @@ public class ChooserActivity extends ResolverActivity {
             int cat = 0;
             int value = which;
             int directTargetAlsoRanked = -1;
+            int numCallerProvided = 0;
             HashedStringCache.HashResult directTargetHashed = null;
             switch (mChooserListAdapter.getPositionTargetType(which)) {
-                case ChooserListAdapter.TARGET_CALLER:
-                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
-                    value -= mChooserListAdapter.getSelectableServiceTargetCount();
-                    break;
                 case ChooserListAdapter.TARGET_SERVICE:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET;
                     // Log the package name + target name to answer the question if most users
@@ -1062,13 +1059,14 @@ public class ChooserActivity extends ResolverActivity {
                     directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
 
                     if (mCallerChooserTargets != null) {
-                        value -= mCallerChooserTargets.length;
+                        numCallerProvided = mCallerChooserTargets.length;
                     }
                     break;
+                case ChooserListAdapter.TARGET_CALLER:
                 case ChooserListAdapter.TARGET_STANDARD:
-                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
-                    value -= mChooserListAdapter.getCallerTargetCount()
-                            + mChooserListAdapter.getSelectableServiceTargetCount();
+                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
+                    value -= mChooserListAdapter.getSelectableServiceTargetCount();
+                    numCallerProvided = mChooserListAdapter.getCallerTargetCount();
                     break;
                 case ChooserListAdapter.TARGET_STANDARD_AZ:
                     // A-Z targets are unranked standard targets; we use -1 to mark that they
@@ -1089,8 +1087,9 @@ public class ChooserActivity extends ResolverActivity {
                     targetLogMaker.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION,
                                     directTargetAlsoRanked);
                 }
+                targetLogMaker.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED,
+                        numCallerProvided);
                 getMetricsLogger().write(targetLogMaker);
-                MetricsLogger.action(this, cat, value);
             }
 
             if (mIsSuccessfullySelected) {
