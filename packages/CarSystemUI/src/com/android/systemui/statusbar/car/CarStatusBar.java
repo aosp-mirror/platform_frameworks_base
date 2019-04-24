@@ -349,7 +349,9 @@ public class CarStatusBar extends StatusBar implements
                 new CloseNotificationGestureListener() {
                     @Override
                     protected void close() {
-                        animateCollapsePanels();
+                        if (mPanelExpanded) {
+                            animateCollapsePanels();
+                        }
                     }
                 });
         // Attached to the NavBars to close the notification shade
@@ -357,7 +359,9 @@ public class CarStatusBar extends StatusBar implements
                 new NavBarCloseNotificationGestureListener() {
                     @Override
                     protected void close() {
-                        animateCollapsePanels();
+                        if (mPanelExpanded) {
+                            animateCollapsePanels();
+                        }
                     }
                 });
         mNavBarNotificationTouchListener =
@@ -518,6 +522,13 @@ public class CarStatusBar extends StatusBar implements
                 carNotificationListener,
                 carUxRestrictionManagerWrapper);
         mNotificationViewController.enable();
+    }
+
+    /**
+     * @return true if the notification panel is currently visible
+     */
+    boolean isNotificationPanelOpen() {
+        return mPanelExpanded;
     }
 
     @Override
