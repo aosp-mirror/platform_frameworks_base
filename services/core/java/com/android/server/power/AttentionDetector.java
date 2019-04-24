@@ -76,6 +76,12 @@ public class AttentionDetector {
     private final AtomicBoolean mRequested;
 
     /**
+     * Monotonously increasing ID for the requests sent.
+     */
+    @VisibleForTesting
+    protected int mRequestId;
+
+    /**
      * {@link android.service.attention.AttentionService} API timeout.
      */
     private long mMaxAttentionApiTimeoutMillis;
@@ -105,36 +111,13 @@ public class AttentionDetector {
     private AtomicLong mConsecutiveTimeoutExtendedCount = new AtomicLong(0);
 
     @VisibleForTesting
-    final AttentionCallbackInternal mCallback = new AttentionCallbackInternal() {
-        @Override
-        public void onSuccess(int result, long timestamp) {
-            Slog.v(TAG, "onSuccess: " + result);
-            if (mRequested.getAndSet(false)) {
-                synchronized (mLock) {
-                    if (mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE) {
-                        if (DEBUG) Slog.d(TAG, "Device slept before receiving callback.");
-                        return;
-                    }
-                    if (result == AttentionService.ATTENTION_SUCCESS_PRESENT) {
-                        mOnUserAttention.run();
-                    } else {
-                        resetConsecutiveExtensionCount();
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(int error) {
-            Slog.i(TAG, "Failed to check attention: " + error);
-            mRequested.set(false);
-        }
-    };
+    AttentionCallbackInternalImpl mCallback;
 
     public AttentionDetector(Runnable onUserAttention, Object lock) {
         mOnUserAttention = onUserAttention;
         mLock = lock;
         mRequested = new AtomicBoolean(false);
+        mRequestId = 0;
 
         // Device starts with an awake state upon boot.
         mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -196,9 +179,7 @@ public class AttentionDetector {
             return nextScreenDimming;
         } else if (mRequested.get()) {
             if (DEBUG) {
-                // TODO(b/128134941): consider adding a member ID increasing counter in
-                //  AttentionCallbackInternal to track this better.
-                Slog.d(TAG, "Pending attention callback, wait.");
+                Slog.d(TAG, "Pending attention callback with ID=" + mCallback.mId + ", wait.");
             }
             return whenToCheck;
         }
@@ -208,6 +189,8 @@ public class AttentionDetector {
         // This means that we must assume that the request was successful, and then cancel it
         // afterwards if AttentionManager couldn't deliver it.
         mRequested.set(true);
+        mRequestId++;
+        mCallback = new AttentionCallbackInternalImpl(mRequestId);
         final boolean sent = mAttentionManager.checkAttention(getAttentionTimeout(), mCallback);
         if (!sent) {
             mRequested.set(false);
@@ -300,5 +283,41 @@ public class AttentionDetector {
         pw.print(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);
         pw.print(" mAttentionServiceSupported=" + isAttentionServiceSupported());
         pw.print(" mRequested=" + mRequested);
+    }
+
+    @VisibleForTesting
+    final class AttentionCallbackInternalImpl extends AttentionCallbackInternal {
+        private final int mId;
+
+        AttentionCallbackInternalImpl(int id) {
+            this.mId = id;
+        }
+
+        @Override
+        public void onSuccess(int result, long timestamp) {
+            Slog.v(TAG, "onSuccess: " + result + ", ID: " + mId);
+            // If we don't check for request ID it's possible to get into a loop: success leads
+            // to the onUserAttention(), which in turn triggers updateUserActivity(), which will
+            // call back onSuccess() instantaneously if there is a cached value, and circle repeats.
+            if (mId == mRequestId && mRequested.getAndSet(false)) {
+                synchronized (mLock) {
+                    if (mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE) {
+                        if (DEBUG) Slog.d(TAG, "Device slept before receiving callback.");
+                        return;
+                    }
+                    if (result == AttentionService.ATTENTION_SUCCESS_PRESENT) {
+                        mOnUserAttention.run();
+                    } else {
+                        resetConsecutiveExtensionCount();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(int error) {
+            Slog.i(TAG, "Failed to check attention: " + error + ", ID: " + mId);
+            mRequested.set(false);
+        }
     }
 }

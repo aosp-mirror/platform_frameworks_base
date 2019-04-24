@@ -1588,6 +1588,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mBackgroundDrawable = mContext.getDrawable(
                         com.android.systemui.R.drawable.global_action_panel_scrim);
                 mScrimAlpha = 1f;
+                initializePanel();
             }
             mGlobalActionsLayout.setSnapToEdge(true);
             getWindow().setBackgroundDrawable(mBackgroundDrawable);

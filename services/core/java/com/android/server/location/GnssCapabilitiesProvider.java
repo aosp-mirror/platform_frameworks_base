@@ -28,33 +28,16 @@ public class GnssCapabilitiesProvider {
     private static final String TAG = "GnssCapabilitiesProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    // Bit masks for capabilities in {@link android.location.GnssCapabilities}.
-    private static final long GNSS_CAPABILITY_LOW_POWER_MODE =
-            1L << GnssCapabilities.LOW_POWER_MODE;
-    private static final long GNSS_CAPABILITY_SATELLITE_BLACKLIST =
-            1L << GnssCapabilities.SATELLITE_BLACKLIST;
-    private static final long GNSS_CAPABILITY_GEOFENCING = 1L << GnssCapabilities.GEOFENCING;
-    private static final long GNSS_CAPABILITY_MEASUREMENTS = 1L << GnssCapabilities.MEASUREMENTS;
-    private static final long GNSS_CAPABILITY_NAV_MESSAGES = 1L << GnssCapabilities.NAV_MESSAGES;
-    private static final long GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS =
-            1L << GnssCapabilities.MEASUREMENT_CORRECTIONS;
-    private static final long GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_LOS_SATS =
-            1L << GnssCapabilities.MEASUREMENT_CORRECTIONS_LOS_SATS;
-    private static final long GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH =
-            1L << GnssCapabilities.MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH;
-    private static final long GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_REFLECTING_PLANE =
-            1L << GnssCapabilities.MEASUREMENT_CORRECTIONS_REFLECTING_PLANE;
-
     private static final long GNSS_CAPABILITIES_TOP_HAL =
-            GNSS_CAPABILITY_LOW_POWER_MODE | GNSS_CAPABILITY_SATELLITE_BLACKLIST
-                    | GNSS_CAPABILITY_GEOFENCING | GNSS_CAPABILITY_MEASUREMENTS
-                    | GNSS_CAPABILITY_NAV_MESSAGES;
+            GnssCapabilities.LOW_POWER_MODE | GnssCapabilities.SATELLITE_BLACKLIST
+                    | GnssCapabilities.GEOFENCING | GnssCapabilities.MEASUREMENTS
+                    | GnssCapabilities.NAV_MESSAGES;
 
     private static final long GNSS_CAPABILITIES_SUB_HAL_MEASUREMENT_CORRECTIONS =
-            GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS
-                    | GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_LOS_SATS
-                    | GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH
-                    | GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_REFLECTING_PLANE;
+            GnssCapabilities.MEASUREMENT_CORRECTIONS
+                    | GnssCapabilities.MEASUREMENT_CORRECTIONS_LOS_SATS
+                    | GnssCapabilities.MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH
+                    | GnssCapabilities.MEASUREMENT_CORRECTIONS_REFLECTING_PLANE;
 
     // Capabilities in {@link android.location.GnssCapabilities} supported by GNSS chipset.
     @GuardedBy("this")
@@ -79,20 +62,20 @@ public class GnssCapabilitiesProvider {
         long gnssCapabilities = 0;
         if (hasCapability(topHalCapabilities,
                 GnssLocationProvider.GPS_CAPABILITY_LOW_POWER_MODE)) {
-            gnssCapabilities |= GNSS_CAPABILITY_LOW_POWER_MODE;
+            gnssCapabilities |= GnssCapabilities.LOW_POWER_MODE;
         }
         if (hasCapability(topHalCapabilities,
                 GnssLocationProvider.GPS_CAPABILITY_SATELLITE_BLACKLIST)) {
-            gnssCapabilities |= GNSS_CAPABILITY_SATELLITE_BLACKLIST;
+            gnssCapabilities |= GnssCapabilities.SATELLITE_BLACKLIST;
         }
         if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_GEOFENCING)) {
-            gnssCapabilities |= GNSS_CAPABILITY_GEOFENCING;
+            gnssCapabilities |= GnssCapabilities.GEOFENCING;
         }
         if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_MEASUREMENTS)) {
-            gnssCapabilities |= GNSS_CAPABILITY_MEASUREMENTS;
+            gnssCapabilities |= GnssCapabilities.MEASUREMENTS;
         }
         if (hasCapability(topHalCapabilities, GnssLocationProvider.GPS_CAPABILITY_NAV_MESSAGES)) {
-            gnssCapabilities |= GNSS_CAPABILITY_NAV_MESSAGES;
+            gnssCapabilities |= GnssCapabilities.NAV_MESSAGES;
         }
 
         synchronized (this) {
@@ -110,18 +93,18 @@ public class GnssCapabilitiesProvider {
      * {@link android.location.GnssCapabilities}.
      */
     void setSubHalMeasurementCorrectionsCapabilities(int measurementCorrectionsCapabilities) {
-        long gnssCapabilities = GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS;
+        long gnssCapabilities = GnssCapabilities.MEASUREMENT_CORRECTIONS;
         if (hasCapability(measurementCorrectionsCapabilities,
                 GnssMeasurementCorrectionsProvider.CAPABILITY_LOS_SATS)) {
-            gnssCapabilities |= GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_LOS_SATS;
+            gnssCapabilities |= GnssCapabilities.MEASUREMENT_CORRECTIONS_LOS_SATS;
         }
         if (hasCapability(measurementCorrectionsCapabilities,
                 GnssMeasurementCorrectionsProvider.CAPABILITY_EXCESS_PATH_LENGTH)) {
-            gnssCapabilities |= GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH;
+            gnssCapabilities |= GnssCapabilities.MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH;
         }
         if (hasCapability(measurementCorrectionsCapabilities,
                 GnssMeasurementCorrectionsProvider.CAPABILITY_REFLECTING_PLANE)) {
-            gnssCapabilities |= GNSS_CAPABILITY_MEASUREMENT_CORRECTIONS_REFLECTING_PLANE;
+            gnssCapabilities |= GnssCapabilities.MEASUREMENT_CORRECTIONS_REFLECTING_PLANE;
         }
 
         synchronized (this) {

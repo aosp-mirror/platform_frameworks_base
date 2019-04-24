@@ -494,4 +494,9 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
         listener.onComplete(makeStatus(ERROR_INTERNAL_INTERRUPTED));
         return true;
     }
+
+    @Override
+    public int getInterfaceVersion() {
+        return this.VERSION;
+    }
 }

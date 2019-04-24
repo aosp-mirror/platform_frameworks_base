@@ -447,7 +447,8 @@ status_t ReportWriter::writeSection(const FdBuffer& buffer) {
         }
     });
 
-    return filter.writeData(buffer, PRIVACY_POLICY_LOCAL, &mMaxSectionDataFilteredSize);
+    return filter.writeData(buffer, PRIVACY_POLICY_LOCAL, &mMaxSectionDataFilteredSize,
+                            true /*encrypt if needed*/);
 }
 
 

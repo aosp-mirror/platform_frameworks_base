@@ -310,6 +310,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static public final String SYSTEM_DIALOG_REASON_ASSIST = "assist";
     static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
 
+    private static final int POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS = 800;
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
@@ -615,6 +616,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPerDisplayFocusEnabled = false;
     private volatile int mTopFocusedDisplayId = INVALID_DISPLAY;
 
+    private int mPowerButtonSuppressionDelayMillis = POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS;
+
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
     private static final int MSG_KEYGUARD_DRAWN_COMPLETE = 5;
@@ -781,6 +784,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POWER_BUTTON_VERY_LONG_PRESS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1105,16 +1111,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
                 case SHORT_PRESS_POWER_GO_TO_SLEEP:
-                    goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                    goToSleepFromPowerButton(eventTime, 0);
                     break;
                 case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
-                    goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
-                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                    goToSleepFromPowerButton(eventTime, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                     break;
                 case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
-                    goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
-                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
-                    launchHomeFromHotKey(DEFAULT_DISPLAY);
+                    if (goToSleepFromPowerButton(eventTime,
+                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE)) {
+                        launchHomeFromHotKey(DEFAULT_DISPLAY);
+                    }
                     break;
                 case SHORT_PRESS_POWER_GO_HOME:
                     shortPressPowerGoHome();
@@ -1135,6 +1141,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
+    }
+
+    /**
+     * Sends the device to sleep as a result of a power button press.
+     *
+     * @return True if the was device was sent to sleep, false if sleep was suppressed.
+     */
+    private boolean goToSleepFromPowerButton(long eventTime, int flags) {
+        // Before we actually go to sleep, we check the last wakeup reason.
+        // If the device very recently woke up from a gesture (like user lifting their device)
+        // then ignore the sleep instruction. This is because users have developed
+        // a tendency to hit the power button immediately when they pick up their device, and we
+        // don't want to put the device back to sleep in those cases.
+        final PowerManager.WakeData lastWakeUp = mPowerManagerInternal.getLastWakeup();
+        if (lastWakeUp != null && lastWakeUp.wakeReason == PowerManager.WAKE_REASON_GESTURE) {
+            final int gestureDelayMillis = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE,
+                    POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS);
+            final long now = SystemClock.uptimeMillis();
+            if (mPowerButtonSuppressionDelayMillis > 0
+                    && (now < lastWakeUp.wakeTime + mPowerButtonSuppressionDelayMillis)) {
+                Slog.i(TAG, "Sleep from power button suppressed. Time since gesture: "
+                        + (now - lastWakeUp.wakeTime) + "ms");
+                return false;
+            }
+        }
+
+        goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, flags);
+        return true;
     }
 
     private void goToSleep(long eventTime, int reason, int flags) {
@@ -1981,6 +2016,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mRingerToggleChord = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.VOLUME_HUSH_GESTURE, VOLUME_HUSH_OFF,
                     UserHandle.USER_CURRENT);
+            mPowerButtonSuppressionDelayMillis = Settings.Global.getInt(resolver,
+                    Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE,
+                    POWER_BUTTON_SUPPRESSION_DELAY_DEFAULT_MILLIS);
             if (!mContext.getResources()
                     .getBoolean(com.android.internal.R.bool.config_volumeHushGestureEnabled)) {
                 mRingerToggleChord = Settings.Secure.VOLUME_HUSH_OFF;
@@ -3594,11 +3632,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-        } else if (ExtconUEventObserver.extconExists()) {
+        } else if (ExtconUEventObserver.extconExists()
+                && ExtconUEventObserver.namedExtconDirExists(HdmiVideoExtconUEventObserver.NAME)) {
             HdmiVideoExtconUEventObserver observer = new HdmiVideoExtconUEventObserver();
             plugged = observer.init();
             mHDMIObserver = observer;
+        } else if (localLOGV) {
+            Slog.v(TAG, "Not observing HDMI plug state because HDMI was not found.");
         }
+
         // This dance forces the code in setHdmiPlugged to run.
         // Always do this so the sticky intent is stuck (to false) if there is no hdmi.
         mDefaultDisplayPolicy.setHdmiPlugged(plugged, true /* force */);
@@ -5658,7 +5700,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private class HdmiVideoExtconUEventObserver extends ExtconStateObserver<Boolean> {
         private static final String HDMI_EXIST = "HDMI=1";
-        private final ExtconInfo mHdmi = new ExtconInfo("hdmi");
+        private static final String NAME = "hdmi";
+        private final ExtconInfo mHdmi = new ExtconInfo(NAME);
 
         private boolean init() {
             boolean plugged = false;

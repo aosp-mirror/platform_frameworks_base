@@ -555,6 +555,18 @@ public final class PowerManager {
     }
 
     /**
+     * @hide
+     */
+    public static class WakeData {
+        public WakeData(long wakeTime, @WakeReason int wakeReason) {
+            this.wakeTime = wakeTime;
+            this.wakeReason = wakeReason;
+        }
+        public long wakeTime;
+        public @WakeReason int wakeReason;
+    }
+
+    /**
      * The value to pass as the 'reason' argument to reboot() to reboot into
      * recovery mode for tasks other than applying system updates, such as
      * doing factory resets.
