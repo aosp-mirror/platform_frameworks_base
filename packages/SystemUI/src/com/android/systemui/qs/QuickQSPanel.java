@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
@@ -35,6 +38,9 @@ import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Version of QSPanel that only shows N Quick Tiles in the QS Header.
@@ -49,8 +55,10 @@ public class QuickQSPanel extends QSPanel {
     private int mMaxTiles;
     protected QSPanel mFullPanel;
 
-    public QuickQSPanel(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    @Inject
+    public QuickQSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            DumpController dumpController) {
+        super(context, attrs, dumpController);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
