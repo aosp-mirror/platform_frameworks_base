@@ -2542,9 +2542,10 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
-    <!-- Indicates whether local non-default displays are private.
-         {@see android.view.Display#FLAG_PRIVATE} -->
-    <bool name="config_localDisplaysPrivate">false</bool>
+    <!-- Controls if local secondary displays should be private or not. Value specified in the array
+         represents physical port address of each display and display in this list will be marked
+         as private. {@see android.view.Display#FLAG_PRIVATE} -->
+    <integer-array translatable="false" name="config_localPrivateDisplayPorts"></integer-array>
 
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT
