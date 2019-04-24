@@ -292,12 +292,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
+            mIsOnLeftEdge = ev.getX() < mEdgeWidth;
             mAllowGesture = (stateFlags & SYSUI_STATE_NAV_BAR_HIDDEN) == 0
                     && ((stateFlags & SYSUI_STATE_BOUNCER_SHOWING) == SYSUI_STATE_BOUNCER_SHOWING
                             || (stateFlags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) == 0)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
-                mIsOnLeftEdge = ev.getX() < mEdgeWidth;
                 mEdgePanelLp.gravity = mIsOnLeftEdge
                         ? (Gravity.LEFT | Gravity.TOP)
                         : (Gravity.RIGHT | Gravity.TOP);
