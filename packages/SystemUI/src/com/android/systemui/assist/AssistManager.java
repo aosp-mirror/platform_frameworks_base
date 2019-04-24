@@ -180,6 +180,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
                     ? TIMEOUT_SERVICE
                     : TIMEOUT_ACTIVITY);
         }
+
+        if (args == null) {
+            args = new Bundle();
+        }
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         startAssistInternal(args, assistComponent, isService);
     }
