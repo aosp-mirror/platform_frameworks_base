@@ -34,6 +34,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.lang.Thread.sleep;
+
 import android.content.Intent;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
@@ -59,8 +61,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
-
-import static java.lang.Thread.sleep;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
