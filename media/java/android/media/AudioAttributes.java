@@ -786,8 +786,13 @@ public final class AudioAttributes implements Parcelable {
 
         /**
          * Sets attributes as inferred from the legacy stream types.
-         * Use this method when building an {@link AudioAttributes} instance to initialize some of
-         * the attributes by information derived from a legacy stream type.
+         * Warning: do not use this method in combination with setting any other attributes such as
+         * usage, content type, flags or haptic control, as this method will overwrite (the more
+         * accurate) information describing the use case previously set in the <code>Builder</code>.
+         * In general, avoid using it and prefer setting usage and content type directly
+         * with {@link #setUsage(int)} and {@link #setContentType(int)}.
+         * <p>Use this method when building an {@link AudioAttributes} instance to initialize some
+         * of the attributes by information derived from a legacy stream type.
          * @param streamType one of {@link AudioManager#STREAM_VOICE_CALL},
          *   {@link AudioManager#STREAM_SYSTEM}, {@link AudioManager#STREAM_RING},
          *   {@link AudioManager#STREAM_MUSIC}, {@link AudioManager#STREAM_ALARM},
@@ -799,7 +804,8 @@ public final class AudioAttributes implements Parcelable {
                 throw new IllegalArgumentException("STREAM_ACCESSIBILITY is not a legacy stream "
                         + "type that was used for audio playback");
             }
-            return setInternalLegacyStreamType(streamType);
+            setInternalLegacyStreamType(streamType);
+            return this;
         }
 
         /**
@@ -815,7 +821,14 @@ public final class AudioAttributes implements Parcelable {
                         AudioProductStrategy.getAudioAttributesForStrategyWithLegacyStreamType(
                                 streamType);
                 if (attributes != null) {
-                    return new Builder(attributes).setHapticChannelsMuted(mMuteHapticChannels);
+                    mUsage = attributes.mUsage;
+                    mContentType = attributes.mContentType;
+                    mFlags = attributes.mFlags;
+                    mMuteHapticChannels = attributes.areHapticChannelsMuted();
+                    mTags = attributes.mTags;
+                    mBundle = attributes.mBundle;
+                    mSource = attributes.mSource;
+                    return this;
                 }
             }
             switch(streamType) {
