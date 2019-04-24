@@ -248,10 +248,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         boolean canLock = mUnlockMethodCache.isMethodSecure()
                 && mUnlockMethodCache.canSkipBouncer();
         boolean clickToUnlock = mAccessibilityController.isAccessibilityEnabled();
-        boolean clickToForceLock = canLock && !clickToUnlock;
-        boolean longClickToForceLock = canLock && !clickToForceLock;
-        setClickable(clickToForceLock || clickToUnlock);
-        setLongClickable(longClickToForceLock);
+        setClickable(clickToUnlock);
+        setLongClickable(canLock && !clickToUnlock);
         setFocusable(mAccessibilityController.isAccessibilityEnabled());
     }
 

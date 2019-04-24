@@ -3326,7 +3326,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showBouncer(boolean scrimmed) {
-        mStatusBarKeyguardViewManager.showBouncer(scrimmed);
+        if (!mIsOccluded && !scrimmed && mState == StatusBarState.KEYGUARD) {
+            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+        } else {
+            mStatusBarKeyguardViewManager.showBouncer(scrimmed);
+        }
     }
 
     @Override
