@@ -144,7 +144,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     /**
      * Value to increment the z-layer when boosting a layer during animations. BOOST in l33tsp34k.
      */
-    private static final int Z_BOOST_BASE = 800570000;
+    @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
 
     // Non-null only for application tokens.
     final IApplicationToken appToken;
@@ -293,7 +293,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private boolean mFreezingScreen;
 
     /** Whether this token should be boosted at the top of all app window tokens. */
-    private boolean mNeedsZBoost;
+    @VisibleForTesting boolean mNeedsZBoost;
     private Letterbox mLetterbox;
 
     private final Point mTmpPoint = new Point();
@@ -2693,7 +2693,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mNeedsZBoost) {
             layer += Z_BOOST_BASE;
         }
-        leash.setLayer(layer);
+        if (!mNeedsAnimationBoundsLayer) {
+            leash.setLayer(layer);
+        }
 
         final DisplayContent dc = getDisplayContent();
         dc.assignStackOrdering();
@@ -2730,6 +2732,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             // Crop to stack bounds.
             t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
+            t.setLayer(mAnimationBoundsLayer, layer);
 
             // Reparent leash to animation bounds layer.
             t.reparent(leash, mAnimationBoundsLayer);
