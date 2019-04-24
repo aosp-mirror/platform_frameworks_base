@@ -36,7 +36,9 @@ TEST(CommonPool, post) {
     EXPECT_TRUE(ran) << "Failed to flip atomic after 1 second";
 }
 
-TEST(CommonPool, threadCount) {
+// test currently relies on timings, which
+// makes it flaky. Disable for now
+TEST(DISABLED_CommonPool, threadCount) {
     std::set<pid_t> threads;
     std::array<std::future<pid_t>, 64> futures;
     for (int i = 0; i < futures.size(); i++) {
@@ -93,7 +95,9 @@ TEST(CommonPool, singleThread) {
     EXPECT_NE(gettid(), tid1);
 }
 
-TEST(CommonPool, fullQueue) {
+// Test currently relies on timings
+// which makes it flaky, disable for now
+TEST(DISABLED_CommonPool, fullQueue) {
     std::mutex lock;
     std::condition_variable fence;
     bool signaled = false;
