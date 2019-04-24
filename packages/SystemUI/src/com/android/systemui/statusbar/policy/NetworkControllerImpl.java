@@ -1084,6 +1084,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean hspaDataDistinguishable;
         boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
+        public String patternOfCarrierSpecificDataIcon = "";
 
         /**
          * Mapping from NR 5G status string to an integer. The NR 5G status string should match
@@ -1122,6 +1123,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL);
                 config.hideLtePlus = b.getBoolean(
                         CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL);
+                config.patternOfCarrierSpecificDataIcon = b.getString(
+                        CarrierConfigManager.KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING);
                 String nr5GIconConfiguration =
                         b.getString(CarrierConfigManager.KEY_5G_ICON_CONFIGURATION_STRING);
                 if (!TextUtils.isEmpty(nr5GIconConfiguration)) {
