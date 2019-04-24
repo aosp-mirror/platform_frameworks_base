@@ -1651,17 +1651,29 @@
     <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
 
-    <!-- Hint text for block button in the interruptiveness settings [CHAR_LIMIT=NONE]-->
-    <string name="hint_text_block">Blocked notifications do not appear anywhere or play a sound. You can unblock notifications in settings.</string>
+    <!-- [CHAR LIMIT=100] Notification Importance title -->
+    <string name="notification_silence_title">Gentle</string>
 
-    <!-- Hint text for silent button in the interruptiveness settings [CHAR_LIMIT=NONE]-->
-    <string name="hint_text_silent">Silent notifications appear in the shade, but do not appear on the lock screen, present a banner, or play a sound.</string>
+    <!-- [CHAR LIMIT=100] Notification Importance title -->
+    <string name="notification_alert_title">Prioritized</string>
 
-    <!-- Hint text for alert button in the interruptiveness settings [CHAR_LIMIT=NONE]-->
-    <string name="hint_text_alert">These notifications will make a sound and show in the notification drawer, status bar, and lock screen</string>
+    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
+    <string name="notification_channel_summary_low">Always silent. Displays in pull-down shade.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
+    <string name="notification_channel_summary_low_status">Always silent. Displays in pull-down shade &amp; status bar.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
+    <string name="notification_channel_summary_low_lock">Always silent. Displays in pull-down shade &amp; on lock screen.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
+    <string name="notification_channel_summary_low_status_lock">Always silent. Displays in pull-down shade, status bar &amp; on lock screen.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: normal importance level summary -->
+    <string name="notification_channel_summary_default">Makes sound and displays in pull-down shade, status bar &amp; on lock screen.</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
-    <string name="notification_unblockable_desc">These notifications can\'t be turned off</string>
+    <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
 
     <!-- Notification: Control panel: label that displays when viewing settings for a group of notifications posted to multiple channels. -->
     <string name="notification_multichannel_desc">This group of notifications cannot be configured here</string>
