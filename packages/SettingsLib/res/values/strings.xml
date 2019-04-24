@@ -69,6 +69,8 @@
 
     <!-- Summary for the remembered network. -->
     <string name="wifi_remembered">Saved</string>
+    <!-- Summary for the disconnected network. [CHAR LIMIT=40] -->
+    <string name="wifi_disconnected">Disconnected</string>
     <!-- Status for networks disabled for unknown reason -->
     <string name="wifi_disabled_generic">Disabled</string>
     <!-- Status for networked disabled from a DNS or DHCP failure -->
