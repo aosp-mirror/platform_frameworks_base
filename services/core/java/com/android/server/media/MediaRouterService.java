@@ -501,6 +501,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
             }
         }
+        mService2.switchUser();
     }
 
     void clientDied(ClientRecord clientRecord) {

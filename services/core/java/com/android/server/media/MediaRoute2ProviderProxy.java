@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 /**
  * Maintains a connection to a particular media route provider service.
@@ -44,6 +46,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
     private final Context mContext;
     private final ComponentName mComponentName;
+    private final String mUniqueId;
     private final int mUserId;
     private final Handler mHandler;
 
@@ -58,9 +61,11 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
     private Connection mActiveConnection;
     private boolean mConnectionReady;
 
-    MediaRoute2ProviderProxy(Context context, ComponentName componentName, int userId) {
-        mContext = context;
-        mComponentName = componentName;
+    MediaRoute2ProviderProxy(@NonNull Context context, @NonNull ComponentName componentName,
+            int userId) {
+        mContext = Objects.requireNonNull(context, "Context must not be null.");
+        mComponentName = Objects.requireNonNull(componentName, "Component name must not be null.");
+        mUniqueId = componentName.flattenToShortString();
         mUserId = userId;
         mHandler = new Handler();
     }
@@ -94,16 +99,11 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
                 && mComponentName.getClassName().equals(className);
     }
 
-    public String getFlattenedComponentName() {
-        return mComponentName.flattenToShortString();
-    }
-
     public void start() {
         if (!mRunning) {
             if (DEBUG) {
                 Slog.d(TAG, this + ": Starting");
             }
-
             mRunning = true;
             updateBinding();
         }
@@ -114,7 +114,6 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             if (DEBUG) {
                 Slog.d(TAG, this + ": Stopping");
             }
-
             mRunning = false;
             updateBinding();
         }
@@ -136,7 +135,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
     }
 
     private boolean shouldBind() {
-        //TODO: binding could be delayed until it's necessary.
+        //TODO: Binding could be delayed until it's necessary.
         if (mRunning) {
             return true;
         }
@@ -241,7 +240,10 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         if (mActiveConnection != connection) {
             return;
         }
-        mProviderInfo = info;
+        // Set a unique provider id for identifying providers.
+        mProviderInfo = new MediaRoute2ProviderInfo.Builder(info)
+                .setUniqueId(mUniqueId)
+                .build();
         if (DEBUG) {
             Slog.d(TAG, this + ": State changed ");
         }

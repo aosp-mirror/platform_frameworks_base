@@ -24,6 +24,7 @@ import android.media.MediaRoute2ProviderInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -115,6 +116,28 @@ class MediaRouter2ServiceImpl {
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    //TODO: Review this is handling multi-user properly.
+    void switchUser() {
+        synchronized (mLock) {
+            int userId = ActivityManager.getCurrentUser();
+            if (mCurrentUserId != userId) {
+                final int oldUserId = mCurrentUserId;
+                mCurrentUserId = userId; // do this first
+
+                UserRecord oldUser = mUserRecords.get(oldUserId);
+                if (oldUser != null) {
+                    oldUser.mHandler.sendEmptyMessage(MediaRouterService.UserHandler.MSG_STOP);
+                    disposeUserIfNeededLocked(oldUser); // since no longer current user
+                }
+
+                UserRecord newUser = mUserRecords.get(userId);
+                if (newUser != null) {
+                    newUser.mHandler.sendEmptyMessage(MediaRouterService.UserHandler.MSG_START);
+                }
+            }
         }
     }
 
@@ -289,6 +312,7 @@ class MediaRouter2ServiceImpl {
         private boolean mManagerStateUpdateScheduled;
 
         UserHandler(MediaRouter2ServiceImpl service, UserRecord userRecord) {
+            super(Looper.getMainLooper(), null, true);
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
@@ -383,14 +407,17 @@ class MediaRouter2ServiceImpl {
             if (service == null) {
                 return;
             }
-
-            //TODO: send provider info
-            MediaRoute2ProviderInfo providerInfo = null;
-            int selectedUid = 0;
-            String selectedRouteId = null;
+            //TODO: Consider using a member variable (like mTempManagers).
+            final List<MediaRoute2ProviderInfo> providers = new ArrayList<>();
             final int mediaCount = mMediaProviders.size();
             for (int i = 0; i < mediaCount; i++) {
-                providerInfo = mMediaProviders.get(i).getProviderInfo();
+                final MediaRoute2ProviderInfo providerInfo =
+                        mMediaProviders.get(i).getProviderInfo();
+                if (providerInfo == null || !providerInfo.isValid()) {
+                    Log.w(TAG, "Ignoring invalid provider info : " + providerInfo);
+                } else {
+                    providers.add(providerInfo);
+                }
             }
 
             try {
@@ -400,13 +427,12 @@ class MediaRouter2ServiceImpl {
                         mTempManagers.add(mUserRecord.mManagerRecords.get(i).mClient);
                     }
                 }
-
-                //TODO: Call proper callbacks when provider descriptor is implemented.
-                if (providerInfo != null) {
+                //TODO: Call !proper callbacks when provider descriptor is implemented.
+                if (!providers.isEmpty()) {
                     final int count = mTempManagers.size();
                     for (int i = 0; i < count; i++) {
                         try {
-                            mTempManagers.get(i).notifyProviderInfoUpdated(providerInfo);
+                            mTempManagers.get(i).notifyProviderInfosUpdated(providers);
                         } catch (RemoteException ex) {
                             Slog.w(TAG, "Failed to call onStateChanged. Manager probably died.",
                                     ex);
