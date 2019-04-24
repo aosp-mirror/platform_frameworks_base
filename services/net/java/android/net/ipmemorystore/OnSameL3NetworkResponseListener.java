@@ -43,6 +43,11 @@ public interface OnSameL3NetworkResponseListener {
                             new SameL3NetworkResponse(sameL3NetworkResponseParcelable));
                 }
             }
+
+            @Override
+            public int getInterfaceVersion() {
+                return this.VERSION;
+            }
         };
     }
 }

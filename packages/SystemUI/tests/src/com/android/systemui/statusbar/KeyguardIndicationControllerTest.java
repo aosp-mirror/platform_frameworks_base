@@ -20,6 +20,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -46,11 +48,14 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -72,6 +77,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private LockIcon mLockIcon;
     @Mock
     private LockPatternUtils mLockPatternUtils;
+    @Mock
+    private ShadeController mShadeController;
+    @Mock
+    private AccessibilityController mAccessibilityController;
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
@@ -102,7 +111,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             Looper.prepare();
         }
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
-                mLockPatternUtils, mWakeLock);
+                mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController);
     }
 
     @Test
@@ -221,5 +230,24 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         assertThat(mTextView.getText()).isEqualTo("Test");
         assertThat(mTextView.getCurrentTextColor()).isEqualTo(Color.WHITE);
         assertThat(mTextView.getAlpha()).isEqualTo(1f);
+    }
+
+    @Test
+    public void lockIcon_click() {
+        createController();
+
+        ArgumentCaptor<View.OnLongClickListener> longClickCaptor = ArgumentCaptor.forClass(
+                View.OnLongClickListener.class);
+        ArgumentCaptor<View.OnClickListener> clickCaptor = ArgumentCaptor.forClass(
+                View.OnClickListener.class);
+        verify(mLockIcon).setOnLongClickListener(longClickCaptor.capture());
+        verify(mLockIcon).setOnClickListener(clickCaptor.capture());
+
+        when(mAccessibilityController.isAccessibilityEnabled()).thenReturn(true);
+        clickCaptor.getValue().onClick(mLockIcon);
+        verify(mShadeController).showBouncer(eq(false));
+
+        longClickCaptor.getValue().onLongClick(mLockIcon);
+        verify(mLockPatternUtils).requireCredentialEntry(anyInt());
     }
 }

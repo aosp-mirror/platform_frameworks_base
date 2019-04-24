@@ -19,8 +19,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.networkstack.permissionconfig"
     android:sharedUserId="android.uid.networkstack"
-    android:versionCode="210000900"
-    android:versionName="Year 2021 Week 00 Build 90 on api-level 0">
+    android:versionCode="210001000"
+    android:versionName="Year 2021 Week 00 Build 100 on api-level 0">
     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
     <!--
     This package only exists to define the below permissions, and enforce that they are only

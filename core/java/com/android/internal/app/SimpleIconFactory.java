@@ -43,7 +43,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableWrapper;
-import android.os.Process;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Pools.SynchronizedPool;
@@ -161,6 +160,7 @@ public class SimpleIconFactory {
     /**
      * Creates bitmap using the source drawable and various parameters.
      * The bitmap is visually normalized with other icons and has enough spacing to add shadow.
+     * Note: this method has been modified from iconloaderlib to remove a profile diff check.
      *
      * @param icon                      source of the icon associated with a user that has no badge,
      *                                  likely user 0
@@ -186,7 +186,7 @@ public class SimpleIconFactory {
         }
 
         final Bitmap result;
-        if (user != null && !Process.myUserHandle().equals(user)) {
+        if (user != null /* if modification from iconloaderlib */) {
             BitmapDrawable drawable = new FixedSizeBitmapDrawable(bitmap);
             Drawable badged = mPm.getUserBadgedIcon(drawable, user);
             if (badged instanceof BitmapDrawable) {

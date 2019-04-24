@@ -90,7 +90,11 @@
 
     <color name="notification_guts_selection_bg">#FFFFFF</color>
     <color name="notification_guts_selection_border">#4285F4</color>
-    <color name="notification_guts_link_icon_tint">@color/GM2_grey_900</color>
+    <color name="notification_guts_link_icon_tint">@color/GM2_grey_700</color>
+    <color name="notification_guts_sub_text_color">@color/GM2_grey_700</color>
+    <color name="notification_guts_header_text_color">@color/GM2_grey_900</color>
+    <color name="notification_silence_color">#FF32c1de</color>
+    <color name="notification_alert_color">#FFF87B2B</color>
 
     <color name="assist_orb_color">#ffffff</color>
 

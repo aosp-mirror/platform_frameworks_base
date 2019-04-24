@@ -274,7 +274,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 }
                 // Even though we want to keep original bounds, we still don't want it to stomp on
                 // an existing task.
-                adjustBoundsToAvoidConflict(display, outParams.mBounds);
+                adjustBoundsToAvoidConflictInDisplay(display, outParams.mBounds);
             }
         } else {
             if (source != null && source.inFreeformWindowingMode()
@@ -534,7 +534,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // Lastly we adjust bounds to avoid conflicts with other tasks as much as possible.
-        adjustBoundsToAvoidConflict(display, inOutBounds);
+        adjustBoundsToAvoidConflictInDisplay(display, inOutBounds);
     }
 
     private int convertOrientationToScreenOrientation(int orientation) {
@@ -678,16 +678,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
      * @param display the display which tasks are to check
      * @param inOutBounds the bounds used to input initial bounds and output result bounds
      */
-    private void adjustBoundsToAvoidConflict(@NonNull ActivityDisplay display,
+    private void adjustBoundsToAvoidConflictInDisplay(@NonNull ActivityDisplay display,
             @NonNull Rect inOutBounds) {
-        final Rect displayBounds = display.getBounds();
-        if (!displayBounds.contains(inOutBounds)) {
-            // The initial bounds are already out of display. The scanning algorithm below doesn't
-            // work so well with them.
-            return;
-        }
-
-        final List<TaskRecord> tasksToCheck = new ArrayList<>();
+        final List<Rect> taskBoundsToCheck = new ArrayList<>();
         for (int i = 0; i < display.getChildCount(); ++i) {
             final ActivityStack stack = display.getChildAt(i);
             if (!stack.inFreeformWindowingMode()) {
@@ -695,11 +688,35 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
 
             for (int j = 0; j < stack.getChildCount(); ++j) {
-                tasksToCheck.add(stack.getChildAt(j));
+                taskBoundsToCheck.add(stack.getChildAt(j).getBounds());
             }
         }
+        adjustBoundsToAvoidConflict(display.getBounds(), taskBoundsToCheck, inOutBounds);
+    }
 
-        if (!boundsConflict(tasksToCheck, inOutBounds)) {
+    /**
+     * Adjusts input bounds to avoid conflict with provided display bounds and list of tasks bounds
+     * for the display.
+     *
+     * Scans the bounds in directions to find a candidate location that does not conflict with the
+     * provided list of task bounds. If starting bounds are outside the display bounds or if no
+     * suitable candidate bounds are found, the method returns the input bounds.
+     *
+     * @param displayBounds display bounds used to restrict the candidate bounds
+     * @param taskBoundsToCheck list of task bounds to check for conflict
+     * @param inOutBounds the bounds used to input initial bounds and output result bounds
+     */
+    @VisibleForTesting
+    void adjustBoundsToAvoidConflict(@NonNull Rect displayBounds,
+            @NonNull List<Rect> taskBoundsToCheck,
+            @NonNull Rect inOutBounds) {
+        if (!displayBounds.contains(inOutBounds)) {
+            // The initial bounds are already out of display. The scanning algorithm below doesn't
+            // work so well with them.
+            return;
+        }
+
+        if (!boundsConflict(taskBoundsToCheck, inOutBounds)) {
             // Current proposal doesn't conflict with any task. Early return to avoid unnecessary
             // calculation.
             return;
@@ -713,11 +730,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
 
             mTmpBounds.set(inOutBounds);
-            while (boundsConflict(tasksToCheck, mTmpBounds) && displayBounds.contains(mTmpBounds)) {
+            while (boundsConflict(taskBoundsToCheck, mTmpBounds)
+                    && displayBounds.contains(mTmpBounds)) {
                 shiftBounds(direction, displayBounds, mTmpBounds);
             }
 
-            if (!boundsConflict(tasksToCheck, mTmpBounds) && displayBounds.contains(mTmpBounds)) {
+            if (!boundsConflict(taskBoundsToCheck, mTmpBounds)
+                    && displayBounds.contains(mTmpBounds)) {
                 // Found a candidate. Just use this.
                 inOutBounds.set(mTmpBounds);
                 if (DEBUG) appendLog("avoid-bounds-conflict=" + inOutBounds);
@@ -772,16 +791,16 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         mTmpDirections[1] = Gravity.TOP | Gravity.LEFT;
     }
 
-    private boolean boundsConflict(@NonNull List<TaskRecord> tasks, @NonNull Rect bounds) {
-        for (TaskRecord task : tasks) {
-            final Rect taskBounds = task.getBounds();
-            final boolean leftClose = Math.abs(taskBounds.left - bounds.left)
+    private boolean boundsConflict(@NonNull List<Rect> taskBoundsToCheck,
+                                   @NonNull Rect candidateBounds) {
+        for (Rect taskBounds : taskBoundsToCheck) {
+            final boolean leftClose = Math.abs(taskBounds.left - candidateBounds.left)
                     < BOUNDS_CONFLICT_THRESHOLD;
-            final boolean topClose = Math.abs(taskBounds.top - bounds.top)
+            final boolean topClose = Math.abs(taskBounds.top - candidateBounds.top)
                     < BOUNDS_CONFLICT_THRESHOLD;
-            final boolean rightClose = Math.abs(taskBounds.right - bounds.right)
+            final boolean rightClose = Math.abs(taskBounds.right - candidateBounds.right)
                     < BOUNDS_CONFLICT_THRESHOLD;
-            final boolean bottomClose = Math.abs(taskBounds.bottom - bounds.bottom)
+            final boolean bottomClose = Math.abs(taskBounds.bottom - candidateBounds.bottom)
                     < BOUNDS_CONFLICT_THRESHOLD;
 
             if ((leftClose && topClose) || (leftClose && bottomClose) || (rightClose && topClose)

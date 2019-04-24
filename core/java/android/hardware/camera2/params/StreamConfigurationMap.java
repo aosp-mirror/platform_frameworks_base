@@ -838,8 +838,10 @@ public final class StreamConfigurationMap {
      * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}
      * capability.  This does not include the stall duration, so for example, a JPEG or RAW16 output
      * resolution with a large stall duration but a minimum frame duration that's above 20 fps will
-     * still be listed in the regular {@link #getOutputSizes} list. All the sizes on this list are
-     * still guaranteed to operate at a rate of at least 10 fps, not including stall duration.</p>
+     * still be listed in the regular {@link #getOutputSizes} list. All the sizes on this list that
+     * are less than 24 megapixels are still guaranteed to operate at a rate of at least 10 fps,
+     * not including stall duration. Sizes on this list that are at least 24 megapixels are allowed
+     * to operate at less than 10 fps.</p>
      *
      * <p>For a device that does not support the BURST_CAPTURE capability, this list will be
      * {@code null}, since resolutions in the {@link #getOutputSizes} list are already not

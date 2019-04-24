@@ -25,6 +25,8 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.role.IRoleManager;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -75,6 +77,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
@@ -115,6 +118,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -2460,19 +2464,37 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
+        String pkgName;
         String component = getNextArg();
-        ComponentName componentName =
-                component != null ? ComponentName.unflattenFromString(component) : null;
-
-        if (componentName == null) {
-            pw.println("Error: component name not specified or invalid");
-            return 1;
+        if (component.indexOf('/') < 0) {
+            // No component specified, so assume it's just a package name.
+            pkgName = component;
+        } else {
+            ComponentName componentName =
+                    component != null ? ComponentName.unflattenFromString(component) : null;
+            if (componentName == null) {
+                pw.println("Error: invalid component name");
+                return 1;
+            }
+            pkgName = componentName.getPackageName();
         }
 
+
+        final CompletableFuture<Boolean> future = new CompletableFuture<>();
+        final RemoteCallback callback = new RemoteCallback(res -> future.complete(res != null));
         try {
-            mInterface.setHomeActivity(componentName, userId);
-            pw.println("Success");
-            return 0;
+            IRoleManager roleManager = android.app.role.IRoleManager.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow(Context.ROLE_SERVICE));
+            roleManager.addRoleHolderAsUser(RoleManager.ROLE_HOME, pkgName,
+                    0, userId, callback);
+            boolean success = future.get();
+            if (success) {
+                pw.println("Success");
+                return 0;
+            } else {
+                pw.println("Error: Failed to set default home.");
+                return 1;
+            }
         } catch (Exception e) {
             pw.println(e.toString());
             return 1;
@@ -3161,6 +3183,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  set-home-activity [--user USER_ID] TARGET-COMPONENT");
         pw.println("    Set the default home activity (aka launcher).");
+        pw.println("    TARGET-COMPONENT can be a package name (com.package.my) or a full");
+        pw.println("    component (com.package.my/component.name). However, only the package name");
+        pw.println("    matters: the actual component used will be determined automatically from");
+        pw.println("    the package.");
         pw.println("");
         pw.println("  set-installer PACKAGE INSTALLER");
         pw.println("    Set installer package name");

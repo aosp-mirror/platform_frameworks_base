@@ -32,7 +32,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
-import android.app.INotificationManager;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -52,6 +51,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -131,8 +131,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private StatusBarStateListener mStatusBarStateListener;
 
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
-
-    private INotificationManager mNotificationManagerService;
+    private IStatusBarService mBarService;
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
@@ -207,13 +206,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
 
-        try {
-            mNotificationManagerService = INotificationManager.Stub.asInterface(
-                    ServiceManager.getServiceOrThrow(Context.NOTIFICATION_SERVICE));
-        } catch (ServiceManager.ServiceNotFoundException e) {
-            e.printStackTrace();
-        }
-
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
@@ -231,6 +223,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
         mSurfaceSynchronizer = synchronizer;
+
+        mBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     /**
@@ -461,6 +456,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         public void onBubbleRemoved(Bubble bubble, int reason) {
             if (mStackView != null) {
                 mStackView.removeBubble(bubble);
+            }
+            if (!bubble.entry.showInShadeWhenBubble()) {
+                // The notification is gone & bubble is gone, time to actually remove it
+                mNotificationEntryManager.performRemoveNotification(bubble.entry.notification);
+            } else {
+                // The notification is still in the shade but we've removed the bubble so
+                // lets make sure NoMan knows it's not a bubble anymore
+                try {
+                    mBarService.onNotificationBubbleChanged(bubble.getKey(), false /* isBubble */);
+                } catch (RemoteException e) {
+                    // Bad things have happened
+                }
             }
         }
 

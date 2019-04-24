@@ -635,7 +635,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                 != second.getEmergencyServiceCategoryBitmask()) {
             return false;
         }
-        if (first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
+        if (!first.getEmergencyUrns().equals(second.getEmergencyUrns())) {
             return false;
         }
         if (first.getEmergencyCallRouting() != second.getEmergencyCallRouting()) {

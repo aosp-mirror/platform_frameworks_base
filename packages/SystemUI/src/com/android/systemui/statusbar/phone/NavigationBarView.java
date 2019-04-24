@@ -145,7 +145,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private NotificationPanelView mPanelView;
 
     private NavBarTintController mTintController;
-    private boolean mAssistantAvailable;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -759,23 +758,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mEdgeBackGestureHandler.onOverlaysChanged();
     }
 
-    public void setAssistantAvailable(boolean available) {
-        mAssistantAvailable = available;
-        updateAssistantAvailability();
-    }
-
-    // TODO(b/112934365): move this back to NavigationBarFragment when prototype is removed
-    private void updateAssistantAvailability() {
-        boolean available = mAssistantAvailable && QuickStepContract.isGesturalMode(getContext());
-        if (mOverviewProxyService.getProxy() != null) {
-            try {
-                mOverviewProxyService.getProxy().onAssistantAvailable(available);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to send assistant availability data to launcher");
-            }
-        }
-    }
-
     public void setMenuVisibility(final boolean show) {
         mContextualButtonGroup.setButtonVisiblity(R.id.menu, show);
     }
@@ -898,10 +880,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void showPinningEnterExitToast(boolean entering) {
         if (entering) {
             mScreenPinningNotify.showPinningStartToast();
-
-            // TODO(b/112934365): remove after prototype finished, only needed to escape from pin
-            getBackButton().setVisibility(VISIBLE);
-            getHomeButton().setVisibility(VISIBLE);
         } else {
             mScreenPinningNotify.showPinningExitToast();
         }
