@@ -596,8 +596,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
-        mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
         Dependency.get(MAIN_HANDLER).post(() -> {
+            mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
             mNotificationListController.updateNotificationsForAppOp(code, uid, packageName, active);
         });
     }
