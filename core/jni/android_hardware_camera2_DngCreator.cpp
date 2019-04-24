@@ -1010,9 +1010,10 @@ static inline bool unDistortWithinPreCorrArray(
         const float cx, const float cy, const float f,
         const int preCorrW, const int preCorrH, const int xMin, const int yMin) {
     undistort(x, y, distortion, cx, cy, f);
-    int xMax = xMin + preCorrW - 1;
-    int yMax = yMin + preCorrH - 1;
-    if (x < xMin || y < yMin || x > xMax || y > yMax) {
+    // xMin and yMin are inclusive, and xMax and yMax are exclusive.
+    int xMax = xMin + preCorrW;
+    int yMax = yMin + preCorrH;
+    if (x < xMin || y < yMin || x >= xMax || y >= yMax) {
         return false;
     }
     return true;
@@ -1976,7 +1977,6 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             if (entry3.count == 5) {
                 gotDistortion = true;
 
-
                 // Scale the distortion coefficients to create a zoom in warpped image so that all
                 // pixels are drawn within input image.
                 for (size_t i = 0; i < entry3.count; i++) {
@@ -1995,8 +1995,8 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
                             preXMin, preYMin);
                 }
 
-                float m_x = std::fmaxf(preWidth-1 - cx, cx);
-                float m_y = std::fmaxf(preHeight-1 - cy, cy);
+                float m_x = std::fmaxf(preWidth - cx, cx);
+                float m_y = std::fmaxf(preHeight - cy, cy);
                 float m_sq = m_x*m_x + m_y*m_y;
                 float m = sqrtf(m_sq); // distance to farthest corner from optical center
                 float f_sq = f * f;
