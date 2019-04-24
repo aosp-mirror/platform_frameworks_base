@@ -512,57 +512,59 @@ public class Process {
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
-     * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @param useSystemGraphicsDriver whether the process uses system graphics driver.
-     * 
+     *
+     * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
      * 
      * {@hide}
      */
-    public static final ProcessStartResult start(@NonNull final String processClass,
-                                  @Nullable final String niceName,
-                                  int uid, int gid, @Nullable int[] gids,
-                                  int runtimeFlags, int mountExternal,
-                                  int targetSdkVersion,
-                                  @Nullable String seInfo,
-                                  @NonNull String abi,
-                                  @Nullable String instructionSet,
-                                  @Nullable String appDataDir,
-                                  @Nullable String invokeWith,
-                                  @Nullable String packageName,
-                                  @Nullable String[] packagesForUid,
-                                  @Nullable String sandboxId,
-                                  @Nullable String[] zygoteArgs,
-                                  boolean useSystemGraphicsDriver) {
+    public static ProcessStartResult start(@NonNull final String processClass,
+                                           @Nullable final String niceName,
+                                           int uid, int gid, @Nullable int[] gids,
+                                           int runtimeFlags,
+                                           int mountExternal,
+                                           int targetSdkVersion,
+                                           @Nullable String seInfo,
+                                           @NonNull String abi,
+                                           @Nullable String instructionSet,
+                                           @Nullable String appDataDir,
+                                           @Nullable String invokeWith,
+                                           @Nullable String packageName,
+                                           @Nullable String[] packagesForUid,
+                                           @Nullable String sandboxId,
+                                           boolean useSystemGraphicsDriver,
+                                           @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    packagesForUid, sandboxId, /*useUnspecializedAppProcessPool=*/ true,
-                    zygoteArgs, useSystemGraphicsDriver);
+                    packagesForUid, sandboxId, /*useUsapPool=*/ true,
+                    useSystemGraphicsDriver, zygoteArgs);
     }
 
     /** @hide */
-    public static final ProcessStartResult startWebView(@NonNull final String processClass,
-                                  @Nullable final String niceName,
-                                  int uid, int gid, @Nullable int[] gids,
-                                  int runtimeFlags, int mountExternal,
-                                  int targetSdkVersion,
-                                  @Nullable String seInfo,
-                                  @NonNull String abi,
-                                  @Nullable String instructionSet,
-                                  @Nullable String appDataDir,
-                                  @Nullable String invokeWith,
-                                  @Nullable String packageName,
-                                  @Nullable String[] packagesForUid,
-                                  @Nullable String sandboxId,
-                                  @Nullable String[] zygoteArgs,
-                                  boolean useSystemGraphicsDriver) {
+    public static ProcessStartResult startWebView(@NonNull final String processClass,
+                                                  @Nullable final String niceName,
+                                                  int uid, int gid, @Nullable int[] gids,
+                                                  int runtimeFlags,
+                                                  int mountExternal,
+                                                  int targetSdkVersion,
+                                                  @Nullable String seInfo,
+                                                  @NonNull String abi,
+                                                  @Nullable String instructionSet,
+                                                  @Nullable String appDataDir,
+                                                  @Nullable String invokeWith,
+                                                  @Nullable String packageName,
+                                                  @Nullable String[] packagesForUid,
+                                                  @Nullable String sandboxId,
+                                                  boolean useSystemGraphicsDriver,
+                                                  @Nullable String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    packagesForUid, sandboxId, /*useUnspecializedAppProcessPool=*/ false,
-                    zygoteArgs, useSystemGraphicsDriver);
+                    packagesForUid, sandboxId, /*useUsapPool=*/ false,
+                    useSystemGraphicsDriver, zygoteArgs);
     }
 
     /**

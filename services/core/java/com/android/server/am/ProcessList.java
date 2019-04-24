@@ -1827,8 +1827,8 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         packageNames, sandboxId,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq},
-                        useSystemGraphicsDriver);
+                        useSystemGraphicsDriver,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             } else if (hostingRecord.usesAppZygote()) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
 
@@ -1836,17 +1836,17 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        packageNames, sandboxId, /*useUnspecializedAppProcessPool=*/ false,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq},
-                        useSystemGraphicsDriver);
+                        packageNames, sandboxId, /*useUsapPool=*/ false,
+                        useSystemGraphicsDriver,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName,
                         packageNames, sandboxId,
-                        new String[] {PROC_START_SEQ_IDENT + app.startSeq},
-                        useSystemGraphicsDriver);
+                        useSystemGraphicsDriver,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
             return startResult;
