@@ -31,6 +31,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -317,7 +318,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(INotificationManager.class),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anyInt(),
+                anySet(),
                 eq(statusBarNotification),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
@@ -345,7 +346,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(INotificationManager.class),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anyInt(),
+                anySet(),
                 eq(statusBarNotification),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
@@ -375,7 +376,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(INotificationManager.class),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anyInt(),
+                anySet(),
                 eq(statusBarNotification),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
@@ -404,7 +405,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(INotificationManager.class),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anyInt(),
+                anySet(),
                 eq(statusBarNotification),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
@@ -432,7 +433,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(INotificationManager.class),
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
-                anyInt(),
+                anySet(),
                 eq(statusBarNotification),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),

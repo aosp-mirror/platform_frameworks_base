@@ -98,6 +98,8 @@
     <color name="notification_guts_button_color">@color/GM2_blue_700</color>
 
     <color name="notification_section_header_label_color">@color/GM2_grey_900</color>
+    <!-- The divider view for the notification channel editor half-shelf -->
+    <color name="notification_channel_dialog_separator">@color/GM2_grey_200</color>
 
     <color name="assist_orb_color">#ffffff</color>
 

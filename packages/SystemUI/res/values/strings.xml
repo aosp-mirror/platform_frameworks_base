@@ -1688,6 +1688,12 @@
     <!-- Notification: Control panel: Label for the app that posted this notification, if it's not the package that the notification was posted for -->
     <string name="notification_delegate_header">Proxied notification</string>
 
+    <!-- [CHAR LIMIT=40 Notification: Label for the inline channel blocking view -->
+    <string name="notification_channel_dialog_title">All <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> notifications</string>
+
+    <!-- [CHAR LIMIT=20 Notification: "See more" button -->
+    <string name="see_more_title">See more</string>
+
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
     <string name="appops_camera">This app is using the camera.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
