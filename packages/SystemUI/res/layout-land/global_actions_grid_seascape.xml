@@ -7,7 +7,7 @@
     android:orientation="horizontal"
     android:clipToPadding="false"
     android:theme="@style/qs_theme"
-    android:gravity="top|right"
+    android:gravity="left"
     android:paddingRight="@dimen/global_actions_top_padding"
     android:clipChildren="false"
 >
