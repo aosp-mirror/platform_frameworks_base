@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.car.drivingstate.CarDrivingStateEvent;
+import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -38,10 +39,13 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.car.notification.CarHeadsUpNotificationManager;
 import com.android.car.notification.CarNotificationListener;
 import com.android.car.notification.CarNotificationView;
 import com.android.car.notification.CarUxRestrictionManagerWrapper;
+import com.android.car.notification.HeadsUpEntry;
 import com.android.car.notification.NotificationClickHandlerFactory;
+import com.android.car.notification.NotificationDataManager;
 import com.android.car.notification.NotificationViewController;
 import com.android.car.notification.PreprocessingManager;
 import com.android.internal.statusbar.RegisterStatusBarResult;
@@ -407,8 +411,13 @@ public class CarStatusBar extends StatusBar implements
         CarNotificationListener carNotificationListener = new CarNotificationListener();
         CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper =
                 new CarUxRestrictionManagerWrapper();
+        NotificationDataManager notificationDataManager = new NotificationDataManager();
+        CarHeadsUpNotificationManager carHeadsUpNotificationManager =
+                new CarSystemUIHeadsUpNotificationManager(mContext, clickHandlerFactory,
+                        notificationDataManager);
+
         carNotificationListener.registerAsSystemService(mContext, carUxRestrictionManagerWrapper,
-                clickHandlerFactory);
+                carHeadsUpNotificationManager, notificationDataManager);
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
         View glassPane = mStatusBarWindow.findViewById(R.id.glass_pane);
@@ -1091,6 +1100,50 @@ public class CarStatusBar extends StatusBar implements
             mClosingVelocity = DEFAULT_FLING_VELOCITY;
             close();
             super.onLongPress(e);
+        }
+    }
+
+    /**
+     * SystemUi version onf the notification manager that overrides methods such that the
+     * notifications end up in the status bar layouts instead of a standalone window.
+     */
+    private class CarSystemUIHeadsUpNotificationManager extends CarHeadsUpNotificationManager {
+
+        CarSystemUIHeadsUpNotificationManager(Context context,
+                NotificationClickHandlerFactory clickHandlerFactory,
+                NotificationDataManager notificationDataManager) {
+            super(context, clickHandlerFactory, notificationDataManager);
+        }
+
+        @Override
+        protected View createHeadsUpPanel() {
+            // In SystemUi the view is already in the window so just return a reference.
+            return mStatusBarWindow.findViewById(R.id.notification_headsup);
+        }
+
+        @Override
+        protected void addHeadsUpPanelToDisplay() {
+            // Set the panel initial state to invisible
+            mHeadsUpPanel.setVisibility(View.INVISIBLE);
+        }
+
+        @Override
+        protected void setHeadsUpVisible() {
+            super.setHeadsUpVisible();
+            if (mHeadsUpPanel.getVisibility() == View.VISIBLE) {
+                mStatusBarWindowController.setHeadsUpShowing(true);
+                mStatusBarWindowController.setForceStatusBarVisible(true);
+            }
+        }
+
+        @Override
+        protected void removeNotificationFromPanel(HeadsUpEntry currentHeadsUpNotification) {
+            super.removeNotificationFromPanel(currentHeadsUpNotification);
+            // If the panel ended up empty and hidden we can remove it from SystemUi
+            if (mHeadsUpPanel.getVisibility() != View.VISIBLE) {
+                mStatusBarWindowController.setHeadsUpShowing(false);
+                mStatusBarWindowController.setForceStatusBarVisible(false);
+            }
         }
     }
 }
