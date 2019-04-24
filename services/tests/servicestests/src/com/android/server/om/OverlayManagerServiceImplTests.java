@@ -19,7 +19,6 @@ package com.android.server.om;
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
-import static android.content.om.OverlayInfo.STATE_TARGET_IS_BEING_REPLACED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -172,8 +171,9 @@ public class OverlayManagerServiceImplTests {
         mImpl.setEnabled(OVERLAY, true, USER);
         assertState(STATE_ENABLED, OVERLAY, USER);
 
+        // target upgrades do not change the state of the overlay
         beginUpgradeTargetPackage(TARGET, USER);
-        assertState(STATE_TARGET_IS_BEING_REPLACED, OVERLAY, USER);
+        assertState(STATE_ENABLED, OVERLAY, USER);
 
         endUpgradeTargetPackage(TARGET, USER);
         assertState(STATE_ENABLED, OVERLAY, USER);
