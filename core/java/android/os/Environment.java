@@ -1115,42 +1115,42 @@ public class Environment {
     }
 
     /**
-     * Returns whether the shared/external storage media at the given path is a
-     * sandboxed view that only contains files owned by the app.
+     * Returns whether the primary shared/external storage media is a legacy
+     * view that includes files not owned by the app.
      * <p>
      * This value may be different from the value requested by
-     * {@code allowExternalStorageSandbox} in the app's manifest, since an app
-     * may inherit its sandboxed state based on when it was first installed.
+     * {@code requestLegacyExternalStorage} in the app's manifest, since an app
+     * may inherit its legacy state based on when it was first installed.
      * <p>
-     * Sandboxed apps can continue to discover and read media belonging to other
-     * apps via {@link android.provider.MediaStore}.
+     * Non-legacy apps can continue to discover and read media belonging to
+     * other apps via {@link android.provider.MediaStore}.
      */
-    public static boolean isExternalStorageSandboxed() {
+    public static boolean isExternalStorageLegacy() {
         final File externalDir = sCurrentUser.getExternalDirs()[0];
-        return isExternalStorageSandboxed(externalDir);
+        return isExternalStorageLegacy(externalDir);
     }
 
     /**
      * Returns whether the shared/external storage media at the given path is a
-     * sandboxed view that only contains files owned by the app.
+     * legacy view that includes files not owned by the app.
      * <p>
      * This value may be different from the value requested by
-     * {@code allowExternalStorageSandbox} in the app's manifest, since an app
-     * may inherit its sandboxed state based on when it was first installed.
+     * {@code requestLegacyExternalStorage} in the app's manifest, since an app
+     * may inherit its legacy state based on when it was first installed.
      * <p>
-     * Sandboxed apps can continue to discover and read media belonging to other
-     * apps via {@link android.provider.MediaStore}.
+     * Non-legacy apps can continue to discover and read media belonging to
+     * other apps via {@link android.provider.MediaStore}.
      *
      * @throws IllegalArgumentException if the path is not a valid storage
      *             device.
      */
-    public static boolean isExternalStorageSandboxed(@NonNull File path) {
+    public static boolean isExternalStorageLegacy(@NonNull File path) {
         final Context context = AppGlobals.getInitialApplication();
         final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
 
         return appOps.checkOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
                 context.getApplicationInfo().uid,
-                context.getOpPackageName()) != AppOpsManager.MODE_ALLOWED;
+                context.getOpPackageName()) == AppOpsManager.MODE_ALLOWED;
     }
 
     static File getDirectory(String variableName, String defaultPath) {
