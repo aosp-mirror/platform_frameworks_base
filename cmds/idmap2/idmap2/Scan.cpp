@@ -39,6 +39,8 @@
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::Idmap;
+using android::idmap2::kPolicyOdm;
+using android::idmap2::kPolicyOem;
 using android::idmap2::kPolicyProduct;
 using android::idmap2::kPolicyPublic;
 using android::idmap2::kPolicySystem;
@@ -93,6 +95,8 @@ Result<std::unique_ptr<std::vector<std::string>>> FindApkFiles(const std::vector
 
 std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
   static const std::vector<std::pair<std::string, std::string>> values = {
+      {"/odm/", kPolicyOdm},
+      {"/oem/", kPolicyOem},
       {"/product/", kPolicyProduct},
       {"/system/", kPolicySystem},
       {"/vendor/", kPolicyVendor},
