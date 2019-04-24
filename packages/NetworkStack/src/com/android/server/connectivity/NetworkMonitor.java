@@ -150,9 +150,6 @@ public class NetworkMonitor extends StateMachine {
 
     private static final int SOCKET_TIMEOUT_MS = 10000;
     private static final int PROBE_TIMEOUT_MS  = 3000;
-    // Enough for 3 DNS queries 5 seconds apart.
-    // TODO: get this from resources and DeviceConfig instead.
-    private static final int DNS_TIMEOUT_MS = 12500;
 
     enum EvaluationResult {
         VALIDATED(true),
