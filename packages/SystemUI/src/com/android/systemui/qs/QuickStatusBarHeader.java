@@ -555,9 +555,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public void onClick(View v) {
-        if (v == mClockView || v == mNextAlarmContainer) {
+        if (v == mClockView) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
-                    AlarmClock.ACTION_SHOW_ALARMS),0);
+                    AlarmClock.ACTION_SHOW_ALARMS), 0);
+        } else if (v == mNextAlarmContainer) {
+            if (mNextAlarm.getShowIntent() != null
+                    && mNextAlarm.getShowIntent().getIntent() != null) {
+                mActivityStarter.postStartActivityDismissingKeyguard(
+                        mNextAlarm.getShowIntent().getIntent(), 0);
+            } else {
+                mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
+                        AlarmClock.ACTION_SHOW_ALARMS), 0);
+            }
         } else if (v == mPrivacyChip) {
             // Makes sure that the builder is grabbed as soon as the chip is pressed
             PrivacyDialogBuilder builder = mPrivacyChip.getBuilder();
