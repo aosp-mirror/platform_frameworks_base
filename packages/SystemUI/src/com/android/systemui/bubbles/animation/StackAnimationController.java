@@ -334,41 +334,38 @@ public class StackAnimationController extends
         mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
     }
 
-    /**
-     * Save the IME height so that the allowable stack bounds reflect the now-visible IME, and
-     * animate the stack out of the way if necessary.
-     */
-    public void updateBoundsForVisibleImeAndAnimate(int imeHeight) {
+    /** Save the current IME height so that we know where the stack bounds should be. */
+    public void setImeHeight(int imeHeight) {
         mImeHeight = imeHeight;
+    }
 
+    /**
+     * Animates the stack either away from the newly visible IME, or back to its original position
+     * due to the IME going away.
+     */
+    public void animateForImeVisibility(boolean imeVisible) {
         final float maxBubbleY = getAllowableStackPositionRegion().bottom;
-        if (mStackPosition.y > maxBubbleY && mPreImeY == Float.MIN_VALUE) {
-            mPreImeY = mStackPosition.y;
+        float destinationY = Float.MIN_VALUE;
 
+        if (imeVisible) {
+            if (mStackPosition.y > maxBubbleY && mPreImeY == Float.MIN_VALUE) {
+                mPreImeY = mStackPosition.y;
+                destinationY = maxBubbleY;
+            }
+        } else {
+            if (mPreImeY > Float.MIN_VALUE) {
+                destinationY = mPreImeY;
+                mPreImeY = Float.MIN_VALUE;
+            }
+        }
+
+        if (destinationY > Float.MIN_VALUE) {
             springFirstBubbleWithStackFollowing(
                     DynamicAnimation.TRANSLATION_Y,
                     getSpringForce(DynamicAnimation.TRANSLATION_Y, /* view */ null)
                             .setStiffness(SpringForce.STIFFNESS_LOW),
                     /* startVel */ 0f,
-                    maxBubbleY);
-        }
-    }
-
-    /**
-     * Clear the IME height from the bounds and animate the stack back to its original position,
-     * assuming it wasn't moved in the meantime.
-     */
-    public void updateBoundsForInvisibleImeAndAnimate() {
-        mImeHeight = 0;
-
-        if (mPreImeY > Float.MIN_VALUE) {
-            springFirstBubbleWithStackFollowing(
-                    DynamicAnimation.TRANSLATION_Y,
-                    getSpringForce(DynamicAnimation.TRANSLATION_Y, /* view */ null)
-                        .setStiffness(SpringForce.STIFFNESS_LOW),
-                    /* startVel */ 0f,
-                    mPreImeY);
-            mPreImeY = Float.MIN_VALUE;
+                    destinationY);
         }
     }
 
