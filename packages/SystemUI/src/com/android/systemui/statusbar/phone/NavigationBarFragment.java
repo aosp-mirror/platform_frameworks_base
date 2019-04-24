@@ -24,6 +24,8 @@ import static android.app.StatusBarManager.windowStateToString;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
@@ -867,6 +869,25 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private void updateAccessibilityServicesState(AccessibilityManager accessibilityManager) {
+        boolean[] feedbackEnabled = new boolean[1];
+        int flags = getA11yButtonState(feedbackEnabled);
+
+        mNavigationBarView.getRotateSuggestionButton()
+                .setAccessibilityFeedbackEnabled(feedbackEnabled[0]);
+
+        boolean clickable = (flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
+        boolean longClickable = (flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
+        mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable);
+        mOverviewProxyService.setSystemUiStateFlag(
+                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable);
+    }
+
+    /**
+     * Returns the system UI flags corresponding the the current accessibility button state
+     * @param outFeedbackEnabled if non-null, sets it to true if accessibility feedback is enabled.
+     */
+    public int getA11yButtonState(@Nullable boolean[] outFeedbackEnabled) {
         int requestingServices = 0;
         try {
             if (Settings.Secure.getIntForUser(mContentResolver,
@@ -881,7 +902,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         // AccessibilityManagerService resolves services for the current user since the local
         // AccessibilityManager is created from a Context with the INTERACT_ACROSS_USERS permission
         final List<AccessibilityServiceInfo> services =
-                accessibilityManager.getEnabledAccessibilityServiceList(
+                mAccessibilityManager.getEnabledAccessibilityServiceList(
                         AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
         for (int i = services.size() - 1; i >= 0; --i) {
             AccessibilityServiceInfo info = services.get(i);
@@ -895,12 +916,12 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             }
         }
 
-        mNavigationBarView.getRotateSuggestionButton()
-                .setAccessibilityFeedbackEnabled(feedbackEnabled);
+        if (outFeedbackEnabled != null) {
+            outFeedbackEnabled[0] = feedbackEnabled;
+        }
 
-        final boolean showAccessibilityButton = requestingServices >= 1;
-        final boolean targetSelection = requestingServices >= 2;
-        mNavigationBarView.setAccessibilityButtonState(showAccessibilityButton, targetSelection);
+        return (requestingServices >= 1 ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
+                | (requestingServices >= 2 ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
     }
 
     private void sendAssistantAvailability(boolean available) {
