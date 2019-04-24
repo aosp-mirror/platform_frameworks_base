@@ -3080,16 +3080,15 @@ package android.location {
   }
 
   public final class GnssCapabilities {
-    method public boolean hasCapability(int);
-    field public static final int GEOFENCING = 2; // 0x2
-    field public static final int LOW_POWER_MODE = 0; // 0x0
-    field public static final int MEASUREMENTS = 3; // 0x3
-    field public static final int MEASUREMENT_CORRECTIONS = 5; // 0x5
-    field public static final int MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH = 7; // 0x7
-    field public static final int MEASUREMENT_CORRECTIONS_LOS_SATS = 6; // 0x6
-    field public static final int MEASUREMENT_CORRECTIONS_REFLECTING_PLANE = 8; // 0x8
-    field public static final int NAV_MESSAGES = 4; // 0x4
-    field public static final int SATELLITE_BLACKLIST = 1; // 0x1
+    method public boolean hasGeofencing();
+    method public boolean hasLowPowerMode();
+    method public boolean hasMeasurementCorrections();
+    method public boolean hasMeasurementCorrectionsExcessPathLength();
+    method public boolean hasMeasurementCorrectionsLosSats();
+    method public boolean hasMeasurementCorrectionsReflectingPane();
+    method public boolean hasMeasurements();
+    method public boolean hasNavMessages();
+    method public boolean hasSatelliteBlacklist();
   }
 
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
@@ -3400,7 +3399,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @Nullable public String getExtraLocationControllerPackage();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
-    method @Nullable public android.location.GnssCapabilities getGnssCapabilities();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GnssCapabilities getGnssCapabilities();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
@@ -9481,7 +9480,7 @@ package android.view {
 package android.view.accessibility {
 
   public final class AccessibilityManager {
-    method public int getAccessibilityWindowId(android.os.IBinder);
+    method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
   }
 

@@ -16,9 +16,13 @@
 
 package android.media;
 
+import android.media.MediaRoute2ProviderInfo;
+
 /**
- * @hide
+ * {@hide}
  */
-oneway interface IMediaRoute2Callback {
-    void onRouteSelected(int uid, String routeId);
+oneway interface IMediaRouter2Manager {
+    void notifyRouteSelected(int uid, String routeId);
+    void notifyControlCategoriesChanged(int uid, in List<String> categories);
+    void notifyProviderInfoUpdated(in MediaRoute2ProviderInfo info);
 }

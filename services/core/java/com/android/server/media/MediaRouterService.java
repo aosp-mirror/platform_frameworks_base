@@ -30,7 +30,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
-import android.media.IMediaRouter2ManagerClient;
+import android.media.IMediaRouter2Manager;
 import android.media.IMediaRouterClient;
 import android.media.IMediaRouterService;
 import android.media.MediaRouter;
@@ -416,7 +416,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void registerManagerAsUser(IMediaRouter2ManagerClient client,
+    public void registerManagerAsUser(IMediaRouter2Manager client,
             String packageName, int userId) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
@@ -427,13 +427,13 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void unregisterManager(IMediaRouter2ManagerClient client) {
+    public void unregisterManager(IMediaRouter2Manager client) {
         mService2.unregisterManager(client);
     }
 
     // Binder call
     @Override
-    public void setRemoteRoute(IMediaRouter2ManagerClient client,
+    public void setRemoteRoute(IMediaRouter2Manager client,
             int uid, String routeId, boolean explicit) {
         mService2.setRemoteRoute(client, uid, routeId, explicit);
     }

@@ -178,7 +178,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
             // Send the assistant availability upon connection
             if (isConnected) {
-                mNavigationBarView.setAssistantAvailable(mAssistantAvailable);
+                sendAssistantAvailability(mAssistantAvailable);
             }
         }
 
@@ -235,7 +235,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             boolean available = mAssistManager
                     .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
             if (mAssistantAvailable != available) {
-                mNavigationBarView.setAssistantAvailable(available);
+                sendAssistantAvailability(available);
                 mAssistantAvailable = available;
             }
         }
@@ -901,6 +901,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         final boolean showAccessibilityButton = requestingServices >= 1;
         final boolean targetSelection = requestingServices >= 2;
         mNavigationBarView.setAccessibilityButtonState(showAccessibilityButton, targetSelection);
+    }
+
+    private void sendAssistantAvailability(boolean available) {
+        if (mOverviewProxyService.getProxy() != null) {
+            try {
+                mOverviewProxyService.getProxy().onAssistantAvailable(available
+                        && QuickStepContract.isGesturalMode(getContext()));
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to send assistant availability data to launcher");
+            }
+        }
     }
 
     // ----- Methods that DisplayNavigationBarController talks to -----

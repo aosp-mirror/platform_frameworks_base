@@ -2064,7 +2064,6 @@ public class SubscriptionManager {
         } else {
             logd("putPhoneIdAndSubIdExtra: no valid subs");
             intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-            intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         }
     }
 
@@ -2075,9 +2074,6 @@ public class SubscriptionManager {
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-        //FIXME this is using phoneId and slotIndex interchangeably
-        //Eventually, this should be removed as it is not the slot id
-        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
     }
 
     /**

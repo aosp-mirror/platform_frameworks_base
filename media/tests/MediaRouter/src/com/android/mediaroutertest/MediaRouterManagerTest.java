@@ -18,12 +18,14 @@ package com.android.mediaroutertest;
 
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRouter;
 import android.media.MediaRouter2Manager;
 import android.support.test.InstrumentationRegistry;
@@ -76,17 +78,15 @@ public class MediaRouterManagerTest {
     }
 
     @Test
-    public void transferTest() throws Exception {
+    public void providerTest() {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
 
         mManager.addCallback(mExecutor, mockCallback);
 
-        verify(mockCallback, after(AWAIT_MS).never())
-            .onRouteSelected(eq(TARGET_UID), any(String.class));
-
-        mManager.selectRoute(TARGET_UID, ROUTE_1);
-        verify(mockCallback, timeout(TIMEOUT_MS)).onRouteSelected(TARGET_UID, ROUTE_1);
-
+        //TODO: should be changed to onRouteAdded
+        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+                .onProviderInfoUpdated(argThat(
+                        (MediaRoute2ProviderInfo info) -> info.getRoutes().size() == 1));
         mManager.removeCallback(mockCallback);
     }
 
@@ -106,5 +106,4 @@ public class MediaRouterManagerTest {
 
         mManager.removeCallback(mockCallback);
     }
-
 }

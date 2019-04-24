@@ -16,12 +16,12 @@
 
 package android.media;
 
-import android.media.IMediaRoute2Callback;
+import android.media.IMediaRoute2ProviderClient;
 
 /**
  * {@hide}
  */
 oneway interface IMediaRoute2Provider {
-    void setCallback(IMediaRoute2Callback callback);
+    void registerClient(IMediaRoute2ProviderClient client);
     void selectRoute(int uid, String id);
 }

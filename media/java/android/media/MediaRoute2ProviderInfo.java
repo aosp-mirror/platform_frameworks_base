@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -70,6 +71,15 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeTypedList(mRoutes);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder()
+                .append("MediaRouteProviderInfo { ")
+                .append("routes=").append(Arrays.toString(getRoutes().toArray()))
+                .append(" }");
+        return result.toString();
     }
 
     /**

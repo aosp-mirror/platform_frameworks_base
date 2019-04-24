@@ -99,7 +99,7 @@ import com.android.server.LocalServices;
  * data for Tron, logcat, event logs and {@link android.app.WaitResult}.
  *
  * Tests:
- * atest CtsActivityManagerDeviceTestCases:ActivityMetricsLoggerTests
+ * atest CtsWindowManagerDeviceTestCases:ActivityMetricsLoggerTests
  */
 class ActivityMetricsLogger {
 

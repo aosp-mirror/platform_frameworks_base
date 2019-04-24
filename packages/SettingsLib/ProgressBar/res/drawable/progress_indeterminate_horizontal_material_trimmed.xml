@@ -14,15 +14,13 @@
      limitations under the License.
 -->
 
-<!-- Variant of progress_indeterminate_horizontal_material in frameworks/base/core/res, which
-     draws the whole height of the progress bar instead having blank space above and below the
-     bar. -->
+<!-- Copy of progress_indeterminate_horizontal_material_trimmed in frameworks/base/core/res -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
                  android:drawable="@drawable/vector_drawable_progress_indeterminate_horizontal_trimmed" >
     <target
         android:name="rect2_grp"
-        android:animation="@*android:anim/progress_indeterminate_horizontal_rect2" />
+        android:animation="@anim/progress_indeterminate_horizontal_rect2_copy" />
     <target
         android:name="rect1_grp"
-        android:animation="@*android:anim/progress_indeterminate_horizontal_rect1" />
+        android:animation="@anim/progress_indeterminate_horizontal_rect1_copy" />
 </animated-vector>

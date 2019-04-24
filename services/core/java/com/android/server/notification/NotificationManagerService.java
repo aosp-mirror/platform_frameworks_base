@@ -1020,6 +1020,24 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void onNotificationBubbleChanged(String key, boolean isBubble) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    final StatusBarNotification n = r.sbn;
+                    final int callingUid = n.getUid();
+                    final String pkg = n.getPackageName();
+                    if (isBubble && isNotificationAppropriateToBubble(r, pkg, callingUid,
+                            null /* oldEntry */)) {
+                        r.getNotification().flags |= FLAG_BUBBLE;
+                    } else {
+                        r.getNotification().flags &= ~FLAG_BUBBLE;
+                    }
+                }
+            }
+        }
     };
 
     @VisibleForTesting
@@ -4782,6 +4800,19 @@ public class NotificationManagerService extends SystemService {
     private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId,
             NotificationRecord oldRecord) {
         Notification notification = r.getNotification();
+        if (isNotificationAppropriateToBubble(r, pkg, userId, oldRecord)) {
+            notification.flags |= FLAG_BUBBLE;
+        } else {
+            notification.flags &= ~FLAG_BUBBLE;
+        }
+    }
+
+    /**
+     * @return whether the provided notification record is allowed to be represented as a bubble.
+     */
+    private boolean isNotificationAppropriateToBubble(NotificationRecord r, String pkg, int userId,
+            NotificationRecord oldRecord) {
+        Notification notification = r.getNotification();
 
         // Does the app want to bubble & have permission to bubble?
         boolean canBubble = notification.getBubbleMetadata() != null
@@ -4807,12 +4838,7 @@ public class NotificationManagerService extends SystemService {
         // OR something that was previously a bubble & still exists
         boolean bubbleUpdate = oldRecord != null
                 && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0;
-
-        if (canBubble && (notificationAppropriateToBubble || appIsForeground || bubbleUpdate)) {
-            notification.flags |= FLAG_BUBBLE;
-        } else {
-            notification.flags &= ~FLAG_BUBBLE;
-        }
+        return canBubble && (notificationAppropriateToBubble || appIsForeground || bubbleUpdate);
     }
 
     private void doChannelWarningToast(CharSequence toastText) {

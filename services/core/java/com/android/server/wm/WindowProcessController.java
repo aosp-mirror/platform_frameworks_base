@@ -23,6 +23,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -98,7 +99,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private final ActivityTaskManagerService mAtm;
     // The actual proc...  may be null only if 'persistent' is true (in which case we are in the
     // process of launching the app)
-    private volatile IApplicationThread mThread;
+    private IApplicationThread mThread;
     // Currently desired scheduling class
     private volatile int mCurSchedGroup;
     // Currently computed process state
@@ -192,8 +193,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mPid;
     }
 
+    @HotPath(caller = HotPath.PROCESS_CHANGE)
     public void setThread(IApplicationThread thread) {
-        mThread = thread;
+        synchronized (mAtm.mGlobalLockWithoutBoost) {
+            mThread = thread;
+        }
     }
 
     IApplicationThread getThread() {
@@ -507,7 +511,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 continue;
             }
             ActivityRecord topActivity = task.getTopActivity();
-            if (topActivity != null && topActivity.visible) {
+            if (topActivity == null) {
+                continue;
+            }
+            // If an activity has just been started it will not yet be visible, but
+            // is expected to be soon. We treat this as if it were already visible.
+            // This ensures a subsequent activity can be started even before this one
+            // becomes visible.
+            if (topActivity.visible || topActivity.isState(INITIALIZING)) {
                 return true;
             }
         }
