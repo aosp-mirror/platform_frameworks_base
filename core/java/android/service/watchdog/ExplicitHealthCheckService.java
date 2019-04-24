@@ -16,6 +16,8 @@
 
 package android.service.watchdog;
 
+import static android.os.Parcelable.Creator;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -26,13 +28,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service to provide packages supporting explicit health checks and route checks to these
@@ -61,7 +68,7 @@ public abstract class ExplicitHealthCheckService extends Service {
     private static final String TAG = "ExplicitHealthCheckService";
 
     /**
-     * {@link Bundle} key for a {@link List} of {@link PackageInfo} value.
+     * {@link Bundle} key for a {@link List} of {@link PackageConfig} value.
      *
      * {@hide}
      */
@@ -130,7 +137,7 @@ public abstract class ExplicitHealthCheckService extends Service {
      *
      * @return all packages supporting explicit health checks
      */
-    @NonNull public abstract List<PackageInfo> onGetSupportedPackages();
+    @NonNull public abstract List<PackageConfig> onGetSupportedPackages();
 
     /**
      * Called when the system requests for all the packages that it has currently requested
@@ -167,6 +174,112 @@ public abstract class ExplicitHealthCheckService extends Service {
         });
     }
 
+    /**
+     * A PackageConfig contains a package supporting explicit health checks and the
+     * timeout in {@link System#uptimeMillis} across reboots after which health
+     * check requests from clients are failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class PackageConfig implements Parcelable {
+        // TODO: Receive from DeviceConfig flag
+        private static final long DEFAULT_HEALTH_CHECK_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(1);
+
+        private final String mPackageName;
+        private final long mHealthCheckTimeoutMillis;
+
+        /**
+         * Creates a new instance.
+         *
+         * @param packageName the package name
+         * @param durationMillis the duration in milliseconds, must be greater than or
+         * equal to 0. If it is 0, it will use a system default value.
+         */
+        public PackageConfig(@NonNull String packageName, long healthCheckTimeoutMillis) {
+            mPackageName = Preconditions.checkNotNull(packageName);
+            if (healthCheckTimeoutMillis == 0) {
+                mHealthCheckTimeoutMillis = DEFAULT_HEALTH_CHECK_TIMEOUT_MILLIS;
+            } else {
+                mHealthCheckTimeoutMillis = Preconditions.checkArgumentNonnegative(
+                        healthCheckTimeoutMillis);
+            }
+        }
+
+        private PackageConfig(Parcel parcel) {
+            mPackageName = parcel.readString();
+            mHealthCheckTimeoutMillis = parcel.readLong();
+        }
+
+        /**
+         * Gets the package name.
+         *
+         * @return the package name
+         */
+        public @NonNull String getPackageName() {
+            return mPackageName;
+        }
+
+        /**
+         * Gets the timeout in milliseconds to evaluate an explicit health check result after a
+         * request.
+         *
+         * @return the duration in {@link System#uptimeMillis} across reboots
+         */
+        public long getHealthCheckTimeoutMillis() {
+            return mHealthCheckTimeoutMillis;
+        }
+
+        @Override
+        public String toString() {
+            return "PackageConfig{" + mPackageName + ", " + mHealthCheckTimeoutMillis + "}";
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other == this) {
+                return true;
+            }
+            if (!(other instanceof PackageConfig)) {
+                return false;
+            }
+
+            PackageConfig otherInfo = (PackageConfig) other;
+            return Objects.equals(otherInfo.getHealthCheckTimeoutMillis(),
+                    mHealthCheckTimeoutMillis)
+                    && Objects.equals(otherInfo.getPackageName(), mPackageName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mPackageName, mHealthCheckTimeoutMillis);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeString(mPackageName);
+            parcel.writeLong(mHealthCheckTimeoutMillis);
+        }
+
+        public static final @NonNull Creator<PackageConfig> CREATOR = new Creator<PackageConfig>() {
+                @Override
+                public PackageConfig createFromParcel(Parcel source) {
+                    return new PackageConfig(source);
+                }
+
+                @Override
+                public PackageConfig[] newArray(int size) {
+                    return new PackageConfig[size];
+                }
+            };
+    }
+
+
     private class ExplicitHealthCheckServiceWrapper extends IExplicitHealthCheckService.Stub {
         @Override
         public void setCallback(RemoteCallback callback) throws RemoteException {
@@ -188,7 +301,7 @@ public abstract class ExplicitHealthCheckService extends Service {
         @Override
         public void getSupportedPackages(RemoteCallback callback) throws RemoteException {
             mHandler.post(() -> {
-                List<PackageInfo> packages =
+                List<PackageConfig> packages =
                         ExplicitHealthCheckService.this.onGetSupportedPackages();
                 Objects.requireNonNull(packages, "Supported package list must be non-null");
                 Bundle bundle = new Bundle();

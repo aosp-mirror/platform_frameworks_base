@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
+
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
@@ -27,7 +29,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.service.watchdog.PackageInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -453,13 +454,13 @@ public class PackageWatchdog {
         }
     }
 
-    private void onSupportedPackages(List<PackageInfo> supportedPackages) {
+    private void onSupportedPackages(List<PackageConfig> supportedPackages) {
         boolean isStateChanged = false;
 
         Map<String, Long> supportedPackageTimeouts = new ArrayMap<>();
-        Iterator<PackageInfo> it = supportedPackages.iterator();
+        Iterator<PackageConfig> it = supportedPackages.iterator();
         while (it.hasNext()) {
-            PackageInfo info = it.next();
+            PackageConfig info = it.next();
             supportedPackageTimeouts.put(info.getPackageName(), info.getHealthCheckTimeoutMillis());
         }
 
