@@ -40,9 +40,10 @@ public final class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent {
      * @param newIcon {@link Uri} to the new icon of this {@link RcsGroupThread}
      * @see RcsMessageStore#persistRcsEvent(RcsEvent)
      */
-    public RcsGroupThreadIconChangedEvent(long timestamp, @NonNull RcsGroupThread rcsGroupThread,
-            @NonNull RcsParticipant originatingParticipant, @Nullable Uri newIcon) {
-        super(timestamp, rcsGroupThread.getThreadId(), originatingParticipant.getId());
+    public RcsGroupThreadIconChangedEvent(long timestamp,
+            @NonNull RcsGroupThread rcsGroupThread, @NonNull RcsParticipant originatingParticipant,
+            @Nullable Uri newIcon) {
+        super(timestamp, rcsGroupThread, originatingParticipant);
         mNewIcon = newIcon;
     }
 
@@ -61,9 +62,9 @@ public final class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent {
      * @hide - not meant for public use.
      */
     @Override
-    public void persist() throws RcsMessageStoreException {
+    void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
         // TODO ensure failure throws
-        RcsControllerCall.call(iRcs -> iRcs.createGroupThreadIconChangedEvent(
+        rcsControllerCall.call(iRcs -> iRcs.createGroupThreadIconChangedEvent(
                 getTimestamp(), getRcsGroupThread().getThreadId(),
                 getOriginatingParticipant().getId(), mNewIcon));
     }

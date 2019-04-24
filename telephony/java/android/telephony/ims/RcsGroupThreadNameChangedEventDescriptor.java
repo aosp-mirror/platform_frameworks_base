@@ -37,11 +37,11 @@ public class RcsGroupThreadNameChangedEventDescriptor extends RcsGroupThreadEven
 
     @Override
     @VisibleForTesting(visibility = PROTECTED)
-    public RcsGroupThreadNameChangedEvent createRcsEvent() {
+    public RcsGroupThreadNameChangedEvent createRcsEvent(RcsControllerCall rcsControllerCall) {
         return new RcsGroupThreadNameChangedEvent(
                 mTimestamp,
-                new RcsGroupThread(mRcsGroupThreadId),
-                new RcsParticipant(mOriginatingParticipantId),
+                new RcsGroupThread(rcsControllerCall, mRcsGroupThreadId),
+                new RcsParticipant(rcsControllerCall, mOriginatingParticipantId),
                 mNewName);
     }
 
