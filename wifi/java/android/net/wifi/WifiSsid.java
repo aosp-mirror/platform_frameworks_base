@@ -129,6 +129,8 @@ public class WifiSsid implements Parcelable {
                                 val = Integer.parseInt(asciiEncoded.substring(i, i + 2), HEX_RADIX);
                             } catch (NumberFormatException e) {
                                 val = -1;
+                            } catch (StringIndexOutOfBoundsException e) {
+                                val = -1;
                             }
                             if (val < 0) {
                                 val = Character.digit(asciiEncoded.charAt(i), HEX_RADIX);
