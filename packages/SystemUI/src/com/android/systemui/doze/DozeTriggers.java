@@ -247,6 +247,10 @@ public class DozeTriggers implements DozeMachine.Part {
                 }
                 if (state == DozeMachine.State.DOZE) {
                     mMachine.requestState(DozeMachine.State.DOZE_AOD);
+                    // Logs AOD open due to sensor wake up.
+                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                            .setType(MetricsEvent.TYPE_OPEN)
+                            .setSubtype(DozeLog.REASON_SENSOR_WAKE_UP));
                 }
             }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
@@ -254,6 +258,10 @@ public class DozeTriggers implements DozeMachine.Part {
             boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
             if (!pausing && !paused) {
                 mMachine.requestState(DozeMachine.State.DOZE);
+                // Logs AOD close due to sensor wake up.
+                mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                        .setType(MetricsEvent.TYPE_CLOSE)
+                        .setSubtype(DozeLog.REASON_SENSOR_WAKE_UP));
             }
         }
     }
