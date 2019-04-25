@@ -306,13 +306,19 @@ public class NotificationLockscreenUserManagerImpl implements
             return false;
         }
         boolean exceedsPriorityThreshold;
-        if (NotificationUtils.useNewInterruptionModel(mContext)) {
+        if (NotificationUtils.useNewInterruptionModel(mContext)
+                && hideSilentNotificationsOnLockscreen()) {
             exceedsPriorityThreshold = getEntryManager().getNotificationData().isHighPriority(sbn);
         } else {
             exceedsPriorityThreshold =
                     !getEntryManager().getNotificationData().isAmbient(sbn.getKey());
         }
         return mShowLockscreenNotifications && exceedsPriorityThreshold;
+    }
+
+    private boolean hideSilentNotificationsOnLockscreen() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0) == 0;
     }
 
     private void setShowLockscreenNotifications(boolean show) {
