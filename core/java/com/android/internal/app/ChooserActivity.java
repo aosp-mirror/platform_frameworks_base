@@ -2496,6 +2496,7 @@ public class ChooserActivity extends ResolverActivity {
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
         private static final int VIEW_TYPE_PROFILE = 3;
+        private static final int VIEW_TYPE_AZ_LABEL = 4;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
@@ -2556,6 +2557,7 @@ public class ChooserActivity extends ResolverActivity {
                             + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
+                            + getAzLabelRowCount()
                             + Math.ceil(
                             (float) mChooserListAdapter.getAlphaTargetCount()
                                     / getMaxTargetsPerRow())
@@ -2593,6 +2595,11 @@ public class ChooserActivity extends ResolverActivity {
             return 0;
         }
 
+        public int getAzLabelRowCount() {
+            // Only show a label if the a-z list is showing
+            return mChooserListAdapter.getAlphaTargetCount() > 0 ? 1 : 0;
+        }
+
         @Override
         public Object getItem(int position) {
             // We have nothing useful to return here.
@@ -2617,6 +2624,10 @@ public class ChooserActivity extends ResolverActivity {
                 return createProfileView(convertView, parent);
             }
 
+            if (viewType == VIEW_TYPE_AZ_LABEL) {
+                return createAzLabelView(parent);
+            }
+
             if (convertView == null) {
                 holder = createViewHolder(viewType, parent);
             } else {
@@ -2630,27 +2641,29 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0 && getContentPreviewRowCount() == 1) {
-                return VIEW_TYPE_CONTENT_PREVIEW;
-            }
+            int count;
 
-            if (getProfileRowCount() == 1 && position == getContentPreviewRowCount()) {
-                return VIEW_TYPE_PROFILE;
-            }
+            int countSum = (count = getContentPreviewRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_CONTENT_PREVIEW;
 
-            final int start = getFirstRowPosition(position);
-            final int startType = mChooserListAdapter.getPositionTargetType(start);
+            countSum += (count = getProfileRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_PROFILE;
 
-            if (startType == ChooserListAdapter.TARGET_SERVICE) {
-                return VIEW_TYPE_DIRECT_SHARE;
-            }
+            countSum += (count = getServiceTargetRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_DIRECT_SHARE;
+
+            countSum += (count = getCallerAndRankedTargetRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_NORMAL;
+
+            countSum += (count = getAzLabelRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_AZ_LABEL;
 
             return VIEW_TYPE_NORMAL;
         }
 
         @Override
         public int getViewTypeCount() {
-            return 4;
+            return 5;
         }
 
         private ViewGroup createContentPreviewView(View convertView, ViewGroup parent) {
@@ -2675,6 +2688,10 @@ public class ChooserActivity extends ResolverActivity {
             mProfileView.setOnClickListener(ChooserActivity.this::onProfileClick);
             bindProfileView();
             return profileRow;
+        }
+
+        private View createAzLabelView(ViewGroup parent) {
+            return mLayoutInflater.inflate(R.layout.chooser_az_label_row, parent, false);
         }
 
         private RowViewHolder loadViewsIntoRow(RowViewHolder holder) {
@@ -2775,13 +2792,21 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         /**
-         * Need to merge CALLER + ranked STANDARD into a single row. All other types
-         * are placed into their own row as determined by their target type, and dividers
-         * are added in the list to separate each type.
+         * Need to merge CALLER + ranked STANDARD into a single row and prevent a separator from
+         * showing on top of the AZ list if the AZ label is visible. All other types are placed into
+         * their own row as determined by their target type, and dividers are added in the list to
+         * separate each type.
          */
         int getRowType(int rowPosition) {
+            // Merge caller and ranked standard into a single row
             int positionType = mChooserListAdapter.getPositionTargetType(rowPosition);
             if (positionType == ChooserListAdapter.TARGET_CALLER) {
+                return ChooserListAdapter.TARGET_STANDARD;
+            }
+
+            // If an the A-Z label is shown, prevent a separator from appearing by making the A-Z
+            // row type the same as the suggestion row type
+            if (getAzLabelRowCount() > 0 && positionType == ChooserListAdapter.TARGET_STANDARD_AZ) {
                 return ChooserListAdapter.TARGET_STANDARD;
             }
 
@@ -2863,6 +2888,8 @@ public class ChooserActivity extends ResolverActivity {
             if (row < callerAndRankedRows + serviceRows) {
                 return serviceCount + (row - serviceRows) * getMaxTargetsPerRow();
             }
+
+            row -= getAzLabelRowCount();
 
             return callerAndRankedCount + serviceCount
                     + (row - callerAndRankedRows - serviceRows) * getMaxTargetsPerRow();
