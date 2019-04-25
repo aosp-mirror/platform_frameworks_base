@@ -855,6 +855,9 @@ public class FingerprintService extends BiometricServiceBase {
 
     @Override
     protected List<Fingerprint> getEnrolledTemplates(int userId) {
+        if (userId != UserHandle.getCallingUserId()) {
+            checkPermission(INTERACT_ACROSS_USERS);
+        }
         return getBiometricUtils().getBiometricsForUser(getContext(), userId);
     }
 
