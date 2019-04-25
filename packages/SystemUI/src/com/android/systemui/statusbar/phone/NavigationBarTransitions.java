@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+
 import static com.android.systemui.statusbar.phone.NavBarTintController.DEFAULT_COLOR_ADAPT_TRANSITION_TIME;
 import static com.android.systemui.statusbar.phone.NavBarTintController.MIN_COLOR_ADAPT_TRANSITION_TIME;
 
@@ -46,6 +48,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
     private boolean mLightsOut;
     private boolean mAutoDim;
     private View mNavButtons;
+    private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
 
     private final Handler mHandler = Handler.getMain();
     private final IWallpaperVisibilityListener mWallpaperVisibilityListener =
@@ -176,9 +179,13 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public int getTintAnimationDuration() {
-        if (NavBarTintController.isEnabled(mView.getContext())) {
+        if (NavBarTintController.isEnabled(mView.getContext(), mNavBarMode)) {
             return Math.max(DEFAULT_COLOR_ADAPT_TRANSITION_TIME, MIN_COLOR_ADAPT_TRANSITION_TIME);
         }
         return LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION;
+    }
+
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
     }
 }
