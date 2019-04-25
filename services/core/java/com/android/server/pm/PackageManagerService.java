@@ -11215,7 +11215,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private @Nullable PackageSetting getOriginalPackageLocked(@NonNull PackageParser.Package pkg,
             @Nullable String renamedPkgName) {
-        if (!isPackageRenamed(pkg, renamedPkgName)) {
+        if (pkg.mOriginalPackages == null || pkg.mOriginalPackages.contains(renamedPkgName)) {
             return null;
         }
         for (int i = pkg.mOriginalPackages.size() - 1; i >= 0; --i) {
