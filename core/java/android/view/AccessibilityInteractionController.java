@@ -682,14 +682,6 @@ public final class AccessibilityInteractionController {
                     // Handle this hidden action separately
                     succeeded = handleClickableSpanActionUiThread(
                             target, virtualDescendantId, arguments);
-                } else if (action == R.id.accessibilityActionOutsideTouch) {
-                    // trigger ACTION_OUTSIDE to notify windows
-                    final long now = SystemClock.uptimeMillis();
-                    MotionEvent event = MotionEvent.obtain(now, now, MotionEvent.ACTION_OUTSIDE,
-                            0, 0, 0);
-                    event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
-                    mViewRootImpl.dispatchInputEvent(event);
-                    succeeded = true;
                 } else {
                     AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
                     if (provider != null) {
@@ -753,6 +745,33 @@ public final class AccessibilityInteractionController {
             }
         } finally {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+        }
+    }
+
+    /**
+     * Notify outside touch event to the target window.
+     */
+    public void notifyOutsideTouchClientThread() {
+        final Message message = mHandler.obtainMessage();
+        message.what = PrivateHandler.MSG_NOTIFY_OUTSIDE_TOUCH;
+
+        // Don't care about pid and tid because there's no interrogating client for this message.
+        scheduleMessage(message, 0, 0, CONSIDER_REQUEST_PREPARERS);
+    }
+
+    private void notifyOutsideTouchUiThread() {
+        if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null
+                || mViewRootImpl.mStopped || mViewRootImpl.mPausedForTransition) {
+            return;
+        }
+        final View root = mViewRootImpl.mView;
+        if (root != null && isShown(root)) {
+            // trigger ACTION_OUTSIDE to notify windows
+            final long now = SystemClock.uptimeMillis();
+            final MotionEvent event = MotionEvent.obtain(now, now, MotionEvent.ACTION_OUTSIDE,
+                    0, 0, 0);
+            event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+            mViewRootImpl.dispatchInputEvent(event);
         }
     }
 
@@ -1328,6 +1347,8 @@ public final class AccessibilityInteractionController {
         private static final int FIRST_NO_ACCESSIBILITY_CALLBACK_MSG = 100;
         private static final int MSG_CLEAR_ACCESSIBILITY_FOCUS =
                 FIRST_NO_ACCESSIBILITY_CALLBACK_MSG + 1;
+        private static final int MSG_NOTIFY_OUTSIDE_TOUCH =
+                FIRST_NO_ACCESSIBILITY_CALLBACK_MSG + 2;
 
         public PrivateHandler(Looper looper) {
             super(looper);
@@ -1357,6 +1378,8 @@ public final class AccessibilityInteractionController {
                     return "MSG_APP_PREPARATION_TIMEOUT";
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS:
                     return "MSG_CLEAR_ACCESSIBILITY_FOCUS";
+                case MSG_NOTIFY_OUTSIDE_TOUCH:
+                    return "MSG_NOTIFY_OUTSIDE_TOUCH";
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
@@ -1395,6 +1418,9 @@ public final class AccessibilityInteractionController {
                 } break;
                 case MSG_CLEAR_ACCESSIBILITY_FOCUS: {
                     clearAccessibilityFocusUiThread();
+                } break;
+                case MSG_NOTIFY_OUTSIDE_TOUCH: {
+                    notifyOutsideTouchUiThread();
                 } break;
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);

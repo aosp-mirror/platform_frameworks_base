@@ -87,6 +87,9 @@ private:
     uint8_t mPolicy;
 };
 
+// TODO: Add privacy flag in incident.proto and auto generate it inside Privacy.
+bool sectionEncryption(int section_id);
+
 }  // namespace incidentd
 }  // namespace os
 }  // namespace android

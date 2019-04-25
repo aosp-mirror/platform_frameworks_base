@@ -245,7 +245,6 @@
   <java-symbol type="id" name="selection_end_handle" />
   <java-symbol type="id" name="insertion_handle" />
   <java-symbol type="id" name="accessibilityActionClickOnClickableSpan" />
-  <java-symbol type="id" name="accessibilityActionOutsideTouch" />
   <java-symbol type="id" name="camera" />
   <java-symbol type="id" name="mic" />
   <java-symbol type="id" name="overlay" />
@@ -1747,6 +1746,8 @@
   <java-symbol type="dimen" name="navigation_bar_height_landscape" />
   <java-symbol type="dimen" name="navigation_bar_width" />
   <java-symbol type="dimen" name="navigation_bar_frame_height" />
+  <java-symbol type="dimen" name="navigation_bar_frame_height_landscape" />
+  <java-symbol type="dimen" name="navigation_bar_gesture_height" />
   <java-symbol type="dimen" name="navigation_bar_frame_width" />
   <java-symbol type="dimen" name="navigation_bar_height_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
@@ -2531,6 +2532,9 @@
   <java-symbol type="bool" name="config_fingerprintSupportsGestures"/>
 
   <!-- Face authentication messages -->
+  <java-symbol type="string" name="face_recalibrate_notification_name" />
+  <java-symbol type="string" name="face_recalibrate_notification_title" />
+  <java-symbol type="string" name="face_recalibrate_notification_content" />
   <java-symbol type="string" name="face_error_unable_to_process" />
   <java-symbol type="string" name="face_error_hw_not_available" />
   <java-symbol type="string" name="face_error_no_space" />
@@ -2784,6 +2788,8 @@
   <java-symbol type="dimen" name="chooser_preview_image_border"/>
   <java-symbol type="dimen" name="chooser_max_collapsed_height" />
   <java-symbol type="layout" name="chooser_grid" />
+  <java-symbol type="id" name="chooser_header" />
+  <java-symbol type="dimen" name="chooser_header_scroll_elevation" />
   <java-symbol type="layout" name="chooser_grid_preview_text" />
   <java-symbol type="layout" name="chooser_grid_preview_image" />
   <java-symbol type="layout" name="chooser_grid_preview_file" />
@@ -3760,4 +3766,8 @@
   <java-symbol type="drawable" name="perm_group_camera" />
   <java-symbol type="drawable" name="perm_group_location" />
   <java-symbol type="drawable" name="perm_group_microphone" />
+
+  <java-symbol type="drawable" name="chooser_direct_share_icon_placeholder" />
+  <java-symbol type="color" name="chooser_gradient_background" />
+  <java-symbol type="color" name="chooser_gradient_highlight" />
 </resources>

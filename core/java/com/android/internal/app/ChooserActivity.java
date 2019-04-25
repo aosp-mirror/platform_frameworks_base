@@ -60,6 +60,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -479,6 +480,28 @@ public class ChooserActivity extends ResolverActivity {
             if (isSendAction(target)) {
                 mResolverDrawerLayout.setOnScrollChangeListener(this::handleScroll);
             }
+
+            final View chooserHeader = mResolverDrawerLayout.findViewById(R.id.chooser_header);
+            final float defaultElevation = chooserHeader.getElevation();
+            final float chooserHeaderScrollElevation =
+                    getResources().getDimensionPixelSize(R.dimen.chooser_header_scroll_elevation);
+
+            mAdapterView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                }
+
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                        int totalItemCount) {
+                    if (view.getChildCount() > 0) {
+                        if (firstVisibleItem > 0 || view.getChildAt(0).getTop() < 0) {
+                            chooserHeader.setElevation(chooserHeaderScrollElevation);
+                            return;
+                        }
+                    }
+
+                    chooserHeader.setElevation(defaultElevation);
+                }
+            });
         }
 
         if (DEBUG) {
@@ -1018,12 +1041,9 @@ public class ChooserActivity extends ResolverActivity {
             int cat = 0;
             int value = which;
             int directTargetAlsoRanked = -1;
+            int numCallerProvided = 0;
             HashedStringCache.HashResult directTargetHashed = null;
             switch (mChooserListAdapter.getPositionTargetType(which)) {
-                case ChooserListAdapter.TARGET_CALLER:
-                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
-                    value -= mChooserListAdapter.getSelectableServiceTargetCount();
-                    break;
                 case ChooserListAdapter.TARGET_SERVICE:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET;
                     // Log the package name + target name to answer the question if most users
@@ -1039,13 +1059,14 @@ public class ChooserActivity extends ResolverActivity {
                     directTargetAlsoRanked = getRankedPosition((SelectableTargetInfo) targetInfo);
 
                     if (mCallerChooserTargets != null) {
-                        value -= mCallerChooserTargets.length;
+                        numCallerProvided = mCallerChooserTargets.length;
                     }
                     break;
+                case ChooserListAdapter.TARGET_CALLER:
                 case ChooserListAdapter.TARGET_STANDARD:
-                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
-                    value -= mChooserListAdapter.getCallerTargetCount()
-                            + mChooserListAdapter.getSelectableServiceTargetCount();
+                    cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
+                    value -= mChooserListAdapter.getSelectableServiceTargetCount();
+                    numCallerProvided = mChooserListAdapter.getCallerTargetCount();
                     break;
                 case ChooserListAdapter.TARGET_STANDARD_AZ:
                     // A-Z targets are unranked standard targets; we use -1 to mark that they
@@ -1066,8 +1087,9 @@ public class ChooserActivity extends ResolverActivity {
                     targetLogMaker.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION,
                                     directTargetAlsoRanked);
                 }
+                targetLogMaker.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED,
+                        numCallerProvided);
                 getMetricsLogger().write(targetLogMaker);
-                MetricsLogger.action(this, cat, value);
             }
 
             if (mIsSuccessfullySelected) {
@@ -1680,7 +1702,10 @@ public class ChooserActivity extends ResolverActivity {
 
     final class PlaceHolderTargetInfo extends NotSelectableTargetInfo {
         public Drawable getDisplayIcon() {
-            return getDrawable(R.drawable.resolver_icon_placeholder);
+            AnimatedVectorDrawable avd = (AnimatedVectorDrawable)
+                    getDrawable(R.drawable.chooser_direct_share_icon_placeholder);
+            avd.start(); // Start animation after generation
+            return avd;
         }
     }
 

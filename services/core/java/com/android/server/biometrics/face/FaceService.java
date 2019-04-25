@@ -23,7 +23,12 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -48,10 +53,10 @@ import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
@@ -123,6 +128,49 @@ public class FaceService extends BiometricServiceBase {
             // Fingerprint currently does not end when the third condition is met which is a bug,
             // but let's leave it as-is for now.
             return result || !authenticated;
+        }
+
+        @Override
+        public boolean onAcquired(int acquireInfo, int vendorCode) {
+
+            if (acquireInfo == FaceManager.FACE_ACQUIRED_RECALIBRATE) {
+                final String name =
+                        getContext().getString(R.string.face_recalibrate_notification_name);
+                final String title =
+                        getContext().getString(R.string.face_recalibrate_notification_title);
+                final String content =
+                        getContext().getString(R.string.face_recalibrate_notification_content);
+
+                final Intent intent = new Intent("android.settings.FACE_SETTINGS");
+                intent.setPackage("com.android.settings");
+
+                final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(getContext(),
+                        0 /* requestCode */, intent, 0 /* flags */, null /* options */,
+                        UserHandle.CURRENT);
+
+                final String id = "FaceService";
+
+                NotificationManager nm =
+                        getContext().getSystemService(NotificationManager.class);
+                NotificationChannel channel = new NotificationChannel(id, name,
+                        NotificationManager.IMPORTANCE_HIGH);
+                Notification notification = new Notification.Builder(getContext(), id)
+                        .setSmallIcon(R.drawable.ic_lock)
+                        .setContentTitle(title)
+                        .setContentText(content)
+                        .setSubText(name)
+                        .setOnlyAlertOnce(true)
+                        .setLocalOnly(true)
+                        .setAutoCancel(true)
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .setContentIntent(pendingIntent)
+                        .build();
+
+                nm.createNotificationChannel(channel);
+                nm.notifyAsUser(null /* tag */, 0 /* id */, notification, UserHandle.CURRENT);
+            }
+
+            return super.onAcquired(acquireInfo, vendorCode);
         }
     }
 

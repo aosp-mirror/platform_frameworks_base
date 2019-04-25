@@ -596,8 +596,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
-        mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
         Dependency.get(MAIN_HANDLER).post(() -> {
+            mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
             mNotificationListController.updateNotificationsForAppOp(code, uid, packageName, active);
         });
     }
@@ -3326,7 +3326,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showBouncer(boolean scrimmed) {
-        mStatusBarKeyguardViewManager.showBouncer(scrimmed);
+        if (!mIsOccluded && !scrimmed && mState == StatusBarState.KEYGUARD) {
+            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+        } else {
+            mStatusBarKeyguardViewManager.showBouncer(scrimmed);
+        }
     }
 
     @Override

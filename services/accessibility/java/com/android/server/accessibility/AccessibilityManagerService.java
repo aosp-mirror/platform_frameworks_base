@@ -2722,9 +2722,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return -1;
     }
 
-    private void notifyOutsideTouchIfNeeded(int targetWindowId, int action, Bundle arguments,
-            int interactionId, IAccessibilityInteractionConnectionCallback callback, int fetchFlags,
-            int interrogatingPid, long interrogatingTid) {
+    private void notifyOutsideTouchIfNeeded(int targetWindowId, int action) {
         if (action != ACTION_CLICK && action != ACTION_LONG_CLICK) {
             return;
         }
@@ -2741,13 +2739,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final RemoteAccessibilityConnection connection = connectionList.get(i);
             if (connection != null) {
                 try {
-                    connection.mConnection.performAccessibilityAction(
-                            AccessibilityNodeInfo.ROOT_ITEM_ID,
-                            R.id.accessibilityActionOutsideTouch, arguments, interactionId,
-                            callback, fetchFlags, interrogatingPid, interrogatingTid);
+                    connection.getRemote().notifyOutsideTouch();
                 } catch (RemoteException re) {
                     if (DEBUG) {
-                        Slog.e(LOG_TAG, "Error calling performAccessibilityAction: " + re);
+                        Slog.e(LOG_TAG, "Error calling notifyOutsideTouch()");
                     }
                 }
             }
@@ -2833,8 +2828,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mPowerManager.userActivity(SystemClock.uptimeMillis(),
                     PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY, 0);
 
-            notifyOutsideTouchIfNeeded(resolvedWindowId, action, arguments, interactionId, callback,
-                    fetchFlags, interrogatingPid, interrogatingTid);
+            notifyOutsideTouchIfNeeded(resolvedWindowId, action);
             if (activityToken != null) {
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .setFocusedActivity(activityToken);
@@ -3790,7 +3784,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private List<Integer> getWatchOutsideTouchWindowIdLocked(int targetWindowId) {
             final WindowInfo targetWindow = mWindowInfoById.get(targetWindowId);
-            if (targetWindow != null && mWindowInfoById != null && mHasWatchOutsideTouchWindow) {
+            if (targetWindow != null && mHasWatchOutsideTouchWindow) {
                 final List<Integer> outsideWindowsId = new ArrayList<>();
                 for (int i = 0; i < mWindowInfoById.size(); i++) {
                     WindowInfo window = mWindowInfoById.valueAt(i);

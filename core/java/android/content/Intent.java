@@ -39,7 +39,6 @@ import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -8609,6 +8608,13 @@ public class Intent implements Parcelable, Cloneable {
      * fields, the identifier is <em>never</em> used for matching against an {@link IntentFilter};
      * it is as if the identifier has not been set on the Intent.
      *
+     * <p>This can be used, for example, to make this Intent unique from other Intents that
+     * are otherwise the same, for use in creating a {@link android.app.PendingIntent}.  (Be aware
+     * however that the receiver of the PendingIntent will see whatever you put in here.)  The
+     * structure of this string is completely undefined by the platform, however if you are going
+     * to be exposing identifier strings across different applications you may need to define
+     * your own structure if there is no central party defining the contents of this field.</p>
+     *
      * @param identifier The identifier for this Intent.  The contents of the string have no
      *                   meaning to the system, except whether they are exactly the same as
      *                   another identifier.
@@ -10180,6 +10186,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mType != null) {
             proto.write(IntentProto.TYPE, mType);
+        }
+        if (mIdentifier != null) {
+            proto.write(IntentProto.IDENTIFIER, mIdentifier);
         }
         if (mFlags != 0) {
             proto.write(IntentProto.FLAG, "0x" + Integer.toHexString(mFlags));

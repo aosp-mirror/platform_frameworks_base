@@ -1714,7 +1714,6 @@ package android.content.pm {
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
-    field public static boolean RESTRICTED_PERMISSIONS_ENABLED;
     field public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 1; // 0x1
     field public static final int RESTRICTION_HIDE_NOTIFICATIONS = 2; // 0x2
     field public static final int RESTRICTION_NONE = 0; // 0x0
@@ -5663,16 +5662,16 @@ package android.permission {
     ctor public PermissionControllerService();
     method public final void attachBaseContext(android.content.Context);
     method @NonNull public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int);
-    method @NonNull public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
-    method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
-    method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
-    method public abstract void onGrantOrUpgradeDefaultRuntimePermissions();
+    method @WorkerThread public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int);
+    method @WorkerThread @NonNull public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
+    method @WorkerThread @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
+    method @WorkerThread public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
+    method @WorkerThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions();
     method @BinderThread public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle);
     method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream);
-    method public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
-    method @NonNull public abstract java.util.Map<java.lang.String,java.util.List<java.lang.String>> onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String);
-    method public abstract boolean onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int);
+    method @WorkerThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
+    method @WorkerThread @NonNull public abstract java.util.Map<java.lang.String,java.util.List<java.lang.String>> onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String);
+    method @WorkerThread public abstract boolean onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
@@ -6015,17 +6014,6 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
     field public static final String APP_STANDBY_ENABLED = "app_standby_enabled";
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
-    field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
-    field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
-    field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
-    field public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
-    field public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
-    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
-    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
-    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
-    field public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS = "captive_portal_other_fallback_urls";
-    field public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
-    field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";

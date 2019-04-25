@@ -18,8 +18,7 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
-import static android.app.NotificationManager.IMPORTANCE_MIN;
-import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -37,9 +36,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -60,7 +57,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 
 import java.util.List;
@@ -104,6 +100,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingChannelImportance;
     private boolean mWasShownHighPriority;
+    private boolean mShowOnLockscreen;
+    private boolean mShowInStatusBar;
     /**
      * The last importance level chosen by the user.  Null if the user has not chosen an importance
      * level; non-null once the user takes an action which indicates an explicit preference.
@@ -119,7 +117,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
-    private GradientDrawable mSelectedBackground;
+    private Drawable mSelectedBackground;
+    private Drawable mUnselectedBackground;
 
     /** Whether this view is being shown as part of the blocking helper. */
     private boolean mIsForBlockingHelper;
@@ -133,6 +132,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnAlert = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         mChosenImportance = IMPORTANCE_DEFAULT;
+        setImportanceSummary(ACTION_ALERT);
         updateButtons(ACTION_ALERT);
     };
 
@@ -140,6 +140,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnSilent = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
         mChosenImportance = IMPORTANCE_LOW;
+        setImportanceSummary(ACTION_TOGGLE_SILENT);
         updateButtons(ACTION_TOGGLE_SILENT);
     };
 
@@ -276,14 +277,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
 
-        mSelectedBackground = new GradientDrawable();
-        mSelectedBackground.setShape(GradientDrawable.RECTANGLE);
-        mSelectedBackground.setColor(mContext.getColor(R.color.notification_guts_selection_bg));
-        final float cornerRadii = getResources().getDisplayMetrics().density * 8;
-        mSelectedBackground.setCornerRadii(new float[]{cornerRadii, cornerRadii, cornerRadii,
-                cornerRadii, cornerRadii, cornerRadii, cornerRadii, cornerRadii});
-        mSelectedBackground.setStroke((int) (getResources().getDisplayMetrics().density * 2),
-                mContext.getColor(R.color.notification_guts_selection_border));
+        mSelectedBackground = mContext.getDrawable(R.drawable.button_border_selected);
+        mUnselectedBackground = mContext.getDrawable(R.drawable.button_border_unselected);
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -296,6 +291,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             NotificationChannel.DEFAULT_CHANNEL_ID)
                     && numTotalChannels == 1;
         }
+
+        mShowInStatusBar = !mINotificationManager.shouldHideSilentStatusIcons(
+                mContext.getPackageName());
+        // TODO: b/128445911 use show on lockscreen setting
 
         bindHeader();
         bindChannelDetails();
@@ -334,6 +333,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             findViewById(R.id.non_configurable_text).setVisibility(VISIBLE);
             findViewById(R.id.non_configurable_multichannel_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
+            ((TextView) findViewById(R.id.done)).setText(R.string.inline_done_button);
         } else if (mNumUniqueChannelsInRow > 1) {
             findViewById(R.id.non_configurable_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
@@ -353,15 +353,17 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         done.setOnClickListener(mOnDismissSettings);
 
 
-        View silent = findViewById(R.id.silent_row);
-        View alert = findViewById(R.id.alert_row);
+        View silent = findViewById(R.id.silence);
+        View alert = findViewById(R.id.alert);
         silent.setOnClickListener(mOnSilent);
         alert.setOnClickListener(mOnAlert);
 
         if (mWasShownHighPriority) {
             updateButtons(ACTION_ALERT);
+            setImportanceSummary(ACTION_ALERT);
         } else {
             updateButtons(ACTION_TOGGLE_SILENT);
+            setImportanceSummary(ACTION_TOGGLE_SILENT);
         }
     }
 
@@ -482,14 +484,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             }
         }
         TextView groupNameView = findViewById(R.id.group_name);
-        TextView groupDividerView = findViewById(R.id.pkg_group_divider);
         if (groupName != null) {
             groupNameView.setText(groupName);
             groupNameView.setVisibility(View.VISIBLE);
-            groupDividerView.setVisibility(View.VISIBLE);
         } else {
             groupNameView.setVisibility(View.GONE);
-            groupDividerView.setVisibility(View.GONE);
         }
     }
 
@@ -504,9 +503,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private boolean hasImportanceChanged() {
         return mSingleNotificationChannel != null
                 && mChosenImportance != null
-                && (mStartingChannelImportance != mChosenImportance
-                || (mWasShownHighPriority && mChosenImportance < IMPORTANCE_DEFAULT)
-                || (!mWasShownHighPriority && mChosenImportance >= IMPORTANCE_DEFAULT));
+                && (mStartingChannelImportance == IMPORTANCE_UNSPECIFIED
+                        || (mWasShownHighPriority && mChosenImportance < IMPORTANCE_DEFAULT)
+                        || (!mWasShownHighPriority && mChosenImportance >= IMPORTANCE_DEFAULT));
     }
 
     private void saveImportance() {
@@ -526,26 +525,73 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (mChosenImportance != null) {
             mMetricsLogger.write(importanceChangeLogMaker());
 
+            int newImportance = mChosenImportance;
+            if (mStartingChannelImportance != IMPORTANCE_UNSPECIFIED) {
+                if ((mWasShownHighPriority && mChosenImportance >= IMPORTANCE_DEFAULT)
+                        || (!mWasShownHighPriority && mChosenImportance < IMPORTANCE_DEFAULT)) {
+                    newImportance = mStartingChannelImportance;
+                }
+            }
+
             Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
             bgHandler.post(
                     new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
                             mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
-                            mStartingChannelImportance, mChosenImportance));
+                            mStartingChannelImportance, newImportance));
         }
     }
 
     private void updateButtons(int blockState) {
-        View silent = findViewById(R.id.silent_row);
-        View alert = findViewById(R.id.alert_row);
+        TextView silence = findViewById(R.id.silence);
+        TextView alert = findViewById(R.id.alert);
+        TextView done = findViewById(R.id.done);
         switch (blockState) {
             case ACTION_TOGGLE_SILENT:
-                silent.setBackground(mSelectedBackground);
-                alert.setBackground(null);
+                updateButtons(silence, alert);
+                if (mWasShownHighPriority) {
+                    done.setText(R.string.inline_ok_button);
+                } else {
+                    done.setText(R.string.inline_done_button);
+                }
                 break;
             case ACTION_ALERT:
-                alert.setBackground(mSelectedBackground);
-                silent.setBackground(null);
+                updateButtons(alert, silence);
+                if (mWasShownHighPriority) {
+                    done.setText(R.string.inline_done_button);
+                } else {
+                    done.setText(R.string.inline_ok_button);
+                }
                 break;
+        }
+    }
+
+    private void updateButtons(TextView selected, TextView unselected) {
+        selected.setBackground(mSelectedBackground);
+        selected.setSelected(true);
+        selected.setTextAppearance(
+                R.style.TextAppearance_NotificationImportanceButton_Selected);
+        unselected.setBackground(mUnselectedBackground);
+        unselected.setSelected(false);
+        unselected.setTextAppearance(
+                R.style.TextAppearance_NotificationImportanceButton_Unselected);
+    }
+
+    void setImportanceSummary(int blockState) {
+        TextView view = findViewById(R.id.description);
+        if (blockState == ACTION_ALERT) {
+            view.setText(R.string.notification_channel_summary_default);
+        } else {
+            if (mShowInStatusBar) {
+                if (mShowOnLockscreen) {
+                    view.setText(R.string.notification_channel_summary_low_status_lock);
+                } else {
+                    view.setText(R.string.notification_channel_summary_low_status);
+                }
+            } else if (mShowOnLockscreen) {
+                view.setText(R.string.notification_channel_summary_low_lock);
+            } else {
+                view.setText(R.string.notification_channel_summary_low);
+            }
         }
     }
 
@@ -556,15 +602,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 break;
             case ACTION_DELIVER_SILENTLY:
                 mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
-                mChosenImportance = IMPORTANCE_LOW;
-                break;
-            case ACTION_TOGGLE_SILENT:
-                mExitReason = NotificationCounters.BLOCKING_HELPER_TOGGLE_SILENT;
-                if (mWasShownHighPriority) {
-                    mChosenImportance = IMPORTANCE_LOW;
-                } else {
-                    mChosenImportance = IMPORTANCE_DEFAULT;
-                }
+                mChosenImportance = mWasShownHighPriority
+                        ? IMPORTANCE_LOW : mStartingChannelImportance;
                 break;
             default:
                 throw new IllegalArgumentException();

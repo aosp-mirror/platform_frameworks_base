@@ -6009,6 +6009,12 @@ message CoolingDevice {
  * Logged from the Intelligence mainline module.
  */
 message IntelligenceEventReported {
+  // The event type.
   optional android.stats.intelligence.EventType event_id = 1;
+  // Success, failure.
   optional android.stats.intelligence.Status status = 2;
+  // How many times the event occured (to report a batch of high frequency events).
+  optional int32 count = 3;
+  // How long the event took (averaged for batches).
+  optional int64 duration_millis = 4;
 }

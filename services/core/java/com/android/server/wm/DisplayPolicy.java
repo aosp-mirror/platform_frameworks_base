@@ -268,6 +268,9 @@ public class DisplayPolicy {
     private int[] mNavigationBarHeightForRotationInCarMode = new int[4];
     private int[] mNavigationBarWidthForRotationInCarMode = new int[4];
 
+    /** See {@link #getNavigationBarFrameHeight} */
+    private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
+
     /** Cached value of {@link ScreenShapeHelper#getWindowOutsetBottomPx} */
     @Px private int mWindowOutsetBottom;
 
@@ -285,10 +288,6 @@ public class DisplayPolicy {
                     mAccessibilityManager.notifyAccessibilityButtonVisibilityChanged(visible);
                 }
             };
-
-    // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-    private NavigationBarExperiments mExperiments = new NavigationBarExperiments();
-    // EXPERIMENT END
 
     @GuardedBy("mHandler")
     private SleepToken mDreamingSleepToken;
@@ -1621,11 +1620,9 @@ public class DisplayPolicy {
             // It's a system nav bar or a portrait screen; nav bar goes on bottom.
             final int top = cutoutSafeUnrestricted.bottom
                     - getNavigationBarHeight(rotation, uiMode);
-            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
             final int topNavBar = cutoutSafeUnrestricted.bottom
-                    - mExperiments.getNavigationBarFrameHeight();
+                    - getNavigationBarFrameHeight(rotation, uiMode);
             navigationFrame.set(0, topNavBar, displayWidth, displayFrames.mUnrestricted.bottom);
-            // EXPERIMENT END
             displayFrames.mStable.bottom = displayFrames.mStableFullscreen.bottom = top;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -1648,11 +1645,7 @@ public class DisplayPolicy {
             // Landscape screen; nav bar goes to the right.
             final int left = cutoutSafeUnrestricted.right
                     - getNavigationBarWidth(rotation, uiMode);
-            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-            final int leftNavBar = cutoutSafeUnrestricted.right
-                    - mExperiments.getNavigationBarFrameWidth();
-            navigationFrame.set(leftNavBar, 0, displayFrames.mUnrestricted.right, displayHeight);
-            // EXPERIMENT END
+            navigationFrame.set(left, 0, displayFrames.mUnrestricted.right, displayHeight);
             displayFrames.mStable.right = displayFrames.mStableFullscreen.right = left;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -1675,11 +1668,7 @@ public class DisplayPolicy {
             // Seascape screen; nav bar goes to the left.
             final int right = cutoutSafeUnrestricted.left
                     + getNavigationBarWidth(rotation, uiMode);
-            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-            final int rightNavBar = cutoutSafeUnrestricted.left
-                    + mExperiments.getNavigationBarFrameWidth();
-            navigationFrame.set(displayFrames.mUnrestricted.left, 0, rightNavBar, displayHeight);
-            // EXPERIMENT END
+            navigationFrame.set(displayFrames.mUnrestricted.left, 0, right, displayHeight);
             displayFrames.mStable.left = displayFrames.mStableFullscreen.left = right;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -1887,10 +1876,21 @@ public class DisplayPolicy {
                 }
             }
 
-            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-            // Offset the ime to avoid overlapping with the nav bar
-            mExperiments.offsetWindowFramesForNavBar(mNavigationBarPosition, win);
-            // EXPERIMENT END
+            // In case the navigation bar is on the bottom, we use the frame height instead of the
+            // regular height for the insets we send to the IME as we need some space to show
+            // additional buttons in SystemUI when the IME is up.
+            if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                final int rotation = displayFrames.mRotation;
+                final int uimode = mService.mPolicy.getUiMode();
+                final int navHeightOffset = getNavigationBarFrameHeight(rotation, uimode)
+                        - getNavigationBarHeight(rotation, uimode);
+                if (navHeightOffset > 0) {
+                    cf.bottom -= navHeightOffset;
+                    sf.bottom -= navHeightOffset;
+                    vf.bottom -= navHeightOffset;
+                    dcf.bottom -= navHeightOffset;
+                }
+            }
 
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
@@ -2623,6 +2623,7 @@ public class DisplayPolicy {
         final int upsideDownRotation = displayRotation.getUpsideDownRotation();
         final int landscapeRotation = displayRotation.getLandscapeRotation();
         final int seascapeRotation = displayRotation.getSeascapeRotation();
+        final int uiMode = mService.mPolicy.getUiMode();
 
         if (hasStatusBar()) {
             mStatusBarHeightForRotation[portraitRotation] =
@@ -2645,6 +2646,14 @@ public class DisplayPolicy {
         mNavigationBarHeightForRotationDefault[landscapeRotation] =
         mNavigationBarHeightForRotationDefault[seascapeRotation] =
                 res.getDimensionPixelSize(R.dimen.navigation_bar_height_landscape);
+
+        // Height of the navigation bar frame when presented horizontally at bottom
+        mNavigationBarFrameHeightForRotationDefault[portraitRotation] =
+        mNavigationBarFrameHeightForRotationDefault[upsideDownRotation] =
+                res.getDimensionPixelSize(R.dimen.navigation_bar_frame_height);
+        mNavigationBarFrameHeightForRotationDefault[landscapeRotation] =
+        mNavigationBarFrameHeightForRotationDefault[seascapeRotation] =
+                res.getDimensionPixelSize(R.dimen.navigation_bar_frame_height_landscape);
 
         // Width of the navigation bar when presented vertically along one side
         mNavigationBarWidthForRotationDefault[portraitRotation] =
@@ -2674,16 +2683,10 @@ public class DisplayPolicy {
         mSideGestureInset = res.getDimensionPixelSize(R.dimen.config_backGestureInset);
         mNavigationBarLetsThroughTaps = res.getBoolean(R.bool.config_navBarTapThrough);
 
-        // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-        mExperiments.onConfigurationChanged(uiContext);
-        // EXPERIMENT END
-
-        // EXPERIMENT: TODO(b/113952590): Replace with real code after experiment.
-        // This should calculate how much above the frame we accept gestures. Currently,
-        // we extend the frame to capture the gestures, so this is 0.
-        mBottomGestureAdditionalInset = mExperiments.getNavigationBarFrameHeight()
-                - mExperiments.getNavigationBarFrameHeight();
-        // EXPERIMENT END
+        // This should calculate how much above the frame we accept gestures.
+        mBottomGestureAdditionalInset = Math.max(0,
+                res.getDimensionPixelSize(R.dimen.navigation_bar_gesture_height)
+                        - getNavigationBarFrameHeight(portraitRotation, uiMode));
 
         updateConfigurationAndScreenSizeDependentBehaviors();
         mWindowOutsetBottom = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
@@ -2745,6 +2748,26 @@ public class DisplayPolicy {
             return mNavigationBarHeightForRotationInCarMode[rotation];
         } else {
             return mNavigationBarHeightForRotationDefault[rotation];
+        }
+    }
+
+    /**
+     * Get the Navigation Bar Frame height. This dimension is the height of the navigation bar that
+     * is used for spacing to show additional buttons on the navigation bar (such as the ime
+     * switcher when ime is visible) while {@link #getNavigationBarHeight} is used for the visible
+     * height that we send to the app as content insets that can be smaller.
+     * <p>
+     * In car mode it will return the same height as {@link #getNavigationBarHeight}
+     *
+     * @param rotation specifies rotation to return dimension from
+     * @param uiMode to determine if in car mode
+     * @return navigation bar frame height
+     */
+    private int getNavigationBarFrameHeight(int rotation, int uiMode) {
+        if (ALTERNATE_CAR_MODE_NAV_SIZE && (uiMode & UI_MODE_TYPE_MASK) == UI_MODE_TYPE_CAR) {
+            return mNavigationBarHeightForRotationInCarMode[rotation];
+        } else {
+            return mNavigationBarFrameHeightForRotationDefault[rotation];
         }
     }
 
