@@ -66,9 +66,17 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
     private static final CharSequence SEPARATOR = " \u2014 ";
     private static final String TEST_CARRIER = "TEST_CARRIER";
+    private static final String TEST_CARRIER_2 = "TEST_CARRIER_2";
+    private static final String TEST_GROUP_UUID = "59b5c870-fc4c-47a4-a99e-9db826b48b24";
+    private static final int TEST_CARRIER_ID = 1;
     private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(0, "", 0,
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
-            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "");
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, 0);
+    private static final SubscriptionInfo TEST_SUBSCRIPTION_2 = new SubscriptionInfo(0, "", 0,
+            TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
+            DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
+            TEST_CARRIER_ID, 0);
     private static final SubscriptionInfo TEST_SUBSCRIPTION_ROAMING = new SubscriptionInfo(0, "", 0,
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
             DATA_ROAMING_ENABLE, null, null, null, null, false, null, "");
@@ -369,6 +377,33 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 captor.getValue().carrierText);
     }
 
+    @Test
+    public void testCarrierText_GroupedSubWithOpportunisticCarrierText() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION);
+        list.add(TEST_SUBSCRIPTION_2);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt()))
+            .thenReturn(IccCardConstants.State.READY);
+        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText();
+
+        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
+        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
+        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
+
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                CarrierTextController.CarrierTextCallbackInfo.class);
+
+        mCarrierTextController.updateCarrierText();
+        mTestableLooper.processAllMessages();
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+
+        assertEquals(TEST_CARRIER_2, captor.getValue().carrierText);
+    }
+
     public static class TestCarrierTextController extends CarrierTextController {
         private KeyguardUpdateMonitor mKUM;
 
@@ -382,6 +417,11 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         public void setListening(CarrierTextCallback callback) {
             super.setListening(callback);
             mKeyguardUpdateMonitor = mKUM;
+        }
+
+        @Override
+        public void updateDisplayOpportunisticSubscriptionCarrierText() {
+            mDisplayOpportunisticSubscriptionCarrierText = true;
         }
     }
 }
