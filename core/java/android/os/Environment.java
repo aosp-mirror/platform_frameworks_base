@@ -54,7 +54,6 @@ public class Environment {
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
-    private static final String DIR_SANDBOX = "sandbox";
     private static final String DIR_DATA = "data";
     private static final String DIR_MEDIA = "media";
     private static final String DIR_OBB = "obb";
@@ -126,10 +125,6 @@ public class Environment {
 
         public File[] buildExternalStoragePublicDirs(String type) {
             return buildPaths(getExternalDirs(), type);
-        }
-
-        public File[] buildExternalStorageAndroidSandboxDirs() {
-            return buildPaths(getExternalDirs(), DIR_ANDROID, DIR_SANDBOX);
         }
 
         public File[] buildExternalStorageAndroidDataDirs() {
@@ -842,15 +837,6 @@ public class Environment {
      * Returns the path for android-specific data on the SD card.
      * @hide
      */
-    public static File[] buildExternalStorageAndroidSandboxDirs() {
-        throwIfUserRequired();
-        return sCurrentUser.buildExternalStorageAndroidSandboxDirs();
-    }
-
-    /**
-     * Returns the path for android-specific data on the SD card.
-     * @hide
-     */
     @UnsupportedAppUsage
     public static File[] buildExternalStorageAndroidDataDirs() {
         throwIfUserRequired();
@@ -905,6 +891,12 @@ public class Environment {
     public static File[] buildExternalStorageAppCacheDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppCacheDirs(packageName);
+    }
+
+    /** @hide */
+    public static File[] buildExternalStoragePublicDirs(@NonNull String dirType) {
+        throwIfUserRequired();
+        return sCurrentUser.buildExternalStoragePublicDirs(dirType);
     }
 
     /**
