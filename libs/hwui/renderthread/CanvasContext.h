@@ -191,15 +191,6 @@ public:
     void setForceDark(bool enable) { mUseForceDark = enable; }
 
     bool useForceDark() {
-        // The force-dark override has the highest priority, followed by the disable setting
-        // for the feature as a whole, followed last by whether or not this context has had
-        // force dark set (typically automatically done via UIMode)
-        if (Properties::forceDarkMode) {
-            return true;
-        }
-        if (!Properties::enableForceDarkSupport) {
-            return false;
-        }
         return mUseForceDark;
     }
 
