@@ -5224,7 +5224,7 @@ public class TelephonyManager {
      */
     public String getMmsUserAgent() {
         if (mContext == null) return null;
-        return mContext.getResources().getString(
+        return SubscriptionManager.getResourcesForSubId(mContext, getSubId()).getString(
                 com.android.internal.R.string.config_mms_user_agent);
     }
 
@@ -5233,7 +5233,7 @@ public class TelephonyManager {
      */
     public String getMmsUAProfUrl() {
         if (mContext == null) return null;
-        return mContext.getResources().getString(
+        return SubscriptionManager.getResourcesForSubId(mContext, getSubId()).getString(
                 com.android.internal.R.string.config_mms_user_agent_profile_url);
     }
 
