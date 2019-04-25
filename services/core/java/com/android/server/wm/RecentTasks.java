@@ -884,7 +884,7 @@ class RecentTasks {
 
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, numVisibleTasks, withExcluded)) {
+                if (isInVisibleRange(tr, i, numVisibleTasks, withExcluded)) {
                     // Fall through
                 } else {
                     // Not in visible range
@@ -989,7 +989,7 @@ class RecentTasks {
             final TaskRecord tr = mTasks.get(i);
             if (isVisibleRecentTask(tr)) {
                 numVisibleTasks++;
-                if (isInVisibleRange(tr, numVisibleTasks, false /* skipExcludedCheck */)) {
+                if (isInVisibleRange(tr, i, numVisibleTasks, false /* skipExcludedCheck */)) {
                     res.put(tr.taskId, true);
                 }
             }
@@ -1210,7 +1210,7 @@ class RecentTasks {
                     continue;
                 } else {
                     numVisibleTasks++;
-                    if (isInVisibleRange(task, numVisibleTasks, false /* skipExcludedCheck */)
+                    if (isInVisibleRange(task, i, numVisibleTasks, false /* skipExcludedCheck */)
                             || !isTrimmable(task)) {
                         // Keep visible tasks in range
                         i++;
@@ -1325,7 +1325,7 @@ class RecentTasks {
     /**
      * @return whether the given visible task is within the policy range.
      */
-    private boolean isInVisibleRange(TaskRecord task, int numVisibleTasks,
+    private boolean isInVisibleRange(TaskRecord task, int taskIndex, int numVisibleTasks,
             boolean skipExcludedCheck) {
         if (!skipExcludedCheck) {
             // Keep the most recent task even if it is excluded from recents
@@ -1334,7 +1334,7 @@ class RecentTasks {
                             == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
             if (isExcludeFromRecents) {
                 if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
-                return numVisibleTasks == 1;
+                return taskIndex == 0;
             }
         }
 
