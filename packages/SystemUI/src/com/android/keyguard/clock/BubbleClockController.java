@@ -54,6 +54,11 @@ public class BubbleClockController implements ClockPlugin {
     private final SysuiColorExtractor mColorExtractor;
 
     /**
+     * Computes preferred position of clock.
+     */
+    private final SmallClockPosition mClockPosition;
+
+    /**
      * Renders preview from clock view.
      */
     private final ViewPreviewer mRenderer = new ViewPreviewer();
@@ -82,6 +87,7 @@ public class BubbleClockController implements ClockPlugin {
         mResources = res;
         mLayoutInflater = inflater;
         mColorExtractor = colorExtractor;
+        mClockPosition = new SmallClockPosition(res);
     }
 
     private void createViews() {
@@ -152,7 +158,7 @@ public class BubbleClockController implements ClockPlugin {
 
     @Override
     public int getPreferredY(int totalHeight) {
-        return totalHeight / 4;
+        return mClockPosition.getPreferredY();
     }
 
     @Override
@@ -173,7 +179,9 @@ public class BubbleClockController implements ClockPlugin {
     }
 
     @Override
-    public void setDarkAmount(float darkAmount) { }
+    public void setDarkAmount(float darkAmount) {
+        mClockPosition.setDarkAmount(darkAmount);
+    }
 
     @Override
     public void onTimeTick() {

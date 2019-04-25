@@ -316,6 +316,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         positionClock();
         // THEN the clock Y position is the preferred Y position.
         assertThat(mClockPosition.clockY).isEqualTo(100);
+        assertThat(mClockPosition.clockAlpha).isEqualTo(OPAQUE);
     }
 
     @Test
@@ -333,6 +334,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2) and not
         // preferred.
         assertThat(mClockPosition.clockY).isEqualTo(1000);
+        assertThat(mClockPosition.clockAlpha).isEqualTo(OPAQUE);
     }
 
     @Test
@@ -349,6 +351,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         positionClock();
         // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2).
         assertThat(mClockPosition.clockY).isEqualTo(1000);
+        assertThat(mClockPosition.clockAlpha).isEqualTo(OPAQUE);
     }
 
     @Test
