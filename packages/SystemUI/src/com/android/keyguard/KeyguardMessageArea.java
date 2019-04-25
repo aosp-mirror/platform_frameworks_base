@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -117,6 +118,15 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         array.recycle();
         mDefaultColorState = newTextColors;
         update();
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        TypedArray array = mContext.obtainStyledAttributes(R.style.Keyguard_TextView, new int[] {
+                android.R.attr.textSize
+        });
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, array.getDimensionPixelSize(0, 0));
+        array.recycle();
     }
 
     @Override
