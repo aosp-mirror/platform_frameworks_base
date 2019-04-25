@@ -63,6 +63,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -1647,11 +1648,13 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testClearData() {
         ArraySet<String> pkg = new ArraySet<>();
         pkg.add(PKG_O);
+        ArraySet<Pair<String, Integer>> pkgPair = new ArraySet<>();
+        pkgPair.add(new Pair(PKG_O, UID_O));
         mHelper.createNotificationChannel(PKG_O, UID_O, getChannel(), true, false);
         mHelper.createNotificationChannelGroup(
                 PKG_O, UID_O, new NotificationChannelGroup("1", "bye"), true);
         mHelper.lockChannelsForOEM(pkg.toArray(new String[]{}));
-        mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, pkg);
+        mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, pkgPair);
         mHelper.setNotificationDelegate(PKG_O, UID_O, "", 1);
         mHelper.setImportance(PKG_O, UID_O, IMPORTANCE_NONE);
         mHelper.setBubblesAllowed(PKG_O, UID_O, false);
@@ -2493,8 +2496,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, b, false, false);
         mHelper.createNotificationChannel(PKG_O, UserHandle.PER_USER_RANGE + 1, c, true, true);
 
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -2513,8 +2516,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, b, false, false);
 
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
 
@@ -2532,8 +2535,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
         mHelper.createNotificationChannel(PKG_O, UID_O, b, false, false);
 
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -2558,8 +2561,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
         mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, b, false, false);
 
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
 
@@ -2572,7 +2575,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         ArraySet<String> toRemove = new ArraySet<>();
         toRemove.add(PKG_O);
         toAdd = new ArraySet<>();
-        toAdd.add(PKG_N_MR1);
+        toAdd.add(new Pair(PKG_N_MR1, UID_N_MR1));
         mHelper.updateDefaultApps(USER.getIdentifier(), toRemove, toAdd);
 
         assertFalse(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -2583,8 +2586,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
     @Test
     public void testUpdateDefaultApps_appDoesNotExist_noCrash() {
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         ArraySet<String> toRemove = new ArraySet<>();
         toRemove.add(PKG_N_MR1);
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), toRemove, toAdd);
@@ -2596,8 +2599,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
 
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
@@ -2612,8 +2615,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testUpdateNotificationChannel_defaultAppLockedImportance() {
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
-        ArraySet<String> toAdd = new ArraySet<>();
-        toAdd.add(PKG_O);
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
         NotificationChannel update = new NotificationChannel("a", "a", IMPORTANCE_NONE);
@@ -2630,5 +2633,44 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         assertEquals(IMPORTANCE_HIGH,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+    }
+
+    @Test
+    public void testDefaultApp_appHasNoSettingsYet() {
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
+        mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
+
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+
+        assertTrue(a.isImportanceLockedByCriticalDeviceFunction());
+    }
+
+    @Test
+    public void testChannelXml_backupDefaultApp() throws Exception {
+        NotificationChannel channel1 =
+                new NotificationChannel("id1", "name1", NotificationManager.IMPORTANCE_HIGH);
+
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel1, true, false);
+
+        // clear data
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, true,
+                UserHandle.USER_SYSTEM, channel1.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
+        mHelper.onPackagesChanged(true, UserHandle.myUserId(), new String[]{PKG_O}, new int[]{
+                UID_O});
+
+        ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
+        toAdd.add(new Pair(PKG_O, UID_O));
+        mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, true, UserHandle.USER_SYSTEM);
+
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, channel1.getId(), false)
+                .isImportanceLockedByCriticalDeviceFunction());
     }
 }

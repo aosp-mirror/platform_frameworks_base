@@ -46,6 +46,7 @@ import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
+import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -191,6 +192,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -1880,7 +1882,7 @@ public class NotificationManagerService extends SystemService {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mZenModeHelper.onSystemReady();
             mRoleObserver = new RoleObserver(getContext().getSystemService(RoleManager.class),
-                    getContext().getMainExecutor());
+                    mPackageManager, getContext().getMainExecutor());
             mRoleObserver.init();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
@@ -8219,11 +8221,14 @@ public class NotificationManagerService extends SystemService {
         private ArrayMap<String, ArrayMap<Integer, ArraySet<String>>> mNonBlockableDefaultApps;
 
         private final RoleManager mRm;
+        private final IPackageManager mPm;
         private final Executor mExecutor;
 
         RoleObserver(@NonNull RoleManager roleManager,
+                @NonNull IPackageManager pkgMgr,
                 @NonNull @CallbackExecutor Executor executor) {
             mRm = roleManager;
+            mPm = pkgMgr;
             mExecutor = executor;
         }
 
@@ -8237,8 +8242,12 @@ public class NotificationManagerService extends SystemService {
                     Integer userId = users.get(j).getUserHandle().getIdentifier();
                     ArraySet<String> approvedForUserId = new ArraySet<>(mRm.getRoleHoldersAsUser(
                             NON_BLOCKABLE_DEFAULT_ROLES[i], UserHandle.of(userId)));
+                    ArraySet<Pair<String, Integer>> approvedAppUids = new ArraySet<>();
+                    for (String pkg : approvedForUserId) {
+                        approvedAppUids.add(new Pair(pkg, getUidForPackage(pkg, userId)));
+                    }
                     userToApprovedList.put(userId, approvedForUserId);
-                    mPreferencesHelper.updateDefaultApps(userId, null, approvedForUserId);
+                    mPreferencesHelper.updateDefaultApps(userId, null, approvedAppUids);
                 }
             }
 
@@ -8281,7 +8290,7 @@ public class NotificationManagerService extends SystemService {
                     prevApprovedForRole.getOrDefault(user.getIdentifier(), new ArraySet<>());
 
             ArraySet<String> toRemove = new ArraySet<>();
-            ArraySet<String> toAdd = new ArraySet<>();
+            ArraySet<Pair<String, Integer>> toAdd = new ArraySet<>();
 
             for (String previous : previouslyApproved) {
                 if (!roleHolders.contains(previous)) {
@@ -8290,7 +8299,8 @@ public class NotificationManagerService extends SystemService {
             }
             for (String nowApproved : roleHolders) {
                 if (!previouslyApproved.contains(nowApproved)) {
-                    toAdd.add(nowApproved);
+                    toAdd.add(new Pair(nowApproved,
+                            getUidForPackage(nowApproved, user.getIdentifier())));
                 }
             }
 
@@ -8303,6 +8313,15 @@ public class NotificationManagerService extends SystemService {
 
             // RoleManager is the source of truth for this data so we don't need to trigger a
             // write of the notification policy xml for this change
+        }
+
+        private int getUidForPackage(String pkg, int userId) {
+            try {
+                return mPm.getPackageUid(pkg, MATCH_ALL, userId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "role manager has bad default " + pkg + " " + userId);
+            }
+            return -1;
         }
     }
 
