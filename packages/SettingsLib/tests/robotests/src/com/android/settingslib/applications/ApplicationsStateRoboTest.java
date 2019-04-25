@@ -191,8 +191,9 @@ public class ApplicationsStateRoboTest {
         shadowContext.setSystemService(Context.STORAGE_STATS_SERVICE, mStorageStatsManager);
         StorageStats storageStats = new StorageStats();
         storageStats.codeBytes = 10;
-        storageStats.dataBytes = 20;
         storageStats.cacheBytes = 30;
+        // Data bytes are a superset of cache bytes.
+        storageStats.dataBytes = storageStats.cacheBytes + 20;
         when(mStorageStatsManager.queryStatsForPackage(any(UUID.class),
             anyString(), any(UserHandle.class))).thenReturn(storageStats);
 
