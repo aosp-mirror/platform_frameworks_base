@@ -137,6 +137,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SuperNotCalledException;
+import android.util.UtilConfig;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 import android.view.ContextThemeWrapper;
@@ -5977,6 +5978,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (data.appInfo.targetSdkVersion <= android.os.Build.VERSION_CODES.HONEYCOMB_MR1) {
             AsyncTask.setDefaultExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
+
+        // Let the util.*Array classes maintain "undefined" for apps targeting Pie or earlier.
+        UtilConfig.setThrowExceptionForUpperArrayOutOfBounds(
+                data.appInfo.targetSdkVersion >= Build.VERSION_CODES.Q);
 
         Message.updateCheckRecycle(data.appInfo.targetSdkVersion);
 
