@@ -56,6 +56,7 @@ public class SizeCompatModeActivityControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        doReturn(true).when(mMockButton).show();
 
         mController = new SizeCompatModeActivityController(mMockAm) {
             @Override

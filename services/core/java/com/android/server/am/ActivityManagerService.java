@@ -17832,8 +17832,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 final ProcessRecord proc = getProcessRecordLocked(processName, uid,
                         true /* keepIfLarge */);
-                mProcessList.removeProcessLocked(proc, false /* callerWillRestart */,
-                        true /* allowRestart */, reason);
+                if (proc != null) {
+                    mProcessList.removeProcessLocked(proc, false /* callerWillRestart */,
+                            true /* allowRestart */, reason);
+                }
             }
         }
 

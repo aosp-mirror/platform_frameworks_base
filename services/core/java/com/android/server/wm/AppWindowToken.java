@@ -1758,8 +1758,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     private void calculateCompatBoundsTransformation(Configuration newParentConfig) {
         final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
-        final Rect viewportBounds = parentAppBounds != null
-                ? parentAppBounds : newParentConfig.windowConfiguration.getBounds();
+        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
+        final Rect viewportBounds = parentAppBounds != null ? parentAppBounds : parentBounds;
         final Rect appBounds = getWindowConfiguration().getAppBounds();
         final Rect contentBounds = appBounds != null ? appBounds : getResolvedOverrideBounds();
         final float contentW = contentBounds.width();
@@ -1778,6 +1778,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mSizeCompatBounds.set(contentBounds);
         mSizeCompatBounds.offsetTo(0, 0);
         mSizeCompatBounds.scale(mSizeCompatScale);
+        // Ensure to align the top with the parent.
+        mSizeCompatBounds.top = parentBounds.top;
         // The decor inset is included in height.
         mSizeCompatBounds.bottom += viewportBounds.top;
         mSizeCompatBounds.left += offsetX;
