@@ -202,6 +202,9 @@ public class ChooserActivity extends ResolverActivity {
     private long mChooserShownTime;
     protected boolean mIsSuccessfullySelected;
 
+    private long mQueriedTargetServicesTimeMs;
+    private long mQueriedSharingShortcutsTimeMs;
+
     private ChooserListAdapter mChooserListAdapter;
     private ChooserRowAdapter mChooserRowAdapter;
     private int mChooserRowServiceSpacing;
@@ -273,6 +276,8 @@ public class ChooserActivity extends ResolverActivity {
                     sri.connection.destroy();
                     mServiceConnections.remove(sri.connection);
                     if (mServiceConnections.isEmpty()) {
+                        logDirectShareTargetReceived(
+                                MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
                         sendVoiceChoicesIfNeeded();
                     }
                     break;
@@ -283,6 +288,8 @@ public class ChooserActivity extends ResolverActivity {
                     }
 
                     unbindRemainingServices();
+                    logDirectShareTargetReceived(
+                            MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE);
                     sendVoiceChoicesIfNeeded();
                     mChooserListAdapter.completeServiceTargetLoading();
                     break;
@@ -305,6 +312,8 @@ public class ChooserActivity extends ResolverActivity {
                     break;
 
                 case SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED:
+                    logDirectShareTargetReceived(
+                            MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER);
                     sendVoiceChoicesIfNeeded();
                     break;
 
@@ -1155,6 +1164,8 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     void queryTargetServices(ChooserListAdapter adapter) {
+        mQueriedTargetServicesTimeMs = System.currentTimeMillis();
+
         final PackageManager pm = getPackageManager();
         ShortcutManager sm = (ShortcutManager) getSystemService(ShortcutManager.class);
         int targetsToQuery = 0;
@@ -1281,6 +1292,7 @@ public class ChooserActivity extends ResolverActivity {
 
     private void queryDirectShareTargets(
                 ChooserListAdapter adapter, boolean skipAppPredictionService) {
+        mQueriedSharingShortcutsTimeMs = System.currentTimeMillis();
         if (!skipAppPredictionService) {
             AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
             if (appPredictor != null) {
@@ -1389,6 +1401,14 @@ public class ChooserActivity extends ResolverActivity {
 
     public void onSetupVoiceInteraction() {
         // Do nothing. We'll send the voice stuff ourselves.
+    }
+
+    private void logDirectShareTargetReceived(int logCategory) {
+        final long queryTime =
+                logCategory == MetricsEvent.ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER
+                        ? mQueriedSharingShortcutsTimeMs : mQueriedTargetServicesTimeMs;
+        final int apiLatency = (int) (System.currentTimeMillis() - queryTime);
+        getMetricsLogger().write(new LogMaker(logCategory).setSubtype(apiLatency));
     }
 
     void updateModelAndChooserCounts(TargetInfo info) {

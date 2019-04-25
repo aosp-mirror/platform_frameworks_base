@@ -1584,6 +1584,22 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     /**
+     * Make a shortcut with an ID and Category.
+     */
+    protected ShortcutInfo makeShortcutWithCategory(String id, Set<String> categories) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setCategories(categories);
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
      * Make an intent.
      */
     protected Intent makeIntent(String action, Class<?> clazz, Object... bundleKeysAndValues) {
@@ -1815,6 +1831,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final ShortcutPackage p = mService.getPackageShortcutForTest(
                 getCallingPackage(), getCallingUserId());
         return p == null ? null : p.getAllShareTargetsForTest();
+    }
+
+    /**
+     * @return the number of shortcuts stored internally for the caller that can be used as a share
+     * target in the ShareSheet. Such shortcuts have a matching category with at least one of the
+     * defined ShareTargets from the app's Xml resource.
+     */
+    protected int getCallerSharingShortcutCount() {
+        final ShortcutPackage p = mService.getPackageShortcutForTest(
+                getCallingPackage(), getCallingUserId());
+        return p == null ? 0 : p.getSharingShortcutCount();
     }
 
     /**
