@@ -170,7 +170,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         int topFocusedDisplayId = INVALID_DISPLAY;
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final DisplayContent dc = mChildren.get(i);
-            changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows);
+            changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows, topFocusedDisplayId);
             final WindowState newFocus = dc.mCurrentFocus;
             if (newFocus != null) {
                 final int pidOfNewFocus = newFocus.mSession.mPid;
@@ -180,6 +180,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (topFocusedDisplayId == INVALID_DISPLAY) {
                     topFocusedDisplayId = dc.getDisplayId();
                 }
+            } else if (topFocusedDisplayId == INVALID_DISPLAY && dc.mFocusedApp != null) {
+                // The top-most display that has a focused app should still be the top focused
+                // display even when the app window is not ready yet (process not attached or
+                // window not added yet).
+                topFocusedDisplayId = dc.getDisplayId();
             }
         }
         if (topFocusedDisplayId == INVALID_DISPLAY) {
