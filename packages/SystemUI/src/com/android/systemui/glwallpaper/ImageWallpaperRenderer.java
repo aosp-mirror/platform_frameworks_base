@@ -78,8 +78,8 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
             mBitmap = mWallpaperManager.getBitmap();
             mBitmapWidth = mBitmap.getWidth();
             mBitmapHeight = mBitmap.getHeight();
-            // Compute per85 as transition threshold, this is an async work.
-            mImageProcessHelper.startComputingPercentile85(mBitmap);
+            // Compute threshold of the image, this is an async work.
+            mImageProcessHelper.start(mBitmap);
             mWallpaperManager.forgetLoadedWallpaper();
         }
     }
@@ -108,13 +108,13 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        float per85 = mImageProcessHelper.getPercentile85();
+        float threshold = mImageProcessHelper.getThreshold();
         float reveal = mImageRevealHelper.getReveal();
 
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_AOD2OPACITY), 1);
-        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_PER85), per85);
+        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_PER85), threshold);
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_REVEAL), reveal);
 
         scaleViewport(reveal);
