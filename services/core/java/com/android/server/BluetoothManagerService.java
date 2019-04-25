@@ -1031,7 +1031,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mAppOps.checkPackage(uid, packageName);
         } catch (SecurityException e) {
             Slog.w(TAG, "checkPackage(): " + packageName + " does not belong to uid " + uid);
-            android.util.EventLog.writeEvent(0x534e4554, "120574260", uid, "");
             throw new SecurityException(e.getMessage());
         }
     }
