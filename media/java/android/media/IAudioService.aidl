@@ -60,6 +60,10 @@ interface IAudioService {
 
     oneway void releasePlayer(in int piid);
 
+    int trackRecorder(in IBinder recorder);
+
+    oneway void recorderEvent(in int riid, in int event);
+
     // Java-only methods below.
 
     oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
