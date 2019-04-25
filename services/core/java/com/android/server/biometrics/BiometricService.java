@@ -306,11 +306,7 @@ public class BiometricService extends SystemService {
                 }
 
                 case MSG_ON_AUTHENTICATION_FAILED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    handleAuthenticationFailed(
-                            args.argi1 /* cookie */,
-                            (boolean) args.arg1 /* requireConfirmation */);
-                    args.recycle();
+                    handleAuthenticationFailed((String) msg.obj /* failureReason */);
                     break;
                 }
 
@@ -567,19 +563,24 @@ public class BiometricService extends SystemService {
         @Override
         public void onAuthenticationFailed(int cookie, boolean requireConfirmation)
                 throws RemoteException {
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = cookie;
-            args.arg1 = requireConfirmation;
-            mHandler.obtainMessage(MSG_ON_AUTHENTICATION_FAILED, args).sendToTarget();
+            String failureReason = getContext().getString(R.string.biometric_not_recognized);
+            mHandler.obtainMessage(MSG_ON_AUTHENTICATION_FAILED, failureReason).sendToTarget();
         }
 
         @Override
         public void onError(int cookie, int error, String message) throws RemoteException {
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = cookie;
-            args.argi2 = error;
-            args.arg1 = message;
-            mHandler.obtainMessage(MSG_ON_ERROR, args).sendToTarget();
+            // Determine if error is hard or soft error. Certain errors (such as TIMEOUT) are
+            // soft errors and we should allow the user to try authenticating again instead of
+            // dismissing BiometricPrompt.
+            if (error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT) {
+                mHandler.obtainMessage(MSG_ON_AUTHENTICATION_FAILED, message).sendToTarget();
+            } else {
+                SomeArgs args = SomeArgs.obtain();
+                args.argi1 = cookie;
+                args.argi2 = error;
+                args.arg1 = message;
+                mHandler.obtainMessage(MSG_ON_ERROR, args).sendToTarget();
+            }
         }
 
         @Override
@@ -1151,13 +1152,13 @@ public class BiometricService extends SystemService {
 
             // Notify SysUI that the biometric has been authenticated. SysUI already knows
             // the implicit/explicit state and will react accordingly.
-            mStatusBarService.onBiometricAuthenticated(true);
+            mStatusBarService.onBiometricAuthenticated(true, null /* failureReason */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
     }
 
-    private void handleAuthenticationFailed(int cookie, boolean requireConfirmation) {
+    private void handleAuthenticationFailed(String failureReason) {
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
@@ -1166,7 +1167,7 @@ public class BiometricService extends SystemService {
                 return;
             }
 
-            mStatusBarService.onBiometricAuthenticated(false);
+            mStatusBarService.onBiometricAuthenticated(false, failureReason);
 
             // TODO: This logic will need to be updated if BP is multi-modal
             if ((mCurrentAuthSession.mModality & TYPE_FACE) != 0) {
