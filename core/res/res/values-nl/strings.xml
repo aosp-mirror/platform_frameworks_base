@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Hiermee kan de app methoden aanroepen om gezichtstemplates toe te voegen en te verwijderen voor gebruik."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"hardware voor gezichtsherkenning gebruiken"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Hiermee kan de app hardware voor gezichtsherkenning gebruiken voor verificatie"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Geen accurate gegevens. Probeer het nog eens."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Overbelicht. Probeer een minder felle belichting."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Te donker. Probeer een fellere verlichting."</string>
@@ -936,8 +942,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"voicemail toevoegen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Hiermee kan de app berichten toevoegen aan de inbox van je voicemail."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatiemachtigingen voor browser aanpassen"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Hiermee kan de app de geolocatiemachtigingen van de browser aanpassen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatierechten voor browser aanpassen"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Hiermee kan de app de geolocatierechten van de browser aanpassen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wil je dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Niet nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthouden"</string>
@@ -1331,7 +1337,7 @@
     <string name="date_time_done" msgid="2507683751759308828">"Gereed"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NIEUW: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Geleverd door <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Geen machtigingen vereist"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Geen rechten nodig"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"hieraan kunnen kosten zijn verbonden"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"Dit apparaat wordt opgeladen via USB"</string>

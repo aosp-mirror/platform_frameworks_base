@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"使用する顔テンプレートの追加や削除を行うメソッドの呼び出しをアプリに許可します。"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"顔認証ハードウェアの使用"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"顔認証ハードウェアを認証に使用することをアプリに許可します"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"顔を認識できませんでした。もう一度お試しください。"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"明るすぎます。もっと暗い場所でお試しください。"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"暗すぎます。もっと明るい場所でお試しください。"</string>
@@ -1058,7 +1064,7 @@
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"この動画はこのデバイスにストリーミングできません。"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"この動画を再生できません。"</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
-    <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>、<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"正午"</string>
     <string name="Noon" msgid="3342127745230013127">"正午"</string>
     <string name="midnight" msgid="7166259508850457595">"午前0時"</string>

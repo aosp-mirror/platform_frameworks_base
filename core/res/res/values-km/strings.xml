@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"អនុញ្ញាតឱ្យកម្មវិធីប្រើវិធីសាស្ត្រដើម្បី​បញ្ចូល និងលុបទម្រង់​គំរូ​ផ្ទៃមុខសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ប្រើ​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃមុខ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"មិនអាច​ថត​ទិន្នន័យទម្រង់មុខ​បាន​ត្រឹមត្រូវទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ភ្លឺពេក។ សូមសាកល្បង​ប្រើ​ពន្លឺស្រាលជាងនេះ។"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ងងឹតជ្រុល។ សូមសាកល្បង​ប្រើ​ពន្លឺភ្លឺជាងនេះ។"</string>

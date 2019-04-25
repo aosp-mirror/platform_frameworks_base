@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允許應用程式呼叫方法來新增及移除可用的臉孔範本。"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"使用臉孔驗證硬體"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"允許應用程式使用臉孔驗證硬體進行驗證"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"無法擷取精準臉孔資料，請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"亮度過高，請嘗試使用較柔和的照明方式。"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"亮度不足，請嘗試使用較明亮的照明方式。"</string>

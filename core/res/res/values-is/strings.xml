@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Leyfir forritinu að beita aðferðum til að bæta við og eyða andlitssniðmátum til notkunar."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"nota vélbúnað andlitsgreiningar"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Leyfir forritinu að nota andlitsgreiningarvélbúnað til auðkenningar"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nákvæm andlitsgögn fengust ekki. Reyndu aftur."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Of bjart. Prófaðu mýkri lýsingu."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Of dimmt. Prófaðu sterkari lýsingu."</string>
