@@ -38,9 +38,10 @@ public class RcsGroupThreadIconChangedEventDescriptor extends RcsGroupThreadEven
 
     @Override
     @VisibleForTesting(visibility = PROTECTED)
-    public RcsGroupThreadIconChangedEvent createRcsEvent() {
-        return new RcsGroupThreadIconChangedEvent(mTimestamp, new RcsGroupThread(mRcsGroupThreadId),
-                new RcsParticipant(mOriginatingParticipantId), mNewIcon);
+    public RcsGroupThreadIconChangedEvent createRcsEvent(RcsControllerCall rcsControllerCall) {
+        return new RcsGroupThreadIconChangedEvent(mTimestamp,
+                new RcsGroupThread(rcsControllerCall, mRcsGroupThreadId),
+                new RcsParticipant(rcsControllerCall, mOriginatingParticipantId), mNewIcon);
     }
 
     public static final @NonNull Creator<RcsGroupThreadIconChangedEventDescriptor> CREATOR =

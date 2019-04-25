@@ -48,7 +48,7 @@ public class RcsParticipantAliasChangedEventTest {
                 .createFromParcel(parcel);
 
         RcsParticipantAliasChangedEvent aliasChangedEvent =
-                aliasChangedEventDescriptor.createRcsEvent();
+                aliasChangedEventDescriptor.createRcsEvent(null);
 
         assertThat(aliasChangedEvent.getParticipant().getId()).isEqualTo(mParticipantId);
         assertThat(aliasChangedEvent.getNewAlias()).isEqualTo(NEW_ALIAS);

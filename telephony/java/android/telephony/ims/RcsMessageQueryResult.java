@@ -32,9 +32,12 @@ import java.util.stream.Collectors;
  * @hide
  */
 public final class RcsMessageQueryResult {
+    private final RcsControllerCall mRcsControllerCall;
     private final RcsMessageQueryResultParcelable mRcsMessageQueryResultParcelable;
 
-    RcsMessageQueryResult(RcsMessageQueryResultParcelable rcsMessageQueryResultParcelable) {
+    RcsMessageQueryResult(RcsControllerCall rcsControllerCall,
+            RcsMessageQueryResultParcelable rcsMessageQueryResultParcelable) {
+        mRcsControllerCall = rcsControllerCall;
         mRcsMessageQueryResultParcelable = rcsMessageQueryResultParcelable;
     }
 
@@ -57,8 +60,8 @@ public final class RcsMessageQueryResult {
     public List<RcsMessage> getMessages() {
         return mRcsMessageQueryResultParcelable.mMessageTypeIdPairs.stream()
                 .map(typeIdPair -> typeIdPair.getType() == MESSAGE_TYPE_INCOMING
-                        ? new RcsIncomingMessage(typeIdPair.getId())
-                        : new RcsOutgoingMessage(typeIdPair.getId()))
+                        ? new RcsIncomingMessage(mRcsControllerCall, typeIdPair.getId())
+                        : new RcsOutgoingMessage(mRcsControllerCall, typeIdPair.getId()))
                 .collect(Collectors.toList());
     }
 }

@@ -40,5 +40,5 @@ public abstract class RcsEvent {
      *
      * @hide
      */
-    abstract void persist() throws RcsMessageStoreException;
+    abstract void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException;
 }
