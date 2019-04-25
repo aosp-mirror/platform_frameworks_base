@@ -559,6 +559,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Umožňuje aplikácii vyvolať metódy, ktoré pridávajú a odstraňujú šablóny tvárí."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"používanie hardvéru na overenie tváre"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Umožňuje aplikácii používať na overenie totožnosti hardvér na overenie tváre"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nepodarilo sa nasnímať presné údaje o tvári. Skúste to znova."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Príliš veľa svetla. Skúste jemnejšie osvetlenie."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Príliš veľká tma. Skúste lepšie osvetlenie."</string>
