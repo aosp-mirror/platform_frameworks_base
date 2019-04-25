@@ -3294,6 +3294,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             return true;
         }
+        if (mStatusBarWindowController.hasAssistActiveSession()) {
+            // Back pressed during an assist session, cancel it.
+            mAssistManager.hideAssist();
+            return true;
+        }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
             if (mNotificationPanel.canPanelBeCollapsed()) {
                 animateCollapsePanels();
