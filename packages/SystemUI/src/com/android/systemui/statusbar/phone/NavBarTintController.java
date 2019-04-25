@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -43,6 +44,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
     private final Handler mHandler = new Handler();
     private final NavigationBarView mNavigationBarView;
     private final LightBarTransitionsController mLightBarController;
+    private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
 
     private final CompositionSamplingListener mSamplingListener;
     private final Runnable mUpdateSamplingListener = this::updateSamplingListener;
@@ -91,7 +93,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
     }
 
     void start() {
-        if (!isEnabled(mNavigationBarView.getContext())) {
+        if (!isEnabled(mNavigationBarView.getContext(), mNavBarMode)) {
             return;
         }
         mSamplingEnabled = true;
@@ -178,6 +180,10 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         }
     }
 
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
+    }
+
     void dump(PrintWriter pw) {
         pw.println("NavBarTintController:");
         pw.println("  navBar isAttached: " + mNavigationBarView.isAttachedToWindow());
@@ -190,8 +196,8 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
     }
 
-    public static boolean isEnabled(Context context) {
+    public static boolean isEnabled(Context context, int navBarMode) {
         return context.getDisplayId() == DEFAULT_DISPLAY
-                && QuickStepContract.isGesturalMode(context);
+                && QuickStepContract.isGesturalMode(navBarMode);
     }
 }

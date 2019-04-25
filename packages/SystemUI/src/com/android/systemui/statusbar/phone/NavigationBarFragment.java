@@ -21,6 +21,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
@@ -119,7 +120,8 @@ import javax.inject.Inject;
  * Fragment containing the NavigationBarFragment. Contains logic for what happens
  * on clicks and view states of the nav bar.
  */
-public class NavigationBarFragment extends LifecycleFragment implements Callbacks {
+public class NavigationBarFragment extends LifecycleFragment implements Callbacks,
+        NavigationModeController.ModeChangedListener {
 
     public static final String TAG = "NavigationBar";
     private static final boolean DEBUG = false;
@@ -160,6 +162,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mLayoutDirection;
 
     private int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+    private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
 
@@ -209,7 +212,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             final ButtonDispatcher backButton = mNavigationBarView.getBackButton();
             final boolean useAltBack =
                     (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-            if (QuickStepContract.isGesturalMode(getContext()) && !useAltBack) {
+            if (QuickStepContract.isGesturalMode(mNavBarMode) && !useAltBack) {
                 // If property was changed to hide/show back button, going home will trigger
                 // launcher to to change the back button alpha to reflect property change
                 backButton.setVisibility(View.GONE);
@@ -246,13 +249,15 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @Inject
     public NavigationBarFragment(AccessibilityManagerWrapper accessibilityManagerWrapper,
             DeviceProvisionedController deviceProvisionedController, MetricsLogger metricsLogger,
-            AssistManager assistManager, OverviewProxyService overviewProxyService) {
+            AssistManager assistManager, OverviewProxyService overviewProxyService,
+            NavigationModeController navigationModeController) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mMetricsLogger = metricsLogger;
         mAssistManager = assistManager;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         mOverviewProxyService = overviewProxyService;
+        mNavBarMode = navigationModeController.addListener(this);
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -928,7 +933,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (mOverviewProxyService.getProxy() != null) {
             try {
                 mOverviewProxyService.getProxy().onAssistantAvailable(available
-                        && QuickStepContract.isGesturalMode(getContext()));
+                        && QuickStepContract.isGesturalMode(mNavBarMode));
             } catch (RemoteException e) {
                 Log.w(TAG, "Unable to send assistant availability data to launcher");
             }
@@ -982,6 +987,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         final boolean anim = mStatusBar.isDeviceInteractive()
                 && mNavigationBarWindowState != WINDOW_STATE_HIDDEN;
         mNavigationBarView.getBarTransitions().transitionTo(mNavigationBarMode, anim);
+    }
+
+    @Override
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
     }
 
     public void disableAnimationsDuringHide(long delay) {
@@ -1040,7 +1050,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
                 if (Intent.ACTION_SCREEN_ON.equals(action)) {
                     // Enabled and screen is on, start it again if enabled
-                    if (NavBarTintController.isEnabled(getContext())) {
+                    if (NavBarTintController.isEnabled(getContext(), mNavBarMode)) {
                         mNavigationBarView.getTintController().start();
                     }
                 } else {

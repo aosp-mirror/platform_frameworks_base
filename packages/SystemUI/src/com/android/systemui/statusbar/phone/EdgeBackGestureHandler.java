@@ -156,7 +156,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
         mWm = context.getSystemService(WindowManager.class);
         mOverviewProxyService = overviewProxyService;
 
-        mEdgeWidth = QuickStepContract.getEdgeSensitivityWidth(context);
+        // TODO: Get this for the current user
+        mEdgeWidth = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_backGestureInset);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mSwipeThreshold = res.getDimension(R.dimen.navigation_edge_action_drag_threshold);
 
@@ -168,7 +170,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
      */
     public void onNavBarAttached() {
         mIsAttached = true;
-        onOverlaysChanged();
+        updateIsEnabled();
     }
 
     /**
@@ -179,11 +181,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
         updateIsEnabled();
     }
 
-    /**
-     * Called when system overlays has changed
-     */
-    public void onOverlaysChanged() {
-        mIsGesturalModeEnabled = QuickStepContract.isGesturalMode(mContext);
+    public void onNavigationModeChanged(int mode) {
+        mIsGesturalModeEnabled = QuickStepContract.isGesturalMode(mode);
         updateIsEnabled();
     }
 
