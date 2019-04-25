@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.StatsLog;
 import android.view.DisplayCutout;
@@ -523,11 +524,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS), 0);
         } else if (v == mNextAlarmContainer) {
-            if (mNextAlarm.getShowIntent() != null
-                    && mNextAlarm.getShowIntent().getIntent() != null) {
+            if (mNextAlarm.getShowIntent() != null) {
                 mActivityStarter.postStartActivityDismissingKeyguard(
-                        mNextAlarm.getShowIntent().getIntent(), 0);
+                        mNextAlarm.getShowIntent());
             } else {
+                Log.d(TAG, "No PendingIntent for next alarm. Using default intent");
                 mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                         AlarmClock.ACTION_SHOW_ALARMS), 0);
             }
