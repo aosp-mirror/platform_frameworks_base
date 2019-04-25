@@ -39,6 +39,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
@@ -60,6 +61,7 @@ import androidx.test.filters.MediumTest;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.wm.TaskRecord.TaskRecordFactory;
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -388,7 +390,8 @@ public class TaskRecordTests extends ActivityTestsBase {
             return null;
         }).when(policy).convertNonDecorInsetsToStableInsets(any(), eq(ROTATION_0));
         doReturn(policy).when(displayContent).getDisplayPolicy();
-        doReturn(mock(DisplayInfo.class)).when(displayContent).getDisplayInfo();
+        doReturn(mock(WmDisplayCutout.class)).when(displayContent)
+                .calculateDisplayCutoutForRotation(anyInt());
 
         // Without limiting to be inside the parent bounds, the out screen size should keep relative
         // to the input bounds.
