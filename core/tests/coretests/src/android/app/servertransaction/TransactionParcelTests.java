@@ -242,7 +242,7 @@ public class TransactionParcelTests {
         LaunchActivityItem item = LaunchActivityItem.obtain(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
-                true /* isForward */, null /* profilerInfo */);
+                true /* isForward */, null /* profilerInfo */, new Binder());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -625,6 +625,16 @@ public class TransactionParcelTests {
 
         @Override
         public final void runIsolatedEntryPoint(String entryPoint, String[] entryPointArgs) {
+        }
+
+        @Override
+        public void requestDirectActions(IBinder activityToken, IVoiceInteractor intractor,
+                RemoteCallback callback) {
+        }
+
+        @Override
+        public void performDirectAction(IBinder activityToken, String actionId, Bundle arguments,
+                RemoteCallback cancellationCallback, RemoteCallback resultCallback) {
         }
     }
 }

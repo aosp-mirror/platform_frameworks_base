@@ -18,9 +18,13 @@ package android.service.voice;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.DirectAction;
 import android.app.Instrumentation;
 import android.app.VoiceInteractor;
 import android.app.assist.AssistContent;
@@ -28,6 +32,7 @@ import android.app.assist.AssistStructure;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -36,9 +41,12 @@ import android.graphics.Region;
 import android.inputmethodservice.SoftInputWindow;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Message;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -52,6 +60,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.Immutable;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -59,10 +68,16 @@ import com.android.internal.app.IVoiceInteractorCallback;
 import com.android.internal.app.IVoiceInteractorRequest;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * An active voice interaction session, providing a facility for the implementation
@@ -156,6 +171,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     final WeakReference<VoiceInteractionSession> mWeakRef
             = new WeakReference<VoiceInteractionSession>(this);
 
+    ICancellationSignal mKillCallback;
+
     final IVoiceInteractor mInteractor = new IVoiceInteractor.Stub() {
         @Override
         public IVoiceInteractorRequest startConfirmation(String callingPackage,
@@ -230,6 +247,19 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             }
             return new boolean[commands.length];
         }
+
+        @Override
+        public void notifyDirectActionsChanged(int taskId, IBinder assistToken) {
+            mHandlerCaller.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    VoiceInteractionSession::onDirectActionsInvalidated,
+                    VoiceInteractionSession.this, new ActivityId(taskId, assistToken))
+            );
+        }
+
+        @Override
+        public void setKillCallback(ICancellationSignal callback) {
+            mKillCallback = callback;
+        }
     };
 
     final IVoiceInteractionSession mSession = new IVoiceInteractionSession.Stub() {
@@ -248,8 +278,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         @Override
-        public void handleAssist(final Bundle data, final AssistStructure structure,
-                final AssistContent content, final int index, final int count) {
+        public void handleAssist(final int taskId, final IBinder assistToken, final Bundle data,
+                final AssistStructure structure, final AssistContent content, final int index,
+                final int count) {
             // We want to pre-warm the AssistStructure before handing it off to the main
             // thread.  We also want to do this on a separate thread, so that if the app
             // is for some reason slow (due to slow filling in of async children in the
@@ -267,9 +298,19 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                             failure = e;
                         }
                     }
-                    mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOOOOII(MSG_HANDLE_ASSIST,
-                            data, failure == null ? structure : null, failure, content,
-                            index, count));
+
+                    SomeArgs args = SomeArgs.obtain();
+                    args.argi1 = taskId;
+                    args.arg1 = data;
+                    args.arg2 = (failure == null) ? structure : null;
+                    args.arg3 = failure;
+                    args.arg4 = content;
+                    args.arg5 = assistToken;
+                    args.argi5 = index;
+                    args.argi6 = count;
+
+                    mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(
+                            MSG_HANDLE_ASSIST, args));
                 }
             };
             retriever.start();
@@ -855,17 +896,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                     break;
                 case MSG_HANDLE_ASSIST:
                     args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onHandleAssist: data=" + args.arg1
+                    if (DEBUG) Log.d(TAG, "onHandleAssist: taskId=" + args.argi1
+                            + "assistToken=" + args.arg5 + " data=" + args.arg1
                             + " structure=" + args.arg2 + " content=" + args.arg3
                             + " activityIndex=" + args.argi5 + " activityCount=" + args.argi6);
-                    if (args.argi5 == 0) {
-                        doOnHandleAssist((Bundle) args.arg1, (AssistStructure) args.arg2,
-                                (Throwable) args.arg3, (AssistContent) args.arg4);
-                    } else {
-                        doOnHandleAssistSecondary((Bundle) args.arg1, (AssistStructure) args.arg2,
-                                (Throwable) args.arg3, (AssistContent) args.arg4,
-                                args.argi5, args.argi6);
-                    }
+                    doOnHandleAssist(args.argi1, (IBinder) args.arg5, (Bundle) args.arg1,
+                            (AssistStructure) args.arg2, (Throwable) args.arg3,
+                            (AssistContent) args.arg4, args.argi5, args.argi6);
                     break;
                 case MSG_HANDLE_SCREENSHOT:
                     if (DEBUG) Log.d(TAG, "onHandleScreenshot: " + msg.obj);
@@ -1062,6 +1099,13 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
     void doDestroy() {
         onDestroy();
+        if (mKillCallback != null) {
+            try {
+                mKillCallback.cancel();
+            } catch (RemoteException e) {
+                /* ignore */
+            }
+        }
         if (mInitialized) {
             mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                     mInsetsComputer);
@@ -1301,6 +1345,94 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
+     * Requests a list of supported actions from an app.
+     *
+     * @param activityId Ths activity id of the app to get the actions from.
+     * @param resultExecutor The handler to receive the callback
+     * @param callback The callback to receive the response
+     */
+    public final void requestDirectActions(@NonNull ActivityId activityId,
+            @NonNull @CallbackExecutor Executor resultExecutor,
+            @NonNull Consumer<List<DirectAction>> callback) {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        try {
+            mSystemService.requestDirectActions(mToken, activityId.getTaskId(),
+                    activityId.getAssistToken(), new RemoteCallback(new DirectActionsReceiver(
+                            Preconditions.checkNotNull(resultExecutor),
+                            Preconditions.checkNotNull(callback))));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called when the direct actions are invalidated.
+     */
+    public void onDirectActionsInvalidated(@NonNull ActivityId activityId) {
+
+    }
+
+    /**
+     * Asks that an action be performed by the app. This will send a request to the app which
+     * provided this action.
+     *
+     * <p> An action could take time to execute and the result is provided asynchronously
+     * via a callback. If the action is taking longer and you want to cancel its execution
+     * you can pass in a cancellation signal through which to notify the app to abort the
+     * action.
+     *
+     * @param action The action to be performed.
+     * @param extras Any optional extras sent to the app as part of the request
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *                          or {@code null} if none.
+     * @param resultExecutor The handler to receive the callback.
+     * @param resultListener The callback to receive the response.
+     *
+     * @see #requestDirectActions(ActivityId, Executor, Consumer)
+     * @see Activity#onGetDirectActions()
+     */
+    public final void performDirectAction(@NonNull DirectAction action, @Nullable Bundle extras,
+            @Nullable CancellationSignal cancellationSignal,
+            @NonNull @CallbackExecutor Executor resultExecutor,
+            @NonNull Consumer<Bundle> resultListener) {
+        if (mToken == null) {
+            throw new IllegalStateException("Can't call before onCreate()");
+        }
+        Preconditions.checkNotNull(resultExecutor);
+        Preconditions.checkNotNull(resultListener);
+
+        if (cancellationSignal != null) {
+            cancellationSignal.throwIfCanceled();
+        }
+
+        final RemoteCallback remoteCallback = new RemoteCallback(b -> {
+            if (b != null) {
+                final IBinder cancellation = b.getBinder(VoiceInteractor.KEY_CANCELLATION_SIGNAL);
+                if (cancellation != null) {
+                    if (cancellationSignal != null) {
+                        cancellationSignal.setRemote(ICancellationSignal.Stub.asInterface(
+                                cancellation));
+                    }
+                } else {
+                    resultExecutor.execute(() -> resultListener.accept(b));
+                }
+            } else {
+                resultExecutor.execute(() -> resultListener.accept(Bundle.EMPTY));
+            }
+        });
+
+        try {
+            mSystemService.performDirectAction(mToken, action.getId(), extras,
+                    action.getTaskId(), action.getActivityId(), remoteCallback,
+                    remoteCallback);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Set whether this session will keep the device awake while it is running a voice
      * activity.  By default, the system holds a wake lock for it while in this state,
      * so that it can work even if the screen is off.  Setting this to false removes that
@@ -1434,20 +1566,14 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mContentFrame.requestApplyInsets();
     }
 
-    void doOnHandleAssist(Bundle data, AssistStructure structure, Throwable failure,
-            AssistContent content) {
+    void doOnHandleAssist(int taskId, IBinder assistToken, Bundle data, AssistStructure structure,
+            Throwable failure, AssistContent content, int index, int count) {
         if (failure != null) {
             onAssistStructureFailure(failure);
         }
-        onHandleAssist(data, structure, content);
-    }
-
-    void doOnHandleAssistSecondary(Bundle data, AssistStructure structure, Throwable failure,
-            AssistContent content, int index, int count) {
-        if (failure != null) {
-            onAssistStructureFailure(failure);
-        }
-        onHandleAssistSecondary(data, structure, content, index, count);
+        AssistState assistState = new AssistState(new ActivityId(taskId, assistToken),
+                data, structure, content, index, count);
+        onHandleAssist(assistState);
     }
 
     /**
@@ -1480,9 +1606,38 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * May be null if assist data has been disabled by the user or device policy; will
      * not be automatically filled in with data from the app if the app has marked its
      * window as secure.
+     *
+     * @deprecated use {@link #onHandleAssist(AssistState)}
      */
+    @Deprecated
     public void onHandleAssist(@Nullable Bundle data, @Nullable AssistStructure structure,
             @Nullable AssistContent content) {
+    }
+
+    /**
+     * Called to receive data from the application that the user was currently viewing when
+     * an assist session is started.  If the original show request did not specify
+     * {@link #SHOW_WITH_ASSIST}, this method will not be called.
+     *
+     * <p>This method is called for all activities along with an index and count that indicates
+     * which activity the data is for. {@code index} will be between 0 and {@code count}-1 and
+     * this method is called once for each activity in no particular order. The {@code count}
+     * indicates how many activities to expect assist data for, including the top focused one.
+     * The focused activity can be determined by calling {@link AssistState#isFocused()}.
+     *
+     * <p>To be responsive to assist requests, process assist data as soon as it is received,
+     * without waiting for all queued activities to return assist data.
+     *
+     * @param state The state object capturing the state of an activity.
+     */
+    public void onHandleAssist(@NonNull AssistState state) {
+        if (state.getIndex() == 0) {
+            onHandleAssist(state.getAssistData(), state.getAssistStructure(),
+                    state.getAssistContent());
+        } else {
+            onHandleAssistSecondary(state.getAssistData(), state.getAssistStructure(),
+                    state.getAssistContent(), state.getIndex(), state.getCount());
+        }
     }
 
     /**
@@ -1519,7 +1674,10 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param count the total number of additional activities for which the assist data is being
      *        returned, including the focused activity that is returned via
      *        {@link #onHandleAssist}.
+     *
+     * @deprecated use {@link #onHandleAssist(AssistState)}
      */
+    @Deprecated
     public void onHandleAssistSecondary(@Nullable Bundle data, @Nullable AssistStructure structure,
             @Nullable AssistContent content, int index, int count) {
     }
@@ -1740,6 +1898,168 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
                 req.dump(innerPrefix, fd, writer, args);
 
             }
+        }
+    }
+
+    private static class DirectActionsReceiver implements RemoteCallback.OnResultListener {
+
+        @NonNull
+        private final Executor mResultExecutor;
+        private final Consumer<List<DirectAction>> mCallback;
+
+        DirectActionsReceiver(Executor resultExecutor, Consumer<List<DirectAction>> callback) {
+            mResultExecutor = resultExecutor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResult(Bundle result) {
+            final List<DirectAction> list;
+            if (result == null) {
+                list = Collections.emptyList();
+            } else {
+                final ParceledListSlice<DirectAction> pls = result.getParcelable(
+                        DirectAction.KEY_ACTIONS_LIST);
+                if (pls != null) {
+                    final List<DirectAction> receivedList = pls.getList();
+                    list = (receivedList != null) ? receivedList : Collections.emptyList();
+                } else {
+                    list = Collections.emptyList();
+                }
+            }
+            mResultExecutor.execute(() -> mCallback.accept(list));
+        }
+    }
+
+    /**
+     * Represents assist state captured when this session was started.
+     * It contains the various assist data objects and a reference to
+     * the source activity.
+     */
+    @Immutable
+    public static final class AssistState {
+        private final @NonNull ActivityId mActivityId;
+        private final int mIndex;
+        private final int mCount;
+        private final @Nullable Bundle mData;
+        private final @Nullable AssistStructure mStructure;
+        private final @Nullable AssistContent mContent;
+
+        AssistState(@NonNull ActivityId activityId, @Nullable Bundle data,
+                @Nullable AssistStructure structure, @Nullable AssistContent content,
+                int index, int count) {
+            mActivityId = activityId;
+            mIndex = index;
+            mCount = count;
+            mData = data;
+            mStructure = structure;
+            mContent = content;
+        }
+
+        /**
+         * @return whether the source activity is focused.
+         */
+        public boolean isFocused() {
+            return mIndex == 0;
+        }
+
+        /**
+         * @return the index of the activity that this state is for.
+         */
+        public @IntRange(from = -1) int getIndex() {
+            return mIndex;
+        }
+
+        /**s
+         * @return the total number of activities for which the assist data is
+         * being returned.
+         */
+        public @IntRange(from = 0) int getCount() {
+            return mCount;
+        }
+
+        /**
+         * @return the id of the source activity
+         */
+        public @NonNull ActivityId getActivityId() {
+            return mActivityId;
+        }
+
+        /**
+         * @return Arbitrary data supplied by the app through
+         * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
+         * May be null if assist data has been disabled by the user or device policy.
+         */
+        public @Nullable Bundle getAssistData() {
+            return mData;
+        }
+
+        /**
+         * @return If available, the structure definition of all windows currently
+         * displayed by the app. May be null if assist data has been disabled by the user
+         * or device policy; will be an empty stub if the application has disabled assist
+         * by marking its window as secure.
+         */
+        public @Nullable AssistStructure getAssistStructure() {
+            return mStructure;
+        }
+
+        /**
+         * @return Additional content data supplied by the app through
+         * {@link android.app.Activity#onProvideAssistContent Activity.onProvideAssistContent}.
+         * May be null if assist data has been disabled by the user or device policy; will
+         * not be automatically filled in with data from the app if the app has marked its
+         * window as secure.
+         */
+        public @Nullable AssistContent getAssistContent() {
+            return mContent;
+        }
+    }
+
+    /**
+     * Represents the id of an assist source activity.
+     */
+    public static class ActivityId {
+        private final int mTaskId;
+        private final IBinder mAssistToken;
+
+        ActivityId(int taskId, IBinder assistToken) {
+            mTaskId = taskId;
+            mAssistToken = assistToken;
+        }
+
+        int getTaskId() {
+            return mTaskId;
+        }
+
+        IBinder getAssistToken() {
+            return mAssistToken;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            ActivityId that = (ActivityId) o;
+
+            if (mTaskId != that.mTaskId) {
+                return false;
+            }
+            return mAssistToken != null
+                    ? mAssistToken.equals(that.mAssistToken)
+                    : that.mAssistToken == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = mTaskId;
+            result = 31 * result + (mAssistToken != null ? mAssistToken.hashCode() : 0);
+            return result;
         }
     }
 }
