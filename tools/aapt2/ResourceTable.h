@@ -228,13 +228,13 @@ class ResourceTable {
 
   enum class CollisionResult { kKeepBoth, kKeepOriginal, kConflict, kTakeNew };
 
-  using CollisionResolverFunc = std::function<CollisionResult(Value*, Value*)>;
+  using CollisionResolverFunc = std::function<CollisionResult(Value*, Value*, bool)>;
 
   // When a collision of resources occurs, this method decides which value to keep.
-  static CollisionResult ResolveValueCollision(Value* existing, Value* incoming);
+  static CollisionResult ResolveValueCollision(Value* existing, Value* incoming, bool overlay);
 
   // When a collision of resources occurs, this method keeps both values
-  static CollisionResult IgnoreCollision(Value* existing, Value* incoming);
+  static CollisionResult IgnoreCollision(Value* existing, Value* incoming, bool overlay);
 
   bool AddResource(const ResourceNameRef& name, const android::ConfigDescription& config,
                    const android::StringPiece& product, std::unique_ptr<Value> value,
