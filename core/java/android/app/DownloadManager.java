@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -33,9 +34,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.provider.Downloads;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -471,6 +474,15 @@ public class DownloadManager {
          * By default, downloads are saved to a generated filename in the shared download cache and
          * may be deleted by the system at any time to reclaim space.
          *
+         * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
+         * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE EXTERNAL_STORAGE}
+         * permission is not needed and the {@code uri} must refer to a path within the
+         * directories owned by the application (e.g. {@link Context#getExternalFilesDir(String)})
+         * or a path within the top-level Downloads directory (as returned by
+         * {@link Environment#getExternalStoragePublicDirectory(String)} with
+         * {@link Environment#DIRECTORY_DOWNLOADS}).
+         *
+         * @param uri a file {@link Uri} indicating the destination for the downloaded file.
          * @return this object
          */
         public Request setDestinationUri(Uri uri) {
@@ -524,6 +536,11 @@ public class DownloadManager {
          * The downloaded file is not scanned by MediaScanner. But it can be
          * made scannable by calling {@link #allowScanningByMediaScanner()}.
          *
+         * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
+         * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE}
+         * permission is not needed and the {@code dirType} must
+         * be {@link Environment#DIRECTORY_DOWNLOADS}.
+         *
          * @param dirType the directory type to pass to {@link Environment#getExternalStoragePublicDirectory(String)}
          * @param subPath the path within the external directory, including the
          *            destination filename
@@ -535,15 +552,29 @@ public class DownloadManager {
             File file = Environment.getExternalStoragePublicDirectory(dirType);
             if (file == null) {
                 throw new IllegalStateException("Failed to get external storage public directory");
-            } else if (file.exists()) {
-                if (!file.isDirectory()) {
-                    throw new IllegalStateException(file.getAbsolutePath() +
-                            " already exists and is not a directory");
+            }
+
+            final Context context = AppGlobals.getInitialApplication();
+            if (context.getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.Q || Environment.isExternalStorageSandboxed()) {
+                try (ContentProviderClient client = context.getContentResolver()
+                        .acquireContentProviderClient(Downloads.Impl.AUTHORITY)) {
+                    final Bundle extras = new Bundle();
+                    extras.putString(Downloads.DIR_TYPE, dirType);
+                    client.call(Downloads.CALL_CREATE_EXTERNAL_PUBLIC_DIR, null, extras);
+                } catch (RemoteException e) {
+                    throw new IllegalStateException("Unable to create directory: "
+                            + file.getAbsolutePath());
                 }
             } else {
-                if (!file.mkdirs()) {
-                    throw new IllegalStateException("Unable to create directory: "+
-                            file.getAbsolutePath());
+                if (file.exists()) {
+                    if (!file.isDirectory()) {
+                        throw new IllegalStateException(file.getAbsolutePath()
+                                + " already exists and is not a directory");
+                    }
+                } else if (!file.mkdirs()) {
+                    throw new IllegalStateException("Unable to create directory: "
+                            + file.getAbsolutePath());
                 }
             }
             setDestinationFromBase(file, subPath);
@@ -1316,6 +1347,16 @@ public class DownloadManager {
      * isMediaScannerScannable to true. It makes the file visible in media managing
      * applications such as Gallery App, which could be a useful purpose of using this API.
      *
+     * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
+     * {@code path} must be within directories owned by the application
+     * {e.g. {@link Context#getExternalFilesDir(String)}} or if the application is running under
+     * the legacy storage model (see
+     * {@link android.R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
+     * android:requestLegacyExternalStorage}), {@code path} can also be within the top-level
+     * Downloads directory (as returned by
+     * {@link Environment#getExternalStoragePublicDirectory(String)} with
+     * {@link Environment#DIRECTORY_DOWNLOADS}).
+     *
      * @param title the title that would appear for this file in Downloads App.
      * @param description the description that would appear for this file in Downloads App.
      * @param isMediaScannerScannable true if the file is to be scanned by MediaScanner. Files
@@ -1345,6 +1386,16 @@ public class DownloadManager {
      * isMediaScannerScannable to true. It makes the file visible in media managing
      * applications such as Gallery App, which could be a useful purpose of using this API.
      *
+     * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
+     * {@code path} must be within directories owned by the application
+     * {e.g. {@link Context#getExternalFilesDir(String)}} or if the application is running under
+     * the legacy storage model (see
+     * {@link android.R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
+     * android:requestLegacyExternalStorage}), {@code path} can also be within the top-level
+     * Downloads directory (as returned by
+     * {@link Environment#getExternalStoragePublicDirectory(String)} with
+     * {@link Environment#DIRECTORY_DOWNLOADS}).
+     *
      * @param title the title that would appear for this file in Downloads App.
      * @param description the description that would appear for this file in Downloads App.
      * @param isMediaScannerScannable true if the file is to be scanned by MediaScanner. Files
@@ -1368,7 +1419,19 @@ public class DownloadManager {
                 length, showNotification, false, uri, referer);
     }
 
-    /** {@hide} */
+    /**
+     * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
+     * {@code path} must be within directories owned by the application
+     * {e.g. {@link Context#getExternalFilesDir(String)}} or if the application is running under
+     * the legacy storage model (see
+     * {@link android.R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
+     * android:requestLegacyExternalStorage}), {@code path} can also be within the top-level
+     * Downloads directory (as returned by
+     * {@link Environment#getExternalStoragePublicDirectory(String)} with
+     * {@link Environment#DIRECTORY_DOWNLOADS}).
+     *
+     * {@hide}
+     */
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification, boolean allowWrite) {
@@ -1376,7 +1439,19 @@ public class DownloadManager {
                 length, showNotification, allowWrite, null, null);
     }
 
-    /** {@hide} */
+    /**
+     * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
+     * {@code path} must be within directories owned by the application
+     * {e.g. {@link Context#getExternalFilesDir(String)}} or if the application is running under
+     * the legacy storage model (see
+     * {@link android.R.styleable#AndroidManifestApplication_requestLegacyExternalStorage
+     * android:requestLegacyExternalStorage}), {@code path} can also be within the top-level
+     * Downloads directory (as returned by
+     * {@link Environment#getExternalStoragePublicDirectory(String)} with
+     * {@link Environment#DIRECTORY_DOWNLOADS}).
+     *
+     * {@hide}
+     */
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification, boolean allowWrite, Uri uri, Uri referer) {
