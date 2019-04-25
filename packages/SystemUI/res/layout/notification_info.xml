@@ -70,6 +70,7 @@
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
             android:ellipsize="end"
+            android:text="@string/notification_delegate_header"
             android:layout_toEndOf="@id/pkg_divider"
             android:maxLines="1" />
         <!-- Optional link to app. Only appears if the channel is not disabled and the app
