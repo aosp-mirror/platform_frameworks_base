@@ -556,7 +556,7 @@ public class DownloadManager {
 
             final Context context = AppGlobals.getInitialApplication();
             if (context.getApplicationInfo().targetSdkVersion
-                    >= Build.VERSION_CODES.Q || Environment.isExternalStorageSandboxed()) {
+                    >= Build.VERSION_CODES.Q || !Environment.isExternalStorageLegacy()) {
                 try (ContentProviderClient client = context.getContentResolver()
                         .acquireContentProviderClient(Downloads.Impl.AUTHORITY)) {
                     final Bundle extras = new Bundle();
