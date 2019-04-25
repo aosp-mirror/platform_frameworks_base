@@ -62,6 +62,49 @@ public class NetworkStackUtils {
      */
     public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
 
+    /**
+     * The URL used for HTTPS captive portal detection upon a new connection.
+     * A 204 response code from the server is used for validation.
+     */
+    public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
+
+    /**
+     * The URL used for HTTP captive portal detection upon a new connection.
+     * A 204 response code from the server is used for validation.
+     */
+    public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
+
+    /**
+     * The URL used for fallback HTTP captive portal detection when previous HTTP
+     * and HTTPS captive portal detection attemps did not return a conclusive answer.
+     */
+    public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
+
+    /**
+     * What to do when connecting a network that presents a captive portal.
+     * Must be one of the CAPTIVE_PORTAL_MODE_* constants above.
+     *
+     * The default for this setting is CAPTIVE_PORTAL_MODE_PROMPT.
+     */
+    public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
+
+    /**
+     * Don't attempt to detect captive portals.
+     */
+    public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0;
+
+    /**
+     * When detecting a captive portal, display a notification that
+     * prompts the user to sign in.
+     */
+    public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1;
+
+    /**
+     * When detecting a captive portal, immediately disconnect from the
+     * network and do not reconnect to that network in the future.
+     */
+    public static final int CAPTIVE_PORTAL_MODE_AVOID = 2;
+
     static {
         System.loadLibrary("networkstackutilsjni");
     }

@@ -10336,8 +10336,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0;
 
         /**
@@ -10346,8 +10344,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1;
 
         /**
@@ -10356,8 +10352,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_AVOID = 2;
 
         /**
@@ -10367,8 +10361,6 @@ public final class Settings {
          * The default for this setting is CAPTIVE_PORTAL_MODE_PROMPT.
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
 
         /**
@@ -10397,8 +10389,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
 
         /**
@@ -10407,8 +10397,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
 
         /**
@@ -10417,8 +10405,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
 
         /**
@@ -10427,8 +10413,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS =
                 "captive_portal_other_fallback_urls";
 
@@ -10438,8 +10422,6 @@ public final class Settings {
          * by "@@,@@".
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS =
                 "captive_portal_fallback_probe_specs";
 
@@ -10450,8 +10432,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
 
         /**
@@ -10460,8 +10440,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
