@@ -95,6 +95,10 @@ bool ResourcePathShortener::Consume(IAaptContext* context, ResourceTable* table)
     android::StringPiece res_subdir, actual_filename, extension;
     util::ExtractResFilePathParts(*file_ref->path, &res_subdir, &actual_filename, &extension);
 
+    // Android detects ColorStateLists via pathname, skip res/color/*
+    if (res_subdir == android::StringPiece("res/color/"))
+      continue;
+
     std::string shortened_filename = ShortenFileName(*file_ref->path, num_chars);
     int collision_count = 0;
     std::string shortened_path = GetShortenedPath(shortened_filename, extension, collision_count);
