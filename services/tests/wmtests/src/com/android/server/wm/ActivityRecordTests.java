@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
@@ -57,9 +59,10 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
-import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
+
+import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,10 +91,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         doReturn(false).when(mService).isBooting();
         doReturn(true).when(mService).isBooted();
-
-        final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
-        doReturn(mock(DisplayPolicy.class)).when(displayContent).getDisplayPolicy();
-        doReturn(mock(DisplayInfo.class)).when(displayContent).getDisplayInfo();
     }
 
     @Test
@@ -191,7 +190,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         prepareFixedAspectRatioUnresizableActivity();
 
         final Rect originalOverrideBounds = new Rect(mActivity.getBounds());
-        mTask.getWindowConfiguration().setAppBounds(0, 0, 600, 1200);
+        setupDisplayAndParentSize(600, 1200);
         // The visible activity should recompute configuration according to the last parent bounds.
         mService.restartActivityProcessIfVisible(mActivity.appToken);
 
@@ -436,10 +435,21 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSizeCompatMode_FixedAspectRatioBoundsWithDecor() {
+        setupDisplayContentForCompatDisplayInsets();
         final int decorHeight = 200; // e.g. The device has cutout.
-        final Rect parentAppBounds = new Rect(0, decorHeight, 600, 1000);
-        mTask.getWindowConfiguration().setAppBounds(parentAppBounds);
-        mTask.getConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        final DisplayPolicy policy = setupDisplayAndParentSize(600, 800).getDisplayPolicy();
+        doAnswer(invocationOnMock -> {
+            final int rotation = invocationOnMock.<Integer>getArgument(0);
+            final Rect insets = invocationOnMock.<Rect>getArgument(4);
+            if (rotation == ROTATION_0) {
+                insets.top = decorHeight;
+            } else if (rotation == ROTATION_90) {
+                insets.left = decorHeight;
+            }
+            return null;
+        }).when(policy).getNonDecorInsetsLw(anyInt() /* rotation */, anyInt() /* width */,
+                anyInt() /* height */, any() /* displayCutout */, any() /* outInsets */);
+
         doReturn(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
                 .when(mActivity.mAppWindowToken).getOrientationIgnoreVisibility();
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -455,7 +465,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // The decor height should be a part of the effective bounds.
         assertEquals(mActivity.getBounds().height(), appBounds.height() + decorHeight);
 
-        mTask.getConfiguration().orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mTask.getConfiguration().windowConfiguration.setRotation(ROTATION_90);
         mActivity.onConfigurationChanged(mTask.getConfiguration());
         // After changing orientation, the aspect ratio should be the same.
         assertEquals(appBounds.width(), appBounds.height());
@@ -487,6 +497,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testSizeCompatMode_FixedScreenBoundsWhenDisplaySizeChanged() {
+        setupDisplayContentForCompatDisplayInsets();
         when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
@@ -497,7 +508,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final Rect originalBounds = new Rect(mActivity.getBounds());
 
         // Change the size of current display.
-        mStack.getDisplay().setBounds(0, 0, 1000, 2000);
+        setupDisplayAndParentSize(1000, 2000);
         ensureActivityConfiguration();
 
         assertEquals(originalBounds, mActivity.getBounds());
@@ -559,11 +570,30 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */
     private void prepareFixedAspectRatioUnresizableActivity() {
+        setupDisplayContentForCompatDisplayInsets();
         when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
                 ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         mActivity.info.maxAspectRatio = 1.5f;
         ensureActivityConfiguration();
+    }
+
+    private void setupDisplayContentForCompatDisplayInsets() {
+        final Rect displayBounds = mStack.getDisplay().getBounds();
+        final DisplayContent displayContent = setupDisplayAndParentSize(
+                displayBounds.width(), displayBounds.height());
+        doReturn(mock(DisplayPolicy.class)).when(displayContent).getDisplayPolicy();
+        doReturn(mock(WmDisplayCutout.class)).when(displayContent)
+                .calculateDisplayCutoutForRotation(anyInt());
+    }
+
+    private DisplayContent setupDisplayAndParentSize(int width, int height) {
+        // The DisplayContent is already a mocked object.
+        final DisplayContent displayContent = mStack.getDisplay().mDisplayContent;
+        displayContent.mBaseDisplayWidth = width;
+        displayContent.mBaseDisplayHeight = height;
+        mTask.getWindowConfiguration().setAppBounds(0, 0, width, height);
+        mTask.getWindowConfiguration().setRotation(ROTATION_0);
+        return displayContent;
     }
 }
