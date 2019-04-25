@@ -114,6 +114,8 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     private final Rect mTempRect = new Rect();
 
+    private AbsListView mNestedScrollingChild;
+
     private final ViewTreeObserver.OnTouchModeChangeListener mTouchModeChangeListener =
             new ViewTreeObserver.OnTouchModeChangeListener() {
                 @Override
@@ -317,6 +319,13 @@ public class ResolverDrawerLayout extends ViewGroup {
         return mIsDragging || mOpenOnClick;
     }
 
+    private boolean isNestedChildScrolled() {
+        return mNestedScrollingChild != null
+                && mNestedScrollingChild.getChildCount() > 0
+                && (mNestedScrollingChild.getFirstVisiblePosition() > 0
+                        || mNestedScrollingChild.getChildAt(0).getTop() < 0);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getActionMasked();
@@ -359,7 +368,11 @@ public class ResolverDrawerLayout extends ViewGroup {
                 }
                 if (mIsDragging) {
                     final float dy = y - mLastTouchY;
-                    performDrag(dy);
+                    if (dy > 0 && isNestedChildScrolled()) {
+                        mNestedScrollingChild.smoothScrollBy((int) -dy, 0);
+                    } else {
+                        performDrag(dy);
+                    }
                 }
                 mLastTouchY = y;
             }
@@ -411,6 +424,9 @@ public class ResolverDrawerLayout extends ViewGroup {
                             smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, yvel);
                             mDismissOnScrollerFinished = true;
                         } else {
+                            if (isNestedChildScrolled()) {
+                                mNestedScrollingChild.smoothScrollToPosition(0);
+                            }
                             smoothScrollTo(yvel < 0 ? 0 : mCollapsibleHeight, yvel);
                         }
                     }
@@ -680,7 +696,13 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     @Override
     public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
-        return (nestedScrollAxes & View.SCROLL_AXIS_VERTICAL) != 0;
+        if ((nestedScrollAxes & View.SCROLL_AXIS_VERTICAL) != 0) {
+            if (child instanceof AbsListView) {
+                mNestedScrollingChild = (AbsListView) child;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
