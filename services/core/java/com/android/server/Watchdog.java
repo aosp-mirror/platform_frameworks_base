@@ -18,7 +18,6 @@ package com.android.server;
 
 import android.app.IActivityController;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -122,7 +121,6 @@ public class Watchdog extends Thread {
     /* This handler will be used to post message back onto the main thread */
     final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
     final HandlerChecker mMonitorChecker;
-    ContentResolver mResolver;
     ActivityManagerService mActivity;
 
     int mPhonePid;
@@ -138,6 +136,7 @@ public class Watchdog extends Thread {
         private final String mName;
         private final long mWaitMax;
         private final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
+        private final ArrayList<Monitor> mMonitorQueue = new ArrayList<Monitor>();
         private boolean mCompleted;
         private Monitor mCurrentMonitor;
         private long mStartTime;
@@ -150,10 +149,17 @@ public class Watchdog extends Thread {
         }
 
         void addMonitorLocked(Monitor monitor) {
-            mMonitors.add(monitor);
+            // We don't want to update mMonitors when the Handler is in the middle of checking
+            // all monitors. We will update mMonitors on the next schedule if it is safe
+            mMonitorQueue.add(monitor);
         }
 
         public void scheduleCheckLocked() {
+            if (mCompleted) {
+                // Safe to update monitors in queue, Handler is not in the middle of work
+                mMonitors.addAll(mMonitorQueue);
+                mMonitorQueue.clear();
+            }
             if (mMonitors.size() == 0 && mHandler.getLooper().getQueue().isPolling()) {
                 // If the target looper has recently been polling, then
                 // there is no reason to enqueue our checker on it since that
@@ -213,6 +219,10 @@ public class Watchdog extends Thread {
 
         @Override
         public void run() {
+            // Once we get here, we ensure that mMonitors does not change even if we call
+            // #addMonitorLocked because we first add the new monitors to mMonitorQueue and
+            // move them to mMonitors on the next schedule when mCompleted is true, at which
+            // point we have completed execution of this method.
             final int size = mMonitors.size();
             for (int i = 0 ; i < size ; i++) {
                 synchronized (Watchdog.this) {
@@ -304,10 +314,13 @@ public class Watchdog extends Thread {
                 DEFAULT_TIMEOUT > ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
     }
 
+    /**
+     * Registers a {@link BroadcastReceiver} to listen to reboot broadcasts and trigger reboot.
+     * Should be called during boot after the ActivityManagerService is up and registered
+     * as a system service so it can handle registration of a {@link BroadcastReceiver}.
+     */
     public void init(Context context, ActivityManagerService activity) {
-        mResolver = context.getContentResolver();
         mActivity = activity;
-
         context.registerReceiver(new RebootRequestReceiver(),
                 new IntentFilter(Intent.ACTION_REBOOT),
                 android.Manifest.permission.REBOOT, null);
@@ -335,9 +348,6 @@ public class Watchdog extends Thread {
 
     public void addMonitor(Monitor monitor) {
         synchronized (this) {
-            if (isAlive()) {
-                throw new RuntimeException("Monitors can't be added once the Watchdog is running");
-            }
             mMonitorChecker.addMonitorLocked(monitor);
         }
     }
@@ -348,9 +358,6 @@ public class Watchdog extends Thread {
 
     public void addThread(Handler thread, long timeoutMillis) {
         synchronized (this) {
-            if (isAlive()) {
-                throw new RuntimeException("Threads can't be added once the Watchdog is running");
-            }
             final String name = thread.getLooper().getThread().getName();
             mHandlerCheckers.add(new HandlerChecker(thread, name, timeoutMillis));
         }
@@ -468,6 +475,7 @@ public class Watchdog extends Thread {
                     }
                     try {
                         wait(timeout);
+                        // Note: mHandlerCheckers and mMonitorChecker may have changed after waiting
                     } catch (InterruptedException e) {
                         Log.wtf(TAG, e);
                     }
