@@ -357,31 +357,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return;
         }
 
-        // Verify the RollbackData is up to date with what's installed on
-        // device.
-        // TODO: We assume that between now and the time we commit the
-        // downgrade install, the currently installed package version does not
-        // change. This is not safe to assume, particularly in the case of a
-        // rollback racing with a roll-forward fix of a buggy package.
-        // Figure out how to ensure we don't commit the rollback if
-        // roll forward happens at the same time.
-        for (PackageRollbackInfo info : data.info.getPackages()) {
-            VersionedPackage installedVersion = getInstalledPackageVersion(info.getPackageName());
-            if (installedVersion == null) {
-                // TODO: Test this case
-                sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
-                        "Package to roll back is not installed");
-                return;
-            }
-
-            if (!packageVersionsEqual(info.getVersionRolledBackFrom(), installedVersion)) {
-                // TODO: Test this case
-                sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
-                        "Package version to roll back not installed.");
-                return;
-            }
-        }
-
         // Get a context for the caller to use to install the downgraded
         // version of the package.
         Context context = null;
@@ -420,6 +395,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
                 }
                 params.setRequestDowngrade(true);
+                params.setRequiredInstalledVersionCode(
+                        info.getVersionRolledBackFrom().getLongVersionCode());
                 if (data.isStaged()) {
                     params.setStaged();
                 }
