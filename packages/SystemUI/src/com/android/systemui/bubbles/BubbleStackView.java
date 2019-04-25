@@ -785,6 +785,10 @@ public class BubbleStackView extends FrameLayout {
                 StatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
     }
 
+    void onDragFinishAsDismiss() {
+        mIsDragging = false;
+    }
+
     /**
      * Calculates how large the expanded view of the bubble can be. This takes into account the
      * y position when the bubbles are expanded as well as the bounds of the dismiss target.
@@ -824,9 +828,12 @@ public class BubbleStackView extends FrameLayout {
         if (updateMessage != null && !isExpanded() && !mIsExpansionAnimating && !mIsDragging) {
             final PointF stackPos = mStackAnimationController.getStackPosition();
 
+            mFlyout.setAlpha(0f);
+            mFlyout.setVisibility(VISIBLE);
+
             mFlyoutText.setText(updateMessage);
             mFlyout.measure(WRAP_CONTENT, WRAP_CONTENT);
-            mFlyout.post(() -> {
+            post(() -> {
                 final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
                 final float destinationX = onLeft
                         ? stackPos.x + mBubbleSize + mBubblePadding
@@ -835,9 +842,6 @@ public class BubbleStackView extends FrameLayout {
                 // Translate towards the stack slightly, then spring out from the stack.
                 mFlyout.setTranslationX(destinationX + (onLeft ? -mBubblePadding : mBubblePadding));
                 mFlyout.setTranslationY(stackPos.y);
-                mFlyout.setAlpha(0f);
-
-                mFlyout.setVisibility(VISIBLE);
 
                 mFlyout.animate().alpha(1f);
                 mFlyoutSpring.animateToFinalPosition(destinationX);
