@@ -127,41 +127,29 @@ public abstract class ContentSuggestionsService extends Service {
      * Called by the system to provide the snapshot for the task associated with the given
      * {@param taskId}.
      */
-    public void onProcessContextImage(
-            int taskId, @Nullable Bitmap contextImage, @NonNull Bundle extras) {
-        // TODO(b/127532182): remove after next prebuilt drop.
-        processContextImage(taskId, contextImage, extras);
-    }
+    public abstract void onProcessContextImage(
+            int taskId, @Nullable Bitmap contextImage, @NonNull Bundle extras);
 
     /**
      * Content selections have been request through {@link ContentSuggestionsManager}, implementer
      * should reply on the callback with selections.
      */
-    public void onSuggestContentSelections(@NonNull SelectionsRequest request,
-            @NonNull ContentSuggestionsManager.SelectionsCallback callback) {
-        // TODO(b/127532182): remove after next prebuilt drop.
-        suggestContentSelections(request, callback);
-    }
+    public abstract void onSuggestContentSelections(@NonNull SelectionsRequest request,
+            @NonNull ContentSuggestionsManager.SelectionsCallback callback);
 
     /**
      * Content classifications have been request through {@link ContentSuggestionsManager},
      * implementer should reply on the callback with classifications.
      */
-    public void onClassifyContentSelections(@NonNull ClassificationsRequest request,
-            @NonNull ContentSuggestionsManager.ClassificationsCallback callback) {
-        // TODO(b/127532182): remove after next prebuilt drop.
-        classifyContentSelections(request, callback);
-    }
+    public abstract void onClassifyContentSelections(@NonNull ClassificationsRequest request,
+            @NonNull ContentSuggestionsManager.ClassificationsCallback callback);
 
     /**
      * User interactions have been reported through {@link ContentSuggestionsManager}, implementer
      * should handle those interactions.
      */
-    public void onNotifyInteraction(
-            @NonNull String requestId, @NonNull Bundle interaction) {
-        // TODO(b/127532182): remove after next prebuilt drop.
-        notifyInteraction(requestId, interaction);
-    }
+    public abstract void onNotifyInteraction(
+            @NonNull String requestId, @NonNull Bundle interaction);
 
     private ContentSuggestionsManager.SelectionsCallback wrapSelectionsCallback(
             ISelectionsCallback callback) {
@@ -183,43 +171,5 @@ public abstract class ContentSuggestionsService extends Service {
                 Slog.e(TAG, "Error sending result: " + e);
             }
         });
-    }
-
-
-    /**
-     * For temporary compat reason, remove with b/127532182
-     * @deprecated use {@link #onProcessContextImage(int, Bitmap, Bundle)} instead.
-     */
-    @Deprecated
-    public void processContextImage(
-            int taskId, @Nullable Bitmap contextImage, @NonNull Bundle extras) {
-    }
-
-    /**
-     * For temporary compat reason, remove with b/127532182
-     * @deprecated use {@link #onSuggestContentSelections(SelectionsRequest,
-     * ContentSuggestionsManager.SelectionsCallback)} instead.
-     */
-    @Deprecated
-    public void suggestContentSelections(@NonNull SelectionsRequest request,
-            @NonNull ContentSuggestionsManager.SelectionsCallback callback) {
-    }
-
-    /**
-     * For temporary compat reason, remove with b/127532182
-     * @deprecated use {@link #onClassifyContentSelections(ClassificationsRequest,
-     * ContentSuggestionsManager.ClassificationsCallback)} instead.
-     */
-    @Deprecated
-    public void classifyContentSelections(@NonNull ClassificationsRequest request,
-            @NonNull ContentSuggestionsManager.ClassificationsCallback callback) {
-    }
-
-    /**
-     * For temporary compat reason, remove with b/127532182
-     * @deprecated use {@link #onNotifyInteraction(String, Bundle)} instead.
-     */
-    @Deprecated
-    public void notifyInteraction(@NonNull String requestId, @NonNull Bundle interaction) {
     }
 }
