@@ -153,7 +153,8 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
         mNativeSurface = nullptr;
     }
 
-    if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
+    if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f &&
+            !mFixedRenderAhead) {
         mFixedRenderAhead = false;
         mRenderAheadCapacity = 1;
     } else {
