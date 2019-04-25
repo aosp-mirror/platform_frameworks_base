@@ -27,8 +27,8 @@ import java.util.List;
  * @hide
  */
 public class RcsOutgoingMessage extends RcsMessage {
-    RcsOutgoingMessage(int id) {
-        super(id);
+    RcsOutgoingMessage(RcsControllerCall rcsControllerCall, int id) {
+        super(rcsControllerCall, id);
     }
 
     /**
@@ -45,12 +45,13 @@ public class RcsOutgoingMessage extends RcsMessage {
         int[] deliveryParticipants;
         List<RcsOutgoingMessageDelivery> messageDeliveries = new ArrayList<>();
 
-        deliveryParticipants = RcsControllerCall.call(
+        deliveryParticipants = mRcsControllerCall.call(
                 iRcs -> iRcs.getMessageRecipients(mId));
 
         if (deliveryParticipants != null) {
             for (Integer deliveryParticipant : deliveryParticipants) {
-                messageDeliveries.add(new RcsOutgoingMessageDelivery(deliveryParticipant, mId));
+                messageDeliveries.add(new RcsOutgoingMessageDelivery(
+                        mRcsControllerCall, deliveryParticipant, mId));
             }
         }
 

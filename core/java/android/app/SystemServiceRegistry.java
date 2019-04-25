@@ -618,7 +618,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<RcsManager>() {
                     @Override
                     public RcsManager createService(ContextImpl ctx) {
-                        return new RcsManager();
+                        return new RcsManager(ctx.getOuterContext());
                     }
                 });
 
