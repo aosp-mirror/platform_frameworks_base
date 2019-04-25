@@ -459,6 +459,7 @@ message StateControllerProto {
 
         optional bool is_charging = 1;
         optional bool is_in_parole = 2;
+        optional int64 elapsed_realtime = 6;
 
         // List of UIDs currently in the foreground.
         repeated int32 foreground_uids = 3;
@@ -477,6 +478,16 @@ message StateControllerProto {
             optional int64 remaining_quota_ms = 6;
         }
         repeated TrackedJob tracked_jobs = 4;
+
+        message AlarmListener {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            // Whether the listener is waiting for an alarm or not.
+            optional bool is_waiting = 1;
+            // The time at which the alarm should go off, in the elapsed realtime timebase. Only
+            // valid if is_waiting is true.
+            optional int64 trigger_time_elapsed = 2;
+        }
 
         message ExecutionStats {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -567,6 +578,8 @@ message StateControllerProto {
             repeated TimingSession saved_sessions = 3;
 
             repeated ExecutionStats execution_stats = 4;
+
+            optional AlarmListener in_quota_alarm_listener = 5;
         }
         repeated PackageStats package_stats = 5;
     }

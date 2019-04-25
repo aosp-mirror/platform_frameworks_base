@@ -511,17 +511,28 @@ public final class QuotaController extends StateController {
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
+        final int userId = jobStatus.getSourceUserId();
+        final String pkgName = jobStatus.getSourcePackageName();
         // Still need to track jobs even if mShouldThrottle is false in case it's set to true at
         // some point.
-        ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUserId(),
-                jobStatus.getSourcePackageName());
+        ArraySet<JobStatus> jobs = mTrackedJobs.get(userId, pkgName);
         if (jobs == null) {
             jobs = new ArraySet<>();
-            mTrackedJobs.add(jobStatus.getSourceUserId(), jobStatus.getSourcePackageName(), jobs);
+            mTrackedJobs.add(userId, pkgName, jobs);
         }
         jobs.add(jobStatus);
         jobStatus.setTrackingController(JobStatus.TRACKING_QUOTA);
-        jobStatus.setQuotaConstraintSatisfied(!mShouldThrottle || isWithinQuotaLocked(jobStatus));
+        if (mShouldThrottle) {
+            final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
+            jobStatus.setQuotaConstraintSatisfied(isWithinQuota);
+            if (!isWithinQuota) {
+                maybeScheduleStartAlarmLocked(userId, pkgName,
+                        getEffectiveStandbyBucket(jobStatus));
+            }
+        } else {
+            // QuotaController isn't throttling, so always set to true.
+            jobStatus.setQuotaConstraintSatisfied(true);
+        }
     }
 
     @Override
@@ -1628,6 +1639,9 @@ public final class QuotaController extends StateController {
             if (isActive()) {
                 pw.print("started at ");
                 pw.print(mStartTimeElapsed);
+                pw.print(" (");
+                pw.print(sElapsedRealtimeClock.millis() - mStartTimeElapsed);
+                pw.print("ms ago)");
             } else {
                 pw.print("NOT active");
             }
@@ -1937,6 +1951,7 @@ public final class QuotaController extends StateController {
         pw.println("Is throttling: " + mShouldThrottle);
         pw.println("Is charging: " + mChargeTracker.isCharging());
         pw.println("In parole: " + mInParole);
+        pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());
         pw.println();
 
         pw.print("Foreground UIDs: ");
@@ -2030,6 +2045,26 @@ public final class QuotaController extends StateController {
             }
         }
         pw.decreaseIndent();
+
+        pw.println();
+        pw.println("In quota alarms:");
+        pw.increaseIndent();
+        for (int u = 0; u < mInQuotaAlarmListeners.numUsers(); ++u) {
+            final int userId = mInQuotaAlarmListeners.keyAt(u);
+            for (int p = 0; p < mInQuotaAlarmListeners.numPackagesForUser(userId); ++p) {
+                final String pkgName = mInQuotaAlarmListeners.keyAt(u, p);
+                QcAlarmListener alarmListener = mInQuotaAlarmListeners.valueAt(u, p);
+
+                pw.print(string(userId, pkgName));
+                pw.print(": ");
+                if (alarmListener.isWaiting()) {
+                    pw.println(alarmListener.getTriggerTimeElapsed());
+                } else {
+                    pw.println("NOT WAITING");
+                }
+            }
+        }
+        pw.decreaseIndent();
     }
 
     @Override
@@ -2040,6 +2075,8 @@ public final class QuotaController extends StateController {
 
         proto.write(StateControllerProto.QuotaController.IS_CHARGING, mChargeTracker.isCharging());
         proto.write(StateControllerProto.QuotaController.IS_IN_PAROLE, mInParole);
+        proto.write(StateControllerProto.QuotaController.ELAPSED_REALTIME,
+                sElapsedRealtimeClock.millis());
 
         for (int i = 0; i < mForegroundUids.size(); ++i) {
             proto.write(StateControllerProto.QuotaController.FOREGROUND_UIDS,
@@ -2130,6 +2167,18 @@ public final class QuotaController extends StateController {
                                 es.jobCountInAllowedTime);
                         proto.end(esToken);
                     }
+                }
+
+                QcAlarmListener alarmListener = mInQuotaAlarmListeners.get(userId, pkgName);
+                if (alarmListener != null) {
+                    final long alToken = proto.start(
+                            StateControllerProto.QuotaController.PackageStats.IN_QUOTA_ALARM_LISTENER);
+                    proto.write(StateControllerProto.QuotaController.AlarmListener.IS_WAITING,
+                            alarmListener.isWaiting());
+                    proto.write(
+                            StateControllerProto.QuotaController.AlarmListener.TRIGGER_TIME_ELAPSED,
+                            alarmListener.getTriggerTimeElapsed());
+                    proto.end(alToken);
                 }
 
                 proto.end(psToken);
