@@ -640,5 +640,14 @@ interface IWindowManager
      * This is needed for testing since the system add windows and injects input
      * quick enough that the windows don't have time to get sent to InputManager.
      */
-     boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode);
+    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode);
+
+    /**
+     * Waits until all animations have completed and input information has been sent from
+     * WindowManager to native InputManager.
+     *
+     * This is needed for testing since we need to ensure input information has been propagated to
+     * native InputManager before proceeding with tests.
+     */
+    void syncInputTransactions();
 }
