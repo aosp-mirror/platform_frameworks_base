@@ -1285,7 +1285,7 @@ Return<void> GnssVisibilityControlCallback::nfwNotifyCb(
     if (proxyAppPackageName && otherProtocolStackName && requestorId) {
         env->CallVoidMethod(mCallbacksObj, method_reportNfwNotification, proxyAppPackageName,
                             notification.protocolStack, otherProtocolStackName,
-                            notification.requestor, requestorId,
+                            notification.requestor, requestorId, notification.responseType,
                             notification.inEmergencyMode, notification.isCachedLocation);
     } else {
         ALOGE("%s: OOM Error\n", __func__);
