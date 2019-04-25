@@ -27,7 +27,13 @@ import android.telephony.ims.aidl.IRcs;
  * @hide - not meant for public use
  */
 class RcsControllerCall {
-    static <R> R call(RcsServiceCall<R> serviceCall) throws RcsMessageStoreException {
+    private final Context mContext;
+
+    RcsControllerCall(Context context) {
+        mContext = context;
+    }
+
+    <R> R call(RcsServiceCall<R> serviceCall) throws RcsMessageStoreException {
         IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_RCS_SERVICE));
         if (iRcs == null) {
             throw new RcsMessageStoreException("Could not connect to RCS storage service");
@@ -40,18 +46,12 @@ class RcsControllerCall {
         }
     }
 
-    static void callWithNoReturn(RcsServiceCallWithNoReturn serviceCall)
+    void callWithNoReturn(RcsServiceCallWithNoReturn serviceCall)
             throws RcsMessageStoreException {
-        IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_RCS_SERVICE));
-        if (iRcs == null) {
-            throw new RcsMessageStoreException("Could not connect to RCS storage service");
-        }
-
-        try {
+        call(iRcs -> {
             serviceCall.methodOnIRcs(iRcs);
-        } catch (RemoteException exception) {
-            throw new RcsMessageStoreException(exception.getMessage());
-        }
+            return null;
+        });
     }
 
     interface RcsServiceCall<R> {
