@@ -22,12 +22,15 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingManager;
@@ -125,7 +128,8 @@ public class SystemUIFactory {
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManager.getInstance(context), expansionCallback);
+                dismissCallbackRegistry, FalsingManager.getInstance(context), expansionCallback,
+                KeyguardUpdateMonitor.getInstance(context), new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
