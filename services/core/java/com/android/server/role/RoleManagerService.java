@@ -39,7 +39,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.database.CursorWindow;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -201,8 +200,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                     // Package is being upgraded - we're about to get ACTION_PACKAGE_ADDED
                     return;
                 }
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> performInitialGrantsIfNecessaryAsync(userId));
+                performInitialGrantsIfNecessaryAsync(userId);
             }
         }, UserHandle.ALL, intentFilter, null, null);
     }

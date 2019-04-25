@@ -39,6 +39,7 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -769,6 +770,40 @@ public class RollbackTest {
 
             processUserData(TEST_APP_A);
             processUserData(TEST_APP_B);
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    @Test
+    @Ignore("b/120200473")
+    /**
+     * Test rollback when app is updated to its same version.
+     */
+    public void testSameVersionUpdate() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            RollbackTestUtils.install("RollbackTestAppACrashingV2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
+            assertRollbackInfoEquals(TEST_APP_A, 2, 2, rollback);
+
+            RollbackTestUtils.rollback(rollback.getRollbackId());
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            rollback = getUniqueRollbackInfoForPackage(
+                    rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
+            assertRollbackInfoEquals(TEST_APP_A, 2, 2, rollback);
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
         }

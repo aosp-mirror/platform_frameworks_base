@@ -596,8 +596,8 @@ public class Typeface {
                 final Font font = mFontBuilder.build();
                 final String key = mAssetManager == null ? null : createAssetUid(
                         mAssetManager, mPath, font.getTtcIndex(), font.getAxes(),
-                        font.getStyle().getWeight(), font.getStyle().getSlant(),
-                        mFallbackFamilyName);
+                        mWeight, mItalic,
+                        mFallbackFamilyName == null ? DEFAULT_FAMILY : mFallbackFamilyName);
                 if (key != null) {
                     // Dynamic cache lookup is only for assets.
                     synchronized (sDynamicCacheLock) {

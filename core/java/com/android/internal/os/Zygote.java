@@ -517,6 +517,9 @@ public final class Zygote {
         Credentials peerCredentials = null;
         ZygoteArguments args = null;
 
+        // Load resources
+        ZygoteInit.nativePreloadOpenGL();
+
         while (true) {
             try {
                 sessionSocket = usapPoolSocket.accept();

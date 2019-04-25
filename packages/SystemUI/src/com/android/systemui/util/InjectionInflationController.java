@@ -29,6 +29,8 @@ import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.qs.QSCarrierGroup;
 import com.android.systemui.qs.QSFooterImpl;
+import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.LockIcon;
@@ -154,6 +156,16 @@ public class InjectionInflationController {
          * Creates the keyguard LockIcon.
          */
         LockIcon createLockIcon();
+
+        /**
+         * Creates the QSPanel.
+         */
+        QSPanel createQSPanel();
+
+        /**
+         * Creates the QuickQSPanel.
+         */
+        QuickQSPanel createQuickQSPanel();
     }
 
     /**

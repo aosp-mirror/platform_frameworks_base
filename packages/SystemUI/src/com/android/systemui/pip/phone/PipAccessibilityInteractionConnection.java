@@ -170,6 +170,11 @@ public class PipAccessibilityInteractionConnection
         // We should not be here.
     }
 
+    @Override
+    public void notifyOutsideTouch() {
+        // Do nothing.
+    }
+
     public static AccessibilityNodeInfo obtainRootAccessibilityNodeInfo() {
         AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain();
         info.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID,

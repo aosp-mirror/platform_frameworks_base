@@ -238,7 +238,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 IMPORTANCE_DEFAULT, true);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
-        assertTrue(nameView.getText().toString().contains("Other"));
+        assertTrue(nameView.getText().toString().contains("Proxied"));
         final TextView dividerView = mNotificationInfo.findViewById(R.id.pkg_divider);
         assertEquals(VISIBLE, dividerView.getVisibility());
     }
