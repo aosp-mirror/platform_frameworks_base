@@ -18,6 +18,7 @@ package com.android.server;
 import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_HEALTH_CHECK_PASSED_PACKAGE;
 import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_REQUESTED_PACKAGES;
 import static android.service.watchdog.ExplicitHealthCheckService.EXTRA_SUPPORTED_PACKAGES;
+import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
 
 import android.Manifest;
 import android.annotation.MainThread;
@@ -35,7 +36,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.watchdog.ExplicitHealthCheckService;
 import android.service.watchdog.IExplicitHealthCheckService;
-import android.service.watchdog.PackageInfo;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -71,7 +71,7 @@ class ExplicitHealthCheckController {
     // To prevent deadlocks between the controller and watchdog threads, we have
     // a lock invariant to ALWAYS acquire the PackageWatchdog#mLock before #mLock in this class.
     // It's easier to just NOT hold #mLock when calling into watchdog code on this consumer.
-    @GuardedBy("mLock") @Nullable private Consumer<List<PackageInfo>> mSupportedConsumer;
+    @GuardedBy("mLock") @Nullable private Consumer<List<PackageConfig>> mSupportedConsumer;
     // Called everytime we need to notify the watchdog to sync requests between itself and the
     // health check service. In practice, should never be null after it has been #setEnabled.
     // To prevent deadlocks between the controller and watchdog threads, we have
@@ -106,7 +106,7 @@ class ExplicitHealthCheckController {
      * ensure a happens-before relationship of the set parameters and visibility on other threads.
      */
     public void setCallbacks(Consumer<String> passedConsumer,
-            Consumer<List<PackageInfo>> supportedConsumer, Runnable notifySyncRunnable) {
+            Consumer<List<PackageConfig>> supportedConsumer, Runnable notifySyncRunnable) {
         synchronized (mLock) {
             if (mPassedConsumer != null || mSupportedConsumer != null
                     || mNotifySyncRunnable != null) {
@@ -146,17 +146,17 @@ class ExplicitHealthCheckController {
             return;
         }
 
-        getSupportedPackages(supportedPackageInfos -> {
+        getSupportedPackages(supportedPackageConfigs -> {
             // Notify the watchdog without lock held
-            mSupportedConsumer.accept(supportedPackageInfos);
+            mSupportedConsumer.accept(supportedPackageConfigs);
             getRequestedPackages(previousRequestedPackages -> {
                 synchronized (mLock) {
                     // Hold lock so requests and cancellations are sent atomically.
                     // It is important we don't mix requests from multiple threads.
 
                     Set<String> supportedPackages = new ArraySet<>();
-                    for (PackageInfo info : supportedPackageInfos) {
-                        supportedPackages.add(info.getPackageName());
+                    for (PackageConfig config : supportedPackageConfigs) {
+                        supportedPackages.add(config.getPackageName());
                     }
                     // Note, this may modify newRequestedPackages
                     newRequestedPackages.retainAll(supportedPackages);
@@ -235,7 +235,7 @@ class ExplicitHealthCheckController {
      * Returns the packages that we can request explicit health checks for.
      * The packages will be returned to the {@code consumer}.
      */
-    private void getSupportedPackages(Consumer<List<PackageInfo>> consumer) {
+    private void getSupportedPackages(Consumer<List<PackageConfig>> consumer) {
         synchronized (mLock) {
             if (!prepareServiceLocked("get health check supported packages")) {
                 return;
@@ -244,7 +244,7 @@ class ExplicitHealthCheckController {
             Slog.d(TAG, "Getting health check supported packages");
             try {
                 mRemoteService.getSupportedPackages(new RemoteCallback(result -> {
-                    List<PackageInfo> packages =
+                    List<PackageConfig> packages =
                             result.getParcelableArrayList(EXTRA_SUPPORTED_PACKAGES);
                     Slog.i(TAG, "Explicit health check supported packages " + packages);
                     consumer.accept(packages);
