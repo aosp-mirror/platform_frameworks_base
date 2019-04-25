@@ -1236,6 +1236,8 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
                 GlobalSettingsProto.Sms.SHORT_CODES_UPDATE_METADATA_URL);
+        p.end(smsToken);
+
         final long soundsToken = p.start(GlobalSettingsProto.SOUNDS);
         dumpSetting(s, p,
                 Settings.Global.CAR_DOCK_SOUND,
