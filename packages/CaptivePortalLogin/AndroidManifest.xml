@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
     <uses-permission android:name="android.permission.NETWORK_BYPASS_PRIVATE_DNS" />
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK" />
 
