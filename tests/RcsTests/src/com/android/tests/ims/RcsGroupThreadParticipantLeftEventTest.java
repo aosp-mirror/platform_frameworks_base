@@ -48,7 +48,7 @@ public class RcsGroupThreadParticipantLeftEventTest {
                 .createFromParcel(parcel);
 
         RcsGroupThreadParticipantLeftEvent participantLeftEvent =
-                participantLeftEventDescriptor.createRcsEvent();
+                participantLeftEventDescriptor.createRcsEvent(null);
 
         assertThat(participantLeftEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);
         assertThat(participantLeftEvent.getLeavingParticipant().getId()).isEqualTo(2);
