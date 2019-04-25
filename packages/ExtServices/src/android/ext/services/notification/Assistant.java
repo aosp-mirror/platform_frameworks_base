@@ -238,7 +238,7 @@ public class Assistant extends NotificationAssistantService {
         }
         mSingleThreadExecutor.submit(() -> {
             NotificationEntry entry =
-                    new NotificationEntry(mPackageManager, sbn.cloneLight(), channel, mSmsHelper);
+                    new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
             SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
             if (DEBUG) {
                 Log.d(TAG, String.format(
@@ -296,7 +296,7 @@ public class Assistant extends NotificationAssistantService {
             Ranking ranking = getRanking(sbn.getKey(), rankingMap);
             if (ranking != null && ranking.getChannel() != null) {
                 NotificationEntry entry = new NotificationEntry(mPackageManager,
-                        sbn.cloneLight(), ranking.getChannel(), mSmsHelper);
+                        sbn, ranking.getChannel(), mSmsHelper);
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
                 ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
