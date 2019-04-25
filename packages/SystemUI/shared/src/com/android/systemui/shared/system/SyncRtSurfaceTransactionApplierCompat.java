@@ -105,7 +105,8 @@ public class SyncRtSurfaceTransactionApplierCompat {
                 }
                 t.setEarlyWakeup();
                 t.apply();
-                mApplyHandler.sendEmptyMessage(toApplySeqNo);
+                Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
+                        .sendToTarget();
             }
         });
 
