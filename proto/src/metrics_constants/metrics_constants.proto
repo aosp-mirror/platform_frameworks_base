@@ -263,6 +263,14 @@ message MetricsEvent {
     PREVIOUSLY_VISIBLE = 2;
   }
 
+  // Types for ACTION_SHORTCUTS_CHANGED
+  enum ShortcutsChangesInfo {
+    SHORTCUTS_CHANGED_UNKNOWN = 0;
+    SHORTCUTS_CHANGED_USER_ID = 1;
+    SHORTCUTS_CHANGED_PACKAGE_COUNT = 2;
+    SHORTCUTS_CHANGED_SHORTCUT_COUNT = 3;
+  }
+
   // Explanations for notification importance, derived from
   // NotificationRecord.mImportanceExplanation.
   enum NotificationImportanceExplanation {
@@ -7224,10 +7232,23 @@ message MetricsEvent {
     // OS: Q
     ASSISTANT = 1716;
 
+    // ACTION: Published shortcuts in ShortcutManager changed
+    //   TYPE: All the SHORTCUTS_CHANGED_* values in ShortcutsChangesInfo
+    // OS: Q
+    ACTION_SHORTCUTS_CHANGED = 1717;
+
+    // ACTION: Direct share targets loaded via ShortcutManager
+    // OS: Q
+    ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER = 1718;
+
+    // ACTION: Direct share targets loaded via ChooserService
+    // OS: Q
+    ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE = 1719;
+
     // Field indicating that an autofill session was created just for augmented autofill purposes.
     // OS: Q
     // Value: 1 for true, absent when false
-    FIELD_AUTOFILL_AUGMENTED_ONLY = 1717;
+    FIELD_AUTOFILL_AUGMENTED_ONLY = 1720;
 
     // The augmented autofill service set its whitelisted packages and activities.
     // OS: Q
@@ -7235,17 +7256,17 @@ message MetricsEvent {
     // request
     // Tag FIELD_AUTOFILL_NUMBER_PACKAGES: Number of whitelisted packages.
     // Tag FIELD_AUTOFILL_NUMBER_ACTIVITIES: Number of whitelisted activities.
-    AUTOFILL_AUGMENTED_WHITELIST_REQUEST = 1718;
+    AUTOFILL_AUGMENTED_WHITELIST_REQUEST = 1721;
 
     // Generic field used to indicate the number of packages in an Autofill metric (typically a
     // whitelist request).
     // OS: Q
-    FIELD_AUTOFILL_NUMBER_PACKAGES = 1719;
+    FIELD_AUTOFILL_NUMBER_PACKAGES = 1722;
 
     // Generic field used to indicate the number of activities in an Autofill metric (typically a
     // whitelist request).
     // OS: Q
-    FIELD_AUTOFILL_NUMBER_ACTIVITIES = 1720;
+    FIELD_AUTOFILL_NUMBER_ACTIVITIES = 1723;
 
     // Reports the result of a request made to the augmented autofill service
     // OS: Q
@@ -7261,7 +7282,7 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric
     // Tag FIELD_AUTOFILL_DURATION: how long it took (in ms) to the service to respond, or -1 if the
     // type of response could not be determined
-    AUTOFILL_AUGMENTED_RESPONSE = 1721;
+    AUTOFILL_AUGMENTED_RESPONSE = 1724;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
