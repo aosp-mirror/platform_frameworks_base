@@ -35,4 +35,5 @@ message AdbDebuggingManagerProto {
     optional string last_key_recevied = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
     optional string user_keys = 3 [ (android.privacy).dest = DEST_LOCAL ];
     optional string system_keys = 4 [ (android.privacy).dest = DEST_LOCAL ];
+    optional string keystore = 5 [ (android.privacy).dest = DEST_LOCAL ];
 }
