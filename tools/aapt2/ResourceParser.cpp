@@ -693,7 +693,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
 
   // If the resource type was not recognized, write the error and return false.
   diag_->Error(DiagMessage(out_resource->source)
-              << "unknown resource type '" << parser->element_name() << "'");
+              << "unknown resource type '" << resource_type << "'");
   return false;
 }
 
