@@ -549,6 +549,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Last systemUiVisibility we dispatched to windows.
     private int mLastDispatchedSystemUiVisibility = 0;
 
+    /** Corner radius that windows should have in order to match the display. */
+    private final float mWindowCornerRadius;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
@@ -909,6 +912,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mWmService.mSystemReady) {
             mDisplayPolicy.systemReady();
         }
+        mWindowCornerRadius = mDisplayPolicy.getWindowCornerRadius();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
@@ -951,6 +955,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     int getDisplayId() {
         return mDisplayId;
+    }
+
+    float getWindowCornerRadius() {
+        return mWindowCornerRadius;
     }
 
     WindowToken getWindowToken(IBinder binder) {
