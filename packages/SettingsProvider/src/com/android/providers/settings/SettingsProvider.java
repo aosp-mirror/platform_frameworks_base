@@ -3237,7 +3237,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 177;
+            private static final int SETTINGS_VERSION = 178;
 
             private final int mUserId;
 
@@ -4335,6 +4335,25 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 177;
+                }
+
+                if (currentVersion == 177) {
+                    // Version 177: Set the default value for Secure Settings: AWARE_ENABLED
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    final Setting awareEnabled = secureSettings.getSettingLocked(
+                            Secure.AWARE_ENABLED);
+
+                    if (awareEnabled.isNull()) {
+                        final boolean defAwareEnabled = getContext().getResources().getBoolean(
+                                R.bool.def_aware_enabled);
+                        secureSettings.insertSettingLocked(
+                                Secure.AWARE_ENABLED, defAwareEnabled ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 178;
                 }
 
 
