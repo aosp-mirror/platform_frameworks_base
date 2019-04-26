@@ -293,6 +293,12 @@ public class FaceDialogView extends BiometricDialogView {
                 mTryAgainButton.setVisibility(View.GONE);
             }
         }
+
+        if (show) {
+            mPositiveButton.setVisibility(View.GONE);
+        } else if (!show && requiresConfirmation()) {
+            mPositiveButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
