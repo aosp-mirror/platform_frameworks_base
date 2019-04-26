@@ -2051,28 +2051,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void createPhysicalNetwork(int netId, int permission) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.networkCreatePhysical(netId, permission);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void createVirtualNetwork(int netId, boolean secure) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.networkCreateVpn(netId, secure);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void addInterfaceToNetwork(String iface, int netId) {
         modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, netId, iface);
     }
