@@ -72,8 +72,4 @@ interface IIpSecService
             int tunnelResourceId, int direction, int transformResourceId, in String callingPackage);
 
     void removeTransportModeTransforms(in ParcelFileDescriptor socket);
-
-    int lockEncapSocketForNattKeepalive(int encapSocketResourceId, int requesterUid);
-
-    void releaseNattKeepalive(int nattKeepaliveResourceId, int ownerUid);
 }
