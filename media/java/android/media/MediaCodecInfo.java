@@ -1709,7 +1709,6 @@ public final class MediaCodecInfo {
                                 * mBlockSize.getHeight());
                 mMaxFrameRate = Math.max(1, Math.max(frameRate, maxFrameRate));
                 mMaxMacroBlockRate = Math.max(1, frameRate) * getMaxMacroBlocks();
-                Log.i("PP", "Created " + this);
             }
 
             /**
@@ -1730,14 +1729,6 @@ public final class MediaCodecInfo {
                         new Size(Math.max(newBlockSize.getWidth(), pp.mBlockSize.getWidth() * 16),
                                  Math.max(newBlockSize.getHeight(), pp.mBlockSize.getHeight() * 16))
                 );
-                /*
-                // these are guaranteed not to overflow as size * blockSize is decimated by 16
-                width = align(pp.width * pp.blockSize.getWidth(), blockSize.getWidth());
-                height = align(pp.height * pp.blockSize.getHeight(), blockSize.getHeight());
-                frameRate = pp.frameRate;
-                macroBlockRate = align(pp.macroBlockRate, blockSize.getWidth * blockSize.getHeight());
-                */
-                Log.i("PP", " from " + pp + " and " + newBlockSize);
             }
 
             /**
