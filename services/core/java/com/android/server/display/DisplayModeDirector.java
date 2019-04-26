@@ -54,9 +54,6 @@ public class DisplayModeDirector {
     // specific display.
     private static final int GLOBAL_ID = -1;
 
-    // What we consider to be the system's "default" refresh rate.
-    private static final float DEFAULT_REFRESH_RATE = 60f;
-
     // The tolerance within which we consider something approximately equals.
     private static final float EPSILON = 0.001f;
 
@@ -536,7 +533,7 @@ public class DisplayModeDirector {
 
         private void updateRefreshRateSettingLocked() {
             float peakRefreshRate = Settings.System.getFloat(mContext.getContentResolver(),
-                    Settings.System.PEAK_REFRESH_RATE, DEFAULT_REFRESH_RATE);
+                    Settings.System.PEAK_REFRESH_RATE, mDefaultPeakRefreshRate);
             Vote vote = Vote.forRefreshRates(0f, peakRefreshRate);
             updateVoteLocked(Vote.PRIORITY_USER_SETTING, vote);
         }
