@@ -140,6 +140,10 @@ public class UiccSlotInfo implements Parcelable {
         return mIsEuicc;
     }
 
+    /**
+     * Returns the ICCID of a the UICC in the given slot, or the EID if it is an eUICC. Note that if
+     * the value is unavailble this will return null.
+     */
     public String getCardId() {
         return mCardId;
     }
