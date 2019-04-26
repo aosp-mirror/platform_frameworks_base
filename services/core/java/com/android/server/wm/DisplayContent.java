@@ -2462,6 +2462,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void switchUser() {
         super.switchUser();
         mWmService.mWindowsChanged = true;
+        mDisplayPolicy.switchUser();
     }
 
     private void resetAnimationBackgroundAnimator() {
