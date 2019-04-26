@@ -65,6 +65,7 @@ import android.net.Uri;
 import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -148,8 +149,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 
 /**
@@ -788,6 +792,7 @@ public class Activity extends ContextThemeWrapper
     private Instrumentation mInstrumentation;
     @UnsupportedAppUsage
     private IBinder mToken;
+    private IBinder mAssistToken;
     @UnsupportedAppUsage
     private int mIdent;
     @UnsupportedAppUsage
@@ -866,7 +871,7 @@ public class Activity extends ContextThemeWrapper
     private boolean mEnableDefaultActionBarUp;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private VoiceInteractor mVoiceInteractor;
+    VoiceInteractor mVoiceInteractor;
 
     @UnsupportedAppUsage
     private CharSequence mTitle;
@@ -1858,9 +1863,12 @@ public class Activity extends ContextThemeWrapper
 
     void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
         if (mVoiceInteractor != null) {
-            for (Request activeRequest: mVoiceInteractor.getActiveRequests()) {
-                activeRequest.cancel();
-                activeRequest.clear();
+            final Request[] requests = mVoiceInteractor.getActiveRequests();
+            if (requests != null) {
+                for (Request activeRequest : mVoiceInteractor.getActiveRequests()) {
+                    activeRequest.cancel();
+                    activeRequest.clear();
+                }
             }
         }
         if (voiceInteractor == null) {
@@ -2314,6 +2322,47 @@ public class Activity extends ContextThemeWrapper
      */
     public void onProvideAssistContent(AssistContent outContent) {
     }
+
+    /**
+     * Returns the list of direct actions supported by the app.
+     *
+     * <p>You should return the list of actions that could be executed in the
+     * current context, which is in the current state of the app. If the actions
+     * that could be executed by the app changes you should report that via
+     * calling {@link VoiceInteractor#notifyDirectActionsChanged()}.
+     *
+     * <p>To get the voice interactor you need to call {@link #getVoiceInteractor()}
+     * which would return non <code>null<c/ode> only if there is an ongoing voice
+     * interaction session. You an also detect when the voice interactor is no
+     * longer valid because the voice interaction session that is backing is finished
+     * by calling {@link VoiceInteractor#registerOnDestroyedCallback(Executor, Runnable)}.
+     *
+     * <p>This method will be called only after {@link #onStart()} is being called and
+     * before {@link #onStop()} is being called.
+     *
+     * @return The currently supported direct actions which cannot be <code>null</code>
+     * or contain <code>null</null> elements.
+     */
+    @NonNull
+    public List<DirectAction> onGetDirectActions() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * This is called to perform an action previously defined by the app.
+     * Apps also have access to {@link #getVoiceInteractor()} to follow up on the action.
+     *
+     * @param actionId The ID for the action
+     * @param arguments Any additional arguments provided by the caller
+     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null}
+     *                          if none.
+     * @param resultListener The callback to provide the result back to the caller
+     *
+     * @see #onGetDirectActions()
+     */
+    public void onPerformDirectAction(@NonNull String actionId,
+            @Nullable Bundle arguments, @Nullable CancellationSignal cancellationSignal,
+            @NonNull Consumer<Bundle> resultListener) { }
 
     /**
      * Request the Keyboard Shortcuts screen to show up. This will trigger
@@ -7626,7 +7675,7 @@ public class Activity extends ContextThemeWrapper
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
-            Window window, ActivityConfigCallback activityConfigCallback) {
+            Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken) {
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
@@ -7647,6 +7696,7 @@ public class Activity extends ContextThemeWrapper
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
+        mAssistToken = assistToken;
         mIdent = ident;
         mApplication = application;
         mIntent = intent;
@@ -7695,6 +7745,11 @@ public class Activity extends ContextThemeWrapper
     @UnsupportedAppUsage
     public final IBinder getActivityToken() {
         return mParent != null ? mParent.getActivityToken() : mToken;
+    }
+
+    /** @hide */
+    public final IBinder getAssistToken() {
+        return mParent != null ? mParent.getAssistToken() : mAssistToken;
     }
 
     /** @hide */

@@ -19,6 +19,7 @@ package com.android.server.voiceinteraction;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -47,6 +48,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -705,6 +707,45 @@ public class VoiceInteractionManagerService extends SystemService {
                 try {
                     return mImpl.startAssistantActivityLocked(callingPid, callingUid, token,
                             intent, resolvedType);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void requestDirectActions(@NonNull IBinder token, int taskId, IBinder assistToken,
+                @NonNull RemoteCallback callback) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "requestDirectActions without running voice interaction service");
+                    callback.sendResult(null);
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.requestDirectActionsLocked(token, taskId, assistToken, callback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public void performDirectAction(@NonNull IBinder token, @NonNull String actionId,
+                @NonNull Bundle arguments, int taskId, IBinder assistToken,
+                @Nullable RemoteCallback cancellationCallback,
+                @NonNull RemoteCallback resultCallback) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "performDirectAction without running voice interaction service");
+                    resultCallback.sendResult(null);
+                    return;
+                }
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    mImpl.performDirectActionLocked(token, actionId, arguments, taskId,
+                            assistToken, cancellationCallback, resultCallback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
