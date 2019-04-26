@@ -79,6 +79,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import android.annotation.CallSuper;
 import android.annotation.Size;
@@ -2473,6 +2474,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return getBounds();
     }
 
+    @VisibleForTesting
+    Rect getAnimationBounds(int appStackClipMode) {
+        if (appStackClipMode == STACK_CLIP_BEFORE_ANIM && getStack() != null) {
+            // Using the stack bounds here effectively applies the clipping before animation.
+            return getStack().getBounds();
+        }
+        // Use task-bounds if available so that activity-level letterbox (maxAspectRatio) is
+        // included in the animation.
+        return getTask() != null ? getTask().getBounds() : getBounds();
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -2493,9 +2505,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final AnimationAdapter adapter;
             AnimationAdapter thumbnailAdapter = null;
 
-            // Separate position and size for use in animators. Use task-bounds for now so
-            // that activity-level letterbox (maxAspectRatio) is included in the animation.
-            mTmpRect.set(getTask() != null ? getTask().getBounds() : getBounds());
+            final int appStackClipMode =
+                    getDisplayContent().mAppTransition.getAppStackClipMode();
+
+            // Separate position and size for use in animators.
+            mTmpRect.set(getAnimationBounds(appStackClipMode));
             mTmpPoint.set(mTmpRect.left, mTmpRect.top);
             mTmpRect.offsetTo(0, 0);
 
@@ -2529,8 +2543,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mTransit = transit;
                 mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {
-                final int appStackClipMode =
-                        getDisplayContent().mAppTransition.getAppStackClipMode();
                 mNeedsAnimationBoundsLayer = (appStackClipMode == STACK_CLIP_AFTER_ANIM);
 
                 final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
