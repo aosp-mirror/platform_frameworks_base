@@ -19,9 +19,6 @@ package com.android.internal.os;
 import static android.system.OsConstants.F_SETFD;
 import static android.system.OsConstants.O_CLOEXEC;
 import static android.system.OsConstants.POLLIN;
-import static android.system.OsConstants.STDERR_FILENO;
-import static android.system.OsConstants.STDIN_FILENO;
-import static android.system.OsConstants.STDOUT_FILENO;
 
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
@@ -129,13 +126,9 @@ class ZygoteConnection {
     Runnable processOneCommand(ZygoteServer zygoteServer) {
         String args[];
         ZygoteArguments parsedArgs = null;
-        FileDescriptor[] descriptors;
 
         try {
             args = Zygote.readArgumentList(mSocketReader);
-
-            // TODO (chriswailes): Remove this and add an assert.
-            descriptors = mSocket.getAncillaryFileDescriptors();
         } catch (IOException ex) {
             throw new IllegalStateException("IOException on command socket", ex);
         }
@@ -279,14 +272,13 @@ class ZygoteConnection {
                 IoUtils.closeQuietly(serverPipeFd);
                 serverPipeFd = null;
 
-                return handleChildProc(parsedArgs, descriptors, childPipeFd,
-                        parsedArgs.mStartChildZygote);
+                return handleChildProc(parsedArgs, childPipeFd, parsedArgs.mStartChildZygote);
             } else {
                 // In the parent. A pid < 0 indicates a failure and will be handled in
                 // handleParentProc.
                 IoUtils.closeQuietly(childPipeFd);
                 childPipeFd = null;
-                handleParentProc(pid, descriptors, serverPipeFd);
+                handleParentProc(pid, serverPipeFd);
                 return null;
             }
         } finally {
@@ -546,11 +538,10 @@ class ZygoteConnection {
      * if successful or returning if failed.
      *
      * @param parsedArgs non-null; zygote args
-     * @param descriptors null-ok; new file descriptors for stdio if available.
      * @param pipeFd null-ok; pipe for communication back to Zygote.
      * @param isZygote whether this new child process is itself a new Zygote.
      */
-    private Runnable handleChildProc(ZygoteArguments parsedArgs, FileDescriptor[] descriptors,
+    private Runnable handleChildProc(ZygoteArguments parsedArgs,
             FileDescriptor pipeFd, boolean isZygote) {
         /**
          * By the time we get here, the native code has closed the two actual Zygote
@@ -559,19 +550,6 @@ class ZygoteConnection {
          */
 
         closeSocket();
-        if (descriptors != null) {
-            try {
-                Os.dup2(descriptors[0], STDIN_FILENO);
-                Os.dup2(descriptors[1], STDOUT_FILENO);
-                Os.dup2(descriptors[2], STDERR_FILENO);
-
-                for (FileDescriptor fd: descriptors) {
-                    IoUtils.closeQuietly(fd);
-                }
-            } catch (ErrnoException ex) {
-                Log.e(TAG, "Error reopening stdio", ex);
-            }
-        }
 
         if (parsedArgs.mNiceName != null) {
             Process.setArgV0(parsedArgs.mNiceName);
@@ -603,19 +581,11 @@ class ZygoteConnection {
      *
      * @param pid != 0; pid of child if &gt; 0 or indication of failed fork
      * if &lt; 0;
-     * @param descriptors null-ok; file descriptors for child's new stdio if
-     * specified.
      * @param pipeFd null-ok; pipe for communication with child.
      */
-    private void handleParentProc(int pid, FileDescriptor[] descriptors, FileDescriptor pipeFd) {
+    private void handleParentProc(int pid, FileDescriptor pipeFd) {
         if (pid > 0) {
             setChildPgid(pid);
-        }
-
-        if (descriptors != null) {
-            for (FileDescriptor fd: descriptors) {
-                IoUtils.closeQuietly(fd);
-            }
         }
 
         boolean usingWrapper = false;
