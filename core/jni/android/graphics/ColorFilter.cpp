@@ -46,14 +46,14 @@ public:
     }
 
     static jlong CreateColorMatrixFilter(JNIEnv* env, jobject, jfloatArray jarray) {
-        AutoJavaFloatArray autoArray(env, jarray, 20);
-        const float* src = autoArray.ptr();
-
-#ifdef SK_SCALAR_IS_FLOAT
-        return reinterpret_cast<jlong>(SkColorFilters::MatrixRowMajor255(src).release());
-#else
-        SkASSERT(false);
-#endif
+        float matrix[20];
+        env->GetFloatArrayRegion(jarray, 0, 20, matrix);
+        // java biases the translates by 255, so undo that before calling skia
+        matrix[ 4] *= (1.0f/255);
+        matrix[ 9] *= (1.0f/255);
+        matrix[14] *= (1.0f/255);
+        matrix[19] *= (1.0f/255);
+        return reinterpret_cast<jlong>(SkColorFilters::Matrix(matrix).release());
     }
 };
 
