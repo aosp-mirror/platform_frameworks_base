@@ -26,6 +26,7 @@ import android.app.IAppTask;
 import android.app.IAssistDataReceiver;
 import android.app.IInstrumentationWatcher;
 import android.app.IProcessObserver;
+import android.app.IRequestFinishCallback;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
@@ -484,4 +485,12 @@ interface IActivityTaskManager {
      * @param activityToken The token of the target activity to restart.
      */
     void restartActivityProcessIfVisible(in IBinder activityToken);
+
+    /**
+     * Reports that an Activity received a back key press when there were no additional activities
+     * on the back stack. If the Activity should be finished, the callback will be invoked. A
+     * callback is used instead of finishing the activity directly from the server such that the
+     * client may perform actions prior to finishing.
+     */
+    void onBackPressedOnTaskRoot(in IBinder activityToken, in IRequestFinishCallback callback);
 }

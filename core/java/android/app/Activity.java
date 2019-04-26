@@ -3666,7 +3666,25 @@ public class Activity extends ContextThemeWrapper
 
         FragmentManager fragmentManager = mFragments.getFragmentManager();
 
-        if (fragmentManager.isStateSaved() || !fragmentManager.popBackStackImmediate()) {
+        if (!fragmentManager.isStateSaved() && fragmentManager.popBackStackImmediate()) {
+            return;
+        }
+        if (!isTaskRoot()) {
+            // If the activity is not the root of the task, allow finish to proceed normally.
+            finishAfterTransition();
+            return;
+        }
+        try {
+            // Inform activity task manager that the activity received a back press
+            // while at the root of the task. This call allows ActivityTaskManager
+            // to intercept or defer finishing.
+            ActivityTaskManager.getService().onBackPressedOnTaskRoot(mToken,
+                    new IRequestFinishCallback.Stub() {
+                        public void requestFinish() {
+                            finishAfterTransition();
+                        }
+                    });
+        } catch (RemoteException e) {
             finishAfterTransition();
         }
     }
