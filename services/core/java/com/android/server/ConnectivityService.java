@@ -3070,15 +3070,40 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // fallback network the default or requested a new network from the
             // NetworkFactories, so network traffic isn't interrupted for an unnecessarily
             // long time.
-            try {
-                mNetd.networkDestroy(nai.network.netId);
-            } catch (RemoteException | ServiceSpecificException e) {
-                loge("Exception destroying network: " + e);
-            }
+            destroyNativeNetwork(nai);
             mDnsManager.removeNetwork(nai.network);
         }
         synchronized (mNetworkForNetId) {
             mNetIdInUse.delete(nai.network.netId);
+        }
+    }
+
+    private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+        try {
+            // This should never fail.  Specifying an already in use NetID will cause failure.
+            if (networkAgent.isVPN()) {
+                mNetd.networkCreateVpn(networkAgent.network.netId,
+                        (networkAgent.networkMisc == null
+                                || !networkAgent.networkMisc.allowBypass));
+            } else {
+                mNetd.networkCreatePhysical(networkAgent.network.netId,
+                        getNetworkPermission(networkAgent.networkCapabilities));
+            }
+            mDnsResolver.createNetworkCache(networkAgent.network.netId);
+            return true;
+        } catch (RemoteException | ServiceSpecificException e) {
+            loge("Error creating network " + networkAgent.network.netId + ": "
+                    + e.getMessage());
+            return false;
+        }
+    }
+
+    private void destroyNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+        try {
+            mNetd.networkDestroy(networkAgent.network.netId);
+            mDnsResolver.destroyNetworkCache(networkAgent.network.netId);
+        } catch (RemoteException | ServiceSpecificException e) {
+            loge("Exception destroying network: " + e);
         }
     }
 
@@ -6475,21 +6500,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // A network that has just connected has zero requests and is thus a foreground network.
             networkAgent.networkCapabilities.addCapability(NET_CAPABILITY_FOREGROUND);
 
-            try {
-                // This should never fail.  Specifying an already in use NetID will cause failure.
-                if (networkAgent.isVPN()) {
-                    mNMS.createVirtualNetwork(networkAgent.network.netId,
-                            (networkAgent.networkMisc == null ||
-                                !networkAgent.networkMisc.allowBypass));
-                } else {
-                    mNMS.createPhysicalNetwork(networkAgent.network.netId,
-                            getNetworkPermission(networkAgent.networkCapabilities));
-                }
-            } catch (Exception e) {
-                loge("Error creating network " + networkAgent.network.netId + ": "
-                        + e.getMessage());
-                return;
-            }
+            if (!createNativeNetwork(networkAgent)) return;
             networkAgent.created = true;
         }
 
