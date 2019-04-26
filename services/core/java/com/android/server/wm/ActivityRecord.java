@@ -417,6 +417,9 @@ final class ActivityRecord extends ConfigurationContainer {
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
 
+    // Token for targeting this activity for assist purposes.
+    final Binder assistToken = new Binder();
+
     private static String startingWindowStateToString(int state) {
         switch (state) {
             case STARTING_WINDOW_NOT_SHOWN:

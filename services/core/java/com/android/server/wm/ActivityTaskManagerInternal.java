@@ -34,6 +34,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.Pair;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
@@ -87,6 +88,16 @@ public abstract class ActivityTaskManagerInternal {
      */
     public static final int APP_TRANSITION_RECENTS_ANIM =
             AppProtoEnums.APP_TRANSITION_RECENTS_ANIM; // 5
+
+    /**
+     * The id of the task source of assist state.
+     */
+    public static final String ASSIST_TASK_ID = "taskId";
+
+    /**
+     * The id of the activity source of assist state.
+     */
+    public static final String ASSIST_ACTIVITY_ID = "activityId";
 
     /**
      * The bundle key to extract the assist data.
@@ -328,6 +339,40 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
 
+    public final class ActivityTokens {
+        private final @NonNull IBinder mActivityToken;
+        private final @NonNull IBinder mAssistToken;
+        private final @NonNull IApplicationThread mAppThread;
+
+        public ActivityTokens(@NonNull IBinder activityToken,
+                @NonNull IBinder assistToken, @NonNull IApplicationThread appThread) {
+            mActivityToken = activityToken;
+            mAssistToken = assistToken;
+            mAppThread = appThread;
+        }
+
+        /**
+         * @return The activity token.
+         */
+        public @NonNull IBinder getActivityToken() {
+            return mActivityToken;
+        }
+
+        /**
+         * @return The assist token.
+         */
+        public @NonNull IBinder getAssistToken() {
+            return mAssistToken;
+        }
+
+        /**
+         * @return The assist token.
+         */
+        public @NonNull IApplicationThread getApplicationThread() {
+            return mAppThread;
+        }
+    }
+
     /**
      * Set the corresponding display information for the process global configuration. To be called
      * when we need to show IME on a different display.
@@ -341,6 +386,14 @@ public abstract class ActivityTaskManagerInternal {
             String resultWho, int requestCode, int resultCode, Intent data);
     public abstract void clearPendingResultForActivity(
             IBinder activityToken, WeakReference<PendingIntentRecord> pir);
+
+    /**
+     * @return the activity token and IApplicationThread for the top activity in the task or null
+     * if there isn't a top activity with a valid process.
+     */
+    @Nullable
+    public abstract ActivityTokens getTopActivityForTask(int taskId);
+
     public abstract IIntentSender getIntentSender(int type, String packageName,
             int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
