@@ -70,6 +70,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -588,6 +589,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // rollback sessions been applied.
             List<RollbackData> enabling = new ArrayList<>();
             List<RollbackData> restoreInProgress = new ArrayList<>();
+            Set<String> apexPackageNames = new HashSet<>();
             synchronized (mLock) {
                 ensureRollbackDataLoadedLocked();
                 for (RollbackData data : mRollbacks) {
@@ -596,6 +598,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             enabling.add(data);
                         } else if (data.restoreUserDataInProgress) {
                             restoreInProgress.add(data);
+                        }
+
+                        for (PackageRollbackInfo info : data.info.getPackages()) {
+                            if (info.isApex()) {
+                                apexPackageNames.add(info.getPackageName());
+                            }
                         }
                     }
                 }
@@ -632,6 +640,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         saveRollbackData(data);
                     }
                 }
+            }
+
+            for (String apexPackageName : apexPackageNames) {
+                // We will not recieve notifications when an apex is updated,
+                // so check now in case any rollbacks ought to be expired. The
+                // onPackagedReplace function is safe to call if the package
+                // hasn't actually been updated.
+                onPackageReplaced(apexPackageName);
             }
 
             mPackageHealthObserver.onBootCompleted();
