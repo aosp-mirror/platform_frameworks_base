@@ -195,6 +195,18 @@ public abstract class DhcpPacket {
     public static final String VENDOR_INFO_ANDROID_METERED = "ANDROID_METERED";
 
     /**
+     * DHCP Optional Type: Option overload option
+     */
+    protected static final byte DHCP_OPTION_OVERLOAD = 52;
+
+    /**
+     * Possible values of the option overload option.
+     */
+    private static final byte OPTION_OVERLOAD_FILE = 1;
+    private static final byte OPTION_OVERLOAD_SNAME = 2;
+    private static final byte OPTION_OVERLOAD_BOTH = 3;
+
+    /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
@@ -853,7 +865,8 @@ public abstract class DhcpPacket {
         Inet4Address ipDst = null;
         Inet4Address bcAddr = null;
         Inet4Address requestedIp = null;
-        String serverHostName = null;
+        String serverHostName;
+        byte optionOverload = 0;
 
         // The following are all unsigned integers. Internally we store them as signed integers of
         // the same length because that way we're guaranteed that they can't be out of the range of
@@ -1108,6 +1121,11 @@ public abstract class DhcpPacket {
                             // Embedded nulls are safe as this does not get passed to netd.
                             vendorInfo = readAsciiString(packet, optionLen, true);
                             break;
+                        case DHCP_OPTION_OVERLOAD:
+                            expectedLen = 1;
+                            optionOverload = packet.get();
+                            optionOverload &= OPTION_OVERLOAD_BOTH;
+                            break;
                         default:
                             // ignore any other parameters
                             for (int i = 0; i < optionLen; i++) {
@@ -1198,7 +1216,11 @@ public abstract class DhcpPacket {
         newPacket.mT2 = T2;
         newPacket.mVendorId = vendorId;
         newPacket.mVendorInfo = vendorInfo;
-        newPacket.mServerHostName = serverHostName;
+        if ((optionOverload & OPTION_OVERLOAD_SNAME) == 0) {
+            newPacket.mServerHostName = serverHostName;
+        } else {
+            newPacket.mServerHostName = "";
+        }
         return newPacket;
     }
 

@@ -302,8 +302,9 @@ public class DhcpPacketTest {
     }
 
     private void assertDhcpResults(String ipAddress, String gateway, String dnsServersString,
-            String domains, String serverAddress, String vendorInfo, int leaseDuration,
-            boolean hasMeteredHint, int mtu, DhcpResults dhcpResults) throws Exception {
+            String domains, String serverAddress, String serverHostName, String vendorInfo,
+            int leaseDuration, boolean hasMeteredHint, int mtu, DhcpResults dhcpResults)
+                    throws Exception {
         assertEquals(new LinkAddress(ipAddress), dhcpResults.ipAddress);
         assertEquals(v4Address(gateway), dhcpResults.gateway);
 
@@ -316,6 +317,7 @@ public class DhcpPacketTest {
 
         assertEquals(domains, dhcpResults.domains);
         assertEquals(v4Address(serverAddress), dhcpResults.serverAddress);
+        assertEquals(serverHostName, dhcpResults.serverHostName);
         assertEquals(vendorInfo, dhcpResults.vendorInfo);
         assertEquals(leaseDuration, dhcpResults.leaseDuration);
         assertEquals(hasMeteredHint, dhcpResults.hasMeteredHint());
@@ -352,7 +354,7 @@ public class DhcpPacketTest {
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.159.247/20", "192.168.159.254", "8.8.8.8,8.8.4.4",
-                null, "192.168.144.3", null, 7200, false, 0, dhcpResults);
+                null, "192.168.144.3", "", null, 7200, false, 0, dhcpResults);
     }
 
     @Test
@@ -366,9 +368,9 @@ public class DhcpPacketTest {
             "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
             // MAC address.
             "30766ff2a90c00000000000000000000" +
-            // Server name.
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Server name ("dhcp.android.com" plus invalid "AAAA" after null terminator).
+            "646863702e616e64726f69642e636f6d00000000000000000000000000000000" +
+            "0000000000004141414100000000000000000000000000000000000000000000" +
             // File.
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000" +
@@ -383,7 +385,8 @@ public class DhcpPacketTest {
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.43.247/24", "192.168.43.1", "192.168.43.1",
-                null, "192.168.43.1", "ANDROID_METERED", 3600, true, 0, dhcpResults);
+                null, "192.168.43.1", "dhcp.android.com", "ANDROID_METERED", 3600, true, 0,
+                dhcpResults);
         assertTrue(dhcpResults.hasMeteredHint());
     }
 
@@ -588,7 +591,7 @@ public class DhcpPacketTest {
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.159.247/20", "192.168.159.254", "8.8.8.8,8.8.4.4",
-                null, "192.168.144.3", null, 7200, false, expectedMtu, dhcpResults);
+                null, "192.168.144.3", "", null, 7200, false, expectedMtu, dhcpResults);
     }
 
     @Test
@@ -732,7 +735,7 @@ public class DhcpPacketTest {
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("172.17.152.118/16", "172.17.1.1", "172.17.1.1",
-                null, "1.1.1.1", null, 43200, false, 0, dhcpResults);
+                null, "1.1.1.1", "", null, 43200, false, 0, dhcpResults);
     }
 
     @Test
@@ -762,7 +765,7 @@ public class DhcpPacketTest {
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.63.93.4/20", "10.63.80.1", "192.0.2.1,192.0.2.2",
-                "domain123.co.uk", "192.0.2.254", null, 49094, false, 0, dhcpResults);
+                "domain123.co.uk", "192.0.2.254", "", null, 49094, false, 0, dhcpResults);
     }
 
     @Test
@@ -795,7 +798,7 @@ public class DhcpPacketTest {
         assertEquals("BCF5AC000000", HexDump.toHexString(offerPacket.getClientMac()));
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.32.158.205/20", "10.32.144.1", "148.88.65.52,148.88.65.53",
-                "lancs.ac.uk", "10.32.255.128", null, 7200, false, 0, dhcpResults);
+                "lancs.ac.uk", "10.32.255.128", "", null, 7200, false, 0, dhcpResults);
     }
 
     @Test
@@ -830,7 +833,7 @@ public class DhcpPacketTest {
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.15.122.242/16", "10.15.200.23",
                 "209.129.128.3,209.129.148.3,209.129.128.6",
-                "wvm.edu", "10.1.105.252", null, 86400, false, 0, dhcpResults);
+                "wvm.edu", "10.1.105.252", "", null, 86400, false, 0, dhcpResults);
     }
 
     @Test
@@ -895,7 +898,7 @@ public class DhcpPacketTest {
         assertEquals("FC3D93000000", HexDump.toHexString(offerPacket.getClientMac()));
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.189.49/24", "192.168.189.1", "8.8.8.8,8.8.4.4",
-                null, "192.171.189.2", null, 28800, false, 0, dhcpResults);
+                null, "192.171.189.2", "", null, 28800, false, 0, dhcpResults);
     }
 
     @Test
