@@ -25,7 +25,6 @@ import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIME
 
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
-import android.metrics.LogMaker;
 import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.Parcel;
@@ -35,10 +34,6 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructPollfd;
 import android.util.Log;
-import android.util.StatsLog;
-
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import dalvik.system.VMRuntime;
 
@@ -53,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A connection that can make spawn requests.
@@ -82,17 +78,16 @@ class ZygoteConnection {
      *
      * @param socket non-null; connected socket
      * @param abiList non-null; a list of ABIs this zygote supports.
-     * @throws IOException
+     * @throws IOException If obtaining the peer credentials fails
      */
     ZygoteConnection(LocalSocket socket, String abiList) throws IOException {
         mSocket = socket;
         this.abiList = abiList;
 
-        mSocketOutStream
-                = new DataOutputStream(socket.getOutputStream());
-
-        mSocketReader = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()), 256);
+        mSocketOutStream = new DataOutputStream(socket.getOutputStream());
+        mSocketReader =
+                new BufferedReader(
+                        new InputStreamReader(socket.getInputStream()), Zygote.SOCKET_BUFFER_SIZE);
 
         mSocket.setSoTimeout(CONNECTION_TIMEOUT_MILLIS);
 
@@ -124,8 +119,7 @@ class ZygoteConnection {
      * for by calling {@code ZygoteConnection.isClosedByPeer}.
      */
     Runnable processOneCommand(ZygoteServer zygoteServer) {
-        String args[];
-        ZygoteArguments parsedArgs = null;
+        String[] args;
 
         try {
             args = Zygote.readArgumentList(mSocketReader);
@@ -140,11 +134,11 @@ class ZygoteConnection {
             return null;
         }
 
-        int pid = -1;
+        int pid;
         FileDescriptor childPipeFd = null;
         FileDescriptor serverPipeFd = null;
 
-        parsedArgs = new ZygoteArguments(args);
+        ZygoteArguments parsedArgs = new ZygoteArguments(args);
 
         if (parsedArgs.mAbiListQuery) {
             handleAbiListQuery();
@@ -229,7 +223,7 @@ class ZygoteConnection {
             }
         }
 
-        /**
+        /*
          * In order to avoid leaking descriptors to the Zygote child,
          * the native code must close the two Zygote socket descriptors
          * in the child process before it switches from Zygote-root to
@@ -254,8 +248,6 @@ class ZygoteConnection {
         if (fd != null) {
             fdsToClose[1] = fd.getInt$();
         }
-
-        fd = null;
 
         pid = Zygote.forkAndSpecialize(parsedArgs.mUid, parsedArgs.mGid, parsedArgs.mGids,
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
@@ -390,82 +382,6 @@ class ZygoteConnection {
         }
     }
 
-    private static class HiddenApiUsageLogger implements VMRuntime.HiddenApiUsageLogger {
-
-        private final MetricsLogger mMetricsLogger = new MetricsLogger();
-        private static HiddenApiUsageLogger sInstance = new HiddenApiUsageLogger();
-        private int mHiddenApiAccessLogSampleRate = 0;
-        private int mHiddenApiAccessStatslogSampleRate = 0;
-
-        public static void setHiddenApiAccessLogSampleRates(int sampleRate, int newSampleRate) {
-            sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
-            sInstance.mHiddenApiAccessStatslogSampleRate = newSampleRate;
-        }
-
-        public static HiddenApiUsageLogger getInstance() {
-            return HiddenApiUsageLogger.sInstance;
-        }
-
-        public void hiddenApiUsed(int sampledValue, String packageName, String signature,
-                int accessMethod, boolean accessDenied) {
-            if (sampledValue < mHiddenApiAccessLogSampleRate) {
-                logUsage(packageName, signature, accessMethod, accessDenied);
-            }
-            if (sampledValue < mHiddenApiAccessStatslogSampleRate) {
-                newLogUsage(signature, accessMethod, accessDenied);
-            }
-        }
-
-        private void logUsage(String packageName, String signature, int accessMethod,
-                                  boolean accessDenied) {
-            int accessMethodMetric = HiddenApiUsageLogger.ACCESS_METHOD_NONE;
-            switch(accessMethod) {
-                case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_NONE;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_REFLECTION:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_REFLECTION;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_JNI:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_JNI;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_LINKING:
-                    accessMethodMetric = MetricsEvent.ACCESS_METHOD_LINKING;
-                    break;
-            }
-            LogMaker logMaker = new LogMaker(MetricsEvent.ACTION_HIDDEN_API_ACCESSED)
-                    .setPackageName(packageName)
-                    .addTaggedData(MetricsEvent.FIELD_HIDDEN_API_SIGNATURE, signature)
-                    .addTaggedData(MetricsEvent.FIELD_HIDDEN_API_ACCESS_METHOD,
-                        accessMethodMetric);
-            if (accessDenied) {
-                logMaker.addTaggedData(MetricsEvent.FIELD_HIDDEN_API_ACCESS_DENIED, 1);
-            }
-            mMetricsLogger.write(logMaker);
-        }
-
-        private void newLogUsage(String signature, int accessMethod, boolean accessDenied) {
-            int accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
-            switch(accessMethod) {
-                case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
-                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_REFLECTION:
-                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__REFLECTION;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_JNI:
-                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__JNI;
-                    break;
-                case HiddenApiUsageLogger.ACCESS_METHOD_LINKING:
-                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__LINKING;
-                    break;
-            }
-            int uid = Process.myUid();
-            StatsLog.write(StatsLog.HIDDEN_API_USED, uid, signature,
-                                   accessMethodProto, accessDenied);
-        }
-    }
-
     /**
      * Changes the API access log sample rate for the Zygote and processes spawned from it.
      *
@@ -485,8 +401,9 @@ class ZygoteConnection {
         return stateChangeWithUsapPoolReset(zygoteServer, () -> {
             int maxSamplingRate = Math.max(samplingRate, statsdSamplingRate);
             ZygoteInit.setHiddenApiAccessLogSampleRate(maxSamplingRate);
-            HiddenApiUsageLogger.setHiddenApiAccessLogSampleRates(samplingRate, statsdSamplingRate);
-            ZygoteInit.setHiddenApiUsageLogger(HiddenApiUsageLogger.getInstance());
+            StatsdHiddenApiUsageLogger.setHiddenApiAccessLogSampleRates(
+                    samplingRate, statsdSamplingRate);
+            ZygoteInit.setHiddenApiUsageLogger(StatsdHiddenApiUsageLogger.getInstance());
         });
     }
 
@@ -543,7 +460,7 @@ class ZygoteConnection {
      */
     private Runnable handleChildProc(ZygoteArguments parsedArgs,
             FileDescriptor pipeFd, boolean isZygote) {
-        /**
+        /*
          * By the time we get here, the native code has closed the two actual Zygote
          * socket connections, and substituted /dev/null in their place.  The LocalSocket
          * objects still need to be closed properly.
@@ -594,11 +511,11 @@ class ZygoteConnection {
                 // bail) happens in a timely manner.
                 final int BYTES_REQUIRED = 4;  // Bytes in an int.
 
-                StructPollfd fds[] = new StructPollfd[] {
+                StructPollfd[] fds = new StructPollfd[] {
                         new StructPollfd()
                 };
 
-                byte data[] = new byte[BYTES_REQUIRED];
+                byte[] data = new byte[BYTES_REQUIRED];
 
                 int remainingSleepTime = WRAPPED_PID_TIMEOUT_MILLIS;
                 int dataIndex = 0;
@@ -612,7 +529,10 @@ class ZygoteConnection {
 
                     int res = android.system.Os.poll(fds, remainingSleepTime);
                     long endTime = System.nanoTime();
-                    int elapsedTimeMs = (int)((endTime - startTime) / 1000000l);
+                    int elapsedTimeMs =
+                            (int) TimeUnit.MILLISECONDS.convert(
+                                    endTime - startTime,
+                                    TimeUnit.NANOSECONDS);
                     remainingSleepTime = WRAPPED_PID_TIMEOUT_MILLIS - elapsedTimeMs;
 
                     if (res > 0) {
