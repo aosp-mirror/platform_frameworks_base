@@ -1,7 +1,12 @@
 {
   "postsubmit": [
     {
-      "name": "CtsDevicePolicyManagerTestCases"
+      "name": "CtsDevicePolicyManagerTestCases",
+      "options": [
+        {
+          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        }
+      ]
     }
   ]
 }
