@@ -453,6 +453,11 @@ public class ChooserActivity extends ResolverActivity {
                 if (mChooserListAdapter == null) {
                     return;
                 }
+                if (resultList.isEmpty()) {
+                    // APS may be disabled, so try querying targets ourselves.
+                    queryDirectShareTargets(mChooserListAdapter, true);
+                    return;
+                }
                 final List<DisplayResolveInfo> driList =
                         getDisplayResolveInfos(mChooserListAdapter);
                 final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
@@ -1272,11 +1277,14 @@ public class ChooserActivity extends ResolverActivity {
         return driList;
     }
 
-    private void queryDirectShareTargets(ChooserListAdapter adapter) {
-        AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
-        if (appPredictor != null) {
-            appPredictor.requestPredictionUpdate();
-            return;
+    private void queryDirectShareTargets(
+                ChooserListAdapter adapter, boolean skipAppPredictionService) {
+        if (!skipAppPredictionService) {
+            AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
+            if (appPredictor != null) {
+                appPredictor.requestPredictionUpdate();
+                return;
+            }
         }
         // Default to just querying ShortcutManager if AppPredictor not present.
         final IntentFilter filter = getTargetIntentFilter();
@@ -1609,7 +1617,7 @@ public class ChooserActivity extends ResolverActivity {
         AbstractResolverComparator resolverComparator;
         if (appPredictor != null) {
             resolverComparator = new AppPredictionServiceResolverComparator(this, getTargetIntent(),
-                    appPredictor, getUser());
+                    getReferrerPackageName(), appPredictor, getUser());
         } else {
             resolverComparator =
                     new ResolverRankerServiceResolverComparator(this, getTargetIntent(),
@@ -2205,7 +2213,7 @@ public class ChooserActivity extends ResolverActivity {
                     Log.d(TAG, "querying direct share targets from ShortcutManager");
                 }
 
-                queryDirectShareTargets(this);
+                queryDirectShareTargets(this, false);
             }
             if (USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS) {
                 if (DEBUG) {
