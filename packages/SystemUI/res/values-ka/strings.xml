@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-ის ძებნა"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS-ით დადგენილი მდებარეობა"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"მდებარეობის მოთხოვნები აქტიურია"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"სენსორების გამორთვა აქტიურია"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ყველა შეტყობინების წაშლა"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"სრული\nსიჩუმე"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"მხოლოდ\nპრიორიტეტულები"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"მხოლოდ\nგაფრთხილებები"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • იტენება უსადენოდ (სრულად დატენვამდე დარჩა<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • იტენება (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> სრულ დატენვამდე)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • იტენება სწრაფად (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> სრულ დატენვამდე)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • იტენება ნელა (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> სრულ დატენვამდე)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"თქვენ დაუკავშირდით <xliff:g id="APPLICATION">%1$s</xliff:g>-ს, რომელსაც თქვენი პირადი ქსელის აქტივობის მონიტორინგი შეუძლია, მათ შორის, ელფოსტის, აპებისა და ვებსაიტების."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"თქვენს სამსახურის პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>. პროფილი დაკავშირებულია <xliff:g id="APPLICATION">%2$s</xliff:g>-თან, რომელსაც შეუძლია ქსელში თქვენი სამსახურეობრივი აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი.\n\nდამატებითი ინფორმაციისთვის დაუკავშირდით თქვენს ადმინისტრატორს."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"თქვენს სამსახურის პროფილს მართავს <xliff:g id="ORGANIZATION">%1$s</xliff:g>. პროფილი დაკავშირებულია <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>-თან, რომელსაც შეუძლია ქსელში თქვენი სამსახურეობრივი აქტივობის (მათ შორის, ელფოსტის, აპებისა და ვებსაიტების) მონიტორინგი.\n\nგარდა ამისა, თქვენ დაკავშირებული ხართ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>-თან, რომელსაც ქსელში თქვენი პირადი აქტივობის მონიტორინგი შეუძლია."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"განბლოკილია TrustAgent-ის მიერ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"მოწყობილობის დარჩება ჩაკეტილი, სანამ ხელით არ გახსნით"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"შეტყობინებების უფრო სწრაფად მიღება"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"იხილეთ განბლოკვამდე"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ჩაკეცვა"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ავტომატური სუბტიტრების მედია"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"მინიშნება სუბტიტრებისთვის"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"სუბტიტრების გადაფარვა"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"ჩართვა"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"გამორთვა"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"გამოტანის მოწყობილობის გადართვა"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ეკრანი ჩამაგრებულია"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ამით ის დარჩება ხედში ჩამაგრების მოხსნამდე. ჩამაგრების მოსახსნელად, ხანგრძლივად შეეხეთ „უკან და მიმოხილვა“-ს."</string>
@@ -640,10 +636,14 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"გაფრთხილების გაგრძელება"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"შეტყობინებების გამორთვა"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"გაგრძელდეს შეტყობინებათა ჩვენება ამ აპიდან?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"დაბლოკილი შეტყობინებები არსად ჩნდება და ბგერას არ გამოსცემს. თქვენ შეგიძლიათ განბლოკოთ შეტყობინებები პარამეტრებიდან."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"ჩუმი შეტყობინებები ჩნდება ჩრდილოვნად, მაგრამ არ ჩნდება ჩაკეტილ ეკრანზე, არ წარმოადგენს ბანერს და არ გამოსცემს ხმას."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"ეს შეტყობინებები გამოსცემს ხმას და გამოჩნდება შეტყობინებების უჯრაში, სტატუსის ზოლში და ჩაკეტილ ეკრანზე"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"ამ შეტყობინებათა გამორთვა ვერ მოხერხდება"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"მსუბუქი"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"პრიორიტეტული"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ყოველთვის ჩუმი. გამოჩნდება ჩამოსაწევ ფარდაში."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ყოველთვის ჩუმი. გამოჩნდება ჩამოსაწევ ფარდაში და სტატუსის ზოლში."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ყოველთვის ჩუმი. გამოჩნდება ჩამოსაწევ ფარდაში და ჩაკეტილ ეკრანზე."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ყოველთვის ჩუმი. გამოჩნდება ჩამოსაწევ ფარდაში, სტატუსის ზოლში და ჩაკეტილ ეკრანზე."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"გამოსცემს ხმას და გამოჩნდება ჩამოსაწევ ფარდაში, სტატუსის ზოლში და ჩაკეტილ ეკრანზე."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"ამ შეტყობინებების შეცვლა შეუძლებელია."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"შეტყობინებების ამ ჯგუფის კონფიგურირება აქ შეუძლებელია"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g>-დან"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ეს აპი იყენებს კამერას."</string>

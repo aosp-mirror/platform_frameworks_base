@@ -34,8 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ખોટો પિન કોડ."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"અમાન્ય કાર્ડ."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"સંપૂર્ણપણે ચાર્જ થયેલ"</string>
-    <!-- no translation found for keyguard_plugged_in_wireless (8404159927155454732) -->
-    <skip />
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • વાયરલેસથી ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ઝડપથી ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ધીમેથી ચાર્જિંગ"</string>

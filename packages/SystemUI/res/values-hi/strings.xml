@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS को खोजा जा रहा है"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"जीपीएस ने यह जगह सेट की है"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"जगह का अनुरोध किया जा रहा है"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"सेंसर बंद हैं"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सभी सूचनाएं साफ़ करें."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"पूरी तरह\nशांत"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"केवल\nप्राथमिकता"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"केवल\nअलार्म"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वायरलेस तरीके से चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • तेज़ चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • धीरे चार्ज हो रहा है (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> में पूरा होगा)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"आप <xliff:g id="APPLICATION">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइट सहित आपकी व्‍यक्‍तिगत नेटवर्क गतिविधि को मॉनिटर कर सकता है."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"आपकी वर्क प्रोफ़ाइल का प्रबंधन <xliff:g id="ORGANIZATION">%1$s</xliff:g> करता है. प्रोफ़ाइल <xliff:g id="APPLICATION">%2$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nऔर जानकारी के लिए, अपने एडमिन से संपर्क करें."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"आपकी कार्य प्रोफ़ाइल का प्रबंधन <xliff:g id="ORGANIZATION">%1$s</xliff:g> करता है. प्रोफ़ाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nआप <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> से भी कनेक्ट हैं, जो आपकी व्यक्तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent की वजह से अनलॉक रखा गया है"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक डिवाइस लॉक रहेगा"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचनाएं ज़्यादा तेज़ी से पाएं"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"आपके द्वारा उन्हें अनलॉक किए जाने से पहले देखें"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"छोटा करें"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"मीडिया में अपने आप कैप्शन जोड़ें"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"कैप्शन सलाह बंद करें"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"कैप्शन ऊपर लगाएं"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"चालू करें"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"बंद करें"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"आउटपुट डिवाइस बदलें"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्‍क्रीन पिन कर दी गई है"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
@@ -640,10 +636,14 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"सूचना देना जारी रखें"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"सूचनाएं बंद करें"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"ब्लॉक की गई सूचनाएं कहीं नहीं दिखाई देती हैं या उनकी कोई आवाज़ नहीं आती. आप सेटिंग में जाकर सूचनाओं को अनब्लॉक कर सकते हैं."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"बिना आवाज़ वाली सूचनाएं अलग रंग में दिखाई देती हैं पर वे लॉक स्क्रीन पर बैनर के रूप में नहीं दिखाई देती हैं, और उनके दिखाई देने पर आवाज़ भी नहीं आती है."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"यह सूचनाएं आवाज़ करेंगी और सूचना की दराज, स्टेटस बार और लॉक स्क्रीन में दिखाई देंगी"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"ये सूचनाएं दिखाया जाना बंद नहीं किया जा सकता"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"बिना आवाज़ के"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"ज़रूरी"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची में दिखाएं."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची और स्टेटस बार पर दिखाएं."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची और लॉक स्क्रीन पर दिखाएं."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची, स्टेटस बार और लॉक स्क्रीन पर दिखाएं."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"सूचना आने पर आवाज़ हाे और नीचे खींचने वाली सूची, स्टेटस बार और लॉक स्क्रीन पर भी दिखाई दे."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> के ज़रिए"</string>
     <string name="appops_camera" msgid="8100147441602585776">"यह ऐप्लिकेशन कैमरे का इस्तेमाल कर रहा है."</string>

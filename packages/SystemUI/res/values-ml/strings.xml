@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-നായി തിരയുന്നു"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ലൊക്കേഷൻ സജ്ജീകരിച്ചത് GPS ആണ്"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"ലൊക്കേഷൻ അഭ്യർത്ഥനകൾ സജീവമാണ്"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"സെൻസറുകൾ ഓഫ് സജീവമാണ്"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"എല്ലാ വിവരങ്ങളും മായ്‌ക്കുക."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"പൂർണ്ണ\nനിശബ്‌ദത"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"മുൻഗണന\nമാത്രം"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"അലാറങ്ങൾ\nമാത്രം"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • വയർലെസ്സ് ആയി ചാർജ് ചെയ്യുന്നു (പൂർണ്ണമാകാൻ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ചാർജ് ചെയ്യുന്നു (പൂർണ്ണമാകാൻ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു (പൂർണ്ണമാകാൻ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു (പൂർണ്ണമാകാൻ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"നിങ്ങൾ <xliff:g id="APPLICATION">%1$s</xliff:g> ആപ്പിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, ഇമെയിലുകൾ, ആപ്‌സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാൻ ഈ ആപ്പിന് കഴിയും."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\nകൂടുതൽ വിവരങ്ങൾക്ക് നിങ്ങളുടെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ആപ്പിലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് നിങ്ങളുടെ വ്യക്തിഗത നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തത്"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"നിങ്ങൾ സ്വമേധയാ അൺലോക്കുചെയ്യുന്നതുവരെ ഉപകരണം ലോക്കുചെയ്‌തതായി തുടരും"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"അറിയിപ്പുകൾ വേഗത്തിൽ സ്വീകരിക്കുക"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"അൺലോക്കുചെയ്യുന്നതിന് മുമ്പ് അവ കാണുക"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ചുരുക്കുക"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"മീഡിയയ്ക്ക് സ്വയമേവ ക്യാപ്ഷൻ"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"അടിക്കുറിപ്പുകൾക്കുള്ള നുറുങ്ങ്"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"അടിക്കുറിപ്പുകൾ മുകളിൽ വയ്ക്കുക"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"ഔട്ട്‌പുട്ട് ഉപകരണം മാറുക"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ\', \'ചുരുക്കവിവരണം\' എന്നിവ സ്‌പർശിച്ച് പിടിക്കുക."</string>
@@ -640,10 +636,22 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"മുന്നറിയിപ്പ് നൽകുന്നത് തുടരുക"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"അറിയിപ്പുകൾ ഓഫാക്കുക"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ഈ ആപ്പിൽ നിന്നുള്ള അറിയിപ്പുകൾ തുടർന്നും കാണിക്കണോ?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"ബ്ലോക്ക് ചെയ്‌ത അറിയിപ്പുകൾ എവിടെയും ദൃശ്യമാവുകയോ ശബ്‌ദം പ്ലേ ചെയ്യുകയോ ഇല്ല. ക്രമീകരണത്തിൽ നിങ്ങൾക്ക് അറിയിപ്പുകൾ അൺബ്ലോക്ക് ചെയ്യാനാവും."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"നിശബ്‌ദ അറിയിപ്പുകൾ ഷെയ്‌ഡിൽ ദൃശ്യമാകും, പക്ഷെ ലോക്ക് സ്‌ക്രീനിൽ ദൃശ്യമാവുകയോ ബാനർ അവതരിപ്പിക്കുകയോ ഒരു ശബ്‌ദം പ്ലേ ചെയ്യുകയോ ഇല്ല."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"ഈ അറിയിപ്പുകൾ ഒരു ശബ്‌ദമുണ്ടാക്കുകയും അറിയിപ്പ് ഡ്രോയർ, സ്‌റ്റാറ്റസ് ബാർ, ലോക്ക് സ്ക്രീൻ എന്നിവയിൽ കാണിക്കുകയും ചെയ്യും"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"ഈ അറിയിപ്പുകൾ ഓഫാക്കാനാവില്ല"</string>
+    <!-- no translation found for notification_silence_title (7352089096356977930) -->
+    <skip />
+    <!-- no translation found for notification_alert_title (3966526305405016221) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
+    <skip />
+    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> വഴി"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ഈ ആപ്പ് ക്യാമറ ഉപയോഗിക്കുന്നുണ്ട്."</string>
