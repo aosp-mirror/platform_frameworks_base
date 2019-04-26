@@ -221,16 +221,6 @@ private:
 
     void drawPoints(const float* points, int count, const SkPaint& paint, SkCanvas::PointMode mode);
 
-    /** Filters the paint for bitmap drawing.
-     *
-     *  After filtering the paint for bitmap drawing,
-     *  also calls filterPaint on the paint.
-     *
-     *  @param paint the paint to filter. Will be initialized with the default
-     *      SkPaint before filtering if filtering is required.
-     */
-    PaintCoW&& filterBitmap(PaintCoW&& paint, sk_sp<SkColorFilter> colorSpaceFilter) const;
-
     class Clip;
 
     std::unique_ptr<SkCanvas> mCanvasOwned;    // might own a canvas we allocated
