@@ -2300,6 +2300,7 @@ public class AssistStructure implements Parcelable {
 
     /**
      * @return The task id for the associated activity.
+     *
      * @hide
      */
     public int getTaskId() {
