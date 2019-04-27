@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS शोधत आहे"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारे स्थान सेट केले"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान विनंत्या सक्रिय"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"सेन्सर बंद आहेत"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सर्व सूचना साफ करा."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"संपूर्ण\nशांतता"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"केवळ\nप्राधान्य"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"केवळ\nअलार्म"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वायरलेस पद्धतीने चार्ज करत आहे (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण चार्ज होईल)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज होत आहे (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • वेगाने चार्ज होत आहे (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • सावकाश चार्ज होत आहे (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मध्ये पूर्ण होईल)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. प्रोफाइल <xliff:g id="APPLICATION">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nअधिक माहितीसाठी, आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते. प्रोफाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या कार्य नेटवर्क क्रियाकलापाचे परीक्षण करू शकते.\n\nतुम्ही <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> शीदेखील कनेक्‍ट केले आहे, जे आपल्या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent ने अनलॉक ठेवले"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"तुम्ही मॅन्युअली अनलॉक करेपर्यंत डिव्हाइस लॉक राहील"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"सूचना अधिक जलद मिळवा"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"तुम्ही अनलॉक करण्‍यापूर्वी त्यांना पहा"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संकुचित करा"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"मीडियाला आपोआप सबटायटल द्या"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"सबटायटल टीप"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"कॅप्शन ओव्हरले करा"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"सुरू करा"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"बंद करा"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"आउटपुट डिव्‍हाइस स्विच करा"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्क्रीन पिन केलेली आहे"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
@@ -640,12 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"सूचना देत रहा"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"सूचना बंद करा"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"या अ‍ॅपकडील सूचना दाखवणे सुरू ठेवायचे?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"ब्लॉक केलेल्या सूचना कुठेही दिसत नाहीत किंवा आवाज प्ले करत नाहीत. तुम्ही सेटिंग्जमध्ये सूचना अनब्लॉक करू शकता."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"सायलंट सूचना रंगछटेमध्ये दिसतात, परंतु लॉक स्क्रीनवर दिसत नाहीत, बॅनर दाखवत नाहीत किंवा आवाज प्ले करत नाहीत."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"या सूचना आवाज करतील आणि सूचना ड्राॅवर, स्टेटस बार आणि लॉक स्क्रीनवर दाखवल्या जातील"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"या सूचना बंद करता येत नाहीत"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"हळू आवाजातील"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"प्राधान्यकृत"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"नेहमी सायलंट. पूल-डाउन शेडमध्ये प्रदर्शित करते."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"नेहमी सायलंट. पूल-डाउन शेड आणि स्टेटस बारमध्ये प्रदर्शित करते."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"नेहमी सायलंट. पूल-डाउन शेडमध्ये आणि लॉक स्क्रीनवर प्रदर्शित करते."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"नेहमी सायलंट. पूल-डाउन शेडमध्ये, स्टेटस बारमध्ये आणि लॉक स्क्रीनवर प्रदर्शित करते."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"आवाज करते आणि पूल-डाउन शेडमध्ये, स्टेटस बारमध्ये आणि लॉक स्क्रीनवर प्रदर्शित करते."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> मार्गे"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"हे अ‍ॅप कॅमेरा वापरत आहे."</string>
     <string name="appops_microphone" msgid="741508267659494555">"हे अ‍ॅप मायक्रोफोन वापरत आहे."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"हे अ‍ॅप स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे."</string>
