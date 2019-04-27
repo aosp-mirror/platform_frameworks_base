@@ -65,17 +65,13 @@ public class FakeStorageManager {
         listener.onStarted(userId, null);
         listener.onFinished(userId, null);
         ArrayList<Pair<byte[], byte[]>> auths = getUserAuth(userId);
-        if (secret != null) {
-            if (auths.size() > 1) {
-                throw new AssertionFailedError("More than one secret exists");
-            }
-            Pair<byte[], byte[]> auth = auths.get(0);
-            if ((!mIgnoreBadUnlock) && auth.second != null && !Arrays.equals(secret, auth.second)) {
-                throw new AssertionFailedError("Invalid secret to unlock user");
-            }
-        } else {
-            if (auths != null && auths.size() > 0) {
-                throw new AssertionFailedError("Cannot unlock encrypted user with empty token");
+        if (auths.size() > 1) {
+            throw new AssertionFailedError("More than one secret exists");
+        }
+        Pair<byte[], byte[]> auth = auths.get(0);
+        if (!Arrays.equals(secret, auth.second)) {
+            if (!mIgnoreBadUnlock) {
+                throw new AssertionFailedError("Invalid secret to unlock user " + userId);
             }
         }
     }
