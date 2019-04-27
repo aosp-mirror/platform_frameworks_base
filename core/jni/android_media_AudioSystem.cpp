@@ -2027,9 +2027,7 @@ static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobjec
 
 static jint android_media_AudioSystem_removeUidDeviceAffinities(JNIEnv *env, jobject clazz,
         jint uid) {
-
-    //###
-    status_t status = NO_ERROR;//AudioSystem::removeUidDeviceAffinities();
+    status_t status = AudioSystem::removeUidDeviceAffinities((uid_t) uid);
     return (jint) nativeToJavaStatus(status);
 }
 
