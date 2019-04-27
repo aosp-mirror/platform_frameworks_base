@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"ស្វែងរក GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"ទីតាំង​​​​​កំណត់​ដោយ GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"សំណើ​ទីតាំង​សកម្ម"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"ឧបករណ៍​ចាប់សញ្ញា​បានបិទ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"សម្អាត​ការ​ជូន​ដំណឹង​ទាំងអស់។"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ស្ងៀមស្ងាត់\nទាំងស្រុង"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"អាទិភាព\nប៉ុណ្ណោះ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"សំឡេងរោទ៍\nប៉ុណ្ណោះ"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុងសាកថ្ម​ឥតខ្សែ (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ទៀត​ទើបពេញ)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុង​សាកថ្ម (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ទៀតទើប​ពេញ)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ទៀតទើបពេញ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • កំពុង​សាកថ្ម​​យឺត (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ទៀតទើប​ពេញ)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"អ្នកត្រូវបានភ្ជាប់ទៅ <xliff:g id="APPLICATION">%1$s</xliff:g> ដែលអាចឃ្លាំមើលសកម្មភាពបណ្តាញរបស់អ្នក រាប់បញ្ចូលទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រ។"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"កម្រង​ព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រងព័ត៌មាន​នេះត្រូវ​បាន​ភ្ជាប់ទៅ <xliff:g id="APPLICATION">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nសម្រាប់​ព័ត៌មាន​បន្ថែម សូម​ទាក់ទង​ទៅអ្នក​គ្រប់គ្រង​របស់​អ្នក។"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ស្ថិតក្រោម​គ្រប់គ្រង​របស់ <xliff:g id="ORGANIZATION">%1$s</xliff:g> ។ កម្រង​ព័ត៌មាននេះ​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។\n\nអ្នកក៏ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​ផ្ទាល់ខ្លួន​របស់​អ្នក។"</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"បាន​ដោះសោ​ដោយភ្នាក់ងារ​​ទុកចិត្ត"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"ឧបករណ៍​នឹង​ចាក់​សោ​រហូត​ដល់​អ្នក​ដោះ​សោ​ដោយ​ដៃ"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ទទួល​បាន​ការ​ជូន​ដំណឹង​កាន់តែ​លឿន"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ឃើញ​ពួកវា​មុន​ពេល​ដោះ​សោ"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"បង្រួម"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"ដាក់ចំណងជើងមេឌៀដោយស្វ័យប្រវត្តិ"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"គន្លឹះអក្សររត់"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"ការដាក់ត្រួតគ្នា​លើអក្សររត់"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"បើក"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"បិទ"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"ប្ដូរ​ឧបករណ៍​បញ្ចេញ​សំឡេង"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
@@ -640,10 +636,14 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"បន្ត​ជូនដំណឹង"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"បិទ​ការជូន​ដំណឹង"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"បន្ត​បង្ហាញ​ការជូនដំណឹង​ពីកម្មវិធីនេះ?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"ការជូនដំណឹង​ដែលបាន​ទប់ស្កាត់មិនបង្ហាញ​នៅគ្រប់ទីកន្លែង ឬបន្លឺសំឡេងទេ។ អ្នក​អាច​ឈប់ទប់ស្កាត់​ការជូនដំណឹង​នៅក្នុងការកំណត់។"</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"ការជូនដំណឹងស្ងាត់​​បង្ហាញ​ជាស្រមោល ប៉ុន្តែ​មិនបង្ហាញ​នៅលើអេក្រង់ចាក់សោ បង្ហាញផ្ទាំងផ្សាយពាណិជ្ជកម្ម ឬបន្លឺសំឡេងទេ។"</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"ការជូនដំណឹង​ទាំងនេះ​នឹង​បន្លឺសំឡេង ហើយ​បង្ហាញ​នៅក្នុងថត​ការជូនដំណឹង របារស្ថានភាព និង​អេក្រង់ចាក់សោ"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"​មិនអាច​បិទការជូនដំណឹង​ទាំងនេះបានទេ"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"ស្ងាត់ៗ"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"ជា​អាទិភាព"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ។"</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ និងរបារ​ស្ថានភាព។"</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ និងនៅលើ​អេក្រង់ចាក់សោ។"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ របារ​ស្ថានភាព និងនៅលើ​អេក្រង់ចាក់សោ។"</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"បញ្ចេញ​សំឡេង និង​បង្ហាញ​នៅក្នុង​ផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ របារ​ស្ថានភាព និង​នៅលើ​អេក្រង់ចាក់សោ។"</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"តាមរយៈ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"កម្មវិធីនេះ​កំពុងប្រើ​កាមេរ៉ា។"</string>

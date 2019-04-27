@@ -75,6 +75,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
@@ -1897,6 +1898,10 @@ public final class OomAdjuster {
             // For apps that sit around for a long time in the interactive state, we need
             // to report this at least once a day so they don't go idle.
             maybeUpdateUsageStatsLocked(app, nowElapsed);
+        } else if (!app.reportedInteraction && (nowElapsed - app.getFgInteractionTime())
+                > mConstants.SERVICE_USAGE_INTERACTION_TIME) {
+            // For foreground services that sit around for a long time but are not interacted with.
+            maybeUpdateUsageStatsLocked(app, nowElapsed);
         }
 
         if (changes != 0) {
@@ -1915,6 +1920,14 @@ public final class OomAdjuster {
         }
 
         return success;
+    }
+
+    // ONLY used for unit testing in OomAdjusterTests.java
+    @VisibleForTesting
+    void maybeUpdateUsageStats(ProcessRecord app, long nowElapsed) {
+        synchronized (mService) {
+            maybeUpdateUsageStatsLocked(app, nowElapsed);
+        }
     }
 
     @GuardedBy("mService")

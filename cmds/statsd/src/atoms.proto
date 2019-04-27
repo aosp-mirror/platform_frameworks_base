@@ -281,6 +281,8 @@ message Atom {
         IntelligenceEventReported intelligence_event_reported =
             188 [(log_from_module) = "intelligence"];
         ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
+        RoleRequestResultReported role_request_result_reported =
+            190 [(log_from_module) = "permissioncontroller"];
     }
 
     // Pulled events will start at field 10000.
@@ -3517,6 +3519,62 @@ message SystemServerWatchdogOccurred {
  *      frameworks/base/core/java/com/android/server/BootReceiver.java
  */
 message TombStoneOccurred {
+}
+
+/*
+ * Information about a role request
+ *
+ * Logged from:
+ *   packages/apps/PermissionController/src/com/android/packageinstaller/role/ui/RequestRoleFragment.java
+ */
+message RoleRequestResultReported {
+    // UID of application requesting the role
+    optional int32 requesting_uid = 1;
+
+    // Package name of application requesting the role
+    optional string requesting_package_name = 2;
+
+    // The role to be granted
+    optional string role_name = 3;
+
+    // The count of applications qualifying for the role
+    optional int32 qualifying_count = 4;
+
+    // UID of application current granted the role
+    optional int32 current_uid = 5;
+
+    // Package name of application current granted the role
+    optional string current_package_name = 6;
+
+    // UID of another application that user chose to grant the role to, instead of the requesting
+    // application
+    optional int32 granted_another_uid = 7;
+
+    // Package name of another application that user chose to grant the role to, instead of the
+    // requesting application
+    optional string granted_another_package_name = 8;
+
+    enum Result {
+        UNDEFINED = 0;
+        // role request was ignored
+        IGNORED = 1;
+        // role request was ignored because it's already granted
+        IGNORED_ALREADY_GRANTED = 2;
+        // role request was ignored because the application isn't qualified
+        IGNORED_NOT_QUALIFIED = 3;
+        // role request was ignored because user said it should be always denied
+        IGNORED_USER_ALWAYS_DENIED = 4;
+        // role was granted by user action
+        USER_GRANTED = 5;
+        // role was denied by user action
+        USER_DENIED = 6;
+        // role was denied by user granting another application the role
+        USER_DENIED_GRANTED_ANOTHER = 7;
+        // role was denied and set to be always denied by the user
+        USER_DENIED_WITH_ALWAYS = 8;
+    }
+    // The result of the role request
+    optional Result result = 9;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"මුහුණු අච්චු එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ ක්‍රම භාවිතය සඳහා මෙම යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"මුහුණු සත්‍යාපක දෘඪාංග භාවිතා කරන්න"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"සත්‍යාපනය සඳහා සත්‍යාපක දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"නිරවද්‍ය මුහුණු දත්ත ගත නොහැකි විය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"දීප්තිය වැඩියි. තවත් මඳ ආලෝකය උත්සාහ කරන්න."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ඉතා අඳුරුයි. තවත් දීප්තිමත් ආලෝකය උත්සාහ කරන්න."</string>

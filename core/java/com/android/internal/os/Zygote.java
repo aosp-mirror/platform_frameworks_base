@@ -518,7 +518,7 @@ public final class Zygote {
         ZygoteArguments args = null;
 
         // Load resources
-        ZygoteInit.nativePreloadOpenGL();
+        ZygoteInit.nativePreloadGraphicsDriver();
 
         while (true) {
             try {

@@ -95,7 +95,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     private Bundle mBundle;
 
-    private int mLastState;
+    private int mState;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
     private boolean mSkipIntro;
@@ -209,7 +209,11 @@ public abstract class BiometricDialogView extends LinearLayout {
         setDismissesDialog(rightSpace);
 
         mNegativeButton.setOnClickListener((View v) -> {
-            mCallback.onNegativePressed();
+            if (mState == STATE_PENDING_CONFIRMATION || mState == STATE_AUTHENTICATED) {
+                mCallback.onUserCanceled();
+            } else {
+                mCallback.onNegativePressed();
+            }
         });
 
         mPositiveButton.setOnClickListener((View v) -> {
@@ -260,7 +264,7 @@ public abstract class BiometricDialogView extends LinearLayout {
             mDialog.getLayoutParams().width = (int) mDialogWidth;
         }
 
-        mLastState = STATE_IDLE;
+        mState = STATE_IDLE;
         updateState(STATE_AUTHENTICATING);
 
         CharSequence titleText = mBundle.getCharSequence(BiometricPrompt.KEY_TITLE);
@@ -287,6 +291,11 @@ public abstract class BiometricDialogView extends LinearLayout {
         }
 
         mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
+
+        if (requiresConfirmation()) {
+            mPositiveButton.setVisibility(View.VISIBLE);
+            mPositiveButton.setEnabled(false);
+        }
 
         if (mWasForceRemoved || mSkipIntro) {
             // Show the dialog immediately
@@ -327,7 +336,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private void setDismissesDialog(View v) {
         v.setClickable(true);
         v.setOnTouchListener((View view, MotionEvent event) -> {
-            if (mLastState != STATE_AUTHENTICATED && shouldGrayAreaDismissDialog()) {
+            if (mState != STATE_AUTHENTICATED && shouldGrayAreaDismissDialog()) {
                 mCallback.onUserCanceled();
             }
             return true;
@@ -406,16 +415,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         return mRequireConfirmation;
     }
 
-    public void showConfirmationButton(boolean show) {
-        if (show) {
-            mHandler.removeMessages(MSG_CLEAR_MESSAGE);
-            updateState(STATE_PENDING_CONFIRMATION);
-            mPositiveButton.setVisibility(View.VISIBLE);
-        } else {
-            mPositiveButton.setVisibility(View.GONE);
-        }
-    }
-
     public void setUserId(int userId) {
         mUserId = userId;
     }
@@ -452,15 +451,21 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     public void updateState(int newState) {
         if (newState == STATE_PENDING_CONFIRMATION) {
+            mHandler.removeMessages(MSG_CLEAR_MESSAGE);
             mErrorText.setVisibility(View.INVISIBLE);
+            mPositiveButton.setEnabled(true);
         } else if (newState == STATE_AUTHENTICATED) {
             mPositiveButton.setVisibility(View.GONE);
             mNegativeButton.setVisibility(View.GONE);
             mErrorText.setVisibility(View.INVISIBLE);
         }
 
-        updateIcon(mLastState, newState);
-        mLastState = newState;
+        if (newState == STATE_PENDING_CONFIRMATION || newState == STATE_AUTHENTICATED) {
+            mNegativeButton.setText(R.string.cancel);
+        }
+
+        updateIcon(mState, newState);
+        mState = newState;
     }
 
     public void showTryAgainButton(boolean show) {

@@ -280,7 +280,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
         default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
                 int type, boolean requireConfirmation, int userId) { }
-        default void onBiometricAuthenticated(boolean authenticated) { }
+        default void onBiometricAuthenticated(boolean authenticated, String failureReason) { }
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
         default void hideBiometricDialog() { }
@@ -760,9 +760,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void onBiometricAuthenticated(boolean authenticated) {
+    public void onBiometricAuthenticated(boolean authenticated, String failureReason) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED, authenticated).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = authenticated;
+            args.arg2 = failureReason;
+            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED, args).sendToTarget();
         }
     }
 
@@ -1023,7 +1026,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                         mCallbacks.get(i).onRotationProposal(msg.arg1, msg.arg2 != 0);
                     }
                     break;
-                case MSG_BIOMETRIC_SHOW:
+                case MSG_BIOMETRIC_SHOW: {
                     mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
                     mHandler.removeMessages(MSG_BIOMETRIC_HELP);
                     mHandler.removeMessages(MSG_BIOMETRIC_AUTHENTICATED);
@@ -1038,11 +1041,17 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     }
                     someArgs.recycle();
                     break;
-                case MSG_BIOMETRIC_AUTHENTICATED:
+                }
+                case MSG_BIOMETRIC_AUTHENTICATED: {
+                    SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricAuthenticated((boolean) msg.obj);
+                        mCallbacks.get(i).onBiometricAuthenticated(
+                                (boolean) someArgs.arg1 /* authenticated */,
+                                (String) someArgs.arg2 /* failureReason */);
                     }
+                    someArgs.recycle();
                     break;
+                }
                 case MSG_BIOMETRIC_HELP:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).onBiometricHelp((String) msg.obj);

@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"لا يمكن فحص الشبكات"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"بدون"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"بلا أمان"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"تم الحفظ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غير مفعّلة"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏تعذّرت تهيئة عنوان IP"</string>
@@ -421,7 +421,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"قبل <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"يتبقى <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"صغير"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"تلقائي"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"الإعداد التلقائي"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"كبير"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"أكبر"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"أكبر مستوى"</string>

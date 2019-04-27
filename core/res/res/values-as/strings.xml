@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"মুখমণ্ডলৰ টেম্প্লেট যোগ কৰাৰ বা মচাৰ পদ্ধতি কামত লগাবলৈ আহ্বান কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ ব্যৱহাৰ কৰক"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"সঠিক মুখমণ্ডলৰ ডেটা কেপচাৰ নহ’ল। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"অতি উজ্জ্বল। ইয়াতকৈ কম পোহৰৰ উৎস ব্যৱহাৰ কৰক।"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"অতি আন্ধাৰ। উজ্জ্বল লাইট ব্যৱহাৰ কৰক।"</string>

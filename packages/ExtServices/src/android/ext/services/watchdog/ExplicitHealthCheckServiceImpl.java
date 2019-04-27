@@ -16,11 +16,12 @@
 
 package android.ext.services.watchdog;
 
+import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.provider.DeviceConfig;
 import android.service.watchdog.ExplicitHealthCheckService;
-import android.service.watchdog.PackageInfo;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -74,8 +75,8 @@ public final class ExplicitHealthCheckServiceImpl extends ExplicitHealthCheckSer
     }
 
     @Override
-    public List<PackageInfo> onGetSupportedPackages() {
-        List<PackageInfo> packages = new ArrayList<>();
+    public List<PackageConfig> onGetSupportedPackages() {
+        List<PackageConfig> packages = new ArrayList<>();
         long requestTimeoutMillis = DeviceConfig.getLong(
                 DeviceConfig.NAMESPACE_ROLLBACK,
                 PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS,
@@ -84,7 +85,7 @@ public final class ExplicitHealthCheckServiceImpl extends ExplicitHealthCheckSer
             requestTimeoutMillis = DEFAULT_REQUEST_TIMEOUT_MILLIS;
         }
         for (ExplicitHealthChecker checker : mSupportedCheckers.values()) {
-            PackageInfo pkg = new PackageInfo(checker.getSupportedPackageName(),
+            PackageConfig pkg = new PackageConfig(checker.getSupportedPackageName(),
                     requestTimeoutMillis);
             packages.add(pkg);
         }

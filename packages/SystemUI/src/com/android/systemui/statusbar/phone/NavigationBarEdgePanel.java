@@ -16,93 +16,221 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Canvas;
+import android.content.res.Configuration;
+import android.graphics.Canvas;;
 import android.graphics.Paint;
-import android.os.SystemClock;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.os.VibrationEffect;
-import android.util.FloatProperty;
 import android.util.MathUtils;
-import android.view.HapticFeedbackConstants;
+import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.VibratorHelper;
 
+import androidx.core.graphics.ColorUtils;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.FloatPropertyCompat;
+import androidx.dynamicanimation.animation.SpringAnimation;
+import androidx.dynamicanimation.animation.SpringForce;
+
 public class NavigationBarEdgePanel extends View {
 
-    // TODO: read from resources once drawing is finalized.
-    private static final boolean SHOW_PROTECTION_STROKE = true;
-    private static final int PROTECTION_COLOR = 0xffc0c0c0;
-    private static final int STROKE_COLOR = 0xffe5e5e5;
-    private static final int PROTECTION_WIDTH_PX = 4;
-    private static final int BASE_EXTENT = 32;
-    private static final int ARROW_HEIGHT_DP = 32;
-    private static final int POINT_EXTENT_DP = 8;
-    private static final int ARROW_THICKNESS_DP = 4;
-    private static final float TRACK_LENGTH_MULTIPLIER = 1.5f;
-    private static final float START_POINTING_RATIO = 0.3f;
-    private static final float POINTEDNESS_BEFORE_SNAP_RATIO = 0.4f;
-    private static final int ANIM_DURATION_MS = 150;
-    private static final long HAPTIC_TIMEOUT_MS = 200;
+    private static final long COLOR_ANIMATION_DURATION_MS = 100;
+    private static final long DISAPPEAR_FADE_ANIMATION_DURATION_MS = 140;
+    private static final long DISAPPEAR_ARROW_ANIMATION_DURATION_MS = 100;
+
+    /**
+     * The size of the protection of the arrow in px. Only used if this is not background protected
+     */
+    private static final int PROTECTION_WIDTH_PX = 2;
+
+    /**
+     * The basic translation in dp where the arrow resides
+     */
+    private static final int BASE_TRANSLATION_DP = 32;
+
+    /**
+     * The length of the arrow leg measured from the center to the end
+     */
+    private static final int ARROW_LENGTH_DP = 18;
+
+    /**
+     * The angle measured from the xAxis, where the leg is when the arrow rests
+     */
+    private static final int ARROW_ANGLE_WHEN_EXTENDED_DEGREES = 56;
+
+    /**
+     * The angle that is added per 1000 px speed to the angle of the leg
+     */
+    private static final int ARROW_ANGLE_ADDED_PER_1000_SPEED = 8;
+
+    /**
+     * The maximum angle offset allowed due to speed
+     */
+    private static final int ARROW_MAX_ANGLE_SPEED_OFFSET_DEGREES = 4;
+
+    /**
+     * The thickness of the arrow. Adjusted to match the home handle (approximately)
+     */
+    private static final float ARROW_THICKNESS_DP = 2.5f;
+
+    /**
+     * The amount of rubber banding we do for the horizontal translation beyond the base translation
+     */
+    private static final int RUBBER_BAND_AMOUNT = 10;
+
+    /**
+     * The interpolator used to rubberband
+     */
+    private static final Interpolator RUBBER_BAND_INTERPOLATOR
+            = new PathInterpolator(1.0f / RUBBER_BAND_AMOUNT, 1.0f, 1.0f, 1.0f);
+
+    /**
+     * The amount of rubber banding we do for the translation before base translation
+     */
+    private static final int RUBBER_BAND_AMOUNT_APPEAR = 4;
+
+    /**
+     * The interpolator used to rubberband the appearing of the arrow.
+     */
+    private static final Interpolator RUBBER_BAND_INTERPOLATOR_APPEAR
+            = new PathInterpolator(1.0f / RUBBER_BAND_AMOUNT_APPEAR, 1.0f, 1.0f, 1.0f);
 
     private final VibratorHelper mVibratorHelper;
 
+    /**
+     * The paint the arrow is drawn with
+     */
     private final Paint mPaint = new Paint();
-    private final Paint mProtectionPaint = new Paint();
-
-    private final ObjectAnimator mEndAnimator;
-    private final ObjectAnimator mLegAnimator;
+    /**
+     * The paint the arrow protection is drawn with
+     */
+    private final Paint mProtectionPaint;
 
     private final float mDensity;
-    private final float mBaseExtent;
-    private final float mPointExtent;
-    private final float mHeight;
-    private final float mStrokeThickness;
+    private final float mBaseTranslation;
+    private final float mArrowLength;
+    private final float mArrowThickness;
+
+    /**
+     * The minimum delta needed in movement for the arrow to change direction / stop triggering back
+     */
+    private final float mMinDeltaForSwitch;
 
     private final float mSwipeThreshold;
+    private final Path mArrowPath = new Path();
 
+    private final SpringAnimation mAngleAnimation;
+    private final SpringAnimation mTranslationAnimation;
+    private final SpringAnimation mVerticalTranslationAnimation;
+    private final SpringForce mAngleAppearForce;
+    private final SpringForce mAngleDisappearForce;
+    private final ValueAnimator mArrowColorAnimator;
+    private final ValueAnimator mArrowDisappearAnimation;
+    private final SpringForce mRegularTranslationSpring;
+    private final SpringForce mTriggerBackSpring;
+
+    private VelocityTracker mVelocityTracker;
+    private boolean mIsDark = false;
+    private boolean mShowProtection = false;
+    private int mProtectionColorLight;
+    private int mArrowPaddingEnd;
+    private int mArrowColorLight;
+    private int mProtectionColorDark;
+    private int mArrowColorDark;
+    private int mProtectionColor;
+    private int mArrowColor;
+
+    /**
+     * True if the panel is currently on the left of the screen
+     */
     private boolean mIsLeftPanel;
 
     private float mStartX;
+    private float mStartY;
+    private float mCurrentAngle;
+    /**
+     * The current translation of the arrow
+     */
+    private float mCurrentTranslation;
+    /**
+     * Where the arrow will be in the resting position.
+     */
+    private float mDesiredTranslation;
 
     private boolean mDragSlopPassed;
-    private long mLastSlopHapticTime;
-    private boolean mGestureDetected;
     private boolean mArrowsPointLeft;
-    private float mGestureLength;
-    private float mLegProgress;
-    private float mDragProgress;
+    private float mMaxTranslation;
+    private boolean mTriggerBack;
+    private float mPreviousTouchTranslation;
+    private float mTotalTouchDelta;
+    private float mVerticalTranslation;
+    private float mDesiredVerticalTranslation;
+    private float mDesiredAngle;
+    private float mAngleOffset;
+    private int mArrowStartColor;
+    private int mCurrentArrowColor;
+    private float mDisappearAmount;
 
-    // How much the "legs" of the back arrow have proceeded from being a line to an arrow.
-    private static final FloatProperty<NavigationBarEdgePanel> LEG_PROGRESS =
-            new FloatProperty<NavigationBarEdgePanel>("legProgress") {
+    private DynamicAnimation.OnAnimationEndListener mSetGoneEndListener
+            = new DynamicAnimation.OnAnimationEndListener() {
+        @Override
+        public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
+                float velocity) {
+            animation.removeEndListener(this);
+            if (!canceled) {
+                setVisibility(GONE);
+            }
+        }
+    };
+    private static final FloatPropertyCompat<NavigationBarEdgePanel> CURRENT_ANGLE =
+            new FloatPropertyCompat<NavigationBarEdgePanel>("currentAngle") {
         @Override
         public void setValue(NavigationBarEdgePanel object, float value) {
-            object.setLegProgress(value);
+            object.setCurrentAngle(value);
         }
 
         @Override
-        public Float get(NavigationBarEdgePanel object) {
-            return object.getLegProgress();
+        public float getValue(NavigationBarEdgePanel object) {
+            return object.getCurrentAngle();
         }
     };
 
-    // How far across the view the arrow should be drawn.
-    private static final FloatProperty<NavigationBarEdgePanel> DRAG_PROGRESS =
-            new FloatProperty<NavigationBarEdgePanel>("dragProgress") {
+    private static final FloatPropertyCompat<NavigationBarEdgePanel> CURRENT_TRANSLATION =
+            new FloatPropertyCompat<NavigationBarEdgePanel>("currentTranslation") {
 
                 @Override
                 public void setValue(NavigationBarEdgePanel object, float value) {
-                    object.setDragProgress(value);
+                    object.setCurrentTranslation(value);
                 }
 
                 @Override
-                public Float get(NavigationBarEdgePanel object) {
-                    return object.getDragProgress();
+                public float getValue(NavigationBarEdgePanel object) {
+                    return object.getCurrentTranslation();
+                }
+            };
+    private static final FloatPropertyCompat<NavigationBarEdgePanel> CURRENT_VERTICAL_TRANSLATION =
+            new FloatPropertyCompat<NavigationBarEdgePanel>("verticalTranslation") {
+
+                @Override
+                public void setValue(NavigationBarEdgePanel object, float value) {
+                    object.setVerticalTranslation(value);
+                }
+
+                @Override
+                public float getValue(NavigationBarEdgePanel object) {
+                    return object.getVerticalTranslation();
                 }
             };
 
@@ -111,62 +239,200 @@ public class NavigationBarEdgePanel extends View {
 
         mVibratorHelper = Dependency.get(VibratorHelper.class);
 
-        mEndAnimator = ObjectAnimator.ofFloat(this, DRAG_PROGRESS, 1f);
-        mEndAnimator.setAutoCancel(true);
-        mEndAnimator.setDuration(ANIM_DURATION_MS);
-
-        mLegAnimator = ObjectAnimator.ofFloat(this, LEG_PROGRESS, 1f);
-        mLegAnimator.setAutoCancel(true);
-        mLegAnimator.setDuration(ANIM_DURATION_MS);
-
         mDensity = context.getResources().getDisplayMetrics().density;
 
-        mBaseExtent = dp(BASE_EXTENT);
-        mHeight = dp(ARROW_HEIGHT_DP);
-        mPointExtent = dp(POINT_EXTENT_DP);
-        mStrokeThickness = dp(ARROW_THICKNESS_DP);
+        mBaseTranslation = dp(BASE_TRANSLATION_DP);
+        mArrowLength = dp(ARROW_LENGTH_DP);
+        mArrowThickness = dp(ARROW_THICKNESS_DP);
+        mMinDeltaForSwitch = dp(32);
 
-        mPaint.setStrokeWidth(mStrokeThickness);
+        mPaint.setStrokeWidth(mArrowThickness);
         mPaint.setStrokeCap(Paint.Cap.ROUND);
-        mPaint.setColor(STROKE_COLOR);
         mPaint.setAntiAlias(true);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
 
-        mProtectionPaint.setStrokeWidth(mStrokeThickness + PROTECTION_WIDTH_PX);
-        mProtectionPaint.setStrokeCap(Paint.Cap.ROUND);
-        mProtectionPaint.setColor(PROTECTION_COLOR);
-        mProtectionPaint.setAntiAlias(true);
+        mArrowColorAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
+        mArrowColorAnimator.setDuration(COLOR_ANIMATION_DURATION_MS);
+        mArrowColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                int newColor = ColorUtils.blendARGB(mArrowStartColor, mArrowColor,
+                        animation.getAnimatedFraction());
+                setCurrentArrowColor(newColor);
+            }
+        });
 
-        // Both panels arrow point the same way
-        mArrowsPointLeft = getLayoutDirection() == LAYOUT_DIRECTION_LTR;
+        mArrowDisappearAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
+        mArrowDisappearAnimation.setDuration(DISAPPEAR_ARROW_ANIMATION_DURATION_MS);
+        mArrowDisappearAnimation.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mArrowDisappearAnimation.addUpdateListener(animation -> {
+            mDisappearAmount = (float) animation.getAnimatedValue();
+            invalidate();
+        });
+
+        mAngleAnimation =
+                new SpringAnimation(this, CURRENT_ANGLE);
+        mAngleAppearForce = new SpringForce()
+                .setStiffness(SpringForce.STIFFNESS_LOW)
+                .setDampingRatio(0.4f)
+                .setFinalPosition(ARROW_ANGLE_WHEN_EXTENDED_DEGREES);
+        mAngleDisappearForce = new SpringForce()
+                .setStiffness(SpringForce.STIFFNESS_MEDIUM)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY)
+                .setFinalPosition(90);
+        mAngleAnimation.setSpring(mAngleAppearForce).setMaxValue(90);
+
+        mTranslationAnimation =
+                new SpringAnimation(this, CURRENT_TRANSLATION);
+        mRegularTranslationSpring = new SpringForce()
+                .setStiffness(SpringForce.STIFFNESS_MEDIUM)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+        mTriggerBackSpring = new SpringForce()
+                .setStiffness(450)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+        mTranslationAnimation.setSpring(mRegularTranslationSpring);
+        mVerticalTranslationAnimation =
+                new SpringAnimation(this, CURRENT_VERTICAL_TRANSLATION);
+        mVerticalTranslationAnimation.setSpring(
+                new SpringForce()
+                        .setStiffness(SpringForce.STIFFNESS_MEDIUM)
+                        .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
+
+        mProtectionPaint = new Paint(mPaint);
+        mProtectionPaint.setStrokeWidth(mArrowThickness + PROTECTION_WIDTH_PX);
+        loadDimens();
+
+        loadColors(context);
+        updateArrowDirection();
 
         mSwipeThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         setVisibility(GONE);
     }
 
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    public boolean shouldTriggerBack() {
+        return mTriggerBack;
+    }
+
+    public void setIsDark(boolean isDark, boolean animate) {
+        mIsDark = isDark;
+        updateIsDark(animate);
+    }
+
+    public void setShowProtection(boolean showProtection) {
+        mShowProtection = showProtection;
+        invalidate();
+    }
+
     public void setIsLeftPanel(boolean isLeftPanel) {
         mIsLeftPanel = isLeftPanel;
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        float edgeOffset = mBaseExtent * mDragProgress - mStrokeThickness;
-        float animatedOffset = mPointExtent * mLegProgress;
-        canvas.save();
-        canvas.translate(
-                mIsLeftPanel ? edgeOffset : getWidth() - edgeOffset,
-                (getHeight() - mHeight) * 0.5f);
+    /**
+     * Adjust the rect to conform the the actual visible bounding box of the arrow.
+     *
+     * @param samplingRect the existing bounding box in screen coordinates, to be modified
+     */
+    public void adjustRectToBoundingBox(Rect samplingRect) {
+        float translation = mDesiredTranslation;
+        if (!mTriggerBack) {
+            // Let's take the resting position and bounds as the sampling rect, since we are not
+            // visible right now
+            translation = mBaseTranslation;
+            if (mIsLeftPanel && mArrowsPointLeft
+                    || (!mIsLeftPanel && !mArrowsPointLeft)) {
+                // If we're on the left we should move less, because the arrow is facing the other
+                // direction
+                translation -= getStaticArrowWidth();
+            }
+        }
+        float left = translation - mArrowThickness / 2.0f;
+        left = mIsLeftPanel ? left : samplingRect.width() - left;
 
-        float outsideX = mArrowsPointLeft ? animatedOffset : 0;
-        float middleX = mArrowsPointLeft ? 0 : animatedOffset;
-
-        if (SHOW_PROTECTION_STROKE) {
-            canvas.drawLine(outsideX, 0, middleX, mHeight * 0.5f, mProtectionPaint);
-            canvas.drawLine(middleX, mHeight * 0.5f, outsideX, mHeight, mProtectionPaint);
+        // Let's calculate the position of the end based on the angle
+        float width = getStaticArrowWidth();
+        float height = polarToCartY(ARROW_ANGLE_WHEN_EXTENDED_DEGREES) * mArrowLength * 2.0f;
+        if (!mArrowsPointLeft) {
+            left -= width;
         }
 
-        canvas.drawLine(outsideX, 0, middleX, mHeight * 0.5f, mPaint);
-        canvas.drawLine(middleX, mHeight * 0.5f, outsideX, mHeight, mPaint);
+        float top = (getHeight() * 0.5f) + mDesiredVerticalTranslation - height / 2.0f;
+        samplingRect.offset((int) left, (int) top);
+        samplingRect.set(samplingRect.left, samplingRect.top,
+                (int) (samplingRect.left + width),
+                (int) (samplingRect.top + height));
+    }
+
+    /**
+     * Updates the UI based on the motion events passed in device co-ordinates
+     */
+    public void handleTouch(MotionEvent event) {
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN : {
+                mDragSlopPassed = false;
+                resetOnDown();
+                mStartX = event.getX();
+                mStartY = event.getY();
+                setVisibility(VISIBLE);
+                break;
+            }
+            case MotionEvent.ACTION_MOVE: {
+                handleMoveEvent(event);
+                break;
+            }
+            // Fall through
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL: {
+                if (mTriggerBack) {
+                    triggerBackAnimation();
+                } else {
+                    if (mTranslationAnimation.isRunning()) {
+                        mTranslationAnimation.addEndListener(mSetGoneEndListener);
+                    } else {
+                        setVisibility(GONE);
+                    }
+                }
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+                break;
+            }
+        }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateArrowDirection();
+        loadDimens();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        float pointerPosition = mCurrentTranslation - mArrowThickness / 2.0f;
+        canvas.save();
+        canvas.translate(
+                mIsLeftPanel ? pointerPosition : getWidth() - pointerPosition,
+                (getHeight() * 0.5f) + mVerticalTranslation);
+
+        // Let's calculate the position of the end based on the angle
+        float x = (polarToCartX(mCurrentAngle) * mArrowLength);
+        float y = (polarToCartY(mCurrentAngle) * mArrowLength);
+        Path arrowPath = calculatePath(x,y);
+        if (mShowProtection) {
+            canvas.drawPath(arrowPath, mProtectionPaint);
+        }
+
+        canvas.drawPath(arrowPath, mPaint);
         canvas.restore();
     }
 
@@ -175,105 +441,295 @@ public class NavigationBarEdgePanel extends View {
         super.onLayout(changed, left, top, right, bottom);
 
         // TODO: read the gesture length from the nav controller.
-        mGestureLength = getWidth();
+        mMaxTranslation = getWidth() - mArrowPaddingEnd;
     }
 
-    private void setLegProgress(float progress) {
-        mLegProgress = progress;
+    private void loadDimens() {
+        mArrowPaddingEnd = getContext().getResources().getDimensionPixelSize(
+                R.dimen.navigation_edge_panel_padding);
+    }
+
+    private void updateArrowDirection() {
+        // Both panels arrow point the same way
+        mArrowsPointLeft = getLayoutDirection() == LAYOUT_DIRECTION_LTR;
         invalidate();
     }
 
-    private float getLegProgress() {
-        return mLegProgress;
+    private void loadColors(Context context) {
+        final int dualToneDarkTheme = Utils.getThemeAttr(context, R.attr.darkIconTheme);
+        final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
+        Context lightContext = new ContextThemeWrapper(context, dualToneLightTheme);
+        Context darkContext = new ContextThemeWrapper(context, dualToneDarkTheme);
+        mArrowColorLight = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
+        mArrowColorDark = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
+        mProtectionColorDark = mArrowColorLight;
+        mProtectionColorLight = mArrowColorDark;
+        updateIsDark(false /* animate */);
     }
 
-    private void setDragProgress(float dragProgress) {
-        mDragProgress = dragProgress;
-        invalidate();
-    }
-
-    private float getDragProgress() {
-        return mDragProgress;
-    }
-
-    private void hide() {
-        animate().alpha(0f).setDuration(ANIM_DURATION_MS)
-                .withEndAction(() -> setVisibility(GONE));
-    }
-
-    /**
-     * Updates the UI based on the motion events passed in device co-ordinates
-     */
-    public void handleTouch(MotionEvent event) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN : {
-                mDragSlopPassed = false;
-                mEndAnimator.cancel();
-                mLegAnimator.cancel();
-                animate().cancel();
-                setLegProgress(0f);
-                setDragProgress(0f);
-                mStartX = event.getX();
-                setVisibility(VISIBLE);
-                break;
-            }
-            case MotionEvent.ACTION_MOVE: {
-                handleNewSwipePoint(event.getX());
-                break;
-            }
-            // Fall through
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL: {
-                hide();
-                break;
-            }
+    private void updateIsDark(boolean animate) {
+        // TODO: Maybe animate protection as well
+        mProtectionColor = mIsDark ? mProtectionColorDark : mProtectionColorLight;
+        mProtectionPaint.setColor(mProtectionColor);
+        mArrowColor = mIsDark ? mArrowColorDark : mArrowColorLight;
+        mArrowColorAnimator.cancel();
+        if (!animate) {
+            setCurrentArrowColor(mArrowColor);
+        } else {
+            mArrowStartColor = mCurrentArrowColor;
+            mArrowColorAnimator.start();
         }
     }
 
-    private void handleNewSwipePoint(float x) {
-        float dist = MathUtils.abs(x - mStartX);
+    private void setCurrentArrowColor(int color) {
+        mCurrentArrowColor = color;
+        mPaint.setColor(color);
+        invalidate();
+    }
+
+    private float getStaticArrowWidth() {
+        return polarToCartX(ARROW_ANGLE_WHEN_EXTENDED_DEGREES) * mArrowLength;
+    }
+
+    private float polarToCartX(float angleInDegrees) {
+        return (float) Math.cos(Math.toRadians(angleInDegrees));
+    }
+
+    private float polarToCartY(float angleInDegrees) {
+        return (float) Math.sin(Math.toRadians(angleInDegrees));
+    }
+
+    private Path calculatePath(float x, float y) {
+        if (!mArrowsPointLeft) {
+            x = -x;
+        }
+        float extent = 1.0f - mDisappearAmount;
+        x = x * extent;
+        y = y * extent;
+        mArrowPath.reset();
+        mArrowPath.moveTo(x, y);
+        mArrowPath.lineTo(0, 0);
+        mArrowPath.lineTo(x, -y);
+        return mArrowPath;
+    }
+
+    private float getCurrentAngle() {
+        return mCurrentAngle;
+    }
+
+    private float getCurrentTranslation() {
+        return mCurrentTranslation;
+    }
+
+    private void triggerBackAnimation() {
+
+        mVelocityTracker.computeCurrentVelocity(1000);
+        // Only do the extra translation if we're not already flinging
+        boolean doExtraTranslation = Math.abs(mVelocityTracker.getXVelocity()) < 1000;
+        if (doExtraTranslation) {
+            setDesiredTranslation(mDesiredTranslation + dp(16), true /* animate */);
+        }
+
+        // Let's also snap the angle a bit
+        if (mAngleOffset < -4) {
+            mAngleOffset = Math.max(-16, mAngleOffset - 16);
+            updateAngle(true /* animated */);
+        }
+
+        // Finally, after the translation, animate back and disappear the arrow
+        Runnable translationEnd = () -> {
+            setTriggerBack(false /* false */, true /* animate */);
+            mTranslationAnimation.setSpring(mTriggerBackSpring);
+            setDesiredTranslation(0, true /* animated */);
+            animate().alpha(0f).setDuration(DISAPPEAR_FADE_ANIMATION_DURATION_MS)
+                    .withEndAction(() -> setVisibility(GONE));
+            mArrowDisappearAnimation.start();
+        };
+        if (mTranslationAnimation.isRunning()) {
+            mTranslationAnimation.addEndListener(new DynamicAnimation.OnAnimationEndListener() {
+                @Override
+                public void onAnimationEnd(DynamicAnimation animation, boolean canceled,
+                        float value,
+                        float velocity) {
+                    animation.removeEndListener(this);
+                    if (!canceled) {
+                        translationEnd.run();
+                    }
+                }
+            });
+        } else {
+            translationEnd.run();
+        }
+
+    }
+
+    private void resetOnDown() {
+        animate().cancel();
+        mAngleAnimation.cancel();
+        mTranslationAnimation.cancel();
+        mVerticalTranslationAnimation.cancel();
+        mArrowDisappearAnimation.cancel();
+        mAngleOffset = 0;
+        mTranslationAnimation.setSpring(mRegularTranslationSpring);
+        // Reset the arrow to the side
+        setTriggerBack(false /* triggerBack */, false /* animated */);
+        setDesiredTranslation(0, false /* animated */);
+        setCurrentTranslation(0);
+        mPreviousTouchTranslation = 0;
+        mTotalTouchDelta = 0;
+        setDesiredVerticalTransition(0, false /* animated */);
+    }
+
+    private void handleMoveEvent(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        float touchTranslation = MathUtils.abs(x - mStartX);
+        float yOffset = y - mStartY;
+        float delta = touchTranslation - mPreviousTouchTranslation;
+        if (Math.abs(delta) > 0) {
+            if (Math.signum(delta) == Math.signum(mTotalTouchDelta)) {
+                mTotalTouchDelta += delta;
+            } else {
+                mTotalTouchDelta = delta;
+            }
+        }
+        mPreviousTouchTranslation = touchTranslation;
 
         // Apply a haptic on drag slop passed
-        if (!mDragSlopPassed && dist > mSwipeThreshold) {
+        if (!mDragSlopPassed && touchTranslation > mSwipeThreshold) {
             mDragSlopPassed = true;
             mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
-            mLastSlopHapticTime = SystemClock.uptimeMillis();
+
+            // Let's show the arrow and animate it in!
+            mDisappearAmount = 0.0f;
             setAlpha(1f);
+            // And animate it go to back by default!
+            setTriggerBack(true /* triggerBack */, true /* animated */);
         }
 
-        setDragProgress(MathUtils.constrainedMap(
-                0, 1.0f,
-                0, mGestureLength * TRACK_LENGTH_MULTIPLIER,
-                dist));
-
-        if (dist < mGestureLength) {
-            float calculatedLegProgress = MathUtils.constrainedMap(
-                    0f, POINTEDNESS_BEFORE_SNAP_RATIO,
-                    mGestureLength * START_POINTING_RATIO, mGestureLength,
-                    dist);
-
-            // Blend animated value with drag calculated value, allow the gesture to continue
-            // while the animation is playing with jump cuts in the animation.
-            setLegProgress(MathUtils.lerp(calculatedLegProgress, mLegProgress, mDragProgress));
-
-            if (mGestureDetected) {
-                mGestureDetected = false;
-
-                mLegAnimator.setFloatValues(POINTEDNESS_BEFORE_SNAP_RATIO);
-                mLegAnimator.start();
-            }
+        // Let's make sure we only go to the baseextend and apply rubberbanding afterwards
+        if (touchTranslation > mBaseTranslation) {
+            float diff = touchTranslation - mBaseTranslation;
+            float progress = MathUtils.saturate(diff / (mBaseTranslation * RUBBER_BAND_AMOUNT));
+            progress = RUBBER_BAND_INTERPOLATOR.getInterpolation(progress)
+                    * (mMaxTranslation - mBaseTranslation);
+            touchTranslation = mBaseTranslation + progress;
         } else {
-            if (!mGestureDetected) {
-                // Prevent another haptic if it was just used
-                if (SystemClock.uptimeMillis() - mLastSlopHapticTime > HAPTIC_TIMEOUT_MS) {
-                    performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
-                }
-                mGestureDetected = true;
+            float diff = mBaseTranslation - touchTranslation;
+            float progress = MathUtils.saturate(diff / mBaseTranslation);
+            progress = RUBBER_BAND_INTERPOLATOR_APPEAR.getInterpolation(progress)
+                    * (mBaseTranslation / RUBBER_BAND_AMOUNT_APPEAR);
+            touchTranslation = mBaseTranslation - progress;
+        }
+        // By default we just assume the current direction is kept
+        boolean triggerBack = mTriggerBack;
 
-                mLegAnimator.setFloatValues(1f);
-                mLegAnimator.start();
+        //  First lets see if we had continuous motion in one direction for a while
+        if (Math.abs(mTotalTouchDelta) > mMinDeltaForSwitch) {
+            triggerBack = mTotalTouchDelta > 0;
+        }
+
+        // Then, let's see if our velocity tells us to change direction
+        mVelocityTracker.computeCurrentVelocity(1000);
+        float xVelocity = mVelocityTracker.getXVelocity();
+        float yVelocity = mVelocityTracker.getYVelocity();
+        float velocity = MathUtils.mag(xVelocity, yVelocity);
+        mAngleOffset = Math.min(velocity / 1000 * ARROW_ANGLE_ADDED_PER_1000_SPEED,
+                ARROW_MAX_ANGLE_SPEED_OFFSET_DEGREES) * Math.signum(xVelocity);
+        if (mIsLeftPanel && mArrowsPointLeft || !mIsLeftPanel && !mArrowsPointLeft) {
+            mAngleOffset *= -1;
+        }
+
+        // Last if the direction in Y is bigger than X * 2 we also abort
+        if (Math.abs(yOffset) > Math.abs(x - mStartX) * 2) {
+            triggerBack = false;
+        }
+        setTriggerBack(triggerBack, true /* animated */);
+
+        if (!mTriggerBack) {
+            touchTranslation = 0;
+        } else if (mIsLeftPanel && mArrowsPointLeft
+                || (!mIsLeftPanel && !mArrowsPointLeft)) {
+            // If we're on the left we should move less, because the arrow is facing the other
+            // direction
+            touchTranslation -= getStaticArrowWidth();
+        }
+        setDesiredTranslation(touchTranslation, true /* animated */);
+        updateAngle(true /* animated */);
+
+        float maxYOffset = getHeight() / 2.0f - mArrowLength;
+        float progress = MathUtils.constrain(
+                Math.abs(yOffset) / (maxYOffset * RUBBER_BAND_AMOUNT),
+                0, 1);
+        float verticalTranslation = RUBBER_BAND_INTERPOLATOR.getInterpolation(progress)
+                * maxYOffset * Math.signum(yOffset);
+        setDesiredVerticalTransition(verticalTranslation, true /* animated */);
+    }
+
+    private void setDesiredVerticalTransition(float verticalTranslation, boolean animated) {
+        if (mDesiredVerticalTranslation != verticalTranslation) {
+            mDesiredVerticalTranslation = verticalTranslation;
+            if (!animated) {
+                setVerticalTranslation(verticalTranslation);
+            } else {
+                mVerticalTranslationAnimation.animateToFinalPosition(verticalTranslation);
+            }
+            invalidate();
+        }
+    }
+
+    private void setVerticalTranslation(float verticalTranslation) {
+        mVerticalTranslation = verticalTranslation;
+        invalidate();
+    }
+
+    private float getVerticalTranslation() {
+        return mVerticalTranslation;
+    }
+
+    private void setDesiredTranslation(float desiredTranslation, boolean animated) {
+        if (mDesiredTranslation != desiredTranslation) {
+            mDesiredTranslation = desiredTranslation;
+            if (!animated) {
+                setCurrentTranslation(desiredTranslation);
+            } else {
+                mTranslationAnimation.animateToFinalPosition(desiredTranslation);
             }
         }
+    }
+
+    private void setCurrentTranslation(float currentTranslation) {
+        mCurrentTranslation = currentTranslation;
+        invalidate();
+    }
+
+    private void setTriggerBack(boolean triggerBack, boolean animated) {
+        if (mTriggerBack != triggerBack) {
+            mTriggerBack = triggerBack;
+            mAngleAnimation.cancel();
+            updateAngle(animated);
+            // Whenever the trigger back state changes the existing translation animation should be
+            // cancelled
+            mTranslationAnimation.cancel();
+        }
+    }
+
+    private void updateAngle(boolean animated) {
+        float newAngle = mTriggerBack ? ARROW_ANGLE_WHEN_EXTENDED_DEGREES + mAngleOffset : 90;
+        if (newAngle != mDesiredAngle) {
+            if (!animated) {
+                setCurrentAngle(newAngle);
+            } else {
+                mAngleAnimation.setSpring(mTriggerBack ? mAngleAppearForce : mAngleDisappearForce);
+                mAngleAnimation.animateToFinalPosition(newAngle);
+            }
+            mDesiredAngle = newAngle;
+        }
+    }
+
+    private void setCurrentAngle(float currentAngle) {
+        mCurrentAngle = currentAngle;
+        invalidate();
     }
 
     private float dp(float dp) {

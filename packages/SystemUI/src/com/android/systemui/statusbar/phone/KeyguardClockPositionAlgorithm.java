@@ -158,7 +158,12 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     private int getPreferredClockY() {
-        return mClockPreferredY - mKeyguardStatusHeight - mClockNotificationsMargin;
+        return mClockPreferredY;
+    }
+
+    private int getExpandedPreferredClockY() {
+        return (mHasCustomClock && !mHasVisibleNotifs) ? getPreferredClockY()
+                : getExpandedClockPosition();
     }
 
     /**
@@ -187,13 +192,11 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getClockY() {
         // Dark: Align the bottom edge of the clock at about half of the screen:
-        float clockYDark = getPreferredClockY() + burnInPreventionOffsetY();
+        float clockYDark = (mHasCustomClock ? getPreferredClockY() : getMaxClockY())
+                + burnInPreventionOffsetY();
         clockYDark = MathUtils.max(0, clockYDark);
 
-        float clockYRegular = getExpandedClockPosition();
-        if (mHasCustomClock && !mHasVisibleNotifs) {
-            clockYRegular = clockYDark;
-        }
+        float clockYRegular = getExpandedPreferredClockY();
         float clockYBouncer = -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
@@ -213,7 +216,7 @@ public class KeyguardClockPositionAlgorithm {
      * @return Alpha from 0 to 1.
      */
     private float getClockAlpha(int y) {
-        float alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedClockPosition()));
+        float alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedPreferredClockY()));
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }

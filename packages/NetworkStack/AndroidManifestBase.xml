@@ -24,6 +24,7 @@
         android:label="NetworkStack"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
+        android:persistent="true"
         android:usesCleartextTraffic="true">
 
         <service android:name="com.android.server.connectivity.ipmemorystore.RegularMaintenanceJobService"

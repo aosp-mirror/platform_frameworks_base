@@ -22,6 +22,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Layout which uses nested LinearLayouts to create a grid with the following behavior:
  *
@@ -40,6 +42,10 @@ import android.widget.LinearLayout;
 public class ListGridLayout extends LinearLayout {
     private static final String TAG = "ListGridLayout";
     private int mExpectedCount;
+    private int mCurrentCount = 0;
+    private boolean mSwapRowsAndColumns;
+    private boolean mReverseSublists;
+    private boolean mReverseItems;
 
     // number of rows and columns to use for different numbers of items
     private final int[][] mConfigs = {
@@ -61,16 +67,60 @@ public class ListGridLayout extends LinearLayout {
     }
 
     /**
+     * Sets whether this grid should prioritize filling rows or columns first.
+     */
+    public void setSwapRowsAndColumns(boolean swap) {
+        mSwapRowsAndColumns = swap;
+    }
+
+    /**
+     * Sets whether this grid should fill sublists in reverse order.
+     */
+    public void setReverseSublists(boolean reverse) {
+        mReverseSublists = reverse;
+    }
+
+    /**
+     * Sets whether this grid should add items to sublists in reverse order.
+     * @param reverse
+     */
+    public void setReverseItems(boolean reverse) {
+        mReverseItems = reverse;
+    }
+
+    /**
      * Remove all items from this grid.
      */
     public void removeAllItems() {
         for (int i = 0; i < getChildCount(); i++) {
-            ViewGroup subList = (ViewGroup) getChildAt(i);
+            ViewGroup subList = getSublist(i);
             if (subList != null) {
                 subList.removeAllViews();
                 subList.setVisibility(View.GONE);
             }
         }
+        mCurrentCount = 0;
+    }
+
+    /**
+     * Adds a view item to this grid, placing it in the correct sublist and ensuring that the
+     * sublist is visible.
+     *
+     * This function is stateful, since it tracks how many items have been added thus far, to
+     * determine which sublist they should be added to. To ensure that this works correctly, call
+     * removeAllItems() instead of removing views individually with removeView() to ensure that the
+     * counter gets reset correctly.
+     * @param item
+     */
+    public void addItem(View item) {
+        ViewGroup parent = getParentView(mCurrentCount, mReverseSublists, mSwapRowsAndColumns);
+        if (mReverseItems) {
+            parent.addView(item, 0);
+        } else {
+            parent.addView(item);
+        }
+        parent.setVisibility(View.VISIBLE);
+        mCurrentCount++;
     }
 
     /**
@@ -83,13 +133,20 @@ public class ListGridLayout extends LinearLayout {
      *                           true will cause rows to fill first, adding one item to each column.
      * @return
      */
-    public ViewGroup getParentView(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
+    @VisibleForTesting
+    protected ViewGroup getParentView(int index, boolean reverseSublists,
+            boolean swapRowsAndColumns) {
         if (getRowCount() == 0 || index < 0) {
             return null;
         }
         int targetIndex = Math.min(index, getMaxElementCount() - 1);
         int row = getParentViewIndex(targetIndex, reverseSublists, swapRowsAndColumns);
-        return (ViewGroup) getChildAt(row);
+        return getSublist(row);
+    }
+
+    @VisibleForTesting
+    protected ViewGroup getSublist(int index) {
+        return (ViewGroup) getChildAt(index);
     }
 
     private int reverseSublistIndex(int index) {

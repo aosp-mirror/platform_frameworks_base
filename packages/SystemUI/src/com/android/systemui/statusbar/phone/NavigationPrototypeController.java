@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+
 import android.annotation.IntDef;
 import android.content.ComponentCallbacks;
 import android.content.Context;
@@ -119,7 +121,7 @@ public class NavigationPrototypeController extends ContentObserver implements Co
                 mListener.onHomeButtonVisibilityChanged(!hideHomeButton());
             } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
                 mListener.onColorAdaptChanged(
-                        NavBarTintController.isEnabled(mContext));
+                        NavBarTintController.isEnabled(mContext, NAV_BAR_MODE_GESTURAL));
             } else if (path.endsWith(SHOW_HOME_HANDLE_SETTING)) {
                 mListener.onHomeHandleVisiblilityChanged(showHomeHandle());
             } else if (path.endsWith(ENABLE_ASSISTANT_GESTURE)) {
@@ -132,7 +134,8 @@ public class NavigationPrototypeController extends ContentObserver implements Co
      * @return the width for edge swipe
      */
     public int getEdgeSensitivityWidth() {
-        return QuickStepContract.getEdgeSensitivityWidth(mContext);
+        return mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_backGestureInset);
     }
 
     /**

@@ -19,4 +19,4 @@ package android.service.watchdog;
 /**
  * @hide
  */
-parcelable PackageInfo;
+parcelable PackageConfig;

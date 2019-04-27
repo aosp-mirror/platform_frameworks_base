@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Aurpegi-txantiloiak gehitu eta ezabatzeko metodoei dei egitea baimentzen dio aplikazioari."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"erabili aurpegi bidez autentifikatzeko hardwarea"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Aurpegi bidez autentifikatzeko hardwarea erabiltzea baimentzen dio aplikazioari"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Ezin izan dira bildu argazkiaren datu zehatzak. Saiatu berriro."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Argi gehiegi dago. Joan toki ilunago batera."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Ilunegi dago. Erabili argi gehiago."</string>

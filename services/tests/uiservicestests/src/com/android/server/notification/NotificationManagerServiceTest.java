@@ -5154,4 +5154,41 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
     }
+
+    @Test
+    public void testNotificationBubbles_disabled_lowRamDevice() throws Exception {
+        // Bubbles are allowed!
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
+        when(mPreferencesHelper.getNotificationChannel(
+                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                mTestNotificationChannel);
+        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
+                mTestNotificationChannel.getImportance());
+
+        // Plain notification that has bubble metadata
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                null /* tvExtender */, true /* isBubble */);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // Would be a normal notification because wouldn't have met requirements to bubble
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+        assertEquals((notifsBefore[0].getNotification().flags & FLAG_BUBBLE), 0);
+
+        // Make the package foreground so that we're allowed to be a bubble
+        when(mActivityManager.getPackageImportance(nr.sbn.getPackageName())).thenReturn(
+                IMPORTANCE_FOREGROUND);
+
+        // And we are low ram
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+
+        // We wouldn't be a bubble because the notification didn't meet requirements (low ram)
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+
+    }
 }

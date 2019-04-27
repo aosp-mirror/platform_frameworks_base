@@ -559,6 +559,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Programai leidžiama aktyv. metodus, norint pridėti ir ištrinti naudojamus veidų šablonus."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"naudoti veido autentifikavimo aparatinę įrangą"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Programai leidžiama naudoti veido autentifikavimo aparatinę įrangą tapatybei nustatyti"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Neužfiks. tikslūs veido duom. Bandykite dar kartą."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Per šviesu. Išbandykite mažesnį apšvietimą."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Per tamsu. Išbandykite šviesesnį apšvietimą."</string>

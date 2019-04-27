@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Се пребарува за GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Локацијата е поставена со GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Активни барања за локација"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"Исклучувањето на сензорите е активно"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Исчисти ги сите известувања."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Целосна\nтишина"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Само\nприоритетни"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Само\nаларми"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни безжично (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до полна батерија)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Се полни (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до полна батерија)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Брзо полнење (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до полна батерија)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Бавно полнење (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> до полна батерија)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Поврзани сте на <xliff:g id="APPLICATION">%1$s</xliff:g>, којашто може да ја следи вашата лична активност на мрежата, вклучувајќи ги е-пораките, апликациите и веб-локациите."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Профилот е поврзан на <xliff:g id="APPLICATION">%2$s</xliff:g>, што може да ја следи вашата работна активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите.\n\nЗа повеќе информации, контактирајте со вашиот администратор."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> управува со вашиот работен профил. Профилот е поврзан на <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, што може да ја следи вашата работна активност на мрежата, заедно со е-пораките, апликациите и веб-сајтовите.\n\nПоврзани сте и на <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, што може да ја следи вашата лична активност на мрежата."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"Се одржува отклучен од TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Уредот ќе остане заклучен додека рачно не го отклучите"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Добивајте известувања побрзо"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Видете ги пред да отклучите"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Собери"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Автоматски титлови"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Совет за затворени титлови"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Преклопување титли"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"овозможи"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"оневозможи"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Префрлете го излезниот уред"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екранот е прикачен"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ќе се гледа сѐ додека не го откачите. Допрете и држете „Назад“ и „Краток преглед“ за откачување."</string>
@@ -640,10 +636,22 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Продолжи да ме предупредуваш"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Исклучи известувања"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Дали да продолжат да се прикажуваат известувања од апликацијава?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"Блокираните известувања не се појавуваат никаде и не пуштаат звук. Може да ги деблокирате известувањата во поставките."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"Стишените известувања се појавуваат во сенка, но не се појавуваат на заклучен екран, во вид на рекламен натпис и не пуштаат звук."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"Овие известувања ќе дадат звук и ќе се прикажат во фиоката за известување, статусната лента и заклучениот екран"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Известувањава не може да се исклучат"</string>
+    <!-- no translation found for notification_silence_title (7352089096356977930) -->
+    <skip />
+    <!-- no translation found for notification_alert_title (3966526305405016221) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
+    <skip />
+    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Оваа група известувања не може да се конфигурира тука"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"преку <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Апликацијава ја користи камерата."</string>

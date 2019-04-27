@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"अॅपला वापरासाठी चेहरा टेम्पलेट जोडण्याच्या आणि हटवण्याच्या पद्धती जारी करू देते."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"चेहरा ऑथेंटिकेशन हार्डवेअर वापरा"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"अॅपला चेहरा ऑथेंटिकेशनसाठी ऑथेंटिकेशन हार्डवेअर वापरू देते"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"अचूक फेस डेटा कॅप्चर करता आला नाही. पुन्हा करा."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"खूप प्रखर. आणखी सौम्य प्रकाश वापरून पहा."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"खूप गडद. आणखी प्रखर प्रकाश वापरून पहा."</string>

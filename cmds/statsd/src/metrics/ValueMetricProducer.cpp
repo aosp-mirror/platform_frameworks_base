@@ -144,6 +144,9 @@ ValueMetricProducer::ValueMetricProducer(
     mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what()) ||
                           HasPositionALL(metric.dimensions_in_condition());
 
+    int64_t numBucketsForward = calcBucketsForwardCount(startTimeNs);
+    mCurrentBucketNum += numBucketsForward;
+
     flushIfNeededLocked(startTimeNs);
 
     if (mIsPulled) {
@@ -156,10 +159,6 @@ ValueMetricProducer::ValueMetricProducer(
     // Adjust start for partial bucket
     mCurrentBucketStartTimeNs = startTimeNs;
     mConditionTimer.newBucketStart(mCurrentBucketStartTimeNs);
-    // Kicks off the puller immediately if condition is true and diff based.
-    if (mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
-        pullAndMatchEventsLocked(startTimeNs, mCondition);
-    }
     VLOG("value metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
@@ -168,6 +167,13 @@ ValueMetricProducer::~ValueMetricProducer() {
     VLOG("~ValueMetricProducer() called");
     if (mIsPulled) {
         mPullerManager->UnRegisterReceiver(mPullTagId, this);
+    }
+}
+
+void ValueMetricProducer::prepareFistBucketLocked() {
+    // Kicks off the puller immediately if condition is true and diff based.
+    if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
+        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs, mCondition);
     }
 }
 

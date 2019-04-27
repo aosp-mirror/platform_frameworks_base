@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Հավելվածին թույլ է տալիս ավելացնել և հեռացնել դեմքի նմուշներ:"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"օգտագործել դեմքի ճանաչման սարքը"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Հավելվածին թույլ է տալիս օգտագործել նույնականացման համար նախատեսված սարքը"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Չհաջողվեց գրանցել դեմքի ճշգրիտ տվյալները։ Կրկնեք։"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Շատ լուսավոր է։ Փորձեք ավելի թեթև լուսավորություն։"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Շատ մութ է։ Փորձեք ավելի պայծառ լուսավորություն։"</string>
@@ -1122,7 +1128,7 @@
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Եզրափակել գործողությունը՝ օգտագործելով %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Ավարտել գործողությունը"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Բացել հետևյալ ծրագրով՝"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել ծրագրով՝ %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Բացել հավելվածով՝ %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Բացել"</string>
     <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"Թույլատրեք, որ <xliff:g id="HOST">%1$s</xliff:g> տիրույթը հղումները բացվեն հետևյալ հավելվածում՝"</string>
     <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"Թույլատրեք, որ <xliff:g id="HOST">%1$s</xliff:g> տիրույթի հղումները բացվեն <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածում"</string>

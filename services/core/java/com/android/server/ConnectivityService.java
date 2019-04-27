@@ -277,7 +277,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private Tethering mTethering;
 
-    private final PermissionMonitor mPermissionMonitor;
+    @VisibleForTesting
+    protected final PermissionMonitor mPermissionMonitor;
 
     private KeyStore mKeyStore;
 
@@ -832,13 +833,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         this(context, netManager, statsService, policyManager,
-            getDnsResolver(), new IpConnectivityLog());
+            getDnsResolver(), new IpConnectivityLog(), NetdService.getInstance());
     }
 
     @VisibleForTesting
     protected ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
-            IDnsResolver dnsresolver, IpConnectivityLog logger) {
+            IDnsResolver dnsresolver, IpConnectivityLog logger, INetd netd) {
         if (DBG) log("ConnectivityService starting up");
 
         mSystemProperties = getSystemProperties();
@@ -878,7 +879,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mDnsResolver = checkNotNull(dnsresolver, "missing IDnsResolver");
         mProxyTracker = makeProxyTracker();
 
-        mNetd = NetdService.getInstance();
+        mNetd = netd;
         mKeyStore = KeyStore.getInstance();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -964,7 +965,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mTethering = makeTethering();
 
-        mPermissionMonitor = new PermissionMonitor(mContext, mNMS, mNetd);
+        mPermissionMonitor = new PermissionMonitor(mContext, mNetd);
 
         // Set up the listener for user state for creating user VPNs.
         // Should run on mHandler to avoid any races.
@@ -2446,6 +2447,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println("NetworkStackClient logs:");
         pw.increaseIndent();
         NetworkStackClient.getInstance().dump(pw);
+        pw.decreaseIndent();
+
+        pw.println();
+        pw.println("Permission Monitor:");
+        pw.increaseIndent();
+        mPermissionMonitor.dump(pw);
+        pw.decreaseIndent();
     }
 
     private void dumpNetworks(IndentingPrintWriter pw) {
@@ -2854,7 +2862,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             nai.networkMonitor().notifyPrivateDnsChanged(cfg.toParcel());
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
 
         // With Private DNS bypass support, we can proceed to update the
@@ -3024,7 +3032,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             nai.networkMonitor().notifyNetworkDisconnected();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
         mNetworkAgentInfos.remove(nai.messenger);
         nai.clatd.update();
@@ -3063,15 +3071,40 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // fallback network the default or requested a new network from the
             // NetworkFactories, so network traffic isn't interrupted for an unnecessarily
             // long time.
-            try {
-                mNetd.networkDestroy(nai.network.netId);
-            } catch (RemoteException | ServiceSpecificException e) {
-                loge("Exception destroying network: " + e);
-            }
+            destroyNativeNetwork(nai);
             mDnsManager.removeNetwork(nai.network);
         }
         synchronized (mNetworkForNetId) {
             mNetIdInUse.delete(nai.network.netId);
+        }
+    }
+
+    private boolean createNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+        try {
+            // This should never fail.  Specifying an already in use NetID will cause failure.
+            if (networkAgent.isVPN()) {
+                mNetd.networkCreateVpn(networkAgent.network.netId,
+                        (networkAgent.networkMisc == null
+                                || !networkAgent.networkMisc.allowBypass));
+            } else {
+                mNetd.networkCreatePhysical(networkAgent.network.netId,
+                        getNetworkPermission(networkAgent.networkCapabilities));
+            }
+            mDnsResolver.createNetworkCache(networkAgent.network.netId);
+            return true;
+        } catch (RemoteException | ServiceSpecificException e) {
+            loge("Error creating network " + networkAgent.network.netId + ": "
+                    + e.getMessage());
+            return false;
+        }
+    }
+
+    private void destroyNativeNetwork(@NonNull NetworkAgentInfo networkAgent) {
+        try {
+            mNetd.networkDestroy(networkAgent.network.netId);
+            mDnsResolver.destroyNetworkCache(networkAgent.network.netId);
+        } catch (RemoteException | ServiceSpecificException e) {
+            loge("Exception destroying network: " + e);
         }
     }
 
@@ -3413,7 +3446,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 nai.networkMonitor().setAcceptPartialConnectivity();
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
         }
     }
@@ -3449,7 +3482,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 nai.networkMonitor().launchCaptivePortalApp();
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
         });
     }
@@ -4077,7 +4110,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             nai.networkMonitor().forceReevaluation(uid);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -5450,7 +5483,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             networkMonitor.start();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            e.rethrowAsRuntimeException();
         }
         nai.asyncChannel.connect(mContext, mTrackerHandler, nai.messenger);
         NetworkInfo networkInfo = nai.networkInfo;
@@ -5469,6 +5502,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
 
         updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities);
+
+        // update filtering rules, need to happen after the interface update so netd knows about the
+        // new interface (the interface name -> index map becomes initialized)
+        updateVpnFiltering(newLp, oldLp, networkAgent);
+
         updateMtu(newLp, oldLp);
         // TODO - figure out what to do for clat
 //        for (LinkProperties lp : newLp.getStackedLinks()) {
@@ -5502,7 +5540,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             try {
                 networkAgent.networkMonitor().notifyLinkPropertiesChanged(newLp);
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
             if (networkAgent.everConnected) {
                 notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
@@ -5631,6 +5669,37 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mDnsManager.setDnsConfigurationForNetwork(netId, newLp, isDefaultNetwork);
         } catch (Exception e) {
             loge("Exception in setDnsConfigurationForNetwork: " + e);
+        }
+    }
+
+    private void updateVpnFiltering(LinkProperties newLp, LinkProperties oldLp,
+            NetworkAgentInfo nai) {
+        final String oldIface = oldLp != null ? oldLp.getInterfaceName() : null;
+        final String newIface = newLp != null ? newLp.getInterfaceName() : null;
+        final boolean wasFiltering = requiresVpnIsolation(nai, nai.networkCapabilities, oldLp);
+        final boolean needsFiltering = requiresVpnIsolation(nai, nai.networkCapabilities, newLp);
+
+        if (!wasFiltering && !needsFiltering) {
+            // Nothing to do.
+            return;
+        }
+
+        if (Objects.equals(oldIface, newIface) && (wasFiltering == needsFiltering)) {
+            // Nothing changed.
+            return;
+        }
+
+        final Set<UidRange> ranges = nai.networkCapabilities.getUids();
+        final int vpnAppUid = nai.networkCapabilities.getEstablishingVpnAppUid();
+        // TODO: this create a window of opportunity for apps to receive traffic between the time
+        // when the old rules are removed and the time when new rules are added. To fix this,
+        // make eBPF support two whitelisted interfaces so here new rules can be added before the
+        // old rules are being removed.
+        if (wasFiltering) {
+            mPermissionMonitor.onVpnUidRangesRemoved(oldIface, ranges, vpnAppUid);
+        }
+        if (needsFiltering) {
+            mPermissionMonitor.onVpnUidRangesAdded(newIface, ranges, vpnAppUid);
         }
     }
 
@@ -5776,6 +5845,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    /**
+     * Returns whether VPN isolation (ingress interface filtering) should be applied on the given
+     * network.
+     *
+     * Ingress interface filtering enforces that all apps under the given network can only receive
+     * packets from the network's interface (and loopback). This is important for VPNs because
+     * apps that cannot bypass a fully-routed VPN shouldn't be able to receive packets from any
+     * non-VPN interfaces.
+     *
+     * As a result, this method should return true iff
+     *  1. the network is an app VPN (not legacy VPN)
+     *  2. the VPN does not allow bypass
+     *  3. the VPN is fully-routed
+     *  4. the VPN interface is non-null
+     *
+     * @See INetd#firewallAddUidInterfaceRules
+     * @See INetd#firewallRemoveUidInterfaceRules
+     */
+    private boolean requiresVpnIsolation(@NonNull NetworkAgentInfo nai, NetworkCapabilities nc,
+            LinkProperties lp) {
+        if (nc == null || lp == null) return false;
+        return nai.isVPN()
+                && !nai.networkMisc.allowBypass
+                && nc.getEstablishingVpnAppUid() != Process.SYSTEM_UID
+                && lp.getInterfaceName() != null
+                && (lp.hasIPv4DefaultRoute() || lp.hasIPv6DefaultRoute());
+    }
+
     private void updateUids(NetworkAgentInfo nai, NetworkCapabilities prevNc,
             NetworkCapabilities newNc) {
         Set<UidRange> prevRanges = null == prevNc ? null : prevNc.getUids();
@@ -5788,6 +5885,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         newRanges.removeAll(prevRangesCopy);
 
         try {
+            // When updating the VPN uid routing rules, add the new range first then remove the old
+            // range. If old range were removed first, there would be a window between the old
+            // range being removed and the new range being added, during which UIDs contained
+            // in both ranges are not subject to any VPN routing rules. Adding new range before
+            // removing old range works because, unlike the filtering rules below, it's possible to
+            // add duplicate UID routing rules.
             if (!newRanges.isEmpty()) {
                 final UidRange[] addedRangesArray = new UidRange[newRanges.size()];
                 newRanges.toArray(addedRangesArray);
@@ -5798,9 +5901,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 prevRanges.toArray(removedRangesArray);
                 mNMS.removeVpnUidRanges(nai.network.netId, removedRangesArray);
             }
+            final boolean wasFiltering = requiresVpnIsolation(nai, prevNc, nai.linkProperties);
+            final boolean shouldFilter = requiresVpnIsolation(nai, newNc, nai.linkProperties);
+            final String iface = nai.linkProperties.getInterfaceName();
+            // For VPN uid interface filtering, old ranges need to be removed before new ranges can
+            // be added, due to the range being expanded and stored as invidiual UIDs. For example
+            // the UIDs might be updated from [0, 99999] to ([0, 10012], [10014, 99999]) which means
+            // prevRanges = [0, 99999] while newRanges = [0, 10012], [10014, 99999]. If prevRanges
+            // were added first and then newRanges got removed later, there would be only one uid
+            // 10013 left. A consequence of removing old ranges before adding new ranges is that
+            // there is now a window of opportunity when the UIDs are not subject to any filtering.
+            // Note that this is in contrast with the (more robust) update of VPN routing rules
+            // above, where the addition of new ranges happens before the removal of old ranges.
+            // TODO Fix this window by computing an accurate diff on Set<UidRange>, so the old range
+            // to be removed will never overlap with the new range to be added.
+            if (wasFiltering && !prevRanges.isEmpty()) {
+                mPermissionMonitor.onVpnUidRangesRemoved(iface, prevRanges,
+                        prevNc.getEstablishingVpnAppUid());
+            }
+            if (shouldFilter && !newRanges.isEmpty()) {
+                mPermissionMonitor.onVpnUidRangesAdded(iface, newRanges,
+                        newNc.getEstablishingVpnAppUid());
+            }
         } catch (Exception e) {
             // Never crash!
-            loge("Exception in updateUids: " + e);
+            loge("Exception in updateUids: ", e);
         }
     }
 
@@ -6376,21 +6501,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // A network that has just connected has zero requests and is thus a foreground network.
             networkAgent.networkCapabilities.addCapability(NET_CAPABILITY_FOREGROUND);
 
-            try {
-                // This should never fail.  Specifying an already in use NetID will cause failure.
-                if (networkAgent.isVPN()) {
-                    mNMS.createVirtualNetwork(networkAgent.network.netId,
-                            (networkAgent.networkMisc == null ||
-                                !networkAgent.networkMisc.allowBypass));
-                } else {
-                    mNMS.createPhysicalNetwork(networkAgent.network.netId,
-                            getNetworkPermission(networkAgent.networkCapabilities));
-                }
-            } catch (Exception e) {
-                loge("Error creating network " + networkAgent.network.netId + ": "
-                        + e.getMessage());
-                return;
-            }
+            if (!createNativeNetwork(networkAgent)) return;
             networkAgent.created = true;
         }
 
@@ -6421,7 +6532,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 networkAgent.networkMonitor().notifyNetworkConnected(
                         networkAgent.linkProperties, networkAgent.networkCapabilities);
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                e.rethrowAsRuntimeException();
             }
             scheduleUnvalidatedPrompt(networkAgent);
 

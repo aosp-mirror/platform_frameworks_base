@@ -32,12 +32,9 @@ import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
-import com.android.systemui.globalactions.GlobalActionsDialog;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
-
-import java.util.ArrayList;
 
 /**
  * Layout for placing two containers at a specific physical position on the device, relative to the
@@ -258,24 +255,16 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
     @Override
     public void onUpdateList() {
         super.onUpdateList();
-        ArrayList<GlobalActionsDialog.Action> separatedActions =
-                mAdapter.getSeparatedItems();
-        ArrayList<GlobalActionsDialog.Action> listActions = mAdapter.getListItems();
 
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            Object action = mAdapter.getItem(i);
-            int separatedIndex = separatedActions.indexOf(action);
             ViewGroup parent;
-            if (separatedIndex != -1) {
+            boolean separated = mAdapter.shouldBeSeparated(i);
+            if (separated) {
                 parent = getSeparatedView();
             } else {
-                int listIndex = listActions.indexOf(action);
                 parent = getListView();
             }
             View v = mAdapter.getView(i, null, parent);
-            final int pos = i;
-            v.setOnClickListener(view -> mAdapter.onClickItem(pos));
-            v.setOnLongClickListener(view -> mAdapter.onLongClickItem(pos));
             parent.addView(v);
         }
     }
@@ -421,7 +410,9 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
+
         post(() -> updatePosition());
+
     }
 
     private void animateChild(int oldHeight, int newHeight) {

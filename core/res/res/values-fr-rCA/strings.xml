@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet à l\'appli d\'employer des méthodes d\'aj. et de suppr. de modèles de reconn. visage."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utiliser le matériel d\'authentification de visage"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permet à l\'appli d\'utiliser du matériel de reconnaissance du visage pour l\'authentification"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Imposs. capt. données visage précises. Réessayez."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Trop lumineux. Essayez un éclairage plus faible."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Trop sombre. Essayez avec un éclairage plus fort."</string>
@@ -1919,8 +1925,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Productivité"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Mémoire de l\'appareil"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Débogage USB"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"heure"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minute"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"heures"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"minutes"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Définir l\'heure"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Entrez une heure valide"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Entrez l\'heure"</string>

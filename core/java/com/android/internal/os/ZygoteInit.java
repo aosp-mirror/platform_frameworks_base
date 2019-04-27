@@ -85,7 +85,8 @@ public class ZygoteInit {
     // TODO (chriswailes): Change this so it is set with Zygote or ZygoteSecondary as appropriate
     private static final String TAG = "Zygote";
 
-    private static final String PROPERTY_DISABLE_OPENGL_PRELOADING = "ro.zygote.disable_gl_preload";
+    private static final String PROPERTY_DISABLE_GRAPHICS_DRIVER_PRELOADING =
+            "ro.zygote.disable_gl_preload";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
 
     private static final int LOG_BOOT_PROGRESS_PRELOAD_START = 3020;
@@ -149,8 +150,8 @@ public class ZygoteInit {
         Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadAppProcessHALs");
         nativePreloadAppProcessHALs();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
-        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadOpenGL");
-        maybePreloadOpenGL();
+        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadGraphicsDriver");
+        maybePreloadGraphicsDriver();
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
         preloadSharedLibraries();
         preloadTextResources();
@@ -193,19 +194,19 @@ public class ZygoteInit {
     native private static void nativePreloadAppProcessHALs();
 
     /**
-     * This call loads the graphics driver by attempting to make an OpenGL call.  If the driver is
+     * This call loads the graphics driver by making an OpenGL or Vulkan call.  If the driver is
      * not currently in memory it will load and initialize it.  The OpenGL call itself is relatively
      * cheap and pure.  This means that it is a low overhead on the initial call, and is safe and
      * cheap to call later.  Calls after the initial invocation will effectively be no-ops for the
      * system.
      */
-    static native void nativePreloadOpenGL();
+    static native void nativePreloadGraphicsDriver();
 
-    private static void maybePreloadOpenGL() {
+    private static void maybePreloadGraphicsDriver() {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
-        if (!SystemProperties.getBoolean(PROPERTY_DISABLE_OPENGL_PRELOADING, false) &&
-                (driverPackageName == null || driverPackageName.isEmpty())) {
-            nativePreloadOpenGL();
+        if (!SystemProperties.getBoolean(PROPERTY_DISABLE_GRAPHICS_DRIVER_PRELOADING, false)
+                && (driverPackageName == null || driverPackageName.isEmpty())) {
+            nativePreloadGraphicsDriver();
         }
     }
 

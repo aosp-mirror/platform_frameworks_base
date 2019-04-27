@@ -363,18 +363,6 @@ interface INetworkManagementService
     boolean isNetworkActive();
 
     /**
-     * Setup a new physical network.
-     * @param permission PERMISSION_NONE if no permissions required to access this network.
-     *                   PERMISSION_NETWORK or PERMISSION_SYSTEM to set respective permission.
-     */
-    void createPhysicalNetwork(int netId, int permission);
-
-    /**
-     * Setup a new VPN.
-     */
-    void createVirtualNetwork(int netId, boolean secure);
-
-    /**
      * Add an interface to a network.
      */
     void addInterfaceToNetwork(String iface, int netId);
@@ -395,9 +383,6 @@ interface INetworkManagementService
      *                   PERMISSION_NETWORK or PERMISSION_SYSTEM to set permission.
      */
     void setNetworkPermission(int netId, int permission);
-
-    void setPermission(String permission, in int[] uids);
-    void clearPermission(in int[] uids);
 
     /**
      * Allow UID to call protect().

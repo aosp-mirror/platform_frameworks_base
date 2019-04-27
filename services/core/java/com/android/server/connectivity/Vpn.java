@@ -1604,12 +1604,7 @@ public class Vpn {
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {
-            for (UidRange uidRange : mBlockedUsers) {
-                if (uidRange.contains(uid)) {
-                    return true;
-                }
-            }
-            return false;
+            return UidRange.containsUid(mBlockedUsers, uid);
         }
     }
 

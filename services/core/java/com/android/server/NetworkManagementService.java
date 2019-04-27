@@ -2051,28 +2051,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void createPhysicalNetwork(int netId, int permission) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.networkCreatePhysical(netId, permission);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void createVirtualNetwork(int netId, boolean secure) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.networkCreateVpn(netId, secure);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void addInterfaceToNetwork(String iface, int netId) {
         modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, netId, iface);
     }
@@ -2144,38 +2122,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
         try {
             mNetdService.networkSetPermissionForNetwork(netId, permission);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private int parsePermission(String permission) {
-        if (permission.equals("NETWORK")) {
-            return INetd.PERMISSION_NETWORK;
-        }
-        if (permission.equals("SYSTEM")) {
-            return INetd.PERMISSION_SYSTEM;
-        }
-        return INetd.PERMISSION_NONE;
-    }
-
-    @Override
-    public void setPermission(String permission, int[] uids) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.networkSetPermissionForUser(parsePermission(permission), uids);
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void clearPermission(int[] uids) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
-        try {
-            mNetdService.networkClearPermissionForUser(uids);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
