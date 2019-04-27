@@ -214,7 +214,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 deviceProvisionedController,
                 new MetricsLogger(),
                 mock(AssistManager.class),
-                mOverviewProxyService);
+                mOverviewProxyService,
+                mock(NavigationModeController.class));
     }
 
     private class HostCallbacksForExternalDisplay extends

@@ -104,6 +104,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public boolean onError(long deviceId, int error, int vendorCode) {
         if (!shouldFrameworkHandleLockout()) {
             switch (error) {
+                case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
                 case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
                 case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
                     if (mStarted) {

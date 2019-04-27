@@ -21,6 +21,7 @@ import android.app.assist.AssistStructure;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.IBinder;
 
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 
@@ -30,8 +31,8 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 oneway interface IVoiceInteractionSession {
     void show(in Bundle sessionArgs, int flags, IVoiceInteractionSessionShowCallback showCallback);
     void hide();
-    void handleAssist(in Bundle assistData, in AssistStructure structure, in AssistContent content,
-                      int index, int count);
+    void handleAssist(int taskId, in IBinder activityId, in Bundle assistData,
+            in AssistStructure structure, in AssistContent content, int index, int count);
     void handleScreenshot(in Bitmap screenshot);
     void taskStarted(in Intent intent, int taskId);
     void taskFinished(in Intent intent, int taskId);

@@ -142,7 +142,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     /**
      * Value to increment the z-layer when boosting a layer during animations. BOOST in l33tsp34k.
      */
-    private static final int Z_BOOST_BASE = 800570000;
+    @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
 
     // Non-null only for application tokens.
     final IApplicationToken appToken;
@@ -291,7 +291,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private boolean mFreezingScreen;
 
     /** Whether this token should be boosted at the top of all app window tokens. */
-    private boolean mNeedsZBoost;
+    @VisibleForTesting boolean mNeedsZBoost;
     private Letterbox mLetterbox;
 
     private final Point mTmpPoint = new Point();
@@ -1758,8 +1758,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     private void calculateCompatBoundsTransformation(Configuration newParentConfig) {
         final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
-        final Rect viewportBounds = parentAppBounds != null
-                ? parentAppBounds : newParentConfig.windowConfiguration.getBounds();
+        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
+        final Rect viewportBounds = parentAppBounds != null ? parentAppBounds : parentBounds;
         final Rect appBounds = getWindowConfiguration().getAppBounds();
         final Rect contentBounds = appBounds != null ? appBounds : getResolvedOverrideBounds();
         final float contentW = contentBounds.width();
@@ -1778,6 +1778,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mSizeCompatBounds.set(contentBounds);
         mSizeCompatBounds.offsetTo(0, 0);
         mSizeCompatBounds.scale(mSizeCompatScale);
+        // Ensure to align the top with the parent.
+        mSizeCompatBounds.top = parentBounds.top;
         // The decor inset is included in height.
         mSizeCompatBounds.bottom += viewportBounds.top;
         mSizeCompatBounds.left += offsetX;
@@ -2691,7 +2693,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mNeedsZBoost) {
             layer += Z_BOOST_BASE;
         }
-        leash.setLayer(layer);
+        if (!mNeedsAnimationBoundsLayer) {
+            leash.setLayer(layer);
+        }
 
         final DisplayContent dc = getDisplayContent();
         dc.assignStackOrdering();
@@ -2728,6 +2732,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             // Crop to stack bounds.
             t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
+            t.setLayer(mAnimationBoundsLayer, layer);
 
             // Reparent leash to animation bounds layer.
             t.reparent(leash, mAnimationBoundsLayer);

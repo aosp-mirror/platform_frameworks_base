@@ -2961,6 +2961,7 @@ android.permission.IPermissionController$Stub$Proxy
 android.permission.IPermissionController
 android.permission.PermissionControllerManager$RemoteService
 android.permission.PermissionControllerManager
+android.permission.PermissionManager$SplitPermissionInfo
 android.preference.Preference$OnPreferenceChangeListener
 android.preference.Preference
 android.preference.PreferenceActivity
@@ -5551,6 +5552,9 @@ com.android.phone.ecc.nano.WireFormatNano
 com.android.server.NetworkManagementSocketTagger$1
 com.android.server.NetworkManagementSocketTagger$SocketTags
 com.android.server.NetworkManagementSocketTagger
+com.android.server.SystemConfig$PermissionEntry
+com.android.server.SystemConfig$SharedLibraryEntry
+com.android.server.SystemConfig
 com.android.server.sip.SipService
 com.android.server.sip.SipWakeupTimer
 com.google.android.collect.Lists

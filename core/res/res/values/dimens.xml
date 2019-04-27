@@ -58,11 +58,6 @@
     <dimen name="navigation_bar_frame_height">@dimen/navigation_bar_height</dimen>
     <!-- Height of the bottom navigation bar frame in landscape -->
     <dimen name="navigation_bar_frame_height_landscape">@dimen/navigation_bar_frame_height</dimen>
-    <!-- Width of the left/right navigation bar frame; this is different than navigation_bar_width
-         where that is the width reported to all the other windows to resize themselves around the
-         navigation bar window but navigation_bar_frame_width is reported to SystemUI navigation
-         bar view's window -->
-    <dimen name="navigation_bar_frame_width">@dimen/navigation_bar_width</dimen>
 
     <!-- The height of the navigation gesture area; if the size is larger than the navigation bar
         frame width/height, then the difference is the spacing from the navigation bar window to
@@ -736,4 +731,5 @@
     <dimen name="chooser_target_width">90dp</dimen>
     <dimen name="chooser_header_scroll_elevation">4dp</dimen>
     <dimen name="chooser_max_collapsed_height">288dp</dimen>
+    <dimen name="chooser_direct_share_label_placeholder_max_width">72dp</dimen>
 </resources>

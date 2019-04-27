@@ -24,6 +24,11 @@ using ::testing::Not;
 using ::testing::NotNull;
 using ::testing::Eq;
 
+android::StringPiece GetExtension(android::StringPiece path) {
+  auto iter = std::find(path.begin(), path.end(), '.');
+  return android::StringPiece(iter, path.end() - iter);
+}
+
 namespace aapt {
 
 TEST(ResourcePathShortenerTest, FileRefPathsChangedInResourceTable) {
@@ -62,6 +67,47 @@ TEST(ResourcePathShortenerTest, FileRefPathsChangedInResourceTable) {
       *GetValue<String>(table.get(), "android:string/string")->value,
               Eq("res/should/still/be/the/same.png"));
   EXPECT_THAT(path_map.find("res/should/still/be/the/same.png"), Eq(path_map.end()));
+}
+
+TEST(ResourcePathShortenerTest, SkipColorFileRefPaths) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:color/colorlist", "res/color/colorlist.xml")
+          .Build();
+
+  std::map<std::string, std::string> path_map;
+  ASSERT_TRUE(ResourcePathShortener(path_map).Consume(context.get(), table.get()));
+
+  // Expect that the path map to not contain the ColorStateList
+  ASSERT_THAT(path_map.find("res/color/colorlist.xml"), Eq(path_map.end()));
+}
+
+TEST(ResourcePathShortenerTest, KeepExtensions) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+
+  std::string original_xml_path = "res/drawable/xmlfile.xml";
+  std::string original_png_path = "res/drawable/pngfile.png";
+
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddFileReference("android:color/xmlfile", original_xml_path)
+          .AddFileReference("android:color/pngfile", original_png_path)
+          .Build();
+
+  std::map<std::string, std::string> path_map;
+  ASSERT_TRUE(ResourcePathShortener(path_map).Consume(context.get(), table.get()));
+
+  // Expect that the path map is populated
+  ASSERT_THAT(path_map.find("res/drawable/xmlfile.xml"), Not(Eq(path_map.end())));
+  ASSERT_THAT(path_map.find("res/drawable/pngfile.png"), Not(Eq(path_map.end())));
+
+  auto shortend_xml_path = path_map[original_xml_path];
+  auto shortend_png_path = path_map[original_png_path];
+
+  EXPECT_THAT(GetExtension(path_map[original_xml_path]), Eq(android::StringPiece(".xml")));
+  EXPECT_THAT(GetExtension(path_map[original_png_path]), Eq(android::StringPiece(".png")));
 }
 
 }   // namespace aapt

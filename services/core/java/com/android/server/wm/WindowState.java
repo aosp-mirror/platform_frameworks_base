@@ -2201,14 +2201,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final Region region = inputWindowHandle.touchableRegion;
         setTouchableRegionCropIfNeeded(inputWindowHandle);
 
-        if (mAppToken != null && !mAppToken.getResolvedOverrideBounds().isEmpty()) {
+        final Rect appOverrideBounds = mAppToken != null
+                ? mAppToken.getResolvedOverrideBounds() : null;
+        if (appOverrideBounds != null && !appOverrideBounds.isEmpty()) {
             // There may have touchable letterboxes around the activity, so in order to let the
             // letterboxes are able to receive touch event and slip to activity, the activity with
             // compatibility bounds cannot occupy full screen touchable region.
             if (modal) {
                 // A modal window uses the whole compatibility bounds.
                 flags |= FLAG_NOT_TOUCH_MODAL;
-                mTmpRect.set(mAppToken.getResolvedOverrideBounds());
+                mTmpRect.set(0, 0, appOverrideBounds.width(), appOverrideBounds.height());
             } else {
                 // Non-modal uses the application based frame.
                 mTmpRect.set(mWindowFrames.mCompatFrame);

@@ -156,7 +156,9 @@ public class EdgeBackGestureHandler implements DisplayListener {
         mWm = context.getSystemService(WindowManager.class);
         mOverviewProxyService = overviewProxyService;
 
-        mEdgeWidth = QuickStepContract.getEdgeSensitivityWidth(context);
+        // TODO: Get this for the current user
+        mEdgeWidth = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_backGestureInset);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mSwipeThreshold = res.getDimension(R.dimen.navigation_edge_action_drag_threshold);
 
@@ -168,7 +170,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
      */
     public void onNavBarAttached() {
         mIsAttached = true;
-        onOverlaysChanged();
+        updateIsEnabled();
     }
 
     /**
@@ -179,11 +181,8 @@ public class EdgeBackGestureHandler implements DisplayListener {
         updateIsEnabled();
     }
 
-    /**
-     * Called when system overlays has changed
-     */
-    public void onOverlaysChanged() {
-        mIsGesturalModeEnabled = QuickStepContract.isGesturalMode(mContext);
+    public void onNavigationModeChanged(int mode) {
+        mIsGesturalModeEnabled = QuickStepContract.isGesturalMode(mode);
         updateIsEnabled();
     }
 
@@ -292,12 +291,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             int stateFlags = mOverviewProxyService.getSystemUiStateFlags();
+            mIsOnLeftEdge = ev.getX() < mEdgeWidth;
             mAllowGesture = (stateFlags & SYSUI_STATE_NAV_BAR_HIDDEN) == 0
                     && ((stateFlags & SYSUI_STATE_BOUNCER_SHOWING) == SYSUI_STATE_BOUNCER_SHOWING
                             || (stateFlags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) == 0)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
-                mIsOnLeftEdge = ev.getX() < mEdgeWidth;
                 mEdgePanelLp.gravity = mIsOnLeftEdge
                         ? (Gravity.LEFT | Gravity.TOP)
                         : (Gravity.RIGHT | Gravity.TOP);

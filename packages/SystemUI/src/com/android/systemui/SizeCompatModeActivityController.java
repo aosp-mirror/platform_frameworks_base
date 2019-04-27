@@ -129,8 +129,11 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
 
         restartButton = createRestartButton(context);
         restartButton.updateLastTargetActivity(activityToken);
-        restartButton.show();
-        mActiveButtons.append(displayId, restartButton);
+        if (restartButton.show()) {
+            mActiveButtons.append(displayId, restartButton);
+        } else {
+            onDisplayRemoved(displayId);
+        }
     }
 
     @VisibleForTesting
@@ -208,8 +211,16 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
             mLastActivityToken = activityToken;
         }
 
-        void show() {
-            getContext().getSystemService(WindowManager.class).addView(this, mWinParams);
+        /** @return {@code false} if the target display is invalid. */
+        boolean show() {
+            try {
+                getContext().getSystemService(WindowManager.class).addView(this, mWinParams);
+            } catch (WindowManager.InvalidDisplayException e) {
+                // The target display may have been removed when the callback has just arrived.
+                Log.w(TAG, "Cannot show on display " + getContext().getDisplayId(), e);
+                return false;
+            }
+            return true;
         }
 
         void remove() {

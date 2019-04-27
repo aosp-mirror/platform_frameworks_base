@@ -226,8 +226,9 @@ public class KeyValueBackupTaskTest {
         // Needed to be able to use a real BMS instead of a mock
         setUpBinderCallerAndApplicationAsSystem(mApplication);
         mBackupManagerService =
-                spy(createUserBackupManagerServiceAndRunTasks(
-                        USER_ID, mContext, mBaseStateDir, mDataDir, mTransportManager));
+                spy(
+                        createUserBackupManagerServiceAndRunTasks(
+                                USER_ID, mContext, mBaseStateDir, mDataDir, mTransportManager));
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
                 mApplication,
@@ -335,9 +336,7 @@ public class KeyValueBackupTaskTest {
                 .isEqualTo("packageState".getBytes());
     }
 
-    /**
-     * Do not update backup token if the backup queue was empty
-     */
+    /** Do not update backup token if the backup queue was empty */
     @Test
     public void testRunTask_whenQueueEmptyOnFirstBackup_doesNotUpdateCurrentToken()
             throws Exception {
@@ -725,8 +724,8 @@ public class KeyValueBackupTaskTest {
     }
 
     /**
-     * Agent unavailable means {@link UserBackupManagerService#bindToAgentSynchronous(ApplicationInfo,
-     * int)} returns {@code null}.
+     * Agent unavailable means {@link
+     * UserBackupManagerService#bindToAgentSynchronous(ApplicationInfo, int)} returns {@code null}.
      *
      * @see #setUpAgent(PackageData)
      */
@@ -759,8 +758,8 @@ public class KeyValueBackupTaskTest {
 
         runTask(task);
 
-        assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1))).isEqualTo(
-                "newState".getBytes());
+        assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1)))
+                .isEqualTo("newState".getBytes());
     }
 
     @Test
@@ -795,7 +794,8 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
-    public void testRunTask_whenNonIncrementalAndBindToAgentThrowsSecurityException() throws Exception {
+    public void testRunTask_whenNonIncrementalAndBindToAgentThrowsSecurityException()
+            throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgent(PACKAGE_1);
         doThrow(SecurityException.class)
@@ -1665,7 +1665,7 @@ public class KeyValueBackupTaskTest {
         runTask(task);
 
         verify(mReporter).onPackageBackupTransportFailure(PACKAGE_1.packageName);
-        verify(mReporter).onTransportNotInitialized();
+        verify(mReporter).onTransportNotInitialized(mTransport.transportName);
         verify(mReporter).onBackupFinished(BackupManager.ERROR_TRANSPORT_ABORTED);
     }
 
@@ -1682,7 +1682,7 @@ public class KeyValueBackupTaskTest {
         runTask(task);
 
         verify(mReporter).onPackageBackupTransportFailure(PM_PACKAGE.packageName);
-        verify(mReporter).onTransportNotInitialized();
+        verify(mReporter).onTransportNotInitialized(mTransport.transportName);
         verify(mReporter).onBackupFinished(BackupManager.ERROR_TRANSPORT_ABORTED);
     }
 
@@ -1771,8 +1771,9 @@ public class KeyValueBackupTaskTest {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         when(transportMock.transport.performBackup(any(), any(), anyInt()))
                 .thenReturn(BackupTransport.TRANSPORT_NOT_INITIALIZED);
-        // First one is in startTask(), second is the one we want.
+        // First one is in startTask(), second is in finishTask(), the third is the one we want.
         when(transportMock.transport.name())
+                .thenReturn(mTransport.transportName)
                 .thenReturn(mTransport.transportName)
                 .thenThrow(DeadObjectException.class);
         setUpAgentWithData(PACKAGE_1);
@@ -2321,9 +2322,7 @@ public class KeyValueBackupTaskTest {
         expectThrows(IllegalArgumentException.class, () -> task.handleCancel(false));
     }
 
-    /**
-     * Do not update backup token if no data was moved.
-     */
+    /** Do not update backup token if no data was moved. */
     @Test
     public void testRunTask_whenNoDataToBackupOnFirstBackup_doesNotUpdateCurrentToken()
             throws Exception {

@@ -385,13 +385,17 @@ public class ZygoteProcess {
      */
     @GuardedBy("mLock")
     private Process.ProcessStartResult zygoteSendArgsAndGetResult(
-            ZygoteState zygoteState, boolean useUsapPool, ArrayList<String> args)
+            ZygoteState zygoteState, boolean useUsapPool, @NonNull ArrayList<String> args)
             throws ZygoteStartFailedEx {
         // Throw early if any of the arguments are malformed. This means we can
         // avoid writing a partial response to the zygote.
         for (String arg : args) {
+            // Making two indexOf calls here is faster than running a manually fused loop due
+            // to the fact that indexOf is a optimized intrinsic.
             if (arg.indexOf('\n') >= 0) {
-                throw new ZygoteStartFailedEx("embedded newlines not allowed");
+                throw new ZygoteStartFailedEx("Embedded newlines not allowed");
+            } else if (arg.indexOf('\r') >= 0) {
+                throw new ZygoteStartFailedEx("Embedded carriage returns not allowed");
             }
         }
 

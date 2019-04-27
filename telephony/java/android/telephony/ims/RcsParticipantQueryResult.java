@@ -30,10 +30,13 @@ import java.util.stream.Collectors;
  * @hide
  */
 public final class RcsParticipantQueryResult {
+    private final RcsControllerCall mRcsControllerCall;
     private final RcsParticipantQueryResultParcelable mRcsParticipantQueryResultParcelable;
 
     RcsParticipantQueryResult(
+            RcsControllerCall rcsControllerCall,
             RcsParticipantQueryResultParcelable rcsParticipantQueryResultParcelable) {
+        mRcsControllerCall = rcsControllerCall;
         mRcsParticipantQueryResultParcelable = rcsParticipantQueryResultParcelable;
     }
 
@@ -55,7 +58,7 @@ public final class RcsParticipantQueryResult {
     @NonNull
     public List<RcsParticipant> getParticipants() {
         return mRcsParticipantQueryResultParcelable.mParticipantIds.stream()
-                .map(RcsParticipant::new)
+                .map(participantId -> new RcsParticipant(mRcsControllerCall, participantId))
                 .collect(Collectors.toList());
     }
 }

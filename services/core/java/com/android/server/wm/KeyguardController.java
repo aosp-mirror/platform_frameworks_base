@@ -264,7 +264,8 @@ class KeyguardController {
         // Keyguard.
         return dismissKeyguard && canDismissKeyguard() && !mAodShowing
                 && (mDismissalRequested
-                || getDisplay(r.getDisplayId()).mDismissingKeyguardActivity != r);
+                || (r.canShowWhenLocked()
+                        && getDisplay(r.getDisplayId()).mDismissingKeyguardActivity != r));
     }
 
     /**

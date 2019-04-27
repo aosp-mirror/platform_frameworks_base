@@ -34,7 +34,7 @@ public class RcsThreadQueryParamsTest {
 
     @Test
     public void testCanUnparcel() {
-        RcsParticipant rcsParticipant = new RcsParticipant(1);
+        RcsParticipant rcsParticipant = new RcsParticipant(null, 1);
         RcsThreadQueryParams rcsThreadQueryParams = new RcsThreadQueryParams.Builder()
                 .setThreadType(THREAD_TYPE_GROUP)
                 .setParticipant(rcsParticipant)
