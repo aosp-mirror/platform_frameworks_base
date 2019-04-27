@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Maakt geluid en wordt weergegeven in pull-downvenster, statusbalk en op vergrendelingsscherm."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Deze meldingen kunnen niet worden aangepast."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"via <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Deze app gebruikt de camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Deze app gebruikt de microfoon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Deze app wordt over andere apps op je scherm heen weergegeven."</string>

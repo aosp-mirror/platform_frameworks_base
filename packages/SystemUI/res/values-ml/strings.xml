@@ -636,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"മുന്നറിയിപ്പ് നൽകുന്നത് തുടരുക"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"അറിയിപ്പുകൾ ഓഫാക്കുക"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ഈ ആപ്പിൽ നിന്നുള്ള അറിയിപ്പുകൾ തുടർന്നും കാണിക്കണോ?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"സൗമ്യമായ"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"മുൻഗണനയുള്ള"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"എപ്പോഴും നിശബ്‌ദം. പുൾ ഡൗൺ ഷെയ്‌ഡിൽ പ്രദർശിപ്പിക്കുന്നു."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"എപ്പോഴും നിശബ്‌ദം. പുൾ ഡൗൺ ഷെയ്‌ഡിലും സ്റ്റാറ്റസ് ബാറിലും പ്രദർശിപ്പിക്കുന്നു."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"എപ്പോഴും നിശബ്‌ദം. പുൾ ഡൗൺ ഷെയ്‌ഡിലും ലോക്ക് സ്ക്രീനിലും പ്രദർശിപ്പിക്കുന്നു."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"എപ്പോഴും നിശബ്‌ദം. പുൾ ഡൗൺ ഷെയ്‌ഡിലും സ്റ്റാറ്റസ് ബാറിലും ലോക്ക് സ്ക്രീനിലും പ്രദർശിപ്പിക്കുന്നു."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"ശബ്‌ദം ഉണ്ടാക്കുകയും, പുൾ ഡൗൺ ഷെയ്‌ഡിലും സ്റ്റാറ്റസ് ബാറിലും ലോക്ക് സ്ക്രീനിലും പ്രദർശിപ്പിക്കുകയും ചെയ്യുന്നു."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"അറിയിപ്പുകളുടെ ഈ ഗ്രൂപ്പ് ഇവിടെ കോണ്‍ഫിഗര്‍ ചെയ്യാൻ കഴിയില്ല"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> വഴി"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ഈ ആപ്പ് ക്യാമറ ഉപയോഗിക്കുന്നുണ്ട്."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ഈ ആപ്പ് മൈക്രോഫോൺ ഉപയോഗിക്കുന്നു."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ഈ ആപ്പ് നിങ്ങളുടെ സ്‌ക്രീനിലെ മറ്റ് ആപ്പുകൾക്ക് മുകളിൽ പ്രദർശിപ്പിക്കുന്നു."</string>

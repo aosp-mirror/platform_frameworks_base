@@ -507,7 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi ishga tushirilgan. U internetdagi harakatlaringiz, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi. <xliff:g id="APPLICATION">%2$s</xliff:g> ilovasi ish tarmog‘idagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin.\n\nBatafsil axborot olish uchun administrator bilan bog‘laning."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Ishchi profilingiz <xliff:g id="ORGANIZATION">%1$s</xliff:g> tomonidan boshqariladi. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ilovasi ish tarmog‘idagi, jumladan, e-pochta, ilova va veb-saytlardagi xatti-harakatlaringizni kuzatishi mumkin.\n\nShuningdek, <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ilovasi ham shaxsiy tarmoqdagi harakatlaringizni kuzatishi mumkin."</string>
-    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent tomonidan qulflanmagan"</string>
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent tomonidan ochilgan"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Qurilma qo‘lda qulfdan chiqarilmaguncha qulflangan holatda qoladi"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Bildirishnomalarni tezroq oling"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Ularni qulfdan chiqarishdan oldin ko‘ring"</string>
@@ -636,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Signal berishda davom etilsin"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Bildirishnoma kelmasin"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"Tovushsiz"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Muhim"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Doimo ovozsiz qolsin. Bildirishnomalar panelida chiqadi."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Doimo ovozsiz qolsin. Bildirishnomalar va holat panelida chiqadi"</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Doimo ovozsiz qolsin. Bildirishnomalar paneli va ekran qulfida chiqadi"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Doimo ovozsiz qolsin. Bildirishnomalar paneli, holat panelida va ekran qulfida chiqadi"</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Ovoz chiqarib, bildirishnomalar paneli, holat paneli va ekran qulfida chiqadi."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> orqali"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Bu ilova kameradan foydalanmoqda."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Bu ilova mikrofondan foydalanmoqda."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Bu ilova ekranda boshqa ilovalar ustidan ochilgan."</string>

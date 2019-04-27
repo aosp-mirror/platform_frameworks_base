@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Maak geluid en wys op aftrekskerm, statusbalk en op sluitskerm."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Hierdie kennisgewings kan nie gewysig word nie."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Hierdie groep kennisgewings kan nie hier opgestel word nie"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"via <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Hierdie program gebruik tans die kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Hierdie program gebruik tans die mikrofoon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Hierdie program wys tans bo-oor ander programme op jou skerm."</string>

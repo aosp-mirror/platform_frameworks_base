@@ -636,16 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"繼續提示"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"關閉通知"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示此應用程式的通知嗎？"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"無聲通知"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"已設為優先"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"一律不發出音效，但會顯示在下拉式通知欄中。"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"一律不發出音效，但會顯示在下拉式通知欄和狀態列中。"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"一律不發出音效，但會顯示在下拉式通知欄和螢幕鎖定畫面中。"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"一律不發出音效，但會顯示在下拉式通知欄、狀態列和螢幕鎖定畫面中。"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"會發出音效並顯示在下拉式通知欄、狀態列和螢幕鎖定畫面中。"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"低重要性"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"優先"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"一律靜音。在下拉式通知欄中顯示。"</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"一律靜音。在下拉式通知欄和狀態列中顯示。"</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"一律靜音。在下拉式通知欄和上鎖畫面中顯示。"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"一律靜音。在下拉式通知欄、狀態列和上鎖畫面中顯示。"</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"發出音效，並在下拉式通知欄、狀態列和上鎖畫面中顯示。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"無法在此設定這組通知"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"透過「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"此應用程式目前使用相機。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"此應用程式目前使用麥克風。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"此應用程式目前透過其他應用程式在畫面上顯示內容。"</string>

@@ -651,7 +651,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Появляются со звуком на панели уведомлений, в строке состояния и на заблокированном экране."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Эти уведомления нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Эту группу уведомлений нельзя настроить здесь."</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"через приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Это приложение использует камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Это приложение использует микрофон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Это приложение располагается поверх других приложений."</string>
