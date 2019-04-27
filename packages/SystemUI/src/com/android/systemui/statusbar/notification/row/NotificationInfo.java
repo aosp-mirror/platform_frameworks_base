@@ -448,22 +448,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         CharSequence delegatePkg = null;
         if (!TextUtils.equals(mPackageName, mDelegatePkg)) {
             // this notification was posted by a delegate!
-            ApplicationInfo info;
-            try {
-                info = mPm.getApplicationInfo(
-                        mDelegatePkg,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                | PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-                if (info != null) {
-                    delegatePkg = String.valueOf(mPm.getApplicationLabel(info));
-                }
-            } catch (PackageManager.NameNotFoundException e) { }
-        }
-        if (delegatePkg != null) {
-            delegateView.setText(mContext.getResources().getString(
-                    R.string.notification_delegate_header, delegatePkg));
             delegateView.setVisibility(View.VISIBLE);
             dividerView.setVisibility(View.VISIBLE);
         } else {

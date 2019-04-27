@@ -327,8 +327,8 @@ public class ZygoteProcess {
                                                   @Nullable String[] packagesForUid,
                                                   @Nullable String sandboxId,
                                                   boolean useUsapPool,
-                                                  @Nullable String[] zygoteArgs,
-                                                  boolean useSystemGraphicsDriver) {
+                                                  boolean useSystemGraphicsDriver,
+                                                  @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
             informZygotesOfUsapPoolStatus();
@@ -339,7 +339,7 @@ public class ZygoteProcess {
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, packagesForUid, sandboxId,
-                    useUsapPool, zygoteArgs);
+                    useUsapPool, useSystemGraphicsDriver, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -548,7 +548,8 @@ public class ZygoteProcess {
                                                       @Nullable String packageName,
                                                       @Nullable String[] packagesForUid,
                                                       @Nullable String sandboxId,
-                                                      boolean useUnspecializedAppProcessPool,
+                                                      boolean useUsapPool,
+                                                      boolean useSystemGraphicsDriver,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<>();
@@ -635,8 +636,10 @@ public class ZygoteProcess {
         }
 
         synchronized(mLock) {
+            // The USAP pool can not be used if the application will not use the systems graphics
+            // driver.  If that driver is requested use the Zygote application start path.
             return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi),
-                                              useUnspecializedAppProcessPool,
+                                              useUsapPool && useSystemGraphicsDriver,
                                               argsForZygote);
         }
     }
@@ -1141,7 +1144,8 @@ public class ZygoteProcess {
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
                     null /* packagesForUid */, null /* sandboxId */,
-                    false /* useUsapPool */, extraArgs);
+                    false /* useUsapPool */, false /*useSystemGraphicsDriver*/,
+                    extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
         }

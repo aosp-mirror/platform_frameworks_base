@@ -163,7 +163,7 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
       }
 
       // Generic idmap parameters
-      const char* argv[9];
+      const char* argv[10];
       int argc = 0;
       struct stat st;
 
@@ -203,6 +203,10 @@ static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
         argv[argc++] = AssetManager::ODM_OVERLAY_DIR;
       }
 
+      if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
+        argv[argc++] = AssetManager::OEM_OVERLAY_DIR;
+      }
+
       // Finally, invoke idmap (if any overlay directory exists)
       if (argc > 5) {
         execv(AssetManager::IDMAP_BIN, (char* const*)argv);
@@ -239,6 +243,10 @@ static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* 
 
   if (stat(AssetManager::ODM_OVERLAY_DIR, &st) == 0) {
     input_dirs.push_back(AssetManager::ODM_OVERLAY_DIR);
+  }
+
+  if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
+    input_dirs.push_back(AssetManager::OEM_OVERLAY_DIR);
   }
 
   if (input_dirs.empty()) {

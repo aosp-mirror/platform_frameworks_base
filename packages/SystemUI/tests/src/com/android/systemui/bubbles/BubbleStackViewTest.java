@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
@@ -53,22 +52,11 @@ public class BubbleStackViewTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAnimateInFlyoutForBubble() throws InterruptedException {
+    public void testAnimateInFlyoutForBubble() {
         when(mNotifEntry.getUpdateMessage(any())).thenReturn("Test Flyout Message.");
         mStackView.animateInFlyoutForBubble(mBubble);
 
-        // Wait for the fade in.
-        Thread.sleep(200);
-
-        // Flyout should be visible and showing our text.
-        assertEquals(1f, mStackView.findViewById(R.id.bubble_flyout).getAlpha(), .01f);
         assertEquals("Test Flyout Message.",
                 ((TextView) mStackView.findViewById(R.id.bubble_flyout_text)).getText());
-
-        // Wait until it should have gone away.
-        Thread.sleep(BubbleStackView.FLYOUT_HIDE_AFTER + 200);
-
-        // Flyout should be gone.
-        assertEquals(View.GONE, mStackView.findViewById(R.id.bubble_flyout).getVisibility());
     }
 }

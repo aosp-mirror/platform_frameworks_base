@@ -131,6 +131,7 @@ import android.net.NetworkStackClient;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.ProxyInfo;
+import android.net.ResolverParamsParcel;
 import android.net.RouteInfo;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
@@ -262,7 +263,8 @@ public class ConnectivityServiceTest {
     @Mock INetd mMockNetd;
     @Mock NetworkStackClient mNetworkStack;
 
-    private ArgumentCaptor<String[]> mStringArrayCaptor = ArgumentCaptor.forClass(String[].class);
+    private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
+            ArgumentCaptor.forClass(ResolverParamsParcel.class);
 
     // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
     // do not go through ConnectivityService but talk to netd directly, so they don't automatically
@@ -4819,16 +4821,13 @@ public class ConnectivityServiceTest {
     @Test
     public void testBasicDnsConfigurationPushed() throws Exception {
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OPPORTUNISTIC, "ignored.example.com");
-        ArgumentCaptor<String[]> tlsServers = ArgumentCaptor.forClass(String[].class);
 
         // Clear any interactions that occur as a result of CS starting up.
         reset(mMockDnsResolver);
 
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         waitForIdle();
-        verify(mMockDnsResolver, never()).setResolverConfiguration(
-                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""),
-                eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        verify(mMockDnsResolver, never()).setResolverConfiguration(any());
         verifyNoMoreInteractions(mMockDnsResolver);
 
         final LinkProperties cellLp = new LinkProperties();
@@ -4846,35 +4845,33 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
         waitForIdle();
         // CS tells netd about the empty DNS config for this network.
-        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""),
-                eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(any());
         reset(mMockDnsResolver);
 
         cellLp.addDnsServer(InetAddress.getByName("2001:db8::1"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
-        assertEquals(1, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "2001:db8::1"));
+                mResolverParamsParcelCaptor.capture());
+        ResolverParamsParcel resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(1, resolvrParams.servers.length);
+        assertTrue(ArrayUtils.contains(resolvrParams.servers, "2001:db8::1"));
         // Opportunistic mode.
-        assertTrue(ArrayUtils.contains(tlsServers.getValue(), "2001:db8::1"));
+        assertTrue(ArrayUtils.contains(resolvrParams.tlsServers, "2001:db8::1"));
         reset(mMockDnsResolver);
 
         cellLp.addDnsServer(InetAddress.getByName("192.0.2.1"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
-        assertEquals(2, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                mResolverParamsParcelCaptor.capture());
+        resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(2, resolvrParams.servers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         // Opportunistic mode.
-        assertEquals(2, tlsServers.getValue().length);
-        assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
+        assertEquals(2, resolvrParams.tlsServers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         reset(mMockDnsResolver);
 
@@ -4887,18 +4884,16 @@ public class ConnectivityServiceTest {
 
         waitForIdle();
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(TLS_SPECIFIER), eq(TLS_SERVERS), eq(EMPTY_STRING_ARRAY));
-        assertEquals(2, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                mResolverParamsParcelCaptor.capture());
+        resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(2, resolvrParams.servers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         reset(mMockDnsResolver);
     }
 
     @Test
     public void testPrivateDnsSettingsChange() throws Exception {
-        ArgumentCaptor<String[]> tlsServers = ArgumentCaptor.forClass(String[].class);
-
         // Clear any interactions that occur as a result of CS starting up.
         reset(mMockDnsResolver);
 
@@ -4913,9 +4908,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         waitForIdle();
         // CS tells netd about the empty DNS config for this network.
-        verify(mMockDnsResolver, never()).setResolverConfiguration(
-                anyInt(), eq(EMPTY_STRING_ARRAY), any(), any(), eq(""),
-                eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        verify(mMockDnsResolver, never()).setResolverConfiguration(any());
         verifyNoMoreInteractions(mMockDnsResolver);
 
         final LinkProperties cellLp = new LinkProperties();
@@ -4936,14 +4929,14 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
         waitForIdle();
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
-        assertEquals(2, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                mResolverParamsParcelCaptor.capture());
+        ResolverParamsParcel resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(2, resolvrParams.tlsServers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         // Opportunistic mode.
-        assertEquals(2, tlsServers.getValue().length);
-        assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
+        assertEquals(2, resolvrParams.tlsServers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         reset(mMockDnsResolver);
         cellNetworkCallback.expectCallback(CallbackState.AVAILABLE, mCellNetworkAgent);
@@ -4958,23 +4951,23 @@ public class ConnectivityServiceTest {
 
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OFF, "ignored.example.com");
         verify(mMockDnsResolver, times(1)).setResolverConfiguration(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
-        assertEquals(2, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                mResolverParamsParcelCaptor.capture());
+        resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(2, resolvrParams.servers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         reset(mMockDnsResolver);
         cellNetworkCallback.assertNoCallback();
 
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OPPORTUNISTIC, "ignored.example.com");
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), tlsServers.capture(), eq(EMPTY_STRING_ARRAY));
-        assertEquals(2, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                mResolverParamsParcelCaptor.capture());
+        resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(2, resolvrParams.servers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
-        assertEquals(2, tlsServers.getValue().length);
-        assertTrue(ArrayUtils.containsAll(tlsServers.getValue(),
+        assertEquals(2, resolvrParams.tlsServers.length);
+        assertTrue(ArrayUtils.containsAll(resolvrParams.tlsServers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         reset(mMockDnsResolver);
         cellNetworkCallback.assertNoCallback();
@@ -5826,9 +5819,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
-        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(
-                eq(cellNetId), eq(EMPTY_STRING_ARRAY), any(), any(),
-                eq(""), eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
+        verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(any());
 
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
@@ -5871,10 +5862,10 @@ public class ConnectivityServiceTest {
         assertEquals(makeClatLinkProperties(myIpv4), stackedLpsAfterChange.get(0));
 
         verify(mMockDnsResolver, times(1)).setResolverConfiguration(
-                eq(cellNetId), mStringArrayCaptor.capture(), any(), any(),
-                eq(""), eq(EMPTY_STRING_ARRAY), eq(EMPTY_STRING_ARRAY));
-        assertEquals(1, mStringArrayCaptor.getValue().length);
-        assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "8.8.8.8"));
+                mResolverParamsParcelCaptor.capture());
+        ResolverParamsParcel resolvrParams = mResolverParamsParcelCaptor.getValue();
+        assertEquals(1, resolvrParams.servers.length);
+        assertTrue(ArrayUtils.contains(resolvrParams.servers, "8.8.8.8"));
 
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
         // linkproperties are cleaned up.
