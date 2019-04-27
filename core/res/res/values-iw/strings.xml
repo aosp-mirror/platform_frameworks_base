@@ -559,12 +559,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"שימוש בחומרה של זיהוי פנים לצורך אימות"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"מאפשרת לאפליקציה להשתמש בחומרה של זיהוי פנים לצורך אימות"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"אימות פנים"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"יש לבצע רישום מחדש של הפנים שלך"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"לשיפור הזיהוי יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"לא ניתן היה לקלוט את הפנים במדויק. יש לנסות שוב."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"בהיר מדי. צריך תאורה עדינה יותר."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"התמונה חשוכה מדי. צריך תאורה חזקה יותר."</string>
