@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ਐਪ ਨੂੰ ਵਰਤਣ ਲਈ ਚਿਹਰਾ ਟੈਮਪਲੇਟ ਸ਼ਾਮਲ ਕਰਨ ਜਾਂ ਮਿਟਾਉਣ ਦੀਆਂ ਵਿਧੀਆਂ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ਆਪਣਾ ਚਿਹਰਾ ਮੁੜ-ਦਰਜ ਕਰੋ"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ਪਛਾਣ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਚਿਹਰੇ ਨੂੰ ਮੁੜ-ਦਰਜ ਕਰੋ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ਸਟੀਕ ਚਿਹਰਾ ਡਾਟਾ ਕੈਪਚਰ ਨਹੀਂ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਚਮਕ। ਹਲਕੀ ਚਮਕ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ਬਹੁਤ ਗੂੜ੍ਹਾ। ਤੇਜ਼ ਰੋਸ਼ਨੀ ਕਰਕੇ ਦੇਖੋ।"</string>

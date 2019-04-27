@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"মুখমণ্ডলৰ টেম্প্লেট যোগ কৰাৰ বা মচাৰ পদ্ধতি কামত লগাবলৈ আহ্বান কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ ব্যৱহাৰ কৰক"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ণ কৰক"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"চিনাক্তকৰণৰ সুবিধাটো উন্নত কৰিবলৈ, অনুগ্ৰহ কৰি আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"সঠিক মুখমণ্ডলৰ ডেটা কেপচাৰ নহ’ল। আকৌ চেষ্টা কৰক।"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"অতি উজ্জ্বল। ইয়াতকৈ কম পোহৰৰ উৎস ব্যৱহাৰ কৰক।"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"অতি আন্ধাৰ। উজ্জ্বল লাইট ব্যৱহাৰ কৰক।"</string>
@@ -1360,8 +1363,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"আপোনাৰ প্ৰশাসকে এই ডিভাইচটোৰ সমস্যা সমাধানৰ বাবে বাগ সম্পৰ্কীয় অভিযোগ বিচাৰিছে। এপ্ আৰু ডেটা শ্বেয়াৰ কৰা হ\'ব পাৰে।"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"শ্বেয়াৰ কৰক"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"প্ৰত্যাখ্যান কৰক"</string>
-    <!-- no translation found for select_input_method (4653387336791222978) -->
-    <skip />
+    <string name="select_input_method" msgid="4653387336791222978">"ইনপুট পদ্ধতি বাছনি কৰক"</string>
     <string name="show_ime" msgid="2506087537466597099">"কায়িক কীব’ৰ্ড সক্ৰিয় হৈ থাকোঁতে ইয়াক স্ক্ৰীণত ৰাখিব"</string>
     <string name="hardware" msgid="194658061510127999">"ভাৰ্শ্বুৱল কীব\'ৰ্ড দেখুৱাওক"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"কায়িক কীব’ৰ্ড কনফিগাৰ কৰক"</string>

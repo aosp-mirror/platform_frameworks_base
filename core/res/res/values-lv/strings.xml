@@ -556,6 +556,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Atļauj lietotnei izsaukt metodes izmantojamo sejas veidņu pievienošanai un dzēšanai."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"izmantot sejas autentifikācijas aparatūru"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Atļauj lietotnei izmantot sejas autentifikācijas aparatūru autentificēšanai"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Sejas autentificēšana"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Atkārtoti reģistrējiet seju"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Lai uzlabotu atpazīšanu, lūdzu, atkārtoti reģistrējiet savu seju"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Neizdevās tvert sejas datus. Mēģiniet vēlreiz."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Pārāk spilgts. Izmēģiniet maigāku apgaismojumu."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Pārāk tumšs. Izmēģiniet spožāku apgaismojumu."</string>
