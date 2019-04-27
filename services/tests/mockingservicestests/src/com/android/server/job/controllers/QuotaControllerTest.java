@@ -2197,4 +2197,51 @@ public class QuotaControllerTest {
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         verify(handler, never()).sendMessageDelayed(any(), anyInt());
     }
+
+    /**
+     * Tests that the start alarm is properly scheduled when a job has been throttled due to the job
+     * count quota.
+     */
+    @Test
+    public void testStartAlarmScheduled_JobCount_AllowedTime() {
+        // saveTimingSession calls maybeScheduleCleanupAlarmLocked which interferes with these tests
+        // because it schedules an alarm too. Prevent it from doing so.
+        spyOn(mQuotaController);
+        doNothing().when(mQuotaController).maybeScheduleCleanupAlarmLocked();
+
+        final long start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        final int standbyBucket = WORKING_INDEX;
+        setProcessState(ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
+
+        // No sessions saved yet.
+        mQuotaController.maybeScheduleStartAlarmLocked(SOURCE_USER_ID, SOURCE_PACKAGE,
+                standbyBucket);
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // Ran jobs up to the job limit. All of them should be allowed to run.
+        for (int i = 0; i < mConstants.QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME; ++i) {
+            JobStatus job = createJobStatus("testStartAlarmScheduled_JobCount_AllowedTime", i);
+            mQuotaController.maybeStartTrackingJobLocked(job, null);
+            assertTrue(job.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+            mQuotaController.prepareForExecutionLocked(job);
+            advanceElapsedClock(SECOND_IN_MILLIS);
+            mQuotaController.maybeStopTrackingJobLocked(job, null, false);
+            advanceElapsedClock(SECOND_IN_MILLIS);
+        }
+        // Start alarm shouldn't have been scheduled since the app was in quota up until this point.
+        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+
+        // The app is now out of job count quota
+        JobStatus throttledJob = createJobStatus(
+                "testStartAlarmScheduled_JobCount_AllowedTime", 42);
+        mQuotaController.maybeStartTrackingJobLocked(throttledJob, null);
+        assertFalse(throttledJob.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+
+        ExecutionStats stats = mQuotaController.getExecutionStatsLocked(SOURCE_USER_ID,
+                SOURCE_PACKAGE, standbyBucket);
+        final long expectedWorkingAlarmTime =
+                stats.jobCountExpirationTimeElapsed + mConstants.QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS;
+        verify(mAlarmManager, times(1))
+                .set(anyInt(), eq(expectedWorkingAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+    }
 }
