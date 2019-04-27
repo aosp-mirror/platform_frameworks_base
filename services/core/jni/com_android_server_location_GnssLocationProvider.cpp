@@ -1860,13 +1860,14 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
      * Fail if the main interface fails to initialize
      */
     if (gnssHal == nullptr) {
-        ALOGE("Unable to Initialize GNSS HAL\n");
+        ALOGE("Unable to initialize GNSS HAL.");
         return JNI_FALSE;
     }
 
-    sp<IGnssCallback> gnssCbIface = new GnssCallback();
-
     Return<bool> result = false;
+
+    // Set top level IGnss.hal callback.
+    sp<IGnssCallback> gnssCbIface = new GnssCallback();
     if (gnssHal_V2_0 != nullptr) {
         result = gnssHal_V2_0->setCallback_2_0(gnssCbIface);
     } else if (gnssHal_V1_1 != nullptr) {
@@ -1876,62 +1877,89 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
     }
 
     if (!result.isOk() || !result) {
-        ALOGE("SetCallback for Gnss Interface fails\n");
+        ALOGE("SetCallback for IGnss interface failed.");
         return JNI_FALSE;
     }
 
-    sp<IGnssXtraCallback> gnssXtraCbIface = new GnssXtraCallback();
+    // Set IGnssXtra.hal callback.
     if (gnssXtraIface == nullptr) {
-        ALOGI("Unable to initialize GNSS Xtra interface\n");
+        ALOGI("Unable to initialize IGnssXtra interface.");
     } else {
+        sp<IGnssXtraCallback> gnssXtraCbIface = new GnssXtraCallback();
         result = gnssXtraIface->setCallback(gnssXtraCbIface);
         if (!result.isOk() || !result) {
             gnssXtraIface = nullptr;
-            ALOGI("SetCallback for Gnss Xtra Interface fails\n");
+            ALOGI("SetCallback for IGnssXtra interface failed.");
         }
     }
 
+    // Set IAGnss.hal callback.
+    Return<void> agnssStatus;
     if (agnssIface_V2_0 != nullptr) {
         sp<IAGnssCallback_V2_0> aGnssCbIface = new AGnssCallback_V2_0();
-        agnssIface_V2_0->setCallback(aGnssCbIface);
+        agnssStatus = agnssIface_V2_0->setCallback(aGnssCbIface);
     } else if (agnssIface != nullptr) {
         sp<IAGnssCallback_V1_0> aGnssCbIface = new AGnssCallback_V1_0();
-        agnssIface->setCallback(aGnssCbIface);
+        agnssStatus = agnssIface->setCallback(aGnssCbIface);
     } else {
-        ALOGI("Unable to initialize AGnss interface\n");
+        ALOGI("Unable to initialize IAGnss interface.");
     }
 
+    if (!agnssStatus.isOk()) {
+        ALOGI("SetCallback for IAGnss interface failed.");
+    }
+
+    // Set IGnssGeofencing.hal callback.
     sp<IGnssGeofenceCallback> gnssGeofencingCbIface = new GnssGeofenceCallback();
     if (gnssGeofencingIface != nullptr) {
-      gnssGeofencingIface->setCallback(gnssGeofencingCbIface);
+        auto status = gnssGeofencingIface->setCallback(gnssGeofencingCbIface);
+        if (!status.isOk()) {
+            ALOGI("SetCallback for IGnssGeofencing interface failed.");
+        }
     } else {
-        ALOGI("Unable to initialize GNSS Geofencing interface\n");
+        ALOGI("Unable to initialize IGnssGeofencing interface.");
     }
 
+    // Set IGnssNi.hal callback.
     sp<IGnssNiCallback> gnssNiCbIface = new GnssNiCallback();
     if (gnssNiIface != nullptr) {
-        gnssNiIface->setCallback(gnssNiCbIface);
+        auto status = gnssNiIface->setCallback(gnssNiCbIface);
+        if (!status.isOk()) {
+            ALOGI("SetCallback for IGnssNi interface failed.");
+        }
     } else {
-        ALOGI("Unable to initialize GNSS NI interface\n");
+        ALOGI("Unable to initialize IGnssNi interface.");
     }
 
+    // Set IAGnssRil.hal callback.
     sp<IAGnssRilCallback> aGnssRilCbIface = new AGnssRilCallback();
     if (agnssRilIface != nullptr) {
-        agnssRilIface->setCallback(aGnssRilCbIface);
+        auto status = agnssRilIface->setCallback(aGnssRilCbIface);
+        if (!status.isOk()) {
+            ALOGI("SetCallback for IAGnssRil interface failed.");
+        }
     } else {
-        ALOGI("Unable to initialize AGnss Ril interface\n");
+        ALOGI("Unable to initialize IAGnssRil interface.");
     }
 
+    // Set IGnssVisibilityControl.hal callback.
     if (gnssVisibilityControlIface != nullptr) {
         sp<IGnssVisibilityControlCallback> gnssVisibilityControlCbIface =
                 new GnssVisibilityControlCallback();
-        gnssVisibilityControlIface->setCallback(gnssVisibilityControlCbIface);
+        result = gnssVisibilityControlIface->setCallback(gnssVisibilityControlCbIface);
+        if (!result.isOk() || !result) {
+            ALOGI("SetCallback for IGnssVisibilityControl interface failed.");
+        }
     }
 
+    // Set IMeasurementCorrections.hal callback.
     if (gnssCorrectionsIface != nullptr) {
         sp<IMeasurementCorrectionsCallback> gnssCorrectionsIfaceCbIface =
                 new MeasurementCorrectionsCallback();
-        gnssCorrectionsIface->setCallback(gnssCorrectionsIfaceCbIface);
+        result = gnssCorrectionsIface->setCallback(gnssCorrectionsIfaceCbIface);
+        if (!result.isOk() || !result) {
+            ALOGI("SetCallback for IMeasurementCorrections interface failed.");
+        }
     }
 
     return JNI_TRUE;
