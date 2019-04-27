@@ -250,6 +250,11 @@ public:
         mActivationType = activationType;
     }
 
+    void prepareFistBucket() {
+        std::lock_guard<std::mutex> lock(mMutex);
+        prepareFistBucketLocked();
+    }
+
     void flushIfExpire(int64_t elapsedTimestampNs);
 
 protected:
@@ -281,6 +286,7 @@ protected:
 
     void setActiveLocked(int64_t currentTimeNs, int64_t remainingTtlNs);
 
+    virtual void prepareFistBucketLocked() {};
     /**
      * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
        also flush the current partial bucket in memory.

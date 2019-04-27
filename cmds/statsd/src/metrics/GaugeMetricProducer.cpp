@@ -141,9 +141,6 @@ GaugeMetricProducer::GaugeMetricProducer(
 
     // Adjust start for partial bucket
     mCurrentBucketStartTimeNs = startTimeNs;
-    if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
-        pullAndMatchEventsLocked(startTimeNs);
-    }
 
     VLOG("Gauge metric %lld created. bucket size %lld start_time: %lld sliced %d",
          (long long)metric.id(), (long long)mBucketSizeNs, (long long)mTimeBaseNs,
@@ -312,6 +309,12 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     if (erase_data) {
         mPastBuckets.clear();
         mSkippedBuckets.clear();
+    }
+}
+
+void GaugeMetricProducer::prepareFistBucketLocked() {
+    if (mIsActive && mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
     }
 }
 
