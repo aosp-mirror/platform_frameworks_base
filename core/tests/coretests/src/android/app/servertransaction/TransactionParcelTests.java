@@ -628,8 +628,8 @@ public class TransactionParcelTests {
         }
 
         @Override
-        public void requestDirectActions(IBinder activityToken, IVoiceInteractor intractor,
-                RemoteCallback callback) {
+        public void requestDirectActions(IBinder activityToken, IVoiceInteractor interactor,
+                RemoteCallback cancellationCallback, RemoteCallback resultCallback) {
         }
 
         @Override
