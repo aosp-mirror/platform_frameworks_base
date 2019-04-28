@@ -50,7 +50,7 @@
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasının <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> aksesuarına erişmesine izin verilsin mi?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> cihazını işlemek için <xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması açılsın mı?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> aksesuarını işlemek için <xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması açılsın mı?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Bu USB aksesuarıyla çalışan yüklü uygulama yok. Bu aksesuar hakkında bilgi içn: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Bu USB aksesuarıyla çalışan yüklü uygulama yok. Bu aksesuar hakkında bilgi için: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB aksesuarı"</string>
     <string name="label_view" msgid="6304565553218192990">"Görüntüle"</string>
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> bağlandığında <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını her zaman aç"</string>
@@ -636,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Uyarıda bulunmaya devam et"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Bildirimleri kapat"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu uygulamadan gelen bildirimler gösterilmeye devam edilsin mi?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"Sessiz"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Öncelikli"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Her zaman sessiz. Aşağı açılır gölgede gösterilir."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Her zaman sessiz. Aşağı açılır gölgede ve durum çubuğunda gösterilir."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Her zaman sessiz. Aşağı açılır gölgede ve kilit ekranında gösterilir."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Her zaman sessiz. Aşağı açılır gölgede, durum çubuğunda ve kilit ekranında gösterilir."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Ses çıkarır. Ayrıca aşağı açılır gölgede, durum çubuğunda ve kilit ekranında gösterilir."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Bu bildirimler değiştirilemez."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Bu bildirim grubu burada yapılandırılamaz"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> ile"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Bu uygulama kamerayı kullanıyor."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Bu uygulama mikrofonu kullanıyor."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Bu uygulama, ekranınızdaki diğer uygulamaların üzerinde görüntüleniyor."</string>

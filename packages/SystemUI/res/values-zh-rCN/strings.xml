@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"发出提示音，并显示在下拉通知栏、状态栏以及锁定屏幕中。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"无法修改这些通知。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"您无法在此处配置这组通知"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"通过<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"此应用正在使用摄像头。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"此应用正在使用麦克风。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"此应用正显示在屏幕上其他应用的上层。"</string>

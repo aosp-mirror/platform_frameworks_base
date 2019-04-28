@@ -41,7 +41,7 @@
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपने आप घुमाना"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
-    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ऑटो"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट का तरीका सेट करें"</string>
@@ -337,7 +337,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"कोई डिवाइस उपलब्ध नहीं"</string>
     <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"वाई-फ़ाई कनेक्ट नहीं है"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"स्क्रीन की रोशनी"</string>
-    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ऑटो"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंग उलटें"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"रंग सुधार मोड"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"और सेटिंग"</string>
@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"सूचना आने पर आवाज़ हाे और नीचे खींचने वाली सूची, स्टेटस बार और लॉक स्क्रीन पर भी दिखाई दे."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> के ज़रिए"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"यह ऐप्लिकेशन कैमरे का इस्तेमाल कर रहा है."</string>
     <string name="appops_microphone" msgid="741508267659494555">"यह ऐप्लिकेशन माइक्रोफ़ोन का इस्तेमाल कर रहा है."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है."</string>

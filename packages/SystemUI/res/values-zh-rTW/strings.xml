@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"會發出音效並顯示在下拉式通知欄、狀態列和螢幕鎖定畫面中。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"無法在這裡設定這個通知群組"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"透過「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"這個應用程式正在使用相機。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"這個應用程式正在使用麥克風。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"這個應用程式顯示在畫面上其他應用程式的上層。"</string>

@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Verranno visualizzate con un suono in area a discesa, barra di stato e schermata di blocco."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Impossibile modificare queste notifiche."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Qui non è possibile configurare questo gruppo di notifiche"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"tramite <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Questa app sta utilizzando la fotocamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Questa app sta utilizzando il microfono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Questa app è visualizzata sopra altre app sullo schermo."</string>
