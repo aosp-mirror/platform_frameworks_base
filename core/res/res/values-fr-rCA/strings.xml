@@ -296,7 +296,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gt à enregistrer l\'audio?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Activités physiques"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"données d\'activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"accéder à vos activités physiques"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à vos activités physiques?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet à l\'appli d\'employer des méthodes d\'aj. et de suppr. de modèles de reconn. visage."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utiliser le matériel d\'authentification de visage"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permet à l\'appli d\'utiliser du matériel de reconnaissance du visage pour l\'authentification"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Authentification du visage"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Inscrivez votre visage à nouveau"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Imposs. capt. données visage précises. Réessayez."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Trop lumineux. Essayez un éclairage plus faible."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Trop sombre. Essayez avec un éclairage plus fort."</string>

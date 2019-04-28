@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ಬಳಕೆಗೆ ಮುಖದ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ಮುಖ ದೃಢೀಕರಣ ಹಾರ್ಡ್‌ವೇರ್‌ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ಧೃಡೀಕರಣಕ್ಕಾಗಿ ಮುಖದ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ಮುಖ ಗುರುತಿಸುವಿಕೆ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ಗುರುತಿಸುವಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ಸರಿಯಾಗಿ ಮುಖ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ತುಂಬಾ ಪ್ರಕಾಶಮಾನವಾಗಿದೆ ಮಂದ ಪ್ರಕಾಶಮಾನವಿರುವ ಲೈಟ್ ಬಳಸಿ"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ತುಂಬಾ ಕಪ್ಪು ಛಾಯೆಯಿದೆ. ಪ್ರಕಾಶಮಾನವಾದ ಲೈಟಿಂಗ್ ಬಳಸಿ."</string>

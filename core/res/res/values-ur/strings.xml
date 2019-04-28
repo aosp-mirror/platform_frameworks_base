@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ایپ کو چہرے کی تمثیلات شامل اور حذف کرنے کے طریقوں کو کالعدم قرار دینے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"چہرے کی توثیق کا ہارڈویئر استعمال کریں"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ایپ کو توثیق کیلئے چہرے کا ہارڈ ویئر استعمال کرنے کی اجازت دیتا ہے"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"چہرے سے تصدیق"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"اپنے چہرے کو دوبارہ مندرج کریں"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"شناخت کو بہتر بنانے کے لیے براہ کرم اپنے چہرے کو دوبارہ مندرج کریں"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"چہرے کا درست ڈيٹا کیپچر نہیں ہو سکا۔ پھر آزمائيں۔"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"کافی روشنی ہے۔ ہلکی روشنی میں آزمائیں۔"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"کافی اندھیرا ہے۔ تیز روشنی میں آزمائیں۔"</string>

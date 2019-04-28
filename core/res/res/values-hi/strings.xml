@@ -508,7 +508,7 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"बायोमीट्रिक हार्डवेयर इस्तेमाल करने दें"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"पुष्टि के लिए, ऐप्लिकेशन को बायोमीट्रिक हार्डवेयर इस्तेमाल करने की मंज़ूरी दें"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"उंगली की छाप के लिए हार्डवेयर को प्रबंधित करें"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"उंगली की छाप वाले टेम्पलेट का उपयोग करने के लिए जोड़ने और हटाने हेतु ऐप को विधियां प्रारंभ करने देती है."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"उंगली की छाप वाले टेम्पलेट का उपयोग करने के लिए जोड़ने और हटाने के लिए ऐप को विधियां प्रारंभ करने देती है."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"उंगली की छाप के लिए हार्डवेयर का उपयोग करें"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ऐप के प्रमाणीकरण के लिए उंगली की छाप हार्डवेयर का उपयोग करने देती है"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"अपने संगीत संग्रह में बदलाव करने की अनुमति दें"</string>
@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ऐप्लिकेशन को चेहरे के टेम्पलेट इस्तेमाल के तरीके जोड़ने और मिटाने की मंज़ूरी मिलती है."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"चेहरे की पुष्टि करने वाला हार्डवेयर इस्तेमाल करें"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ऐप्लिकेशन को चेहरे की पुष्टि करने वाले हार्डवेयर का इस्तेमाल करने की मंज़ूरी मिलती है"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"चेहरे की पहचान"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"अपना चेहरा फिर से दर्ज करें"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"कृपया अपना चेहरा फिर से दर्ज करें ताकि आपको बेहतर तरीके से पहचाना जा सके"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"चेहरे से जुड़ा सटीक डेटा कैप्चर नहीं किया जा सका. फिर से कोशिश करें."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"बहुत रोशनी है. हल्की रोशनी आज़माएं."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"बहुत अंधेरा है. बेहतर रोशनी में आज़माएं."</string>
@@ -913,8 +910,8 @@
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nक्या आप वाकई इस पेज से दूर नेविगेट करना चाहते हैं?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"दुबारा पूछें"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"सलाह: ज़ूम इन और आउट करने के लिए दो बार छूएं."</string>
-    <string name="autofill_this_form" msgid="4616758841157816676">"स्‍वत: भरण"</string>
-    <string name="setup_autofill" msgid="7103495070180590814">"स्वत: भरण सेट करें"</string>
+    <string name="autofill_this_form" msgid="4616758841157816676">"अपने आप भरने की सुविधा"</string>
+    <string name="setup_autofill" msgid="7103495070180590814">"अपने आप भरें जाना सेट करें"</string>
     <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> के साथ अपने आप जानकारी भरने की सुविधा"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
@@ -1199,7 +1196,7 @@
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> में से <xliff:g id="NUMBER_0">%1$d</xliff:g> ऐप्स  अनुकूलित हो रहा है."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तैयार हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ऐप्स  प्रारंभ होने वाले हैं"</string>
-    <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्‍त हो रहा है."</string>
+    <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट खत्म हो रहा है."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चल रही है"</string>
     <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"गेम पर वापस जाने के लिए टैप करें"</string>
     <string name="heavy_weight_switcher_title" msgid="387882830435195342">"गेम चुनें"</string>
@@ -1558,7 +1555,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"वाई-फ़ाई की सीमा से ज़्यादा डेटा खर्च"</string>
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"अाप अपनी तय सीमा से <xliff:g id="SIZE">%s</xliff:g> ज़्यादा डेटा इस्तेमाल कर चुके हैं"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पृष्ठभूमि डेटा प्रतिबंधित है"</string>
-    <string name="data_usage_restricted_body" msgid="469866376337242726">"प्रतिबंध निकालने हेतु टैप करें."</string>
+    <string name="data_usage_restricted_body" msgid="469866376337242726">"प्रतिबंध निकालने के लिए टैप करें."</string>
     <string name="data_usage_rapid_title" msgid="1809795402975261331">"माेबाइल डेटा का ज़्यादा इस्तेमाल"</string>
     <string name="data_usage_rapid_body" msgid="6897825788682442715">"आपके एेप्लिकेशन ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
     <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ने आम तौर पर इस्तेमाल होने वाले डेटा से ज़्यादा डेटा खर्च कर दिया है"</string>
@@ -1905,7 +1902,7 @@
     <string name="user_encrypted_message" msgid="4923292604515744267">"अनलॉक करने के लिए टैप करें"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"उपयोगकर्ता डेटा लॉक किया गया"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"कार्य प्रोफ़ाइल लॉक है"</string>
-    <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलॉक करने हेतु टैप करें"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलॉक करने के लिए टैप करें"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> से कनेक्ट किया गया"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"फ़ाइलें देखने के लिए टैप करें"</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप्लिकेशन की जानकारी"</string>
