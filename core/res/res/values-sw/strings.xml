@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Huruhusu programu iombe njia za kuongeza na kufuta violezo vya uso vitakavyotumiwa."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"tumia maunzi ya kuthibistiha uso"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Huruhusu programu ithibitishe uso kwa kutumia maunzi ya kuthibitisha"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Utambuzi wa Uso"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Sajili uso wako tena"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Ili kuimarisha utambuzi, tafadhali sajili uso wako tena"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Imeshindwa kunasa data sahihi ya uso. Jaribu tena."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Inang\'aa mno. Jaribu mwangaza hafifu"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Hakuna mwangaza wa kutosha. Jaribu kuongeza mwangaza."</string>
@@ -1472,7 +1475,7 @@
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Umezima kipengele cha kusambaza mtandao"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Wasiliana na msimamizi wako ili upate maelezo zaidi"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Nyuma"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"Ifuatayo"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Endelea"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Ruka"</string>
     <string name="no_matches" msgid="8129421908915840737">"Hakuna vinavyolingana"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Pata kwenye ukurasa"</string>

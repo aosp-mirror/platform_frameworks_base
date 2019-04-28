@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Recherche de GPS..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Position définie par GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Demandes de localisation actives"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"Option « Capteurs désactivés » active"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Supprimer toutes les notifications"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorités\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • En recharge sans fil (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à la recharge complète)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"En recharge : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à charge complète)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"En recharge rapide : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à ch. comp.)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"En recharge lente : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à ch. comp.)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Vous êtes connecté à <xliff:g id="APPLICATION">%1$s</xliff:g>. Cette application peut contrôler votre activité personnelle sur le réseau, y compris les courriels, les applications et les sites Web."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux courriels, aux applications et aux sites Web.\n\nPour en savoir plus, communiquez avec votre administrateur."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Votre profil professionnel est géré par <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Ce profil est connecté à <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, qui peut contrôler votre activité professionnelle sur le réseau, y compris l\'activité relative aux courriels, aux applications et aux sites Web.\n\nVous êtes également connecté à <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, qui peut contrôler votre activité personnelle sur le réseau."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"Maintenu déverrouillé par TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"L\'appareil restera verrouillé jusqu\'à ce que vous le déverrouilliez manuellement"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Voir les notifications plus rapidement"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Afficher les notifications avant de déverrouiller l\'appareil"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Réduire"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Aj. auto. s-titres aux médias"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Astuce concernant les sous-titres"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Superposition de sous-titres"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"activer"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"désactiver"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Changer d\'appareil de sortie"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"L\'écran est épinglé"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Retour » et « Aperçu »."</string>
@@ -640,12 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continuer d\'envoyer des alertes"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Désactiver les notifications"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuer à afficher les notifications de cette application?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"Les notifications bloquées ne s\'affichent nulle part et n\'émettent aucun son. Vous pouvez débloquer les notifications dans les paramètres."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"Les notifications silencieuses s\'affichent dans l\'ombre, mais pas sur l\'écran de verrouillage ni dans une bannière, et elles n\'émettent aucun son."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"Ces notifications émettront un son et s\'afficheront dans le panneau des notifications, dans la barre d\'état et sur l\'écran de verrouillage"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Ces notifications ne peuvent pas être désactivées"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"Discrètes"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Priorisées"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Toujours silencieux. S\'affiche dans le volet déroulant."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Toujours silencieux. S\'affiche dans le volet déroulant et dans la barre d\'état."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Toujours silencieux. S\'affiche dans le volet déroulant et sur l\'écran de verrouillage."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Toujours silencieux. S\'affiche dans le volet déroulant, dans la barre d\'état et sur l\'écran de verrouillage."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Émet un son et s\'affiche dans le volet déroulant, dans la barre d\'état et sur l\'écran de verrouillage."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ces notifications ne peuvent pas être modifiées"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ce groupe de notifications ne peut pas être configuré ici"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Cette application utilise l\'appareil photo."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Cette application utilise le microphone."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Cette application superpose du contenu par-dessus d\'autres applications à l\'écran."</string>

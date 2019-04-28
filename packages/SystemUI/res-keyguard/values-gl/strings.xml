@@ -34,15 +34,14 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Código PIN incorrecto"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"A tarxeta non é válida."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Batería totalmente cargada"</string>
-    <!-- no translation found for keyguard_plugged_in_wireless (8404159927155454732) -->
-    <skip />
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando sen fíos"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rapidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Conecta o cargador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Preme Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Bloqueada pola rede"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Non hai ningunha tarxeta SIM"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Sen tarxeta SIM"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"Non hai ningunha tarxeta SIM na tableta."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"Non hai ningunha tarxeta SIM no teléfono."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Insire unha tarxeta SIM."</string>

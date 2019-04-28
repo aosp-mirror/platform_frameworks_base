@@ -559,6 +559,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Umožňuje aplikaci volat metody k přidání a smazání šablon obličeje, které budou použity."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"použití hardwaru k ověření obličeje"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Umožňuje aplikaci provést ověření pomocí hardwaru k ověření obličeje"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Ověřování obličejem"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Zaznamenejte obličej znovu"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Chcete-li rozpoznání zdokonalit, zaznamenejte obličej znovu"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Obličej se nepodařilo zachytit. Zkuste to znovu."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Je příliš světlo. Zmírněte osvětlení."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Je moc velká tma. Přejděte na světlo."</string>

@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ഉപയോഗിക്കാനായി, മുഖത്തിന്റെ ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"പരിശോധിച്ചുറപ്പിക്കലിനായി മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ  ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"തിരിച്ചറിയൽ മെച്ചപ്പെടുത്താൻ, നിങ്ങളുടെ മുഖം ദയവായി വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"കൃത്യ മുഖ ഡാറ്റ എടുക്കാനായില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"വളരെയധികം തെളിച്ചം. സൗമ്യതയേറിയ പ്രകാശം ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"വളരെ ഇരുണ്ടത്. തിളക്കമേറിയ ലൈറ്റിംഗ് പരീക്ഷിക്കുക."</string>

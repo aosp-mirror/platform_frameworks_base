@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Vyhľadávanie satelitov GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavená pomocou GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Žiadosti o polohu sú aktívne"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"Funkcia Senzory sú vypnuté je aktívna"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazať všetky upozornenia."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -407,8 +408,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Úplné\nticho"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Iba\nprioritné"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Iba\nbudíky"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa bezdrôtovo (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa rýchlo (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa pomaly (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -513,8 +513,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Ste pripojený/-á k aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g>, ktorá môže sledovať vašu osobnú aktivitu v sieti vrátane e-mailových správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Váš pracovný profil spravuje organizácia <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je pripojený k aplikácii <xliff:g id="APPLICATION">%2$s</xliff:g>, ktorá môže sledovať vašu pracovnú aktivitu v sieti vrátane správ, aplikácií a webových stránok.\n\nĎalšie informácie vám poskytne správca."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Váš pracovný profil spravuje organizácia <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je pripojený k aplikácii <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ktorá môže sledovať vašu pracovnú aktivitu v sieti vrátane správ, aplikácií a webových stránok.\n\nPripojili ste sa k aplikácii <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ktorá môže sledovať vašu osobnú aktivitu v sieti."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"Odomknutie udržiava TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Zariadenie zostane uzamknuté, dokým ho ručne neodomknete."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Získavať upozornenia rýchlejšie"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Zobraziť pred odomknutím"</string>
@@ -527,12 +526,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Zbaliť"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Automaticky pridávať titulky k médiám"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Zavrieť tip pre titulky"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Prekrytie titulkov"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"povoliť"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"zakázať"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Prepnúť výstupné zariadenie"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
@@ -646,12 +642,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Naďalej upozorňovať"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Vypnúť upozornenia"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Majú sa upozornenia z tejto aplikácie naďalej zobrazovať?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"Blokované upozornenia sa nikde nezobrazujú ani neprehrávajú zvuk. Upozornenia môžete odblokovať v nastaveniach."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"Tiché upozornenia sa zobrazujú s odtieňom, ale nie na uzamknutej obrazovke, nezobrazia banner ani neprehrajú zvuk."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"Tieto upozornenia budú mať zvukový signál a zobrazia sa vo vysúvacom paneli s upozorneniami, v stavovom riadku a na uzamknutej obrazovke"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Tieto upozornenia sa nedajú vypnúť"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"Nenápadné"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Prioritné"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli a stavovom riadku."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli a na uzamknutej obrazovke."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli, stavovom riadku a na uzamknutej obrazovke."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Vydáva zvukový signál a zobrazuje sa v rozbaľovacom paneli, stavovom riadku a na uzamknutej obrazovke."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Tieto upozornenia sa nedajú upraviť."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Túto skupinu upozornení nejde na tomto mieste konfigurovať"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"prostredníctvom aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Táto aplikácia používa fotoaparát."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Táto aplikácia používa mikrofón."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Táto aplikácia sa zobrazuje cez ďalšie aplikácie na obrazovke."</string>

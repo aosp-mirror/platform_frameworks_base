@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"መተግበሪያው ጥቅም ላይ እንዲውሉ የፊት ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"የፊት ማረጋገጫ ሃርድዌር ይጠቀሙ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"መተግበሪያው የማረጋገጫ ሃርድዌር ለማረጋገጥ ሥራ እንዲጠቀም ያስችለዋል"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"በመልክ ማረጋገጥ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"የእርስዎን ፊት ዳግመኛ ያስመዝግቡ"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ማንነትን ለይቶ ማወቅን ለማሻሻል፣ እባክዎ የእርስዎን ፊት ዳግም ያስመዝግቡ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ትክክለኛ የፊት ውሂብ ማንሳት አልተቻለም። እንደገና ይሞክሩ።"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ከልክ በላይ ፈካ ያለ። ይበልጥ ረጋ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ከልክ በላይ ጨለማ ነው። ከዚህ ፈካ ያለ ብርሃን አጠቃቀምን ይሞክሩ።"</string>

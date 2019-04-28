@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Laat program toe om metodes te benut om gesigtemplate vir gebruik by te voeg en uit te vee."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gebruik gesigstawinghardeware"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Laat die program toe om gesigstawinghardeware vir stawing te gebruik"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Gesigstawing"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Skryf jou gesig weer in"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Skryf asseblief jou gesig weer in om herkenning te verbeter"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Kon nie gesigdata akkuraat vasvang nie. Probeer weer."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Te helder. Probeer sagter beligting."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Te donker. Probeer helderder beligting."</string>

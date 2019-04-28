@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允許應用程式調用方法，以加入和刪除可用的臉孔範本。"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"使用臉孔驗證硬件"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"允許應用程式使用臉孔驗證硬件來驗證"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"臉孔驗證"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"重新註冊臉孔"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"如要提高識別能力，請重新註冊您的臉孔"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"無法擷取準確的臉容資料。請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"影像太亮。請嘗試在更暗的環境下使用。"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"影像太暗。請嘗試在更明亮的環境下使用。"</string>
@@ -1458,7 +1461,7 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕按一下即可管理網絡。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在連線至永久連線的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"永遠開啟的 VPN 已中斷連線"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"保持開啟的 VPN 已中斷連線"</string>
     <string name="vpn_lockdown_error" msgid="3133844445659711681">"無法連接永久連線的 VPN"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"變更網絡或 VPN 設定"</string>
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>

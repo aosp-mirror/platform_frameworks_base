@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"อนุญาตให้แอปเรียกใช้วิธีเพิ่มและลบเทมเพลตใบหน้าสำหรับการใช้งาน"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ใช้ฮาร์ดแวร์ตรวจสอบสิทธิ์ด้วยใบหน้า"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"อนุญาตให้แอปใช้ฮาร์ดแวร์ตรวจสอบสิทธิ์ด้วยใบหน้าเพื่อตรวจสอบสิทธิ์"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"การตรวจสอบสิทธิ์ด้วยใบหน้า"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ลงทะเบียนใบหน้าอีกครั้ง"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"โปรดลงทะเบียนใบหน้าอีกครั้งเพื่อปรับปรุงการจดจำ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"บันทึกข้อมูลใบหน้าที่ถูกต้องไม่ได้ ลองอีกครั้ง"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"สว่างเกินไป ลองหาตำแหน่งที่แสงน้อยกว่านี้"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"มืดเกินไป ลองหาตำแหน่งที่สว่างขึ้น"</string>
@@ -975,7 +978,7 @@
     <string name="last_month" msgid="3959346739979055432">"เดือนที่แล้ว"</string>
     <string name="older" msgid="5211975022815554840">"เก่ากว่า"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"ในวันที่ <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"ที่ <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ใน <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"วัน"</string>
     <string name="days" msgid="4774547661021344602">"วัน"</string>

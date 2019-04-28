@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"မျက်နှာ စိစစ်ခြင်း"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ပိုမှတ်မိစေရန် သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"အလွန် လင်းသည်။ အလင်းလျှော့ကြည့်ပါ။"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"အလွန်မှောင်သည်။ ပိုလင်းအောင် လုပ်ကြည့်ပါ။"</string>

@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Lar appen bruke metoder for å legge til og slette ansiktmaler for bruk."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"bruke maskinvare for ansiktsautentisering"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Lar appen bruke maskinvare for ansiktsautentisering til autentisering"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Ansiktsautentisering"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Registrer ansiktet ditt på nytt"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"For å forbedre gjenkjennelse, registrer ansiktet ditt på nytt"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Kunne ikke ta opp nøyaktige ansiktsdata Prøv igjen"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"For lyst. Prøv svakere belysning."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"For mørkt. Prøv sterkere belysning."</string>
