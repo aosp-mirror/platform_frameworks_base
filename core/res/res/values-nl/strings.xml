@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Hiermee kan de app methoden aanroepen om gezichtstemplates toe te voegen en te verwijderen voor gebruik."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"hardware voor gezichtsherkenning gebruiken"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Hiermee kan de app hardware voor gezichtsherkenning gebruiken voor verificatie"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Gezichtsherkenning"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Je gezicht opnieuw registreren"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Registreer je gezicht opnieuw om de herkenning te verbeteren"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Geen accurate gegevens. Probeer het nog eens."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Overbelicht. Probeer een minder felle belichting."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Te donker. Probeer een fellere verlichting."</string>
@@ -1211,7 +1208,7 @@
     <string name="dump_heap_ready_notification" msgid="1162196579925048701">"Heap dump van <xliff:g id="PROC">%1$s</xliff:g> is klaar"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap dump verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
-    <string name="dump_heap_text" msgid="8546022920319781701">"Het proces van <xliff:g id="PROC">%1$s</xliff:g> heeft de geheugenlimiet van <xliff:g id="SIZE">%2$s</xliff:g> overschreden. Er is een heap dump beschikbaar die je met de ontwikkelaar kunt delen. Let op: Deze heap dump kan persoonsgegevens bevatten waartoe de app toegang heeft."</string>
+    <string name="dump_heap_text" msgid="8546022920319781701">"Het proces van <xliff:g id="PROC">%1$s</xliff:g> heeft de geheugenlimiet van <xliff:g id="SIZE">%2$s</xliff:g> overschreden. Er is een heap dump beschikbaar die je met de ontwikkelaar kunt delen. Let op: Deze heap dump kan persoonlijke informatie bevatten waartoe de app toegang heeft."</string>
     <string name="dump_heap_system_text" msgid="3236094872980706024">"Het proces <xliff:g id="PROC">%1$s</xliff:g> overschrijdt de geheugenlimiet van <xliff:g id="SIZE">%2$s</xliff:g>. Er is een heap dump beschikbaar die je kunt delen. Let op: Deze heap dump kan gevoelige persoonlijke informatie bevatten waartoe het proces toegang heeft. Dit omvat mogelijk wat je hebt getypt."</string>
     <string name="dump_heap_ready_text" msgid="1778041771455343067">"Er is een heap dump beschikbaar van het proces van <xliff:g id="PROC">%1$s</xliff:g>. Deze kun je delen. Let op: Deze heap dump bevat mogelijk gevoelige persoonlijke informatie waartoe het proces toegang heeft. Dit omvat mogelijk wat je hebt getypt."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>

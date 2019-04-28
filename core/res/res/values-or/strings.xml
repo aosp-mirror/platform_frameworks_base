@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଫେସିଆଲ୍‍ ଟେମ୍ପଲେଟ୍‍ ଯୋଡିବା ଓ ଡିଲିଟ୍‍ ର ପଦ୍ଧତି ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ର ପ୍ରମାଣ ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ମୁହଁ ପ୍ରାମାଣିକତା"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ଚିହ୍ନଟକରଣକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ମୁହଁର ଡାଟା କ୍ୟାପଚର୍ ହେଲାନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ଅତ୍ୟଧିକ ଅନ୍ଧକାର। ଉଜ୍ବଳ ଲାଇଟ୍ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
@@ -1366,8 +1363,7 @@
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"ଏହି ଡିଭାଇସ୍‌ର ସମସ୍ୟା ସମାଧାନ କରିବା ପାଇଁ ଆପଣଙ୍କର ଆଡମିନ୍‌ ଏକ ବଗ୍‍ ରିପୋର୍ଟ ମାଗିଛନ୍ତି। ଆପ୍‍ ଓ ଡାଟା ଶେୟର୍‌ କରାଯାଇପାରେ।"</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ସେୟାର୍‌ କରନ୍ତୁ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"</string>
-    <!-- no translation found for select_input_method (4653387336791222978) -->
-    <skip />
+    <string name="select_input_method" msgid="4653387336791222978">"ଇନପୁଟ୍ ପଦ୍ଧତି ବାଛନ୍ତୁ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ଫିଜିକାଲ୍‌ କୀ’ବୋର୍ଡ ସକ୍ରିୟ ଥିବାବେଳେ ଏହାକୁ ସ୍କ୍ରୀନ୍‌ ଉପରେ ରଖନ୍ତୁ"</string>
     <string name="hardware" msgid="194658061510127999">"ଭର୍ଚୁଆଲ୍ କୀ’ବୋର୍ଡ ଦେଖାନ୍ତୁ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ଫିଜିକଲ୍ କୀ\'ବୋର୍ଡ କନଫିଗର୍‍ କରନ୍ତୁ"</string>

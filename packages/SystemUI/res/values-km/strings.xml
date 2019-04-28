@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"បញ្ចេញ​សំឡេង និង​បង្ហាញ​នៅក្នុង​ផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ របារ​ស្ថានភាព និង​នៅលើ​អេក្រង់ចាក់សោ។"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"តាមរយៈ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"កម្មវិធីនេះ​កំពុងប្រើ​កាមេរ៉ា។"</string>
     <string name="appops_microphone" msgid="741508267659494555">"កម្មវិធីនេះ​កំពុងប្រើ​មីក្រូហ្វូន។"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"កម្មវិធីនេះ​កំពុងបង្ហាញ​ពីលើកម្មវិធី​ផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក។"</string>

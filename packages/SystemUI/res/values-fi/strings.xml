@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Äänellinen ilmoitus näkyy vedettävällä ilmoitusalueella, tilapalkissa ja lukitusnäytöllä."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Tämä sovellus käyttää kameraa."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Tämä sovellus käyttää mikrofonia."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Tämä sovellus näkyy näytöllä muiden sovellusten päällä."</string>

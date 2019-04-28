@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"përdor harduerin për vërtetimin e fytyrës"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Lejon aplikacionin të përdorë harduer vërtetimi të fytyrës për procesin e vërtetimit"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Vërtetimi me fytyrë"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Regjistro përsëri fytyrën tënde"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Me shumë ndriçim. Provo një ndriçim më të butë."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Shumë i errët. Provo një ndriçim më të fortë."</string>

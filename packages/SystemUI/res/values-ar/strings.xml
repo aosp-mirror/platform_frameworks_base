@@ -648,24 +648,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"متابعة إرسال التنبيهات"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"إيقاف الإشعارات"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"الإشعارات الهادئة"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"له الأولوية"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"كتم الصوت دائمًا: يظهر هذا الإعداد في خيار منسدل."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"كتم الصوت دائمًا: سيظهر هذا الإعداد في خيار منسدل وفي شريط الحالة."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"كتم الصوت دائمًا: يظهر هذا الاختيار في خيار منسدِل وعلى شاشة التأمين."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"كتم الصوت دائمًا: يظهر هذا الإعداد في خيار منسدل وفي شريط الحالة وفي شاشة التأمين."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"ستسمع صوتًا وسيظهر لك هذا الإعداد في خيار منسدل وفي شريط الحالة وفي شاشة التأمين."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"عبر <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"يستخدم هذا التطبيق الكاميرا."</string>
     <string name="appops_microphone" msgid="741508267659494555">"يستخدم هذا التطبيق الميكروفون."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك."</string>

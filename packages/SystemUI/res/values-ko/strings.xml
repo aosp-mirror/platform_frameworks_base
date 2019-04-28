@@ -636,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"계속 알림"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"알림 사용 중지"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"조용히 표시됨"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"우선순위 지정됨"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"항상 음소거됩니다. 풀다운 창에 표시됩니다."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"항상 음소거됩니다. 풀다운 창 및 상태 표시줄에 표시됩니다."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"항상 음소거됩니다. 풀다운 창 및 잠금 화면에 표시됩니다."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"항상 음소거됩니다. 풀다운 창, 상태 표시줄, 잠금 화면에 표시됩니다."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"풀다운 창, 상태 표시줄, 잠금 화면에 소리와 함께 표시됩니다."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"제공: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"앱이 카메라를 사용 중입니다."</string>
     <string name="appops_microphone" msgid="741508267659494555">"앱이 마이크를 사용 중입니다."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"앱이 화면의 다른 앱 위에 표시되고 있습니다."</string>

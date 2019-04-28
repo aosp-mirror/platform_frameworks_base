@@ -640,24 +640,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Weiterhin Benachrichtigungen senden"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Benachrichtigungen deaktivieren"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Benachrichtigungen dieser App weiterhin anzeigen?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"Stumm"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Priorisiert"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste und der Statusleiste."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste und auf dem Sperrbildschirm."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste, der Statusleiste und auf dem Sperrbildschirm."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Akustisches Signal ertönt. Benachrichtigungen erscheinen in der Benachrichtigungsleiste, der Statusleiste und auf dem Sperrbildschirm."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"über <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Diese App verwendet die Kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Diese App verwendet das Mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Diese App wird über anderen Apps auf dem Bildschirm angezeigt."</string>

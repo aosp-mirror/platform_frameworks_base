@@ -636,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"متنبہ کرنا جاری رکھیں"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"اطلاعات کو آف کریں"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"اس ایپ کی طرف سے اطلاعات دکھانا جاری رکھیں؟"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"لطیف"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"ترجیح دی گئی"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ میں ڈسپلے کرتا ہے۔"</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ اور اسٹیٹس بار پر ڈسپلے کرتا ہے۔"</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ اور مقفل اسکرین پر ڈسپلے کرتا ہے۔"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ، اسٹیٹس بار اور مقفل اسکرین پر ڈسپلے کرتا ہے۔"</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"نیچے کی طرف کھینچیں شیڈ، اسٹیٹس بار اور مقفل اسکرین پر آواز اور ڈسپلے کرتا ہے۔"</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"بذریعہ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"یہ ایپ کیمرے کا استعمال کر رہی ہے۔"</string>
     <string name="appops_microphone" msgid="741508267659494555">"یہ ایپ مائیکروفون کا استعمال کر رہی ہے۔"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"یہ ایپ آپ کی اسکرین پر دیگر ایپس پر ڈسپلے کر رہی ہے۔"</string>
