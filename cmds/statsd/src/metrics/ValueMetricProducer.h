@@ -113,6 +113,8 @@ private:
     void flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                   const int64_t& nextBucketStartTimeNs) override;
 
+    void prepareFistBucketLocked() override;
+
     void dropDataLocked(const int64_t dropTimeNs) override;
 
     // Calculate previous bucket end time based on current time.

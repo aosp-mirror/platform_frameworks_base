@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Ricerca del GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posizione stabilita dal GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Richieste di accesso alla posizione attive"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"Opzione Sensori disattivati attiva"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Cancella tutte le notifiche."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silenzio\ntotale"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Solo con\npriorità"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Solo\nsveglie"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • In carica wireless (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> al termine)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • In carica (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> al termine)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ricarica veloce (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> al termine)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ricarica lenta (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> al termine)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Sei collegato a <xliff:g id="APPLICATION">%1$s</xliff:g>, che consente di monitorare la tua attività di rete personale, inclusi siti web, email e app."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nPer ulteriori informazioni, contatta l\'amministratore."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nSei collegato anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"Sbloccato da TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Il dispositivo resterà bloccato fino allo sblocco manuale"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Ricevi notifiche più velocemente"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Visualizza prima di sbloccare"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Comprimi"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Sottotitoli automatici"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Suggerimento sottotitoli"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Overlay sottotitoli"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"attiva"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"disattiva"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Cambia dispositivo di uscita"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La schermata è fissata"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
@@ -640,10 +636,14 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continua ad avvisare"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Disattiva notifiche"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuare a ricevere notifiche da questa app?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"Le notifiche bloccate non vengono visualizzate e non riproducono suoni. Puoi sbloccare le notifiche nelle impostazioni."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"Le notifiche silenziose vengono visualizzate nella relativa area, ma non nella schermata di blocco, presentano un banner o riproducono un suono."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"Queste notifiche verranno mostrate nel riquadro a scomparsa delle notifiche, nella barra di stato e nella schermata di blocco; inoltre verrà emesso un suono"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Queste notifiche non possono essere disattivate"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"Modalità senza avvisi"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Con priorità"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Sempre silenz. Le notifiche verranno visualizzate nell\'area a discesa."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Sempre silenz. Le notifiche verranno visualizzate nell\'area a discesa e nella barra di stato."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Sempre silenz. Le notifiche verranno visualizzate nell\'area a discesa e sulla schermata di blocco."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Sempre silenz. Le notifiche verranno visualizzate nell\'area a discesa, nella barra di stato e sulla schermata di blocco."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Verranno visualizzate con un suono in area a discesa, barra di stato e schermata di blocco."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Impossibile modificare queste notifiche."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Qui non è possibile configurare questo gruppo di notifiche"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"tramite <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Questa app sta utilizzando la fotocamera."</string>

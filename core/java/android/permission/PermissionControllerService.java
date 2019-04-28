@@ -33,16 +33,12 @@ import android.Manifest;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.WorkerThread;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager.PermissionGrantState;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
@@ -59,6 +55,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * This service is meant to be implemented by the app controlling permissions.
@@ -78,15 +77,6 @@ public abstract class PermissionControllerService extends Service {
      */
     public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
 
-    // No need for locking - always set first and never modified
-    private Handler mHandler;
-
-    @Override
-    public final void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        mHandler = new Handler(base.getMainLooper());
-    }
-
     /**
      * Revoke a set of runtime permissions for various apps.
      *
@@ -94,23 +84,25 @@ public abstract class PermissionControllerService extends Service {
      * @param doDryRun Compute the permissions that would be revoked, but not actually revoke them
      * @param reason Why the permission should be revoked
      * @param callerPackageName The package name of the calling app
-     *
-     * @return the actually removed permissions as {@code Map<packageName, List<permission>>}
+     * @param callback Callback waiting for the actually removed permissions as
+     * {@code Map<packageName, List<permission>>}
      */
-    @WorkerThread
-    public abstract @NonNull Map<String, List<String>> onRevokeRuntimePermissions(
+    @BinderThread
+    public abstract void onRevokeRuntimePermissions(
             @NonNull Map<String, List<String>> requests, boolean doDryRun,
-            @PermissionControllerManager.Reason int reason, @NonNull String callerPackageName);
+            @PermissionControllerManager.Reason int reason, @NonNull String callerPackageName,
+            @NonNull Consumer<Map<String, List<String>>> callback);
 
     /**
      * Create a backup of the runtime permissions.
      *
      * @param user The user to back up
      * @param backup The stream to write the backup to
+     * @param callback Callback waiting for operation to be complete
      */
-    @WorkerThread
+    @BinderThread
     public abstract void onGetRuntimePermissionsBackup(@NonNull UserHandle user,
-            @NonNull OutputStream backup);
+            @NonNull OutputStream backup, @NonNull Runnable callback);
 
     /**
      * Restore a backup of the runtime permissions.
@@ -120,10 +112,11 @@ public abstract class PermissionControllerService extends Service {
      *
      * @param user The user to restore
      * @param backup The stream to read the backup from
+     * @param callback Callback waiting for operation to be complete
      */
     @BinderThread
     public abstract void onRestoreRuntimePermissionsBackup(@NonNull UserHandle user,
-            @NonNull InputStream backup);
+            @NonNull InputStream backup, @NonNull Runnable callback);
 
     /**
      * Restore the permission state of an app that was provided in
@@ -131,33 +124,32 @@ public abstract class PermissionControllerService extends Service {
      *
      * @param packageName The app to restore
      * @param user The user to restore
-     *
-     * @return {@code true} iff there is still delayed backup left
+     * @param callback Callback waiting for whether there is still delayed backup left
      */
     @BinderThread
-    public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String packageName,
-            @NonNull UserHandle user);
+    public abstract void onRestoreDelayedRuntimePermissionsBackup(@NonNull String packageName,
+            @NonNull UserHandle user, @NonNull Consumer<Boolean> callback);
 
     /**
      * Gets the runtime permissions for an app.
      *
      * @param packageName The package for which to query.
-     *
-     * @return descriptions of the runtime permissions of the app
+     * @param callback Callback waiting for the descriptions of the runtime permissions of the app
      */
-    @WorkerThread
-    public abstract @NonNull List<RuntimePermissionPresentationInfo> onGetAppPermissions(
-            @NonNull String packageName);
+    @BinderThread
+    public abstract void onGetAppPermissions(@NonNull String packageName,
+            @NonNull Consumer<List<RuntimePermissionPresentationInfo>> callback);
 
     /**
      * Revokes the permission {@code permissionName} for app {@code packageName}
      *
      * @param packageName The package for which to revoke
      * @param permissionName The permission to revoke
+     * @param callback Callback waiting for operation to be complete
      */
-    @WorkerThread
+    @BinderThread
     public abstract void onRevokeRuntimePermission(@NonNull String packageName,
-            @NonNull String permissionName);
+            @NonNull String permissionName, @NonNull Runnable callback);
 
     /**
      * Count how many apps have one of a set of permissions.
@@ -165,36 +157,36 @@ public abstract class PermissionControllerService extends Service {
      * @param permissionNames The permissions the app might have
      * @param flags Modify which apps to count. By default all non-system apps that request a
      *              permission are counted
-     *
-     * @return the number of apps that have one of the permissions
+     * @param callback Callback waiting for the number of apps that have one of the permissions
      */
-    @WorkerThread
-    public abstract int onCountPermissionApps(@NonNull List<String> permissionNames,
-            @CountPermissionAppsFlag int flags);
+    @BinderThread
+    public abstract void onCountPermissionApps(@NonNull List<String> permissionNames,
+            @CountPermissionAppsFlag int flags, @NonNull IntConsumer callback);
 
     /**
      * Count how many apps have used permissions.
      *
      * @param countSystem Also count system apps
      * @param numMillis The number of milliseconds in the past to check for uses
-     *
-     * @return descriptions of the users of permissions
+     * @param callback Callback waiting for the descriptions of the users of permissions
      */
-    @WorkerThread
-    public abstract @NonNull List<RuntimePermissionUsageInfo> onGetPermissionUsages(
-            boolean countSystem, long numMillis);
+    @BinderThread
+    public abstract void onGetPermissionUsages(boolean countSystem, long numMillis,
+            @NonNull Consumer<List<RuntimePermissionUsageInfo>> callback);
 
     /**
      * Grant or upgrade runtime permissions. The upgrade could be performed
      * based on whether the device upgraded, whether the permission database
      * version is old, or because the permission policy changed.
      *
+     * @param callback Callback waiting for operation to be complete
+     *
      * @see PackageManager#isDeviceUpgrading()
      * @see PermissionManager#getRuntimePermissionsVersion()
      * @see PermissionManager#setRuntimePermissionsVersion(int)
      */
-    @WorkerThread
-    public abstract void onGrantOrUpgradeDefaultRuntimePermissions();
+    @BinderThread
+    public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable callback);
 
     /**
      * Set the runtime permission state from a device admin.
@@ -203,11 +195,13 @@ public abstract class PermissionControllerService extends Service {
      * @param packageName Package the permission belongs to
      * @param permission Permission to change
      * @param grantState State to set the permission into
+     * @param callback Callback waiting for whether the state could be set or not
      */
-    @WorkerThread
-    public abstract boolean onSetRuntimePermissionGrantStateByDeviceAdmin(
+    @BinderThread
+    public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(
             @NonNull String callerPackageName, @NonNull String packageName,
-            @NonNull String permission, @PermissionGrantState int grantState);
+            @NonNull String permission, @PermissionGrantState int grantState,
+            @NonNull Consumer<Boolean> callback);
 
     @Override
     public final @NonNull IBinder onBind(Intent intent) {
@@ -241,9 +235,25 @@ public abstract class PermissionControllerService extends Service {
                     throw new RuntimeException(e);
                 }
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(() ->
-                        PermissionControllerService.this.revokeRuntimePermissions(request, doDryRun,
-                                reason, callerPackageName, callback));
+                onRevokeRuntimePermissions(request,
+                        doDryRun, reason, callerPackageName, revoked -> {
+                            checkNotNull(revoked);
+                            Bundle bundledizedRevoked = new Bundle();
+                            for (Map.Entry<String, List<String>> appRevocation :
+                                    revoked.entrySet()) {
+                                checkNotNull(appRevocation.getKey());
+                                checkCollectionElementsNotNull(appRevocation.getValue(),
+                                        "permissions");
+
+                                bundledizedRevoked.putStringArrayList(appRevocation.getKey(),
+                                        new ArrayList<>(appRevocation.getValue()));
+                            }
+
+                            Bundle result = new Bundle();
+                            result.putBundle(PermissionControllerManager.KEY_RESULT,
+                                    bundledizedRevoked);
+                            callback.sendResult(result);
+                        });
             }
 
             @Override
@@ -253,8 +263,15 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(() ->
-                        PermissionControllerService.this.getRuntimePermissionsBackup(user, pipe));
+                try (OutputStream backup = new ParcelFileDescriptor.AutoCloseOutputStream(pipe)) {
+                    CountDownLatch latch = new CountDownLatch(1);
+                    onGetRuntimePermissionsBackup(user, backup, latch::countDown);
+                    latch.await();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Could not open pipe to write backup to", e);
+                } catch (InterruptedException e) {
+                    Log.e(LOG_TAG, "getRuntimePermissionBackup timed out", e);
+                }
             }
 
             @Override
@@ -265,9 +282,13 @@ public abstract class PermissionControllerService extends Service {
                 enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
 
                 try (InputStream backup = new ParcelFileDescriptor.AutoCloseInputStream(pipe)) {
-                    onRestoreRuntimePermissionsBackup(user, backup);
+                    CountDownLatch latch = new CountDownLatch(1);
+                    onRestoreRuntimePermissionsBackup(user, backup, latch::countDown);
+                    latch.await();
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Could not open pipe to read backup from", e);
+                } catch (InterruptedException e) {
+                    Log.e(LOG_TAG, "restoreRuntimePermissionBackup timed out", e);
                 }
             }
 
@@ -280,11 +301,13 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
 
-                boolean hasMoreBackup = onRestoreDelayedRuntimePermissionsBackup(packageName, user);
-
-                Bundle result = new Bundle();
-                result.putBoolean(PermissionControllerManager.KEY_RESULT, hasMoreBackup);
-                callback.sendResult(result);
+                onRestoreDelayedRuntimePermissionsBackup(packageName, user,
+                        hasMoreBackup -> {
+                            Bundle result = new Bundle();
+                            result.putBoolean(PermissionControllerManager.KEY_RESULT,
+                                    hasMoreBackup);
+                            callback.sendResult(result);
+                        });
             }
 
             @Override
@@ -294,9 +317,17 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> PermissionControllerService.this.getAppPermissions(packageName,
-                                callback));
+                onGetAppPermissions(packageName,
+                        permissions -> {
+                            if (permissions != null && !permissions.isEmpty()) {
+                                Bundle result = new Bundle();
+                                result.putParcelableList(PermissionControllerManager.KEY_RESULT,
+                                        permissions);
+                                callback.sendResult(result);
+                            } else {
+                                callback.sendResult(null);
+                            }
+                        });
             }
 
             @Override
@@ -306,9 +337,14 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> PermissionControllerService.this.onRevokeRuntimePermission(
-                                packageName, permissionName));
+                CountDownLatch latch = new CountDownLatch(1);
+                PermissionControllerService.this.onRevokeRuntimePermission(packageName,
+                        permissionName, latch::countDown);
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    Log.e(LOG_TAG, "revokeRuntimePermission timed out", e);
+                }
             }
 
             @Override
@@ -320,9 +356,11 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> PermissionControllerService.this.countPermissionApps(permissionNames,
-                                flags, callback));
+                onCountPermissionApps(permissionNames, flags, numApps -> {
+                    Bundle result = new Bundle();
+                    result.putInt(PermissionControllerManager.KEY_RESULT, numApps);
+                    callback.sendResult(result);
+                });
             }
 
             @Override
@@ -333,9 +371,15 @@ public abstract class PermissionControllerService extends Service {
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> PermissionControllerService.this.getPermissionUsages(countSystem,
-                                numMillis, callback));
+                onGetPermissionUsages(countSystem, numMillis, users -> {
+                    if (users != null && !users.isEmpty()) {
+                        Bundle result = new Bundle();
+                        result.putParcelableList(PermissionControllerManager.KEY_RESULT, users);
+                        callback.sendResult(result);
+                    } else {
+                        callback.sendResult(null);
+                    }
+                });
             }
 
             @Override
@@ -361,10 +405,12 @@ public abstract class PermissionControllerService extends Service {
                 enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                         null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> PermissionControllerService.this
-                                .setRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
-                                        packageName, permission, grantState, callback));
+                onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
+                        packageName, permission, grantState, wasSet -> {
+                            Bundle result = new Bundle();
+                            result.putBoolean(PermissionControllerManager.KEY_RESULT, wasSet);
+                            callback.sendResult(result);
+                        });
             }
 
             @Override
@@ -374,89 +420,8 @@ public abstract class PermissionControllerService extends Service {
                 enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                         null);
 
-                AsyncTask.THREAD_POOL_EXECUTOR.execute(
-                        () -> PermissionControllerService.this
-                                .grantOrUpgradeDefaultRuntimePermissions(callback));
+                onGrantOrUpgradeDefaultRuntimePermissions(() -> callback.sendResult(Bundle.EMPTY));
             }
         };
-    }
-
-    private void revokeRuntimePermissions(@NonNull Map<String, List<String>> requests,
-            boolean doDryRun, @PermissionControllerManager.Reason int reason,
-            @NonNull String callerPackageName, @NonNull RemoteCallback callback) {
-        Map<String, List<String>> revoked = onRevokeRuntimePermissions(requests,
-                doDryRun, reason, callerPackageName);
-
-        checkNotNull(revoked);
-        Bundle bundledizedRevoked = new Bundle();
-        for (Map.Entry<String, List<String>> appRevocation : revoked.entrySet()) {
-            checkNotNull(appRevocation.getKey());
-            checkCollectionElementsNotNull(appRevocation.getValue(), "permissions");
-
-            bundledizedRevoked.putStringArrayList(appRevocation.getKey(),
-                    new ArrayList<>(appRevocation.getValue()));
-        }
-
-        Bundle result = new Bundle();
-        result.putBundle(PermissionControllerManager.KEY_RESULT, bundledizedRevoked);
-        callback.sendResult(result);
-    }
-
-    private void getRuntimePermissionsBackup(@NonNull UserHandle user,
-            @NonNull ParcelFileDescriptor backupFile) {
-        try (OutputStream backup = new ParcelFileDescriptor.AutoCloseOutputStream(backupFile)) {
-            onGetRuntimePermissionsBackup(user, backup);
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Could not open pipe to write backup to", e);
-        }
-    }
-
-    private void getAppPermissions(@NonNull String packageName, @NonNull RemoteCallback callback) {
-        List<RuntimePermissionPresentationInfo> permissions = onGetAppPermissions(packageName);
-        if (permissions != null && !permissions.isEmpty()) {
-            Bundle result = new Bundle();
-            result.putParcelableList(PermissionControllerManager.KEY_RESULT, permissions);
-            callback.sendResult(result);
-        } else {
-            callback.sendResult(null);
-        }
-    }
-
-    private void countPermissionApps(@NonNull List<String> permissionNames,
-            @CountPermissionAppsFlag int flags, @NonNull RemoteCallback callback) {
-        int numApps = onCountPermissionApps(permissionNames, flags);
-
-        Bundle result = new Bundle();
-        result.putInt(PermissionControllerManager.KEY_RESULT, numApps);
-        callback.sendResult(result);
-    }
-
-    private void getPermissionUsages(boolean countSystem, long numMillis,
-            @NonNull RemoteCallback callback) {
-        List<RuntimePermissionUsageInfo> users =
-                onGetPermissionUsages(countSystem, numMillis);
-        if (users != null && !users.isEmpty()) {
-            Bundle result = new Bundle();
-            result.putParcelableList(PermissionControllerManager.KEY_RESULT, users);
-            callback.sendResult(result);
-        } else {
-            callback.sendResult(null);
-        }
-    }
-
-    private void setRuntimePermissionGrantStateByDeviceAdmin(@NonNull String callerPackageName,
-            @NonNull String packageName, @NonNull String permission,
-            @PermissionGrantState int grantState, @NonNull RemoteCallback callback) {
-        boolean wasSet = onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
-                packageName, permission, grantState);
-
-        Bundle result = new Bundle();
-        result.putBoolean(PermissionControllerManager.KEY_RESULT, wasSet);
-        callback.sendResult(result);
-    }
-
-    private void grantOrUpgradeDefaultRuntimePermissions(@NonNull RemoteCallback callback) {
-        onGrantOrUpgradeDefaultRuntimePermissions();
-        callback.sendResult(Bundle.EMPTY);
     }
 }

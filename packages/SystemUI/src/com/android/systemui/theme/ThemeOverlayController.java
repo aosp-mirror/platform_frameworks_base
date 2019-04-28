@@ -24,6 +24,7 @@ import android.content.om.OverlayManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -66,6 +67,7 @@ public class ThemeOverlayController extends SystemUI {
         mUserManager = mContext.getSystemService(UserManager.class);
         mThemeManager = new ThemeOverlayManager(
                 mContext.getSystemService(OverlayManager.class),
+                AsyncTask.THREAD_POOL_EXECUTOR,
                 mContext.getString(R.string.launcher_overlayable_package));
         final Handler bgHandler = Dependency.get(Dependency.BG_HANDLER);
         final IntentFilter filter = new IntentFilter();

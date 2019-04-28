@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Iskanje GPS-a"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija nastavljena z GPS-om"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivne zahteve za lokacijo"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"Izklop za tipala je aktiven"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Izbriši vsa obvestila."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"in <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -407,8 +408,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Popolna\ntišina"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Samo\nprednostno"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Samo\nalarmi"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • brezžično polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do napolnjenosti)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do napolnjenosti)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • hitro polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do napolnjenosti)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • počasno polnjenje (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> do napolnjenosti)"</string>
@@ -513,8 +513,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"Povezani ste z aplikacijo <xliff:g id="APPLICATION">%1$s</xliff:g>, ki lahko nadzira vašo osebno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"Delovni profil upravlja organizacija <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan z aplikacijo <xliff:g id="APPLICATION">%2$s</xliff:g>, ki lahko nadzira vašo delovno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nZa več informacij se obrnite na skrbnika."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"Delovni profil upravlja organizacija <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Profil je povezan z aplikacijo <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ki lahko nadzira vašo delovno omrežno dejavnost, vključno z e-pošto, aplikacijami in spletnimi mesti.\n\nPovezani ste tudi z aplikacijo <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ki lahko nadzira vašo osebno omrežno dejavnost."</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent ohranja odklenjeno"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Naprava bo ostala zaklenjena, dokler je ročno ne odklenete."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Hitrejše prejemanje obvestil"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Oglejte si jih pred odklepanjem"</string>
@@ -527,12 +526,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Strni"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"Samod. napisi predstavnosti"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"Zapiranje namiga za podnapise"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"Prekrivni podnapisi"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"omogoči"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"onemogoči"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Izbira druge izhodne naprave"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Zaslon je pripet"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
@@ -646,10 +642,14 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Še naprej opozarjaj"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Izklopi obvestila"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite, da so obvestila te aplikacije še naprej prikazana?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"Blokirana obvestila se ne prikažejo nikjer in ne predvajajo zvoka. Obvestila lahko odblokirate v nastavitvah."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"Obvestila z izklopljenim zvokom so prikazana na zaslonu z obvestili, niso pa prikazana na zaklenjenem zaslonu, ne prikažejo pasice in ne predvajajo zvoka."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"Ob prejemu teh obvestil bo predvajan zvok, obvestila pa bodo prikazana na zaslonu z obvestili, v vrstici stanja in na zaklenjenem zaslonu"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Teh obvestil ni mogoče izklopiti"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"Brez zvočnega opozorila"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Prednostno"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili in v vrstici stanja."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili in na zaklenjenem zaslonu."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili, v vrstici stanja in na zaklenjenem zaslonu."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Zvok ter prikaz na poteznem zaslonu z obvestili, v vrstici stanja in na zaklenjenem zaslonu."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Te skupine obvestil ni mogoče konfigurirati tukaj"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"prek aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ta aplikacija uporablja fotoaparat."</string>

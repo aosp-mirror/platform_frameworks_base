@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 // TODO: User changes should deny everything that's pending.
@@ -376,11 +377,11 @@ class PendingReports {
             Log.w(TAG, "Can't parse id from: " + uriString);
             return null;
         }
-        final int size = mPending.size();
-        for (int i = 0; i < size; i++) {
-            final PendingReportRec rec = mPending.get(i);
+
+        for (Iterator<PendingReportRec> i = mPending.iterator(); i.hasNext();) {
+            final PendingReportRec rec = i.next();
             if (rec.id == id) {
-                mPending.remove(i);
+                i.remove();
                 return rec;
             }
         }
@@ -391,12 +392,12 @@ class PendingReports {
      * Remove a PendingReportRec keyed by listener.
      */
     private void removePendingReportRecLocked(IIncidentAuthListener listener) {
-        final int size = mPending.size();
-        for (int i = 0; i < size; i++) {
-            final PendingReportRec rec = mPending.get(i);
+
+        for (Iterator<PendingReportRec> i = mPending.iterator(); i.hasNext();) {
+            final PendingReportRec rec = i.next();
             if (rec.listener.asBinder() == listener.asBinder()) {
                 Log.i(TAG, "  ...Removed PendingReportRec index=" + i + ": " + rec.getUri());
-                mPending.remove(i);
+                i.remove();
             }
         }
     }

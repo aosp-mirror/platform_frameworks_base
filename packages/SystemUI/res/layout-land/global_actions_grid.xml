@@ -8,7 +8,7 @@
     android:clipToPadding="false"
     android:theme="@style/qs_theme"
     android:paddingLeft="@dimen/global_actions_top_padding"
-    android:gravity="top|left"
+    android:gravity="right"
     android:clipChildren="false"
 >
     <LinearLayout

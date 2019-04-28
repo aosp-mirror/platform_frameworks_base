@@ -301,7 +301,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong pisikal na aktibidad?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at mag-record ng video"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na kumuha ng mga larawan at mag-record ng video?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na kumuha ng larawan at mag-record ng video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Mga log ng tawag"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"binabasa at sinusulat ang log ng tawag sa telepono"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong mga log ng tawag sa telepono?"</string>
@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gumamit ng hardware sa pag-authenticate ng mukha"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Pumapayag na gumamit ng face authentication hardware ang app para sa pag-authenticate"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Hindi makakuha ng tamang face data. Subukang muli."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Masyadong maliwanag. Subukang bawasan ang liwanag."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Masyadong madilim. Subukan sa mas maliwanag."</string>

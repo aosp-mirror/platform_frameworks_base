@@ -153,7 +153,7 @@ oneway interface IStatusBar
     void showBiometricDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver, int type,
             boolean requireConfirmation, int userId);
     // Used to hide the dialog when a biometric is authenticated
-    void onBiometricAuthenticated(boolean authenticated);
+    void onBiometricAuthenticated(boolean authenticated, String failureReason);
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
     void onBiometricHelp(String message);
     // Used to set a message - the dialog will dismiss after a certain amount of time

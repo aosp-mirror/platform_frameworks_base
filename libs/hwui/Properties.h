@@ -163,10 +163,6 @@ enum DebugLevel {
  */
 #define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
 
-#define PROPERTY_FORCE_DARK "debug.hwui.force_dark"
-
-#define PROPERTY_ENABLE_FORCE_DARK "debug.hwui.force_dark_enabled"
-
 #define PROPERTY_RENDERAHEAD "debug.hwui.render_ahead"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,6 +214,7 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
+    ANDROID_API static RenderPipelineType peekRenderPipelineType();
     ANDROID_API static RenderPipelineType getRenderPipelineType();
 
     ANDROID_API static bool enableHighContrastText;
@@ -237,8 +234,6 @@ public:
     static bool disableVsync;
 
     static bool skpCaptureEnabled;
-    static bool forceDarkMode;
-    static bool enableForceDarkSupport;
 
     // For experimentation b/68769804
     ANDROID_API static bool enableRTAnimations;

@@ -214,8 +214,8 @@
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM திறத்தலை அனுமதிக்கவா?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"எச்சரிக்கை: இந்த அமைப்பு இயக்கப்பட்டிருக்கும்போது, சாதன பாதுகாப்பு அம்சங்கள் இந்தச் சாதனத்தில் இயங்காது."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"போலி இருப்பிடப் பயன்பாட்டைத் தேர்ந்தெடு"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"போலி இருப்பிடப் பயன்பாடு அமைக்கப்படவில்லை"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"போலி இருப்பிடப் பயன்பாடு: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"போலி இருப்பிடப் ஆப்ஸ் அமைக்கப்படவில்லை"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"போலி இருப்பிடப் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"நெட்வொர்க்கிங்"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"வயர்லெஸ் காட்சிக்கான சான்றிதழ்"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"வைஃபை அதிவிவர நுழைவை இயக்கு"</string>
@@ -270,17 +270,17 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"பெயர்கள் இல்லாத புளூடூத் சாதனங்கள் (MAC முகவரிகள் மட்டும்) காட்டப்படும்"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"மிகவும் அதிகமான ஒலியளவு அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கும்."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"அக முனையம்"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் பயன்பாட்டை இயக்கு"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் ஆப்ஸை இயக்கு"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"பிழைதிருத்தம்"</string>
     <string name="debug_app" msgid="8349591734751384446">"பிழைத்திருத்தப் பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"பிழைத்திருத்தப் பயன்பாடு அமைக்கப்படவில்லை"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"பிழைதிருத்தும் பயன்பாடு: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"பிழைத்திருத்தப் ஆப்ஸ் அமைக்கப்படவில்லை"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"பிழைதிருத்தும் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="no_application" msgid="2813387563129153880">"ஒன்றுமில்லை"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"பிழைதிருத்திக்குக் காத்திருக்கவும்"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"பிழைதிருத்தப்பட்ட பயன்பாடு செயல்படுவதற்கு முன்பு பிழைதிருத்தியை இணைப்பதற்குக் காத்திருக்கிறது"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"பிழைதிருத்தப்பட்ட ஆப்ஸ் செயல்படுவதற்கு முன்பு பிழைதிருத்தியை இணைப்பதற்குக் காத்திருக்கிறது"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"உள்ளீடு"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"வரைபொருள்"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"வன்பொருள் முடுக்கத்துடன் கூடிய காட்சியாக்கம்"</string>

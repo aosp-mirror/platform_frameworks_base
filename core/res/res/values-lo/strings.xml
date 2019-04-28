@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ໃຊ້ຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າ"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າສຳລັບການກວດສອບຄວາມຖືກຕ້ອງ"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໃບໜ້າທີ່ຖືກຕ້ອງໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ແຈ້ງເກີນໄປ. ລອງຄ່ອຍແສງໄຟລົງ."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ມືດເກີນ. ກະລຸນາລອງໃຊ້ສະພາບແສງທີ່ແຈ້ງຂຶ້ນ."</string>

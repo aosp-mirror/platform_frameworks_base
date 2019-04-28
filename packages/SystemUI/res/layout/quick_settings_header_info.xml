@@ -20,7 +20,8 @@
     android:layout_height="@dimen/qs_header_tooltip_height"
     android:layout_below="@id/quick_status_bar_system_icons"
     android:paddingStart="@dimen/status_bar_padding_start"
-    android:paddingEnd="@dimen/status_bar_padding_end">
+    android:paddingEnd="@dimen/status_bar_padding_end"
+    android:theme="@style/QSHeaderTheme">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -50,7 +51,6 @@
                     android:layout_width="@dimen/qs_header_alarm_icon_size"
                     android:layout_height="@dimen/qs_header_alarm_icon_size"
                     android:src="@drawable/ic_alarm"
-                    android:tint="?android:attr/textColorPrimary"
                     android:contentDescription="@string/accessibility_quick_settings_alarm_set"
                     android:visibility="gone"/>
 
@@ -85,7 +85,6 @@
                     android:id="@+id/ringer_mode_icon"
                     android:layout_width="@dimen/qs_header_alarm_icon_size"
                     android:layout_height="@dimen/qs_header_alarm_icon_size"
-                    android:tint="?android:attr/textColorPrimary"
                     android:visibility="gone"/>
 
                 <TextView

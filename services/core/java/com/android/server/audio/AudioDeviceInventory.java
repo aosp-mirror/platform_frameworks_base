@@ -363,8 +363,8 @@ public final class AudioDeviceInventory {
                         "onSetWiredDeviceConnectionState state DISCONNECTED");
             }
 
-            if (!handleDeviceConnection(wdcs.mState == 1, wdcs.mType, wdcs.mAddress,
-                    wdcs.mName)) {
+            if (!handleDeviceConnection(wdcs.mState == AudioService.CONNECTION_STATE_CONNECTED,
+                    wdcs.mType, wdcs.mAddress, wdcs.mName)) {
                 // change of connection state failed, bailout
                 return;
             }
@@ -375,7 +375,9 @@ public final class AudioDeviceInventory {
                 }
                 mDeviceBroker.checkMusicActive(wdcs.mType, wdcs.mCaller);
             }
-            mDeviceBroker.checkVolumeCecOnHdmiConnection(wdcs.mState, wdcs.mCaller);
+            if (wdcs.mType == AudioSystem.DEVICE_OUT_HDMI) {
+                mDeviceBroker.checkVolumeCecOnHdmiConnection(wdcs.mState, wdcs.mCaller);
+            }
             sendDeviceConnectionIntent(wdcs.mType, wdcs.mState, wdcs.mAddress, wdcs.mName);
             updateAudioRoutes(wdcs.mType, wdcs.mState);
         }

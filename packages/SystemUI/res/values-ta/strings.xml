@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ஐத் தேடுகிறது"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS அமைத்த இருப்பிடம்"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"இருப்பிடக் கோரிக்கைகள் இயக்கப்பட்டன"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"’சென்சார்கள் ஆஃப்’ செயலில் உள்ளது"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"எல்லா அறிவிப்புகளையும் அழி."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -640,10 +641,22 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"தொடர்ந்து விழிப்பூட்டு"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"அறிவிப்புகளை முடக்கு"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"இந்தப் பயன்பாட்டின் அறிவிப்புகளைத் தொடர்ந்து காட்டவா?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"தடுக்கப்பட்ட அறிவிப்புகள் எங்கும் தோன்றாது, ஒலியும் எழுப்பாது. அமைப்புகளில் இதை மாற்றிக் கொள்ளலாம்."</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"ஒலியில்லாத அறிவிப்புகள் பின்னணியில் காட்டப்படுகின்றன, இவை பூட்டுத் திரையிலோ பேனரிலோ காட்டப்படுவதில்லை. அவை ஒலியும் எழுப்பாது."</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"அறிவிப்பு டிராயரிலும், நிலைப் பட்டியிலும், பூட்டுத் திரையிலும் ஒலியுடன் அறிவிக்கப்படும்"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"இந்த அறிவிப்புகளை ஆஃப் செய்ய முடியாது"</string>
+    <!-- no translation found for notification_silence_title (7352089096356977930) -->
+    <skip />
+    <!-- no translation found for notification_alert_title (3966526305405016221) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
+    <skip />
+    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
+    <skip />
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
     <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> மூலமாக"</string>
     <string name="appops_camera" msgid="8100147441602585776">"இந்த ஆப்ஸானது கேமராவை உபயோகிக்கிறது."</string>
@@ -881,7 +894,7 @@
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"மொபைல் டேட்டாவை ஆஃப் செய்யவா?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> மொபைல் நிறுவனத்தின் மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"உங்கள் மொபைல் நிறுவனம்"</string>
-    <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையைப் பயன்பாடு மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையை ஆப்ஸ் மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> பயன்பாட்டை, <xliff:g id="APP_2">%2$s</xliff:g> பயன்பாட்டின் விழிப்பூட்டல்களைக் காண்பிக்க அனுமதிக்கவா?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- இது, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டிலிருந்து தகவலைப் படிக்கும்"</string>
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- இது, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டிற்குள் சென்று செயல்பாடுகளில் ஈடுபடும்"</string>

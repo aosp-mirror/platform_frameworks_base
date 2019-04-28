@@ -105,6 +105,7 @@ class ValueMetricProducerTestHelper {
                 kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                 logEventMatcherIndex, eventMatcherWizard, tagId,
                 bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+        valueProducer->prepareFistBucket();
         return valueProducer;
     }
 
@@ -124,6 +125,7 @@ class ValueMetricProducerTestHelper {
                 new ValueMetricProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
                                         eventMatcherWizard, tagId, bucketStartTimeNs,
                                         bucketStartTimeNs, pullerManager);
+        valueProducer->prepareFistBucket();
         valueProducer->mCondition = ConditionState::kFalse;
         return valueProducer;
     }
@@ -167,6 +169,7 @@ TEST(ValueMetricProducerTest, TestCalcPreviousBucketEndTime) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       logEventMatcherIndex, eventMatcherWizard, -1, startTimeBase,
                                       22, pullerManager);
+    valueProducer.prepareFistBucket();
 
     EXPECT_EQ(startTimeBase, valueProducer.calcPreviousBucketEndTime(60 * NS_PER_SEC + 10));
     EXPECT_EQ(startTimeBase, valueProducer.calcPreviousBucketEndTime(60 * NS_PER_SEC + 10));
@@ -196,6 +199,7 @@ TEST(ValueMetricProducerTest, TestFirstBucket) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       logEventMatcherIndex, eventMatcherWizard, -1, 5,
                                       600 * NS_PER_SEC + NS_PER_SEC / 2, pullerManager);
+    valueProducer.prepareFistBucket();
 
     EXPECT_EQ(600500000000, valueProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(10, valueProducer.mCurrentBucketNum);
@@ -377,6 +381,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
             kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
             logEventMatcherIndex, eventMatcherWizard, tagId,
             bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+    valueProducer->prepareFistBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -665,6 +670,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -722,6 +728,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
+    valueProducer.prepareFistBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -772,6 +779,7 @@ TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
+    valueProducer.prepareFistBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -846,6 +854,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -888,6 +897,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
     valueProducer.mCondition = ConditionState::kFalse;
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
@@ -962,6 +972,7 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       logEventMatcherIndex, eventMatcherWizard, -1 /*not pulled*/,
                                       bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+    valueProducer.prepareFistBucket();
 
     sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert, alarmMonitor);
 
@@ -1258,6 +1269,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1302,6 +1314,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1348,6 +1361,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1398,6 +1412,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1443,6 +1458,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1516,6 +1532,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutputMultiValue) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
+    valueProducer.prepareFistBucket();
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -2064,7 +2081,7 @@ TEST(ValueMetricProducerTest, TestResetBaseOnPullTooLate) {
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, tagId, bucket2StartTimeNs,
                                       bucket2StartTimeNs, pullerManager);
-
+    valueProducer.prepareFistBucket();
     valueProducer.mCondition = ConditionState::kFalse;
 
     // Event should be skipped since it is from previous bucket.
@@ -2845,6 +2862,7 @@ TEST(ValueMetricProducerTest, TestPullNeededFastDump) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
+    valueProducer.prepareFistBucket();
 
     ProtoOutputStream output;
     std::set<string> strSet;
@@ -2887,6 +2905,7 @@ TEST(ValueMetricProducerTest, TestFastDumpWithoutCurrentBucket) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
+    valueProducer.prepareFistBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -2950,6 +2969,7 @@ TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
                                       eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
+    valueProducer.prepareFistBucket();
 
     ProtoOutputStream output;
     std::set<string> strSet;
@@ -2961,7 +2981,6 @@ TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
     EXPECT_EQ(1, report.value_metrics().data_size());
     EXPECT_EQ(1, report.value_metrics().data(0).bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
-    EXPECT_EQ(10, report.value_metrics().data(0).bucket_info(0).condition_true_nanos());
 }
 
 TEST(ValueMetricProducerTest, TestPulledData_noDiff_withoutCondition) {

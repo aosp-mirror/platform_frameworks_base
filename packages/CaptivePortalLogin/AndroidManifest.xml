@@ -18,14 +18,15 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.captiveportallogin"
-    android:versionCode="210001200"
-    android:versionName="q_release_aml_210001200">
+    android:versionCode="210001300"
+    android:versionName="q_release_aml_210001300">
 
     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
     <uses-permission android:name="android.permission.NETWORK_BYPASS_PRIVATE_DNS" />
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK" />
 

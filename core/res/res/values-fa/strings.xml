@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استفاده از سخت‌افزار احراز هویت با چهره"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"به برنامه امکان می‌دهد از سخت‌افزار احراز هویت با چهره برای احراز هویت استفاده کند"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"خیلی روشن است. روشنایی‌اش را ملایم‌تر کنید."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"خیلی تاریک است. تصویر را روشن‌تر کنید."</string>

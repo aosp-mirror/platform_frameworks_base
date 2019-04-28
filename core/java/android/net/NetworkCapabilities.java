@@ -822,6 +822,11 @@ public final class NetworkCapabilities implements Parcelable {
         mEstablishingVpnAppUid = uid;
     }
 
+    /** @hide */
+    public int getEstablishingVpnAppUid() {
+        return mEstablishingVpnAppUid;
+    }
+
     /**
      * Value indicating that link bandwidth is unspecified.
      * @hide

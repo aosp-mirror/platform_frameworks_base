@@ -71,7 +71,7 @@ import java.util.ArrayList;
  */
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
         StatusBarStateController.StateListener, ConfigurationController.ConfigurationListener,
-        NotificationPanelView.PanelExpansionListener {
+        NotificationPanelView.PanelExpansionListener, NavigationModeController.ModeChangedListener {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -192,10 +192,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
-        mGesturalNav = QuickStepContract.isGesturalMode(context);
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
+        mLastGesturalNav = QuickStepContract.isGesturalMode(
+                Dependency.get(NavigationModeController.class).addListener(this));
         mDockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
@@ -587,8 +588,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
-    public void onOverlayChanged() {
-        boolean gesturalNav = QuickStepContract.isGesturalMode(mContext);
+    public void onNavigationModeChanged(int mode) {
+        boolean gesturalNav = QuickStepContract.isGesturalMode(mode);
         if (gesturalNav != mGesturalNav) {
             mGesturalNav = gesturalNav;
             updateStates();

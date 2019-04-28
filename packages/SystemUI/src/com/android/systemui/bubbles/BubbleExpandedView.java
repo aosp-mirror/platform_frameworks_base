@@ -25,6 +25,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.app.ActivityView;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -121,7 +122,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         public void onActivityViewReady(ActivityView view) {
             if (!mActivityViewReady) {
                 mActivityViewReady = true;
-                mActivityView.startActivity(mBubbleIntent);
+                // Custom options so there is no activity transition animation
+                ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
+                        0 /* enterResId */, 0 /* exitResId */);
+                // Post to keep the lifecycle normal
+                post(() -> mActivityView.startActivity(mBubbleIntent, options));
             }
         }
 

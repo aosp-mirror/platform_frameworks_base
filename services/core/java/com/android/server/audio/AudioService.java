@@ -260,6 +260,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_UPDATE_RINGER_MODE = 25;
     private static final int MSG_SET_DEVICE_STREAM_VOLUME = 26;
     private static final int MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS = 27;
+    private static final int MSG_HDMI_VOLUME_CHECK = 28;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -409,16 +410,16 @@ public class AudioService extends IAudioService.Stub
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
-            case AudioSystem.AUDIO_STATUS_SERVER_DIED:
-                mRecordMonitor.clear();
+                case AudioSystem.AUDIO_STATUS_SERVER_DIED:
+                    mRecordMonitor.onAudioServerDied();
 
-                sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
-                        SENDMSG_NOOP, 0, 0, null, 0);
-                sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
-                        SENDMSG_QUEUE, 0, 0, null, 0);
-                break;
-            default:
-                break;
+                    sendMsg(mAudioHandler, MSG_AUDIO_SERVER_DIED,
+                            SENDMSG_NOOP, 0, 0, null, 0);
+                    sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
+                            SENDMSG_QUEUE, 0, 0, null, 0);
+                    break;
+                default:
+                    break;
             }
         }
     };
@@ -1060,11 +1061,19 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+
     /**
      * Called from AudioDeviceBroker when DEVICE_OUT_HDMI is connected or disconnected.
      */
-    /*package*/ void checkVolumeCecOnHdmiConnection(int state, String caller) {
-        if (state != 0) {
+    /*package*/ void postCheckVolumeCecOnHdmiConnection(
+            @AudioService.ConnectionState  int state, String caller) {
+        sendMsg(mAudioHandler, MSG_HDMI_VOLUME_CHECK, SENDMSG_REPLACE,
+                state /*arg1*/, 0 /*arg2 ignored*/, caller /*obj*/, 0 /*delay*/);
+    }
+
+    private void onCheckVolumeCecOnHdmiConnection(
+            @AudioService.ConnectionState int state, String caller) {
+        if (state == AudioService.CONNECTION_STATE_CONNECTED) {
             // DEVICE_OUT_HDMI is now connected
             if ((AudioSystem.DEVICE_OUT_HDMI & mSafeMediaVolumeDevices) != 0) {
                 sendMsg(mAudioHandler,
@@ -1077,7 +1086,7 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (isPlatformTelevision()) {
-                checkAllFixedVolumeDevices();
+                checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI, caller);
                 synchronized (mHdmiClientLock) {
                     if (mHdmiManager != null && mHdmiPlaybackClient != null) {
                         mHdmiCecSink = false;
@@ -1095,6 +1104,21 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
             }
+        }
+    }
+
+    private void checkAddAllFixedVolumeDevices(int device, String caller) {
+        final int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int streamType = 0; streamType < numStreamTypes; streamType++) {
+            if (!mStreamStates[streamType].hasIndexForDevice(device)) {
+                // set the default value, if device is affected by a full/fix/abs volume rule, it
+                // will taken into account in checkFixedVolumeDevices()
+                mStreamStates[streamType].setIndex(
+                        mStreamStates[mStreamVolumeAlias[streamType]]
+                                .getIndex(AudioSystem.DEVICE_OUT_DEFAULT),
+                        device, caller);
+            }
+            mStreamStates[streamType].checkFixedVolumeDevices();
         }
     }
 
@@ -5329,6 +5353,9 @@ public class AudioService extends IAudioService.Stub
                 case MSG_OBSERVE_DEVICES_FOR_ALL_STREAMS:
                     onObserveDevicesForAllStreams();
                     break;
+
+                case MSG_HDMI_VOLUME_CHECK:
+                    onCheckVolumeCecOnHdmiConnection(msg.arg1, (String) msg.obj);
             }
         }
     }
@@ -6004,7 +6031,8 @@ public class AudioService extends IAudioService.Stub
                         // HDMI output
                         mFullVolumeDevices &= ~AudioSystem.DEVICE_OUT_HDMI;
                     }
-                    checkAllFixedVolumeDevices();
+                    checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI,
+                            "HdmiPlaybackClient.DisplayStatusCallback");
                 }
             }
         }
@@ -6941,6 +6969,23 @@ public class AudioService extends IAudioService.Stub
                 (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         return mRecordMonitor.getActiveRecordingConfigurations(isPrivileged);
+    }
+
+    //======================
+    // Audio recording state notification from clients
+    //======================
+    /**
+     * Track a recorder provided by the client
+     */
+    public int trackRecorder(IBinder recorder) {
+        return mRecordMonitor.trackRecorder(recorder);
+    }
+
+    /**
+     * Receive an event from the client about a tracked recorder
+     */
+    public void recorderEvent(int riid, int event) {
+        mRecordMonitor.recorderEvent(riid, event);
     }
 
     public void disableRingtoneSync(final int userId) {

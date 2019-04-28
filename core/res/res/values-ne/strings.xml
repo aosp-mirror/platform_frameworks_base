@@ -553,6 +553,12 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"अनुप्रयोगलाई प्रयोगका लागि अनुहार टेम्प्लेट थप्न र मेटाउने तरिका आह्वान गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"अनुहार प्रमाणिकरण हार्डवेयर प्रयोग गर्नुहोस्"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"अनुप्रयोगलाई प्रमाणीकरणका लागि अनुहार प्रमाणीकरण हार्डवेयर प्रयोग गर्न अनुमति दिन्छ"</string>
+    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
+    <skip />
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"अनुहारको सटीक डेटा खिच्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"ज्यादै चम्किलो। अझ मधुरो प्रकाश प्रयोग गरी हेर्नु…"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"ज्यादै अँध्यारो छ। अझ बढी प्रकाशमा गई हेर्नुहोस्"</string>

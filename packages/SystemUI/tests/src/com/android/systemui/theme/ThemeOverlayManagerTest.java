@@ -47,13 +47,12 @@ import com.android.systemui.SysuiTestCase;
 import com.google.android.collect.Maps;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.HashMap;
@@ -87,7 +86,8 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mManager = new ThemeOverlayManager(mOverlayManager, LAUNCHER_PACKAGE);
+        mManager = new ThemeOverlayManager(mOverlayManager, MoreExecutors.directExecutor(),
+                LAUNCHER_PACKAGE);
         when(mOverlayManager.getOverlayInfosForTarget(ANDROID_PACKAGE, UserHandle.SYSTEM))
                 .thenReturn(Lists.newArrayList(
                         createOverlayInfo(TEST_DISABLED_PREFIX + OVERLAY_CATEGORY_COLOR,
@@ -132,17 +132,6 @@ public class ThemeOverlayManagerTest extends SysuiTestCase {
 
         for (String overlayPackage : ALL_CATEGORIES_MAP.values()) {
             verify(mOverlayManager).setEnabledExclusiveInCategory(overlayPackage, TEST_USER);
-        }
-    }
-
-    @Test
-    public void allCategoriesSpecified_enabledInOrder() {
-        mManager.applyCurrentUserOverlays(ALL_CATEGORIES_MAP, TEST_USER_HANDLES);
-
-        InOrder inOrder = Mockito.inOrder(mOverlayManager);
-        for (String category : THEME_CATEGORIES) {
-            inOrder.verify(mOverlayManager)
-                    .setEnabledExclusiveInCategory(ALL_CATEGORIES_MAP.get(category), TEST_USER);
         }
     }
 

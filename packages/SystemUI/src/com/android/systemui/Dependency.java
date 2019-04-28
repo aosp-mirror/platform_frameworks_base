@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -244,6 +245,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<LightBarController> mLightBarController;
     @Inject Lazy<IWindowManager> mIWindowManager;
     @Inject Lazy<OverviewProxyService> mOverviewProxyService;
+    @Inject Lazy<NavigationModeController> mNavBarModeController;
     @Inject Lazy<EnhancedEstimates> mEnhancedEstimates;
     @Inject Lazy<VibratorHelper> mVibratorHelper;
     @Inject Lazy<IStatusBarService> mIStatusBarService;
@@ -406,6 +408,8 @@ public class Dependency extends SystemUI {
         mProviders.put(IWindowManager.class, mIWindowManager::get);
 
         mProviders.put(OverviewProxyService.class, mOverviewProxyService::get);
+
+        mProviders.put(NavigationModeController.class, mNavBarModeController::get);
 
         mProviders.put(EnhancedEstimates.class, mEnhancedEstimates::get);
 

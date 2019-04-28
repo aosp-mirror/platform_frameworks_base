@@ -20,12 +20,7 @@ import static android.os.Process.INVALID_UID;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -41,7 +36,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
-import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -3243,7 +3237,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 177;
+            private static final int SETTINGS_VERSION = 178;
 
             private final int mUserId;
 
@@ -4321,50 +4315,19 @@ public class SettingsProvider extends ContentProvider {
 
                 if (currentVersion == 176) {
                     // Version 176: Migrate the existing swipe up setting into the resource overlay
-                    //              for the navigation bar interaction mode.
+                    //              for the navigation bar interaction mode.  We do so only if the
+                    //              setting is set.
 
-                    final IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
-                            ServiceManager.getService(Context.OVERLAY_SERVICE));
-                    int navBarMode = -1;
-
-                    // Migrate the swipe up setting only if it is set
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
                     final Setting swipeUpSetting = secureSettings.getSettingLocked(
                             "swipe_up_to_switch_apps_enabled");
-                    if (swipeUpSetting != null && !swipeUpSetting.isNull()) {
-                        navBarMode = swipeUpSetting.getValue().equals("1")
-                                ? NAV_BAR_MODE_2BUTTON
-                                : NAV_BAR_MODE_3BUTTON;
-                    }
-
-                    // Temporary: Only for migration for dogfooders, to be removed
-                    try {
-                        final OverlayInfo info = overlayManager.getOverlayInfo(
-                                "com.android.internal.experiment.navbar.type.inset",
-                                UserHandle.USER_CURRENT);
-                        if (info != null && info.isEnabled()) {
-                            navBarMode = NAV_BAR_MODE_GESTURAL;
-                        }
-                    } catch (RemoteException e) {
-                        // Ingore, fall through
-                    }
-
-                    if (navBarMode != -1) {
-                        String overlayPackage = "";
+                    if (swipeUpSetting != null && !swipeUpSetting.isNull()
+                            && swipeUpSetting.getValue().equals("1")) {
+                        final IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
+                                ServiceManager.getService(Context.OVERLAY_SERVICE));
                         try {
-                            switch (navBarMode) {
-                                case NAV_BAR_MODE_3BUTTON:
-                                    overlayPackage = NAV_BAR_MODE_3BUTTON_OVERLAY;
-                                    break;
-                                case NAV_BAR_MODE_2BUTTON:
-                                    overlayPackage = NAV_BAR_MODE_2BUTTON_OVERLAY;
-                                    break;
-                                case NAV_BAR_MODE_GESTURAL:
-                                    overlayPackage = NAV_BAR_MODE_GESTURAL_OVERLAY;
-                                    break;
-                            }
-                            overlayManager.setEnabledExclusiveInCategory(overlayPackage,
-                                    UserHandle.USER_CURRENT);
+                            overlayManager.setEnabledExclusiveInCategory(
+                                    NAV_BAR_MODE_2BUTTON_OVERLAY, UserHandle.USER_CURRENT);
                         } catch (RemoteException e) {
                             throw new IllegalStateException(
                                     "Failed to set nav bar interaction mode overlay");
@@ -4372,6 +4335,25 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 177;
+                }
+
+                if (currentVersion == 177) {
+                    // Version 177: Set the default value for Secure Settings: AWARE_ENABLED
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    final Setting awareEnabled = secureSettings.getSettingLocked(
+                            Secure.AWARE_ENABLED);
+
+                    if (awareEnabled.isNull()) {
+                        final boolean defAwareEnabled = getContext().getResources().getBoolean(
+                                R.bool.def_aware_enabled);
+                        secureSettings.insertSettingLocked(
+                                Secure.AWARE_ENABLED, defAwareEnabled ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 178;
                 }
 
 

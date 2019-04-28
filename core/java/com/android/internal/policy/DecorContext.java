@@ -25,6 +25,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.contentcapture.ContentCaptureManager;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -34,7 +36,8 @@ import java.lang.ref.WeakReference;
  *
  * @hide
  */
-class DecorContext extends ContextThemeWrapper {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class DecorContext extends ContextThemeWrapper {
     private PhoneWindow mPhoneWindow;
     private WindowManager mWindowManager;
     private Resources mActivityResources;
@@ -42,8 +45,9 @@ class DecorContext extends ContextThemeWrapper {
 
     private WeakReference<Context> mActivityContext;
 
+    @VisibleForTesting
     public DecorContext(Context context, Context activityContext) {
-        super(context, null);
+        super(context.createDisplayContext(activityContext.getDisplay()), null);
         mActivityContext = new WeakReference<>(activityContext);
         mActivityResources = activityContext.getResources();
     }

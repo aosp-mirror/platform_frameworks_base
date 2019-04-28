@@ -238,7 +238,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляция: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Жеке DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Жеке DNS режимін таңдаңыз"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"Өшіру"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Өшірулі"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматты"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Жеке DNS провайдерінің хост атауы"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS провайдерінің хост атауын енгізіңіз"</string>

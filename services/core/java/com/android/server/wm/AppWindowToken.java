@@ -79,6 +79,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import android.annotation.CallSuper;
 import android.annotation.Size;
@@ -142,7 +143,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     /**
      * Value to increment the z-layer when boosting a layer during animations. BOOST in l33tsp34k.
      */
-    private static final int Z_BOOST_BASE = 800570000;
+    @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
 
     // Non-null only for application tokens.
     final IApplicationToken appToken;
@@ -291,7 +292,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private boolean mFreezingScreen;
 
     /** Whether this token should be boosted at the top of all app window tokens. */
-    private boolean mNeedsZBoost;
+    @VisibleForTesting boolean mNeedsZBoost;
     private Letterbox mLetterbox;
 
     private final Point mTmpPoint = new Point();
@@ -1758,8 +1759,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     private void calculateCompatBoundsTransformation(Configuration newParentConfig) {
         final Rect parentAppBounds = newParentConfig.windowConfiguration.getAppBounds();
-        final Rect viewportBounds = parentAppBounds != null
-                ? parentAppBounds : newParentConfig.windowConfiguration.getBounds();
+        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
+        final Rect viewportBounds = parentAppBounds != null ? parentAppBounds : parentBounds;
         final Rect appBounds = getWindowConfiguration().getAppBounds();
         final Rect contentBounds = appBounds != null ? appBounds : getResolvedOverrideBounds();
         final float contentW = contentBounds.width();
@@ -1778,6 +1779,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mSizeCompatBounds.set(contentBounds);
         mSizeCompatBounds.offsetTo(0, 0);
         mSizeCompatBounds.scale(mSizeCompatScale);
+        // Ensure to align the top with the parent.
+        mSizeCompatBounds.top = parentBounds.top;
         // The decor inset is included in height.
         mSizeCompatBounds.bottom += viewportBounds.top;
         mSizeCompatBounds.left += offsetX;
@@ -1979,13 +1982,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
-            // Get the bounds of the "space-to-fill". We union the Task and the Stack bounds here
-            // to handle both split window (where task-bounds can be larger) and orientation
-            // letterbox (where the task is letterboxed within stack).
-            Rect spaceToFill = getTask().getBounds();
-            if (getStack() != null) {
-                spaceToFill.union(getStack().getBounds());
-            }
+            // Get the bounds of the "space-to-fill". In multi-window mode, the task-level
+            // represents this. In fullscreen-mode, the stack does (since the orientation letterbox
+            // is also applied to the task).
+            Rect spaceToFill = (inMultiWindowMode() || getStack() == null)
+                    ? getTask().getDisplayedBounds() : getStack().getDisplayedBounds();
             mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
@@ -2473,6 +2474,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return getBounds();
     }
 
+    @VisibleForTesting
+    Rect getAnimationBounds(int appStackClipMode) {
+        if (appStackClipMode == STACK_CLIP_BEFORE_ANIM && getStack() != null) {
+            // Using the stack bounds here effectively applies the clipping before animation.
+            return getStack().getBounds();
+        }
+        // Use task-bounds if available so that activity-level letterbox (maxAspectRatio) is
+        // included in the animation.
+        return getTask() != null ? getTask().getBounds() : getBounds();
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -2493,9 +2505,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final AnimationAdapter adapter;
             AnimationAdapter thumbnailAdapter = null;
 
-            // Separate position and size for use in animators. Use task-bounds for now so
-            // that activity-level letterbox (maxAspectRatio) is included in the animation.
-            mTmpRect.set(getTask() != null ? getTask().getBounds() : getBounds());
+            final int appStackClipMode =
+                    getDisplayContent().mAppTransition.getAppStackClipMode();
+
+            // Separate position and size for use in animators.
+            mTmpRect.set(getAnimationBounds(appStackClipMode));
             mTmpPoint.set(mTmpRect.left, mTmpRect.top);
             mTmpRect.offsetTo(0, 0);
 
@@ -2529,8 +2543,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mTransit = transit;
                 mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
             } else {
-                final int appStackClipMode =
-                        getDisplayContent().mAppTransition.getAppStackClipMode();
                 mNeedsAnimationBoundsLayer = (appStackClipMode == STACK_CLIP_AFTER_ANIM);
 
                 final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
@@ -2691,7 +2703,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mNeedsZBoost) {
             layer += Z_BOOST_BASE;
         }
-        leash.setLayer(layer);
+        if (!mNeedsAnimationBoundsLayer) {
+            leash.setLayer(layer);
+        }
 
         final DisplayContent dc = getDisplayContent();
         dc.assignStackOrdering();
@@ -2728,6 +2742,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             // Crop to stack bounds.
             t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
+            t.setLayer(mAnimationBoundsLayer, layer);
 
             // Reparent leash to animation bounds layer.
             t.reparent(leash, mAnimationBoundsLayer);

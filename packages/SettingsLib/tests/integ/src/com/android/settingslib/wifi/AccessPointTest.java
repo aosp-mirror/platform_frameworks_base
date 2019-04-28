@@ -516,6 +516,30 @@ public class AccessPointTest {
     }
 
     @Test
+    public void testSummaryString_showsDisconnected() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+        ap.update(new WifiConfiguration());
+
+        assertThat(ap.getSettingsSummary(true /*convertSavedAsDisconnected*/))
+                .isEqualTo(mContext.getString(R.string.wifi_disconnected));
+    }
+
+    @Test
+    public void testSummaryString_concatenatedMeteredAndDisconnected() {
+        AccessPoint ap = createAccessPointWithScanResultCache();
+        WifiConfiguration config = new WifiConfiguration();
+        config.meteredHint = true;
+        ap.update(config);
+
+        String expectedString =
+                mContext.getResources().getString(R.string.preference_summary_default_combination,
+                        mContext.getString(R.string.wifi_metered_label),
+                        mContext.getString(R.string.wifi_disconnected));
+        assertThat(ap.getSettingsSummary(true /*convertSavedAsDisconnected*/))
+                .isEqualTo(expectedString);
+    }
+
+    @Test
     public void testSummaryString_showsConnectedViaSuggestionOrSpecifierApp() throws Exception {
         final int rssi = -55;
         final String appPackageName = "com.test.app";
