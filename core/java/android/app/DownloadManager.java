@@ -1370,7 +1370,12 @@ public class DownloadManager {
      * @param showNotification true if a notification is to be sent, false otherwise
      * @return  an ID for the download entry added to the downloads app, unique across the system
      * This ID is used to make future calls related to this download.
+     *
+     * @deprecated Apps should instead contribute files to
+     * {@link android.provider.MediaStore.Downloads} collection to make them available to user
+     * as part of Downloads.
      */
+    @Deprecated
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification) {
@@ -1411,7 +1416,12 @@ public class DownloadManager {
      * @param referer the HTTP Referer for the download
      * @return  an ID for the download entry added to the downloads app, unique across the system
      * This ID is used to make future calls related to this download.
+     *
+     * @deprecated Apps should instead contribute files to
+     * {@link android.provider.MediaStore.Downloads} collection to make them available to user
+     * as part of Downloads.
      */
+    @Deprecated
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification, Uri uri, Uri referer) {
@@ -1430,8 +1440,13 @@ public class DownloadManager {
      * {@link Environment#getExternalStoragePublicDirectory(String)} with
      * {@link Environment#DIRECTORY_DOWNLOADS}).
      *
+     * @deprecated Apps should instead contribute files to
+     * {@link android.provider.MediaStore.Downloads} collection to make them available to user
+     * as part of Downloads.
+     *
      * {@hide}
      */
+    @Deprecated
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification, boolean allowWrite) {
@@ -1451,7 +1466,12 @@ public class DownloadManager {
      * {@link Environment#DIRECTORY_DOWNLOADS}).
      *
      * {@hide}
+     *
+     * @deprecated Apps should instead contribute files to
+     * {@link android.provider.MediaStore.Downloads} collection to make them available to user
+     * as part of Downloads.
      */
+    @Deprecated
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification, boolean allowWrite, Uri uri, Uri referer) {
