@@ -1284,13 +1284,15 @@ public final class StrictMode {
         return oldPolicyMask;
     }
 
-    private static ThreadPolicy allowThreadViolations() {
+    /** @hide */
+    public static ThreadPolicy allowThreadViolations() {
         ThreadPolicy oldPolicy = getThreadPolicy();
         setThreadPolicyMask(0);
         return oldPolicy;
     }
 
-    private static VmPolicy allowVmViolations() {
+    /** @hide */
+    public static VmPolicy allowVmViolations() {
         VmPolicy oldPolicy = getVmPolicy();
         sVmPolicy = VmPolicy.LAX;
         return oldPolicy;
