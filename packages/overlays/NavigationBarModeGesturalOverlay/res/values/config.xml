@@ -31,7 +31,7 @@
     <bool name="config_navBarTapThrough">true</bool>
 
     <!-- Controls the size of the back gesture inset. -->
-    <dimen name="config_backGestureInset">20dp</dimen>
+    <dimen name="config_backGestureInset">24dp</dimen>
 
     <!-- Controls whether the navbar needs a scrim with
      {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
