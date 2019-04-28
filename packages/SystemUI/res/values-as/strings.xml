@@ -271,6 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"জিপিএছ সন্ধান কৰি থকা হৈছে"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"জিপিএছএ অৱস্থান ছেট কৰিছে"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"অৱস্থানৰ অনুৰোধ সক্ৰিয় হৈ আছে"</string>
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"ছেন্সৰ অফ সক্ৰিয় কৰা আছে"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"সকলো জাননী মচক৷"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -403,8 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"সম্পূর্ণ \n নিৰৱতা"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"কেৱল\nগুৰুত্বপূৰ্ণ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"কেৱল\nএলাৰ্মসমূহ"</string>
-    <!-- no translation found for keyguard_indication_charging_time_wireless (6959284458466962592) -->
-    <skip />
+    <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • বেতাঁৰৰ জৰিয়তে চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ’বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • দ্ৰুতগতিৰে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
@@ -507,8 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"আপুনি <xliff:g id="APPLICATION">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে, যিয়ে ইমেইল, এপ্ আৰু ৱেবছাইটসমূহকে সামৰি আপোনাৰ ব্যক্তিগত নেটৱর্কৰ কার্যকলাপ নিৰীক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>য়ে আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইল পৰিচালনা কৰে। এই প্ৰ\'ফাইলটো <xliff:g id="APPLICATION">%2$s</xliff:g>ৰে সংযুক্ত হৈ আছে যি ইমেইল, এপ্ আৰু ৱেবছাইটসমূহকে ধৰি আপোনাৰ কর্মস্থানৰ নেটৱর্কৰ কাৰ্যকলাপ নিৰীক্ষণ কৰিব পাৰিব। \n\nঅধিক তথ্যৰ বাবে আপোনাৰ প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>য়ে আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইল পৰিচালনা কৰে। এই প্ৰ\'ফাইলটো <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>ৰে সংযুক্ত হৈ আছে যি ইমেইল, এপ্ আৰু ৱেবছাইটসমূহকে ধৰি আপোনাৰ কর্মস্থানৰ নেটৱর্কৰ কাৰ্যকলাপ নিৰীক্ষণ কৰিব পাৰিব। \n\nআপুনি <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>ৰ সৈতেও সংযুক্ত হৈ আছে, যি আপোনাৰ ব্য়ক্তিগত নেটৱৰ্কৰ কাৰ্যকলাপ নিৰীক্ষণ কৰিব পাৰে।"</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked (2712865815371519117) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgentএ আনলক কৰি ৰাখিছে"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"আপুনি নিজে আনলক নকৰালৈকে ডিভাইচ লক হৈ থাকিব"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"জাননী ক্ষিপ্ৰতাৰে লাভ কৰক"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"আপুনি আনলক কৰাৰ পূৰ্বে তেওঁলোকক চাওক"</string>
@@ -521,12 +520,9 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"সংকুচিত কৰক"</string>
     <string name="volume_odi_captions_tip" msgid="1193653197906918269">"স্বয়ংক্ৰিয় কেপশ্বন মিডিয়া"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="1163987066404128967">"কেপচন টিপ বন্ধ কৰক"</string>
-    <!-- no translation found for volume_odi_captions_content_description (2950736796270214785) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_enable (49750248924730302) -->
-    <skip />
-    <!-- no translation found for volume_odi_captions_hint_disable (8980842810619956593) -->
-    <skip />
+    <string name="volume_odi_captions_content_description" msgid="2950736796270214785">"কেপশ্বন অভাৰলে’"</string>
+    <string name="volume_odi_captions_hint_enable" msgid="49750248924730302">"সক্ষম কৰক"</string>
+    <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"অক্ষম কৰক"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"আউটপুট ডিভাইচ সলনি কৰক"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্ৰীণ পিন কৰা হ’ল"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'পিছলৈ যাওক\' আৰু \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
@@ -640,12 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"সতৰ্ক কৰি থাকক"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"জাননী অফ কৰক"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই এপটোৰ জাননী দেখুওৱাই থাকিব লাগিবনে?"</string>
-    <string name="hint_text_block" msgid="3554459167504485284">"অৱৰোধ কৰা জাননী ক’তো দেখা নাযায় বা সেইবোৰে কোনো শব্দ নকৰে। আপুনি ছেটিংসমূহলৈ গৈ জাননীসমূহ অৱৰোধৰ পৰা আঁতৰাব পাৰে৷"</string>
-    <string name="hint_text_silent" msgid="859468056340177016">"নিৰৱ জাননীসমূহ শ্বেডত দেখা যায়, কিন্তু লক স্ক্ৰীণত আৰু বেনাৰ হিচাপে দেখা নাযায় আৰু কোনো শব্দ নকৰে।"</string>
-    <string name="hint_text_alert" msgid="2721169810318722524">"এই জাননীবোৰে এটা শব্দ কৰিব আৰু জাননী দেৰাজ, স্থিতি দণ্ড আৰু লক স্ক্ৰীণত দেখা যাব"</string>
-    <string name="notification_unblockable_desc" msgid="1037434112919403708">"এই জাননীসমূহ বন্ধ কৰিব নোৱাৰি"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"সাধাৰণ"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"অগ্ৰাধিকাৰপ্ৰাপ্ত"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"সদায় নিৰৱ। পুল ডাউন শ্বেডত প্ৰদর্শন কৰে।"</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"সদায় নিৰৱ। পুল ডাউন শ্বেড &amp; স্থিতিৰ দণ্ডত প্ৰদর্শন কৰে।"</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"সদায় নিৰৱ। পুল ডাউন শ্বেড &amp; লক স্ক্ৰীণত প্ৰদর্শন কৰে।"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"সদায় নিৰৱ। পুল ডাউন শ্বেড, স্থিতি দণ্ড &amp; লক স্ক্ৰীণত প্ৰদর্শন কৰে।"</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"শব্দ কৰে আৰু পুল ডাউন শ্বেড, স্থিতি দণ্ড &amp; লক স্ক্ৰীণত প্ৰদর্শন কৰে।"</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জৰিয়তে"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"এই এপে কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই এপে মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"এই এপটো আপোনাৰ স্ক্ৰীণত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ আছে।"</string>
