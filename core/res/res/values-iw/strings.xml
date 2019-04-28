@@ -297,7 +297,7 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏שליחה והצגה של הודעות SMS"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה לשלוח הודעות SMS ולהציג אותן?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"אחסון"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"גישה אל תמונות, מדיה וקבצים במכשיר שלך"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"גישה לתמונות, למדיה ולקבצים במכשיר שלך"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה לתמונות, למדיה ולקבצים במכשיר?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"מיקרופון"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"הקלטת אודיו"</string>
@@ -559,6 +559,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"שימוש בחומרה של זיהוי פנים לצורך אימות"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"מאפשרת לאפליקציה להשתמש בחומרה של זיהוי פנים לצורך אימות"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"אימות פנים"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"יש לבצע רישום מחדש של הפנים שלך"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"לשיפור הזיהוי יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"לא ניתן היה לקלוט את הפנים במדויק. יש לנסות שוב."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"בהיר מדי. צריך תאורה עדינה יותר."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"התמונה חשוכה מדי. צריך תאורה חזקה יותר."</string>
@@ -1347,7 +1350,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"‏שולח הודעות SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt; <xliff:g id="APP_NAME">%1$s</xliff:g> &lt;/ b&gt; שולח מספר רב של הודעות SMS. האם ברצונך לאפשר לאפליקציה זו להמשיך לשלוח הודעות?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"כן, זה בסדר"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"לא, אין מצב"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"עדיף שלא"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; רוצה לשלוח הודעה אל &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"הדבר "<b>"עלול לגרום לחיובים"</b>" בחשבון המכשיר הנייד שלך."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"הדבר יגרום לחיובים בחשבון המכשיר הנייד שלך."</b></string>
@@ -1403,7 +1406,7 @@
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"שיתוף דוח על באג…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"מנהל המערכת ביקש דוח על באג כדי לסייע בפתרון בעיות במכשיר זה. ייתכן שאפליקציות ונתונים ישותפו."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"שתף"</string>
-    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"לא, אין מצב"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"עדיף שלא"</string>
     <string name="select_input_method" msgid="4653387336791222978">"בחר שיטת הזנה"</string>
     <string name="show_ime" msgid="2506087537466597099">"להשאיר במסך בזמן שהמקלדת הפיזית פעילה"</string>
     <string name="hardware" msgid="194658061510127999">"הצג מקלדת וירטואלית"</string>
@@ -1482,7 +1485,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"האם ברצונך לאפשר בקשה זו?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"בקשת גישה"</string>
     <string name="allow" msgid="7225948811296386551">"כן, זה בסדר"</string>
-    <string name="deny" msgid="2081879885755434506">"לא, אין מצב"</string>
+    <string name="deny" msgid="2081879885755434506">"עדיף שלא"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"בקשת הרשאה"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"נדרשת הרשאה\nלחשבון <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"אתה משתמש באפליקציה זו מחוץ לפרופיל העבודה שלך"</string>

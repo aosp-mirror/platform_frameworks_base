@@ -559,6 +559,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Aplikaciji omogoča sprožanje načinov za dodajanje in brisanje predlog z obrazi za uporabo."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"uporaba strojne opreme za preverjanje pristnosti obraza"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Aplikaciji omogoča uporabo strojne opreme za preverjanje pristnosti obraza"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Preverjanje pristnosti z obrazom"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Znova prijavite obraz"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Za izboljšanje prepoznavanja znova prijavite svoj obraz"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Točnih podatkov o obrazu ni bilo mogoče zajeti. Poskusite znova."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Presvetlo. Poskusite z blažjo osvetlitvijo."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Pretemno. Poskusite z močnejšo osvetlitvijo."</string>

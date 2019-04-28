@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ઍપને ઉપયોગ માટે ચહેરાના નમૂના ઉમેરવા અને ડિલીટ કરવાની પદ્ધતિને રદ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ચહેરા પ્રમાણીકરણના હાર્ડવેરનો ઉપયોગ કરો"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ઍપને પ્રમાણીકરણ માટે ચહેરા પ્રમાણીકરણના હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ચહેરાનું પ્રમાણીકરણ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ઓળખવાની પ્રક્રિયાને બહેતર બનાવવા માટે કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ચહેરાનો સચોટ ડેટા કૅપ્ચર ન થયો. ફરી પ્રયાસ કરો."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"અતિશય પ્રકાશિત. થોડો હળવો પ્રકાશ અજમાવી જુઓ."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"અતિશય ઘેરી. વધુ ઝળહળતો પ્રકાશ અજમાવો"</string>

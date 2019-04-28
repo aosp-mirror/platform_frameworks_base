@@ -556,6 +556,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Dozvoljava da aplikacija aktivira metode za dodavanje i brisanje šablona lica radi korišćenja."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"korišćenje hardv. za potvrdu identiteta pomoću lica"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Dozvoljava da aplikacija koristi hardver za potvrdu identiteta pomoću lica"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Potvrda identiteta licem"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Ponovo registrujte lice"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Da biste poboljšali prepoznavanje, ponovo registrujte lice"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Snimanje lica nije uspelo. Probajte ponovo."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Previše je svetlo. Probajte sa slabijim osvetljenjem."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Pretamno je. Probajte sa jačim osvetljenjem."</string>

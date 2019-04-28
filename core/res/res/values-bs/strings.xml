@@ -556,6 +556,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Omogućava aplikaciji korištenje metoda za dodavanje i brisanje šablona lica za upotrebu."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"upotreba hardvera za autentifikaciju licem"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Omogućava aplikaciji da za autentifikaciju koristi hardver za autentifikaciju licem"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autentifikacija licem"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Ponovo registrirajte lice"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Ponovo registrirajte lice da poboljšate prepoznavanje"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Lice nije snimljeno precizno. Pokušajte ponovo."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Previše svijetlo. Probajte s blažim osvjetljenjem."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Previše je tamno. Pokušajte s jačim osvjetljenjem."</string>
@@ -1225,7 +1228,7 @@
     <string name="new_app_description" msgid="5894852887817332322">"Aplikacija <xliff:g id="OLD_APP">%1$s</xliff:g> će se zatvoriti bez pohranjivanja"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> premašuje ograničenje memorije"</string>
     <string name="dump_heap_ready_notification" msgid="1162196579925048701">"Snimak dinamičkog dijela memorije procesa <xliff:g id="PROC">%1$s</xliff:g> je spreman"</string>
-    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Snimak dinamičkog stanja memorije je napravljen. Dodirnite za dijeljenje."</string>
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Snimak dinamičkog dijela memorije je napravljen. Dodirnite za dijeljenje."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Želite li dijeliti snimak dinamičkog dijela memorije?"</string>
     <string name="dump_heap_text" msgid="8546022920319781701">"Proces <xliff:g id="PROC">%1$s</xliff:g> je premašio ograničenje memorije od <xliff:g id="SIZE">%2$s</xliff:g>. Snimak dinamičkog dijela memorije vam je dostupan i možete ga dijeliti s njegovim programerom. Budite oprezni: ovaj snimak dinamičkog dijela memorije može sadržavati vaše lične podatke kojima aplikacija ima pristup."</string>
     <string name="dump_heap_system_text" msgid="3236094872980706024">"Proces <xliff:g id="PROC">%1$s</xliff:g> je premašio ograničenje memorije od <xliff:g id="SIZE">%2$s</xliff:g>. Snimak dinamičkog dijela memorije vam je dostupan i možete ga dijeliti. Budite oprezni: ovaj snimak dinamičkog dijela memorije može sadržavati osjetljive lične podatke kojima ovaj proces ima pristup i mogu uključivati stvari koje ste unijeli."</string>

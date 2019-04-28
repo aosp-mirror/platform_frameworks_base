@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ব্যবহার করার জন্য ফেস টেম্পলেট যোগ করা এবং মোছার পদ্ধতি গ্রহণ করতে অ্যাপটিকে অনুমতি দেয়৷"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ফেস যাচাইকরণ হার্ডওয়্যার ব্যবহার করুন"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"প্রমাণীকরণের জন্য ফেস যাচাইকরণ হার্ডওয়্যার ব্যবহার করার অনুমতি অ্যাপটিকে দেয়"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ফেস যাচাইকরণ"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"আপনার ফেস আবার এনরোল করুন"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"শনাক্তকরণের উন্নতি করতে আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"মুখের সঠিক ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"খুব উজ্জ্বল। আলো কমিয়ে চেষ্টা করে দেখুন।"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"খুব অন্ধকার। আরও উজ্জ্বল আলো ব্যবহার করে দেখুন।"</string>

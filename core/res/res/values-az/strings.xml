@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Proqramdan istifadə üçün barmaq izi şablonlarını əlavə etmək və silmək məqsədilə üsullara müraciət etməyə imkan verir."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"üz identifikasiyası proqramından istifadə edin"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Tətbiqin üz identifikasiyası proqramından identifikasiya zamanı istifadə etməsinə icazə verir"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Üz identifikasiyası"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Üzünüzü yenidən qeydiyyatdan keçirin"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Tanınmanı təkmilləşdirmək üçün üzünüzü yenidən qeydiyyatdan keçirin"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Dəqiq üz datası əldə edilmədi. Yenidən cəhd edin."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Çox işıqlıdır. Daha az işıqlı şəkli sınayın."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Çox qaranlıqdır. Parlaq işıqdan istifadə edin."</string>

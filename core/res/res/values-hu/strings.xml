@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Engedélyezi, hogy az alkalmazás arcsablon-hozzáadási és -törlési metódusokat hívjon."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"arcfelismerő hardver használata"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Engedélyezi, hogy az alkalmazás hitelesítésre használja az arcfelismerő hardvert"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Arcfelismerés"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Rögzítsen újra képet az arcáról"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"A felismerés javítása érdekében rögzítsen újra az arcáról készített képet"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Sikertelen az arc pontos rögzítése. Próbálja újra."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Túl világos. Próbálja kevésbé erős világítással."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Túl sötét. Próbálja jobb megvilágítás mellett."</string>

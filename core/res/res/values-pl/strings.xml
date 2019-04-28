@@ -559,6 +559,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Zezwala na aktywowanie przez aplikację metody dodawania i usuwania szablonów twarzy."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"używanie sprzętu do uwierzytelniania za pomocą twarzy"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Zezwala na używanie przez aplikację sprzętu do analizy twarzy na potrzeby uwierzytelniania"</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Uwierzytelnianie twarzą"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Zarejestruj swoją twarz ponownie"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Aby poprawić rozpoznawanie, ponownie zarejestruj swoją twarz"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Zbyt jasno. Spróbuj przy słabszym świetle."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Zbyt ciemno. Spróbuj w jaśniejszym świetle."</string>

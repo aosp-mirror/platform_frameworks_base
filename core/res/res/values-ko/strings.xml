@@ -553,6 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"사용할 얼굴 템플릿의 추가 및 삭제 메서드를 앱에서 호출하도록 허용합니다."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"얼굴 인증 하드웨어 사용"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"앱에서 얼굴 인증 하드웨어를 인증에 사용하도록 허용합니다."</string>
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"얼굴 인증"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"얼굴 재등록 필요"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"너무 밝습니다. 조명 밝기를 조금 낮춰보세요."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"너무 어둡습니다. 조명을 밝게 해 보세요."</string>
@@ -1797,7 +1800,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"확인"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"절전 모드에서는 백그라운드 활동을 사용 중지하거나 제한합니다. 배터리 수명을 늘리기 위해 일부 시각 효과 및 기타 배터리 소모가 큰 기능이 제한됩니다. "<annotation id="url">"자세히 알아보기"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"절전 모드에서는 백그라운드 활동을 사용 중지하거나 제한합니다. 배터리 수명을 늘리기 위해 일부 시각 효과 및 기타 배터리 소모가 큰 기능이 제한됩니다."</string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"절전 모드에서는 배터리 수명을 늘리기 위해 백그라운드 활동, 일부 시각 효과 및 기타 배터리 소모가 큰 기능을 사용 중지하거나 제한합니다."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>
