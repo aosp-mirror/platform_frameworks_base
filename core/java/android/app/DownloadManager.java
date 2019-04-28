@@ -591,7 +591,15 @@ public class DownloadManager {
         /**
          * If the file to be downloaded is to be scanned by MediaScanner, this method
          * should be called before {@link DownloadManager#enqueue(Request)} is called.
+         *
+         * @deprecated Starting in Q, this value is ignored. Files downloaded to
+         * public Downloads directory (as returned by
+         * {@link Environment#getExternalStoragePublicDirectory(String)} with
+         * {@link Environment#DIRECTORY_DOWNLOADS}) will be scanned by MediaScanner
+         * and files downloaded to directories owned by applications
+         * (e.g. {@link Context#getExternalFilesDir(String)}) will not be scanned.
          */
+        @Deprecated
         public void allowScanningByMediaScanner() {
             mScannable = true;
         }
@@ -773,7 +781,15 @@ public class DownloadManager {
          * default.
          * @param isVisible whether to display this download in the Downloads UI
          * @return this object
+         *
+         * @deprecated Starting in Q, this value is ignored. Files downloaded to
+         * public Downloads directory (as returned by
+         * {@link Environment#getExternalStoragePublicDirectory(String)} with
+         * {@link Environment#DIRECTORY_DOWNLOADS}) will be visible in system's Downloads UI
+         * and files downloaded to directories owned by applications
+         * (e.g. {@link Context#getExternalFilesDir(String)}) will not be visible.
          */
+        @Deprecated
         public Request setVisibleInDownloadsUi(boolean isVisible) {
             mIsVisibleInDownloadsUi = isVisible;
             return this;
