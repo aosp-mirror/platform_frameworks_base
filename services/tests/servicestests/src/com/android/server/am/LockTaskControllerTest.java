@@ -389,7 +389,7 @@ public class LockTaskControllerTest {
         mLockTaskController.startLockTaskMode(tr1, false, TEST_UID);
         mLockTaskController.startLockTaskMode(tr2, false, TEST_UID);
 
-        // WHEN calling stopLockTaskMode on the root task
+        // WHEN calling clearLockedTasks on the root task
         mLockTaskController.clearLockedTasks("testClearLockedTasks");
 
         // THEN the lock task mode should be inactive
@@ -403,7 +403,81 @@ public class LockTaskControllerTest {
     }
 
     @Test
-    public void testUpdateLockTaskPackages() throws Exception {
+    public void testClearLockedTasks_noLockSetting_noPassword_deviceIsUnlocked() throws Exception {
+        // GIVEN There is no setting set for LOCK_TO_APP_EXIT_LOCKED
+        Settings.Secure.clearProviderForTest();
+
+        // AND no password is set
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(anyInt()))
+                .thenReturn(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+
+        // AND there is a task record
+        TaskRecord tr1 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
+
+        // WHEN calling clearLockedTasks on the root task
+        mLockTaskController.clearLockedTasks("testClearLockedTasks");
+
+        // THEN the device should not be locked
+        verify(mWindowManager, never()).lockNow(any());
+    }
+
+    @Test
+    public void testClearLockedTasks_noLockSetting_password_deviceIsLocked() throws Exception {
+        // GIVEN There is no setting set for LOCK_TO_APP_EXIT_LOCKED
+        Settings.Secure.clearProviderForTest();
+
+        // AND a password is set
+        when(mLockPatternUtils.isSecure(anyInt()))
+                .thenReturn(true);
+
+        // AND there is a task record
+        TaskRecord tr1 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
+
+        // WHEN calling clearLockedTasks on the root task
+        mLockTaskController.clearLockedTasks("testClearLockedTasks");
+
+        // THEN the device should be locked
+        verify(mWindowManager, times(1)).lockNow(any());
+    }
+
+    @Test
+    public void testClearLockedTasks_lockSettingTrue_deviceIsLocked() throws Exception {
+        // GIVEN LOCK_TO_APP_EXIT_LOCKED is set to 1
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_TO_APP_EXIT_LOCKED, 1, mContext.getUserId());
+
+        // AND there is a task record
+        TaskRecord tr1 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
+
+        // WHEN calling clearLockedTasks on the root task
+        mLockTaskController.clearLockedTasks("testClearLockedTasks");
+
+        // THEN the device should be locked
+        verify(mWindowManager, times(1)).lockNow(any());
+    }
+
+    @Test
+    public void testClearLockedTasks_lockSettingFalse_doesNotRequirePassword() throws Exception {
+        // GIVEN LOCK_TO_APP_EXIT_LOCKED is set to 1
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_TO_APP_EXIT_LOCKED, 0, mContext.getUserId());
+
+        // AND there is a task record
+        TaskRecord tr1 = getTaskRecord(TaskRecord.LOCK_TASK_AUTH_WHITELISTED);
+        mLockTaskController.startLockTaskMode(tr1, true, TEST_UID);
+
+        // WHEN calling clearLockedTasks on the root task
+        mLockTaskController.clearLockedTasks("testClearLockedTasks");
+
+        // THEN the device should be unlocked
+        verify(mWindowManager, never()).lockNow(any());
+    }
+
+    @Test
+    public void testUpdateLockTaskPackages() {
         String[] whitelist1 = {TEST_PACKAGE_NAME, TEST_PACKAGE_NAME_2};
         String[] whitelist2 = {TEST_PACKAGE_NAME};
 
