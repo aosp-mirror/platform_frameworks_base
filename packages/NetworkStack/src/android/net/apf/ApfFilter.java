@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NattKeepalivePacketDataParcelable;
 import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
@@ -1691,13 +1692,13 @@ public class ApfFilter {
     }
 
     /**
-     * Add keepalive ack packet filter.
+     * Add TCP keepalive ack packet filter.
      * This will add a filter to drop acks to the keepalive packet passed as an argument.
      *
      * @param slot The index used to access the filter.
      * @param sentKeepalivePacket The attributes of the sent keepalive packet.
      */
-    public synchronized void addKeepalivePacketFilter(final int slot,
+    public synchronized void addTcpKeepalivePacketFilter(final int slot,
             final TcpKeepalivePacketDataParcelable sentKeepalivePacket) {
         log("Adding keepalive ack(" + slot + ")");
         if (null != mKeepaliveAcks.get(slot)) {
@@ -1708,6 +1709,18 @@ public class ApfFilter {
                 ? new TcpKeepaliveAckV4(sentKeepalivePacket)
                 : new TcpKeepaliveAckV6(sentKeepalivePacket));
         installNewProgramLocked();
+    }
+
+    /**
+     * Add NATT keepalive packet filter.
+     * This will add a filter to drop NATT keepalive packet which is passed as an argument.
+     *
+     * @param slot The index used to access the filter.
+     * @param sentKeepalivePacket The attributes of the sent keepalive packet.
+     */
+    public synchronized void addNattKeepalivePacketFilter(final int slot,
+            final NattKeepalivePacketDataParcelable sentKeepalivePacket) {
+        Log.e(TAG, "APF add NATT keepalive filter is not implemented");
     }
 
     /**
