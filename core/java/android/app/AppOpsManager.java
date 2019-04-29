@@ -4337,6 +4337,7 @@ public class AppOpsManager {
      * {@link #getOpsForPackage(int, String, String...)})}.
      *
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
