@@ -60,6 +60,8 @@ public class PhoneStateListener {
 
     /**
      * Stop listening for updates.
+     *
+     * The PhoneStateListener is not tied to any subscription and unregistered for any update.
      */
     public static final int LISTEN_NONE = 0;
 
@@ -433,7 +435,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when device service state changes.
+     * Callback invoked when device service state changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE
@@ -445,7 +453,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when network signal strength changes.
+     * Callback invoked when network signal strength changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE
@@ -459,21 +473,39 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the message-waiting indicator changes.
+     * Callback invoked when the message-waiting indicator changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      */
     public void onMessageWaitingIndicatorChanged(boolean mwi) {
         // default implementation empty
     }
 
     /**
-     * Callback invoked when the call-forwarding indicator changes.
+     * Callback invoked when the call-forwarding indicator changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      */
     public void onCallForwardingIndicatorChanged(boolean cfi) {
         // default implementation empty
     }
 
     /**
-     * Callback invoked when device cell location changes.
+     * Callback invoked when device cell location changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      */
     public void onCellLocationChanged(CellLocation location) {
         // default implementation empty
@@ -482,7 +514,14 @@ public class PhoneStateListener {
     /**
      * Callback invoked when device call state changes.
      * <p>
-     * Reports the state of Telephony (mobile) calls on the device.
+     * Reports the state of Telephony (mobile) calls on the device for the registered subscription.
+     * <p>
+     * Note: the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      * <p>
      * Note: The state returned here may differ from that returned by
      * {@link TelephonyManager#getCallState()}. Receivers of this callback should be aware that
@@ -500,7 +539,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when connection state changes.
+     * Callback invoked when connection state changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @see TelephonyManager#DATA_DISCONNECTED
      * @see TelephonyManager#DATA_CONNECTING
@@ -518,7 +563,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when data activity state changes.
+     * Callback invoked when data activity state changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @see TelephonyManager#DATA_ACTIVITY_NONE
      * @see TelephonyManager#DATA_ACTIVITY_IN
@@ -531,12 +582,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when network signal strengths changes.
-     *
-     * @see ServiceState#STATE_EMERGENCY_ONLY
-     * @see ServiceState#STATE_IN_SERVICE
-     * @see ServiceState#STATE_OUT_OF_SERVICE
-     * @see ServiceState#STATE_POWER_OFF
+     * Callback invoked when network signal strengths changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      */
     public void onSignalStrengthsChanged(SignalStrength signalStrength) {
         // default implementation empty
@@ -544,8 +596,15 @@ public class PhoneStateListener {
 
 
     /**
-     * The Over The Air Service Provisioning (OTASP) has changed. Requires
-     * the READ_PHONE_STATE permission.
+     * The Over The Air Service Provisioning (OTASP) has changed on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * Requires the READ_PHONE_STATE permission.
      * @param otaspMode is integer <code>OTASP_UNKNOWN=1<code>
      *   means the value is currently unknown and the system should wait until
      *   <code>OTASP_NEEDED=2<code> or <code>OTASP_NOT_NEEDED=3<code> is received before
@@ -559,15 +618,28 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when a observed cell info has changed,
-     * or new cells have been added or removed.
+     * Callback invoked when a observed cell info has changed or new cells have been added
+     * or removed on the registered subscription.
+     * Note, the registration subId s from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param cellInfo is the list of currently visible cells.
      */
     public void onCellInfoChanged(List<CellInfo> cellInfo) {
     }
 
     /**
-     * Callback invoked when precise device call state changes.
+     * Callback invoked when precise device call state changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      * @param callState {@link PreciseCallState}
      * @hide
      */
@@ -578,7 +650,14 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when call disconnect cause changes.
+     * Callback invoked when call disconnect cause changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param disconnectCause {@link DisconnectCause}.
      * @param preciseDisconnectCause {@link PreciseDisconnectCause}.
      *
@@ -591,7 +670,14 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when Ims call disconnect cause changes.
+     * Callback invoked when Ims call disconnect cause changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param imsReasonInfo {@link ImsReasonInfo} contains details on why IMS call failed.
      *
      * @hide
@@ -603,7 +689,15 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when data connection state changes with precise information.
+     * Callback invoked when data connection state changes with precise information
+     * on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param dataConnectionState {@link PreciseDataConnectionState}
      *
      * @hide
@@ -616,7 +710,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when data connection state changes with precise information.
+     * Callback invoked when data connection real time info changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @hide
      */
@@ -628,7 +728,15 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when there has been a change in the Single Radio Voice Call Continuity
-     * (SRVCC) state for the currently active call.
+     * (SRVCC) state for the currently active call on the registered subscription.
+     *
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @hide
      */
     @SystemApi
@@ -637,7 +745,15 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the SIM voice activation state has changed
+     * Callback invoked when the SIM voice activation state has changed on the registered
+     * subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param state is the current SIM voice activation state
      * @hide
      */
@@ -646,7 +762,15 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the SIM data activation state has changed
+     * Callback invoked when the SIM data activation state has changed on the registered
+     * subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param state is the current SIM data activation state
      * @hide
      */
@@ -654,7 +778,14 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the user mobile data state has changed
+     * Callback invoked when the user mobile data state has changed on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
      * @param enabled indicates whether the current user mobile data state is enabled or disabled.
      */
     public void onUserMobileDataStateChanged(boolean enabled) {
@@ -662,7 +793,14 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the current physical channel configuration has changed
+     * Callback invoked when the current physical channel configuration has changed on the
+     * registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @param configs List of the current {@link PhysicalChannelConfig}s
      * @hide
@@ -673,7 +811,14 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the current emergency number list has changed
+     * Callback invoked when the current emergency number list has changed on the registered
+     * subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
      * @param emergencyNumberList Map including the key as the active subscription ID
      *                           (Note: if there is no active subscription, the key is
@@ -688,8 +833,15 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when OEM hook raw event is received. Requires
-     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * Callback invoked when OEM hook raw event is received on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
      * @param rawData is the byte array of the OEM hook raw data.
      * @hide
      */
@@ -699,8 +851,10 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when phone capability changes. Requires
-     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * Callback invoked when phone capability changes.
+     * Note, this callback triggers regardless of registered subscription.
+     *
+     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
      * @param capability the new phone capability
      * @hide
      */
@@ -709,8 +863,10 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when active data subId changes. Requires
-     * the READ_PHONE_STATE permission.
+     * Callback invoked when active data subId changes.
+     * Note, this callback triggers regardless of registered subscription.
+     *
+     * Requires the READ_PHONE_STATE permission.
      * @param subId current subscription used to setup Cellular Internet data.
      *              For example, it could be the current active opportunistic subscription in use,
      *              or the subscription user selected as default data subscription in DSDS mode.
@@ -720,8 +876,15 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the call attributes changes. Requires
-     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * Callback invoked when the call attributes changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * Requires the READ_PRIVILEGED_PHONE_STATE permission.
      * @param callAttributes the call attributes
      * @hide
      */
@@ -731,7 +894,15 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when modem radio power state changes. Requires
+     * Callback invoked when modem radio power state changes on the registered subscription.
+     * Note, the registration subId comes from {@link TelephonyManager} object which registers
+     * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
+     * If this TelephonyManager object was created with
+     * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
+     * subId. Otherwise, this callback applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * Requires
      * the READ_PRIVILEGED_PHONE_STATE permission.
      * @param state the modem radio power state
      * @hide
@@ -746,6 +917,10 @@ public class PhoneStateListener {
      * app that a network action that could result in connectivity loss
      * has been requested by an app using
      * {@link android.telephony.TelephonyManager#notifyCarrierNetworkChange(boolean)}
+     *
+     * Note, this callback is pinned to the registered subscription and will be invoked when
+     * the notifying carrier app has carrier privilege rule on the registered
+     * subscription. {@link android.telephony.TelephonyManager#hasCarrierPrivileges}
      *
      * @param active Whether the carrier network change is or shortly
      *               will be active. This value is true to indicate
