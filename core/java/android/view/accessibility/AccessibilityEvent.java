@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.BitUtils;
@@ -390,7 +391,10 @@ import java.util.List;
  * @see AccessibilityNodeInfo
  */
 public final class AccessibilityEvent extends AccessibilityRecord implements Parcelable {
-    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "AccessibilityEvent";
+
+    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
+
     /** @hide */
     public static final boolean DEBUG_ORIGIN = false;
 
@@ -1346,8 +1350,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 builder.append("\n");
             }
             if (DEBUG) {
-                builder.append("; SourceWindowId: ").append(mSourceWindowId);
-                builder.append("; SourceNodeId: ").append(mSourceNodeId);
+                builder.append("; SourceWindowId: 0x").append(Long.toHexString(mSourceWindowId));
+                builder.append("; SourceNodeId: 0x").append(Long.toHexString(mSourceNodeId));
             }
             for (int i = 0; i < getRecordCount(); i++) {
                 builder.append("  Record ").append(i).append(":");
