@@ -41,6 +41,7 @@ public final class IpConfigurationParcelableUtil {
         p.mtu = results.mtu;
         p.serverAddress = parcelAddress(results.serverAddress);
         p.vendorInfo = results.vendorInfo;
+        p.serverHostName = results.serverHostName;
         return p;
     }
 
@@ -54,6 +55,7 @@ public final class IpConfigurationParcelableUtil {
         results.mtu = p.mtu;
         results.serverAddress = (Inet4Address) unparcelAddress(p.serverAddress);
         results.vendorInfo = p.vendorInfo;
+        results.serverHostName = p.serverHostName;
         return results;
     }
 
