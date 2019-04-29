@@ -2078,6 +2078,22 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /*package*/ int getHearingAidStreamType() {
+        return getHearingAidStreamType(mMode);
+    }
+
+    private int getHearingAidStreamType(int mode) {
+        switch (mode) {
+            case AudioSystem.MODE_IN_COMMUNICATION:
+            case AudioSystem.MODE_IN_CALL:
+                return AudioSystem.STREAM_VOICE_CALL;
+            case AudioSystem.MODE_NORMAL:
+            default:
+                break;
+        }
+        return AudioSystem.STREAM_MUSIC;
+    }
+
     /**
      * Manage an audio mode change for audio devices that use an "absolute volume" model,
      * i.e. the framework sends the full scale signal, and the actual volume for the use case
@@ -2087,14 +2103,10 @@ public class AudioService extends IAudioService.Stub
         if (oldMode == newMode) {
             return;
         }
-        int streamType = AudioSystem.STREAM_MUSIC;
         switch (newMode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
-                streamType = AudioSystem.STREAM_VOICE_CALL;
-                break;
             case AudioSystem.MODE_NORMAL:
-                streamType = AudioSystem.STREAM_MUSIC;
                 break;
             case AudioSystem.MODE_RINGTONE:
                 // not changing anything for ringtone
@@ -2105,6 +2117,9 @@ public class AudioService extends IAudioService.Stub
                 // don't know what to do in this case, better bail
                 return;
         }
+
+        int streamType = getHearingAidStreamType(newMode);
+
         final int device = AudioSystem.getDevicesForStream(streamType);
         if ((device & mAbsVolumeMultiModeCaseDevices) == 0) {
             return;
