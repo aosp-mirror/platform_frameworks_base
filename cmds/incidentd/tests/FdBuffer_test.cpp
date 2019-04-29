@@ -233,8 +233,8 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
 }
 
 TEST_F(FdBufferTest, ReadInStreamMoreThan4MBWithMove) {
-    const std::string testFile = kTestDataPath + "morethan4MB.txt";
-    size_t fourMB = (size_t)4 * 1024 * 1024;
+    const std::string testFile = kTestDataPath + "morethan24MB.txt";
+    size_t twentyfourMB = (size_t)24 * 1024 * 1024;
     unique_fd fd(open(testFile.c_str(), O_RDONLY | O_CLOEXEC));
     ASSERT_NE(fd.get(), -1);
     int pid = fork();
@@ -254,21 +254,21 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MBWithMove) {
         ASSERT_EQ(NO_ERROR,
                   buffer.readProcessedDataInStream(fd, std::move(p2cPipe.writeFd()),
                                                    std::move(c2pPipe.readFd()), READ_TIMEOUT));
-        EXPECT_EQ(buffer.size(), fourMB);
+        EXPECT_EQ(buffer.size(), twentyfourMB);
         EXPECT_FALSE(buffer.timedOut());
         EXPECT_TRUE(buffer.truncated());
         wait(&pid);
         sp<ProtoReader> reader = buffer.data()->read();
-        reader->move(fourMB);
+        reader->move(twentyfourMB);
 
-        EXPECT_EQ(reader->bytesRead(), fourMB);
+        EXPECT_EQ(reader->bytesRead(), twentyfourMB);
         EXPECT_FALSE(reader->hasNext());
     }
 }
 
 TEST_F(FdBufferTest, ReadInStreamMoreThan4MBWithNext) {
-    const std::string testFile = kTestDataPath + "morethan4MB.txt";
-    size_t fourMB = (size_t)4 * 1024 * 1024;
+    const std::string testFile = kTestDataPath + "morethan24MB.txt";
+    size_t twentyfourMB = (size_t)24 * 1024 * 1024;
     unique_fd fd(open(testFile.c_str(), O_RDONLY | O_CLOEXEC));
     ASSERT_NE(fd.get(), -1);
     int pid = fork();
@@ -288,7 +288,7 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MBWithNext) {
         ASSERT_EQ(NO_ERROR,
                   buffer.readProcessedDataInStream(fd, std::move(p2cPipe.writeFd()),
                                                    std::move(c2pPipe.readFd()), READ_TIMEOUT));
-        EXPECT_EQ(buffer.size(), fourMB);
+        EXPECT_EQ(buffer.size(), twentyfourMB);
         EXPECT_FALSE(buffer.timedOut());
         EXPECT_TRUE(buffer.truncated());
         wait(&pid);

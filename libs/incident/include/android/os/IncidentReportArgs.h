@@ -53,7 +53,7 @@ public:
     void addHeader(const vector<uint8_t>& headerProto);
 
     inline bool all() const { return mAll; }
-    bool containsSection(int section) const;
+    bool containsSection(int section, bool specific) const;
     inline int getPrivacyPolicy() const { return mPrivacyPolicy; }
     inline const set<int>& sections() const { return mSections; }
     inline const string& receiverPkg() const { return mReceiverPkg; }
