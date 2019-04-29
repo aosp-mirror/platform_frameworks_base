@@ -19,8 +19,10 @@ package android.net;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_PORT;
 
+import android.annotation.NonNull;
 import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.util.IpUtils;
+import android.os.Parcelable;
 import android.system.OsConstants;
 
 import java.net.Inet4Address;
@@ -29,8 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /** @hide */
-public final class NattKeepalivePacketData extends KeepalivePacketData {
-
+public final class NattKeepalivePacketData extends KeepalivePacketData implements Parcelable {
     // This should only be constructed via static factory methods, such as
     // nattKeepalivePacket
     private NattKeepalivePacketData(InetAddress srcAddress, int srcPort,
@@ -76,5 +77,19 @@ public final class NattKeepalivePacketData extends KeepalivePacketData {
         buf.putShort(udpChecksumOffset, IpUtils.udpChecksum(buf, 0, IPV4_HEADER_LENGTH));
 
         return new NattKeepalivePacketData(srcAddress, srcPort, dstAddress, dstPort, buf.array());
+    }
+
+     /**
+     * Convert this NattKeepalivePacketData to a NattKeepalivePacketDataParcelable.
+     */
+    @NonNull
+    public NattKeepalivePacketDataParcelable toStableParcelable() {
+        final NattKeepalivePacketDataParcelable parcel = new NattKeepalivePacketDataParcelable();
+
+        parcel.srcAddress = srcAddress.getAddress();
+        parcel.srcPort = srcPort;
+        parcel.dstAddress = dstAddress.getAddress();
+        parcel.dstPort = dstPort;
+        return parcel;
     }
 }
