@@ -179,6 +179,7 @@ public class SparseIntArray implements Cloneable {
     public int keyAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return mKeys[index];
@@ -203,6 +204,7 @@ public class SparseIntArray implements Cloneable {
     public int valueAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return mValues[index];
@@ -219,6 +221,7 @@ public class SparseIntArray implements Cloneable {
     public void setValueAt(int index, int value) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         mValues[index] = value;

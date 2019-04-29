@@ -175,6 +175,7 @@ public class SparseBooleanArray implements Cloneable {
     public int keyAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return mKeys[index];
@@ -199,6 +200,7 @@ public class SparseBooleanArray implements Cloneable {
     public boolean valueAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return mValues[index];
@@ -215,6 +217,7 @@ public class SparseBooleanArray implements Cloneable {
     public void setValueAt(int index, boolean value) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         mValues[index] = value;

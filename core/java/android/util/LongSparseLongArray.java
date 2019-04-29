@@ -179,6 +179,7 @@ public class LongSparseLongArray implements Cloneable {
     public long keyAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return mKeys[index];
@@ -203,6 +204,7 @@ public class LongSparseLongArray implements Cloneable {
     public long valueAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return mValues[index];
