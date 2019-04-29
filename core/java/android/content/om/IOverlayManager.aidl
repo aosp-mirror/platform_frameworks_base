@@ -152,4 +152,9 @@ interface IOverlayManager {
      * @param userId The user for which to change the overlay.
      */
     boolean setLowestPriority(in String packageName, in int userId);
+
+    /**
+     * Returns the list of default overlay packages, or an empty array if there are none.
+     */
+    String[] getDefaultOverlayPackages();
 }
