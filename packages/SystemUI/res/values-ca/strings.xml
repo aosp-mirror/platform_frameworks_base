@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Emet un so i es mostra a l\'àrea de notificacions, la barra d\'estat i la pantalla de bloqueig."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Aquestes notificacions no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquest grup de notificacions no es pot configurar aquí"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"mitjançant <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Aquesta aplicació utilitza la càmera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Aquesta aplicació utilitza el micròfon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla."</string>

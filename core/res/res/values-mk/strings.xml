@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Дозволува апликац. да повика начини за додавање и бришење шаблони на лице за користење."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"користи хардвер за проверка на лице"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Дозволува апликацијата да користи хардвер за лице за проверка"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Проверка на лик"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Повторно регистрирајте го ликот"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"За да се подобри препознавањето, повторно регистрирајте го ликот"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Не се сними прецизна слика. Обидете се повторно."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Премногу светла. Пробајте со послабо осветлување."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Премногу темна. Пробајте со посилно осветлување."</string>

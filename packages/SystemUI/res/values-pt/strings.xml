@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"Emite sons e é exibida na aba suspensa, barra de status e tela de bloqueio."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Não é possível modificar essas notificações."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Não é possível configurar esse grupo de notificações aqui"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"pelo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Este app está usando a câmera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Este app está usando o microfone."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Este app está sobreposto a outros apps na sua tela."</string>

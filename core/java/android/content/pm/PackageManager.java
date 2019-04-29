@@ -3143,6 +3143,14 @@ public abstract class PackageManager {
     @SystemApi
     public static final int FLAG_PERMISSION_APPLY_RESTRICTION =  1 << 14;
 
+    /**
+     * Permission flag: The permission is granted because the application holds a role.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int FLAG_PERMISSION_GRANTED_BY_ROLE =  1 << 15;
 
     /**
      * Permission flags: Bitwise or of all permission flags allowing an
@@ -3183,7 +3191,8 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT
             | FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
             | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
-            | FLAG_PERMISSION_APPLY_RESTRICTION;
+            | FLAG_PERMISSION_APPLY_RESTRICTION
+            | FLAG_PERMISSION_GRANTED_BY_ROLE;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3947,7 +3956,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT,
             FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT,
             FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT,
-            FLAG_PERMISSION_APPLY_RESTRICTION
+            FLAG_PERMISSION_APPLY_RESTRICTION,
+            FLAG_PERMISSION_GRANTED_BY_ROLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -7030,7 +7040,8 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT: return "RESTRICTION_INSTALLER_EXEMPT";
             case FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT: return "RESTRICTION_SYSTEM_EXEMPT";
             case FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT: return "RESTRICTION_UPGRADE_EXEMPT";
-            case FLAG_PERMISSION_APPLY_RESTRICTION: return "FLAG_PERMISSION_APPLY_RESTRICTION";
+            case FLAG_PERMISSION_APPLY_RESTRICTION: return "APPLY_RESTRICTION";
+            case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
             default: return Integer.toString(flag);
         }
     }

@@ -271,8 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS కోసం శోధిస్తోంది"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"స్థానం GPS ద్వారా సెట్ చేయబడింది"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"స్థాన అభ్యర్థనలు సక్రియంగా ఉన్నాయి"</string>
-    <!-- no translation found for accessibility_sensors_off_active (157126524598525432) -->
-    <skip />
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"సెన్సార్‌లు ఆఫ్ యాక్టివ్‌లో ఉంది"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -637,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ఎప్పటికప్పుడు హెచ్చరించు"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"నోటిఫికేషన్‌లను ఆఫ్ చేయి"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"సాధారణ"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"ప్రాధాన్యం గలవి"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్‌లో ప్రదర్శింపబడుతుంది."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్ &amp; స్థితి పట్టీ‌లో ప్రదర్శింపబడుంది."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్ &amp; లాక్ స్క్రీన్‌లో ప్రదర్శింపబడుతుంది."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్, స్థితి పట్టీ &amp; లాక్ స్క్రీన్‌లో ప్రదర్శింపబడుతుంది."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"శబ్దం చేస్తుంది, కిందకు-లాగే షేడ్, స్థితి పట్టీ &amp; లాక్ స్క్రీన్‌ లో.ప్రదర్శింపబడుతుంది."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>

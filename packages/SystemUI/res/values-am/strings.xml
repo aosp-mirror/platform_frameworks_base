@@ -646,7 +646,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"በወደ ታች ተጎታች ዝርዝር ጥላ እና በማያ ገጽ መቆለፊያ ውስጥ ድምፅን እና ማሳያዎችን ፍጠር።"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"እነዚህ ማሳወቂያዎች ሊሻሻሉ አይችሉም።"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"የማሳወቂያዎች ይህ ቡድን እዚህ ላይ ሊዋቀር አይችልም"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"በ<xliff:g id="APP_NAME">%1$s</xliff:g> በኩል"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ይህ መተግበሪያ ካሜራውን እየተጠቀመ ነው።"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ይህ መተግበሪያ ማይክሮፎኑን እየተጠቀመ ነው።"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ይህ መተግበሪያ በማያ ገጽዎ ላይ ባሉ ሌሎች መተግበሪያዎች ላይ እያሳየ ነው።"</string>

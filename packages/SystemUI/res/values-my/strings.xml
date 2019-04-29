@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"အသံပြုပြီး ဆွဲချသည့်အရိပ်၊ အခြေအနေပြနေရာနှင့် လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပြသပါ။"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ဤအကြောင်းကြားချက်များကို ပြုပြင်၍ မရပါ။"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ဤအကြောင်းကြားချက်အုပ်စုကို ဤနေရာတွင် စီစဉ်သတ်မှတ်၍ မရပါ"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> မှတစ်ဆင့်"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုနေသည်။"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုနေသည်။"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ဤအက်ပ်က ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>

@@ -645,7 +645,8 @@
     <string name="notification_channel_summary_default" msgid="619096010741301745">"通知音が鳴り、プルダウン シェード、ステータスバー、ロック画面に表示されます。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"このグループの通知はここでは設定できません"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> 経由"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"このアプリはカメラを使用しています。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"このアプリはマイクを使用しています。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"このアプリは画面上で他のアプリの上に重ねて表示されます。"</string>

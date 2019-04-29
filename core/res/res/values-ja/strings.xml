@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"使用する顔テンプレートの追加や削除を行うメソッドの呼び出しをアプリに許可します。"</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"顔認証ハードウェアの使用"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"顔認証ハードウェアを認証に使用することをアプリに許可します"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"顔認証"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"顔の再登録"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"認識を改善するには、顔を再登録してください"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"顔を認識できませんでした。もう一度お試しください。"</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"明るすぎます。もっと暗い場所でお試しください。"</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"暗すぎます。もっと明るい場所でお試しください。"</string>
@@ -1803,7 +1800,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"バッテリー セーバーを有効にすると、電池を長持ちさせるようバックグラウンド アクティビティ、一部の視覚効果など、電力消費量の多い機能が制限されます。"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"バッテリー セーバーを有効にすると、電池を長持ちさせるようバックグラウンド アクティビティ、一部の視覚効果など、電力消費量の多い機能が制限されます。"</string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"バッテリー セーバーを有効にすると、電池を長持ちさせるため、バックグラウンド アクティビティや一部の視覚効果など、電力消費量の多い機能が制限されます。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ON にする"</string>

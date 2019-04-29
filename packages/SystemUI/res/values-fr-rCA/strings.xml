@@ -636,24 +636,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continuer d\'envoyer des alertes"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Désactiver les notifications"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuer à afficher les notifications de cette application?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"Discrètes"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Priorisées"</string>
+    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Toujours silencieux. S\'affiche dans le volet déroulant."</string>
+    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Toujours silencieux. S\'affiche dans le volet déroulant et dans la barre d\'état."</string>
+    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Toujours silencieux. S\'affiche dans le volet déroulant et sur l\'écran de verrouillage."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Toujours silencieux. S\'affiche dans le volet déroulant, dans la barre d\'état et sur l\'écran de verrouillage."</string>
+    <string name="notification_channel_summary_default" msgid="619096010741301745">"Émet un son et s\'affiche dans le volet déroulant, dans la barre d\'état et sur l\'écran de verrouillage."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ces notifications ne peuvent pas être modifiées"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ce groupe de notifications ne peut pas être configuré ici"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Cette application utilise l\'appareil photo."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Cette application utilise le microphone."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Cette application superpose du contenu par-dessus d\'autres applications à l\'écran."</string>
