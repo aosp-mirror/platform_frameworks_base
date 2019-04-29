@@ -1553,7 +1553,7 @@ public class ApfTest {
         parcel.seq = seqNum;
         parcel.ack = ackNum;
 
-        apfFilter.addKeepalivePacketFilter(slot1, parcel);
+        apfFilter.addTcpKeepalivePacketFilter(slot1, parcel);
         program = cb.getApfProgram();
 
         // Verify IPv4 keepalive ack packet is dropped
@@ -1592,7 +1592,7 @@ public class ApfTest {
             ipv6Parcel.seq = seqNum;
             ipv6Parcel.ack = ackNum;
 
-            apfFilter.addKeepalivePacketFilter(slot1, ipv6Parcel);
+            apfFilter.addTcpKeepalivePacketFilter(slot1, ipv6Parcel);
             program = cb.getApfProgram();
 
             // Verify IPv6 keepalive ack packet is dropped
@@ -1614,8 +1614,8 @@ public class ApfTest {
             apfFilter.removeKeepalivePacketFilter(slot1);
 
             // Verify multiple filters
-            apfFilter.addKeepalivePacketFilter(slot1, parcel);
-            apfFilter.addKeepalivePacketFilter(slot2, ipv6Parcel);
+            apfFilter.addTcpKeepalivePacketFilter(slot1, parcel);
+            apfFilter.addTcpKeepalivePacketFilter(slot2, ipv6Parcel);
             program = cb.getApfProgram();
 
             // Verify IPv4 keepalive ack packet is dropped

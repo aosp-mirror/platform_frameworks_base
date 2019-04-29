@@ -567,6 +567,16 @@ public class ConnectivityServiceTest {
                 protected void preventAutomaticReconnect() {
                     mPreventReconnectReceived.open();
                 }
+
+                @Override
+                protected void addKeepalivePacketFilter(Message msg) {
+                    Log.i(TAG, "Add keepalive packet filter.");
+                }
+
+                @Override
+                protected void removeKeepalivePacketFilter(Message msg) {
+                    Log.i(TAG, "Remove keepalive packet filter.");
+                }
             };
 
             assertEquals(mNetworkAgent.netId, nmNetworkCaptor.getValue().netId);
