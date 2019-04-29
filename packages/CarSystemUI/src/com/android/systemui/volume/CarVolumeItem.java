@@ -29,8 +29,6 @@ import com.android.systemui.R;
 /** Holds all related data to represent a volume group. */
 public class CarVolumeItem {
 
-    private boolean mIsDirty;
-
     private Drawable mPrimaryIcon;
     private Drawable mSupplementalIcon;
     private View.OnClickListener mSupplementalIconOnClickListener;
@@ -40,50 +38,38 @@ public class CarVolumeItem {
     private int mMax;
     private int mProgress;
     private SeekBar.OnSeekBarChangeListener mOnSeekBarChangeListener;
-
-    public CarVolumeItem() {
-        mIsDirty = true;
-    }
-
+    
     /**
      * Called when {@link CarVolumeItem} is bound to its ViewHolder.
      */
     void bind(CarVolumeItemViewHolder viewHolder) {
-        if (mIsDirty) {
             viewHolder.bind(/* carVolumeItem= */ this);
-            mIsDirty = false;
-        }
     }
 
     /** Sets progress of seekbar. */
     public void setProgress(int progress) {
         mProgress = progress;
-        mIsDirty = true;
     }
 
     /** Sets max value of seekbar. */
     public void setMax(int max) {
         mMax = max;
-        mIsDirty = true;
     }
 
     /** Sets {@link SeekBar.OnSeekBarChangeListener}. */
     public void setOnSeekBarChangeListener(SeekBar.OnSeekBarChangeListener listener) {
         mOnSeekBarChangeListener = listener;
-        mIsDirty = true;
     }
 
     /** Sets the primary icon. */
     public void setPrimaryIcon(Drawable drawable) {
         mPrimaryIcon = drawable;
-        mIsDirty = true;
     }
 
     /** Sets the supplemental icon and the visibility of the supplemental icon divider. */
     public void setSupplementalIcon(Drawable drawable, boolean showSupplementalIconDivider) {
         mSupplementalIcon = drawable;
         mShowSupplementalIconDivider = showSupplementalIconDivider;
-        mIsDirty = true;
     }
 
     /**
@@ -103,7 +89,6 @@ public class CarVolumeItem {
     /** Sets {@code OnClickListener} for the supplemental icon. */
     public void setSupplementalIconListener(View.OnClickListener listener) {
         mSupplementalIconOnClickListener = listener;
-        mIsDirty = true;
     }
 
     /** Defines the view holder which shows the information held by {@link CarVolumeItem}. */
