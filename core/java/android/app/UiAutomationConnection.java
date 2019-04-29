@@ -128,17 +128,28 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
         final long identity = Binder.clearCallingIdentity();
         try {
-            IWindowManager manager = IWindowManager.Stub.asInterface(
-                    ServiceManager.getService(Context.WINDOW_SERVICE));
-            try {
-                return manager.injectInputAfterTransactionsApplied(event, mode);
-            } catch (RemoteException e) {
-            }
-            return false;
+            return mWindowManager.injectInputAfterTransactionsApplied(event, mode);
+        } catch (RemoteException e) {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return false;
     }
+
+    @Override
+    public void syncInputTransactions() {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+
+        try {
+            mWindowManager.syncInputTransactions();
+        } catch (RemoteException e) {
+        }
+    }
+
 
     @Override
     public boolean setRotation(int rotation) {
