@@ -114,6 +114,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ImageUtils;
+import com.android.internal.widget.ResolverDrawerLayout;
 
 import com.google.android.collect.Lists;
 
@@ -142,6 +143,8 @@ public class ChooserActivity extends ResolverActivity {
      */
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
+
+    private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 
     private static final boolean DEBUG = false;
 
@@ -502,6 +505,21 @@ public class ChooserActivity extends ResolverActivity {
                     chooserHeader.setElevation(defaultElevation);
                 }
             });
+
+            mResolverDrawerLayout.setOnCollapsedChangedListener(
+                    new ResolverDrawerLayout.OnCollapsedChangedListener() {
+
+                        // Only consider one expansion per activity creation
+                        private boolean mWrittenOnce = false;
+
+                        @Override
+                        public void onCollapsedChanged(boolean isCollapsed) {
+                            if (!isCollapsed && !mWrittenOnce) {
+                                incrementNumSheetExpansions();
+                                mWrittenOnce = true;
+                            }
+                        }
+                    });
         }
 
         if (DEBUG) {
@@ -879,6 +897,15 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         return CONTENT_PREVIEW_TEXT;
+    }
+
+    private int getNumSheetExpansions() {
+        return getPreferences(Context.MODE_PRIVATE).getInt(PREF_NUM_SHEET_EXPANSIONS, 0);
+    }
+
+    private void incrementNumSheetExpansions() {
+        getPreferences(Context.MODE_PRIVATE).edit().putInt(PREF_NUM_SHEET_EXPANSIONS,
+                getNumSheetExpansions() + 1).apply();
     }
 
     @Override
@@ -2491,6 +2518,7 @@ public class ChooserActivity extends ResolverActivity {
 
         private DirectShareViewHolder mDirectShareViewHolder;
         private int mChooserTargetWidth = 0;
+        private boolean mShowAzLabelIfPoss;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
@@ -2501,9 +2529,13 @@ public class ChooserActivity extends ResolverActivity {
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
 
+        private static final int NUM_EXPANSIONS_TO_HIDE_AZ_LABEL = 20;
+
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
+
+            mShowAzLabelIfPoss = getNumSheetExpansions() < NUM_EXPANSIONS_TO_HIDE_AZ_LABEL;
 
             wrappedAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
@@ -2597,7 +2629,7 @@ public class ChooserActivity extends ResolverActivity {
 
         public int getAzLabelRowCount() {
             // Only show a label if the a-z list is showing
-            return mChooserListAdapter.getAlphaTargetCount() > 0 ? 1 : 0;
+            return (mShowAzLabelIfPoss && mChooserListAdapter.getAlphaTargetCount() > 0) ? 1 : 0;
         }
 
         @Override
