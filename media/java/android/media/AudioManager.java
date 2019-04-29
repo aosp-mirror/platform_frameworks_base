@@ -3766,9 +3766,24 @@ public class AudioManager {
      * with frameworks/av/include/media/AudioPolicy.h
      */
     /** @hide */
-    public final static int RECORD_CONFIG_EVENT_START = 1;
+    public static final int RECORD_CONFIG_EVENT_NONE = -1;
     /** @hide */
-    public final static int RECORD_CONFIG_EVENT_STOP = 0;
+    public static final int RECORD_CONFIG_EVENT_START = 0;
+    /** @hide */
+    public static final int RECORD_CONFIG_EVENT_STOP = 1;
+    /** @hide */
+    public static final int RECORD_CONFIG_EVENT_UPDATE = 2;
+    /** @hide */
+    public static final int RECORD_CONFIG_EVENT_DEATH = 3;
+    /**
+     * keep in sync with frameworks/native/include/audiomanager/AudioManager.h
+     */
+    /** @hide */
+    public static final int RECORD_RIID_INVALID = -1;
+    /** @hide */
+    public static final int RECORDER_STATE_STARTED = 0;
+    /** @hide */
+    public static final int RECORDER_STATE_STOPPED = 1;
 
     /**
      * All operations on this list are sync'd on mRecordCallbackLock.

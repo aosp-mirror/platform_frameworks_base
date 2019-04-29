@@ -26,6 +26,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
+#include <audiomanager/AudioManager.h>
 #include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
 #include <media/MicrophoneInfo.h>
@@ -353,7 +354,15 @@ android_media_AudioSystem_newAudioSessionId(JNIEnv *env, jobject thiz)
 static jint
 android_media_AudioSystem_newAudioPlayerId(JNIEnv *env, jobject thiz)
 {
-    return AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_PLAYER);
+    int id = AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_CLIENT);
+    return id != AUDIO_UNIQUE_ID_ALLOCATE ? id : PLAYER_PIID_INVALID;
+}
+
+static jint
+android_media_AudioSystem_newAudioRecorderId(JNIEnv *env, jobject thiz)
+{
+    int id = AudioSystem::newAudioUniqueId(AUDIO_UNIQUE_ID_USE_CLIENT);
+    return id != AUDIO_UNIQUE_ID_ALLOCATE ? id : RECORD_RIID_INVALID;
 }
 
 static jint
@@ -470,9 +479,10 @@ android_media_AudioSystem_recording_callback(int event,
 
     env->CallStaticVoidMethod(clazz,
                               gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative,
-                              event, (jint) clientInfo->uid, clientInfo->session,
-                              clientInfo->source, clientInfo->port_id, clientInfo->silenced,
-                              recParamArray, jClientEffects, jEffects, source);
+                              event, (jint) clientInfo->riid, (jint) clientInfo->uid,
+                              clientInfo->session, clientInfo->source, clientInfo->port_id,
+                              clientInfo->silenced, recParamArray, jClientEffects, jEffects,
+                              source);
     env->DeleteLocalRef(clazz);
     env->DeleteLocalRef(recParamArray);
     env->DeleteLocalRef(jClientEffects);
@@ -2246,6 +2256,7 @@ static const JNINativeMethod gMethods[] = {
     {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
     {"newAudioSessionId",   "()I",      (void *)android_media_AudioSystem_newAudioSessionId},
     {"newAudioPlayerId",    "()I",      (void *)android_media_AudioSystem_newAudioPlayerId},
+    {"newAudioRecorderId",  "()I",      (void *)android_media_AudioSystem_newAudioRecorderId},
     {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;I)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
     {"handleDeviceConfigChange", "(ILjava/lang/String;Ljava/lang/String;I)I", (void *)android_media_AudioSystem_handleDeviceConfigChange},
@@ -2440,7 +2451,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
                     "dynamicPolicyCallbackFromNative", "(ILjava/lang/String;I)V");
     gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative =
             GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
-                    "recordingCallbackFromNative", "(IIIIIZ[I[Landroid/media/audiofx/AudioEffect$Descriptor;[Landroid/media/audiofx/AudioEffect$Descriptor;I)V");
+                    "recordingCallbackFromNative", "(IIIIIIZ[I[Landroid/media/audiofx/AudioEffect$Descriptor;[Landroid/media/audiofx/AudioEffect$Descriptor;I)V");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);
