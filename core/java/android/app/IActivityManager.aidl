@@ -592,4 +592,9 @@ interface IActivityManager {
      * unlockProgressListener can be null if monitoring progress is not necessary.
      */
     boolean startUserInForegroundWithListener(int userid, IProgressListener unlockProgressListener);
+
+    /**
+     *  Force full screen for devices with cutout
+     */
+    boolean shouldForceCutoutFullscreen(in String packageName);
 }
