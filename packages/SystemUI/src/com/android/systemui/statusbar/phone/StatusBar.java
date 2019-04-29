@@ -1166,18 +1166,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onThemeChanged() {
-        // Recreate Indication controller because internal references changed
-        if (mKeyguardIndicationController != null) {
-            mKeyguardIndicationController.destroy();
-        }
-        mKeyguardIndicationController =
-                SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
-                        mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
-                        mStatusBarWindow.findViewById(R.id.lock_icon));
-        mNotificationPanel.setKeyguardIndicationController(mKeyguardIndicationController);
-        mKeyguardIndicationController
-                .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
-        mKeyguardIndicationController.setVisible(mState == StatusBarState.KEYGUARD);
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.onThemeChanged();
         }
