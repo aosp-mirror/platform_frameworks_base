@@ -75,12 +75,11 @@ public class QSCarrier extends LinearLayout {
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
-            mMobileRoaming.setImageTintList(ColorStateList.valueOf(
-                    mDualToneHandler.getSingleColor(mColorForegroundIntensity)));
-            SignalDrawable d = new SignalDrawable(mContext);
-            d.setColors(mDualToneHandler.getBackgroundColor(mColorForegroundIntensity),
-                    mDualToneHandler.getFillColor(mColorForegroundIntensity));
-            mMobileSignal.setImageDrawable(d);
+            ColorStateList colorStateList = ColorStateList.valueOf(
+                    mDualToneHandler.getSingleColor(mColorForegroundIntensity));
+            mMobileRoaming.setImageTintList(colorStateList);
+            mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
+            mMobileSignal.setImageTintList(colorStateList);
             mMobileSignal.setImageLevel(state.mobileSignalIconId);
 
             StringBuilder contentDescription = new StringBuilder();
