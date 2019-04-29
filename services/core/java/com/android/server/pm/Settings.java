@@ -2575,10 +2575,6 @@ public final class Settings {
             writeKernelMappingLPr(ps);
         }
 
-        for (final SharedUserSetting sus : mSharedUsers.values()) {
-            knownSet.remove(sus.getStorageSandboxName());
-        }
-
         // Remove any unclaimed mappings
         for (int i = 0; i < knownSet.size(); i++) {
             final String name = knownSet.valueAt(i);
@@ -2589,20 +2585,10 @@ public final class Settings {
         }
     }
 
-    void writeKernelMappingLPr(SharedUserSetting sus) {
-        if (mKernelMappingFilename == null || sus == null || sus.name == null) return;
-
-        writeKernelMappingLPr(sus.getStorageSandboxName(),
-                sus.userId, sus.getNotInstalledUserIds());
-    }
-
     void writeKernelMappingLPr(PackageSetting ps) {
         if (mKernelMappingFilename == null || ps == null || ps.name == null) return;
 
         writeKernelMappingLPr(ps.name, ps.appId, ps.getNotInstalledUserIds());
-        if (ps.sharedUser != null) {
-            writeKernelMappingLPr(ps.sharedUser);
-        }
     }
 
     void writeKernelMappingLPr(String name, int appId, int[] excludedUserIds) {
