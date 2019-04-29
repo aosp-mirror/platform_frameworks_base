@@ -1323,14 +1323,17 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
     }
 
-    /** Returns true if the focus activity was adjusted to the home stack top activity. */
-    boolean moveHomeActivityToTop(String reason) {
+    /**
+     * Moves the focusable home activity to top. If there is no such activity, the home stack will
+     * still move to top.
+     */
+    void moveHomeActivityToTop(String reason) {
         final ActivityRecord top = getHomeActivity();
         if (top == null) {
-            return false;
+            moveHomeStackToFront(reason);
+            return;
         }
         top.moveFocusableActivityToTop(reason);
-        return true;
     }
 
     @Nullable
