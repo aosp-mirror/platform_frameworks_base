@@ -49,7 +49,6 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
@@ -60,7 +59,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
@@ -98,7 +96,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.os.storage.DiskInfo;
 import android.os.storage.IObbActionListener;
 import android.os.storage.IStorageEventListener;
@@ -117,13 +114,11 @@ import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -179,8 +174,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -350,9 +343,6 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
 
-    @GuardedBy("mPackagesLock")
-    private final SparseArray<ArraySet<String>> mPackages = new SparseArray<>();
-
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
     /** Holding lock for AppFuse business */
@@ -469,14 +459,11 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile IVold mVold;
     private volatile IStoraged mStoraged;
 
-    private volatile boolean mSystemReady = false;
     private volatile boolean mBootCompleted = false;
     private volatile boolean mDaemonConnected = false;
     private volatile boolean mSecureKeyguardShowing = true;
 
     private PackageManagerInternal mPmInternal;
-    private UserManagerInternal mUmInternal;
-    private ActivityManagerInternal mAmInternal;
 
     private IPackageManager mIPackageManager;
     private IAppOpsService mIAppOpsService;
@@ -965,7 +952,7 @@ class StorageManagerService extends IStorageManager.Stub
                     mVold.onUserAdded(user.id, user.serialNumber);
                 }
                 for (int userId : systemUnlockedUsers) {
-                    sendUserStartedCallback(userId);
+                    mVold.onUserStarted(userId);
                     mStoraged.onUserStarted(userId);
                 }
                 mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
@@ -983,7 +970,7 @@ class StorageManagerService extends IStorageManager.Stub
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
         try {
-            sendUserStartedCallback(userId);
+            mVold.onUserStarted(userId);
             mStoraged.onUserStarted(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
@@ -1016,53 +1003,12 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.wtf(TAG, e);
         }
 
-        synchronized (mPackagesLock) {
-            mPackages.delete(userId);
-        }
-
         synchronized (mLock) {
             mSystemUnlockedUsers = ArrayUtils.removeInt(mSystemUnlockedUsers, userId);
         }
     }
 
-    private void sendUserStartedCallback(int userId) throws Exception {
-        if (!ENABLE_ISOLATED_STORAGE) {
-            mVold.onUserStarted(userId, EmptyArray.STRING, EmptyArray.INT, EmptyArray.STRING);
-        }
-
-        final String[] packages;
-        final int[] appIds;
-        final String[] sandboxIds;
-        final SparseArray<String> sharedUserIds = mPmInternal.getAppsWithSharedUserIds();
-        final List<ApplicationInfo> appInfos =
-                mContext.getPackageManager().getInstalledApplicationsAsUser(
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
-        synchronized (mPackagesLock) {
-            final ArraySet<String> userPackages = new ArraySet<>();
-            final ArrayMap<String, Integer> packageToAppId = new ArrayMap<>();
-            for (int i = appInfos.size() - 1; i >= 0; --i) {
-                final ApplicationInfo appInfo = appInfos.get(i);
-                if (appInfo.isInstantApp()) {
-                    continue;
-                }
-                userPackages.add(appInfo.packageName);
-                packageToAppId.put(appInfo.packageName, UserHandle.getAppId(appInfo.uid));
-            }
-            mPackages.put(userId, userPackages);
-
-            packages = new String[userPackages.size()];
-            appIds = new int[userPackages.size()];
-            sandboxIds = new String[userPackages.size()];
-            for (int i = userPackages.size() - 1; i >= 0; --i) {
-                packages[i] = userPackages.valueAt(i);
-                appIds[i] = packageToAppId.get(packages[i]);
-                sandboxIds[i] = getSandboxId(packages[i], sharedUserIds.get(appIds[i]));
-            }
-        }
-        mVold.onUserStarted(userId, packages, appIds, sandboxIds);
-    }
-
-     private boolean supportsBlockCheckpoint() throws RemoteException {
+    private boolean supportsBlockCheckpoint() throws RemoteException {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         return mVold.supportsBlockCheckpoint();
     }
@@ -1596,11 +1542,6 @@ class StorageManagerService extends IStorageManager.Stub
         connect();
     }
 
-    private static String getSandboxId(String packageName, String sharedUserId) {
-        return sharedUserId == null
-                ? packageName : StorageManager.SHARED_SANDBOX_PREFIX + sharedUserId;
-    }
-
     private void connect() {
         IBinder binder = ServiceManager.getService("storaged");
         if (binder != null) {
@@ -1663,8 +1604,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void servicesReady() {
         mPmInternal = LocalServices.getService(PackageManagerInternal.class);
-        mUmInternal = LocalServices.getService(UserManagerInternal.class);
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mIPackageManager = IPackageManager.Stub.asInterface(
                 ServiceManager.getService("package"));
@@ -1694,7 +1633,6 @@ class StorageManagerService extends IStorageManager.Stub
         LocalServices.getService(ActivityTaskManagerInternal.class)
                 .registerScreenObserver(this);
 
-        mSystemReady = true;
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
 
@@ -2994,7 +2932,6 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void mkdirs(String callingPkg, String appPath) {
-        final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final int userId = UserHandle.getUserId(callingUid);
         final UserEnvironment userEnv = new UserEnvironment(userId);
@@ -3033,13 +2970,11 @@ class StorageManagerService extends IStorageManager.Stub
                 appPath = appPath + "/";
             }
 
-            final String systemPath = translateAppToSystem(appPath, callingPid, callingUid);
-
             try {
-                mVold.mkdirs(systemPath);
+                mVold.mkdirs(appPath);
                 return;
             } catch (Exception e) {
-                throw new IllegalStateException("Failed to prepare " + systemPath + ": " + e);
+                throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
             }
         }
 
@@ -3306,75 +3241,6 @@ class StorageManagerService extends IStorageManager.Stub
             remountUidExternalStorage(uid, getMountMode(uid, packageName));
         }
     };
-
-    private static final Pattern PATTERN_TRANSLATE = Pattern.compile(
-            "(?i)^(/storage/[^/]+/(?:[0-9]+/)?)(.*)");
-
-    @Override
-    public String translateAppToSystem(String path, int pid, int uid) {
-        return translateInternal(path, pid, uid, true);
-    }
-
-    @Override
-    public String translateSystemToApp(String path, int pid, int uid) {
-        return translateInternal(path, pid, uid, false);
-    }
-
-    private String translateInternal(String path, int pid, int uid, boolean toSystem) {
-        if (true) return path;
-
-        if (path.contains("/../")) {
-            throw new SecurityException("Shady looking path " + path);
-        }
-
-        final int mountMode = mAmInternal.getStorageMountMode(pid, uid);
-        if (mountMode == Zygote.MOUNT_EXTERNAL_FULL
-                || mountMode == Zygote.MOUNT_EXTERNAL_LEGACY) {
-            return path;
-        }
-
-        final Matcher m = PATTERN_TRANSLATE.matcher(path);
-        if (m.matches()) {
-            final String device = m.group(1);
-            final String devicePath = m.group(2);
-
-            if (mountMode == Zygote.MOUNT_EXTERNAL_INSTALLER
-                    && devicePath.startsWith("Android/obb/")) {
-                return path;
-            }
-
-            // Does path belong to any packages belonging to this UID? If so,
-            // they get to go straight through to legacy paths.
-            final String[] pkgs = mContext.getPackageManager().getPackagesForUid(uid);
-            for (String pkg : pkgs) {
-                if (devicePath.startsWith("Android/data/" + pkg + "/") ||
-                        devicePath.startsWith("Android/media/" + pkg + "/") ||
-                        devicePath.startsWith("Android/obb/" + pkg + "/")) {
-                    return path;
-                }
-            }
-
-            final String sharedUserId = mPmInternal.getSharedUserIdForPackage(pkgs[0]);
-            final String sandboxId = getSandboxId(pkgs[0], sharedUserId);
-
-            if (toSystem) {
-                // Everything else goes into sandbox.
-                return device + "Android/sandbox/" + sandboxId + "/" + devicePath;
-            } else {
-                // Does path belong to this sandbox? If so, leave sandbox.
-                final String sandboxPrefix = "Android/sandbox/" + sandboxId + "/";
-                if (devicePath.startsWith(sandboxPrefix)) {
-                    return device + devicePath.substring(sandboxPrefix.length());
-                }
-
-                // Path isn't valid inside sandbox!
-                throw new SecurityException(
-                        "Path " + path + " isn't valid inside sandbox " + sandboxId);
-            }
-        }
-
-        return path;
-    }
 
     private void addObbStateLocked(ObbState obbState) throws RemoteException {
         final IBinder binder = obbState.getBinder();
@@ -4047,56 +3913,6 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
             return true;
-        }
-
-        @Override
-        public void prepareSandboxForApp(String packageName, int appId, String sharedUserId,
-                int userId) {
-            final String sandboxId;
-            synchronized (mPackagesLock) {
-                final ArraySet<String> userPackages = mPackages.get(userId);
-                // If userPackages is empty, it means the user is not started yet, so no need to
-                // do anything now.
-                if (userPackages == null || userPackages.contains(packageName)) {
-                    return;
-                }
-                userPackages.add(packageName);
-                sandboxId = StorageManagerService.this.getSandboxId(packageName, sharedUserId);
-            }
-
-            try {
-                mVold.prepareSandboxForApp(packageName, appId, sandboxId, userId);
-            } catch (Exception e) {
-                Slog.wtf(TAG, e);
-            }
-        }
-
-        @Override
-        public void destroySandboxForApp(String packageName, String sharedUserId, int userId) {
-            if (!ENABLE_ISOLATED_STORAGE) {
-                return;
-            }
-            final String sandboxId = StorageManagerService.this.getSandboxId(
-                    packageName, sharedUserId);
-            synchronized (mPackagesLock) {
-                final ArraySet<String> userPackages = mPackages.get(userId);
-                // If the userPackages is null, it means the user is not started but we still
-                // need to delete the sandbox data though.
-                if (userPackages != null) {
-                    userPackages.remove(packageName);
-                }
-            }
-            try {
-                mVold.destroySandboxForApp(packageName, sandboxId, userId);
-            } catch (Exception e) {
-                Slog.wtf(TAG, e);
-            }
-        }
-
-        @Override
-        public String getSandboxId(String packageName) {
-            return StorageManagerService.this.getSandboxId(packageName,
-                    mPmInternal.getSharedUserIdForPackage(packageName));
         }
     }
 }
