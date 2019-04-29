@@ -23,8 +23,9 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaRoute2Info;
-import android.media.MediaRouter;
+import android.media.MediaRouter2;
 import android.media.MediaRouter2Manager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -49,15 +50,19 @@ public class MediaRouterManagerTest {
     private static final int TARGET_UID = 109992;
 
     // Must be the same as SampleMediaRoute2ProviderService
-    public static final String ROUTE_ID1 = "route_id";
-    public static final String ROUTE_NAME1 = "route_name";
+    public static final String ROUTE_ID1 = "route_id1";
+    public static final String ROUTE_NAME1 = "Sample Route 1";
+    public static final String ROUTE_ID2 = "route_id2";
+    public static final String ROUTE_NAME2 = "Sample Route 2";
+    public static final String ACTION_REMOVE_ROUTE =
+            "com.android.mediarouteprovider.action_remove_route";
 
     private static final int AWAIT_MS = 1000;
     private static final int TIMEOUT_MS = 5000;
 
     private Context mContext;
     private MediaRouter2Manager mManager;
-    private MediaRouter mRouter;
+    private MediaRouter2 mRouter;
     private Executor mExecutor;
 
     private static final List<String> TEST_CONTROL_CATEGORIES = new ArrayList();
@@ -72,15 +77,15 @@ public class MediaRouterManagerTest {
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
         mManager = MediaRouter2Manager.getInstance(mContext);
-        mRouter = (MediaRouter) mContext.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mRouter = MediaRouter2.getInstance(mContext);
         mExecutor = new ThreadPoolExecutor(
             1, 20, 3, TimeUnit.SECONDS,
             new SynchronousQueue<Runnable>());
     }
 
-    //TODO: onRouteChanged, onRouteRemoved must be tested
+    //TODO: Test onRouteChanged when it's properly implemented.
     @Test
-    public void testRouteAddedOnce() {
+    public void testRouteAdded() {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
 
         mManager.addCallback(mExecutor, mockCallback);
@@ -92,18 +97,49 @@ public class MediaRouterManagerTest {
     }
 
     @Test
+    public void testRouteRemoved() {
+        MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
+        mManager.addCallback(mExecutor, mockCallback);
+
+        MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
+
+        //TODO: Figure out a more proper way to test.
+        // (Control requests shouldn't be used in this way.)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                (Runnable) () -> {
+                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
+                    mRouter.sendControlRequest(
+                            new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2).build(),
+                            new Intent(ACTION_REMOVE_ROUTE));
+                    mRouter.removeCallback(mockRouterCallback);
+                }
+        );
+        verify(mockCallback, timeout(TIMEOUT_MS)).onRouteRemoved(argThat(
+                (MediaRoute2Info info) ->
+                        info.getId().equals(ROUTE_ID2) && info.getName().equals(ROUTE_NAME2)));
+        mManager.removeCallback(mockCallback);
+    }
+
+    @Test
     public void controlCategoryTest() throws Exception {
         final int uid = android.os.Process.myUid();
 
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
         mManager.addCallback(mExecutor, mockCallback);
 
+        MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
+
         verify(mockCallback, after(AWAIT_MS).never()).onControlCategoriesChanged(uid,
                 TEST_CONTROL_CATEGORIES);
 
-        mRouter.setControlCategories(TEST_CONTROL_CATEGORIES);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                (Runnable) () -> {
+                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
+                    mRouter.removeCallback(mockRouterCallback);
+                }
+        );
         verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-            .onControlCategoriesChanged(uid, TEST_CONTROL_CATEGORIES);
+                .onControlCategoriesChanged(uid, TEST_CONTROL_CATEGORIES);
 
         mManager.removeCallback(mockCallback);
     }

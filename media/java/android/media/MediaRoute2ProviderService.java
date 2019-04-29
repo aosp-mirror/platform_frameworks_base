@@ -64,7 +64,16 @@ public abstract class MediaRoute2ProviderService extends Service {
     public abstract void onSelect(int uid, String routeId);
 
     /**
-     * Updates provider info from selected route and appliation.
+     * Called when sendControlRequest is called on a route of the provider.
+     *
+     * @param routeId The id of the target route
+     * @param request The media control request intent
+     */
+    //TODO: Discuss what to use for request (e.g., Intent? Request class?)
+    public abstract void onControlRequest(String routeId, Intent request);
+
+    /**
+     * Updates provider info from selected route and application.
      *
      * TODO: When provider descriptor is defined, this should update the descriptor correctly.
      *
@@ -117,9 +126,16 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void selectRoute(int uid, String id) {
+        public void selectRoute(IMediaRoute2ProviderClient client, int uid, String id) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelect,
                     MediaRoute2ProviderService.this, uid, id));
+        }
+
+        @Override
+        public void notifyControlRequestSent(IMediaRoute2ProviderClient client, String id,
+                Intent request) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onControlRequest,
+                    MediaRoute2ProviderService.this, id, request));
         }
     }
 }

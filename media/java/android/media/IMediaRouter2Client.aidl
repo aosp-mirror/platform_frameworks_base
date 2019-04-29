@@ -16,14 +16,10 @@
 
 package android.media;
 
-import android.content.Intent;
-import android.media.IMediaRoute2ProviderClient;
-
 /**
- * {@hide}
+ * @hide
  */
-oneway interface IMediaRoute2Provider {
-    void registerClient(IMediaRoute2ProviderClient client);
-    void selectRoute(IMediaRoute2ProviderClient client, int uid, String id);
-    void notifyControlRequestSent(IMediaRoute2ProviderClient client, String id, in Intent request);
+oneway interface IMediaRouter2Client {
+    void notifyStateChanged();
+    void notifyRestoreRoute();
 }

@@ -30,9 +30,11 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
+import android.media.IMediaRouter2Client;
 import android.media.IMediaRouter2Manager;
 import android.media.IMediaRouterClient;
 import android.media.IMediaRouterService;
+import android.media.MediaRoute2Info;
 import android.media.MediaRouter;
 import android.media.MediaRouterClientState;
 import android.media.RemoteDisplayState;
@@ -250,7 +252,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        mService2.registerClientAsUser(client, packageName, userId);
     }
 
     // Binder call
@@ -268,7 +269,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-        mService2.unregisterClient(client);
     }
 
     // Binder call
@@ -308,12 +308,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    // Binder call
-    @Override
-    public void setControlCategories(IMediaRouterClient client, List<String> categories) {
-        mService2.setControlCategories(client, categories);
     }
 
     // Binder call
@@ -418,6 +412,29 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public void registerClient2AsUser(IMediaRouter2Client client, String packageName, int userId) {
+        final int uid = Binder.getCallingUid();
+        if (!validatePackageName(uid, packageName)) {
+            throw new SecurityException("packageName must match the calling uid");
+        }
+        mService2.registerClientAsUser(client, packageName, userId);
+    }
+
+    // Binder call
+    @Override
+    public void unregisterClient2(IMediaRouter2Client client) {
+        mService2.unregisterClient(client);
+    }
+
+    // Binder call
+    @Override
+    public void sendControlRequest(IMediaRouter2Client client, MediaRoute2Info route,
+            Intent request) {
+        mService2.sendControlRequest(client, route, request);
+    }
+
+    // Binder call
+    @Override
     public void registerManagerAsUser(IMediaRouter2Manager manager,
             String packageName, int userId) {
         final int uid = Binder.getCallingUid();
@@ -438,6 +455,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     public void setRemoteRoute(IMediaRouter2Manager manager,
             int uid, String routeId, boolean explicit) {
         mService2.setRemoteRoute(manager, uid, routeId, explicit);
+    }
+
+    // Binder call
+    @Override
+    public void setControlCategories(IMediaRouter2Client client, List<String> categories) {
+        mService2.setControlCategories(client, categories);
     }
 
     void restoreBluetoothA2dp() {
