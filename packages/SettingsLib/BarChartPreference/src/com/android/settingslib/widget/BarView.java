@@ -18,6 +18,7 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -73,7 +74,12 @@ public class BarView extends LinearLayout {
         mIcon.setImageDrawable(barViewInfo.getIcon());
         mBarTitle.setText(barViewInfo.getTitle());
         mBarSummary.setText(barViewInfo.getSummary());
-        mIcon.setContentDescription(barViewInfo.getContentDescription());
+
+        final CharSequence barViewInfoContent = barViewInfo.getContentDescription();
+        if (!TextUtils.isEmpty(barViewInfoContent)
+                && !TextUtils.equals((barViewInfo.getTitle()), barViewInfoContent)) {
+            mIcon.setContentDescription(barViewInfo.getContentDescription());
+        }
     }
 
     @VisibleForTesting
