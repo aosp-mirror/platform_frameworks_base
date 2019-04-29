@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.service.watchdog.ExplicitHealthCheckService.PackageConfig;
+
 import static com.android.server.PackageWatchdog.MonitoredPackage;
 import static com.android.server.PackageWatchdog.TRIGGER_FAILURE_COUNT;
 
@@ -28,7 +30,6 @@ import android.content.Context;
 import android.content.pm.VersionedPackage;
 import android.os.Handler;
 import android.os.test.TestLooper;
-import android.service.watchdog.PackageInfo;
 import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
@@ -741,7 +742,7 @@ public class PackageWatchdogTest {
         private List<String> mSupportedPackages = new ArrayList<>();
         private List<String> mRequestedPackages = new ArrayList<>();
         private Consumer<String> mPassedConsumer;
-        private Consumer<List<PackageInfo>> mSupportedConsumer;
+        private Consumer<List<PackageConfig>> mSupportedConsumer;
         private Runnable mNotifySyncRunnable;
 
         @Override
@@ -754,7 +755,7 @@ public class PackageWatchdogTest {
 
         @Override
         public void setCallbacks(Consumer<String> passedConsumer,
-                Consumer<List<PackageInfo>> supportedConsumer, Runnable notifySyncRunnable) {
+                Consumer<List<PackageConfig>> supportedConsumer, Runnable notifySyncRunnable) {
             mPassedConsumer = passedConsumer;
             mSupportedConsumer = supportedConsumer;
             mNotifySyncRunnable = notifySyncRunnable;
@@ -766,11 +767,11 @@ public class PackageWatchdogTest {
             if (mIsEnabled) {
                 packages.retainAll(mSupportedPackages);
                 mRequestedPackages.addAll(packages);
-                List<PackageInfo> packageInfos = new ArrayList<>();
+                List<PackageConfig> packageConfigs = new ArrayList<>();
                 for (String packageName: packages) {
-                    packageInfos.add(new PackageInfo(packageName, SHORT_DURATION));
+                    packageConfigs.add(new PackageConfig(packageName, SHORT_DURATION));
                 }
-                mSupportedConsumer.accept(packageInfos);
+                mSupportedConsumer.accept(packageConfigs);
             } else {
                 mSupportedConsumer.accept(Collections.emptyList());
             }
