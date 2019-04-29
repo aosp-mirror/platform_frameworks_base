@@ -250,6 +250,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+        mService2.registerClientAsUser(client, packageName, userId);
     }
 
     // Binder call
@@ -267,6 +268,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+        mService2.unregisterClient(client);
     }
 
     // Binder call
@@ -416,26 +418,26 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void registerManagerAsUser(IMediaRouter2Manager client,
+    public void registerManagerAsUser(IMediaRouter2Manager manager,
             String packageName, int userId) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
         }
-        mService2.registerManagerAsUser(client, packageName, userId);
+        mService2.registerManagerAsUser(manager, packageName, userId);
     }
 
     // Binder call
     @Override
-    public void unregisterManager(IMediaRouter2Manager client) {
-        mService2.unregisterManager(client);
+    public void unregisterManager(IMediaRouter2Manager manager) {
+        mService2.unregisterManager(manager);
     }
 
     // Binder call
     @Override
-    public void setRemoteRoute(IMediaRouter2Manager client,
+    public void setRemoteRoute(IMediaRouter2Manager manager,
             int uid, String routeId, boolean explicit) {
-        mService2.setRemoteRoute(client, uid, routeId, explicit);
+        mService2.setRemoteRoute(manager, uid, routeId, explicit);
     }
 
     void restoreBluetoothA2dp() {
