@@ -392,6 +392,10 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ResourcesManager mResourcesManager;
 
+    // Registry of remote cancellation transports pending a reply with reply handles.
+    @GuardedBy("this")
+    private @Nullable Map<SafeCancellationTransport, CancellationSignal> mRemoteCancellations;
+
     private static final class ProviderKey {
         final String authority;
         final int userId;
@@ -1657,29 +1661,82 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         @Override
         public void requestDirectActions(@NonNull IBinder activityToken,
-                @NonNull IVoiceInteractor interactor, @NonNull RemoteCallback callback) {
-            mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handleRequestDirectActions,
-                    ActivityThread.this, activityToken, interactor, callback));
-        }
-
-        @Override
-        public void performDirectAction(IBinder activityToken, String actionId, Bundle arguments,
-                RemoteCallback cancellationCallback, RemoteCallback resultCallback) {
-            final CancellationSignal cancellationSignal;
+                @NonNull IVoiceInteractor interactor, @Nullable RemoteCallback cancellationCallback,
+                @NonNull RemoteCallback callback) {
+            final CancellationSignal cancellationSignal = new CancellationSignal();
             if (cancellationCallback != null) {
-                final ICancellationSignal transport = CancellationSignal.createTransport();
-                cancellationSignal = CancellationSignal.fromTransport(transport);
+                final ICancellationSignal transport = createSafeCancellationTransport(
+                        cancellationSignal);
                 final Bundle cancellationResult = new Bundle();
                 cancellationResult.putBinder(VoiceInteractor.KEY_CANCELLATION_SIGNAL,
                         transport.asBinder());
                 cancellationCallback.sendResult(cancellationResult);
-            } else {
-                cancellationSignal = new CancellationSignal();
             }
+            mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handleRequestDirectActions,
+                    ActivityThread.this, activityToken, interactor, cancellationSignal, callback));
+        }
 
+        @Override
+        public void performDirectAction(@NonNull IBinder activityToken, @NonNull String actionId,
+                @Nullable Bundle arguments, @Nullable RemoteCallback cancellationCallback,
+                @NonNull RemoteCallback resultCallback) {
+            final CancellationSignal cancellationSignal = new CancellationSignal();
+            if (cancellationCallback != null) {
+                final ICancellationSignal transport = createSafeCancellationTransport(
+                        cancellationSignal);
+                final Bundle cancellationResult = new Bundle();
+                cancellationResult.putBinder(VoiceInteractor.KEY_CANCELLATION_SIGNAL,
+                        transport.asBinder());
+                cancellationCallback.sendResult(cancellationResult);
+            }
             mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handlePerformDirectAction,
                     ActivityThread.this, activityToken, actionId, arguments,
                     cancellationSignal, resultCallback));
+        }
+    }
+
+    private @NonNull SafeCancellationTransport createSafeCancellationTransport(
+            @NonNull CancellationSignal cancellationSignal) {
+        synchronized (ActivityThread.this) {
+            if (mRemoteCancellations == null) {
+                mRemoteCancellations = new ArrayMap<>();
+            }
+            final SafeCancellationTransport transport = new SafeCancellationTransport(
+                    this, cancellationSignal);
+            mRemoteCancellations.put(transport, cancellationSignal);
+            return transport;
+        }
+    }
+
+    private @NonNull CancellationSignal removeSafeCancellationTransport(
+            @NonNull SafeCancellationTransport transport) {
+        synchronized (ActivityThread.this) {
+            final CancellationSignal cancellation = mRemoteCancellations.remove(transport);
+            if (mRemoteCancellations.isEmpty()) {
+                mRemoteCancellations = null;
+            }
+            return cancellation;
+        }
+    }
+
+    private static final class SafeCancellationTransport extends ICancellationSignal.Stub {
+        private final @NonNull WeakReference<ActivityThread> mWeakActivityThread;
+
+        SafeCancellationTransport(@NonNull ActivityThread activityThread,
+                @NonNull CancellationSignal cancellation) {
+            mWeakActivityThread = new WeakReference<>(activityThread);
+        }
+
+        @Override
+        public void cancel() {
+            final ActivityThread activityThread = mWeakActivityThread.get();
+            if (activityThread != null) {
+                final CancellationSignal cancellation = activityThread
+                        .removeSafeCancellationTransport(this);
+                if (cancellation != null) {
+                    cancellation.cancel();
+                }
+            }
         }
     }
 
@@ -3491,27 +3548,31 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     /** Fetches the user actions for the corresponding activity */
     private void handleRequestDirectActions(@NonNull IBinder activityToken,
-            @NonNull IVoiceInteractor interactor, @NonNull RemoteCallback callback) {
+            @NonNull IVoiceInteractor interactor, @NonNull CancellationSignal cancellationSignal,
+            @NonNull RemoteCallback callback) {
         final ActivityClientRecord r = mActivities.get(activityToken);
-        if (r != null) {
-            final int lifecycleState = r.getLifecycleState();
-            if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
-                callback.sendResult(null);
-                return;
+        if (r == null) {
+            callback.sendResult(null);
+            return;
+        }
+        final int lifecycleState = r.getLifecycleState();
+        if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
+            callback.sendResult(null);
+            return;
+        }
+        if (r.activity.mVoiceInteractor == null
+                || r.activity.mVoiceInteractor.mInteractor.asBinder()
+                != interactor.asBinder()) {
+            if (r.activity.mVoiceInteractor != null) {
+                r.activity.mVoiceInteractor.destroy();
             }
-            if (r.activity.mVoiceInteractor == null
-                    || r.activity.mVoiceInteractor.mInteractor.asBinder()
-                    != interactor.asBinder()) {
-                if (r.activity.mVoiceInteractor != null) {
-                    r.activity.mVoiceInteractor.destroy();
-                }
-                r.activity.mVoiceInteractor = new VoiceInteractor(interactor, r.activity,
-                        r.activity, Looper.myLooper());
-            }
-            final List<DirectAction> actions = r.activity.onGetDirectActions();
+            r.activity.mVoiceInteractor = new VoiceInteractor(interactor, r.activity,
+                    r.activity, Looper.myLooper());
+        }
+        r.activity.onGetDirectActions(cancellationSignal, (actions) -> {
             Preconditions.checkNotNull(actions);
             Preconditions.checkCollectionElementsNotNull(actions, "actions");
-            if (actions != null && !actions.isEmpty()) {
+            if (!actions.isEmpty()) {
                 final int actionCount = actions.size();
                 for (int i = 0; i < actionCount; i++) {
                     final DirectAction action = actions.get(i);
@@ -3521,9 +3582,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                 result.putParcelable(DirectAction.KEY_ACTIONS_LIST,
                         new ParceledListSlice<>(actions));
                 callback.sendResult(result);
+            } else {
+                callback.sendResult(null);
             }
-        }
-        callback.sendResult(null);
+        });
     }
 
     /** Performs an actions in the corresponding activity */
@@ -3539,16 +3601,11 @@ public final class ActivityThread extends ClientTransactionHandler {
                 return;
             }
             final Bundle nonNullArguments = (arguments != null) ? arguments : Bundle.EMPTY;
-            final WeakReference<RemoteCallback> weakCallback = new WeakReference<>(resultCallback);
             r.activity.onPerformDirectAction(actionId, nonNullArguments, cancellationSignal,
-                    (b) -> {
-                final RemoteCallback strongCallback = weakCallback.get();
-                if (strongCallback != null) {
-                    strongCallback.sendResult(b);
-                }
-            });
+                    resultCallback::sendResult);
+        } else {
+            resultCallback.sendResult(null);
         }
-        resultCallback.sendResult(null);
     }
 
     public void handleTranslucentConversionComplete(IBinder token, boolean drawComplete) {

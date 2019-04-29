@@ -163,7 +163,7 @@ interface IVoiceInteractionManagerService {
      * Requests a list of supported actions from a specific activity.
      */
     void requestDirectActions(in IBinder token, int taskId, IBinder assistToken,
-            in RemoteCallback callback);
+             in RemoteCallback cancellationCallback, in RemoteCallback callback);
 
     /**
      * Requests performing an action from a specific activity.

@@ -714,17 +714,19 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void requestDirectActions(@NonNull IBinder token, int taskId, IBinder assistToken,
-                @NonNull RemoteCallback callback) {
+        public void requestDirectActions(@NonNull IBinder token, int taskId,
+                @NonNull IBinder assistToken, @Nullable RemoteCallback cancellationCallback,
+                @NonNull RemoteCallback resultCallback) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "requestDirectActions without running voice interaction service");
-                    callback.sendResult(null);
+                    resultCallback.sendResult(null);
                     return;
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.requestDirectActionsLocked(token, taskId, assistToken, callback);
+                    mImpl.requestDirectActionsLocked(token, taskId, assistToken,
+                            cancellationCallback, resultCallback);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
