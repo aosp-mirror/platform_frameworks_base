@@ -887,6 +887,7 @@ public class PopupWindow {
      *
      * @return true if popup will be clipped to the screen instead of the window, false otherwise
      * @deprecated Use {@link #isClippedToScreen()} instead
+     * @removed
      */
     @Deprecated
     public boolean isClipToScreenEnabled() {
@@ -901,6 +902,7 @@ public class PopupWindow {
      * the {@link #update()} methods.</p>
      *
      * @deprecated Use {@link #setIsClippedToScreen(boolean)} instead
+     * @removed
      */
     @Deprecated
     public void setClipToScreenEnabled(boolean enabled) {
@@ -988,6 +990,7 @@ public class PopupWindow {
      * @return true if the window will always be positioned in screen coordinates.
      *
      * @deprecated Use {@link #isLaidOutInScreen()} instead
+     * @removed
      */
     @Deprecated
     public boolean isLayoutInScreenEnabled() {
@@ -1001,6 +1004,7 @@ public class PopupWindow {
      *
      * @param enabled true if the popup should always be positioned in screen coordinates
      * @deprecated Use {@link #setIsLaidOutInScreen(boolean)} instead
+     * @removed
      */
     @Deprecated
     public void setLayoutInScreenEnabled(boolean enabled) {
