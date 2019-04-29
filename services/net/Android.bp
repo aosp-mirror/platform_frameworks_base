@@ -16,7 +16,10 @@ aidl_interface {
         },
     },
     api_dir: "aidl/ipmemorystore",
-    versions: ["1"],
+    versions: [
+        "1",
+        "2",
+    ],
 }
 
 aidl_interface {
@@ -50,7 +53,10 @@ aidl_interface {
     },
     api_dir: "aidl/networkstack",
     imports: ["ipmemorystore-aidl-interfaces"],
-    versions: ["1"],
+    versions: [
+        "1",
+        "2",
+    ],
 }
 
 java_library_static {
