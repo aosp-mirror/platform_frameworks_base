@@ -17,7 +17,9 @@
 package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
 
@@ -178,6 +180,20 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
+    public void testOnAnimationLeashLostWhenAnimatableParentSurfaceControlNull() {
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        spyOn(mAnimatable);
+
+        // Verify onAnimationLeashLost will be called even animatable's parent surface control lost.
+        doReturn(null).when(mAnimatable).getParentSurfaceControl();
+        mAnimatable.mSurfaceAnimator.cancelAnimation();
+
+        final SurfaceControl leash = mAnimatable.mLeash;
+        verify(mTransaction).remove(eq(leash));
+        verify(mAnimatable).onAnimationLeashLost(mTransaction);
+    }
+
+    @Test
     public void testDeferFinish() {
 
         // Start animation
@@ -272,7 +288,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationLeashDestroyed(Transaction t) {
+        public void onAnimationLeashLost(Transaction t) {
         }
 
         @Override

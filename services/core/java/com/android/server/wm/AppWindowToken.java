@@ -2668,8 +2668,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
-    public void onAnimationLeashDestroyed(Transaction t) {
-        super.onAnimationLeashDestroyed(t);
+    public void onAnimationLeashLost(Transaction t) {
+        super.onAnimationLeashLost(t);
         if (mAnimationBoundsLayer != null) {
             t.remove(mAnimationBoundsLayer);
             mAnimationBoundsLayer = null;
@@ -2855,7 +2855,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         t.reparent(mTransitChangeLeash, null);
         mTransitChangeLeash = null;
         if (cancel) {
-            onAnimationLeashDestroyed(t);
+            onAnimationLeashLost(t);
         }
     }
 
