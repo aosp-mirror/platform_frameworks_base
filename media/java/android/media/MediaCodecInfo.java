@@ -1677,6 +1677,13 @@ public final class MediaCodecInfo {
                 return "PerformancePoint(" + info + ")";
             }
 
+            @Override
+            public int hashCode() {
+                // only max frame rate must equal between performance points that equal to one
+                // another
+                return mMaxFrameRate;
+            }
+
             /**
              * Create a detailed performance point with custom max frame rate and macroblock size.
              *
