@@ -305,6 +305,32 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
+    public void setUserSerialNumbers_keepsPlatformKeyGenerationId() {
+        int userId = 42;
+        int generationId = 110;
+        Long serialNumber = 10L;
+
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId);
+        mRecoverableKeyStoreDb.setUserSerialNumber(userId, serialNumber);
+
+        assertEquals(generationId, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(userId));
+    }
+
+    @Test
+    public void setPlatformKeyGenerationId_keepsUserSerialNumber() {
+        int userId = 42;
+        int generationId = 110;
+        Long serialNumber = 10L;
+
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId);
+        mRecoverableKeyStoreDb.setUserSerialNumber(userId, serialNumber);
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId + 1);
+
+        assertEquals(serialNumber, mRecoverableKeyStoreDb.getUserSerialNumbers().get(userId));
+    }
+
+
+    @Test
     public void removeUserFromAllTables_removesData() throws Exception {
         int userId = 12;
         int generationId = 24;
