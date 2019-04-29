@@ -33,6 +33,7 @@ import static android.app.AppOpsManager.OP_NONE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
+import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
@@ -18533,6 +18534,21 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(origId);
             }
         }
+    }
+
+    /**
+     * Synchronously update the system ActivityThread, bypassing any deferred threading so any
+     * resources and overlaid values are available immediately.
+     */
+    public void updateSystemUiContext() {
+        PackageManagerInternal packageManagerInternal;
+        synchronized (this) {
+            packageManagerInternal = getPackageManagerInternalLocked();
+        }
+
+        ApplicationInfo ai = packageManagerInternal.getApplicationInfo("android",
+                GET_SHARED_LIBRARY_FILES, Binder.getCallingUid(), UserHandle.USER_SYSTEM);
+        ActivityThread.currentActivityThread().handleSystemApplicationInfoChanged(ai);
     }
 
     void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
