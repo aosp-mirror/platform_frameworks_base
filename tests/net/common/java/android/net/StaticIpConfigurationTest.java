@@ -31,7 +31,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 @RunWith(AndroidJUnit4.class)
@@ -46,6 +48,7 @@ public class StaticIpConfigurationTest {
     private static final InetAddress DNS2 = IpAddress("8.8.4.4");
     private static final InetAddress DNS3 = IpAddress("4.2.2.2");
     private static final String IFACE = "eth0";
+    private static final String FAKE_DOMAINS = "google.com";
 
     private static InetAddress IpAddress(String addr) {
         return InetAddress.parseNumericAddress(addr);
@@ -69,7 +72,7 @@ public class StaticIpConfigurationTest {
         s.dnsServers.add(DNS1);
         s.dnsServers.add(DNS2);
         s.dnsServers.add(DNS3);
-        s.domains = "google.com";
+        s.domains = FAKE_DOMAINS;
         return s;
     }
 
@@ -178,8 +181,8 @@ public class StaticIpConfigurationTest {
         expected.addDnsServer(DNS3);
         assertEquals(expected, s.toLinkProperties(IFACE));
 
-        s.domains = "google.com";
-        expected.setDomains("google.com");
+        s.domains = FAKE_DOMAINS;
+        expected.setDomains(FAKE_DOMAINS);
         assertEquals(expected, s.toLinkProperties(IFACE));
 
         s.gateway = null;
@@ -217,5 +220,54 @@ public class StaticIpConfigurationTest {
         StaticIpConfiguration s = makeTestObject();
         StaticIpConfiguration s2 = passThroughParcel(s);
         assertEquals(s, s2);
+    }
+
+    @Test
+    public void testBuilder() {
+        final ArrayList<InetAddress> dnsServers = new ArrayList<>();
+        dnsServers.add(DNS1);
+
+        final StaticIpConfiguration s = new StaticIpConfiguration.Builder()
+                .setIpAddress(ADDR)
+                .setGateway(GATEWAY)
+                .setDomains(FAKE_DOMAINS)
+                .setDnsServers(dnsServers)
+                .build();
+
+        assertEquals(s.ipAddress, s.getIpAddress());
+        assertEquals(ADDR, s.getIpAddress());
+        assertEquals(s.gateway, s.getGateway());
+        assertEquals(GATEWAY, s.getGateway());
+        assertEquals(s.domains, s.getDomains());
+        assertEquals(FAKE_DOMAINS, s.getDomains());
+        assertTrue(s.dnsServers.equals(s.getDnsServers()));
+        assertEquals(1, s.getDnsServers().size());
+        assertEquals(DNS1, s.getDnsServers().get(0));
+    }
+
+    @Test
+    public void testAddDnsServers() {
+        final StaticIpConfiguration s = new StaticIpConfiguration((StaticIpConfiguration) null);
+        checkEmpty(s);
+
+        s.addDnsServer(DNS1);
+        assertEquals(1, s.getDnsServers().size());
+        assertEquals(DNS1, s.getDnsServers().get(0));
+
+        s.addDnsServer(DNS2);
+        s.addDnsServer(DNS3);
+        assertEquals(3, s.getDnsServers().size());
+        assertEquals(DNS2, s.getDnsServers().get(1));
+        assertEquals(DNS3, s.getDnsServers().get(2));
+    }
+
+    @Test
+    public void testGetRoutes() {
+        final StaticIpConfiguration s = makeTestObject();
+        final List<RouteInfo> routeInfoList = s.getRoutes(IFACE);
+
+        assertEquals(2, routeInfoList.size());
+        assertEquals(new RouteInfo(ADDR, (InetAddress) null, IFACE), routeInfoList.get(0));
+        assertEquals(new RouteInfo((IpPrefix) null, GATEWAY, IFACE), routeInfoList.get(1));
     }
 }
