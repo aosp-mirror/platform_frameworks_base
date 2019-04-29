@@ -55,9 +55,10 @@ public class IpConfigurationParcelableUtilTest {
         mDhcpResults.serverAddress = (Inet4Address) parseNumericAddress("192.168.44.44");
         mDhcpResults.vendorInfo = "TEST_VENDOR_INFO";
         mDhcpResults.leaseDuration = 3600;
+        mDhcpResults.serverHostName = "dhcp.example.com";
         mDhcpResults.mtu = 1450;
         // Any added DhcpResults field must be included in equals() to be tested properly
-        assertFieldCountEquals(8, DhcpResults.class);
+        assertFieldCountEquals(9, DhcpResults.class);
     }
 
     @Test
@@ -98,6 +99,12 @@ public class IpConfigurationParcelableUtilTest {
     @Test
     public void testParcelUnparcelDhcpResults_NullVendorInfo() {
         mDhcpResults.vendorInfo = null;
+        doDhcpResultsParcelUnparcelTest();
+    }
+
+    @Test
+    public void testParcelUnparcelDhcpResults_NullServerHostName() {
+        mDhcpResults.serverHostName = null;
         doDhcpResultsParcelUnparcelTest();
     }
 
