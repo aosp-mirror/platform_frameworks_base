@@ -1064,6 +1064,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
+            mH.removeMessages(H.APPLICATION_INFO_CHANGED);
             sendMessage(H.APPLICATION_INFO_CHANGED, ai);
         }
 
@@ -5126,6 +5127,7 @@ public final class ActivityThread extends ClientTransactionHandler {
      * handling current transaction item before relaunching the activity.
      */
     void scheduleRelaunchActivity(IBinder token) {
+        mH.removeMessages(H.RELAUNCH_ACTIVITY, token);
         sendMessage(H.RELAUNCH_ACTIVITY, token);
     }
 
