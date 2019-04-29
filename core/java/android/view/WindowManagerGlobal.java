@@ -636,18 +636,36 @@ public final class WindowManagerGlobal {
     }
 
     public void setStoppedState(IBinder token, boolean stopped) {
+        ArrayList<ViewRootImpl> nonCurrentThreadRoots = null;
         synchronized (mLock) {
             int count = mViews.size();
             for (int i = count - 1; i >= 0; i--) {
                 if (token == null || mParams.get(i).token == token) {
                     ViewRootImpl root = mRoots.get(i);
                     // Client might remove the view by "stopped" event.
-                    root.setWindowStopped(stopped);
+                    if (root.mThread == Thread.currentThread()) {
+                        root.setWindowStopped(stopped);
+                    } else {
+                        if (nonCurrentThreadRoots == null) {
+                            nonCurrentThreadRoots = new ArrayList<>();
+                        }
+                        nonCurrentThreadRoots.add(root);
+                    }
                     // Recursively forward stopped state to View's attached
                     // to this Window rather than the root application token,
                     // e.g. PopupWindow's.
                     setStoppedState(root.mAttachInfo.mWindowToken, stopped);
                 }
+            }
+        }
+
+        // Update the stopped state synchronously to ensure the surface won't be used after server
+        // side has destroyed it. This operation should be outside the lock to avoid any potential
+        // paths from setWindowStopped to WindowManagerGlobal which may cause deadlocks.
+        if (nonCurrentThreadRoots != null) {
+            for (int i = nonCurrentThreadRoots.size() - 1; i >= 0; i--) {
+                ViewRootImpl root = nonCurrentThreadRoots.get(i);
+                root.mHandler.runWithScissors(() -> root.setWindowStopped(stopped), 0);
             }
         }
     }
