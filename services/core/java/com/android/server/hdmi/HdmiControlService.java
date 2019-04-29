@@ -1461,25 +1461,34 @@ public class HdmiControlService extends SystemService {
                         return playback().getDeviceInfo();
                     }
                     // Otherwise get the active source and look for it from the device list
-                    ActiveSource activeSource = mActiveSource;
-                    // If the active source is not set yet, return null
-                    if (!activeSource.isValid()) {
+                    ActiveSource activeSource = getLocalActiveSource();
+                    // If the physical address is not set yet, return null
+                    if (activeSource.physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS) {
                         return null;
                     }
                     if (audioSystem() != null) {
                         HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
                         for (HdmiDeviceInfo info : audioSystem.getSafeCecDevicesLocked()) {
-                            if (info.getLogicalAddress() == activeSource.logicalAddress) {
+                            if (info.getPhysicalAddress() == activeSource.physicalAddress) {
                                 return info;
                             }
                         }
                     }
                     // If the device info is not in the list yet, return a device info with minimum
                     // information from mActiveSource.
-                    return new HdmiDeviceInfo(activeSource.logicalAddress,
-                        activeSource.physicalAddress, pathToPortId(activeSource.physicalAddress),
-                        HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
-                        HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress));
+                    // If the Active Source has unregistered logical address, return with an
+                    // HdmiDeviceInfo built from physical address information only.
+                    return HdmiUtils.isValidAddress(activeSource.logicalAddress)
+                        ?
+                        new HdmiDeviceInfo(activeSource.logicalAddress,
+                            activeSource.physicalAddress,
+                            pathToPortId(activeSource.physicalAddress),
+                            HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
+                            HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress))
+                        :
+                            new HdmiDeviceInfo(activeSource.physicalAddress,
+                                pathToPortId(activeSource.physicalAddress));
+
                 }
                 return null;
             }
@@ -2808,7 +2817,7 @@ public class HdmiControlService extends SystemService {
         setLastInputForMhl(Constants.INVALID_PORT_ID);
     }
 
-    ActiveSource getActiveSource() {
+    ActiveSource getLocalActiveSource() {
         synchronized (mLock) {
             return mActiveSource;
         }
