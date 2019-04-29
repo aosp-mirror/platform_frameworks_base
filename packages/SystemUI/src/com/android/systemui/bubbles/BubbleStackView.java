@@ -22,16 +22,21 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.StatsLog;
 import android.view.Choreographer;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -56,6 +61,7 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
+import com.android.systemui.recents.TriangleShape;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.math.BigDecimal;
@@ -72,6 +78,9 @@ public class BubbleStackView extends FrameLayout {
 
     /** Duration of the flyout alpha animations. */
     private static final int FLYOUT_ALPHA_ANIMATION_DURATION = 100;
+
+    /** Max width of the flyout, in terms of percent of the screen width. */
+    private static final float FLYOUT_MAX_WIDTH_PERCENT = .6f;
 
     /** How long to wait, in milliseconds, before hiding the flyout. */
     @VisibleForTesting
@@ -126,13 +135,17 @@ public class BubbleStackView extends FrameLayout {
 
     private FrameLayout mExpandedViewContainer;
 
-    private View mFlyout;
+    private FrameLayout mFlyoutContainer;
+    private FrameLayout mFlyout;
     private TextView mFlyoutText;
+    private ShapeDrawable mLeftFlyoutTriangle;
+    private ShapeDrawable mRightFlyoutTriangle;
     /** Spring animation for the flyout. */
     private SpringAnimation mFlyoutSpring;
     /** Runnable that fades out the flyout and then sets it to GONE. */
     private Runnable mHideFlyout =
-            () -> mFlyout.animate().alpha(0f).withEndAction(() -> mFlyout.setVisibility(GONE));
+            () -> mFlyoutContainer.animate().alpha(0f).withEndAction(
+                    () -> mFlyoutContainer.setVisibility(GONE));
 
     /** Layout change listener that moves the stack to the nearest valid position on rotation. */
     private OnLayoutChangeListener mMoveStackToValidPositionOnLayoutListener;
@@ -146,6 +159,9 @@ public class BubbleStackView extends FrameLayout {
 
     private int mBubbleSize;
     private int mBubblePadding;
+    private int mFlyoutPadding;
+    private int mFlyoutSpaceFromBubble;
+    private int mPointerSize;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
     private int mStatusBarHeight;
@@ -218,6 +234,9 @@ public class BubbleStackView extends FrameLayout {
         Resources res = getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mFlyoutPadding = res.getDimensionPixelSize(R.dimen.bubble_flyout_padding_x);
+        mFlyoutSpaceFromBubble = res.getDimensionPixelSize(R.dimen.bubble_flyout_space_from_bubble);
+        mPointerSize = res.getDimensionPixelSize(R.dimen.bubble_flyout_pointer_size);
         mExpandedAnimateXDistance =
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
         mExpandedAnimateYDistance =
@@ -244,7 +263,6 @@ public class BubbleStackView extends FrameLayout {
                 getResources().getInteger(R.integer.bubbles_max_rendered));
         mBubbleContainer.setController(mStackAnimationController);
         mBubbleContainer.setElevation(elevation);
-        mBubbleContainer.setPadding(padding, 0, padding, 0);
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
 
@@ -254,16 +272,17 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
 
-        mFlyout = mInflater.inflate(R.layout.bubble_flyout, this, false);
-        mFlyout.setVisibility(GONE);
-        mFlyout.animate()
+        mFlyoutContainer = (FrameLayout) mInflater.inflate(R.layout.bubble_flyout, this, false);
+        mFlyoutContainer.setVisibility(GONE);
+        mFlyoutContainer.setClipToPadding(false);
+        mFlyoutContainer.setClipChildren(false);
+        mFlyoutContainer.animate()
                 .setDuration(FLYOUT_ALPHA_ANIMATION_DURATION)
                 .setInterpolator(new AccelerateDecelerateInterpolator());
-        addView(mFlyout);
 
-        mFlyoutText = mFlyout.findViewById(R.id.bubble_flyout_text);
-
-        mFlyoutSpring = new SpringAnimation(mFlyout, DynamicAnimation.TRANSLATION_X);
+        mFlyout = mFlyoutContainer.findViewById(R.id.bubble_flyout);
+        addView(mFlyoutContainer);
+        setupFlyout();
 
         mExpandedViewXAnim =
                 new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
@@ -592,7 +611,7 @@ public class BubbleStackView extends FrameLayout {
             }
             // Outside parts of view we care about.
             return null;
-        } else if (isIntersecting(mFlyout, x, y)) {
+        } else if (mFlyoutContainer.getVisibility() == VISIBLE && isIntersecting(mFlyout, x, y)) {
             return mFlyout;
         }
 
@@ -828,27 +847,52 @@ public class BubbleStackView extends FrameLayout {
         if (updateMessage != null && !isExpanded() && !mIsExpansionAnimating && !mIsDragging) {
             final PointF stackPos = mStackAnimationController.getStackPosition();
 
-            mFlyout.setAlpha(0f);
-            mFlyout.setVisibility(VISIBLE);
+            // Set the flyout TextView's max width in terms of percent, and then subtract out the
+            // padding so that the entire flyout view will be the desired width (rather than the
+            // TextView being the desired width + extra padding).
+            mFlyoutText.setMaxWidth(
+                    (int) (getWidth() * FLYOUT_MAX_WIDTH_PERCENT) - mFlyoutPadding * 2);
+
+            mFlyoutContainer.setAlpha(0f);
+            mFlyoutContainer.setVisibility(VISIBLE);
 
             mFlyoutText.setText(updateMessage);
-            mFlyout.measure(WRAP_CONTENT, WRAP_CONTENT);
-            post(() -> {
-                final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
+
+            final boolean onLeft = mStackAnimationController.isStackOnLeftSide();
+
+            if (onLeft) {
+                mLeftFlyoutTriangle.setAlpha(255);
+                mRightFlyoutTriangle.setAlpha(0);
+            } else {
+                mLeftFlyoutTriangle.setAlpha(0);
+                mRightFlyoutTriangle.setAlpha(255);
+            }
+
+            mFlyoutContainer.post(() -> {
+                // Multi line flyouts get top-aligned to the bubble.
+                if (mFlyoutText.getLineCount() > 1) {
+                    mFlyoutContainer.setTranslationY(stackPos.y);
+                } else {
+                    // Single line flyouts are vertically centered with respect to the bubble.
+                    mFlyoutContainer.setTranslationY(
+                            stackPos.y + (mBubbleSize - mFlyout.getHeight()) / 2f);
+                }
+
                 final float destinationX = onLeft
-                        ? stackPos.x + mBubbleSize + mBubblePadding
-                        : stackPos.x - mFlyout.getMeasuredWidth();
+                        ? stackPos.x + mBubbleSize + mFlyoutSpaceFromBubble
+                        : stackPos.x - mFlyoutContainer.getWidth() - mFlyoutSpaceFromBubble;
 
                 // Translate towards the stack slightly, then spring out from the stack.
-                mFlyout.setTranslationX(destinationX + (onLeft ? -mBubblePadding : mBubblePadding));
-                mFlyout.setTranslationY(stackPos.y);
+                mFlyoutContainer.setTranslationX(
+                        destinationX + (onLeft ? -mBubblePadding : mBubblePadding));
 
-                mFlyout.animate().alpha(1f);
+                mFlyoutContainer.animate().alpha(1f);
                 mFlyoutSpring.animateToFinalPosition(destinationX);
 
                 mFlyout.removeCallbacks(mHideFlyout);
                 mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
             });
+
             logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
         }
     }
@@ -869,7 +913,7 @@ public class BubbleStackView extends FrameLayout {
             mBubbleContainer.getBoundsOnScreen(outRect);
         }
 
-        if (mFlyout.getVisibility() == View.VISIBLE) {
+        if (mFlyoutContainer.getVisibility() == View.VISIBLE) {
             final Rect flyoutBounds = new Rect();
             mFlyout.getBoundsOnScreen(flyoutBounds);
             outRect.union(flyoutBounds);
@@ -921,6 +965,74 @@ public class BubbleStackView extends FrameLayout {
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
             mExpandedViewContainer.setAlpha(1.0f);
         }
+    }
+
+    /** Sets up the flyout views and drawables. */
+    private void setupFlyout() {
+        // Retrieve the styled floating background color.
+        TypedArray ta = mContext.obtainStyledAttributes(
+                new int[] {android.R.attr.colorBackgroundFloating});
+        final int floatingBackgroundColor = ta.getColor(0, Color.WHITE);
+        ta.recycle();
+
+        // Retrieve the flyout background, which is currently a rounded white rectangle with a
+        // shadow but no triangular arrow pointing anywhere.
+        final LayerDrawable flyoutBackground = (LayerDrawable) mFlyout.getBackground();
+
+        // Create the triangle drawables and set their color.
+        mLeftFlyoutTriangle =
+                new ShapeDrawable(TriangleShape.createHorizontal(
+                        mPointerSize, mPointerSize, true /* isPointingLeft */));
+        mRightFlyoutTriangle =
+                new ShapeDrawable(TriangleShape.createHorizontal(
+                        mPointerSize, mPointerSize, false /* isPointingLeft */));
+        mLeftFlyoutTriangle.getPaint().setColor(floatingBackgroundColor);
+        mRightFlyoutTriangle.getPaint().setColor(floatingBackgroundColor);
+
+        // Add both triangles to the drawable. We'll show and hide the appropriate ones when we show
+        // the flyout.
+        final int leftTriangleIndex = flyoutBackground.addLayer(mLeftFlyoutTriangle);
+        flyoutBackground.setLayerSize(leftTriangleIndex, mPointerSize, mPointerSize);
+        flyoutBackground.setLayerGravity(leftTriangleIndex, Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        flyoutBackground.setLayerInsetLeft(leftTriangleIndex, -mPointerSize);
+
+        final int rightTriangleIndex = flyoutBackground.addLayer(mRightFlyoutTriangle);
+        flyoutBackground.setLayerSize(rightTriangleIndex, mPointerSize, mPointerSize);
+        flyoutBackground.setLayerGravity(
+                rightTriangleIndex, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        flyoutBackground.setLayerInsetRight(rightTriangleIndex, -mPointerSize);
+
+        // Append the appropriate triangle's outline to the view's outline so that the shadows look
+        // correct.
+        mFlyout.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                final boolean leftPointing = mStackAnimationController.isStackOnLeftSide();
+
+                // Get the outline from the appropriate triangle.
+                final Outline triangleOutline = new Outline();
+                if (leftPointing) {
+                    mLeftFlyoutTriangle.getOutline(triangleOutline);
+                } else {
+                    mRightFlyoutTriangle.getOutline(triangleOutline);
+                }
+
+                // Offset it to the correct position, since it has no intrinsic position since
+                // that is maintained by the parent LayerDrawable.
+                triangleOutline.offset(
+                        leftPointing ? -mPointerSize : mFlyout.getWidth(),
+                        mFlyout.getHeight() / 2 - mPointerSize / 2);
+
+                // Merge the outlines.
+                final Outline compoundOutline = new Outline();
+                flyoutBackground.getOutline(compoundOutline);
+                compoundOutline.mPath.addPath(triangleOutline.mPath);
+                outline.set(compoundOutline);
+            }
+        });
+
+        mFlyoutText = mFlyout.findViewById(R.id.bubble_flyout_text);
+        mFlyoutSpring = new SpringAnimation(mFlyoutContainer, DynamicAnimation.TRANSLATION_X);
     }
 
     private void applyCurrentState() {
