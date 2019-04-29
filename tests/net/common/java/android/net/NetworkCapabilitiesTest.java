@@ -33,6 +33,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 
@@ -584,5 +586,21 @@ public class NetworkCapabilitiesTest {
         nc1.setUids(uidRange(10, 13));
         nc2.set(nc1);  // Overwrites, as opposed to combineCapabilities
         assertEquals(nc1, nc2);
+    }
+
+    @Test
+    public void testGetTransportTypes() {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        nc.addTransportType(TRANSPORT_CELLULAR);
+        nc.addTransportType(TRANSPORT_WIFI);
+        nc.addTransportType(TRANSPORT_VPN);
+        nc.addTransportType(TRANSPORT_TEST);
+
+        final int[] transportTypes = nc.getTransportTypes();
+        assertEquals(4, transportTypes.length);
+        assertEquals(TRANSPORT_CELLULAR, transportTypes[0]);
+        assertEquals(TRANSPORT_WIFI, transportTypes[1]);
+        assertEquals(TRANSPORT_VPN, transportTypes[2]);
+        assertEquals(TRANSPORT_TEST, transportTypes[3]);
     }
 }
