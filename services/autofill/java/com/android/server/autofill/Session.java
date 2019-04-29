@@ -1202,9 +1202,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     @Nullable
-    private FillResponse getLastResponseLocked(@Nullable String logPrefix) {
+    private FillResponse getLastResponseLocked(@Nullable String logPrefixFmt) {
+        final String logPrefix = sDebug && logPrefixFmt != null
+                ? String.format(logPrefixFmt, this.id)
+                : null;
         if (mContexts == null) {
-            if (sDebug && logPrefix != null) Slog.d(TAG, logPrefix + ": no contexts");
+            if (logPrefix != null) Slog.d(TAG, logPrefix + ": no contexts");
             return null;
         }
         if (mResponses == null) {
@@ -1240,6 +1243,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return response == null ? null : response.getSaveInfo();
     }
 
+    @GuardedBy("mLock")
+    int getSaveInfoFlagsLocked() {
+        final SaveInfo saveInfo = getSaveInfoLocked();
+        return saveInfo == null ? 0 : saveInfo.getFlags();
+    }
+
     /**
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
      * when necessary.
@@ -1251,7 +1260,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void handleLogContextCommitted() {
         final FillResponse lastResponse;
         synchronized (mLock) {
-            lastResponse = getLastResponseLocked("logContextCommited()");
+            lastResponse = getLastResponseLocked("logContextCommited(%s)");
         }
 
         if (lastResponse == null) {
@@ -1294,7 +1303,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void logContextCommittedLocked(@Nullable ArrayList<AutofillId> detectedFieldIds,
             @Nullable ArrayList<FieldClassification> detectedFieldClassifications) {
-        final FillResponse lastResponse = getLastResponseLocked("logContextCommited()");
+        final FillResponse lastResponse = getLastResponseLocked("logContextCommited(%s)");
         if (lastResponse == null) return;
 
         final int flags = lastResponse.getFlags();
@@ -1609,7 +1618,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return false;
         }
-        final FillResponse response = getLastResponseLocked("showSaveLocked()");
+        final FillResponse response = getLastResponseLocked("showSaveLocked(%s)");
         final SaveInfo saveInfo = response == null ? null : response.getSaveInfo();
 
         /*
@@ -1623,13 +1632,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          * - server didn't ask to keep session alive
          */
         if (saveInfo == null) {
-            if (sVerbose) Slog.v(TAG, "showSaveLocked(): no saveInfo from service");
+            if (sVerbose) Slog.v(TAG, "showSaveLocked(" + this.id + "): no saveInfo from service");
             return true;
         }
 
         if ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
             // TODO(b/113281366): log metrics
-            if (sDebug) Slog.v(TAG, "showSaveLocked(): service asked to delay save");
+            if (sDebug) Slog.v(TAG, "showSaveLocked(" + this.id + "): service asked to delay save");
             return false;
         }
 
@@ -1961,7 +1970,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (node != null) {
                 final AutofillValue value = node.getAutofillValue();
                 if (sDebug) {
-                    Slog.d(TAG, "getValueFromContexts(" + autofillId + ") at " + i + ": " + value);
+                    Slog.d(TAG, "getValueFromContexts(" + this.id + "/" + autofillId + ") at "
+                            + i + ": " + value);
                 }
                 if (value != null && !value.isEmpty()) {
                     return value;
@@ -2065,7 +2075,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        if (sVerbose) Slog.v(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
+        if (sVerbose) Slog.v(TAG, "callSaveLocked(" + this.id + "): mViewStates=" + mViewStates);
 
         if (mContexts == null) {
             Slog.w(TAG, "callSaveLocked(): no contexts");
@@ -2108,15 +2118,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final ArrayList<FillContext> contexts;
         if (previousSessions != null) {
             if (sDebug) {
-                Slog.d(TAG, "mergeSessions(): Merging the content of " + previousSessions.size()
-                        + " sessions for task " + taskId);
+                Slog.d(TAG, "mergeSessions(" + this.id + "): Merging the content of "
+                        + previousSessions.size() + " sessions for task " + taskId);
             }
             contexts = new ArrayList<>();
             for (int i = 0; i < previousSessions.size(); i++) {
                 final Session previousSession = previousSessions.get(i);
                 final ArrayList<FillContext> previousContexts = previousSession.mContexts;
                 if (previousContexts == null) {
-                    Slog.w(TAG, "mergeSessions(): Not merging null contexts from "
+                    Slog.w(TAG, "mergeSessions(" + this.id + "): Not merging null contexts from "
                             + previousSession.id);
                     continue;
                 }
@@ -2124,14 +2134,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     previousSession.updateValuesForSaveLocked();
                 }
                 if (sDebug) {
-                    Slog.d(TAG, "mergeSessions(): adding " + previousContexts.size()
+                    Slog.d(TAG, "mergeSessions(" + this.id + "): adding " + previousContexts.size()
                             + " context from previous session #" + previousSession.id);
                 }
                 contexts.addAll(previousContexts);
                 if (mClientState == null && previousSession.mClientState != null) {
                     if (sDebug) {
-                        Slog.d(TAG, "mergeSessions(): setting client state from previous session"
-                                + previousSession.id);
+                        Slog.d(TAG, "mergeSessions(" + this.id + "): setting client state from "
+                                + "previous session" + previousSession.id);
                     }
                     mClientState = previousSession.mClientState;
                 }
@@ -2251,8 +2261,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         if (sVerbose) {
-            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + actionAsString(action)
-                    + ", flags=" + flags);
+            Slog.v(TAG, "updateLocked(" + this.id + "): id=" + id + ", action="
+                    + actionAsString(action) + ", flags=" + flags);
         }
         ViewState viewState = mViewStates.get(id);
 
@@ -3293,7 +3303,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     void removeSelfLocked() {
-        if (sVerbose) Slog.v(TAG, "removeSelfLocked(): " + mPendingSaveUi);
+        if (sVerbose) Slog.v(TAG, "removeSelfLocked(" + this.id + "): " + mPendingSaveUi);
         if (mDestroyed) {
             Slog.w(TAG, "Call to Session#removeSelfLocked() rejected - session: "
                     + id + " destroyed");
