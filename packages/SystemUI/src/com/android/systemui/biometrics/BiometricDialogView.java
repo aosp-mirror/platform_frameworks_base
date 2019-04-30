@@ -288,6 +288,11 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
+        if (requiresConfirmation()) {
+            mPositiveButton.setVisibility(View.VISIBLE);
+            mPositiveButton.setEnabled(false);
+        }
+
         if (mWasForceRemoved || mSkipIntro) {
             // Show the dialog immediately
             mLayout.animate().cancel();
@@ -406,14 +411,10 @@ public abstract class BiometricDialogView extends LinearLayout {
         return mRequireConfirmation;
     }
 
-    public void showConfirmationButton(boolean show) {
-        if (show) {
-            mHandler.removeMessages(MSG_CLEAR_MESSAGE);
-            updateState(STATE_PENDING_CONFIRMATION);
-            mPositiveButton.setVisibility(View.VISIBLE);
-        } else {
-            mPositiveButton.setVisibility(View.GONE);
-        }
+    public void onReadyForConfirmation() {
+        mHandler.removeMessages(MSG_CLEAR_MESSAGE);
+        updateState(STATE_PENDING_CONFIRMATION);
+        mPositiveButton.setEnabled(true);
     }
 
     public void setUserId(int userId) {
