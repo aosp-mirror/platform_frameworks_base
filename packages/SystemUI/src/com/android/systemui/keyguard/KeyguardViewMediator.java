@@ -639,8 +639,8 @@ public class KeyguardViewMediator extends SystemUI {
         public int getBouncerPromptReason() {
             int currentUser = ActivityManager.getCurrentUser();
             boolean trust = mTrustManager.isTrustUsuallyManaged(currentUser);
-            boolean fingerprint = mUpdateMonitor.isUnlockWithFingerprintPossible(currentUser);
-            boolean any = trust || fingerprint;
+            boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
+            boolean any = trust || biometrics;
             KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
                     mUpdateMonitor.getStrongAuthTracker();
             int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
