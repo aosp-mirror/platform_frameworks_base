@@ -263,7 +263,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     }
 
     public void requestDirectActionsLocked(@NonNull IBinder token, int taskId,
-            IBinder assistToken, @NonNull RemoteCallback callback) {
+            @NonNull IBinder assistToken,  @Nullable RemoteCallback cancellationCallback,
+            @NonNull RemoteCallback callback) {
         if (mActiveSession == null || token != mActiveSession.mToken) {
             Slog.w(TAG, "requestDirectActionsLocked does not match active session");
             callback.sendResult(null);
@@ -277,7 +278,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             try {
                 tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
-                        mActiveSession.mInteractor, callback);
+                        mActiveSession.mInteractor, cancellationCallback, callback);
             } catch (RemoteException e) {
                 Slog.w("Unexpected remote error", e);
                 callback.sendResult(null);
