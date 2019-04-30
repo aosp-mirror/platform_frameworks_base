@@ -449,11 +449,17 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * Return the key at the given index in the array.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     *
      * @param index The desired index, must be between 0 and {@link #size()}-1.
      * @return Returns the key stored at the given index.
      */
     public K keyAt(int index) {
-        if (index >= mSize) {
+        if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
             throw new ArrayIndexOutOfBoundsException(index);
         }
@@ -462,11 +468,17 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * Return the value at the given index in the array.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     *
      * @param index The desired index, must be between 0 and {@link #size()}-1.
      * @return Returns the value stored at the given index.
      */
     public V valueAt(int index) {
-        if (index >= mSize) {
+        if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
             throw new ArrayIndexOutOfBoundsException(index);
         }
@@ -475,12 +487,18 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * Set the value at a given index in the array.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     *
      * @param index The desired index, must be between 0 and {@link #size()}-1.
      * @param value The new value to store at this index.
      * @return Returns the previous value at the given index.
      */
     public V setValueAt(int index, V value) {
-        if (index >= mSize) {
+        if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
             throw new ArrayIndexOutOfBoundsException(index);
         }
@@ -673,11 +691,17 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
     /**
      * Remove the key/value mapping at the given index.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     *
      * @param index The desired index, must be between 0 and {@link #size()}-1.
      * @return Returns the value that was stored at this index.
      */
     public V removeAt(int index) {
-        if (index >= mSize) {
+        if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
             throw new ArrayIndexOutOfBoundsException(index);
         }
