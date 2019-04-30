@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
@@ -69,7 +70,8 @@ import java.util.IllegalFormatConversionException;
 /**
  * Controls the indications and error messages shown on the Keyguard
  */
-public class KeyguardIndicationController implements StateListener {
+public class KeyguardIndicationController implements StateListener,
+        UnlockMethodCache.OnUnlockMethodChangedListener {
 
     private static final String TAG = "KeyguardIndication";
     private static final boolean DEBUG_CHARGING_SPEED = false;
@@ -81,6 +83,9 @@ public class KeyguardIndicationController implements StateListener {
     private final Context mContext;
     private final ShadeController mShadeController;
     private final AccessibilityController mAccessibilityController;
+    private final UnlockMethodCache mUnlockMethodCache;
+    private final StatusBarStateController mStatusBarStateController;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTextView;
     private KeyguardIndicationTextView mDisclosure;
@@ -122,18 +127,21 @@ public class KeyguardIndicationController implements StateListener {
         this(context, indicationArea, lockIcon, new LockPatternUtils(context),
                 WakeLock.createPartial(context, "Doze:KeyguardIndication"),
                 Dependency.get(ShadeController.class),
-                Dependency.get(AccessibilityController.class));
-
-        registerCallbacks(KeyguardUpdateMonitor.getInstance(context));
+                Dependency.get(AccessibilityController.class),
+                UnlockMethodCache.getInstance(context),
+                Dependency.get(StatusBarStateController.class),
+                KeyguardUpdateMonitor.getInstance(context));
     }
 
     /**
-     * Creates a new KeyguardIndicationController for testing. Does *not* register callbacks.
+     * Creates a new KeyguardIndicationController for testing.
      */
     @VisibleForTesting
     KeyguardIndicationController(Context context, ViewGroup indicationArea, LockIcon lockIcon,
             LockPatternUtils lockPatternUtils, WakeLock wakeLock, ShadeController shadeController,
-            AccessibilityController accessibilityController) {
+            AccessibilityController accessibilityController, UnlockMethodCache unlockMethodCache,
+            StatusBarStateController statusBarStateController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mIndicationArea = indicationArea;
         mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
@@ -143,6 +151,9 @@ public class KeyguardIndicationController implements StateListener {
         mLockIcon = lockIcon;
         mShadeController = shadeController;
         mAccessibilityController = accessibilityController;
+        mUnlockMethodCache = unlockMethodCache;
+        mStatusBarStateController = statusBarStateController;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         // lock icon is not used on all form factors.
         if (mLockIcon != null) {
             mLockIcon.setOnLongClickListener(this::handleLockLongClick);
@@ -161,15 +172,12 @@ public class KeyguardIndicationController implements StateListener {
 
         mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-
         updateDisclosure();
-    }
 
-    private void registerCallbacks(KeyguardUpdateMonitor monitor) {
-        monitor.registerCallback(getKeyguardCallback());
-
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mTickReceiver);
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+        mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
+        mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
+        mStatusBarStateController.addCallback(this);
+        mUnlockMethodCache.addListener(this);
     }
 
     /**
@@ -179,8 +187,10 @@ public class KeyguardIndicationController implements StateListener {
      * //TODO: This can probably be converted to a fragment and not have to be manually recreated
      */
     public void destroy() {
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mTickReceiver);
-        Dependency.get(StatusBarStateController.class).removeCallback(this);
+        mKeyguardUpdateMonitor.removeCallback(mTickReceiver);
+        mKeyguardUpdateMonitor.removeCallback(getKeyguardCallback());
+        mStatusBarStateController.removeCallback(this);
+        mUnlockMethodCache.removeListener(this);
     }
 
     private boolean handleLockLongClick(View view) {
@@ -271,7 +281,8 @@ public class KeyguardIndicationController implements StateListener {
      *
      * @return {@code null} or an empty string if a trust indication text should not be shown.
      */
-    private String getTrustGrantedIndication() {
+    @VisibleForTesting
+    String getTrustGrantedIndication() {
         return mContext.getString(R.string.keyguard_indication_trust_unlocked);
     }
 
@@ -363,7 +374,6 @@ public class KeyguardIndicationController implements StateListener {
                 return;
             }
 
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
             int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustGrantedIndication = getTrustGrantedIndication();
             String trustManagedIndication = getTrustManagedIndication();
@@ -374,7 +384,7 @@ public class KeyguardIndicationController implements StateListener {
                 mTextView.switchIndication(mTransientIndication);
                 mTextView.setTextColor(mTransientTextColorState);
             } else if (!TextUtils.isEmpty(trustGrantedIndication)
-                    && updateMonitor.getUserHasTrust(userId)) {
+                    && mKeyguardUpdateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustGrantedIndication);
                 mTextView.setTextColor(mInitialTextColorState);
             } else if (mPowerPluggedIn) {
@@ -389,8 +399,8 @@ public class KeyguardIndicationController implements StateListener {
                     mTextView.switchIndication(indication);
                 }
             } else if (!TextUtils.isEmpty(trustManagedIndication)
-                    && updateMonitor.getUserTrustIsManaged(userId)
-                    && !updateMonitor.getUserHasTrust(userId)) {
+                    && mKeyguardUpdateMonitor.getUserTrustIsManaged(userId)
+                    && !mKeyguardUpdateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustManagedIndication);
                 mTextView.setTextColor(mInitialTextColorState);
             } else {
@@ -570,6 +580,11 @@ public class KeyguardIndicationController implements StateListener {
     @Override
     public void onDozingChanged(boolean isDozing) {
         setDozing(isDozing);
+    }
+
+    @Override
+    public void onUnlockMethodStateChanged() {
+        updateIndication(!mDozing);
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {
