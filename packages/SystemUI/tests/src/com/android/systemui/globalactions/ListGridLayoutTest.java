@@ -125,27 +125,27 @@ public class ListGridLayoutTest extends SysuiTestCase {
         assertEquals(null,
                 mListGridLayout.getParentView(-1, false, false));
 
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(0, false, false));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(1, false, false));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(2, false, false));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(3, false, false));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(4, false, false));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(5, false, false));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(6, false, false));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(7, false, false));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(8, false, false));
 
         // above valid range
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(9, false, false));
     }
 
@@ -157,27 +157,27 @@ public class ListGridLayoutTest extends SysuiTestCase {
         assertEquals(null,
                 mListGridLayout.getParentView(-1, true, false));
 
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(0, true, false));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(1, true, false));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(2, true, false));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(3, true, false));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(4, true, false));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(5, true, false));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(6, true, false));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(7, true, false));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(8, true, false));
 
         // above valid range
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(9, true, false));
     }
 
@@ -189,27 +189,27 @@ public class ListGridLayoutTest extends SysuiTestCase {
         assertEquals(null,
                 mListGridLayout.getParentView(-1, false, true));
 
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(0, false, true));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(1, false, true));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(2, false, true));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(3, false, true));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(4, false, true));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(5, false, true));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(6, false, true));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(7, false, true));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(8, false, true));
 
         // above valid range
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(9, false, true));
     }
 
@@ -221,35 +221,38 @@ public class ListGridLayoutTest extends SysuiTestCase {
         assertEquals(null,
                 mListGridLayout.getParentView(-1, true, true));
 
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(0, true, true));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(1, true, true));
-        assertEquals(mListGridLayout.getChildAt(2),
+        assertEquals(mListGridLayout.getSublist(2),
                 mListGridLayout.getParentView(2, true, true));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(3, true, true));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(4, true, true));
-        assertEquals(mListGridLayout.getChildAt(1),
+        assertEquals(mListGridLayout.getSublist(1),
                 mListGridLayout.getParentView(5, true, true));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(6, true, true));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(7, true, true));
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(8, true, true));
 
         // above valid range
-        assertEquals(mListGridLayout.getChildAt(0),
+        assertEquals(mListGridLayout.getSublist(0),
                 mListGridLayout.getParentView(9, true, true));
     }
 
     @Test
     public void testRemoveAllItems() {
-        ViewGroup row1 = (ViewGroup) mListGridLayout.getChildAt(0);
-        ViewGroup row2 = (ViewGroup) mListGridLayout.getChildAt(1);
-        ViewGroup row3 = (ViewGroup) mListGridLayout.getChildAt(2);
+        ViewGroup row1 = mListGridLayout.getSublist(0);
+        row1.setVisibility(View.VISIBLE);
+        ViewGroup row2 = mListGridLayout.getSublist(1);
+        row2.setVisibility(View.VISIBLE);
+        ViewGroup row3 = mListGridLayout.getSublist(2);
+        row3.setVisibility(View.VISIBLE);
         View item1 = new View(mContext, null);
         View item2 = new View(mContext, null);
         View item3 = new View(mContext, null);
@@ -265,7 +268,66 @@ public class ListGridLayoutTest extends SysuiTestCase {
         mListGridLayout.removeAllItems();
 
         assertEquals(0, row1.getChildCount());
+        assertEquals(View.GONE, row1.getVisibility());
         assertEquals(0, row2.getChildCount());
-        assertEquals(0, row2.getChildCount());
+        assertEquals(View.GONE, row2.getVisibility());
+        assertEquals(0, row3.getChildCount());
+        assertEquals(View.GONE, row3.getVisibility());
+    }
+
+    @Test
+    public void testAddItem() {
+        mListGridLayout.setExpectedCount(4);
+
+        View item1 = new View(mContext, null);
+        View item2 = new View(mContext, null);
+        View item3 = new View(mContext, null);
+        View item4 = new View(mContext, null);
+
+        mListGridLayout.addItem(item1);
+        mListGridLayout.addItem(item2);
+        mListGridLayout.addItem(item3);
+        mListGridLayout.addItem(item4);
+        assertEquals(2, mListGridLayout.getSublist(0).getChildCount());
+        assertEquals(2, mListGridLayout.getSublist(1).getChildCount());
+        assertEquals(0, mListGridLayout.getSublist(2).getChildCount());
+
+        mListGridLayout.removeAllItems();
+        mListGridLayout.addItem(item1);
+
+        assertEquals(1, mListGridLayout.getSublist(0).getChildCount());
+        assertEquals(0, mListGridLayout.getSublist(1).getChildCount());
+        assertEquals(0, mListGridLayout.getSublist(2).getChildCount());
+    }
+
+    @Test
+    public void testAddItem_reverseItems() {
+        mListGridLayout.setExpectedCount(3);
+
+        View item1 = new View(mContext, null);
+        View item2 = new View(mContext, null);
+        View item3 = new View(mContext, null);
+
+        mListGridLayout.addItem(item1);
+        mListGridLayout.addItem(item2);
+        mListGridLayout.addItem(item3);
+
+        ViewGroup sublist = mListGridLayout.getSublist(0);
+
+        assertEquals(item1, sublist.getChildAt(0));
+        assertEquals(item2, sublist.getChildAt(1));
+        assertEquals(item3, sublist.getChildAt(2));
+
+
+        mListGridLayout.removeAllItems();
+        mListGridLayout.setReverseItems(true);
+
+        mListGridLayout.addItem(item1);
+        mListGridLayout.addItem(item2);
+        mListGridLayout.addItem(item3);
+
+        assertEquals(item3, sublist.getChildAt(0));
+        assertEquals(item2, sublist.getChildAt(1));
+        assertEquals(item1, sublist.getChildAt(2));
     }
 }
