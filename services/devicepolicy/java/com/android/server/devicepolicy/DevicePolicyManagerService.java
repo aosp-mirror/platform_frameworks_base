@@ -546,9 +546,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private DevicePolicyConstants mConstants;
 
-    private static boolean ENABLE_LOCK_GUARD = Build.IS_ENG
-            || true // STOPSHIP Remove it.
-            || (SystemProperties.getInt("debug.dpm.lock_guard", 0) == 1);
+    private static final boolean ENABLE_LOCK_GUARD = true;
 
     interface Stats {
         int LOCK_GUARD_GUARD = 0;
