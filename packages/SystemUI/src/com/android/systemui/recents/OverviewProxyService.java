@@ -35,6 +35,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import android.annotation.FloatRange;
+import android.app.ActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -143,6 +144,25 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             StatusBar.class);
                     if (statusBar != null) {
                         statusBar.showScreenPinningRequest(taskId, false /* allowCancel */);
+                    }
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void stopScreenPinning() {
+            if (!verifyCaller("stopScreenPinning")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> {
+                    try {
+                        ActivityTaskManager.getService().stopSystemLockTaskMode();
+                    } catch (RemoteException e) {
+                        Log.e(TAG_OPS, "Failed to stop screen pinning");
                     }
                 });
             } finally {

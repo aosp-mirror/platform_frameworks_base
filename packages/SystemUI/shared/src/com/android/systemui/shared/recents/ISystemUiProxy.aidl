@@ -96,4 +96,9 @@ interface ISystemUiProxy {
      * Notifies that the accessibility button in the system's navigation area has been long clicked
      */
     void notifyAccessibilityButtonLongClicked() = 16;
+
+    /**
+     * Ends the system screen pinning.
+     */
+    void stopScreenPinning() = 17;
 }
