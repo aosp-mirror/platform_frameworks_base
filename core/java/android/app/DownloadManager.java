@@ -30,6 +30,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.CursorWrapper;
+import android.database.DatabaseUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;
@@ -1258,55 +1259,50 @@ public class DownloadManager {
             throw new SecurityException(displayName + " is not a valid filename");
         }
 
-        Query query = new Query().setFilterById(id);
-        Cursor cursor = null;
-        String oldDisplayName = null;
-        String mimeType = null;
-        try {
-            cursor = query(query);
+        final String filePath;
+        final Query query = new Query().setFilterById(id);
+        try (Cursor cursor = query(query)) {
             if (cursor == null) {
-                return false;
+                throw new IllegalStateException("Missing cursor for download id=" + id);
             }
             if (cursor.moveToFirst()) {
-                int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
-                if (DownloadManager.STATUS_SUCCESSFUL != status) {
-                    return false;
+                final int status = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_STATUS));
+                if (status != DownloadManager.STATUS_SUCCESSFUL) {
+                    throw new IllegalStateException("Download is not completed yet: "
+                            + DatabaseUtils.dumpCurrentRowToString(cursor));
                 }
-                oldDisplayName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
-                mimeType = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MEDIA_TYPE));
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+                filePath = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOCAL_FILENAME));
+                if (filePath == null) {
+                    throw new IllegalStateException("Download doesn't have a valid file path: "
+                            + DatabaseUtils.dumpCurrentRowToString(cursor));
+                } else if (!new File(filePath).exists()) {
+                    throw new IllegalStateException("Downloaded file doesn't exist anymore: "
+                            + DatabaseUtils.dumpCurrentRowToString(cursor));
+                }
+            } else {
+                throw new IllegalStateException("Missing download id=" + id);
             }
         }
 
-        if (oldDisplayName == null || mimeType == null) {
-            throw new IllegalStateException(
-                    "Document with id " + id + " does not exist");
-        }
-
-        final File parent = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS);
-
-        final File before = new File(parent, oldDisplayName);
-        final File after = new File(parent, displayName);
+        final File before = new File(filePath);
+        final File after = new File(before.getParentFile(), displayName);
 
         if (after.exists()) {
-            throw new IllegalStateException("Already exists " + after);
+            throw new IllegalStateException("File already exists: " + after);
         }
         if (!before.renameTo(after)) {
-            throw new IllegalStateException("Failed to rename to " + after);
+            throw new IllegalStateException(
+                    "Failed to rename file from " + before + " to " + after);
         }
 
-        ContentValues values = new ContentValues();
+        final ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_TITLE, displayName);
         values.put(Downloads.Impl._DATA, after.toString());
         values.putNull(Downloads.Impl.COLUMN_MEDIAPROVIDER_URI);
-        long[] ids = {id};
+        final long[] ids = { id };
 
-        return (mResolver.update(mBaseUri, values, getWhereClauseForIds(ids),
-                getWhereArgsForIds(ids)) == 1);
+        return mResolver.update(
+                mBaseUri, values, getWhereClauseForIds(ids), getWhereArgsForIds(ids)) == 1;
     }
 
     /**
