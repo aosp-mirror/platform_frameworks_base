@@ -24,8 +24,10 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -529,7 +531,8 @@ public class Environment {
      * <p>
      * Writing to this path requires the
      * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission,
-     * and starting in {@link android.os.Build.VERSION_CODES#KITKAT}, read access requires the
+     * and starting in {@link android.os.Build.VERSION_CODES#KITKAT}, read
+     * access requires the
      * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission,
      * which is automatically granted if you hold the write permission.
      * <p>
@@ -551,7 +554,16 @@ public class Environment {
      *
      * @see #getExternalStorageState()
      * @see #isExternalStorageRemovable()
+     * @deprecated To improve user privacy, direct access to shared/external
+     *             storage devices is deprecated. When an app targets
+     *             {@link android.os.Build.VERSION_CODES#Q}, the path returned
+     *             from this method is no longer directly accessible to apps.
+     *             Apps can continue to access content stored on shared/external
+     *             storage by migrating to alternatives such as
+     *             {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT}.
      */
+    @Deprecated
     public static File getExternalStorageDirectory() {
         throwIfUserRequired();
         return sCurrentUser.getExternalDirs()[0];
@@ -827,7 +839,16 @@ public class Environment {
      * @return Returns the File path for the directory. Note that this directory
      *         may not yet exist, so you must make sure it exists before using
      *         it such as with {@link File#mkdirs File.mkdirs()}.
+     * @deprecated To improve user privacy, direct access to shared/external
+     *             storage devices is deprecated. When an app targets
+     *             {@link android.os.Build.VERSION_CODES#Q}, the path returned
+     *             from this method is no longer directly accessible to apps.
+     *             Apps can continue to access content stored on shared/external
+     *             storage by migrating to alternatives such as
+     *             {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT}.
      */
+    @Deprecated
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStoragePublicDirs(type)[0];
