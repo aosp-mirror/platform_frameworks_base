@@ -4816,10 +4816,11 @@ public class NotificationManagerService extends SystemService {
             NotificationRecord oldRecord) {
         Notification notification = r.getNotification();
 
-        // Does the app want to bubble & have permission to bubble?
+        // Does the app want to bubble & is able to bubble
         boolean canBubble = notification.getBubbleMetadata() != null
                 && mPreferencesHelper.areBubblesAllowed(pkg, userId)
-                && r.getChannel().canBubble();
+                && r.getChannel().canBubble()
+                && !mActivityManager.isLowRamDevice();
 
         // Is the app in the foreground?
         final boolean appIsForeground =
