@@ -2819,6 +2819,21 @@ public class HdmiControlService extends SystemService {
             mActiveSource.logicalAddress = logicalAddress;
             mActiveSource.physicalAddress = physicalAddress;
         }
+        // If the current device is a source device, check if the current Active Source matches
+        // the local device info. Set mIsActiveSource of the local device accordingly.
+        for (HdmiCecLocalDevice device : getAllLocalDevices()) {
+            // mIsActiveSource only exists in source device, ignore this setting if the current
+            // device is not an HdmiCecLocalDeviceSource.
+            if (!(device instanceof HdmiCecLocalDeviceSource)) {
+                continue;
+            }
+            if (logicalAddress == device.getDeviceInfo().getLogicalAddress()
+                && physicalAddress == getPhysicalAddress()) {
+                ((HdmiCecLocalDeviceSource) device).setIsActiveSource(true);
+            } else {
+                ((HdmiCecLocalDeviceSource) device).setIsActiveSource(false);
+            }
+        }
     }
 
     // This method should only be called when the device can be the active source
