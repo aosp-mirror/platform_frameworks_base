@@ -89,15 +89,33 @@ import java.util.concurrent.locks.ReentrantLock;
  <h4>Raw Audio Buffers</h4>
  <p>
  Raw audio buffers contain entire frames of PCM audio data, which is one sample for each channel
- in channel order. Each sample is a {@linkplain AudioFormat#ENCODING_PCM_16BIT 16-bit signed
- integer in native byte order}.
+ in channel order. Each PCM audio sample is either a 16 bit signed integer or a float,
+ in native byte order.
+ Raw audio buffers in the float PCM encoding are only possible
+ if the MediaFormat's {@linkplain MediaFormat#KEY_PCM_ENCODING}
+ is set to {@linkplain AudioFormat#ENCODING_PCM_FLOAT} during MediaCodec
+ {@link #configure configure(&hellip;)}
+ and confirmed by {@link #getOutputFormat} for decoders
+ or {@link #getInputFormat} for encoders.
+ A sample method to check for float PCM in the MediaFormat is as follows:
 
  <pre class=prettyprint>
+ static boolean isPcmFloat(MediaFormat format) {
+   return format.getInteger(MediaFormat.KEY_PCM_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
+       == AudioFormat.ENCODING_PCM_FLOAT;
+ }</pre>
+
+ In order to extract, in a short array,
+ one channel of a buffer containing 16 bit signed integer audio data,
+ the following code may be used:
+
+ <pre class=prettyprint>
+ // Assumes the buffer PCM encoding is 16 bit.
  short[] getSamplesForChannel(MediaCodec codec, int bufferId, int channelIx) {
    ByteBuffer outputBuffer = codec.getOutputBuffer(bufferId);
    MediaFormat format = codec.getOutputFormat(bufferId);
    ShortBuffer samples = outputBuffer.order(ByteOrder.nativeOrder()).asShortBuffer();
-   int numChannels = formet.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
+   int numChannels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
    if (channelIx &lt; 0 || channelIx &gt;= numChannels) {
      return null;
    }
