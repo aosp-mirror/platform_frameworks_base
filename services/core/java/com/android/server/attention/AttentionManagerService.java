@@ -374,8 +374,15 @@ public class AttentionManagerService extends SystemService {
     private void dumpInternal(IndentingPrintWriter ipw) {
         ipw.println("Attention Manager Service (dumpsys attention) state:\n");
 
-        ipw.printPair("context", mContext);
-        ipw.println();
+        ipw.println("AttentionServicePackageName=" + getServiceConfigPackage(mContext));
+        ipw.println("Resolved component:");
+        if (mComponentName != null) {
+            ipw.increaseIndent();
+            ipw.println("Component=" + mComponentName.getPackageName());
+            ipw.println("Class=" + mComponentName.getClassName());
+            ipw.decreaseIndent();
+        }
+
         synchronized (mLock) {
             int size = mUserStates.size();
             ipw.print("Number user states: ");
@@ -511,10 +518,24 @@ public class AttentionManagerService extends SystemService {
         }
 
         private void dump(IndentingPrintWriter pw) {
-            pw.printPair("context", mContext);
-            pw.printPair("userId", mUserId);
+            pw.println("userId=" + mUserId);
             synchronized (mLock) {
-                pw.printPair("binding", mBinding);
+                pw.println("binding=" + mBinding);
+                pw.println("current attention check:");
+                if (mCurrentAttentionCheck != null) {
+                    pw.increaseIndent();
+                    pw.println("is dispatched=" + mCurrentAttentionCheck.mIsDispatched);
+                    pw.println("is fulfilled:=" + mCurrentAttentionCheck.mIsFulfilled);
+                    pw.decreaseIndent();
+                }
+                pw.println("attention check cache:");
+                if (mAttentionCheckCache != null) {
+                    pw.increaseIndent();
+                    pw.println("last computed=" + mAttentionCheckCache.mLastComputed);
+                    pw.println("timestamp=" + mAttentionCheckCache.mTimestamp);
+                    pw.println("result=" + mAttentionCheckCache.mResult);
+                    pw.decreaseIndent();
+                }
             }
         }
 
