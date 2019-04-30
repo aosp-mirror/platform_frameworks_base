@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UserIdInt;
+import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -93,7 +94,7 @@ public class RoleControllerManager {
             int userId = context.getUserId();
             RemoteService remoteService = sRemoteServices.get(userId);
             if (remoteService == null) {
-                remoteService = new RemoteService(context.getApplicationContext(),
+                remoteService = new RemoteService(ActivityThread.currentApplication(),
                         remoteServiceComponentName, handler, userId);
                 sRemoteServices.put(userId, remoteService);
             }
