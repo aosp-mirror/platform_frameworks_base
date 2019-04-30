@@ -22,7 +22,7 @@
     android:gravity="right"
     android:layout_gravity="right"
     android:background="@android:color/transparent"
-    android:theme="@style/volume_dialog_theme">
+    android:theme="@style/qs_theme">
 
     <!-- right-aligned to be physically near volume button -->
     <LinearLayout
