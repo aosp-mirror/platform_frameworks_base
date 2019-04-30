@@ -633,8 +633,8 @@
     <!-- Text shown when viewing channel settings for notifications related to vpn status -->
     <string name="notification_channel_vpn">VPN status</string>
 
-    <!-- Text shown when viewing channel settings for notifications related to remote device administration -->
-    <string name="notification_channel_device_admin">Device administration</string>
+    <!-- Notification channel name. This channel sends high-priority alerts from the user's IT admin for key updates about the user's work device or work profile. -->
+    <string name="notification_channel_device_admin">Alerts from your IT admin</string>
 
     <!-- Text shown when viewing channel settings for notifications related to important alerts -->
     <string name="notification_channel_alerts">Alerts</string>
@@ -5035,13 +5035,8 @@
     <!-- Notification content shown when new SMS/MMS is received while the device is locked [CHAR LIMIT=NONE] -->
     <string name="new_sms_notification_content">Open SMS app to view</string>
 
-    <!-- Notification title shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
-    <string name="user_encrypted_title">Some functionality may be limited</string>
-    <!-- Notification message shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
-    <string name="user_encrypted_message">Tap to unlock</string>
-    <!-- Notification detail shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
-    <string name="user_encrypted_detail">User data locked</string>
-
+    <!-- Notification title shown when user profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=36] -->
+    <string name="profile_encrypted_title">Some functionality may be limited</string>
     <!-- Notification detail shown when work profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
     <string name="profile_encrypted_detail">Work profile locked</string>
     <!-- Notification message shown when work profile is credential encrypted and requires the user to unlock before some features are usable [CHAR LIMIT=30] -->
