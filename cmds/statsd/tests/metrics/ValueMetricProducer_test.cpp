@@ -2981,7 +2981,6 @@ TEST(ValueMetricProducerTest, TestPullNeededNoTimeConstraints) {
     EXPECT_EQ(1, report.value_metrics().data_size());
     EXPECT_EQ(1, report.value_metrics().data(0).bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
-    EXPECT_EQ(10, report.value_metrics().data(0).bucket_info(0).condition_true_nanos());
 }
 
 TEST(ValueMetricProducerTest, TestPulledData_noDiff_withoutCondition) {
