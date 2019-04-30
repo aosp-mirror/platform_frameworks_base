@@ -1164,6 +1164,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // Carrier might want to manage notifications themselves
             final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            if (!CarrierConfigManager.isConfigForIdentifiedCarrier(config)) {
+                if (LOGV) Slog.v(TAG, "isConfigForIdentifiedCarrier returned false");
+                // Don't show notifications until we confirm that the loaded config is from an
+                // identified carrier, which may want to manage their own notifications. This method
+                // should be called every time the carrier config changes anyways, and there's no
+                // reason to alert if there isn't a carrier.
+                return;
+            }
+
             final boolean notifyWarning = getBooleanDefeatingNullable(config,
                     KEY_DATA_WARNING_NOTIFICATION_BOOL, true);
             final boolean notifyLimit = getBooleanDefeatingNullable(config,
