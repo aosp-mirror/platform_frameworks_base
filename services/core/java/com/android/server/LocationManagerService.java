@@ -3049,6 +3049,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isProviderPackage(String packageName) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG,
+                Manifest.permission.READ_DEVICE_CONFIG + " permission required");
         synchronized (mLock) {
             for (LocationProvider provider : mProviders) {
                 if (provider.getPackagesLocked().contains(packageName)) {
