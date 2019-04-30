@@ -15,9 +15,13 @@
   limitations under the License.
   -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-            android:paddingMode="stack">
-    <item>
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:paddingMode="stack">
+
+    <item
+        android:top="8dp"
+        android:bottom="8dp">
         <shape>
             <corners
                 android:radius="20dp"/>
