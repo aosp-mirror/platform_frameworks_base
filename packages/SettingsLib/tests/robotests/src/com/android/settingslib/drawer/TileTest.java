@@ -23,6 +23,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowPackageManager;
+import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(RobolectricTestRunner.class)
 public class TileTest {
@@ -163,5 +164,18 @@ public class TileTest {
         tile.getTitle(RuntimeEnvironment.application);
 
         assertThat(tile.mLastUpdateTime).isNotEqualTo(staleTimeStamp);
+    }
+
+    @Test
+    public void getTitle_noActivity_returnNull() {
+        final ResolveInfo info = new ResolveInfo();
+        info.activityInfo = mActivityInfo;
+        final ShadowPackageManager spm = Shadow.extract(mContext.getPackageManager());
+        spm.removePackage(mActivityInfo.packageName);
+
+        final Tile tile = new Tile(mActivityInfo, "category");
+        ReflectionHelpers.setField(tile, "mActivityInfo", null);
+
+        assertThat(tile.getTitle(RuntimeEnvironment.application)).isNull();
     }
 }

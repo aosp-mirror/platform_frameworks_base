@@ -174,7 +174,7 @@ public class Tile implements Parcelable {
                             packageManager.getResourcesForApplication(mActivityPackage);
                     title = res.getString(mMetaData.getInt(META_DATA_PREFERENCE_TITLE));
                 } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
-                    Log.d(TAG, "Couldn't find info", e);
+                    Log.w(TAG, "Couldn't find info", e);
                 }
             } else {
                 title = mMetaData.getString(META_DATA_PREFERENCE_TITLE);
@@ -183,23 +183,13 @@ public class Tile implements Parcelable {
         // Set the preference title to the activity's label if no
         // meta-data is found
         if (title == null) {
-            title = getActivityInfo(context).loadLabel(packageManager);
+            final ActivityInfo activityInfo = getActivityInfo(context);
+            if (activityInfo == null) {
+                return null;
+            }
+            title = activityInfo.loadLabel(packageManager);
         }
         return title;
-    }
-
-    /**
-     * Returns the raw metadata for summary, this is used for comparing 2 summary text without
-     * loading the real string.
-     */
-    public String getSummaryReference() {
-        if (mSummaryOverride != null) {
-            return mSummaryOverride.toString();
-        }
-        if (mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_SUMMARY)) {
-            return mMetaData.get(META_DATA_PREFERENCE_SUMMARY).toString();
-        }
-        return null;
     }
 
     /**
@@ -302,7 +292,7 @@ public class Tile implements Parcelable {
         if (iconResId != 0) {
             final Icon icon = Icon.createWithResource(activityInfo.packageName, iconResId);
             if (isIconTintable(context)) {
-                final TypedArray a = context.obtainStyledAttributes(new int[] {
+                final TypedArray a = context.obtainStyledAttributes(new int[]{
                         android.R.attr.colorControlNormal});
                 final int tintColor = a.getColor(0, 0);
                 a.recycle();
@@ -357,6 +347,9 @@ public class Tile implements Parcelable {
             if (infoList != null && !infoList.isEmpty()) {
                 mActivityInfo = infoList.get(0).activityInfo;
                 mMetaData = mActivityInfo.metaData;
+            } else {
+                Log.e(TAG, "Cannot find package info for "
+                        + intent.getComponent().flattenToString());
             }
         }
         return mActivityInfo;
