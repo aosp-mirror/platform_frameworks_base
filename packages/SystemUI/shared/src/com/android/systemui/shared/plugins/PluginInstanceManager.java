@@ -295,8 +295,10 @@ public class PluginInstanceManager<T extends Plugin> {
                         info.serviceInfo.name);
                 PluginInfo<T> t = handleLoadPlugin(name);
                 if (t == null) continue;
-                mMainHandler.obtainMessage(mMainHandler.PLUGIN_CONNECTED, t).sendToTarget();
+
+                // add plugin before sending PLUGIN_CONNECTED message
                 mPlugins.add(t);
+                mMainHandler.obtainMessage(mMainHandler.PLUGIN_CONNECTED, t).sendToTarget();
             }
         }
 
