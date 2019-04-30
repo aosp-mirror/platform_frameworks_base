@@ -40,6 +40,7 @@ import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -225,6 +226,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mAuthenticationCallback = callback;
                 mCryptoObject = crypto;
                 long sessionId = crypto != null ? crypto.getOpId() : 0;
+                Trace.beginSection("FaceManager#authenticate");
                 mService.authenticate(mToken, sessionId, userId, mServiceReceiver,
                         flags, mContext.getOpPackageName());
             } catch (RemoteException e) {
@@ -236,6 +238,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                             getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
                                     0 /* vendorCode */));
                 }
+            } finally {
+                Trace.endSection();
             }
         }
     }
@@ -276,6 +280,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mEnrollmentCallback = callback;
+                Trace.beginSection("FaceManager#enroll");
                 mService.enroll(mToken, token, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
@@ -287,6 +292,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                             getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
                                 0 /* vendorCode */));
                 }
+            } finally {
+                Trace.endSection();
             }
         }
     }
@@ -965,6 +972,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
         @Override
         public void handleMessage(android.os.Message msg) {
+            Trace.beginSection("FaceManager#handleMessage: " + Integer.toString(msg.what));
             switch (msg.what) {
                 case MSG_ENROLL_RESULT:
                     sendEnrollResult((Face) msg.obj, msg.arg1 /* remaining */);
@@ -1000,6 +1008,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 default:
                     Log.w(TAG, "Unknown message: " + msg.what);
             }
+            Trace.endSection();
         }
     }
 
