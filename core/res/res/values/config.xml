@@ -360,6 +360,9 @@
     <!-- Reserved privileged keepalive slots per transport. -->
     <integer translatable="false" name="config_reservedPrivilegedKeepaliveSlots">2</integer>
 
+    <!-- Allowed unprivileged keepalive slots per uid. -->
+    <integer translatable="false" name="config_allowedUnprivilegedKeepalivePerUid">2</integer>
+
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tethering over USB this should
          be empty.  An example would be "usb.*" -->
