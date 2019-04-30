@@ -3403,7 +3403,7 @@ package android.location {
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
-    method public boolean isProviderPackage(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
@@ -6842,19 +6842,19 @@ package android.service.watchdog {
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelHealthCheck(@NonNull String);
     method @NonNull public abstract java.util.List<java.lang.String> onGetRequestedPackages();
-    method @NonNull public abstract java.util.List<android.service.watchdog.PackageInfo> onGetSupportedPackages();
+    method @NonNull public abstract java.util.List<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> onGetSupportedPackages();
     method public abstract void onRequestHealthCheck(@NonNull String);
     field public static final String BIND_PERMISSION = "android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE";
     field public static final String SERVICE_INTERFACE = "android.service.watchdog.ExplicitHealthCheckService";
   }
 
-  public final class PackageInfo implements android.os.Parcelable {
-    ctor public PackageInfo(@NonNull String, long);
+  public static final class ExplicitHealthCheckService.PackageConfig implements android.os.Parcelable {
+    ctor public ExplicitHealthCheckService.PackageConfig(@NonNull String, long);
     method public int describeContents();
     method public long getHealthCheckTimeoutMillis();
     method @NonNull public String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.watchdog.PackageInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.watchdog.ExplicitHealthCheckService.PackageConfig> CREATOR;
   }
 
 }

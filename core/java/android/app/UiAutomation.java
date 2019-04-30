@@ -602,6 +602,25 @@ public final class UiAutomation {
     }
 
     /**
+     * A request for WindowManagerService to wait until all animations have completed and input
+     * information has been sent from WindowManager to native InputManager.
+     *
+     * @hide
+     */
+    @TestApi
+    public void syncInputTransactions() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            // Calling out without a lock held.
+            mUiAutomationConnection.syncInputTransactions();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while syncing input transactions!", re);
+        }
+    }
+
+    /**
      * Sets the device rotation. A client can freeze the rotation in
      * desired state or freeze the rotation to its current state or
      * unfreeze the rotation (rotating the device changes its rotation

@@ -7550,18 +7550,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         if (shouldWaitForAnimToComplete) {
-            waitForAnimationsToComplete();
-
-            synchronized (mGlobalLock) {
-                mWindowPlacerLocked.performSurfacePlacementIfScheduled();
-                mRoot.forAllDisplays(displayContent ->
-                        displayContent.getInputMonitor().updateInputWindowsImmediately());
-            }
-
-            new SurfaceControl.Transaction().syncInputWindows().apply(true);
+            syncInputTransactions();
         }
 
         return LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
+    }
+
+    @Override
+    public void syncInputTransactions() {
+        waitForAnimationsToComplete();
+
+        synchronized (mGlobalLock) {
+            mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+            mRoot.forAllDisplays(displayContent ->
+                    displayContent.getInputMonitor().updateInputWindowsImmediately());
+        }
+        new SurfaceControl.Transaction().syncInputWindows().apply(true);
     }
 
     private void waitForAnimationsToComplete() {

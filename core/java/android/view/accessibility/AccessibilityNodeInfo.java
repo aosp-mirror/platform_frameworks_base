@@ -29,6 +29,7 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -90,9 +91,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AccessibilityNodeInfo implements Parcelable {
 
-    private static final boolean DEBUG = false;
-
     private static final String TAG = "AccessibilityNodeInfo";
+
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG) && Build.IS_DEBUGGABLE;
 
     /** @hide */
     public static final int UNDEFINED_CONNECTION_ID = -1;
@@ -3943,13 +3944,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append(super.toString());
 
         if (DEBUG) {
-            builder.append("; sourceNodeId: " + mSourceNodeId);
-            builder.append("; windowId: " + mWindowId);
-            builder.append("; accessibilityViewId: ").append(getAccessibilityViewId(mSourceNodeId));
-            builder.append("; virtualDescendantId: ").append(getVirtualDescendantId(mSourceNodeId));
-            builder.append("; mParentNodeId: " + mParentNodeId);
-            builder.append("; traversalBefore: ").append(mTraversalBefore);
-            builder.append("; traversalAfter: ").append(mTraversalAfter);
+            builder.append("; sourceNodeId: 0x").append(Long.toHexString(mSourceNodeId));
+            builder.append("; windowId: 0x").append(Long.toHexString(mWindowId));
+            builder.append("; accessibilityViewId: 0x")
+                    .append(Long.toHexString(getAccessibilityViewId(mSourceNodeId)));
+            builder.append("; virtualDescendantId: 0x")
+                    .append(Long.toHexString(getVirtualDescendantId(mSourceNodeId)));
+            builder.append("; mParentNodeId: 0x").append(Long.toHexString(mParentNodeId));
+            builder.append("; traversalBefore: 0x").append(Long.toHexString(mTraversalBefore));
+            builder.append("; traversalAfter: 0x").append(Long.toHexString(mTraversalAfter));
 
             int granularities = mMovementGranularities;
             builder.append("; MovementGranularities: [");
@@ -3967,7 +3970,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             final LongArray childIds = mChildNodeIds;
             if (childIds != null) {
                 for (int i = 0, count = childIds.size(); i < count; i++) {
-                    builder.append(childIds.get(i));
+                    builder.append("0x").append(Long.toHexString(childIds.get(i)));
                     if (i < count - 1) {
                         builder.append(", ");
                     }

@@ -400,10 +400,7 @@ public class PlatformKeyManager {
      * @throws IOException if there was an issue with local database update.
      */
     private void setGenerationId(int userId, int generationId) throws IOException {
-        long updatedRows = mDatabase.setPlatformKeyGenerationId(userId, generationId);
-        if (updatedRows < 0) {
-            throw new IOException("Failed to set the platform key in the local DB.");
-        }
+        mDatabase.setPlatformKeyGenerationId(userId, generationId);
     }
 
     /**

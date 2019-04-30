@@ -157,7 +157,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
         return new AudioRecordingConfiguration( /*anonymized uid*/ -1,
                 in.mClientSessionId, in.mClientSource, in.mClientFormat,
                 in.mDeviceFormat, in.mPatchHandle, "" /*empty package name*/,
-                in.mClientPortId, in.mClientSilenced, in.mDeviceSource, in.mClientEffects,
+                /*anonymized portId*/ -1, in.mClientSilenced, in.mDeviceSource, in.mClientEffects,
                 in.mDeviceEffects);
     }
 
@@ -270,11 +270,12 @@ public final class AudioRecordingConfiguration implements Parcelable {
     }
 
     /**
+     * @hide
      * Returns the system unique ID assigned for the AudioRecord object corresponding to this
      * AudioRecordingConfiguration client.
      * @return the port ID.
      */
-    int getClientPortId() {
+    public int getClientPortId() {
         return mClientPortId;
     }
 

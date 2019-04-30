@@ -54,6 +54,7 @@ import java.io.PrintWriter;
 public class KeyguardBouncer {
 
     private static final String TAG = "KeyguardBouncer";
+    static final long BOUNCER_FACE_DELAY = 800;
     static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
     static final float EXPANSION_HIDDEN = 1f;
     static final float EXPANSION_VISIBLE = 0f;
@@ -66,6 +67,7 @@ public class KeyguardBouncer {
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
     private final BouncerExpansionCallback mExpansionCallback;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -93,16 +95,18 @@ public class KeyguardBouncer {
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager,
-            BouncerExpansionCallback expansionCallback) {
+            BouncerExpansionCallback expansionCallback,
+            KeyguardUpdateMonitor keyguardUpdateMonitor, Handler handler) {
         mContext = context;
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mContainer = container;
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mFalsingManager = falsingManager;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mExpansionCallback = expansionCallback;
-        mHandler = new Handler();
+        mHandler = handler;
+        mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
     }
 
     public void show(boolean resetSecuritySelection) {
@@ -164,7 +168,11 @@ public class KeyguardBouncer {
 
         // Split up the work over multiple frames.
         DejankUtils.removeCallbacks(mResetRunnable);
-        DejankUtils.postAfterTraversal(mShowRunnable);
+        if (mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
+            mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
+        } else {
+            DejankUtils.postAfterTraversal(mShowRunnable);
+        }
 
         mCallback.onBouncerVisiblityChanged(true /* shown */);
         mExpansionCallback.onStartingToShow();
@@ -266,6 +274,7 @@ public class KeyguardBouncer {
 
     private void cancelShowRunnable() {
         DejankUtils.removeCallbacks(mShowRunnable);
+        mHandler.removeCallbacks(mShowRunnable);
         mShowingSoon = false;
     }
 

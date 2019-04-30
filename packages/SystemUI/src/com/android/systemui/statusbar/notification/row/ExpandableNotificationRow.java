@@ -2641,7 +2641,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
 
     private int getHeadsUpHeight() {
-        return mPrivateLayout.getHeadsUpHeight();
+        return getShowingLayout().getHeadsUpHeight();
     }
 
     public boolean areGutsExposed() {
