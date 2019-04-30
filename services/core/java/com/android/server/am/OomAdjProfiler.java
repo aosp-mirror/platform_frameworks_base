@@ -29,6 +29,9 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.io.PrintWriter;
 
 public class OomAdjProfiler {
+    // Disable profiling for Q. Re-enable once b/130635979 is fixed.
+    private static final boolean PROFILING_DISABLED = true;
+
     @GuardedBy("this")
     private boolean mOnBattery;
     @GuardedBy("this")
@@ -56,6 +59,9 @@ public class OomAdjProfiler {
     final RingBuffer<CpuTimes> mSystemServerCpuTimesHist = new RingBuffer<>(CpuTimes.class, 10);
 
     void batteryPowerChanged(boolean onBattery) {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         synchronized (this) {
             scheduleSystemServerCpuTimeUpdate();
             mOnBattery = onBattery;
@@ -63,6 +69,9 @@ public class OomAdjProfiler {
     }
 
     void onWakefulnessChanged(int wakefulness) {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         synchronized (this) {
             scheduleSystemServerCpuTimeUpdate();
             mScreenOff = wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -70,6 +79,9 @@ public class OomAdjProfiler {
     }
 
     void oomAdjStarted() {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         synchronized (this) {
             mOomAdjStartTimeMs = SystemClock.currentThreadTimeMillis();
             mOomAdjStarted = true;
@@ -77,6 +89,9 @@ public class OomAdjProfiler {
     }
 
     void oomAdjEnded() {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         synchronized (this) {
             if (!mOomAdjStarted) {
                 return;
@@ -86,6 +101,9 @@ public class OomAdjProfiler {
     }
 
     private void scheduleSystemServerCpuTimeUpdate() {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         synchronized (this) {
             if (mSystemServerCpuTimeUpdateScheduled) {
                 return;
@@ -98,6 +116,9 @@ public class OomAdjProfiler {
     }
 
     private void updateSystemServerCpuTime(boolean onBattery, boolean screenOff) {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         final long cpuTimeMs = mProcessCpuTracker.getCpuTimeForPid(Process.myPid());
         synchronized (this) {
             mSystemServerCpuTime.addCpuTimeMs(
@@ -121,6 +142,9 @@ public class OomAdjProfiler {
     }
 
     void dump(PrintWriter pw) {
+        if (PROFILING_DISABLED) {
+            return;
+        }
         synchronized (this) {
             if (mSystemServerCpuTimeUpdateScheduled) {
                 while (mSystemServerCpuTimeUpdateScheduled) {
