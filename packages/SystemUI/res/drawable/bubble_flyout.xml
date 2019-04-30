@@ -14,7 +14,6 @@
   ~ limitations under the License
   -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
-    <!-- TODO: Add the triangle pointing to the bubble stack. -->
     <item>
         <shape android:shape="rectangle">
             <solid android:color="?android:attr/colorBackgroundFloating" />
@@ -22,8 +21,10 @@
                 android:bottomLeftRadius="?android:attr/dialogCornerRadius"
                 android:topLeftRadius="?android:attr/dialogCornerRadius"
                 android:bottomRightRadius="?android:attr/dialogCornerRadius"
-                android:topRightRadius="?android:attr/dialogCornerRadius"
-            />
+                android:topRightRadius="?android:attr/dialogCornerRadius" />
+            <padding
+                android:left="@dimen/bubble_flyout_pointer_size"
+                android:right="@dimen/bubble_flyout_pointer_size" />
         </shape>
     </item>
 </layer-list>
