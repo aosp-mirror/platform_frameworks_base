@@ -1241,6 +1241,14 @@ public final class ColorDisplayService extends SystemService {
         }
 
         /**
+         * Reset the CCT value for the display white balance transform to its default value.
+         */
+        public boolean resetDisplayWhiteBalanceColorTemperature() {
+            return setDisplayWhiteBalanceColorTemperature(getContext().getResources()
+                    .getInteger(R.integer.config_displayWhiteBalanceColorTemperatureDefault));
+        }
+
+        /**
          * Sets the listener and returns whether display white balance is currently enabled.
          */
         public boolean setDisplayWhiteBalanceListener(DisplayWhiteBalanceListener listener) {
