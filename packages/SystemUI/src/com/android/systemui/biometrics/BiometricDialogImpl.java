@@ -249,7 +249,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                     mContext.getResources()
                             .getText(mCurrentDialog.getAuthenticatedAccessibilityResourceId()));
             if (mCurrentDialog.requiresConfirmation()) {
-                mCurrentDialog.onReadyForConfirmation();
+                mCurrentDialog.updateState(BiometricDialogView.STATE_PENDING_CONFIRMATION);
             } else {
                 mCurrentDialog.updateState(BiometricDialogView.STATE_AUTHENTICATED);
                 mHandler.postDelayed(() -> {
