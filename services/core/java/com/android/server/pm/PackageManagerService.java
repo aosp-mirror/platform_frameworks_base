@@ -23915,6 +23915,18 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public int getTargetSdkVersionForPackage(String packageName)
+                throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo info = getApplicationInfo(packageName, 0, callingUser);
+            if (info == null) {
+                throw new RemoteException(
+                        "Couldn't get ApplicationInfo for package " + packageName);
+            }
+            return info.targetSdkVersion;
+        }
+
+        @Override
         public boolean[] isAudioPlaybackCaptureAllowed(String[] packageNames)
                 throws RemoteException {
             int callingUser = UserHandle.getUserId(Binder.getCallingUid());
