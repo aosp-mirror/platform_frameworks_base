@@ -327,12 +327,12 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                true /* persistMessage*/);
+                true /* persistMessage*/, ActivityThread.currentPackageName());
     }
 
     private void sendTextMessageInternal(String destinationAddress, String scAddress,
             String text, PendingIntent sentIntent, PendingIntent deliveryIntent,
-            boolean persistMessage) {
+            boolean persistMessage, String packageName) {
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -345,9 +345,8 @@ public final class SmsManager {
             // If the subscription is invalid or default, we will use the default phone to send the
             // SMS and possibly fail later in the SMS sending process.
             ISms iSms = getISmsServiceOrThrow();
-            iSms.sendTextForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
-                    destinationAddress,
-                    scAddress, text, sentIntent, deliveryIntent,
+            iSms.sendTextForSubscriber(getSubscriptionId(), packageName,
+                    destinationAddress, scAddress, text, sentIntent, deliveryIntent,
                     persistMessage);
         } catch (RemoteException ex) {
             // ignore it
@@ -379,7 +378,7 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                false /* persistMessage */);
+                false /* persistMessage */, ActivityThread.currentPackageName());
     }
 
     /**
@@ -620,13 +619,30 @@ public final class SmsManager {
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/);
+                deliveryIntents, true /* persistMessage*/, ActivityThread.currentPackageName());
+    }
+
+    /**
+     * @hide
+     * Similar method as #sendMultipartTextMessage(String, String, ArrayList, ArrayList, ArrayList)
+     * With an additional argument
+     * @param packageName serves as the default package name if ActivityThread.currentpackageName is
+     *                    null.
+     */
+    public void sendMultipartTextMessageExternal(
+            String destinationAddress, String scAddress, ArrayList<String> parts,
+            ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
+            String packageName) {
+        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+                deliveryIntents, true /* persistMessage*/,
+                ActivityThread.currentPackageName() == null
+                        ? packageName : ActivityThread.currentPackageName());
     }
 
     private void sendMultipartTextMessageInternal(
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents,
-            boolean persistMessage) {
+            boolean persistMessage, String packageName) {
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -638,8 +654,7 @@ public final class SmsManager {
             try {
                 ISms iSms = getISmsServiceOrThrow();
                 iSms.sendMultipartTextForSubscriber(getSubscriptionId(),
-                        ActivityThread.currentPackageName(),
-                        destinationAddress, scAddress, parts,
+                        packageName, destinationAddress, scAddress, parts,
                         sentIntents, deliveryIntents, persistMessage);
             } catch (RemoteException ex) {
                 // ignore it
@@ -653,8 +668,8 @@ public final class SmsManager {
             if (deliveryIntents != null && deliveryIntents.size() > 0) {
                 deliveryIntent = deliveryIntents.get(0);
             }
-            sendTextMessage(destinationAddress, scAddress, parts.get(0),
-                    sentIntent, deliveryIntent);
+            sendTextMessageInternal(destinationAddress, scAddress, parts.get(0),
+                    sentIntent, deliveryIntent, true, packageName);
         }
     }
 
@@ -675,7 +690,7 @@ public final class SmsManager {
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, false /* persistMessage*/);
+                deliveryIntents, false /* persistMessage*/, ActivityThread.currentPackageName());
     }
 
     /**
