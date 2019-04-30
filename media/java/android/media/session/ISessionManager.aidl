@@ -16,6 +16,7 @@
 package android.media.session;
 
 import android.content.ComponentName;
+import android.content.pm.ParceledListSlice;
 import android.media.IRemoteVolumeController;
 import android.media.Session2Token;
 import android.media.session.IActiveSessionsListener;
@@ -38,7 +39,7 @@ interface ISessionManager {
             in Bundle sessionInfo, int userId);
     void notifySession2Created(in Session2Token sessionToken);
     List<MediaSession.Token> getSessions(in ComponentName compName, int userId);
-    List<Session2Token> getSession2Tokens(int userId);
+    ParceledListSlice getSession2Tokens(int userId);
     void dispatchMediaKeyEvent(String packageName, boolean asSystemService, in KeyEvent keyEvent,
             boolean needWakeLock);
     boolean dispatchMediaKeyEventToSessionAsSystemService(String packageName,
