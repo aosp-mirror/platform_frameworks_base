@@ -2380,6 +2380,12 @@
     <!-- ============================= -->
     <eat-comment />
 
+    <!-- Removed View attributes without a specified format (b/131100106) -->
+    <attr name="__removed3" />
+    <attr name="__removed4" />
+    <attr name="__removed5" />
+    <attr name="__removed6" />
+
     <!-- Attributes that can be used with {@link android.view.View} or
          any of its subclasses.  Also see {@link #ViewGroup_Layout} for
          attributes that are processed by the view's parent. -->
@@ -4742,7 +4748,7 @@
         <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
         <!-- Weight for the font used in the TextView. -->
-        <attr name="textFontWeight" />
+        <attr name="textFontWeight" format="integer"/>
         <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
         <!-- Specifies the {@link android.os.LocaleList} for the text in this TextView.
@@ -8038,7 +8044,7 @@
         <attr name="supportsAmbientMode" format="boolean" />
 
         <!-- Uri that specifies a settings Slice for this wallpaper. -->
-        <attr name="settingsSliceUri" />
+        <attr name="settingsSliceUri" format="string"/>
 
         <!-- Indicates that this wallpaper service can support multiple engines to render on each
              surface independently. An example use case is a multi-display set-up where the
@@ -8262,7 +8268,7 @@
         <!-- The activity to launch when the setting is clicked on. -->
         <attr name="settingsActivity"/>
         <!-- The user restriction for this preference. -->
-        <attr name="userRestriction"/>
+        <attr name="userRestriction" format="string"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -8920,7 +8926,7 @@
         <attr name="layout_ignoreOffset" format="boolean" />
         <attr name="layout_gravity" />
         <attr name="layout_hasNestedScrollIndicator" format="boolean" />
-        <attr name="layout_maxHeight" />
+        <attr name="layout_maxHeight" format="dimension"/>
     </declare-styleable>
 
     <!-- @hide -->
@@ -9130,4 +9136,6 @@
         <attr name="magnifierHorizontalOffset" format="dimension" />
         <attr name="magnifierColorOverlay" format="color" />
     </declare-styleable>
+
+    <attr name="autoSizePresetSizes" />
 </resources>

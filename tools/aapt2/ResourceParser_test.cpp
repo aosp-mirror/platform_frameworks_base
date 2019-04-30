@@ -341,7 +341,7 @@ TEST_F(ResourceParserTest, ParseAttrAndDeclareStyleableUnderConfigButRecordAsNoC
   std::string input = R"(
       <attr name="foo" />
       <declare-styleable name="bar">
-        <attr name="baz" />
+        <attr name="baz" format="reference"/>
       </declare-styleable>)";
   ASSERT_TRUE(TestParse(input, watch_config));
 
@@ -589,8 +589,7 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
   EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
 
   Attribute* attr = test::GetValue<Attribute>(&table_, "attr/bar");
-  ASSERT_THAT(attr, NotNull());
-  EXPECT_TRUE(attr->IsWeak());
+  ASSERT_THAT(attr, IsNull());
 
   attr = test::GetValue<Attribute>(&table_, "attr/bat");
   ASSERT_THAT(attr, NotNull());
