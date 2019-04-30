@@ -133,7 +133,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
-    private KeyguardIndicationController mIndicationController;
     private AccessibilityController mAccessibilityController;
     private StatusBar mStatusBar;
     private KeyguardAffordanceHelper mAffordanceHelper;
@@ -221,7 +220,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     };
 
     public void initFrom(KeyguardBottomAreaView oldBottomArea) {
-        setKeyguardIndicationController(oldBottomArea.mIndicationController);
         setStatusBar(oldBottomArea.mStatusBar);
     }
 
@@ -706,15 +704,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     updateLeftAffordance();
                 }
             };
-
-    public void setKeyguardIndicationController(
-            KeyguardIndicationController keyguardIndicationController) {
-        mIndicationController = keyguardIndicationController;
-    }
-
-    public void showTransientIndication(int id) {
-        mIndicationController.showTransientIndication(id);
-    }
 
     public void updateLeftAffordance() {
         updateLeftAffordanceIcon();
