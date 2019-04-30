@@ -87,8 +87,8 @@ status_t ProtoDecryptor::readOneBlock(string* output) {
             mReader->move(toRead);
         }
         if (pos != sectionSize) {
-            ALOGE("Failed to read one block");
             return BAD_VALUE;
+            ALOGE("Failed to read one block");
         }
     } else {
         return BAD_VALUE;
