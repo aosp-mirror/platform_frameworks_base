@@ -34,6 +34,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -175,6 +176,13 @@ public class SystemUIFactory {
     public AssistManager provideAssistManager(DeviceProvisionedController controller,
             Context context) {
         return new AssistManager(controller, context);
+    }
+
+    @Singleton
+    @Provides
+    @Nullable
+    public DockManager provideDockManager(Context context) {
+        return null;
     }
 
     @Singleton
