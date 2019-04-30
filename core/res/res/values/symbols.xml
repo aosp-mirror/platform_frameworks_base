@@ -1406,6 +1406,9 @@
   <java-symbol type="drawable" name="ic_wifi_signal_2" />
   <java-symbol type="drawable" name="ic_wifi_signal_3" />
   <java-symbol type="drawable" name="ic_wifi_signal_4" />
+  <java-symbol type="drawable" name="ic_signal_wifi_transient_animation" />
+  <java-symbol type="drawable" name="ic_hotspot_transient_animation" />
+  <java-symbol type="drawable" name="ic_bluetooth_transient_animation" />
   <java-symbol type="drawable" name="stat_notify_rssi_in_range" />
   <java-symbol type="drawable" name="stat_sys_gps_on" />
   <java-symbol type="drawable" name="stat_sys_tether_wifi" />
