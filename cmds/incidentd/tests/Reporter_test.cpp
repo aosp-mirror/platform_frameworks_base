@@ -144,9 +144,9 @@ TEST_F(ReporterTest, IncidentReportArgs) {
     args2.addSection(3);
 
     args1.merge(args2);
-    ASSERT_TRUE(args1.containsSection(1));
-    ASSERT_FALSE(args1.containsSection(2));
-    ASSERT_TRUE(args1.containsSection(3));
+    ASSERT_TRUE(args1.containsSection(1, false));
+    ASSERT_FALSE(args1.containsSection(2, false));
+    ASSERT_TRUE(args1.containsSection(3, false));
 }
 
 /*

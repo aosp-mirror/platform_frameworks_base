@@ -63,6 +63,15 @@ static pid_t fork_execute_incident_helper(const int id, Fpipe* p2cPipe, Fpipe* c
     return fork_execute_cmd(const_cast<char**>(ihArgs), p2cPipe, c2pPipe);
 }
 
+bool section_requires_specific_mention(int sectionId) {
+    switch (sectionId) {
+        case 3025: // restricted_images
+            return true;
+        default:
+            return false;
+    }
+}
+
 // ================================================================================
 Section::Section(int i, int64_t timeoutMs)
     : id(i),

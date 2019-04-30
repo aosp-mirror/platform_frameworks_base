@@ -171,6 +171,13 @@ private:
     std::string mType;
 };
 
+
+/**
+ * These sections will not be generated when doing an 'all' report, either
+ * for size, speed of collection, or privacy.
+ */
+bool section_requires_specific_mention(int sectionId);
+
 }  // namespace incidentd
 }  // namespace os
 }  // namespace android
