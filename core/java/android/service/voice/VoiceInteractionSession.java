@@ -76,6 +76,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -170,6 +171,9 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
 
     final WeakReference<VoiceInteractionSession> mWeakRef
             = new WeakReference<VoiceInteractionSession>(this);
+
+    // Registry of remote callbacks pending a reply with reply handles.
+    final Map<SafeResultListener, Consumer<Bundle>> mRemoteCallbacks = new ArrayMap<>();
 
     ICancellationSignal mKillCallback;
 
@@ -1105,6 +1109,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             } catch (RemoteException e) {
                 /* ignore */
             }
+            mKillCallback = null;
         }
         if (mInitialized) {
             mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
@@ -1314,8 +1319,6 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
-
-
     /**
      * <p>Ask that a new assistant activity be started.  This will create a new task in the
      * in activity manager: this means that
@@ -1349,19 +1352,57 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      *
      * @param activityId Ths activity id of the app to get the actions from.
      * @param resultExecutor The handler to receive the callback
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *     or {@code null} if none.
      * @param callback The callback to receive the response
      */
     public final void requestDirectActions(@NonNull ActivityId activityId,
+            @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor resultExecutor,
             @NonNull Consumer<List<DirectAction>> callback) {
+        Preconditions.checkNotNull(activityId);
+        Preconditions.checkNotNull(resultExecutor);
+        Preconditions.checkNotNull(callback);
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
         }
+
+        if (cancellationSignal != null) {
+            cancellationSignal.throwIfCanceled();
+        }
+
+        final RemoteCallback cancellationCallback = (cancellationSignal != null)
+                ? new RemoteCallback(b -> {
+                    if (b != null) {
+                        final IBinder cancellation = b.getBinder(
+                                VoiceInteractor.KEY_CANCELLATION_SIGNAL);
+                        if (cancellation != null) {
+                            cancellationSignal.setRemote(ICancellationSignal.Stub.asInterface(
+                                    cancellation));
+                        }
+                    }
+                })
+                : null;
+
         try {
             mSystemService.requestDirectActions(mToken, activityId.getTaskId(),
-                    activityId.getAssistToken(), new RemoteCallback(new DirectActionsReceiver(
-                            Preconditions.checkNotNull(resultExecutor),
-                            Preconditions.checkNotNull(callback))));
+                    activityId.getAssistToken(), cancellationCallback,
+                    new RemoteCallback(createSafeResultListener((result) -> {
+                List<DirectAction> list;
+                if (result == null) {
+                    list = Collections.emptyList();
+                } else {
+                    final ParceledListSlice<DirectAction> pls = result.getParcelable(
+                            DirectAction.KEY_ACTIONS_LIST);
+                    if (pls != null) {
+                        final List<DirectAction> receivedList = pls.getList();
+                        list = (receivedList != null) ? receivedList : Collections.emptyList();
+                    } else {
+                        list = Collections.emptyList();
+                    }
+                }
+                resultExecutor.execute(() -> callback.accept(list));
+            })));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -1390,8 +1431,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
      * @param resultExecutor The handler to receive the callback.
      * @param resultListener The callback to receive the response.
      *
-     * @see #requestDirectActions(ActivityId, Executor, Consumer)
-     * @see Activity#onGetDirectActions()
+     * @see #requestDirectActions(ActivityId, CancellationSignal, Executor, Consumer)
+     * @see Activity#onGetDirectActions(CancellationSignal, Consumer)
      */
     public final void performDirectAction(@NonNull DirectAction action, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal,
@@ -1407,26 +1448,31 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             cancellationSignal.throwIfCanceled();
         }
 
-        final RemoteCallback remoteCallback = new RemoteCallback(b -> {
-            if (b != null) {
-                final IBinder cancellation = b.getBinder(VoiceInteractor.KEY_CANCELLATION_SIGNAL);
-                if (cancellation != null) {
-                    if (cancellationSignal != null) {
-                        cancellationSignal.setRemote(ICancellationSignal.Stub.asInterface(
-                                cancellation));
+        final RemoteCallback cancellationCallback = (cancellationSignal != null)
+                ? new RemoteCallback(createSafeResultListener(b -> {
+                    if (b != null) {
+                        final IBinder cancellation = b.getBinder(
+                                VoiceInteractor.KEY_CANCELLATION_SIGNAL);
+                        if (cancellation != null) {
+                            cancellationSignal.setRemote(ICancellationSignal.Stub.asInterface(
+                                    cancellation));
+                        }
                     }
-                } else {
-                    resultExecutor.execute(() -> resultListener.accept(b));
-                }
+                }))
+                : null;
+
+        final RemoteCallback resultCallback = new RemoteCallback(createSafeResultListener(b -> {
+            if (b != null) {
+                resultExecutor.execute(() -> resultListener.accept(b));
             } else {
                 resultExecutor.execute(() -> resultListener.accept(Bundle.EMPTY));
             }
-        });
+        }));
 
         try {
             mSystemService.performDirectAction(mToken, action.getId(), extras,
-                    action.getTaskId(), action.getActivityId(), remoteCallback,
-                    remoteCallback);
+                    action.getTaskId(), action.getActivityId(), cancellationCallback,
+                    resultCallback);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -1901,33 +1947,18 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
     }
 
-    private static class DirectActionsReceiver implements RemoteCallback.OnResultListener {
-
-        @NonNull
-        private final Executor mResultExecutor;
-        private final Consumer<List<DirectAction>> mCallback;
-
-        DirectActionsReceiver(Executor resultExecutor, Consumer<List<DirectAction>> callback) {
-            mResultExecutor = resultExecutor;
-            mCallback = callback;
+    private SafeResultListener createSafeResultListener(
+            @NonNull Consumer<Bundle> consumer) {
+        synchronized (this) {
+            final SafeResultListener listener = new SafeResultListener(consumer, this);
+            mRemoteCallbacks.put(listener, consumer);
+            return listener;
         }
+    }
 
-        @Override
-        public void onResult(Bundle result) {
-            final List<DirectAction> list;
-            if (result == null) {
-                list = Collections.emptyList();
-            } else {
-                final ParceledListSlice<DirectAction> pls = result.getParcelable(
-                        DirectAction.KEY_ACTIONS_LIST);
-                if (pls != null) {
-                    final List<DirectAction> receivedList = pls.getList();
-                    list = (receivedList != null) ? receivedList : Collections.emptyList();
-                } else {
-                    list = Collections.emptyList();
-                }
-            }
-            mResultExecutor.execute(() -> mCallback.accept(list));
+    private Consumer<Bundle> removeSafeResultListener(@NonNull SafeResultListener listener) {
+        synchronized (this) {
+            return mRemoteCallbacks.remove(listener);
         }
     }
 
@@ -2060,6 +2091,26 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             int result = mTaskId;
             result = 31 * result + (mAssistToken != null ? mAssistToken.hashCode() : 0);
             return result;
+        }
+    }
+
+    private static class SafeResultListener implements RemoteCallback.OnResultListener {
+        private final @NonNull WeakReference<VoiceInteractionSession> mWeakSession;
+
+        SafeResultListener(@NonNull Consumer<Bundle> action,
+                @NonNull VoiceInteractionSession session) {
+            mWeakSession = new WeakReference<>(session);
+        }
+
+        @Override
+        public void onResult(Bundle result) {
+            final VoiceInteractionSession session = mWeakSession.get();
+            if (session != null) {
+                final Consumer<Bundle> consumer = session.removeSafeResultListener(this);
+                if (consumer != null) {
+                    consumer.accept(result);
+                }
+            }
         }
     }
 }
