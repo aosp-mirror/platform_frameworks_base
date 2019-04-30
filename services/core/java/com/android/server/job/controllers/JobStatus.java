@@ -161,6 +161,12 @@ public final class JobStatus {
      */
     private final long latestRunTimeElapsedMillis;
 
+    /**
+     * Valid only for periodic jobs. The original latest point in the future at which this
+     * job was expected to run.
+     */
+    private long mOriginalLatestRunTimeElapsedMillis;
+
     /** How many times this job has failed, used to compute back-off. */
     private final int numFailures;
 
@@ -394,6 +400,7 @@ public final class JobStatus {
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
+        this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
 
         int requiredConstraints = job.getConstraintFlags();
@@ -869,6 +876,14 @@ public final class JobStatus {
 
     public long getLatestRunTimeElapsed() {
         return latestRunTimeElapsedMillis;
+    }
+
+    public long getOriginalLatestRunTimeElapsed() {
+        return mOriginalLatestRunTimeElapsedMillis;
+    }
+
+    public void setOriginalLatestRunTimeElapsed(long latestRunTimeElapsed) {
+        mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsed;
     }
 
     /**
