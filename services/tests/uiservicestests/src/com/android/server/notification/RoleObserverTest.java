@@ -16,57 +16,18 @@
 
 package com.android.server.notification;
 
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
-import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
-import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-import static android.app.NotificationManager.IMPORTANCE_HIGH;
-import static android.app.NotificationManager.IMPORTANCE_LOW;
-import static android.app.NotificationManager.IMPORTANCE_MAX;
-import static android.app.NotificationManager.IMPORTANCE_NONE;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.app.role.RoleManager.ROLE_DIALER;
 import static android.app.role.RoleManager.ROLE_EMERGENCY;
 import static android.app.role.RoleManager.ROLE_SMS;
-import static android.content.pm.PackageManager.FEATURE_WATCH;
-import static android.content.pm.PackageManager.PERMISSION_DENIED;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.Build.VERSION_CODES.O_MR1;
-import static android.os.Build.VERSION_CODES.P;
-import static android.service.notification.Adjustment.KEY_IMPORTANCE;
-import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
-import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
-import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.content.pm.PackageManager.MATCH_ALL;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,94 +35,43 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
-import android.app.INotificationManager;
-import android.app.ITransientNotification;
 import android.app.IUriGrantsManager;
-import android.app.Notification;
-import android.app.Notification.MessagingStyle.Message;
-import android.app.NotificationChannel;
-import android.app.NotificationChannelGroup;
-import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.role.RoleManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
-import android.content.ComponentName;
-import android.content.ContentUris;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
-import android.graphics.Color;
-import android.media.AudioManager;
-import android.net.Uri;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
-import android.provider.MediaStore;
-import android.provider.Settings;
-import android.service.notification.Adjustment;
-import android.service.notification.NotificationListenerService;
-import android.service.notification.NotificationStats;
-import android.service.notification.NotifyingApp;
-import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.testing.TestablePermissions;
-import android.text.Html;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Pair;
 
-import com.android.internal.R;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.server.LocalServices;
 import com.android.server.UiServiceTestCase;
-import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.stubbing.Answer;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-
-import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -174,6 +84,8 @@ public class RoleObserverTest extends UiServiceTestCase {
 
     @Mock
     private PreferencesHelper mPreferencesHelper;
+    @Mock
+    private IPackageManager mPm;
     @Mock
     private UserManager mUm;
     @Mock
@@ -214,7 +126,7 @@ public class RoleObserverTest extends UiServiceTestCase {
         when(mUm.getUsers()).thenReturn(mUsers);
 
         mService = new TestableNotificationManagerService(mContext);
-        mRoleObserver = mService.new RoleObserver(mRoleManager, mExecutor);
+        mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
             mService.init(mock(Looper.class),
@@ -238,13 +150,26 @@ public class RoleObserverTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testInit() {
+    public void testInit() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
         List<String> emer0 = new ArrayList<>();
         emer0.add("emergency");
         List<String> sms10 = new ArrayList<>();
         sms10.add("sms");
+
+        ArraySet<Pair<String, Integer>> dialer0Pair = new ArraySet<>();
+        dialer0Pair.add(new Pair("dialer", 30));
+        when(mPm.getPackageUid("dialer", MATCH_ALL, 0)).thenReturn(30);
+
+        ArraySet<Pair<String, Integer>> emer0Pair = new ArraySet<>();
+        emer0Pair.add(new Pair("emergency", 40));
+        when(mPm.getPackageUid("emergency", MATCH_ALL, 0)).thenReturn(40);
+
+        ArraySet<Pair<String, Integer>> sms10Pair = new ArraySet<>();
+        sms10Pair.add(new Pair("sms", 50));
+        when(mPm.getPackageUid("sms", MATCH_ALL, 10)).thenReturn(50);
+
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
                 mUsers.get(0).getUserHandle())).
@@ -285,13 +210,13 @@ public class RoleObserverTest extends UiServiceTestCase {
                 eq(mExecutor), any(), eq(UserHandle.ALL));
 
         // make sure we told pref helper about the state of the world
-        verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, new ArraySet<>(dialer0));
-        verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, new ArraySet<>(emer0));
-        verify(mPreferencesHelper, times(1)).updateDefaultApps(10, null, new ArraySet<>(sms10));
+        verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, dialer0Pair);
+        verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, emer0Pair);
+        verify(mPreferencesHelper, times(1)).updateDefaultApps(10, null, sms10Pair);
     }
 
     @Test
-    public void testSwapDefault() {
+    public void testSwapDefault() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
 
@@ -305,6 +230,10 @@ public class RoleObserverTest extends UiServiceTestCase {
         List<String> newDefault = new ArrayList<>();
         newDefault.add("phone");
 
+        ArraySet<Pair<String, Integer>> newDefaultPair = new ArraySet<>();
+        newDefaultPair.add(new Pair("phone", 30));
+        when(mPm.getPackageUid("phone", MATCH_ALL, 0)).thenReturn(30);
+
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
                 mUsers.get(0).getUserHandle())).
@@ -313,11 +242,11 @@ public class RoleObserverTest extends UiServiceTestCase {
         mRoleObserver.onRoleHoldersChanged(ROLE_DIALER, UserHandle.of(0));
 
         verify(mPreferencesHelper, times(1)).updateDefaultApps(
-                0, new ArraySet<>(dialer0), new ArraySet<>(newDefault));
+                0, new ArraySet<>(dialer0), newDefaultPair);
     }
 
     @Test
-    public void testSwapDefault_multipleOverlappingApps() {
+    public void testSwapDefault_multipleOverlappingApps() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
         dialer0.add("phone");
@@ -342,15 +271,17 @@ public class RoleObserverTest extends UiServiceTestCase {
                 mUsers.get(0).getUserHandle())).
                 thenReturn(newDefault);
 
-        mRoleObserver.onRoleHoldersChanged(ROLE_DIALER, UserHandle.of(0));
-
         ArraySet<String> expectedRemove = new ArraySet<>();
         expectedRemove.add("dialer");
-        ArraySet<String> expectedAdd = new ArraySet<>();
-        expectedAdd.add("emerPhone");
+
+        ArraySet<Pair<String, Integer>> expectedAddPair = new ArraySet<>();
+        expectedAddPair.add(new Pair("emerPhone", 30));
+        when(mPm.getPackageUid("emerPhone", MATCH_ALL, 0)).thenReturn(30);
+
+        mRoleObserver.onRoleHoldersChanged(ROLE_DIALER, UserHandle.of(0));
 
         verify(mPreferencesHelper, times(1)).updateDefaultApps(
-                0, expectedRemove, expectedAdd);
+                0, expectedRemove, expectedAddPair);
 
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(ROLE_DIALER, "phone", 0));
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(ROLE_DIALER, "emerPhone", 0));
@@ -358,7 +289,7 @@ public class RoleObserverTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSwapDefault_newUser() {
+    public void testSwapDefault_newUser() throws Exception {
         List<String> dialer0 = new ArrayList<>();
         dialer0.add("dialer");
 
@@ -377,6 +308,10 @@ public class RoleObserverTest extends UiServiceTestCase {
                 mUsers.get(1).getUserHandle())).
                 thenReturn(dialer10);
 
+        ArraySet<Pair<String, Integer>> expectedAddPair = new ArraySet<>();
+        expectedAddPair.add(new Pair("phone", 30));
+        when(mPm.getPackageUid("phone", MATCH_ALL, 10)).thenReturn(30);
+
         mRoleObserver.onRoleHoldersChanged(ROLE_DIALER, UserHandle.of(10));
 
         ArraySet<String> expectedRemove = new ArraySet<>();
@@ -384,7 +319,7 @@ public class RoleObserverTest extends UiServiceTestCase {
         expectedAdd.add("phone");
 
         verify(mPreferencesHelper, times(1)).updateDefaultApps(
-                10, expectedRemove, expectedAdd);
+                10, expectedRemove, expectedAddPair);
 
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(ROLE_DIALER, "phone", 10));
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(ROLE_DIALER, "dialer", 0));
