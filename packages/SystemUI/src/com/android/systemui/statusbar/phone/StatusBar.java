@@ -3584,7 +3584,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Notify overview proxy service of the new states
         Dependency.get(OverviewProxyService.class).setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING,
-                isBouncerShowing());
+                isBouncerShowing(), mContext.getDisplayId());
     }
 
     /**
