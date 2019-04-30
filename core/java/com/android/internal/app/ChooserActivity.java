@@ -3059,10 +3059,9 @@ public class ChooserActivity extends ResolverActivity {
             int yDiff = (int) ((oldy - y) * DIRECT_SHARE_EXPANSION_RATE);
 
             int prevHeight = mDirectShareCurrHeight;
-            mDirectShareCurrHeight = Math.min(mDirectShareCurrHeight + yDiff,
-                    mDirectShareMaxHeight);
-            mDirectShareCurrHeight = Math.max(mDirectShareCurrHeight, mDirectShareMinHeight);
-            yDiff = mDirectShareCurrHeight - prevHeight;
+            int newHeight = Math.min(prevHeight + yDiff, mDirectShareMaxHeight);
+            newHeight = Math.max(newHeight, mDirectShareMinHeight);
+            yDiff = newHeight - prevHeight;
 
             if (view == null || view.getChildCount() == 0 || yDiff == 0) {
                 return;
@@ -3079,7 +3078,7 @@ public class ChooserActivity extends ResolverActivity {
                     if (child.getTag() != null && child.getTag() instanceof DirectShareViewHolder) {
                         int widthSpec = MeasureSpec.makeMeasureSpec(child.getWidth(),
                                 MeasureSpec.EXACTLY);
-                        int heightSpec = MeasureSpec.makeMeasureSpec(mDirectShareCurrHeight,
+                        int heightSpec = MeasureSpec.makeMeasureSpec(newHeight,
                                 MeasureSpec.EXACTLY);
                         child.measure(widthSpec, heightSpec);
                         child.getLayoutParams().height = child.getMeasuredHeight();
@@ -3089,6 +3088,10 @@ public class ChooserActivity extends ResolverActivity {
                         foundExpansion = true;
                     }
                 }
+            }
+
+            if (foundExpansion) {
+                mDirectShareCurrHeight = newHeight;
             }
         }
     }
