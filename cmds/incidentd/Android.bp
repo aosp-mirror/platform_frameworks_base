@@ -31,6 +31,7 @@ cc_binary {
         "-Wno-missing-field-initializers",
         "-Wno-unused-variable",
         "-Wunused-parameter",
+        "-Wno-tautological-undefined-compare",
 
         // Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
         "-Wno-error=implicit-fallthrough",
@@ -96,6 +97,7 @@ cc_test {
         "-Wno-unused-variable",
         "-Wunused-parameter",
         "-g",
+        "-Wno-tautological-undefined-compare",
 
         // Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
         "-Wno-error=implicit-fallthrough",

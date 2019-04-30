@@ -174,12 +174,11 @@ void ReportHandler::schedule_send_broadcasts_locked() {
 }
 
 void ReportHandler::take_report() {
-    // Cycle the batch
+    // Cycle the batch and throttle.
     sp<ReportBatch> batch;
     {
         unique_lock<mutex> lock(mLock);
-        batch = mBatch;
-        mBatch = new ReportBatch();
+        batch = mThrottler->filterBatch(mBatch);
     }
 
     if (batch->empty()) {
@@ -189,13 +188,6 @@ void ReportHandler::take_report() {
 
     sp<Reporter> reporter = new Reporter(mWorkDirectory, batch);
 
-    // TODO: Do we really want to clear the reports if we throttle?  Should we only throttle
-    // requests going to dropbox?  How do we reconcile throttling with testing?
-    if (mThrottler->shouldThrottle()) {
-        ALOGW("RunReport got throttled.");
-        return;
-    }
-
     // Take the report, which might take a while. More requests might queue
     // up while we're doing this, and we'll handle them in their next batch.
     // TODO: We should further rate-limit the reports to no more than N per time-period.
@@ -203,7 +195,13 @@ void ReportHandler::take_report() {
     size_t reportByteSize = 0;
     reporter->runReport(&reportByteSize);
 
-    mThrottler->addReportSize(reportByteSize);
+    // Tell the throttler how big it was, for the next throttling.
+    // TODO: This still isn't ideal. The throttler really should just track the
+    // persisted reqeusts, but changing Reporter::runReport() to track that individually
+    // will be a big change.
+    if (batch->hasPersistedReports()) {
+        mThrottler->addReportSize(reportByteSize);
+    }
 
     // Kick off the next steps, one of which is to send any new or otherwise remaining
     // approvals, and one of which is to send any new or remaining broadcasts.
@@ -247,11 +245,11 @@ IncidentService::IncidentService(const sp<Looper>& handlerLooper) {
 IncidentService::~IncidentService() {}
 
 Status IncidentService::reportIncident(const IncidentReportArgs& args) {
-    // TODO: Validate that the privacy policy is one of the real ones.
-    // If it isn't, clamp it to the next more restrictive real one.
+    IncidentReportArgs argsCopy(args);
 
-    // TODO: This function should reject the LOCAL privacy policy.
-    // Those have to stream.
+    // Validate that the privacy policy is one of the real ones.
+    // If it isn't, clamp it to the next more restrictive real one.
+    argsCopy.setPrivacyPolicy(cleanup_privacy_policy(args.getPrivacyPolicy()));
 
     // TODO: Check that the broadcast recevier has the proper permissions
     // TODO: Maybe we should consider relaxing the permissions if it's going to
@@ -261,8 +259,15 @@ Status IncidentService::reportIncident(const IncidentReportArgs& args) {
         return status;
     }
 
+    // If they asked for the LOCAL privacy policy, give them EXPLICT.  LOCAL has to
+    // be streamed. (This only applies to shell/root, because everyone else would have
+    // been rejected by checkIncidentPermissions()).
+    if (argsCopy.getPrivacyPolicy() < PRIVACY_POLICY_EXPLICIT) {
+        ALOGI("Demoting privacy policy to EXPLICT for persisted report.");
+        argsCopy.setPrivacyPolicy(PRIVACY_POLICY_EXPLICIT);
+    }
+
     // If they didn't specify a component, use dropbox.
-    IncidentReportArgs argsCopy(args);
     if (argsCopy.receiverPkg().length() == 0 && argsCopy.receiverCls().length() == 0) {
         argsCopy.setReceiverPkg(DROPBOX_SENTINEL.getPackageName());
         argsCopy.setReceiverCls(DROPBOX_SENTINEL.getClassName());
@@ -276,21 +281,20 @@ Status IncidentService::reportIncident(const IncidentReportArgs& args) {
 Status IncidentService::reportIncidentToStream(const IncidentReportArgs& args,
                                                const sp<IIncidentReportStatusListener>& listener,
                                                const unique_fd& stream) {
-    // TODO: Validate that the privacy policy is one of the real ones.
-    // If it isn't, clamp it to the next more restrictive real one.
-
-    // TODO: Only shell should be able to do a LOCAL privacy policy report.
+    IncidentReportArgs argsCopy(args);
 
     // Streaming reports can not also be broadcast.
-    IncidentReportArgs argsCopy(args);
     argsCopy.setReceiverPkg("");
     argsCopy.setReceiverCls("");
+
+    // Validate that the privacy policy is one of the real ones.
+    // If it isn't, clamp it to the next more restrictive real one.
+    argsCopy.setPrivacyPolicy(cleanup_privacy_policy(args.getPrivacyPolicy()));
 
     Status status = checkIncidentPermissions(argsCopy);
     if (!status.isOk()) {
         return status;
     }
-
 
     // The ReportRequest takes ownership of the fd, so we need to dup it.
     int fd = dup(stream.get());

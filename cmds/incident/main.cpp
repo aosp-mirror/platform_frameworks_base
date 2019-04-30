@@ -263,6 +263,9 @@ main(int argc, char** argv)
                 return 1;
         }
     }
+    if (destination == DEST_UNSET) {
+        destination = DEST_STDOUT;
+    }
 
     string pkg;
     string cls;
