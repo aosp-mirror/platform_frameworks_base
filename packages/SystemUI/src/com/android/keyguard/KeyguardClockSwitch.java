@@ -9,12 +9,14 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.os.Build;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
 import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.transition.TransitionValues;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.View;
@@ -46,6 +48,8 @@ import javax.inject.Named;
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
 public class KeyguardClockSwitch extends RelativeLayout {
+
+    private static final String TAG = "KeyguardClockSwitch";
 
     /**
      * Controller used to track StatusBar state to know when to show the big_clock_container.
@@ -342,6 +346,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockViewBold.refresh();
         if (mClockPlugin != null) {
             mClockPlugin.onTimeTick();
+        }
+        if (Build.IS_DEBUGGABLE) {
+            // Log for debugging b/130888082 (sysui waking up, but clock not updating)
+            Log.d(TAG, "Updating clock: " + mClockView.getText());
         }
     }
 
