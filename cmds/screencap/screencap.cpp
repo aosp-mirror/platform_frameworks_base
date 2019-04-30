@@ -86,20 +86,6 @@ static sk_sp<SkColorSpace> dataSpaceToColorSpace(ui::Dataspace d)
     }
 }
 
-static ui::Dataspace pickBestDataspace(ui::ColorMode colorMode)
-{
-    switch (colorMode) {
-        case ui::ColorMode::SRGB:
-            return ui::Dataspace::V0_SRGB;
-        case ui::ColorMode::DISPLAY_P3:
-        case ui::ColorMode::BT2100_PQ:
-        case ui::ColorMode::BT2100_HLG:
-            return ui::Dataspace::DISPLAY_P3;
-        default:
-            return ui::Dataspace::V0_SRGB;
-    }
-}
-
 static uint32_t dataSpaceToInt(ui::Dataspace d)
 {
     switch (d) {
@@ -181,14 +167,6 @@ int main(int argc, char** argv)
     uint32_t w, s, h, f;
     size_t size = 0;
 
-    // Maps orientations from DisplayInfo to ISurfaceComposer
-    static const uint32_t ORIENTATION_MAP[] = {
-        ISurfaceComposer::eRotateNone, // 0 == DISPLAY_ORIENTATION_0
-        ISurfaceComposer::eRotate270, // 1 == DISPLAY_ORIENTATION_90
-        ISurfaceComposer::eRotate180, // 2 == DISPLAY_ORIENTATION_180
-        ISurfaceComposer::eRotate90, // 3 == DISPLAY_ORIENTATION_270
-    };
-
     // setThreadPoolMaxThreadCount(0) actually tells the kernel it's
     // not allowed to spawn any additional threads, but we still spawn
     // a binder thread from userspace when we call startThreadPool().
@@ -196,34 +174,10 @@ int main(int argc, char** argv)
     ProcessState::self()->setThreadPoolMaxThreadCount(0);
     ProcessState::self()->startThreadPool();
 
-    const sp<IBinder> display = SurfaceComposerClient::getPhysicalDisplayToken(*displayId);
-    if (display == nullptr) {
-        fprintf(stderr, "Failed to get token for invalid display %"
-                ANDROID_PHYSICAL_DISPLAY_ID_FORMAT "\n", *displayId);
-        return 1;
-    }
-
-    Vector<DisplayInfo> configs;
-    SurfaceComposerClient::getDisplayConfigs(display, &configs);
-    int activeConfig = SurfaceComposerClient::getActiveConfig(display);
-    if (static_cast<size_t>(activeConfig) >= configs.size()) {
-        fprintf(stderr, "Active config %d not inside configs (size %zu)\n",
-                activeConfig, configs.size());
-        return 1;
-    }
-    uint8_t displayOrientation = configs[activeConfig].orientation;
-    uint32_t captureOrientation = ORIENTATION_MAP[displayOrientation];
-
+    ui::Dataspace outDataspace;
     sp<GraphicBuffer> outBuffer;
-    ui::Dataspace reqDataspace =
-        pickBestDataspace(SurfaceComposerClient::getActiveColorMode(display));
 
-    // Due to the fact that we hard code the way we write pixels into screenshot,
-    // we hard code RGBA_8888 here.
-    ui::PixelFormat reqPixelFormat = ui::PixelFormat::RGBA_8888;
-    status_t result = ScreenshotClient::capture(display, reqDataspace, reqPixelFormat, Rect(),
-                                                0 /* reqWidth */, 0 /* reqHeight */, false,
-                                                captureOrientation, &outBuffer);
+    status_t result = ScreenshotClient::capture(*displayId, &outDataspace, &outBuffer);
     if (result != NO_ERROR) {
         close(fd);
         return 1;
@@ -233,10 +187,10 @@ int main(int argc, char** argv)
 
     if (base == nullptr || result != NO_ERROR) {
         String8 reason;
-        if (base == nullptr) {
-            reason = "Failed to write to buffer";
+        if (result != NO_ERROR) {
+            reason.appendFormat(" Error Code: %d", result);
         } else {
-            reason.appendFormat("Error Code: %d", result);
+            reason = "Failed to write to buffer";
         }
         fprintf(stderr, "Failed to take screenshot (%s)\n", reason.c_str());
         close(fd);
@@ -252,7 +206,7 @@ int main(int argc, char** argv)
     if (png) {
         const SkImageInfo info =
             SkImageInfo::Make(w, h, flinger2skia(f), kPremul_SkAlphaType,
-                              dataSpaceToColorSpace(reqDataspace));
+                              dataSpaceToColorSpace(outDataspace));
         SkPixmap pixmap(info, base, s * bytesPerPixel(f));
         struct FDWStream final : public SkWStream {
           size_t fBytesWritten = 0;
@@ -269,7 +223,7 @@ int main(int argc, char** argv)
             notifyMediaScanner(fn);
         }
     } else {
-        uint32_t c = dataSpaceToInt(reqDataspace);
+        uint32_t c = dataSpaceToInt(outDataspace);
         write(fd, &w, 4);
         write(fd, &h, 4);
         write(fd, &f, 4);
