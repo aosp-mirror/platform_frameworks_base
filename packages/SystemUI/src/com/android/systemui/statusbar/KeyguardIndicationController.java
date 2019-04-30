@@ -143,11 +143,6 @@ public class KeyguardIndicationController implements StateListener,
             StatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
-        mIndicationArea = indicationArea;
-        mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
-        mInitialTextColorState = mTextView != null ?
-                mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
-        mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
         mShadeController = shadeController;
         mAccessibilityController = accessibilityController;
@@ -172,6 +167,7 @@ public class KeyguardIndicationController implements StateListener,
 
         mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        setIndicationArea(indicationArea);
         updateDisclosure();
 
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
@@ -180,17 +176,13 @@ public class KeyguardIndicationController implements StateListener,
         mUnlockMethodCache.addListener(this);
     }
 
-    /**
-     * Used by {@link com.android.systemui.statusbar.phone.StatusBar} to give the indication
-     * controller a chance to unregister itself as a receiver.
-     *
-     * //TODO: This can probably be converted to a fragment and not have to be manually recreated
-     */
-    public void destroy() {
-        mKeyguardUpdateMonitor.removeCallback(mTickReceiver);
-        mKeyguardUpdateMonitor.removeCallback(getKeyguardCallback());
-        mStatusBarStateController.removeCallback(this);
-        mUnlockMethodCache.removeListener(this);
+    public void setIndicationArea(ViewGroup indicationArea) {
+        mIndicationArea = indicationArea;
+        mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
+        mInitialTextColorState = mTextView != null ?
+                mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
+        mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
+        updateIndication(false /* animate */);
     }
 
     private boolean handleLockLongClick(View view) {

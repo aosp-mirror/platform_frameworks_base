@@ -80,7 +80,6 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -731,12 +730,14 @@ public class ZenModeHelper {
 
     public void writeXml(XmlSerializer out, boolean forBackup, Integer version, int userId)
             throws IOException {
-        final int N = mConfigs.size();
-        for (int i = 0; i < N; i++) {
-            if (forBackup && mConfigs.keyAt(i) != userId) {
-                continue;
+        synchronized (mConfigs) {
+            final int n = mConfigs.size();
+            for (int i = 0; i < n; i++) {
+                if (forBackup && mConfigs.keyAt(i) != userId) {
+                    continue;
+                }
+                mConfigs.valueAt(i).writeXml(out, version);
             }
-            mConfigs.valueAt(i).writeXml(out, version);
         }
     }
 

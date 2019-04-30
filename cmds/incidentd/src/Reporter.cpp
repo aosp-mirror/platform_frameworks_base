@@ -66,22 +66,18 @@ IncidentMetadata_Destination privacy_policy_to_dest(uint8_t privacyPolicy) {
     }
 }
 
-void poo_make_metadata(IncidentMetadata* result, const IncidentMetadata& full,
-        int64_t reportId, int32_t privacyPolicy, const IncidentReportArgs& args) {
-    result->set_report_id(reportId);
-    result->set_dest(privacy_policy_to_dest(privacyPolicy));
 
-    size_t sectionCount = full.sections_size();
-    for (int sectionIndex = 0; sectionIndex < sectionCount; sectionIndex++) {
-        const IncidentMetadata::SectionStats& sectionStats = full.sections(sectionIndex);
-        if (args.containsSection(sectionStats.id())) {
-            *result->add_sections() = sectionStats;
-        }
-    }
+static bool contains_section(const IncidentReportArgs& args, int sectionId) {
+    return args.containsSection(sectionId, section_requires_specific_mention(sectionId));
+}
+
+static bool contains_section(const sp<ReportRequest>& args, int sectionId) {
+    return args->containsSection(sectionId);
 }
 
 // ARGS must have a containsSection(int) method
-template <typename ARGS> void make_metadata(IncidentMetadata* result, const IncidentMetadata& full,
+template <typename ARGS>
+void make_metadata(IncidentMetadata* result, const IncidentMetadata& full,
         int64_t reportId, int32_t privacyPolicy, ARGS args) {
     result->set_report_id(reportId);
     result->set_dest(privacy_policy_to_dest(privacyPolicy));
@@ -89,7 +85,7 @@ template <typename ARGS> void make_metadata(IncidentMetadata* result, const Inci
     size_t sectionCount = full.sections_size();
     for (int sectionIndex = 0; sectionIndex < sectionCount; sectionIndex++) {
         const IncidentMetadata::SectionStats& sectionStats = full.sections(sectionIndex);
-        if (args->containsSection(sectionStats.id())) {
+        if (contains_section(args, sectionStats.id())) {
             *result->add_sections() = sectionStats;
         }
     }
@@ -158,6 +154,10 @@ ReportRequest::~ReportRequest() {
 
 bool ReportRequest::ok() {
     return mFd >= 0 && mStatus == NO_ERROR;
+}
+
+bool ReportRequest::containsSection(int sectionId) const {
+    return args.containsSection(sectionId, section_requires_specific_mention(sectionId));
 }
 
 void ReportRequest::closeFd() {
@@ -283,6 +283,22 @@ bool ReportBatch::containsSection(int sectionId) {
 }
 
 void ReportBatch::clearPersistedRequests() {
+    mPersistedRequests.clear();
+}
+
+void ReportBatch::transferStreamingRequests(const sp<ReportBatch>& that) {
+    for (vector<sp<ReportRequest>>::iterator request = mStreamingRequests.begin();
+            request != mStreamingRequests.end(); request++) {
+        that->mStreamingRequests.push_back(*request);
+    }
+    mStreamingRequests.clear();
+}
+
+void ReportBatch::transferPersistedRequests(const sp<ReportBatch>& that) {
+    for (map<ComponentName, sp<ReportRequest>>::iterator it = mPersistedRequests.begin();
+            it != mPersistedRequests.end(); it++) {
+        that->mPersistedRequests[it->first] = it->second;
+    }
     mPersistedRequests.clear();
 }
 
@@ -441,7 +457,9 @@ status_t ReportWriter::writeSection(const FdBuffer& buffer) {
 
     // Add the fds for the streamed requests
     mBatch->forEachStreamingRequest([&filter, this](const sp<ReportRequest>& request) {
-        if (request->ok() && request->args.containsSection(mCurrentSectionId)) {
+        if (request->ok()
+                && request->args.containsSection(mCurrentSectionId,
+                    section_requires_specific_mention(mCurrentSectionId))) {
             filter.addFd(new StreamingFilterFd(request->args.getPrivacyPolicy(),
                         request->getFd(), request));
         }
@@ -619,7 +637,7 @@ DONE:
         mBatch->getCombinedPersistedArgs(&combinedArgs);
         IncidentMetadata persistedMetadata;
         make_metadata(&persistedMetadata, metadata, mPersistedFile->getTimestampNs(),
-                persistedPrivacyPolicy, &combinedArgs);
+                persistedPrivacyPolicy, combinedArgs);
         mPersistedFile->setMetadata(persistedMetadata);
 
         mPersistedFile->markCompleted();

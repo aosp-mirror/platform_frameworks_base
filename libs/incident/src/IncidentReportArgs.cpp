@@ -194,9 +194,13 @@ IncidentReportArgs::addHeader(const vector<uint8_t>& headerProto)
 }
 
 bool
-IncidentReportArgs::containsSection(int section) const
+IncidentReportArgs::containsSection(int section, bool specific) const
 {
-     return mAll || mSections.find(section) != mSections.end();
+    if (specific) {
+        return mSections.find(section) != mSections.end();
+    } else {
+        return mAll || mSections.find(section) != mSections.end();
+    }
 }
 
 void

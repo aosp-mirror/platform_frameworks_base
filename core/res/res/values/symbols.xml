@@ -394,7 +394,7 @@
   <java-symbol type="bool" name="config_supportsInsecureLockScreen" />
   <java-symbol type="bool" name="config_guestUserEphemeral" />
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
-  <java-symbol type="bool" name="config_localDisplaysPrivate" />
+  <java-symbol type="array" name="config_localPrivateDisplayPorts" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />
   <java-symbol type="bool" name="config_enableAppWidgetService" />
   <java-symbol type="string" name="config_defaultPictureInPictureScreenEdgeInsets" />
@@ -3678,6 +3678,7 @@
 
   <!-- For Secondary Launcher -->
   <java-symbol type="string" name="config_secondaryHomeComponent" />
+  <java-symbol type="bool" name="config_useSystemProvidedLauncherForSecondary" />
 
   <java-symbol type="string" name="battery_saver_notification_channel_name" />
   <java-symbol type="string" name="battery_saver_sticky_disabled_notification_title" />

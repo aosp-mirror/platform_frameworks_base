@@ -387,9 +387,13 @@ static void nativeSetGeometry(JNIEnv* env, jclass clazz, jlong transactionObj, j
     Rect source, dst;
     if (sourceObj != NULL) {
         source = rectFromObj(env, sourceObj);
+    } else {
+        source.makeInvalid();
     }
     if (dstObj != NULL) {
         dst = rectFromObj(env, dstObj);
+    } else {
+        dst.makeInvalid();
     }
     transaction->setGeometry(ctrl, source, dst, orientation);
 }

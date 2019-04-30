@@ -94,6 +94,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
@@ -369,19 +370,17 @@ class RootActivityContainer extends ConfigurationContainer
             displayId = getTopDisplayFocusedStack().mDisplayId;
         }
 
-        Intent homeIntent;
-        ActivityInfo aInfo;
+        Intent homeIntent = null;
+        ActivityInfo aInfo = null;
         if (displayId == DEFAULT_DISPLAY) {
             homeIntent = mService.getHomeIntent();
             aInfo = resolveHomeActivity(userId, homeIntent);
-        } else if (!mService.mSupportsMultiDisplay) {
-            return false;
-        } else {
+        } else if (shouldPlaceSecondaryHomeOnDisplay(displayId)) {
             Pair<ActivityInfo, Intent> info = resolveSecondaryHomeActivity(userId, displayId);
             aInfo = info.first;
             homeIntent = info.second;
         }
-        if (aInfo == null) {
+        if (aInfo == null || homeIntent == null) {
             return false;
         }
 
@@ -534,6 +533,46 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     /**
+     * Check if the display is valid for secondary home activity.
+     * @param displayId The id of the target display.
+     * @return {@code true} if allow to launch, {@code false} otherwise.
+     */
+    boolean shouldPlaceSecondaryHomeOnDisplay(int displayId) {
+        if (displayId == DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException(
+                    "shouldPlaceSecondaryHomeOnDisplay: Should not be DEFAULT_DISPLAY");
+        } else if (displayId == INVALID_DISPLAY) {
+            return false;
+        }
+
+        if (!mService.mSupportsMultiDisplay) {
+            // Can't launch home on secondary display if device does not support multi-display.
+            return false;
+        }
+
+        final boolean deviceProvisioned = Settings.Global.getInt(
+                mService.mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+        if (!deviceProvisioned) {
+            // Can't launch home on secondary display before device is provisioned.
+            return false;
+        }
+
+        if (!StorageManager.isUserKeyUnlocked(mCurrentUser)) {
+            // Can't launch home on secondary displays if device is still locked.
+            return false;
+        }
+
+        final ActivityDisplay display = getActivityDisplay(displayId);
+        if (display == null || display.isRemoved() || !display.supportsSystemDecorations()) {
+            // Can't launch home on display that doesn't support system decorations.
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Check if home activity start should be allowed on a display.
      * @param homeInfo {@code ActivityInfo} of the home activity that is going to be launched.
      * @param displayId The id of the target display.
@@ -562,22 +601,7 @@ class RootActivityContainer extends ConfigurationContainer
             return true;
         }
 
-        if (displayId != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
-            // Can't launch home on secondary display if device not support multi-display.
-            return false;
-        }
-
-        final boolean deviceProvisioned = Settings.Global.getInt(
-                mService.mContext.getContentResolver(),
-                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
-        if (displayId != DEFAULT_DISPLAY && displayId != INVALID_DISPLAY && !deviceProvisioned) {
-            // Can't launch home on secondary display before device is provisioned.
-            return false;
-        }
-
-        final ActivityDisplay display = getActivityDisplay(displayId);
-        if (display == null || display.isRemoved() || !display.supportsSystemDecorations()) {
-            // Can't launch home on display that doesn't support system decorations.
+        if (!shouldPlaceSecondaryHomeOnDisplay(displayId)) {
             return false;
         }
 

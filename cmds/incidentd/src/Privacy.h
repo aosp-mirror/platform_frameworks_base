@@ -50,8 +50,11 @@ struct Privacy {
 
     // DESTINATION Enum in frameworks/base/core/proto/android/privacy.proto.
     uint8_t policy;
+
     // A list of regexp rules for stripping string fields in proto.
     const char** patterns;
+
+    string toString() const;
 };
 
 // Encode field id used by ProtoOutputStream.
@@ -89,6 +92,11 @@ private:
 
 // TODO: Add privacy flag in incident.proto and auto generate it inside Privacy.
 bool sectionEncryption(int section_id);
+
+/**
+ * If a privacy policy is other than the defined values, update it to a real one.
+ */
+uint8_t cleanup_privacy_policy(uint8_t policy);
 
 }  // namespace incidentd
 }  // namespace os
