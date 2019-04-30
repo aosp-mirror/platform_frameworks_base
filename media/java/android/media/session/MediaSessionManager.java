@@ -24,6 +24,7 @@ import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
 import android.media.MediaSession2;
@@ -218,7 +219,8 @@ public final class MediaSessionManager {
     @NonNull
     public List<Session2Token> getSession2Tokens(int userId) {
         try {
-            return mService.getSession2Tokens(userId);
+            ParceledListSlice slice = mService.getSession2Tokens(userId);
+            return slice == null ? new ArrayList<>() : slice.getList();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get session tokens", e);
         }
