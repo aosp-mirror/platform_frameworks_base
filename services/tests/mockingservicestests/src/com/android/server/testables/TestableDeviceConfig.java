@@ -21,9 +21,14 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 import android.util.Pair;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
@@ -32,9 +37,11 @@ import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.mockito.Mockito;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +64,8 @@ public final class TestableDeviceConfig implements TestRule {
     private StaticMockitoSession mMockitoSession;
     private Map<DeviceConfig.OnPropertyChangedListener, Pair<String, Executor>>
             mOnPropertyChangedListenerMap = new HashMap<>();
+    private Map<DeviceConfig.OnPropertiesChangedListener, Pair<String, Executor>>
+            mOnPropertiesChangedListenerMap = new HashMap<>();
     private Map<String, String> mKeyValueMap = new ConcurrentHashMap<>();
 
     /**
@@ -77,6 +86,18 @@ public final class TestableDeviceConfig implements TestRule {
         doAnswer((Answer<Void>) invocationOnMock -> {
             String namespace = invocationOnMock.getArgument(0);
             Executor executor = invocationOnMock.getArgument(1);
+            DeviceConfig.OnPropertiesChangedListener onPropertiesChangedListener =
+                    invocationOnMock.getArgument(2);
+            mOnPropertiesChangedListenerMap.put(
+                    onPropertiesChangedListener, new Pair<>(namespace, executor));
+            return null;
+        }).when(() -> DeviceConfig.addOnPropertiesChangedListener(
+                anyString(), any(Executor.class),
+                any(DeviceConfig.OnPropertiesChangedListener.class)));
+
+        doAnswer((Answer<Void>) invocationOnMock -> {
+            String namespace = invocationOnMock.getArgument(0);
+            Executor executor = invocationOnMock.getArgument(1);
             DeviceConfig.OnPropertyChangedListener onPropertyChangedListener =
                     invocationOnMock.getArgument(2);
             mOnPropertyChangedListenerMap.put(
@@ -91,6 +112,14 @@ public final class TestableDeviceConfig implements TestRule {
                     String name = invocationOnMock.getArgument(1);
                     String value = invocationOnMock.getArgument(2);
                     mKeyValueMap.put(getKey(namespace, name), value);
+                    for (DeviceConfig.OnPropertiesChangedListener listener :
+                            mOnPropertiesChangedListenerMap.keySet()) {
+                        if (namespace.equals(mOnPropertiesChangedListenerMap.get(listener).first)) {
+                            mOnPropertiesChangedListenerMap.get(listener).second.execute(
+                                    () -> listener.onPropertiesChanged(
+                                            getProperties(namespace, name, value)));
+                        }
+                    }
                     for (DeviceConfig.OnPropertyChangedListener listener :
                             mOnPropertyChangedListenerMap.keySet()) {
                         if (namespace.equals(mOnPropertyChangedListenerMap.get(listener).first)) {
@@ -114,18 +143,95 @@ public final class TestableDeviceConfig implements TestRule {
             protected void succeeded(Description description) {
                 mMockitoSession.finishMocking();
                 mOnPropertyChangedListenerMap.clear();
+                mOnPropertiesChangedListenerMap.clear();
             }
 
             @Override
             protected void failed(Throwable e, Description description) {
                 mMockitoSession.finishMocking(e);
                 mOnPropertyChangedListenerMap.clear();
+                mOnPropertiesChangedListenerMap.clear();
             }
         }.apply(base, description);
     }
 
     private static String getKey(String namespace, String name) {
         return namespace + "/" + name;
+    }
+
+    private Properties getProperties(String namespace, String name, String value) {
+        Properties properties = Mockito.mock(Properties.class);
+        when(properties.getNamespace()).thenReturn(namespace);
+        when(properties.getKeyset()).thenReturn(Collections.singleton(name));
+        when(properties.getBoolean(anyString(), anyBoolean())).thenAnswer(
+                invocation -> {
+                    String key = invocation.getArgument(0);
+                    boolean defaultValue = invocation.getArgument(1);
+                    if (name.equalsIgnoreCase(key) && value != null) {
+                        return Boolean.parseBoolean(value);
+                    } else {
+                        return defaultValue;
+                    }
+                }
+        );
+        when(properties.getFloat(anyString(), anyFloat())).thenAnswer(
+                invocation -> {
+                    String key = invocation.getArgument(0);
+                    float defaultValue = invocation.getArgument(1);
+                    if (name.equalsIgnoreCase(key) && value != null) {
+                        try {
+                            return Float.parseFloat(value);
+                        } catch (NumberFormatException e) {
+                            return defaultValue;
+                        }
+                    } else {
+                        return defaultValue;
+                    }
+                }
+        );
+        when(properties.getInt(anyString(), anyInt())).thenAnswer(
+                invocation -> {
+                    String key = invocation.getArgument(0);
+                    int defaultValue = invocation.getArgument(1);
+                    if (name.equalsIgnoreCase(key) && value != null) {
+                        try {
+                            return Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            return defaultValue;
+                        }
+                    } else {
+                        return defaultValue;
+                    }
+                }
+        );
+        when(properties.getLong(anyString(), anyLong())).thenAnswer(
+                invocation -> {
+                    String key = invocation.getArgument(0);
+                    long defaultValue = invocation.getArgument(1);
+                    if (name.equalsIgnoreCase(key) && value != null) {
+                        try {
+                            return Long.parseLong(value);
+                        } catch (NumberFormatException e) {
+                            return defaultValue;
+                        }
+                    } else {
+                        return defaultValue;
+                    }
+                }
+        );
+        when(properties.getString(anyString(), anyString())).thenAnswer(
+                invocation -> {
+                    String key = invocation.getArgument(0);
+                    String defaultValue = invocation.getArgument(1);
+                    if (name.equalsIgnoreCase(key) && value != null) {
+                        return value;
+                    } else {
+                        return defaultValue;
+                    }
+                }
+        );
+
+        return properties;
     }
 
 }
