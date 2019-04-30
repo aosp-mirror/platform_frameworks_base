@@ -2764,6 +2764,9 @@ public class ApplicationPackageManager extends PackageManager {
         if (itemInfo.packageName != null) {
             dr = getDrawable(itemInfo.packageName, itemInfo.icon, appInfo);
         }
+        if (dr == null && itemInfo != appInfo) {
+            dr = loadUnbadgedItemIcon(appInfo, appInfo);
+        }
         if (dr == null) {
             dr = itemInfo.loadDefaultIcon(this);
         }
