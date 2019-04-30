@@ -549,6 +549,8 @@ public final class Zygote {
             }
         }
 
+        setAppProcessName(args, "USAP");
+
         applyUidSecurityPolicy(args, peerCredentials);
         applyDebuggerSystemProperty(args);
 
@@ -605,16 +607,12 @@ public final class Zygote {
         }
 
         specializeAppProcess(args.mUid, args.mGid, args.mGids,
-                           args.mRuntimeFlags, rlimits, args.mMountExternal,
-                           args.mSeInfo, args.mNiceName, args.mStartChildZygote,
-                           args.mInstructionSet, args.mAppDataDir, args.mPackageName,
-                           args.mPackagesForUid, args.mSandboxId);
+                             args.mRuntimeFlags, rlimits, args.mMountExternal,
+                             args.mSeInfo, args.mNiceName, args.mStartChildZygote,
+                             args.mInstructionSet, args.mAppDataDir, args.mPackageName,
+                             args.mPackagesForUid, args.mSandboxId);
 
         disableExecuteOnly(args.mTargetSdkVersion);
-
-        if (args.mNiceName != null) {
-            Process.setArgV0(args.mNiceName);
-        }
 
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -622,6 +620,16 @@ public final class Zygote {
         return ZygoteInit.zygoteInit(args.mTargetSdkVersion,
                                      args.mRemainingArgs,
                                      null /* classLoader */);
+    }
+
+    static void setAppProcessName(ZygoteArguments args, String loggingTag) {
+        if (args.mNiceName != null) {
+            Process.setArgV0(args.mNiceName);
+        } else if (args.mPackageName != null) {
+            Process.setArgV0(args.mPackageName);
+        } else {
+            Log.w(loggingTag, "Unable to set package name.");
+        }
     }
 
     private static final String USAP_ERROR_PREFIX = "Invalid command to USAP: ";
