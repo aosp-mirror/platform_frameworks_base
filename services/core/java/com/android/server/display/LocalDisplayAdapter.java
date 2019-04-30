@@ -405,7 +405,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.presentationDeadlineNanos = phys.presentationDeadlineNanos;
                 mInfo.state = mState;
                 mInfo.uniqueId = getUniqueId();
-                mInfo.address = DisplayAddress.fromPhysicalDisplayId(mPhysicalDisplayId);
+                final DisplayAddress.Physical physicalAddress =
+                        DisplayAddress.fromPhysicalDisplayId(mPhysicalDisplayId);
+                mInfo.address = physicalAddress;
 
                 // Assume that all built-in displays that have secure output (eg. HDCP) also
                 // support compositing from gralloc protected buffers.
@@ -462,7 +464,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                     }
 
-                    if (res.getBoolean(com.android.internal.R.bool.config_localDisplaysPrivate)) {
+                    if (isDisplayPrivate(physicalAddress)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
                 }
@@ -796,6 +798,24 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 modes[i] = record.mMode;
             }
             return modes;
+        }
+
+        private boolean isDisplayPrivate(DisplayAddress.Physical physicalAddress) {
+            if (physicalAddress == null) {
+                return false;
+            }
+            final Resources res = getOverlayContext().getResources();
+            int[] ports = res.getIntArray(
+                    com.android.internal.R.array.config_localPrivateDisplayPorts);
+            if (ports != null) {
+                int port = physicalAddress.getPort();
+                for (int p : ports) {
+                    if (p == port) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
