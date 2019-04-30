@@ -236,7 +236,7 @@ public final class AudioDeviceInventory {
     }
 
     /*package*/ void onSetHearingAidConnectionState(BluetoothDevice btDevice,
-                @AudioService.BtProfileConnectionState int state) {
+                @AudioService.BtProfileConnectionState int state, int streamType) {
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
@@ -253,7 +253,7 @@ public final class AudioDeviceInventory {
             if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                 makeHearingAidDeviceUnavailable(address);
             } else if (!isConnected && state == BluetoothProfile.STATE_CONNECTED) {
-                makeHearingAidDeviceAvailable(address, BtHelper.getName(btDevice),
+                makeHearingAidDeviceAvailable(address, BtHelper.getName(btDevice), streamType,
                         "onSetHearingAidConnectionState");
             }
         }
@@ -719,10 +719,11 @@ public final class AudioDeviceInventory {
     }
 
     @GuardedBy("mConnectedDevices")
-    private void makeHearingAidDeviceAvailable(String address, String name, String eventSource) {
-        final int hearingAidVolIndex = mDeviceBroker.getVssVolumeForDevice(AudioSystem.STREAM_MUSIC,
+    private void makeHearingAidDeviceAvailable(
+            String address, String name, int streamType, String eventSource) {
+        final int hearingAidVolIndex = mDeviceBroker.getVssVolumeForDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID);
-        mDeviceBroker.postSetHearingAidVolumeIndex(hearingAidVolIndex, AudioSystem.STREAM_MUSIC);
+        mDeviceBroker.postSetHearingAidVolumeIndex(hearingAidVolIndex, streamType);
 
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name,
@@ -732,7 +733,7 @@ public final class AudioDeviceInventory {
                 new DeviceInfo(AudioSystem.DEVICE_OUT_HEARING_AID, name,
                         address, AudioSystem.AUDIO_FORMAT_DEFAULT));
         mDeviceBroker.postAccessoryPlugMediaUnmute(AudioSystem.DEVICE_OUT_HEARING_AID);
-        mDeviceBroker.postApplyVolumeOnDevice(AudioSystem.STREAM_MUSIC,
+        mDeviceBroker.postApplyVolumeOnDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID, "makeHearingAidDeviceAvailable");
         setCurrentAudioRouteNameIfPossible(name);
     }
