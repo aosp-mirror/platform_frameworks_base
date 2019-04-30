@@ -99,6 +99,7 @@ easier.
     <style name="Widget.DeviceDefault.ActionBar.TabText" parent="Widget.Material.ActionBar.TabText"/>
     <style name="Widget.DeviceDefault.ActionBar.TabBar" parent="Widget.Material.ActionBar.TabBar"/>
     <style name="Widget.DeviceDefault.ActionBar.Solid" parent="Widget.Material.ActionBar.Solid">
+        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
         <item name="background">?attr/colorPrimaryDark</item>
         <item name="backgroundStacked">?attr/colorPrimaryDark</item>
         <item name="backgroundSplit">?attr/colorPrimaryDark</item>
