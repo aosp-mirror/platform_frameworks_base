@@ -169,24 +169,22 @@ ProfileType Properties::getProfileType() {
     return sProfileType;
 }
 
-RenderPipelineType Properties::getRenderPipelineType() {
+RenderPipelineType Properties::peekRenderPipelineType() {
+    // If sRenderPipelineType has been locked, just return the locked type immediately.
     if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
         return sRenderPipelineType;
     }
     bool useVulkan = use_vulkan().value_or(false);
     char prop[PROPERTY_VALUE_MAX];
-    if (useVulkan) {
-        property_get(PROPERTY_RENDERER, prop, "skiavk");
-    } else {
-        property_get(PROPERTY_RENDERER, prop, "skiagl");
-    }
+    property_get(PROPERTY_RENDERER, prop, useVulkan ? "skiavk" : "skiagl");
     if (!strcmp(prop, "skiavk")) {
-        ALOGD("Skia Vulkan Pipeline");
-        sRenderPipelineType = RenderPipelineType::SkiaVulkan;
-    } else {  //"skiagl"
-        ALOGD("Skia GL Pipeline");
-        sRenderPipelineType = RenderPipelineType::SkiaGL;
+        return RenderPipelineType::SkiaVulkan;
     }
+    return RenderPipelineType::SkiaGL;
+}
+
+RenderPipelineType Properties::getRenderPipelineType() {
+    sRenderPipelineType = peekRenderPipelineType();
     return sRenderPipelineType;
 }
 
