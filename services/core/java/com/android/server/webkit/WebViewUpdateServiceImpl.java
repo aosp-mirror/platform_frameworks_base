@@ -81,8 +81,11 @@ public class WebViewUpdateServiceImpl {
     void prepareWebViewInSystemServer() {
         migrateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
-        mSystemInterface.notifyZygote(isMultiProcessEnabled());
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
+        boolean multiProcessEnabled = isMultiProcessEnabled();
+        mSystemInterface.notifyZygote(multiProcessEnabled);
+        if (multiProcessEnabled) {
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
+        }
     }
 
     void startZygoteWhenReady() {
