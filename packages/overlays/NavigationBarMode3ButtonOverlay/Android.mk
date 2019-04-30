@@ -18,7 +18,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_RRO_THEME := NavigationBarMode3Button
-LOCAL_CERTIFICATE := platform
+
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
