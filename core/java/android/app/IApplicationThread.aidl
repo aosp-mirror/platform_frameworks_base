@@ -141,7 +141,7 @@ oneway interface IApplicationThread {
     void setNetworkBlockSeq(long procStateSeq);
     void scheduleTransaction(in ClientTransaction transaction);
     void requestDirectActions(IBinder activityToken, IVoiceInteractor intractor,
-        in RemoteCallback callback);
+            in RemoteCallback cancellationCallback, in RemoteCallback callback);
     void performDirectAction(IBinder activityToken, String actionId,
             in Bundle arguments, in RemoteCallback cancellationCallback,
             in RemoteCallback resultCallback);
