@@ -7284,6 +7284,15 @@ message MetricsEvent {
     // type of response could not be determined
     AUTOFILL_AUGMENTED_RESPONSE = 1724;
 
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Invalid data
+    ACTION_VERIFY_SLICE_ERROR_INVALID_DATA = 1725;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Parsing error
+    ACTION_VERIFY_SLICE_PARSING_ERROR = 1726;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Other exception
+    ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
+
     // ---- Skipping ahead to avoid conflicts between master and release branches.
     // OPEN: Settings > System > Gestures > Global Actions Panel
     // CATEGORY: SETTINGS
