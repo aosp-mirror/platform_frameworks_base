@@ -22,7 +22,7 @@
     android:gravity="right"
     android:layout_gravity="right"
     android:background="@android:color/transparent"
-    android:theme="@style/volume_dialog_theme">
+    android:theme="@style/qs_theme">
 
     <FrameLayout
         android:id="@+id/volume_dialog"
