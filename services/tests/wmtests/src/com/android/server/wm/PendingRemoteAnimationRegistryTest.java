@@ -24,6 +24,7 @@ import android.app.ActivityOptions;
 import android.platform.test.annotations.Presubmit;
 import android.view.RemoteAnimationAdapter;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.OffsettableClock;
@@ -73,6 +74,7 @@ public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testTimeout() {
         mRegistry.addPendingAnimation("com.android.test", mAdapter);
         mClock.fastForward(5000);
