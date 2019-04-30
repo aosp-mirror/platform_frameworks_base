@@ -115,8 +115,10 @@ public class NotificationLockscreenUserManagerImpl implements
 
                 updateLockscreenNotificationSetting();
                 updatePublicMode();
-                mPresenter.onUserSwitched(mCurrentUserId);
+                // The filtering needs to happen before the update call below in order to make sure
+                // the presenter has the updated notifications from the new user
                 getEntryManager().getNotificationData().filterAndSort();
+                mPresenter.onUserSwitched(mCurrentUserId);
 
                 for (UserChangedListener listener : mListeners) {
                     listener.onUserChanged(mCurrentUserId);
