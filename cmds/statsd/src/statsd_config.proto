@@ -377,21 +377,23 @@ message Subscription {
   optional float probability_of_informing = 7 [default = 1.1];
 }
 
+enum ActivationType {
+  ACTIVATION_TYPE_UNKNOWN = 0;
+  ACTIVATE_IMMEDIATELY = 1;
+  ACTIVATE_ON_BOOT = 2;
+}
+
 message EventActivation {
   optional int64 atom_matcher_id = 1;
   optional int64 ttl_seconds = 2;
   optional int64 deactivation_atom_matcher_id = 3;
+  optional ActivationType activation_type = 4;
 }
 
 message MetricActivation {
   optional int64 metric_id = 1;
 
-  enum ActivationType {
-      UNKNOWN = 0;
-      ACTIVATE_IMMEDIATELY = 1;
-      ACTIVATE_ON_BOOT = 2;
-  }
-  optional ActivationType activation_type = 3;
+  optional ActivationType activation_type = 3 [deprecated = true];
 
   repeated EventActivation event_activation = 2;
 }

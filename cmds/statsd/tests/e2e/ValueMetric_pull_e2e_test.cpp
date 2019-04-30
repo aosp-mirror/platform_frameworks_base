@@ -279,7 +279,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation) {
     const int64_t ttlNs = 2 * bucketSizeNs; // Two buckets.
     auto metric_activation = config.add_metric_activation();
     metric_activation->set_metric_id(metricId);
-    metric_activation->set_activation_type(MetricActivation::ACTIVATE_IMMEDIATELY);
+    metric_activation->set_activation_type(ACTIVATE_IMMEDIATELY);
     auto event_activation = metric_activation->add_event_activation();
     event_activation->set_atom_matcher_id(batterySaverStartMatcher.id());
     event_activation->set_ttl_seconds(ttlNs / 1000000000);
