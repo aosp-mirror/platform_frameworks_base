@@ -468,6 +468,48 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     /**
+     * Tests that secondary home activity should not be resolved if device is still locked.
+     */
+    @Test
+    public void testStartSecondaryHomeOnDisplayWithUserKeyLocked() {
+        // Create secondary displays.
+        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
+
+        doReturn(true).when(secondDisplay).supportsSystemDecorations();
+        // Use invalid user id to let StorageManager.isUserKeyUnlocked() return false.
+        final int currentUser = mRootActivityContainer.mCurrentUser;
+        mRootActivityContainer.mCurrentUser = -1;
+
+        mRootActivityContainer.startHomeOnDisplay(0 /* userId */, "testStartSecondaryHome",
+                secondDisplay.mDisplayId, true /* allowInstrumenting */, true /* fromHomeKey */);
+
+        try {
+            verify(mRootActivityContainer, never()).resolveSecondaryHomeActivity(anyInt(),
+                    anyInt());
+        } finally {
+            mRootActivityContainer.mCurrentUser = currentUser;
+        }
+    }
+
+    /**
+     * Tests that secondary home activity should not be resolved if display does not support system
+     * decorations.
+     */
+    @Test
+    public void testStartSecondaryHomeOnDisplayWithoutSysDecorations() {
+        // Create secondary displays.
+        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
+        doReturn(false).when(secondDisplay).supportsSystemDecorations();
+
+        mRootActivityContainer.startHomeOnDisplay(0 /* userId */, "testStartSecondaryHome",
+                secondDisplay.mDisplayId, true /* allowInstrumenting */, true /* fromHomeKey */);
+
+        verify(mRootActivityContainer, never()).resolveSecondaryHomeActivity(anyInt(), anyInt());
+    }
+
+    /**
      * Tests that secondary home should be selected if default home not set.
      */
     @Test
