@@ -18671,6 +18671,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean installedStateChanged = false;
         if (deletedPs != null) {
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                final SparseBooleanArray changedUsers = new SparseBooleanArray();
                 synchronized (mPackages) {
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                     clearDefaultBrowserIfNeeded(packageName);
@@ -18702,10 +18703,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
                     }
+                    clearPackagePreferredActivitiesLPw(
+                            deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 }
-                final SparseBooleanArray changedUsers = new SparseBooleanArray();
-                clearPackagePreferredActivitiesLPw(
-                        deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 if (changedUsers.size() > 0) {
                     updateDefaultHomeNotLocked(changedUsers);
                     postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
