@@ -1063,11 +1063,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
      private boolean supportsBlockCheckpoint() throws RemoteException {
-        // Only the system process is permitted to start checkpoints
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to check block based checkpoint support");
-        }
-
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         return mVold.supportsBlockCheckpoint();
     }
 
@@ -2726,11 +2722,7 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public boolean needsCheckpoint() throws RemoteException {
-        // Only the system process is permitted to commit checkpoints
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to commit checkpoint changes");
-        }
-
+        enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         return mVold.needsCheckpoint();
     }
 
