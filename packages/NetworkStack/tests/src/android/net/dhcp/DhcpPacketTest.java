@@ -302,8 +302,9 @@ public class DhcpPacketTest {
     }
 
     private void assertDhcpResults(String ipAddress, String gateway, String dnsServersString,
-            String domains, String serverAddress, String vendorInfo, int leaseDuration,
-            boolean hasMeteredHint, int mtu, DhcpResults dhcpResults) throws Exception {
+            String domains, String serverAddress, String serverHostName, String vendorInfo,
+            int leaseDuration, boolean hasMeteredHint, int mtu, DhcpResults dhcpResults)
+                    throws Exception {
         assertEquals(new LinkAddress(ipAddress), dhcpResults.ipAddress);
         assertEquals(v4Address(gateway), dhcpResults.gateway);
 
@@ -316,6 +317,7 @@ public class DhcpPacketTest {
 
         assertEquals(domains, dhcpResults.domains);
         assertEquals(v4Address(serverAddress), dhcpResults.serverAddress);
+        assertEquals(serverHostName, dhcpResults.serverHostName);
         assertEquals(vendorInfo, dhcpResults.vendorInfo);
         assertEquals(leaseDuration, dhcpResults.leaseDuration);
         assertEquals(hasMeteredHint, dhcpResults.hasMeteredHint());
@@ -327,6 +329,7 @@ public class DhcpPacketTest {
         // TODO: Turn all of these into golden files. This will probably require using
         // androidx.test.InstrumentationRegistry for obtaining a Context object
         // to read such golden files, along with an appropriate Android.mk.
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "451001480000000080118849c0a89003c0a89ff7" +
@@ -347,16 +350,18 @@ public class DhcpPacketTest {
             // Options
             "638253633501023604c0a89003330400001c200104fffff0000304c0a89ffe06080808080808080404" +
             "3a0400000e103b040000189cff00000000000000000000"));
+        // CHECKSTYLE:ON Generated code
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.159.247/20", "192.168.159.254", "8.8.8.8,8.8.4.4",
-                null, "192.168.144.3", null, 7200, false, 0, dhcpResults);
+                null, "192.168.144.3", "", null, 7200, false, 0, dhcpResults);
     }
 
     @Test
     public void testOffer2() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "450001518d0600004011144dc0a82b01c0a82bf7" +
@@ -366,9 +371,9 @@ public class DhcpPacketTest {
             "02010600dfc23d1f0002000000000000c0a82bf7c0a82b0100000000" +
             // MAC address.
             "30766ff2a90c00000000000000000000" +
-            // Server name.
-            "0000000000000000000000000000000000000000000000000000000000000000" +
-            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Server name ("dhcp.android.com" plus invalid "AAAA" after null terminator).
+            "646863702e616e64726f69642e636f6d00000000000000000000000000000000" +
+            "0000000000004141414100000000000000000000000000000000000000000000" +
             // File.
             "0000000000000000000000000000000000000000000000000000000000000000" +
             "0000000000000000000000000000000000000000000000000000000000000000" +
@@ -377,13 +382,15 @@ public class DhcpPacketTest {
             // Options
             "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
             "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"));
+        // CHECKSTYLE:ON Generated code
 
         assertEquals(337, packet.limit());
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.43.247/24", "192.168.43.1", "192.168.43.1",
-                null, "192.168.43.1", "ANDROID_METERED", 3600, true, 0, dhcpResults);
+                null, "192.168.43.1", "dhcp.android.com", "ANDROID_METERED", 3600, true, 0,
+                dhcpResults);
         assertTrue(dhcpResults.hasMeteredHint());
     }
 
@@ -588,11 +595,12 @@ public class DhcpPacketTest {
         assertTrue(offerPacket instanceof DhcpOfferPacket);  // Implicitly checks it's non-null.
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.159.247/20", "192.168.159.254", "8.8.8.8,8.8.4.4",
-                null, "192.168.144.3", null, 7200, false, expectedMtu, dhcpResults);
+                null, "192.168.144.3", "", null, 7200, false, expectedMtu, dhcpResults);
     }
 
     @Test
     public void testMtu() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "451001480000000080118849c0a89003c0a89ff7" +
@@ -613,6 +621,7 @@ public class DhcpPacketTest {
             // Options
             "638253633501023604c0a89003330400001c200104fffff0000304c0a89ffe06080808080808080404" +
             "3a0400000e103b040000189cff00000000"));
+        // CHECKSTYLE:ON Generated code
 
         checkMtu(packet, 0, null);
         checkMtu(packet, 0, mtuBytes(1501));
@@ -629,6 +638,7 @@ public class DhcpPacketTest {
 
     @Test
     public void testBadHwaddrLength() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "450001518d0600004011144dc0a82b01c0a82bf7" +
@@ -649,6 +659,7 @@ public class DhcpPacketTest {
             // Options
             "638253633501023604c0a82b01330400000e103a04000007083b0400000c4e0104ffffff00" +
             "1c04c0a82bff0304c0a82b010604c0a82b012b0f414e44524f49445f4d455445524544ff"));
+        // CHECKSTYLE:ON Generated code
         String expectedClientMac = "30766FF2A90C";
 
         final int hwAddrLenOffset = 20 + 8 + 2;
@@ -705,6 +716,7 @@ public class DhcpPacketTest {
         //    store any information in the overloaded fields).
         //
         // For now, we just check that it parses correctly.
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "b4cef6000000e80462236e300800" +
@@ -727,16 +739,18 @@ public class DhcpPacketTest {
             // Options
             "638253633501023604010101010104ffff000033040000a8c03401030304ac1101010604ac110101" +
             "0000000000000000000000000000000000000000000000ff000000"));
+        // CHECKSTYLE:ON Generated code
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("172.17.152.118/16", "172.17.1.1", "172.17.1.1",
-                null, "1.1.1.1", null, 43200, false, 0, dhcpResults);
+                null, "1.1.1.1", "", null, 43200, false, 0, dhcpResults);
     }
 
     @Test
     public void testBug2111() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.
             "4500014c00000000ff119beac3eaf3880a3f5d04" +
@@ -757,16 +771,18 @@ public class DhcpPacketTest {
             // Options.
             "638253633501023604c00002fe33040000bfc60104fffff00003040a3f50010608c0000201c0000202" +
             "0f0f646f6d61696e3132332e636f2e756b0000000000ff00000000"));
+        // CHECKSTYLE:ON Generated code
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L3);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.63.93.4/20", "10.63.80.1", "192.0.2.1,192.0.2.2",
-                "domain123.co.uk", "192.0.2.254", null, 49094, false, 0, dhcpResults);
+                "domain123.co.uk", "192.0.2.254", "", null, 49094, false, 0, dhcpResults);
     }
 
     @Test
     public void testBug2136() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "bcf5ac000000d0c7890000000800" +
@@ -789,17 +805,19 @@ public class DhcpPacketTest {
             // Options.
             "6382536335010236040a20ff80330400001c200104fffff00003040a20900106089458413494584135" +
             "0f0b6c616e63732e61632e756b000000000000000000ff00000000"));
+        // CHECKSTYLE:ON Generated code
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         assertEquals("BCF5AC000000", HexDump.toHexString(offerPacket.getClientMac()));
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.32.158.205/20", "10.32.144.1", "148.88.65.52,148.88.65.53",
-                "lancs.ac.uk", "10.32.255.128", null, 7200, false, 0, dhcpResults);
+                "lancs.ac.uk", "10.32.255.128", "", null, 7200, false, 0, dhcpResults);
     }
 
     @Test
     public void testUdpServerAnySourcePort() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "9cd917000000001c2e0000000800" +
@@ -823,6 +841,7 @@ public class DhcpPacketTest {
             // Options.
             "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
             "d18180060f0777766d2e6564751c040a0fffffff000000"));
+        // CHECKSTYLE:ON Generated code
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
@@ -830,11 +849,12 @@ public class DhcpPacketTest {
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("10.15.122.242/16", "10.15.200.23",
                 "209.129.128.3,209.129.148.3,209.129.128.6",
-                "wvm.edu", "10.1.105.252", null, 86400, false, 0, dhcpResults);
+                "wvm.edu", "10.1.105.252", "", null, 86400, false, 0, dhcpResults);
     }
 
     @Test
     public void testUdpInvalidDstPort() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "9cd917000000001c2e0000000800" +
@@ -858,6 +878,7 @@ public class DhcpPacketTest {
             // Options.
             "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
             "d18180060f0777766d2e6564751c040a0fffffff000000"));
+        // CHECKSTYLE:ON Generated code
 
         try {
             DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
@@ -867,6 +888,7 @@ public class DhcpPacketTest {
 
     @Test
     public void testMultipleRouters() throws Exception {
+        // CHECKSTYLE:OFF Generated code
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // Ethernet header.
             "fc3d93000000" + "081735000000" + "0800" +
@@ -889,13 +911,14 @@ public class DhcpPacketTest {
             // Options.
             "638253633501023604c0abbd023304000070803a04000038403b04000062700104ffffff00" +
             "0308c0a8bd01ffffff0006080808080808080404ff000000000000"));
+        // CHECKSTYLE:ON Generated code
 
         DhcpPacket offerPacket = DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
         assertTrue(offerPacket instanceof DhcpOfferPacket);
         assertEquals("FC3D93000000", HexDump.toHexString(offerPacket.getClientMac()));
         DhcpResults dhcpResults = offerPacket.toDhcpResults();
         assertDhcpResults("192.168.189.49/24", "192.168.189.1", "8.8.8.8,8.8.4.4",
-                null, "192.171.189.2", null, 28800, false, 0, dhcpResults);
+                null, "192.171.189.2", "", null, 28800, false, 0, dhcpResults);
     }
 
     @Test

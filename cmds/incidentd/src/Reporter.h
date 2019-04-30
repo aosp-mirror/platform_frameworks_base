@@ -16,7 +16,6 @@
 #pragma once
 
 #include "FdBuffer.h"
-#include "Throttler.h"
 #include "WorkDirectory.h"
 
 #include "frameworks/base/core/proto/android/os/metadata.pb.h"
@@ -58,7 +57,7 @@ public:
 
     bool ok();  // returns true if the request is ok for write.
 
-    bool containsSection(int sectionId) const { return args.containsSection(sectionId); }
+    bool containsSection(int sectionId) const;
 
     sp<IIncidentReportStatusListener> getListener() { return mListener; }
 
@@ -153,6 +152,18 @@ public:
      * Remove all of the broadcast (persisted) requests.
      */
     void clearPersistedRequests();
+
+    /**
+     * Move the streaming requests in this batch to that batch.  After this call there
+     * will be no streaming requests in this batch.
+     */
+    void transferStreamingRequests(const sp<ReportBatch>& that);
+
+    /**
+     * Move the persisted requests in this batch to that batch.  After this call there
+     * will be no streaming requests in this batch.
+     */
+    void transferPersistedRequests(const sp<ReportBatch>& that);
 
     /**
      * Get the requests that have encountered errors.

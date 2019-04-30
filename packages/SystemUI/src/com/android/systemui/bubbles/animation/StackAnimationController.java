@@ -120,7 +120,11 @@ public class StackAnimationController extends
     private float mStackOffset;
     /** Diameter of the bubbles themselves. */
     private int mIndividualBubbleSize;
-    /** Size of spacing around the bubbles, separating it from the edge of the screen. */
+    /**
+     * The amount of space to add between the bubbles and certain UI elements, such as the top of
+     * the screen or the IME. This does not apply to the left/right sides of the screen since the
+     * stack goes offscreen intentionally.
+     */
     private int mBubblePadding;
     /** How far offscreen the stack rests. */
     private int mBubbleOffscreen;
@@ -381,7 +385,6 @@ public class StackAnimationController extends
         if (insets != null) {
             allowableRegion.left =
                     -mBubbleOffscreen
-                            - mBubblePadding
                             + Math.max(
                             insets.getSystemWindowInsetLeft(),
                             insets.getDisplayCutout() != null
@@ -391,7 +394,6 @@ public class StackAnimationController extends
                     mLayout.getWidth()
                             - mIndividualBubbleSize
                             + mBubbleOffscreen
-                            - mBubblePadding
                             - Math.max(
                             insets.getSystemWindowInsetRight(),
                             insets.getDisplayCutout() != null
@@ -521,7 +523,6 @@ public class StackAnimationController extends
 
         if (mLayout.getChildCount() > 0) {
             property.setValue(mLayout.getChildAt(0), value);
-
             if (mLayout.getChildCount() > 1) {
                 animationForChildAtIndex(1)
                         .property(property, value + getOffsetForChainedPropertyAnimation(property))

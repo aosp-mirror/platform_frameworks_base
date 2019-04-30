@@ -723,7 +723,8 @@ import com.android.internal.annotations.GuardedBy;
                 case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onSetHearingAidConnectionState(
-                                (BluetoothDevice) msg.obj, msg.arg1);
+                                (BluetoothDevice) msg.obj, msg.arg1,
+                                mAudioService.getHearingAidStreamType());
                     }
                     break;
                 case MSG_BT_HEADSET_CNCT_FAILED:

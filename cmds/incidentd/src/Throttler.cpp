@@ -33,6 +33,21 @@ Throttler::Throttler(size_t limit, int64_t refractoryPeriodMs)
 
 Throttler::~Throttler() {}
 
+sp<ReportBatch> Throttler::filterBatch(const sp<ReportBatch>& queued) {
+    sp<ReportBatch> result = new ReportBatch();
+
+    // We will never throttle the streaming ones.
+    queued->transferStreamingRequests(result);
+
+    // If the persisted ones aren't to be throttled, then add them to the
+    // batch we're going to do.
+    if (!shouldThrottle()) {
+        queued->transferPersistedRequests(result);
+    }
+
+    return result;
+}
+
 bool Throttler::shouldThrottle() {
     int64_t now = android::elapsedRealtime();
     if (now > mRefractoryPeriodMs + mLastRefractoryMs) {

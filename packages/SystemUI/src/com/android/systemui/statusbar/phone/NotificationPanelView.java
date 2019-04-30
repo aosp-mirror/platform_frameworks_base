@@ -337,6 +337,7 @@ public class NotificationPanelView extends PanelView implements
      * work, check the current id with the cached id.
      */
     private int mThemeResId;
+    private KeyguardIndicationController mKeyguardIndicationController;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -516,6 +517,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea.initFrom(oldBottomArea);
         addView(mKeyguardBottomArea, index);
         initBottomArea();
+        mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
         onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
                 mStatusBarStateController.getInterpolatedDozeAmount());
 
@@ -535,7 +537,8 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setKeyguardIndicationController(KeyguardIndicationController indicationController) {
-        mKeyguardBottomArea.setKeyguardIndicationController(indicationController);
+        mKeyguardIndicationController = indicationController;
+        mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
     }
 
     @Override
@@ -3045,7 +3048,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void showTransientIndication(int id) {
-        mKeyguardBottomArea.showTransientIndication(id);
+        mKeyguardIndicationController.showTransientIndication(id);
     }
 
     @Override

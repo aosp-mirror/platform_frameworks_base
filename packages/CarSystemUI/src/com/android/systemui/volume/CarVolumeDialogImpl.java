@@ -609,6 +609,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     return;
                 }
                 mAvailableVolumeItems.get(mVolumeGroupId).progress = progress;
+                mAvailableVolumeItems.get(
+                        mVolumeGroupId).carVolumeItem.setProgress(progress);
                 mCarAudioManager.setGroupVolume(mVolumeGroupId, progress, 0);
             } catch (CarNotConnectedException e) {
                 Log.e(TAG, "Car is not connected!", e);

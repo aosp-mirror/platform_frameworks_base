@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
@@ -1072,7 +1073,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         @Override
-        public List<Session2Token> getSession2Tokens(int userId) {
+        public ParceledListSlice getSession2Tokens(int userId) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1087,7 +1088,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 synchronized (mLock) {
                     result = getSession2TokensLocked(resolvedUserId);
                 }
-                return result;
+                return new ParceledListSlice(result);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

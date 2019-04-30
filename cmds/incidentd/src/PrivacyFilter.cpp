@@ -18,6 +18,10 @@
 
 #include "PrivacyFilter.h"
 
+#include "incidentd_util.h"
+#include "proto_util.h"
+#include "Section.h"
+
 #include <android-base/file.h>
 #include <android/util/ProtoFileReader.h>
 #include <android/util/protobuf.h>
@@ -25,8 +29,6 @@
 
 #include "cipher/IncidentKeyStore.h"
 #include "cipher/ProtoEncryption.h"
-#include "incidentd_util.h"
-#include "proto_util.h"
 
 namespace android {
 namespace os {
@@ -190,7 +192,7 @@ status_t FieldStripper::strip(const uint8_t privacyPolicy) {
         ProtoOutputStream proto;
 
         // Optimization when no strip happens.
-        if (mRestrictions == NULL || mRestrictions->children == NULL || spec.RequireAll()) {
+        if (mRestrictions == NULL || spec.RequireAll()) {
             if (spec.CheckPremission(mRestrictions)) {
                 mSize = mData->size();
             }
@@ -220,6 +222,11 @@ status_t FieldStripper::strip(const uint8_t privacyPolicy) {
 status_t FieldStripper::writeData(int fd) {
     status_t err = NO_ERROR;
     sp<ProtoReader> reader = mData;
+    if (mData == nullptr) {
+        // There had been an error processing the data. We won't write anything,
+        // but we also won't return an error, because errors are fatal.
+        return NO_ERROR;
+    }
     while (reader->readBuffer() != NULL) {
         err = WriteFully(fd, reader->readBuffer(), reader->currentToRead()) ? NO_ERROR : -errno;
         reader->move(reader->currentToRead());
@@ -316,7 +323,7 @@ status_t PrivacyFilter::writeData(const FdBuffer& buffer, uint8_t bufferLevel, s
             if (err != NO_ERROR) {
                 // We can't successfully strip this data.  We will skip
                 // the rest of this section.
-                return err;
+                return NO_ERROR;
             }
         }
 
@@ -367,8 +374,8 @@ status_t filter_and_write_report(int to, int from, uint8_t bufferLevel,
         uint64_t fieldTag = reader->readRawVarint();
         uint32_t fieldId = read_field_id(fieldTag);
         uint8_t wireType = read_wire_type(fieldTag);
-        if (wireType == WIRE_TYPE_LENGTH_DELIMITED && args.containsSection(fieldId)) {
-            VLOG("Read section %d", fieldId);
+        if (wireType == WIRE_TYPE_LENGTH_DELIMITED
+                && args.containsSection(fieldId, section_requires_specific_mention(fieldId))) {
             // We need this field, but we need to strip it to the level provided in args.
             PrivacyFilter filter(fieldId, get_privacy_of_section(fieldId));
             filter.addFd(new ReadbackFilterFd(args.getPrivacyPolicy(), to));
