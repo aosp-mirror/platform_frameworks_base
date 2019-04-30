@@ -868,12 +868,12 @@ public class LinkPropertiesTest {
 
         source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
-        TestUtils.assertParcelingIsLossless(source, LinkProperties.CREATOR);
+        TestUtils.assertParcelingIsLossless(source);
     }
 
     @Test
     public void testParcelUninitialized() throws Exception {
         LinkProperties empty = new LinkProperties();
-        TestUtils.assertParcelingIsLossless(empty, LinkProperties.CREATOR);
+        TestUtils.assertParcelingIsLossless(empty);
     }
 }
