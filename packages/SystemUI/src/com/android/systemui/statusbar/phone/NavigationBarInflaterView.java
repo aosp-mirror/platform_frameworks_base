@@ -84,6 +84,8 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String KEY_CODE_END = ")";
     private static final String WEIGHT_SUFFIX = "W";
     private static final String WEIGHT_CENTERED_SUFFIX = "WC";
+    private static final String ABSOLUTE_SUFFIX = "A";
+    private static final String ABSOLUTE_VERTICAL_CENTERED_SUFFIX = "C";
 
     private final List<NavBarButtonProvider> mPlugins = new ArrayList<>();
 
@@ -353,17 +355,20 @@ public class NavigationBarInflaterView extends FrameLayout
         String sizeStr = extractSize(buttonSpec);
         if (sizeStr == null) return v;
 
-        if (sizeStr.contains(WEIGHT_SUFFIX)) {
+        if (sizeStr.contains(WEIGHT_SUFFIX) || sizeStr.contains(ABSOLUTE_SUFFIX)) {
             // To support gravity, wrap in RelativeLayout and apply gravity to it.
             // Children wanting to use gravity must be smaller then the frame.
-            float weight = Float.parseFloat(sizeStr.substring(0, sizeStr.indexOf(WEIGHT_SUFFIX)));
             ReverseRelativeLayout frame = new ReverseRelativeLayout(mContext);
             LayoutParams childParams = new LayoutParams(v.getLayoutParams());
 
             // Compute gravity to apply
             int gravity = (landscape) ? (start ? Gravity.TOP : Gravity.BOTTOM)
                     : (start ? Gravity.START : Gravity.END);
-            if (sizeStr.endsWith(WEIGHT_CENTERED_SUFFIX)) gravity = Gravity.CENTER;
+            if (sizeStr.endsWith(WEIGHT_CENTERED_SUFFIX)) {
+                gravity = Gravity.CENTER;
+            } else if (sizeStr.endsWith(ABSOLUTE_VERTICAL_CENTERED_SUFFIX)) {
+                gravity = Gravity.CENTER_VERTICAL;
+            }
 
             // Set default gravity, flipped if needed in reversed layouts (270 RTL and 90 LTR)
             frame.setDefaultGravity(gravity);
@@ -371,8 +376,16 @@ public class NavigationBarInflaterView extends FrameLayout
 
             frame.addView(v, childParams);
 
-            // Use weighting to set the width of the frame
-            frame.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, weight));
+            if (sizeStr.contains(WEIGHT_SUFFIX)) {
+                // Use weighting to set the width of the frame
+                float weight = Float.parseFloat(
+                        sizeStr.substring(0, sizeStr.indexOf(WEIGHT_SUFFIX)));
+                frame.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, weight));
+            } else {
+                int width = (int) convertDpToPx(mContext,
+                        Float.parseFloat(sizeStr.substring(0, sizeStr.indexOf(ABSOLUTE_SUFFIX))));
+                frame.setLayoutParams(new LinearLayout.LayoutParams(width, MATCH_PARENT));
+            }
 
             // Ensure ripples can be drawn outside bounds
             frame.setClipChildren(false);
@@ -490,8 +503,6 @@ public class NavigationBarInflaterView extends FrameLayout
         }
     }
 
-
-
     private void clearViews() {
         if (mButtonDispatchers != null) {
             for (int i = 0; i < mButtonDispatchers.size(); i++) {
@@ -506,6 +517,10 @@ public class NavigationBarInflaterView extends FrameLayout
         for (int i = 0; i < group.getChildCount(); i++) {
             ((ViewGroup) group.getChildAt(i)).removeAllViews();
         }
+    }
+
+    private static float convertDpToPx(Context context, float dp) {
+        return dp * context.getResources().getDisplayMetrics().density;
     }
 
     @Override

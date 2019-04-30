@@ -34,7 +34,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.FloatProperty;
@@ -79,7 +78,6 @@ public class KeyButtonDrawable extends Drawable {
 
     private final Paint mIconPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final Paint mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
-    private final Paint mOvalBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final ShadowDrawableState mState;
     private AnimatedVectorDrawable mAnimatedDrawable;
 
@@ -101,7 +99,6 @@ public class KeyButtonDrawable extends Drawable {
             mAnimatedDrawable = (AnimatedVectorDrawable) mState.mChildState.newDrawable().mutate();
             setDrawableBounds(mAnimatedDrawable);
         }
-        mOvalBgPaint.setColor(mState.mDarkColor);
     }
 
     public void setDarkIntensity(float intensity) {
@@ -215,6 +212,15 @@ public class KeyButtonDrawable extends Drawable {
         return mState.mBaseWidth + (mState.mShadowSize + Math.abs(mState.mShadowOffsetX)) * 2;
     }
 
+    /** Return if the drawable has oval background. */
+    public boolean hasOvalBg() {
+        return mState.mHasOvalBg;
+    }
+
+    public int getDarkColor() {
+        return mState.mDarkColor;
+    }
+
     public boolean canAnimate() {
         return mState.mSupportsAnimation;
     }
@@ -242,10 +248,6 @@ public class KeyButtonDrawable extends Drawable {
         Rect bounds = getBounds();
         if (bounds.isEmpty()) {
             return;
-        }
-
-        if (mState.mHasOvalBg) {
-            canvas.drawOval(new RectF(bounds), mOvalBgPaint);
         }
 
         if (mAnimatedDrawable != null) {
