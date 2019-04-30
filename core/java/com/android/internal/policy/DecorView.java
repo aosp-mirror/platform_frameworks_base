@@ -1943,6 +1943,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         initializeElevation();
     }
 
+    @Override
+    public void onMovedToDisplay(int displayId, Configuration config) {
+        super.onMovedToDisplay(displayId, config);
+        // Have to explicitly update displayId because it may use DecorContext
+        getContext().updateDisplay(displayId);
+    }
+
     /**
      * Determines if the workspace is entirely covered by the window.
      * @return {@code true} when the window is filling the entire screen/workspace.
