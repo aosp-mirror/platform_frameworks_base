@@ -93,13 +93,13 @@ class ZygoteServer {
     /**
      * The name of the unspecialized app process pool socket to use if the USAP pool is enabled.
      */
-    private LocalServerSocket mUsapPoolSocket;
+    private final LocalServerSocket mUsapPoolSocket;
 
     /**
      * File descriptor used for communication between the signal handler and the ZygoteServer poll
      * loop.
      * */
-    private FileDescriptor mUsapPoolEventFD;
+    private final FileDescriptor mUsapPoolEventFD;
 
     /**
      * Whether or not mZygoteSocket's underlying FD should be closed directly.
@@ -371,8 +371,8 @@ class ZygoteServer {
      * worth at a time.
      */
     Runnable runSelectLoop(String abiList) {
-        ArrayList<FileDescriptor> socketFDs = new ArrayList<FileDescriptor>();
-        ArrayList<ZygoteConnection> peers = new ArrayList<ZygoteConnection>();
+        ArrayList<FileDescriptor> socketFDs = new ArrayList<>();
+        ArrayList<ZygoteConnection> peers = new ArrayList<>();
 
         socketFDs.add(mZygoteSocket.getFileDescriptor());
         peers.add(null);
@@ -381,7 +381,7 @@ class ZygoteServer {
             fetchUsapPoolPolicyPropsWithMinInterval();
 
             int[] usapPipeFDs = null;
-            StructPollfd[] pollFDs = null;
+            StructPollfd[] pollFDs;
 
             // Allocate enough space for the poll structs, taking into account
             // the state of the USAP pool for this Zygote (could be a
@@ -417,6 +417,8 @@ class ZygoteServer {
                 pollFDs[pollIndex].events = (short) POLLIN;
                 ++pollIndex;
 
+                // The usapPipeFDs array will always be filled in if the USAP Pool is enabled.
+                assert usapPipeFDs != null;
                 for (int usapPipeFD : usapPipeFDs) {
                     FileDescriptor managedFd = new FileDescriptor();
                     managedFd.setInt$(usapPipeFD);
@@ -513,8 +515,10 @@ class ZygoteServer {
 
                     // If this is the event FD the payload will be the number of USAPs removed.
                     // If this is a reporting pipe FD the payload will be the PID of the USAP
-                    // that was just specialized.
-                    long messagePayload = -1;
+                    // that was just specialized.  The `continue` statements below ensure that
+                    // the messagePayload will always be valid if we complete the try block without
+                    // an exception.
+                    long messagePayload;
 
                     try {
                         byte[] buffer = new byte[Zygote.USAP_MANAGEMENT_MESSAGE_BYTES];
@@ -555,7 +559,7 @@ class ZygoteServer {
                 int[] sessionSocketRawFDs =
                         socketFDs.subList(1, socketFDs.size())
                                 .stream()
-                                .mapToInt(fd -> fd.getInt$())
+                                .mapToInt(FileDescriptor::getInt$)
                                 .toArray();
 
                 final Runnable command = fillUsapPool(sessionSocketRawFDs);
