@@ -703,12 +703,17 @@ class TouchExplorer extends BaseEventStreamTransformation
                             final float secondPtrX = event.getX(1);
                             final float secondPtrY = event.getY(1);
 
-                            final float deltaX = firstPtrX - secondPtrX;
-                            final float deltaY = firstPtrY - secondPtrY;
+                            final int pointerIndex = event.findPointerIndex(mDraggingPointerId);
+                            final float deltaX =
+                                    (pointerIndex == 0) ? (secondPtrX - firstPtrX)
+                                            : (firstPtrX - secondPtrX);
+                            final float deltaY =
+                                    (pointerIndex == 0) ? (secondPtrY - firstPtrY)
+                                            : (firstPtrY - secondPtrY);
                             final double distance = Math.hypot(deltaX, deltaY);
 
                             if (distance > mScaledMinPointerDistanceToUseMiddleLocation) {
-                                event.setLocation(deltaX / 2, deltaY / 2);
+                                event.offsetLocation(deltaX / 2, deltaY / 2);
                             }
 
                             // If still dragging send a drag event.
