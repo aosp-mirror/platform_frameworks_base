@@ -968,6 +968,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public String getSettingsSummary() {
+        return getSettingsSummary(false /*convertSavedAsDisconnected*/);
+    }
+
+    /**
+     * Returns the summary for the AccessPoint.
+     */
+    public String getSettingsSummary(boolean convertSavedAsDisconnected) {
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
@@ -1033,8 +1040,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
                                     R.string.wifi_ap_unable_to_handle_new_sta));
                             break;
                         default:
-                            // "Saved"
-                            summary.append(mContext.getString(R.string.wifi_remembered));
+                            if (convertSavedAsDisconnected) {
+                                // Disconnected
+                                summary.append(mContext.getString(R.string.wifi_disconnected));
+                            } else {
+                                // "Saved"
+                                summary.append(mContext.getString(R.string.wifi_remembered));
+                            }
                             break;
                     }
                 }
