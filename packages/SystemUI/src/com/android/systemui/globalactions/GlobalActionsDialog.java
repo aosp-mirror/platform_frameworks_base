@@ -919,56 +919,46 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      * via {@link com.android.systemui.globalactions.GlobalActionsDialog#mDeviceProvisioned}.
      */
     public class MyAdapter extends MultiListAdapter {
-        @Override
-        public int getCount() {
+        private int countItems(boolean separated) {
             int count = 0;
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
 
-                if (mKeyguardShowing && !action.showDuringKeyguard()) {
-                    continue;
+                if (shouldBeShown(action) && action.shouldBeSeparated() == separated) {
+                    count++;
                 }
-                if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
-                    continue;
-                }
-                count++;
             }
             return count;
+        }
+
+        private boolean shouldBeShown(Action action) {
+            if (mKeyguardShowing && !action.showDuringKeyguard()) {
+                return false;
+            }
+            if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int countSeparatedItems() {
+            return countItems(true);
+        }
+
+        @Override
+        public int countListItems() {
+            return countItems(false);
+        }
+
+        @Override
+        public int getCount() {
+            return countSeparatedItems() + countListItems();
         }
 
         @Override
         public boolean isEnabled(int position) {
             return getItem(position).isEnabled();
-        }
-
-        @Override
-        public ArrayList<Action> getSeparatedItems() {
-            ArrayList<Action> separatedActions = new ArrayList<Action>();
-            if (!shouldUseSeparatedView()) {
-                return separatedActions;
-            }
-            for (int i = 0; i < mItems.size(); i++) {
-                final Action action = mItems.get(i);
-                if (action.shouldBeSeparated()) {
-                    separatedActions.add(action);
-                }
-            }
-            return separatedActions;
-        }
-
-        @Override
-        public ArrayList<Action> getListItems() {
-            if (!shouldUseSeparatedView()) {
-                return new ArrayList<Action>(mItems);
-            }
-            ArrayList<Action> listActions = new ArrayList<Action>();
-            for (int i = 0; i < mItems.size(); i++) {
-                final Action action = mItems.get(i);
-                if (!action.shouldBeSeparated()) {
-                    listActions.add(action);
-                }
-            }
-            return listActions;
         }
 
         @Override
@@ -978,14 +968,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public Action getItem(int position) {
-
             int filteredPos = 0;
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
-                if (mKeyguardShowing && !action.showDuringKeyguard()) {
-                    continue;
-                }
-                if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
+                if (!shouldBeShown(action)) {
                     continue;
                 }
                 if (filteredPos == position) {
@@ -1010,10 +996,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
-            // Everything but screenshot, the last item, gets white background.
-            if (position == getCount() - 1) {
-                MultiListLayout.get(parent).setDivisionView(view);
-            }
+            view.setOnClickListener(v -> onClickItem(position));
+            view.setOnLongClickListener(v -> onLongClickItem(position));
             return view;
         }
 
@@ -1034,6 +1018,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mDialog.dismiss();
             }
             item.onPress();
+        }
+
+        @Override
+        public boolean shouldBeSeparated(int position) {
+            return getItem(position).shouldBeSeparated();
         }
     }
 
@@ -1590,7 +1579,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mScrimAlpha = 1f;
                 initializePanel();
             }
-            mGlobalActionsLayout.setSnapToEdge(true);
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
 
