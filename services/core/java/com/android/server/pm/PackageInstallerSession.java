@@ -2050,6 +2050,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
 
+            if (isStagedAndInTerminalState()) {
+                // We keep the session in the database if it's in a finalized state. It will be
+                // removed by PackageInstallerService when the last update time is old enough.
+                // Also, in such cases cleanStageDir() has already been executed so no need to
+                // do it now.
+                return;
+            }
             if (mCommitted && params.isStaged) {
                 synchronized (mLock) {
                     mDestroyed = true;
