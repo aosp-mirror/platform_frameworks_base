@@ -29,6 +29,8 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
 
+import androidx.test.filters.FlakyTest;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +74,7 @@ public class TaskPersisterTest {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testTaskIdsPersistence() {
         SparseBooleanArray taskIdsOnFile = new SparseBooleanArray();
         for (int i = 0; i < 100; i++) {
