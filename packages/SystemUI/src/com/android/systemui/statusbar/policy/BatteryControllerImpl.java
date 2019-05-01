@@ -212,13 +212,15 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @Nullable
     private String generateTimeRemainingString() {
-        if (mEstimate == null) {
-            return null;
-        }
+        synchronized (mFetchCallbacks) {
+            if (mEstimate == null) {
+                return null;
+            }
 
-        String percentage = NumberFormat.getPercentInstance().format((double) mLevel / 100.0);
-        return PowerUtil.getBatteryRemainingShortStringFormatted(
-                mContext, mEstimate.getEstimateMillis());
+            String percentage = NumberFormat.getPercentInstance().format((double) mLevel / 100.0);
+            return PowerUtil.getBatteryRemainingShortStringFormatted(
+                    mContext, mEstimate.getEstimateMillis());
+        }
     }
 
     private void updateEstimateInBackground() {
@@ -230,9 +232,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         mFetchingEstimate = true;
         Dependency.get(Dependency.BG_HANDLER).post(() -> {
             // Only fetch the estimate if they are enabled
-            mEstimate = null;
-            if (mEstimates.isHybridNotificationEnabled()) {
-                updateEstimate();
+            synchronized (mFetchCallbacks) {
+                mEstimate = null;
+                if (mEstimates.isHybridNotificationEnabled()) {
+                    updateEstimate();
+                }
             }
             mFetchingEstimate = false;
             Dependency.get(Dependency.MAIN_HANDLER).post(this::notifyEstimateFetchCallbacks);
@@ -240,9 +244,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     private void notifyEstimateFetchCallbacks() {
-        String estimate = generateTimeRemainingString();
-
         synchronized (mFetchCallbacks) {
+            String estimate = generateTimeRemainingString();
             for (EstimateFetchCompletion completion : mFetchCallbacks) {
                 completion.onBatteryRemainingEstimateRetrieved(estimate);
             }
