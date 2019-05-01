@@ -188,7 +188,7 @@ status_t JHwBinder::onTransact(
         if (env->IsInstanceOf(excep, gErrorClass)) {
             /* It's an error */
             LOG(ERROR) << "Forcefully exiting";
-            exit(1);
+            _exit(1);
         } else {
             LOG(ERROR) << "Uncaught exception!";
         }
