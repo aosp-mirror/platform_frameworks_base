@@ -108,12 +108,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_TASK_ID;
 import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
@@ -136,6 +134,7 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.Dialog;
 import android.app.IActivityController;
 import android.app.IActivityTaskManager;
@@ -216,7 +215,6 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -873,6 +871,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     boolean hasUserRestriction(String restriction, int userId) {
         return getUserManager().hasUserRestriction(restriction, userId);
+    }
+
+    boolean hasSystemAlertWindowPermission(int callingUid, int callingPid, String callingPackage) {
+        final int mode = getAppOpsService().noteOperation(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+                callingUid, callingPackage);
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            return checkPermission(Manifest.permission.SYSTEM_ALERT_WINDOW, callingPid, callingUid)
+                    == PERMISSION_GRANTED;
+        }
+        return mode == AppOpsManager.MODE_ALLOWED;
     }
 
     protected RecentTasks createRecentTasks() {
