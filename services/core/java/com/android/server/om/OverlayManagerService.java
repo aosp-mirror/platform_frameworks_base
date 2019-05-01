@@ -720,6 +720,26 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @Override
+        public String[] getDefaultOverlayPackages() throws RemoteException {
+            try {
+                traceBegin(TRACE_TAG_RRO, "OMS#getDefaultOverlayPackages");
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MODIFY_THEME_OVERLAY, null);
+
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    synchronized (mLock) {
+                        return mImpl.getDefaultOverlayPackages();
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            } finally {
+                traceEnd(TRACE_TAG_RRO);
+            }
+        }
+
+        @Override
         public void onShellCommand(@NonNull final FileDescriptor in,
                 @NonNull final FileDescriptor out, @NonNull final FileDescriptor err,
                 @NonNull final String[] args, @NonNull final ShellCallback callback,

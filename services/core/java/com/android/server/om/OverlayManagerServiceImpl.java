@@ -641,6 +641,10 @@ final class OverlayManagerServiceImpl {
         pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
     }
 
+    @NonNull String[] getDefaultOverlayPackages() {
+        return mDefaultOverlays;
+    }
+
     List<String> getEnabledOverlayPackageNames(@NonNull final String targetPackageName,
             final int userId) {
         final List<OverlayInfo> overlays = mSettings.getOverlaysForTarget(targetPackageName,
