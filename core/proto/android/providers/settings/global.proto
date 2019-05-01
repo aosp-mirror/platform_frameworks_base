@@ -501,7 +501,10 @@ message GlobalSettingsProto {
     }
     optional IntentFirewall intent_firewall = 65;
 
-    optional SettingProto job_scheduler_constants = 66;
+    optional SettingProto job_scheduler_constants = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto job_scheduler_quota_controller_constants = 149 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto job_scheduler_time_controller_constants = 150 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     optional SettingProto keep_profile_in_background = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message LangId {
@@ -1049,5 +1052,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 149;
+    // Next tag = 151;
 }
