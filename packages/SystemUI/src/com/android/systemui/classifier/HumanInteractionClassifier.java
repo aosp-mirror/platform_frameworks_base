@@ -151,7 +151,9 @@ public class HumanInteractionClassifier extends Classifier {
     }
 
     private void addTouchEvent(MotionEvent event) {
-        mClassifierData.update(event);
+        if (!mClassifierData.update(event)) {
+            return;
+        }
 
         for (StrokeClassifier c : mStrokeClassifiers) {
             c.onTouchEvent(event);
