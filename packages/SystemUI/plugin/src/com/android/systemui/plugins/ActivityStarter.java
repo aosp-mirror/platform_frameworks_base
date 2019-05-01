@@ -17,6 +17,7 @@ package com.android.systemui.plugins;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.view.View;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
@@ -32,11 +33,18 @@ public interface ActivityStarter {
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
 
     /**
-     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but allows
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent)}, but allows
      * you to specify the callback that is executed on the UI thread after the intent is sent.
      */
     void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback);
+
+    /**
+     * Similar to {@link #startPendingIntentDismissingKeyguard(PendingIntent, Runnable)}, but also
+     * specifies an associated view that should be used for the activity launch animation.
+     */
+    void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentUiThreadCallback, View associatedView);
 
     /**
      * The intent flag can be specified in startActivity().
