@@ -331,6 +331,11 @@ private:
     status_t cmd_log_app_breadcrumb(int outFd, const Vector<String8>& args);
 
     /**
+     * Write an BinaryPushStateChanged event, as if calling StatsLog.logBinaryPushStateChanged().
+     */
+    status_t cmd_log_binary_push(int outFd, const Vector<String8>& args);
+
+    /**
      * Print contents of a pulled metrics source.
      */
     status_t cmd_print_pulled_metrics(int outFd, const Vector<String8>& args);

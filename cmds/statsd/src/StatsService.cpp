@@ -28,6 +28,7 @@
 
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
+#include <android-base/strings.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/PermissionController.h>
@@ -394,6 +395,10 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
             return cmd_log_app_breadcrumb(out, args);
         }
 
+        if (!args[0].compare(String8("log-binary-push"))) {
+            return cmd_log_binary_push(out, args);
+        }
+
         if (!args[0].compare(String8("clear-puller-cache"))) {
             return cmd_clear_puller_cache(out);
         }
@@ -461,6 +466,21 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  STATE         Integer in [0, 3], as per atoms.proto.\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
+    dprintf(out,
+            "usage: adb shell cmd stats log-binary-push NAME VERSION STAGING ROLLBACK_ENABLED "
+            "LOW_LATENCY STATE EXPERIMENT_IDS\n");
+    dprintf(out, "  Log a binary push state changed event.\n");
+    dprintf(out, "  NAME                The train name.\n");
+    dprintf(out, "  VERSION             The train version code.\n");
+    dprintf(out, "  STAGING             If this train requires a restart.\n");
+    dprintf(out, "  ROLLBACK_ENABLED    If rollback should be enabled for this install.\n");
+    dprintf(out, "  LOW_LATENCY         If the train requires low latency monitoring.\n");
+    dprintf(out, "  STATE               The status of the train push.\n");
+    dprintf(out, "                      Integer value of the enum in atoms.proto.\n");
+    dprintf(out, "  EXPERIMENT_IDS      Comma separated list of experiment ids.\n");
+    dprintf(out, "                      Leave blank for none.\n");
+    dprintf(out, "\n");
+    dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats config remove [UID] [NAME]\n");
     dprintf(out, "usage: adb shell cmd stats config update [UID] NAME\n");
     dprintf(out, "\n");
@@ -506,7 +526,6 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  --configs     Send the list of configs in the name list instead of\n");
     dprintf(out, "                the currently active configs\n");
     dprintf(out, "  NAME LIST     List of configuration names to be included in the broadcast.\n");
-
     dprintf(out, "\n");
     dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats print-stats\n");
@@ -818,6 +837,39 @@ status_t StatsService::cmd_log_app_breadcrumb(int out, const Vector<String8>& ar
         print_cmd_help(out);
         return UNKNOWN_ERROR;
     }
+    return NO_ERROR;
+}
+
+status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args) {
+    // Security checks are done in the sendBinaryPushStateChanged atom.
+    const int argCount = args.size();
+    if (argCount != 7 && argCount != 8) {
+        dprintf(out, "Incorrect number of argument supplied\n");
+        return UNKNOWN_ERROR;
+    }
+    android::String16 trainName = android::String16(args[1].c_str());
+    int64_t trainVersion = strtoll(args[2].c_str(), nullptr, 10);
+    int options = 0;
+    if (args[3] == "1") {
+        options = options | IStatsManager::FLAG_REQUIRE_STAGING;
+    }
+    if (args[4] == "1") {
+        options = options | IStatsManager::FLAG_ROLLBACK_ENABLED;
+    }
+    if (args[5] == "1") {
+        options = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
+    }
+    int32_t state = atoi(args[6].c_str());
+    vector<int64_t> experimentIds;
+    if (argCount == 8) {
+        vector<string> experimentIdsString = android::base::Split(string(args[7].c_str()), ",");
+        for (string experimentIdString : experimentIdsString) {
+            int64_t experimentId = strtoll(experimentIdString.c_str(), nullptr, 10);
+            experimentIds.push_back(experimentId);
+        }
+    }
+    dprintf(out, "Logging BinaryPushStateChanged\n");
+    sendBinaryPushStateChangedAtom(trainName, trainVersion, options, state, experimentIds);
     return NO_ERROR;
 }
 
@@ -1207,22 +1259,25 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
                                                     const int options,
                                                     const int32_t state,
                                                     const std::vector<int64_t>& experimentIdsIn) {
+    // Note: We skip the usage stats op check here since we do not have a package name.
+    // This is ok since we are overloading the usage_stats permission.
+    // This method only sends data, it does not receive it.
+    pid_t pid = IPCThreadState::self()->getCallingPid();
     uid_t uid = IPCThreadState::self()->getCallingUid();
-    // For testing
-    if (uid == AID_ROOT || uid == AID_SYSTEM || uid == AID_SHELL) {
-        return ok();
+        // Root, system, and shell always have access
+    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
+        // Caller must be granted these permissions
+        if (!checkCallingPermission(String16(kPermissionDump))) {
+            return exception(binder::Status::EX_SECURITY,
+                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
+                                          kPermissionDump));
+        }
+        if (!checkCallingPermission(String16(kPermissionUsage))) {
+            return exception(binder::Status::EX_SECURITY,
+                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
+                                          kPermissionUsage));
+        }
     }
-
-    // Caller must be granted these permissions
-    if (!checkCallingPermission(String16(kPermissionDump))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
-    }
-    if (!checkCallingPermission(String16(kPermissionUsage))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
-    }
-    // TODO: add verifier permission
 
     bool readTrainInfoSuccess = false;
     InstallTrainInfo trainInfoOnDisk;
