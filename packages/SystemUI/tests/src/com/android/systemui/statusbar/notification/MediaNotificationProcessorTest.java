@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertNotSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -24,17 +26,22 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.widget.RemoteViews;
 
+import androidx.palette.graphics.Palette;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,14 +50,31 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class MediaNotificationProcessorTest extends SysuiTestCase {
 
+    private static final int BITMAP_WIDTH = 10;
+    private static final int BITMAP_HEIGHT = 10;
+
+    /**
+     * Color tolerance is borrowed from the AndroidX test utilities for Palette.
+     */
+    private static final int COLOR_TOLERANCE = 8;
+
     private MediaNotificationProcessor mProcessor;
     private Bitmap mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
     private ImageGradientColorizer mColorizer;
+    @Nullable private Bitmap mArtwork;
 
     @Before
     public void setUp() {
         mColorizer = spy(new TestableColorizer(mBitmap));
         mProcessor = new MediaNotificationProcessor(getContext(), getContext(), mColorizer);
+    }
+
+    @After
+    public void tearDown() {
+        if (mArtwork != null) {
+            mArtwork.recycle();
+            mArtwork = null;
+        }
     }
 
     @Test
@@ -98,6 +122,36 @@ public class MediaNotificationProcessorTest extends SysuiTestCase {
         assertNotSame(contentView, remoteViews);
         contentView = builder.createHeadsUpContentView();
         assertNotSame(contentView, remoteViews);
+    }
+
+    @Test
+    public void findBackgroundSwatch_white() {
+        // Given artwork that is completely white.
+        mArtwork = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(mArtwork);
+        canvas.drawColor(Color.WHITE);
+        // WHEN the background swatch is computed
+        Palette.Swatch swatch = MediaNotificationProcessor.findBackgroundSwatch(mArtwork);
+        // THEN the swatch color is white
+        assertCloseColors(swatch.getRgb(), Color.WHITE);
+    }
+
+    @Test
+    public void findBackgroundSwatch_red() {
+        // Given artwork that is completely red.
+        mArtwork = Bitmap.createBitmap(BITMAP_WIDTH, BITMAP_HEIGHT, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(mArtwork);
+        canvas.drawColor(Color.RED);
+        // WHEN the background swatch is computed
+        Palette.Swatch swatch = MediaNotificationProcessor.findBackgroundSwatch(mArtwork);
+        // THEN the swatch color is red
+        assertCloseColors(swatch.getRgb(), Color.RED);
+    }
+
+    static void assertCloseColors(int expected, int actual) {
+        assertThat((float) Color.red(expected)).isWithin(COLOR_TOLERANCE).of(Color.red(actual));
+        assertThat((float) Color.green(expected)).isWithin(COLOR_TOLERANCE).of(Color.green(actual));
+        assertThat((float) Color.blue(expected)).isWithin(COLOR_TOLERANCE).of(Color.blue(actual));
     }
 
     public static class TestableColorizer extends ImageGradientColorizer {
