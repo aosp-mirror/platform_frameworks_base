@@ -30,6 +30,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import android.view.View;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
@@ -79,11 +80,12 @@ public class ActivityLaunchAnimator {
     }
 
     public RemoteAnimationAdapter getLaunchAnimation(
-            ExpandableNotificationRow sourceNotification, boolean occluded) {
-        if (!mCallback.areLaunchAnimationsEnabled() || occluded) {
+            View sourceView, boolean occluded) {
+        if (!(sourceView instanceof ExpandableNotificationRow) || !mCallback.areLaunchAnimationsEnabled() || occluded) {
             return null;
         }
-        AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
+        AnimationRunner animationRunner = new AnimationRunner(
+                (ExpandableNotificationRow) sourceView);
         return new RemoteAnimationAdapter(animationRunner, ANIMATION_DURATION,
                 ANIMATION_DURATION - 150 /* statusBarTransitionDelay */);
     }

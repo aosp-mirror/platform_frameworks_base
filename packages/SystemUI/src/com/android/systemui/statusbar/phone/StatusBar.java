@@ -593,6 +593,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updateScrimController();
             };
     private ActivityIntentHelper mActivityIntentHelper;
+    private ShadeController mShadeController;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -1062,7 +1063,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback =
                 (StatusBarRemoteInputCallback) Dependency.get(
                         NotificationRemoteInputManager.Callback.class);
-        final ShadeController shadeController = Dependency.get(ShadeController.class);
+        mShadeController = Dependency.get(ShadeController.class);
         final ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
 
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
@@ -1070,7 +1071,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
                 mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
-                mLockscreenUserManager, shadeController, mKeyguardMonitor,
+                mLockscreenUserManager, mShadeController, mKeyguardMonitor,
                 mNotificationInterruptionStateProvider, mMetricsLogger,
                 new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
                 Dependency.get(BG_HANDLER), mActivityIntentHelper, mBubbleController);
@@ -4344,6 +4345,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
+        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback, null /* row */);
+    }
+
+    @Override
+    public void startPendingIntentDismissingKeyguard(
+            final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback,
+            View associatedView) {
         final boolean afterKeyguardGone = intent.isActivity()
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
@@ -4351,7 +4359,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         executeActionDismissingKeyguard(() -> {
             try {
                 intent.send(null, 0, null, null, null, null, getActivityOptions(
-                        null /* animationAdapter */));
+                        mActivityLaunchAnimator.getLaunchAnimation(associatedView,
+                                mShadeController.isOccluded())));
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
                 // Just log the exception message.
