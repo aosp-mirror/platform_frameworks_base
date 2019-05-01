@@ -18,6 +18,7 @@ package com.android.server.job;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -1801,7 +1802,8 @@ public class JobSchedulerService extends com.android.server.SystemService
      *
      * @see #maybeQueueReadyJobsForExecutionLocked
      */
-    private JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule) {
+    @VisibleForTesting
+    JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule) {
         final long elapsedNowMillis = sElapsedRealtimeClock.millis();
         final JobInfo job = failureToReschedule.getJob();
 
@@ -1848,6 +1850,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 elapsedNowMillis + delayMillis,
                 JobStatus.NO_LATEST_RUNTIME, backoffAttempts,
                 failureToReschedule.getLastSuccessfulRunTime(), sSystemClock.millis());
+        if (job.isPeriodic()) {
+            newJob.setOriginalLatestRunTimeElapsed(
+                    failureToReschedule.getOriginalLatestRunTimeElapsed());
+        }
         for (int ic=0; ic<mControllers.size(); ic++) {
             StateController controller = mControllers.get(ic);
             controller.rescheduleForFailureLocked(newJob, failureToReschedule);
@@ -1868,23 +1874,41 @@ public class JobSchedulerService extends com.android.server.SystemService
      * @return A new job representing the execution criteria for this instantiation of the
      * recurring job.
      */
-    private JobStatus getRescheduleJobForPeriodic(JobStatus periodicToReschedule) {
+    @VisibleForTesting
+    JobStatus getRescheduleJobForPeriodic(JobStatus periodicToReschedule) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
-        // Compute how much of the period is remaining.
-        long runEarly = 0L;
+        final long newLatestRuntimeElapsed;
+        final long period = periodicToReschedule.getJob().getIntervalMillis();
+        final long latestRunTimeElapsed = periodicToReschedule.getOriginalLatestRunTimeElapsed();
+        final long flex = periodicToReschedule.getJob().getFlexMillis();
 
-        // If this periodic was rescheduled it won't have a deadline.
-        if (periodicToReschedule.hasDeadlineConstraint()) {
-            runEarly = Math.max(periodicToReschedule.getLatestRunTimeElapsed() - elapsedNow, 0L);
+        if (elapsedNow > latestRunTimeElapsed) {
+            // The job ran past its expected run window. Have it count towards the current window
+            // and schedule a new job for the next window.
+            if (DEBUG) {
+                Slog.i(TAG, "Periodic job ran after its intended window.");
+            }
+            final long diffMs = (elapsedNow - latestRunTimeElapsed);
+            int numSkippedWindows = (int) (diffMs / period) + 1; // +1 to include original window
+            if (period != flex && diffMs > Math.min(30 * MINUTE_IN_MILLIS, (period - flex) / 2)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Custom flex job ran too close to next window.");
+                }
+                // For custom flex periods, if the job was run too close to the next window,
+                // skip the next window and schedule for the following one.
+                numSkippedWindows += 1;
+            }
+            newLatestRuntimeElapsed = latestRunTimeElapsed + (period * numSkippedWindows);
+        } else {
+            newLatestRuntimeElapsed = latestRunTimeElapsed + period;
         }
-        long flex = periodicToReschedule.getJob().getFlexMillis();
-        long period = periodicToReschedule.getJob().getIntervalMillis();
-        long newLatestRuntimeElapsed = elapsedNow + runEarly + period;
-        long newEarliestRunTimeElapsed = newLatestRuntimeElapsed - flex;
+
+        final long newEarliestRunTimeElapsed = newLatestRuntimeElapsed - flex;
 
         if (DEBUG) {
             Slog.v(TAG, "Rescheduling executed periodic. New execution window [" +
-                    newEarliestRunTimeElapsed/1000 + ", " + newLatestRuntimeElapsed/1000 + "]s");
+                    newEarliestRunTimeElapsed / 1000 + ", " + newLatestRuntimeElapsed / 1000
+                    + "]s");
         }
         return new JobStatus(periodicToReschedule, getCurrentHeartbeat(),
                 newEarliestRunTimeElapsed, newLatestRuntimeElapsed,
