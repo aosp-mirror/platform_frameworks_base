@@ -2132,6 +2132,10 @@ def show_deprecations_at_birth(cur, prev):
 
     # Remove all existing things so we're left with new
     for prev_clazz in prev.values():
+        if prev_clazz.fullname not in cur:
+            # The class was removed this release; we can safely ignore it.
+            continue
+
         cur_clazz = cur[prev_clazz.fullname]
         if not is_interesting(cur_clazz): continue
 
