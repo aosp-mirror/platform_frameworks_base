@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 import android.view.Display;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -83,6 +84,7 @@ import javax.inject.Singleton;
 public class BubbleController implements ConfigurationController.ConfigurationListener {
 
     private static final String TAG = "BubbleController";
+    private static final boolean DEBUG = true;
 
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
@@ -203,6 +205,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         configurationController.addCallback(this /* configurationListener */);
 
+        mBubbleData = data;
+        mBubbleData.setListener(mBubbleDataListener);
+
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
 
@@ -219,9 +224,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-        mBubbleData = data;
-        mBubbleData.setListener(mBubbleDataListener);
         mSurfaceSynchronizer = synchronizer;
 
         mBarService = IStatusBarService.Stub.asInterface(
@@ -482,7 +484,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
 
         @Override
-        public void onSelectionChanged(Bubble selectedBubble) {
+        public void onSelectionChanged(@Nullable Bubble selectedBubble) {
             if (mStackView != null) {
                 mStackView.setSelectedBubble(selectedBubble);
             }
@@ -506,6 +508,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         public void apply() {
             mNotificationEntryManager.updateNotifications();
             updateVisibility();
+
+            if (DEBUG) {
+                Log.d(TAG, "[BubbleData]");
+                Log.d(TAG, formatBubblesString(mBubbleData.getBubbles(),
+                        mBubbleData.getSelectedBubble()));
+
+                if (mStackView != null) {
+                    Log.d(TAG, "[BubbleStackView]");
+                    Log.d(TAG, formatBubblesString(mStackView.getBubblesOnScreen(),
+                            mStackView.getExpandedBubble()));
+                }
+            }
         }
     };
 
@@ -621,6 +635,23 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 && entry.getBubbleMetadata().isNotificationSuppressed()
                 && isForegroundApp(mContext, entry.notification.getPackageName());
         entry.setShowInShadeWhenBubble(!suppressNotification);
+    }
+
+    static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {
+        StringBuilder sb = new StringBuilder();
+        for (Bubble bubble : bubbles) {
+            if (bubble == null) {
+                sb.append("   <null> !!!!!\n");
+            } else {
+                boolean isSelected = (bubble == selected);
+                sb.append(String.format("%s Bubble{act=%12d, ongoing=%d, key=%s}\n",
+                        ((isSelected) ? "->" : "  "),
+                        bubble.getLastActivity(),
+                        (bubble.isOngoing() ? 1 : 0),
+                        bubble.getKey()));
+            }
+        }
+        return sb.toString();
     }
 
     /**
