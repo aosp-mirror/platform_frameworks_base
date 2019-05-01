@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2019, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="config_batterymeterPerimeterPath" translatable="false">
+        M 4,0 V 2 H 2.33 C 1.6,2 1,2.6 1,3.33 V 18.66 C 1,19.4 1.6,20 2.33,20 H 9.66 C 10.4,20 11,19.4 11,18.67 V 3.33 C 11,2.6 10.4,2 9.67,2 H 8 V 0 Z
+    </string>
+    <string name="config_batterymeterErrorPerimeterPath" translatable="false">
+        M 3.5,0 V 0.5 1.5 H 2.3301 C 1.3261,1.5 0.5,2.3261 0.5,3.3301 V 18.16 C 0.5,19.17 1.3261,20 2.3301,20 H 9.6602 C 10.67,20 11.5,19.174 11.5,18.17 V 3.3301 C 11.5,2.3261 10.674,1.5 9.6699,1.5 H 8.5 V 0 Z M 9.1698,2.9999 C 9.6259,2.9999 9.9999,3.374 9.9999,3.83 V 17.67 C 9.9999,18.126 9.6299,18.5 9.1601,18.5 H 2.83 C 2.3741,18.5 2,18.13 2,17.66 V 3.83 C 2,3.374 2.3741,2.9999 2.83,2.9999 Z
+    </string>
+    <string name="config_batterymeterFillMask" translatable="false">
+        M 4,0 V 2 H 2.33 C 1.6,2 1,2.6 1,3.33 V 18.66 C 1,19.4 1.6,20 2.33,20 H 9.66 C 10.4,20 11,19.4 11,18.67 V 3.33 C 11,2.6 10.4,2 9.67,2 H 8 V 0 Z
+    </string>
+    <string name="config_batterymeterBoltPath" translatable="false">
+        M 8.58,10 C 8.77,10 8.89,10.2 8.8,10.37 L 5.94,15.74 C 5.7,16.19 5,16.02 5,15.5 V 12 H 3.42 C 3.23,12 3.11,11.8 3.2,11.63 L 6.06,6.26 C 6.3,5.81 7,5.98 7,6.5 V 10 Z
+    </string>
+    <string name="config_batterymeterPowersavePath" translatable="false">
+        M 9,11 C 9,11.55 8.55,12 8,12 H 7 V 13 C 7,13.55 6.55,14 6,14 5.45,14 5,13.55 5,13 V 12 H 4 C 3.45,12 3,11.55 3,11 3,10.45 3.45,10.005 4,10 H 5 V 9 C 5,8.45 5.45,8 6,8 6.55,8 7,8.45 7,9 V 10 H 8 C 8.55,10 9,10.45 9,11 Z
+    </string>
+    <bool name="config_batterymeterDualTone">true</bool>
+</resources>
