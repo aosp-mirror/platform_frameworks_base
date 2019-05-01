@@ -2871,10 +2871,10 @@ public class ChooserActivity extends ResolverActivity {
 
             if (startType != lastStartType
                     || rowPosition == getContentPreviewRowCount() + getProfileRowCount()) {
-                row.setBackground(
+                row.setForeground(
                         getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             } else {
-                row.setBackground(null);
+                row.setForeground(null);
             }
 
             int columnCount = holder.getColumnCount();
