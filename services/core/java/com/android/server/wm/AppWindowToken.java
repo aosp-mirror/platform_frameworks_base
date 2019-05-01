@@ -203,7 +203,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean removed;
 
     // Information about an application starting window if displayed.
-    StartingData startingData;
+    StartingData mStartingData;
     WindowState startingWindow;
     StartingSurface startingSurface;
     boolean startingDisplayed;
@@ -385,8 +385,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // it from behind the starting window, so there is no need for it to also be doing its
             // own stuff.
             win.cancelAnimation();
-            removeStartingWindow();
         }
+        removeStartingWindow();
         updateReportedVisibilityLocked();
     }
 
@@ -874,7 +874,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG_WM, "removeAppToken: "
                 + this + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
 
-        if (startingData != null) {
+        if (mStartingData != null) {
             removeStartingWindow();
         }
 
@@ -1053,7 +1053,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // If this is the last window and we had requested a starting transition window,
             // well there is no point now.
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Nulling last startingData");
-            startingData = null;
+            mStartingData = null;
             if (mHiddenSetFromTransferredStartingWindow) {
                 // We set the hidden state to false for the token from a transferred starting window.
                 // We now reset it back to true since the starting window was the last window in the
@@ -1486,13 +1486,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             final long origId = Binder.clearCallingIdentity();
             try {
                 // Transfer the starting window over to the new token.
-                startingData = fromToken.startingData;
+                mStartingData = fromToken.mStartingData;
                 startingSurface = fromToken.startingSurface;
                 startingDisplayed = fromToken.startingDisplayed;
                 fromToken.startingDisplayed = false;
                 startingWindow = tStartingWindow;
                 reportedVisible = fromToken.reportedVisible;
-                fromToken.startingData = null;
+                fromToken.mStartingData = null;
                 fromToken.startingSurface = null;
                 fromToken.startingWindow = null;
                 fromToken.startingMoved = true;
@@ -1538,13 +1538,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 Binder.restoreCallingIdentity(origId);
             }
             return true;
-        } else if (fromToken.startingData != null) {
+        } else if (fromToken.mStartingData != null) {
             // The previous app was getting ready to show a
             // starting window, but hasn't yet done so.  Steal it!
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
                     "Moving pending starting from " + fromToken + " to " + this);
-            startingData = fromToken.startingData;
-            fromToken.startingData = null;
+            mStartingData = fromToken.mStartingData;
+            fromToken.mStartingData = null;
             fromToken.startingMoved = true;
             scheduleAddStartingWindow();
             return true;
@@ -2042,7 +2042,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             return false;
         }
 
-        if (startingData != null) {
+        if (mStartingData != null) {
             return false;
         }
 
@@ -2123,7 +2123,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SplashScreenStartingData");
-        startingData = new SplashScreenStartingData(mWmService, pkg,
+        mStartingData = new SplashScreenStartingData(mWmService, pkg,
                 theme, compatInfo, nonLocalizedLabel, labelRes, icon, logo, windowFlags,
                 getMergedOverrideConfiguration());
         scheduleAddStartingWindow();
@@ -2137,7 +2137,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating SnapshotStartingData");
-        startingData = new SnapshotStartingData(mWmService, snapshot);
+        mStartingData = new SnapshotStartingData(mWmService, snapshot);
         scheduleAddStartingWindow();
         return true;
     }
@@ -2156,18 +2156,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         @Override
         public void run() {
+            // Can be accessed without holding the global lock
+            final StartingData startingData;
             synchronized (mWmService.mGlobalLock) {
                 // There can only be one adding request, silly caller!
                 mWmService.mAnimationHandler.removeCallbacks(this);
-            }
 
-            if (startingData == null) {
-                // Animation has been canceled... do nothing.
-                if (DEBUG_STARTING_WINDOW) {
-                    Slog.v(TAG, "startingData was nulled out before handling"
-                            + " mAddStartingWindow: " + AppWindowToken.this);
+                if (mStartingData == null) {
+                    // Animation has been canceled... do nothing.
+                    if (DEBUG_STARTING_WINDOW) {
+                        Slog.v(TAG, "startingData was nulled out before handling"
+                                + " mAddStartingWindow: " + AppWindowToken.this);
+                    }
+                    return;
                 }
-                return;
+                startingData = mStartingData;
             }
 
             if (DEBUG_STARTING_WINDOW) {
@@ -2185,20 +2188,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 synchronized (mWmService.mGlobalLock) {
                     // If the window was successfully added, then
                     // we need to remove it.
-                    if (removed || startingData == null) {
+                    if (removed || mStartingData == null) {
                         if (DEBUG_STARTING_WINDOW) {
                             Slog.v(TAG, "Aborted starting " + AppWindowToken.this
-                                    + ": removed=" + removed + " startingData=" + startingData);
+                                    + ": removed=" + removed + " startingData=" + mStartingData);
                         }
                         startingWindow = null;
-                        startingData = null;
+                        mStartingData = null;
                         abort = true;
                     } else {
                         startingSurface = surface;
                     }
                     if (DEBUG_STARTING_WINDOW && !abort) {
-                        Slog.v(TAG, "Added starting " + AppWindowToken.this + ": startingWindow="
-                                + startingWindow + " startingView=" + startingSurface);
+                        Slog.v(TAG,
+                                "Added starting " + AppWindowToken.this + ": startingWindow="
+                                        + startingWindow + " startingView=" + startingSurface);
                     }
                 }
                 if (abort) {
@@ -2245,21 +2249,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void removeStartingWindow() {
         if (startingWindow == null) {
-            if (startingData != null) {
+            if (mStartingData != null) {
                 // Starting window has not been added yet, but it is scheduled to be added.
                 // Go ahead and cancel the request.
                 if (DEBUG_STARTING_WINDOW) {
                     Slog.v(TAG_WM, "Clearing startingData for token=" + this);
                 }
-                startingData = null;
+                mStartingData = null;
             }
             return;
         }
 
         final WindowManagerPolicy.StartingSurface surface;
-        if (startingData != null) {
+        if (mStartingData != null) {
             surface = startingSurface;
-            startingData = null;
+            mStartingData = null;
             startingSurface = null;
             startingWindow = null;
             startingDisplayed = false;
@@ -2994,8 +2998,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             pw.print(prefix); pw.print("inPendingTransaction=");
                     pw.println(inPendingTransaction);
         }
-        if (startingData != null || removed || firstWindowDrawn || mIsExiting) {
-            pw.print(prefix); pw.print("startingData="); pw.print(startingData);
+        if (mStartingData != null || removed || firstWindowDrawn || mIsExiting) {
+            pw.print(prefix); pw.print("startingData="); pw.print(mStartingData);
                     pw.print(" removed="); pw.print(removed);
                     pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
                     pw.print(" mIsExiting="); pw.println(mIsExiting);
