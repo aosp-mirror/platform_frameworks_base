@@ -53,7 +53,7 @@ import javax.inject.Singleton;
 @Singleton
 public class NavigationBarController implements Callbacks {
 
-    private static final String TAG = NavigationBarController.class.getName();
+    private static final String TAG = NavigationBarController.class.getSimpleName();
 
     private final Context mContext;
     private final Handler mHandler;

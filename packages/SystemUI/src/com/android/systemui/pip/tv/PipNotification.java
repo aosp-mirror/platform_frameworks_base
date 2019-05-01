@@ -43,7 +43,7 @@ import com.android.systemui.util.NotificationChannels;
  */
 public class PipNotification {
     private static final String TAG = "PipNotification";
-    private static final String NOTIFICATION_TAG = PipNotification.class.getName();
+    private static final String NOTIFICATION_TAG = PipNotification.class.getSimpleName();
     private static final boolean DEBUG = PipManager.DEBUG;
 
     private static final String ACTION_MENU = "PipNotification.menu";
