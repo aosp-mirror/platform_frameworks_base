@@ -53,7 +53,7 @@
     <!-- Clock with header -->
     <dimen name="widget_small_font_size">22dp</dimen>
     <dimen name="widget_vertical_padding">32dp</dimen>
-    <dimen name="widget_vertical_padding_clock">30dp</dimen>
+    <dimen name="widget_vertical_padding_clock">12dp</dimen>
     <!-- Subtitle paddings -->
     <dimen name="widget_horizontal_padding">8dp</dimen>
     <dimen name="widget_icon_size">16dp</dimen>
