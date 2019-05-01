@@ -22,7 +22,6 @@ import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNO
 
 import android.Manifest;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.attention.AttentionManagerInternal;
@@ -43,6 +42,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -56,7 +58,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StatsLog;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -76,15 +77,6 @@ public class AttentionManagerService extends SystemService {
     private static final String LOG_TAG = "AttentionManagerService";
     private static final boolean DEBUG = false;
 
-    /**
-     * DeviceConfig flag name, allows a CTS to inject a fake implementation.
-     *
-     * @hide
-     */
-    @TestApi
-    public static final String COMPONENT_NAME = "component_name";
-
-
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
@@ -96,6 +88,7 @@ public class AttentionManagerService extends SystemService {
 
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
     private static final String SERVICE_ENABLED = "service_enabled";
+    private static String sTestAttentionServicePackage;
     private final Context mContext;
     private final PowerManager mPowerManager;
     private final Object mLock;
@@ -135,7 +128,7 @@ public class AttentionManagerService extends SystemService {
 
     /** Returns {@code true} if attention service is configured on this device. */
     public static boolean isServiceConfigured(Context context) {
-        return !TextUtils.isEmpty(getServiceConfig(context));
+        return !TextUtils.isEmpty(getServiceConfigPackage(context));
     }
 
     /** Resolves and sets up the attention service if it had not been done yet. */
@@ -332,8 +325,8 @@ public class AttentionManagerService extends SystemService {
         return mUserStates.get(userId);
     }
 
-    private static String getServiceConfig(Context context) {
-        return context.getString(R.string.config_defaultAttentionService);
+    private static String getServiceConfigPackage(Context context) {
+        return context.getPackageManager().getAttentionServicePackageName();
     }
 
     /**
@@ -341,28 +334,26 @@ public class AttentionManagerService extends SystemService {
      * system.
      */
     private static ComponentName resolveAttentionService(Context context) {
-        final String flag = DeviceConfig.getProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
-                COMPONENT_NAME);
+        final String serviceConfigPackage = getServiceConfigPackage(context);
 
-        final String componentNameString = flag != null ? flag : getServiceConfig(context);
-        if (TextUtils.isEmpty(componentNameString)) {
-            return null;
-        }
-
-        final ComponentName componentName = ComponentName.unflattenFromString(componentNameString);
-        if (componentName == null) {
+        String resolvedPackage;
+        int flags = PackageManager.MATCH_SYSTEM_ONLY;
+        if (!TextUtils.isEmpty(sTestAttentionServicePackage)) {
+            resolvedPackage = sTestAttentionServicePackage;
+            flags = PackageManager.GET_META_DATA;
+        } else if (!TextUtils.isEmpty(serviceConfigPackage)) {
+            resolvedPackage = serviceConfigPackage;
+        } else {
             return null;
         }
 
         final Intent intent = new Intent(AttentionService.SERVICE_INTERFACE).setPackage(
-                componentName.getPackageName());
+                resolvedPackage);
 
-        // Make sure that only system apps can declare the AttentionService.
-        final ResolveInfo resolveInfo = context.getPackageManager().resolveService(intent,
-                PackageManager.MATCH_SYSTEM_ONLY);
+        final ResolveInfo resolveInfo = context.getPackageManager().resolveService(intent, flags);
         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
             Slog.wtf(LOG_TAG, String.format("Service %s not found in package %s",
-                    AttentionService.SERVICE_INTERFACE, componentName
+                    AttentionService.SERVICE_INTERFACE, serviceConfigPackage
             ));
             return null;
         }
@@ -447,6 +438,7 @@ public class AttentionManagerService extends SystemService {
         }
 
         void cancelInternal() {
+            mIsFulfilled = true;
             mCallbackInternal.onFailure(ATTENTION_FAILURE_CANCELLED);
         }
     }
@@ -606,7 +598,6 @@ public class AttentionManagerService extends SystemService {
             }
             return;
         }
-        userState.mCurrentAttentionCheck.mIsFulfilled = true;
 
         if (userState.mService == null) {
             userState.mCurrentAttentionCheck.cancelInternal();
@@ -654,7 +645,165 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
+    private final class AttentionManagerServiceShellCommand extends ShellCommand {
+        class TestableAttentionCallbackInternal extends AttentionCallbackInternal {
+            private int mLastCallbackCode = -1;
+
+            @Override
+            public void onSuccess(int result, long timestamp) {
+                mLastCallbackCode = result;
+            }
+
+            @Override
+            public void onFailure(int error) {
+                mLastCallbackCode = error;
+            }
+
+            public void reset() {
+                mLastCallbackCode = -1;
+            }
+
+            public int getLastCallbackCode() {
+                return mLastCallbackCode;
+            }
+        }
+
+        final TestableAttentionCallbackInternal mTestableAttentionCallback =
+                new TestableAttentionCallbackInternal();
+
+        @Override
+        public int onCommand(@Nullable final String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
+            final PrintWriter err = getErrPrintWriter();
+            try {
+                switch (cmd) {
+                    case "getAttentionServiceComponent":
+                        return cmdResolveAttentionServiceComponent();
+                    case "call":
+                        switch (getNextArgRequired()) {
+                            case "checkAttention":
+                                return cmdCallCheckAttention();
+                            case "cancelCheckAttention":
+                                return cmdCallCancelAttention();
+                            default:
+                                throw new IllegalArgumentException("Invalid argument");
+                        }
+                    case "setTestableAttentionService":
+                        return cmdSetTestableAttentionService(getNextArgRequired());
+                    case "clearTestableAttentionService":
+                        return cmdClearTestableAttentionService();
+                    case "getLastTestCallbackCode":
+                        return cmdGetLastTestCallbackCode();
+                    default:
+                        return handleDefaultCommands(cmd);
+                }
+            } catch (IllegalArgumentException e) {
+                err.println("Error: " + e.getMessage());
+            }
+            return -1;
+        }
+
+        private int cmdSetTestableAttentionService(String testingServicePackage) {
+            final PrintWriter out = getOutPrintWriter();
+            if (TextUtils.isEmpty(testingServicePackage)) {
+                out.println("false");
+            } else {
+                sTestAttentionServicePackage = testingServicePackage;
+                resetStates();
+                out.println(mComponentName != null ? "true" : "false");
+            }
+            return 0;
+        }
+
+        private int cmdClearTestableAttentionService() {
+            sTestAttentionServicePackage = "";
+            mTestableAttentionCallback.reset();
+            resetStates();
+            return 0;
+        }
+
+        private int cmdCallCheckAttention() {
+            final PrintWriter out = getOutPrintWriter();
+            boolean calledSuccessfully = checkAttention(2000, mTestableAttentionCallback);
+            out.println(calledSuccessfully ? "true" : "false");
+            return 0;
+        }
+
+        private int cmdCallCancelAttention() {
+            final PrintWriter out = getOutPrintWriter();
+            cancelAttentionCheck(mTestableAttentionCallback);
+            out.println("true");
+            return 0;
+        }
+
+        private int cmdResolveAttentionServiceComponent() {
+            final PrintWriter out = getOutPrintWriter();
+            ComponentName resolvedComponent = resolveAttentionService(mContext);
+            out.println(resolvedComponent != null ? resolvedComponent.flattenToShortString() : "");
+            return 0;
+        }
+
+        private int cmdGetLastTestCallbackCode() {
+            final PrintWriter out = getOutPrintWriter();
+            out.println(mTestableAttentionCallback.getLastCallbackCode());
+            return 0;
+        }
+
+        private void resetStates() {
+            mComponentName = resolveAttentionService(mContext);
+            mUserStates.clear();
+        }
+
+        @Override
+        public void onHelp() {
+            final PrintWriter out = getOutPrintWriter();
+            out.println("Attention commands: ");
+            out.println("  setTestableAttentionService <service_package>: Bind to a custom"
+                    + " implementation of attention service");
+            out.println("  ---<service_package>:");
+            out.println(
+                    "       := Package containing the Attention Service implementation to bind to");
+            out.println("  ---returns:");
+            out.println("       := true, if was bound successfully");
+            out.println("       := false, if was not bound successfully");
+            out.println("  clearTestableAttentionService: Undo custom bindings. Revert to previous"
+                    + " behavior");
+            out.println("  getAttentionServiceComponent: Get the current service component string");
+            out.println("  ---returns:");
+            out.println("       := If valid, the component string (in shorten form) for the"
+                    + " currently bound service.");
+            out.println("       := else, empty string");
+            out.println("  call checkAttention: Calls check attention");
+            out.println("  ---returns:");
+            out.println(
+                    "       := true, if the call was successfully dispatched to the service "
+                            + "implementation."
+                            + " (to see the result, call getLastTestCallbackCode)");
+            out.println("       := false, otherwise");
+            out.println("  call cancelCheckAttention: Cancels check attention");
+            out.println("  getLastTestCallbackCode");
+            out.println("  ---returns:");
+            out.println(
+                    "       := An integer, representing the last callback code received from the "
+                            + "bounded implementation. If none, it will return -1");
+        }
+    }
+
     private final class BinderService extends Binder {
+        AttentionManagerServiceShellCommand mAttentionManagerServiceShellCommand =
+                new AttentionManagerServiceShellCommand();
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err,
+                String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            mAttentionManagerServiceShellCommand.exec(this, in, out, err, args, callback,
+                    resultReceiver);
+        }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) {
