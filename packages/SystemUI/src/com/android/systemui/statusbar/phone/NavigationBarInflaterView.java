@@ -71,6 +71,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String RIGHT = "right";
     public static final String CONTEXTUAL = "contextual";
     public static final String IME_SWITCHER = "ime_switcher";
+    public static final String START_CONTEXTUAL = "start_contextual";
 
     public static final String GRAVITY_SEPARATOR = ";";
     public static final String BUTTON_SEPARATOR = ",";
@@ -419,6 +420,8 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.home_handle, parent, false);
         } else if (IME_SWITCHER.equals(button)) {
             v = inflater.inflate(R.layout.ime_switcher, parent, false);
+        } else if (START_CONTEXTUAL.equals(button)) {
+            v = inflater.inflate(R.layout.start_contextual, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
