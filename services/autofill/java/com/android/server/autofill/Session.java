@@ -33,7 +33,6 @@ import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.toArray;
-import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
@@ -564,7 +563,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Reads a new structure and then request a new fill response from the fill service.
      */
     @GuardedBy("mLock")
-    private void requestNewFillResponseLocked(int flags) {
+    private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
+            int flags) {
         if (mForAugmentedAutofillOnly || (flags & FLAG_AUGMENTED_AUTOFILL_REQUEST) != 0) {
             // TODO(b/122858578): log metrics
             if (sVerbose) {
@@ -575,6 +575,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             triggerAugmentedAutofillLocked();
             return;
         }
+        viewState.setState(newState);
 
         int requestId;
 
@@ -2165,19 +2166,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull ViewState viewState, int flags) {
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
             if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
-            viewState.setState(STATE_RESTARTED_SESSION);
-            requestNewFillResponseLocked(flags);
+            requestNewFillResponseLocked(viewState, ViewState.STATE_RESTARTED_SESSION, flags);
             return;
         }
 
         // If it's not, then check if it it should start a partition.
         if (shouldStartNewPartitionLocked(id)) {
             if (sDebug) {
-                Slog.d(TAG, "Starting partition for view id " + id + ": "
+                Slog.d(TAG, "Starting partition or augmented request for view id " + id + ": "
                         + viewState.getStateAsString());
             }
-            viewState.setState(ViewState.STATE_STARTED_PARTITION);
-            requestNewFillResponseLocked(flags);
+            requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_PARTITION, flags);
         } else {
             if (sVerbose) {
                 Slog.v(TAG, "Not starting new partition for view " + id + ": "
@@ -2283,8 +2282,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // View is triggering autofill.
                 mCurrentViewId = viewState.id;
                 viewState.update(value, virtualBounds, flags);
-                viewState.setState(ViewState.STATE_STARTED_SESSION);
-                requestNewFillResponseLocked(flags);
+                requestNewFillResponseLocked(viewState, ViewState.STATE_STARTED_SESSION, flags);
                 break;
             case ACTION_VALUE_CHANGED:
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
@@ -2386,6 +2384,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
 
+                // Update the view states first...
+                mCurrentViewId = viewState.id;
+                viewState.setCurrentValue(value);
+
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
                     if (sDebug) Slog.d(TAG, "Ignoring VIEW_ENTERED on URL BAR (id=" + id + ")");
                     return;
@@ -2396,10 +2398,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // triggered augmented autofill
 
                     if (sDebug) Slog.d(TAG, "updateLocked(" + id + "): augmented-autofillable");
-
-                    // Update the view states first...
-                    mCurrentViewId = viewState.id;
-                    viewState.setCurrentValue(value);
 
                     // ...then trigger the augmented autofill UI
                     triggerAugmentedAutofillLocked();
