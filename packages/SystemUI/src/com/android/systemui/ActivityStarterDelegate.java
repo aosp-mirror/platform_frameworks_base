@@ -16,6 +16,7 @@ package com.android.systemui;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.view.View;
 
 import com.android.systemui.plugins.ActivityStarter;
 
@@ -50,6 +51,16 @@ public class ActivityStarterDelegate implements ActivityStarter {
             return;
         }
         mActualStarter.startPendingIntentDismissingKeyguard(intent, intentSentCallback);
+    }
+
+    @Override
+    public void startPendingIntentDismissingKeyguard(PendingIntent intent,
+            Runnable intentSentCallback, View associatedView) {
+        if (mActualStarter == null) {
+            return;
+        }
+        mActualStarter.startPendingIntentDismissingKeyguard(intent, intentSentCallback,
+                associatedView);
     }
 
     @Override
