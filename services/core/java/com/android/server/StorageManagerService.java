@@ -802,8 +802,8 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             });
         // For now, simply clone property when it changes
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_STORAGE,
-                mContext.getMainExecutor(), (namespace, name, value) -> {
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_STORAGE,
+                mContext.getMainExecutor(), (properties) -> {
                     refreshIsolatedStorageSettings();
                 });
         refreshIsolatedStorageSettings();

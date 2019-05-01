@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -118,15 +119,18 @@ public class NotificationMediaManager implements Dumpable {
     private ImageView mBackdropBack;
 
     private boolean mShowCompactMediaSeekbar;
-    private final DeviceConfig.OnPropertyChangedListener mPropertyChangedListener =
-            new DeviceConfig.OnPropertyChangedListener() {
+    private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
         @Override
-        public void onPropertyChanged(String namespace, String name, String value) {
-            if (SystemUiDeviceConfigFlags.COMPACT_MEDIA_SEEKBAR_ENABLED.equals(name)) {
-                if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: compact media seekbar flag updated: " + value);
+        public void onPropertiesChanged(Properties properties) {
+            for (String name : properties.getKeyset()) {
+                if (SystemUiDeviceConfigFlags.COMPACT_MEDIA_SEEKBAR_ENABLED.equals(name)) {
+                    String value = properties.getString(name, null);
+                    if (DEBUG_MEDIA) {
+                        Log.v(TAG, "DEBUG_MEDIA: compact media seekbar flag updated: " + value);
+                    }
+                    mShowCompactMediaSeekbar = "true".equals(value);
                 }
-                mShowCompactMediaSeekbar = "true".equals(value);
             }
         }
     };
@@ -189,9 +193,9 @@ public class NotificationMediaManager implements Dumpable {
                 DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.COMPACT_MEDIA_SEEKBAR_ENABLED));
 
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 mContext.getMainExecutor(),
-                mPropertyChangedListener);
+                mPropertiesChangedListener);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {

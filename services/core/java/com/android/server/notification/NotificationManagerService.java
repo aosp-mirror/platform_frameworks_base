@@ -1811,14 +1811,15 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void registerDeviceConfigChange() {
-        DeviceConfig.addOnPropertyChangedListener(
+        DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 getContext().getMainExecutor(),
-                (namespace, name, value) -> {
-                    if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
+                (properties) -> {
+                    if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())) {
                         return;
                     }
-                    if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
+                    if (properties.getKeyset()
+                            .contains(SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE)) {
                         mAssistants.resetDefaultAssistantsIfNecessary();
                     }
                 });
