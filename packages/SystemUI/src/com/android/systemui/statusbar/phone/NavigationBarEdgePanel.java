@@ -23,6 +23,7 @@ import android.graphics.Canvas;;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.util.MathUtils;
 import android.view.ContextThemeWrapper;
@@ -49,6 +50,11 @@ public class NavigationBarEdgePanel extends View {
     private static final long COLOR_ANIMATION_DURATION_MS = 100;
     private static final long DISAPPEAR_FADE_ANIMATION_DURATION_MS = 140;
     private static final long DISAPPEAR_ARROW_ANIMATION_DURATION_MS = 100;
+
+    /**
+     * The minimum time required since the first vibration effect to receive a second one
+     */
+    private static final int MIN_TIME_BETWEEN_EFFECTS_MS = 120;
 
     /**
      * The size of the protection of the arrow in px. Only used if this is not background protected
@@ -182,6 +188,7 @@ public class NavigationBarEdgePanel extends View {
     private int mArrowStartColor;
     private int mCurrentArrowColor;
     private float mDisappearAmount;
+    private long mVibrationTime;
 
     private DynamicAnimation.OnAnimationEndListener mSetGoneEndListener
             = new DynamicAnimation.OnAnimationEndListener() {
@@ -394,7 +401,7 @@ public class NavigationBarEdgePanel extends View {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
                 if (mTriggerBack) {
-                    triggerBackAnimation();
+                    triggerBack();
                 } else {
                     if (mTranslationAnimation.isRunning()) {
                         mTranslationAnimation.addEndListener(mSetGoneEndListener);
@@ -521,8 +528,10 @@ public class NavigationBarEdgePanel extends View {
         return mCurrentTranslation;
     }
 
-    private void triggerBackAnimation() {
-
+    private void triggerBack() {
+        if (SystemClock.uptimeMillis() - mVibrationTime >= MIN_TIME_BETWEEN_EFFECTS_MS) {
+            mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
+        }
         mVelocityTracker.computeCurrentVelocity(1000);
         // Only do the extra translation if we're not already flinging
         boolean doExtraTranslation = Math.abs(mVelocityTracker.getXVelocity()) < 1000;
@@ -577,6 +586,7 @@ public class NavigationBarEdgePanel extends View {
         setCurrentTranslation(0);
         mPreviousTouchTranslation = 0;
         mTotalTouchDelta = 0;
+        mVibrationTime = 0;
         setDesiredVerticalTransition(0, false /* animated */);
     }
 
@@ -599,6 +609,7 @@ public class NavigationBarEdgePanel extends View {
         if (!mDragSlopPassed && touchTranslation > mSwipeThreshold) {
             mDragSlopPassed = true;
             mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
+            mVibrationTime = SystemClock.uptimeMillis();
 
             // Let's show the arrow and animate it in!
             mDisappearAmount = 0.0f;
