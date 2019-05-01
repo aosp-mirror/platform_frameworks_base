@@ -634,7 +634,7 @@ public final class ActiveServices {
         }
 
         if (allowBackgroundActivityStarts) {
-            r.hasStartedWhitelistingBgActivityStarts = true;
+            r.setHasStartedWhitelistingBgActivityStarts(true);
             scheduleCleanUpHasStartedWhitelistingBgActivityStartsLocked(r);
         }
 
@@ -760,11 +760,6 @@ public final class ActiveServices {
                     SystemClock.uptimeMillis());
         }
         service.callStart = false;
-
-        // the service will not necessarily be brought down, so only clear the whitelisting state
-        // for start-based bg activity starts now, and drop any existing future cleanup callback
-        service.setHasStartedWhitelistingBgActivityStarts(false);
-        mAm.mHandler.removeCallbacks(service.startedWhitelistingBgActivityStartsCleanUp);
 
         bringDownServiceIfNeededLocked(service, false, false);
     }
