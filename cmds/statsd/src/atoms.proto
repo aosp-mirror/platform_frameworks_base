@@ -48,6 +48,7 @@ import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
+import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -283,6 +284,16 @@ message Atom {
         ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
         RoleRequestResultReported role_request_result_reported =
             190 [(log_from_module) = "permissioncontroller"];
+        MediametricsAudiopolicyReported mediametrics_audiopolicy_reported = 191;
+        MediametricsAudiorecordReported mediametrics_audiorecord_reported = 192;
+        MediametricsAudiothreadReported mediametrics_audiothread_reported = 193;
+        MediametricsAudiotrackReported mediametrics_audiotrack_reported = 194;
+        MediametricsCodecReported mediametrics_codec_reported = 195;
+        MediametricsDrmWidevineReported mediametrics_drm_widevine_reported = 196;
+        MediametricsExtractorReported mediametrics_extractor_reported = 197;
+        MediametricsMediadrmReported mediametrics_mediadrm_reported = 198;
+        MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
+        MediametricsRecorderReported mediametrics_recorder_reported = 200;
     }
 
     // Pulled events will start at field 10000.
@@ -5812,6 +5823,160 @@ message ProcessStartTime {
     // hostingNameStr field in ProcessRecord. The component class name that runs
     // in this process.
     optional string hosting_name = 9;
+}
+
+/**
+ * Track Media Codec usage
+ * Logged from:
+ *   frameworks/av/media/libstagefright/MediaCodec.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_codec.cpp
+ */
+message MediametricsCodecReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.CodecData codec_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track Media Extractor (pulling video/audio streams out of containers) usage
+ * Logged from:
+ *   frameworks/av/media/libstagefright/RemoteMediaExtractor.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_extractor.cpp
+ */
+message MediametricsExtractorReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.ExtractorData extractor_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiopolicy.cpp
+ */
+message MediametricsAudiopolicyReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioPolicyData audiopolicy_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone requests.
+ * Logged from
+ *   frameworks/av/media/libaudioclient/AudioRecord.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiorecord.cpp
+ */
+message MediametricsAudiorecordReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioRecordData audiorecord_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/media/libnblog/ReportPerformance.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiothread.cpp
+ */
+message MediametricsAudiothreadReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioThreadData audiothread_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/media/libaudioclient/AudioTrack.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiotrack.cpp
+ */
+message MediametricsAudiotrackReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioTrackData audiotrack_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track information about DRM framework performance
+ * Logged from
+ *   frameworks/av/drm/libmediadrm/DrmHal.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_drm.cpp
+ */
+message MediametricsMediadrmReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    // vendor+description tell about which DRM plugin is in use on this device
+    optional string vendor = 5;
+    optional string description = 6;
+    // from frameworks/av/drm/libmediadrm/protos/metrics.proto
+    optional bytes framework_stats = 7 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track information about the widevine DRM plugin performance
+ * Logged from
+ *   vendor/widevine/libwvdrmengine/cdm/metrics
+ *   frameworks/av/services/mediaanalytics/statsd_drm.cpp
+ */
+message MediametricsDrmWidevineReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional bytes vendor_specific_stats = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track information about recordings (e.g. camcorder)
+ * Logged from
+ *   frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_recorder.cpp
+ */
+message MediametricsRecorderReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.RecorderData recorder_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track Media Player usage
+ * Logged from:
+ *   frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_nuplayer.cpp
+ */
+message MediametricsNuPlayerReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.NuPlayerData nuplayer_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /**
