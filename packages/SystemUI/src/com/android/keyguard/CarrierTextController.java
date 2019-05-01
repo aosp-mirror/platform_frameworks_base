@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -40,6 +41,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.TelephonyProperties;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -70,6 +72,8 @@ public class CarrierTextController {
     private Context mContext;
     private CharSequence mSeparator;
     private WakefulnessLifecycle mWakefulnessLifecycle;
+    @VisibleForTesting
+    protected boolean mDisplayOpportunisticSubscriptionCarrierText;
     private final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
                 @Override
@@ -247,7 +251,6 @@ public class CarrierTextController {
     }
 
     /**
-     * STOPSHIP(b/130246708) remove when no longer needed for testing purpose.
      * @param subscriptions
      */
     private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
@@ -274,21 +277,40 @@ public class CarrierTextController {
         }
     }
 
+    /**
+     * updates if opportunistic sub carrier text should be displayed or not
+     *
+     */
+    @VisibleForTesting
+    public void updateDisplayOpportunisticSubscriptionCarrierText() {
+        mDisplayOpportunisticSubscriptionCarrierText = SystemProperties
+            .getBoolean(TelephonyProperties
+                .DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME, false);
+    }
+
+    protected List<SubscriptionInfo> getSubscriptionInfo() {
+        List<SubscriptionInfo> subs;
+        if (mDisplayOpportunisticSubscriptionCarrierText) {
+            SubscriptionManager subscriptionManager = ((SubscriptionManager) mContext
+                    .getSystemService(
+                    Context.TELEPHONY_SUBSCRIPTION_SERVICE));
+            subs = subscriptionManager.getActiveSubscriptionInfoList(false);
+            if (subs == null) {
+                subs = new ArrayList<>();
+            } else {
+                filterMobileSubscriptionInSameGroup(subs);
+            }
+        } else {
+            subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
+        }
+        return subs;
+    }
+
     protected void updateCarrierText() {
         boolean allSimsMissing = true;
         boolean anySimReadyAndInService = false;
         CharSequence displayText = null;
-
-        // STOPSHIP(b/130246708) revert to mKeyguardUpdateMonitor.getSubscriptionInfo(false).
-        SubscriptionManager subscriptionManager = ((SubscriptionManager) mContext.getSystemService(
-                Context.TELEPHONY_SUBSCRIPTION_SERVICE));
-        List<SubscriptionInfo> subs = subscriptionManager.getActiveSubscriptionInfoList(false);
-
-        if (subs == null) {
-            subs = new ArrayList<>();
-        } else {
-            filterMobileSubscriptionInSameGroup(subs);
-        }
+        List<SubscriptionInfo> subs = getSubscriptionInfo();
 
         final int numSubs = subs.size();
         final int[] subsIds = new int[numSubs];

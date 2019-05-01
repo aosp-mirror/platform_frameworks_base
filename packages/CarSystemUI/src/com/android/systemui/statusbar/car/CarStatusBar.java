@@ -485,10 +485,7 @@ public class CarStatusBar extends StatusBar implements
                     mNotificationListAtBottomAtTimeOfTouch = false;
                 }
 
-                boolean handled = false;
-                if (mNotificationListAtBottomAtTimeOfTouch && mNotificationListAtBottom) {
-                    handled = closeGestureDetector.onTouchEvent(event);
-                }
+                boolean handled = closeGestureDetector.onTouchEvent(event);
                 boolean isTracking = mIsTracking;
                 Rect rect = mNotificationList.getClipBounds();
                 float clippedHeight = 0;
@@ -1037,8 +1034,18 @@ public class CarStatusBar extends StatusBar implements
             GestureDetector.SimpleOnGestureListener {
 
         @Override
+        public boolean onSingleTapUp(MotionEvent motionEvent) {
+            animateNotificationPanel(DEFAULT_FLING_VELOCITY, true);
+            return false;
+        }
+
+        @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
+            if (!mNotificationListAtBottomAtTimeOfTouch && !mNotificationListAtBottom) {
+                return false;
+            }
+            // should not clip while scroll to the bottom of the list.
             if (!mNotificationListAtBottomAtTimeOfTouch) {
                 return false;
             }
@@ -1074,7 +1081,9 @@ public class CarStatusBar extends StatusBar implements
         @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
-
+            if (!mNotificationListAtBottomAtTimeOfTouch && !mNotificationListAtBottom) {
+                return false;
+            }
             if (Math.abs(event1.getX() - event2.getX()) > SWIPE_MAX_OFF_PATH
                     || Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY) {
                 // swipe was not vertical or was not fast enough

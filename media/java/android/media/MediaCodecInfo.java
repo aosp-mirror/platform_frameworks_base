@@ -1709,7 +1709,6 @@ public final class MediaCodecInfo {
                                 * mBlockSize.getHeight());
                 mMaxFrameRate = Math.max(1, Math.max(frameRate, maxFrameRate));
                 mMaxMacroBlockRate = Math.max(1, frameRate) * getMaxMacroBlocks();
-                Log.i("PP", "Created " + this);
             }
 
             /**
@@ -1730,14 +1729,6 @@ public final class MediaCodecInfo {
                         new Size(Math.max(newBlockSize.getWidth(), pp.mBlockSize.getWidth() * 16),
                                  Math.max(newBlockSize.getHeight(), pp.mBlockSize.getHeight() * 16))
                 );
-                /*
-                // these are guaranteed not to overflow as size * blockSize is decimated by 16
-                width = align(pp.width * pp.blockSize.getWidth(), blockSize.getWidth());
-                height = align(pp.height * pp.blockSize.getHeight(), blockSize.getHeight());
-                frameRate = pp.frameRate;
-                macroBlockRate = align(pp.macroBlockRate, blockSize.getWidth * blockSize.getHeight());
-                */
-                Log.i("PP", " from " + pp + " and " + newBlockSize);
             }
 
             /**
@@ -3144,6 +3135,93 @@ public final class MediaCodecInfo {
                         maxLengthInBlocks, maxLengthInBlocks,
                         maxBlocks, maxBlocksPerSecond,
                         8 /* blockWidth */, 8 /* blockHeight */,
+                        1 /* widthAlignment */, 1 /* heightAlignment */);
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
+                maxBlocksPerSecond = 829440;
+                maxBlocks = 36864;
+                maxBps = 200000;
+                int maxDim = 512;
+
+                // Sample rate, Picture Size, Bit rate and luma dimension for AV1 Codec,
+                // corresponding to the definitions in
+                // "AV1 Bitstream & Decoding Process Specification", Annex A
+                // found at https://aomedia.org/av1-bitstream-and-decoding-process-specification/
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    long SR = 0; // luma sample rate
+                    int FS = 0;  // luma picture size
+                    int BR = 0;  // bit rate kbps
+                    int D = 0;   // luma D
+                    switch (profileLevel.level) {
+                        case CodecProfileLevel.AV1Level2:
+                            SR =     5529600; FS =   147456; BR =   1500; D =  2048; break;
+                        case CodecProfileLevel.AV1Level21:
+                        case CodecProfileLevel.AV1Level22:
+                        case CodecProfileLevel.AV1Level23:
+                            SR =    10454400; FS =   278784; BR =   3000; D =  2816; break;
+
+                        case CodecProfileLevel.AV1Level3:
+                            SR =    24969600; FS =   665856; BR =   6000; D =  4352; break;
+                        case CodecProfileLevel.AV1Level31:
+                        case CodecProfileLevel.AV1Level32:
+                        case CodecProfileLevel.AV1Level33:
+                            SR =    39938400; FS =  1065024; BR =  10000; D =  5504; break;
+
+                        case CodecProfileLevel.AV1Level4:
+                            SR =    77856768; FS =  2359296; BR =  12000; D =  6144; break;
+                        case CodecProfileLevel.AV1Level41:
+                        case CodecProfileLevel.AV1Level42:
+                        case CodecProfileLevel.AV1Level43:
+                            SR =   155713536; FS =  2359296; BR =  20000; D =  6144; break;
+
+                        case CodecProfileLevel.AV1Level5:
+                            SR =   273715200; FS =  8912896; BR =  30000; D =  8192; break;
+                        case CodecProfileLevel.AV1Level51:
+                            SR =   547430400; FS =  8912896; BR =  40000; D =  8192; break;
+                        case CodecProfileLevel.AV1Level52:
+                            SR =  1094860800; FS =  8912896; BR =  60000; D =  8192; break;
+                        case CodecProfileLevel.AV1Level53:
+                            SR =  1176502272; FS =  8912896; BR =  60000; D =  8192; break;
+
+                        case CodecProfileLevel.AV1Level6:
+                            SR =  1176502272; FS = 35651584; BR =  60000; D = 16384; break;
+                        case CodecProfileLevel.AV1Level61:
+                            SR = 2189721600L; FS = 35651584; BR = 100000; D = 16384; break;
+                        case CodecProfileLevel.AV1Level62:
+                            SR = 4379443200L; FS = 35651584; BR = 160000; D = 16384; break;
+                        case CodecProfileLevel.AV1Level63:
+                            SR = 4706009088L; FS = 35651584; BR = 160000; D = 16384; break;
+
+                        default:
+                            Log.w(TAG, "Unrecognized level "
+                                    + profileLevel.level + " for " + mime);
+                            errors |= ERROR_UNRECOGNIZED;
+                    }
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.AV1ProfileMain8:
+                        case CodecProfileLevel.AV1ProfileMain10:
+                        case CodecProfileLevel.AV1ProfileMain10HDR10:
+                        case CodecProfileLevel.AV1ProfileMain10HDR10Plus:
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            errors |= ERROR_UNRECOGNIZED;
+                    }
+                    errors &= ~ERROR_NONE_SUPPORTED;
+                    maxBlocksPerSecond = Math.max(SR, maxBlocksPerSecond);
+                    maxBlocks = Math.max(FS, maxBlocks);
+                    maxBps = Math.max(BR * 1000, maxBps);
+                    maxDim = Math.max(D, maxDim);
+                }
+
+                final int blockSize = 8;
+                int maxLengthInBlocks = Utils.divUp(maxDim, blockSize);
+                maxBlocks = Utils.divUp(maxBlocks, blockSize * blockSize);
+                maxBlocksPerSecond = Utils.divUp(maxBlocksPerSecond, blockSize * blockSize);
+                applyMacroBlockLimits(
+                        maxLengthInBlocks, maxLengthInBlocks,
+                        maxBlocks, maxBlocksPerSecond,
+                        blockSize, blockSize,
                         1 /* widthAlignment */, 1 /* heightAlignment */);
             } else {
                 Log.w(TAG, "Unsupported mime " + mime);

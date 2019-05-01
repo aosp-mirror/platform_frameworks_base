@@ -2314,7 +2314,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public boolean isProviderPackage(@NonNull String packageName) {
         try {
             return mService.isProviderPackage(packageName);

@@ -41,10 +41,16 @@
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
-    <dimen name="navigation_edge_panel_width">52dp</dimen>
-    <dimen name="navigation_edge_panel_height">52dp</dimen>
+    <dimen name="navigation_edge_panel_width">76dp</dimen>
+    <!-- Padding at the end of the navigation panel to allow the arrow not to be clipped off -->
+    <dimen name="navigation_edge_panel_padding">24dp</dimen>
+    <dimen name="navigation_edge_panel_height">84dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+    <!-- The minimum display position of the arrow on the screen -->
+    <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
+    <!-- The amount by which the arrow is shifted to avoid the finger-->
+    <dimen name="navigation_edge_finger_offset">48dp</dimen>
 
     <!-- Luminance threshold to determine black/white contrast for the navigation affordances -->
     <item name="navigation_luminance_threshold" type="dimen" format="float">0.5</item>
@@ -1064,16 +1070,20 @@
     <dimen name="bubble_elevation">1dp</dimen>
     <!-- How much the bubble flyout text container is elevated. -->
     <dimen name="bubble_flyout_elevation">4dp</dimen>
-    <!-- How much padding is around the flyout text. -->
-    <dimen name="bubble_flyout_padding">16dp</dimen>
-    <!-- The maximum width of a bubble flyout. -->
-    <dimen name="bubble_flyout_maxwidth">200dp</dimen>
+    <!-- How much padding is around the left and right sides of the flyout text. -->
+    <dimen name="bubble_flyout_padding_x">16dp</dimen>
+    <!-- How much padding is around the top and bottom of the flyout text. -->
+    <dimen name="bubble_flyout_padding_y">8dp</dimen>
+    <!-- Size of the triangle that points from the flyout to the bubble stack. -->
+    <dimen name="bubble_flyout_pointer_size">6dp</dimen>
+    <!-- How much space to leave between the flyout (tip of the arrow) and the bubble stack. -->
+    <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
     <!-- Padding around a collapsed bubble -->
     <dimen name="bubble_view_padding">0dp</dimen>
     <!-- Padding between bubbles when displayed in expanded state -->
     <dimen name="bubble_padding">8dp</dimen>
     <!-- Size of individual bubbles. -->
-    <dimen name="individual_bubble_size">56dp</dimen>
+    <dimen name="individual_bubble_size">52dp</dimen>
     <!-- How much to inset the icon in the circle -->
     <dimen name="bubble_icon_inset">16dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->

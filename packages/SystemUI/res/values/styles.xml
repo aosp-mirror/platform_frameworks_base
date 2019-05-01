@@ -224,6 +224,7 @@
 
     <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textColor">@color/dark_mode_qs_icon_color_single_tone</item>
     </style>
 
     <style name="TextAppearance.AppOpsDialog" />
@@ -317,10 +318,6 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-    <style name="volume_dialog_theme" parent="qs_theme">
-        <item name="android:windowIsFloating">false</item>
-    </style>
-
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>
@@ -371,6 +368,17 @@
         <item name="fillColor">@color/dark_mode_icon_color_dual_tone_fill</item>
         <item name="singleToneColor">@color/dark_mode_icon_color_single_tone</item>
     </style>
+    <style name="QSHeaderDarkTheme">
+        <item name="backgroundColor">@color/dark_mode_qs_icon_color_dual_tone_background</item>
+        <item name="fillColor">@color/dark_mode_qs_icon_color_dual_tone_fill</item>
+        <item name="singleToneColor">@color/dark_mode_qs_icon_color_single_tone</item>
+    </style>
+
+    <style name="QSHeaderTheme" parent="@style/Theme.SystemUI">
+        <item name="lightIconTheme">@style/DualToneLightTheme</item>
+        <item name="darkIconTheme">@style/QSHeaderDarkTheme</item>
+    </style>
+
     <style name="QSIconTheme">
         <item name="backgroundColor">?android:attr/textColorHint</item>
         <item name="fillColor">?android:attr/textColorPrimary</item>

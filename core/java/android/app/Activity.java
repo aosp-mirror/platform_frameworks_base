@@ -2340,12 +2340,20 @@ public class Activity extends ContextThemeWrapper
      * <p>This method will be called only after {@link #onStart()} is being called and
      * before {@link #onStop()} is being called.
      *
-     * @return The currently supported direct actions which cannot be <code>null</code>
-     * or contain <code>null</null> elements.
+     * <p>You should pass to the callback the currently supported direct actions which
+     * cannot be <code>null</code> or contain <code>null</null> elements.
+     *
+     * <p>You should return the action list as soon as possible to ensure the consumer,
+     * for example the assistant, is as responsive as possible which would improve user
+     * experience of your app.
+     *
+     * @param cancellationSignal A signal to cancel the operation in progress.
+     * @param callback The callback to send the action list. The actions list cannot
+     *     contain <code>null</code> elements.
      */
-    @NonNull
-    public List<DirectAction> onGetDirectActions() {
-        return Collections.emptyList();
+    public void onGetDirectActions(@NonNull CancellationSignal cancellationSignal,
+            @NonNull Consumer<List<DirectAction>> callback) {
+        callback.accept(Collections.emptyList());
     }
 
     /**
@@ -2354,14 +2362,13 @@ public class Activity extends ContextThemeWrapper
      *
      * @param actionId The ID for the action
      * @param arguments Any additional arguments provided by the caller
-     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null}
-     *                          if none.
+     * @param cancellationSignal A signal to cancel the operation in progress.
      * @param resultListener The callback to provide the result back to the caller
      *
-     * @see #onGetDirectActions()
+     * @see #onGetDirectActions(CancellationSignal, Consumer)
      */
     public void onPerformDirectAction(@NonNull String actionId,
-            @Nullable Bundle arguments, @Nullable CancellationSignal cancellationSignal,
+            @NonNull Bundle arguments, @NonNull CancellationSignal cancellationSignal,
             @NonNull Consumer<Bundle> resultListener) { }
 
     /**

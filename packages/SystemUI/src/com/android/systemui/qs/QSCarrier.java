@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
 
 public class QSCarrier extends LinearLayout {
@@ -35,6 +36,7 @@ public class QSCarrier extends LinearLayout {
     private QSCarrierText mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
+    private DualToneHandler mDualToneHandler;
     private ColorStateList mColorForegroundStateList;
     private float mColorForegroundIntensity;
 
@@ -57,6 +59,7 @@ public class QSCarrier extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_combo);
         mMobileSignal = findViewById(R.id.mobile_signal);
         mMobileRoaming = findViewById(R.id.mobile_roaming);
@@ -66,16 +69,17 @@ public class QSCarrier extends LinearLayout {
                 android.R.attr.colorForeground);
         mColorForegroundStateList = ColorStateList.valueOf(colorForeground);
         mColorForegroundIntensity = QuickStatusBarHeader.getColorIntensity(colorForeground);
-
     }
 
     public void updateState(QSCarrierGroup.CellSignalState state) {
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
-            mMobileRoaming.setImageTintList(mColorForegroundStateList);
+            mMobileRoaming.setImageTintList(ColorStateList.valueOf(
+                    mDualToneHandler.getSingleColor(mColorForegroundIntensity)));
             SignalDrawable d = new SignalDrawable(mContext);
-            d.setDarkIntensity(mColorForegroundIntensity);
+            d.setColors(mDualToneHandler.getBackgroundColor(mColorForegroundIntensity),
+                    mDualToneHandler.getFillColor(mColorForegroundIntensity));
             mMobileSignal.setImageDrawable(d);
             mMobileSignal.setImageLevel(state.mobileSignalIconId);
 

@@ -693,7 +693,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
 
   // If the resource type was not recognized, write the error and return false.
   diag_->Error(DiagMessage(out_resource->source)
-              << "unknown resource type '" << parser->element_name() << "'");
+              << "unknown resource type '" << resource_type << "'");
   return false;
 }
 
@@ -1712,7 +1712,14 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       child_ref.SetSource(item_source);
       styleable->entries.push_back(std::move(child_ref));
 
-      out_resource->child_resources.push_back(std::move(child_resource));
+      // Do not add referenced attributes that do not define a format to the table.
+      CHECK(child_resource.value != nullptr);
+      Attribute* attr = ValueCast<Attribute>(child_resource.value.get());
+
+      CHECK(attr != nullptr);
+      if (attr->type_mask != android::ResTable_map::TYPE_ANY) {
+        out_resource->child_resources.push_back(std::move(child_resource));
+      }
 
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
       diag_->Error(DiagMessage(item_source) << "unknown tag <"

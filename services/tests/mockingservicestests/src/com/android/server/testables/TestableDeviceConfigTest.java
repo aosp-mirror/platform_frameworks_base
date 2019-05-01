@@ -16,7 +16,7 @@
 
 package com.android.server.testables;
 
-import static android.provider.DeviceConfig.OnPropertyChangedListener;
+import static android.provider.DeviceConfig.OnPropertiesChangedListener;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -93,20 +93,22 @@ public class TestableDeviceConfigTest {
     public void testListener() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
-        OnPropertyChangedListener changeListener = (namespace, name, value) -> {
-            assertThat(namespace).isEqualTo(sNamespace);
-            assertThat(name).isEqualTo(sKey);
-            assertThat(value).isEqualTo(sValue);
+        OnPropertiesChangedListener changeListener = (properties) -> {
+            assertThat(properties.getNamespace()).isEqualTo(sNamespace);
+            assertThat(properties.getKeyset().size()).isEqualTo(1);
+            assertThat(properties.getKeyset()).contains(sKey);
+            assertThat(properties.getString(sKey, "bogus_value")).isEqualTo(sValue);
+            assertThat(properties.getString("bogus_key", "bogus_value")).isEqualTo("bogus_value");
             countDownLatch.countDown();
         };
         try {
-            DeviceConfig.addOnPropertyChangedListener(sNamespace,
+            DeviceConfig.addOnPropertiesChangedListener(sNamespace,
                     ActivityThread.currentApplication().getMainExecutor(), changeListener);
             DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
             assertThat(countDownLatch.await(
                     WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
         } finally {
-            DeviceConfig.removeOnPropertyChangedListener(changeListener);
+            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
         }
     }
 

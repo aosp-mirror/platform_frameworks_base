@@ -405,6 +405,7 @@ public class DisplayWhiteBalanceController implements
         mThrottler.clear();
         mAmbientColorTemperature = -1.0f;
         mPendingAmbientColorTemperature = -1.0f;
+        mColorDisplayServiceInternal.resetDisplayWhiteBalanceColorTemperature();
         return true;
     }
 

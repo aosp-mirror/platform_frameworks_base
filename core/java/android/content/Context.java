@@ -3015,7 +3015,8 @@ public abstract class Context {
      *      specify an explicit component name.
      * @param flags Operation options for the binding as per {@link #bindService}.
      * @param instanceName Unique identifier for the service instance.  Each unique
-     *      name here will result in a different service instance being created.
+     *      name here will result in a different service instance being created.  Identifiers
+     *      must only contain ASCII letters, digits, underscores, and periods.
      * @return Returns success of binding as per {@link #bindService}.
      * @param executor Callbacks on ServiceConnection will be called on executor.
      *      Must use same instance for the same instance of ServiceConnection.
@@ -3023,6 +3024,7 @@ public abstract class Context {
      *      This must be a valid ServiceConnection object; it must not be null.
      *
      * @throws SecurityException If the caller does not have permission to access the service
+     * @throws IllegalArgumentException If the instanceName is invalid.
      *
      * @see #bindService
      */

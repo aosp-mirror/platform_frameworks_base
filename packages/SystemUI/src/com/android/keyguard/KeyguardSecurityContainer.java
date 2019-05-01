@@ -38,6 +38,8 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.Dependency;
+import com.android.systemui.SystemUIFactory;
+import com.android.systemui.util.InjectionInflationController;
 
 public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -67,6 +69,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private KeyguardSecurityView mCurrentSecurityView;
     private SecurityCallback mSecurityCallback;
     private AlertDialog mAlertDialog;
+    private InjectionInflationController mInjectionInflationController;
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
 
@@ -101,6 +104,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSecurityModel = new KeyguardSecurityModel(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+
+        mInjectionInflationController =  new InjectionInflationController(
+            SystemUIFactory.getInstance().getRootComponent());
     }
 
     public void setSecurityCallback(SecurityCallback callback) {
@@ -157,7 +163,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (view == null && layoutId != 0) {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
             if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
-            View v = inflater.inflate(layoutId, mSecurityViewFlipper, false);
+            View v = mInjectionInflationController.injectable(inflater)
+                    .inflate(layoutId, mSecurityViewFlipper, false);
             mSecurityViewFlipper.addView(v);
             updateSecurityView(v);
             view = (KeyguardSecurityView)v;

@@ -760,6 +760,12 @@ bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
     return true;
 }
 
+void prepareFistBucket(const vector<sp<MetricProducer>>& allMetricProducers) {
+    for (const auto& metric: allMetricProducers) {
+        metric->prepareFistBucket();
+    }
+}
+
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
                       const sp<StatsPullerManager>& pullerManager,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
@@ -816,6 +822,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         ALOGE("initMetricActivations failed");
         return false;
     }
+
+    prepareFistBucket(allMetricProducers);
 
     return true;
 }

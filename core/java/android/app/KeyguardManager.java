@@ -125,15 +125,14 @@ public class KeyguardManager {
     public static final int RESULT_ALTERNATE = 1;
 
     /**
-     * @deprecated see {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)}
-     *
      * Get an intent to prompt the user to confirm credentials (pin, pattern, password or biometrics
      * if enrolled) for the current user of the device. The caller is expected to launch this
      * activity using {@link android.app.Activity#startActivityForResult(Intent, int)} and check for
      * {@link android.app.Activity#RESULT_OK} if the user successfully completes the challenge.
      *
      * @return the intent for launching the activity or null if no password is required.
-     **/
+     * @deprecated see {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)}
+     */
     @Deprecated
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
     public Intent createConfirmDeviceCredentialIntent(CharSequence title,

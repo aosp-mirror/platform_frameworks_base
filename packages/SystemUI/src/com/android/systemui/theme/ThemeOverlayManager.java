@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 class ThemeOverlayManager {
@@ -91,10 +92,13 @@ class ThemeOverlayManager {
     /* Target package for each overlay category. */
     private final Map<String, String> mCategoryToTargetPackage = new ArrayMap<>();
     private final OverlayManager mOverlayManager;
+    private final Executor mExecutor;
     private final String mLauncherPackage;
 
-    ThemeOverlayManager(OverlayManager overlayManager, String launcherPackage) {
+    ThemeOverlayManager(OverlayManager overlayManager, Executor executor,
+            String launcherPackage) {
         mOverlayManager = overlayManager;
+        mExecutor = executor;
         mLauncherPackage = launcherPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
                 OVERLAY_CATEGORY_COLOR, OVERLAY_CATEGORY_FONT,
@@ -149,19 +153,21 @@ class ThemeOverlayManager {
     private void setEnabled(
             String packageName, String category, Set<UserHandle> handles, boolean enabled) {
         for (UserHandle userHandle : handles) {
-            setEnabled(packageName, userHandle, enabled);
+            setEnabledAsync(packageName, userHandle, enabled);
         }
         if (!handles.contains(UserHandle.SYSTEM) && SYSTEM_USER_CATEGORIES.contains(category)) {
-            setEnabled(packageName, UserHandle.SYSTEM, enabled);
+            setEnabledAsync(packageName, UserHandle.SYSTEM, enabled);
         }
     }
 
-    private void setEnabled(String pkg, UserHandle userHandle, boolean enabled) {
-        if (DEBUG) Log.d(TAG, String.format("setEnabled: %s %s %b", pkg, userHandle, enabled));
-        if (enabled) {
-            mOverlayManager.setEnabledExclusiveInCategory(pkg, userHandle);
-        } else {
-            mOverlayManager.setEnabled(pkg, false, userHandle);
-        }
+    private void setEnabledAsync(String pkg, UserHandle userHandle, boolean enabled) {
+        mExecutor.execute(() -> {
+            if (DEBUG) Log.d(TAG, String.format("setEnabled: %s %s %b", pkg, userHandle, enabled));
+            if (enabled) {
+                mOverlayManager.setEnabledExclusiveInCategory(pkg, userHandle);
+            } else {
+                mOverlayManager.setEnabled(pkg, false, userHandle);
+            }
+        });
     }
 }

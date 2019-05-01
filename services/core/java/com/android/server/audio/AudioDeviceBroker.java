@@ -416,8 +416,9 @@ import com.android.internal.annotations.GuardedBy;
         mAudioService.checkMusicActive(deviceType, caller);
     }
 
-    /*package*/ void checkVolumeCecOnHdmiConnection(int state, String caller) {
-        mAudioService.checkVolumeCecOnHdmiConnection(state, caller);
+    /*package*/ void checkVolumeCecOnHdmiConnection(
+            @AudioService.ConnectionState  int state, String caller) {
+        mAudioService.postCheckVolumeCecOnHdmiConnection(state, caller);
     }
 
     /*package*/ boolean hasAudioFocusUsers() {

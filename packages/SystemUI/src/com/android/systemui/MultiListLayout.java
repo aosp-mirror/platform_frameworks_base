@@ -26,16 +26,12 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.util.leak.RotationUtils;
 
-import java.util.ArrayList;
-
 /**
  * Layout class representing the Global Actions menu which appears when the power button is held.
  */
 public abstract class MultiListLayout extends LinearLayout {
     protected boolean mHasOutsideTouch;
     protected MultiListAdapter mAdapter;
-    protected boolean mSnapToEdge;
-
     protected int mRotation;
     protected RotationListener mRotationListener;
 
@@ -51,7 +47,7 @@ public abstract class MultiListLayout extends LinearLayout {
     /**
      * Removes all child items from the separated and list views, if they exist.
      */
-    public abstract void removeAllItems();
+    protected abstract void removeAllItems();
 
     /**
      * Sets the divided view, which may have a differently-colored background.
@@ -67,13 +63,6 @@ public abstract class MultiListLayout extends LinearLayout {
 
     protected void setSeparatedViewVisibility(boolean visible) {
         getSeparatedView().setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    /**
-     * Sets whether the GlobalActions view should snap to the edge of the screen.
-     */
-    public void setSnapToEdge(boolean snap) {
-        mSnapToEdge = snap;
     }
 
     /**
@@ -122,6 +111,7 @@ public abstract class MultiListLayout extends LinearLayout {
     }
 
     protected void onUpdateList() {
+        removeAllItems();
         setSeparatedViewVisibility(mAdapter.hasSeparatedItems());
     }
 
@@ -163,16 +153,14 @@ public abstract class MultiListLayout extends LinearLayout {
      */
     public abstract static class MultiListAdapter extends BaseAdapter {
         /**
-         * Creates an ArrayList of items which should be rendered in the separated view.
-         * @param useSeparatedView is true if the separated view will be used, false otherwise.
+         * Counts the number of items to be rendered in the separated view.
          */
-        public abstract ArrayList getSeparatedItems();
+        public abstract int countSeparatedItems();
 
         /**
-         * Creates an ArrayList of items which should be rendered in the list view.
-         * @param useSeparatedView True if the separated view will be used, false otherwise.
+         * Counts the number of items be rendered in the list view.
          */
-        public abstract ArrayList getListItems();
+        public abstract int countListItems();
 
         /**
          * Callback to run when an individual item is clicked or pressed.
@@ -192,7 +180,13 @@ public abstract class MultiListLayout extends LinearLayout {
          * or not to hide the separated list from view.
          */
         public boolean hasSeparatedItems() {
-            return getSeparatedItems().size() > 0;
+            return countSeparatedItems() > 0;
         }
+
+        /**
+         * Determines whether the item at the given index should be rendered in the separarted view.
+         * @param position The index of the item.
+         */
+        public abstract boolean shouldBeSeparated(int position);
     }
 }

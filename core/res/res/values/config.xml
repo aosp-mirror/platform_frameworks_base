@@ -2542,9 +2542,10 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
-    <!-- Indicates whether local non-default displays are private.
-         {@see android.view.Display#FLAG_PRIVATE} -->
-    <bool name="config_localDisplaysPrivate">false</bool>
+    <!-- Controls if local secondary displays should be private or not. Value specified in the array
+         represents physical port address of each display and display in this list will be marked
+         as private. {@see android.view.Display#FLAG_PRIVATE} -->
+    <integer-array translatable="false" name="config_localPrivateDisplayPorts"></integer-array>
 
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT
@@ -3861,6 +3862,10 @@
          set in AndroidManifest.
          {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
     <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
+
+    <!-- Force secondary home launcher specified in config_secondaryHomeComponent always. If this is
+         not set, secondary home launcher can be replaced by user. -->
+    <bool name ="config_useSystemProvidedLauncherForSecondary">false</bool>
 
     <!-- If device supports corner radius on windows.
          This should be turned off on low-end devices to improve animation performance. -->
