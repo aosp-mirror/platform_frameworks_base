@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -29,7 +30,6 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WIN
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
@@ -477,7 +477,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    public void setSystemUiStateFlag(int flag, boolean enabled) {
+    public void setSystemUiStateFlag(int flag, boolean enabled, int displayId) {
+        if (displayId != DEFAULT_DISPLAY) {
+            // Ignore non-default displays for now
+            return;
+        }
+
         int newState = mSysUiStateFlags;
         if (enabled) {
             newState |= flag;
@@ -502,8 +507,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 && statusBar.getPanel().isFullyExpanded();
         final boolean bouncerShowing = statusBar != null && statusBar.isBouncerShowing();
         mSysUiStateFlags = 0;
-        mSysUiStateFlags |= ActivityManagerWrapper.getInstance().isScreenPinningActive()
-                ? SYSUI_STATE_SCREEN_PINNING : 0;
         mSysUiStateFlags |= (navBarFragment != null && !navBarFragment.isNavBarWindowVisible())
                 ? SYSUI_STATE_NAV_BAR_HIDDEN : 0;
         mSysUiStateFlags |= panelExpanded
