@@ -687,6 +687,7 @@ java_defaults {
         "core/java/com/android/server/DropboxLogTags.logtags",
         "core/java/org/chromium/arc/EventLogTags.logtags",
 
+        ":apex-properties",
         ":platform-properties",
 
         ":framework-statslog-gen",
