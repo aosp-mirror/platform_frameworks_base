@@ -986,7 +986,7 @@ Status StatsService::informDeviceShutdown() {
     ENFORCE_UID(AID_SYSTEM);
     VLOG("StatsService::informDeviceShutdown");
     mProcessor->WriteDataToDisk(DEVICE_SHUTDOWN, FAST);
-    mProcessor->WriteMetricsActivationToDisk(getElapsedRealtimeNs());
+    mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
     return Status::ok();
 }
 
@@ -1021,14 +1021,14 @@ Status StatsService::statsCompanionReady() {
 
 void StatsService::Startup() {
     mConfigManager->Startup();
-    mProcessor->LoadMetricsActivationFromDisk();
+    mProcessor->LoadActiveConfigsFromDisk();
 }
 
 void StatsService::Terminate() {
     ALOGI("StatsService::Terminating");
     if (mProcessor != nullptr) {
         mProcessor->WriteDataToDisk(TERMINATION_SIGNAL_RECEIVED, FAST);
-        mProcessor->WriteMetricsActivationToDisk(getElapsedRealtimeNs());
+        mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
     }
 }
 

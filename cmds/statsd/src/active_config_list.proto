@@ -21,23 +21,26 @@ option java_package = "com.android.os";
 option java_multiple_files = true;
 option java_outer_classname = "ActiveConfigProto";
 
+message ActiveEventActivation {
+    optional int32 atom_matcher_index = 1;
+
+    // Time left in activation. When this proto is loaded after device boot,
+    // the activation should be set to active for this duration.
+    optional int64 remaining_ttl_nanos = 2;
+}
+
 message ActiveMetric {
-    // metric id
-    optional int64 metric_id = 1;
-    // Remaining time to live in nano seconds. -1 for infinity.
-    optional int64 time_to_live_nanos = 2;
+    optional int64 id = 1;
+    repeated ActiveEventActivation activation = 2;
 }
 
 message ActiveConfig {
-    // config id
-    optional int64 config_id = 1;
-    // config uid
+    optional int64 id = 1;
     optional int32 uid = 2;
-    // metrics
-    repeated ActiveMetric active_metric = 3;
+    repeated ActiveMetric metric = 3;
 }
 
 // all configs and their metrics on device.
 message ActiveConfigList {
-    repeated ActiveConfig active_config = 1;
+    repeated ActiveConfig config = 1;
 }
