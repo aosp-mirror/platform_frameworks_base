@@ -263,6 +263,9 @@ public class AlarmManagerServiceTest {
 
         mService.onStart();
         spyOn(mService.mHandler);
+        // Stubbing the handler. Test should simulate any handling of messages synchronously.
+        doReturn(true).when(mService.mHandler).sendMessageAtTime(any(Message.class), anyLong());
+
         assertEquals(mService.mSystemUiUid, SYSTEM_UI_UID);
         assertEquals(mService.mClockReceiver, mClockReceiver);
         assertEquals(mService.mWakeLock, mWakeLock);
@@ -617,11 +620,9 @@ public class AlarmManagerServiceTest {
         testQuotasNoDeferral(STANDBY_BUCKET_RARE);
     }
 
-    private void sendAndHandleBucketChanged(int bucket) {
+    private void assertAndHandleBucketChanged(int bucket) {
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(bucket);
-        // Stubbing the handler call to simulate it synchronously here.
-        doReturn(true).when(mService.mHandler).sendMessage(any(Message.class));
         mAppStandbyListener.onAppIdleStateChanged(TEST_CALLING_PACKAGE,
                 UserHandle.getUserId(TEST_CALLING_UID), false, bucket, 0);
         final ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -652,7 +653,7 @@ public class AlarmManagerServiceTest {
         // The next upcoming alarm in queue should also be set as expected.
         assertEquals(firstTrigger + workingQuota - 1, mTestTimer.getElapsed());
         // Downgrading the bucket now
-        sendAndHandleBucketChanged(STANDBY_BUCKET_RARE);
+        assertAndHandleBucketChanged(STANDBY_BUCKET_RARE);
         final int rareQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_RARE);
         // The last alarm should now be deferred.
         final long expectedNextTrigger = (firstTrigger + workingQuota - 1 - rareQuota)
@@ -680,15 +681,13 @@ public class AlarmManagerServiceTest {
         assertEquals(deferredTrigger, mTestTimer.getElapsed());
 
         // Upgrading the bucket now
-        sendAndHandleBucketChanged(STANDBY_BUCKET_ACTIVE);
+        assertAndHandleBucketChanged(STANDBY_BUCKET_ACTIVE);
         // The last alarm should now be rescheduled to go as per original expectations
         final long originalTrigger = firstTrigger + frequentQuota;
         assertEquals("Incorrect next alarm trigger", originalTrigger, mTestTimer.getElapsed());
     }
 
-    private void sendAndHandleParoleChanged(boolean parole) {
-        // Stubbing the handler call to simulate it synchronously here.
-        doReturn(true).when(mService.mHandler).sendMessage(any(Message.class));
+    private void assertAndHandleParoleChanged(boolean parole) {
         mAppStandbyListener.onParoleStateChanged(parole);
         final ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
         verify(mService.mHandler, atLeastOnce()).sendMessage(messageCaptor.capture());
@@ -719,7 +718,7 @@ public class AlarmManagerServiceTest {
         // Any subsequent alarms in queue should all be deferred
         assertEquals(firstTrigger + mAppStandbyWindow + 1, mTestTimer.getElapsed());
         // Paroling now
-        sendAndHandleParoleChanged(true);
+        assertAndHandleParoleChanged(true);
 
         // Subsequent alarms should now go off as per original expectations.
         for (int i = 0; i < 5; i++) {
@@ -728,7 +727,7 @@ public class AlarmManagerServiceTest {
             mTestTimer.expire();
         }
         // Come out of parole
-        sendAndHandleParoleChanged(false);
+        assertAndHandleParoleChanged(false);
 
         // Subsequent alarms should again get deferred
         final long expectedNextTrigger = (firstTrigger + 5) + 1 + mAppStandbyWindow;
@@ -935,6 +934,26 @@ public class AlarmManagerServiceTest {
         assertEquals(numAlarms, mService.mAlarmsPerUid.size());
         mService.removeUserLocked(mockUserId);
         assertEquals(0, mService.mAlarmsPerUid.size());
+    }
+
+    @Test
+    public void alarmCountOnRemoveFromPendingWhileIdle() {
+        mService.mPendingIdleUntil = mock(AlarmManagerService.Alarm.class);
+        final int numAlarms = 15;
+        final PendingIntent[] pis = new PendingIntent[numAlarms];
+        for (int i = 0; i < numAlarms; i++) {
+            pis[i] = getNewMockPendingIntent();
+            setTestAlarm(ELAPSED_REALTIME, mNowElapsedTest + i + 5, pis[i]);
+        }
+        assertEquals(numAlarms, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+        assertEquals(numAlarms, mService.mPendingWhileIdleAlarms.size());
+        final int toRemove = 8;
+        for (int i = 0; i < toRemove; i++) {
+            mService.removeLocked(pis[i], null);
+            assertEquals(numAlarms - i - 1, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
+        }
+        mService.removeLocked(TEST_CALLING_UID);
+        assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID, 0));
     }
 
     @Test
