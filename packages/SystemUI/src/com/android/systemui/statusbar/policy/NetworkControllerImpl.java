@@ -662,8 +662,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 cachedControllers.remove(subId);
             } else {
                 MobileSignalController controller = new MobileSignalController(mContext, mConfig,
-                        mHasMobileDataFeature, mPhone, mCallbackHandler,
-                        this, subscriptions.get(i), mSubDefaults, mReceiverHandler.getLooper());
+                        mHasMobileDataFeature, mPhone.createForSubscriptionId(subId),
+                        mCallbackHandler, this, subscriptions.get(i),
+                        mSubDefaults, mReceiverHandler.getLooper());
                 controller.setUserSetupComplete(mUserSetup);
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
@@ -1049,7 +1050,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         SubscriptionInfo info = new SubscriptionInfo(id, "", simSlotIndex, "", "", 0, 0, "", 0,
                 null, null, null, "", false, null, null);
         MobileSignalController controller = new MobileSignalController(mContext,
-                mConfig, mHasMobileDataFeature, mPhone, mCallbackHandler, this, info,
+                mConfig, mHasMobileDataFeature,
+                mPhone.createForSubscriptionId(info.getSubscriptionId()), mCallbackHandler, this, info,
                 mSubDefaults, mReceiverHandler.getLooper());
         mMobileSignalControllers.put(id, controller);
         controller.getState().userSetup = true;

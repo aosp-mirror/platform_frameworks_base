@@ -94,8 +94,7 @@ public class MobileSignalController extends SignalController<
         mPhone = phone;
         mDefaults = defaults;
         mSubscriptionInfo = info;
-        mPhoneStateListener = new MobilePhoneStateListener(info.getSubscriptionId(),
-                receiverLooper);
+        mPhoneStateListener = new MobilePhoneStateListener(receiverLooper);
         mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
         mNetworkNameDefault = getStringIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default);
@@ -574,8 +573,8 @@ public class MobileSignalController extends SignalController<
     }
 
     class MobilePhoneStateListener extends PhoneStateListener {
-        public MobilePhoneStateListener(int subId, Looper looper) {
-            super(subId, looper);
+        public MobilePhoneStateListener(Looper looper) {
+            super(looper);
         }
 
         @Override

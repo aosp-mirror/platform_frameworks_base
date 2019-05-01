@@ -130,6 +130,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
         when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
                 new NetworkCapabilities[] { mNetCapabilities });
+        when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
