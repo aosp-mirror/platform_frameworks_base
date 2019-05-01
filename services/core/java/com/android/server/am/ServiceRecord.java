@@ -38,7 +38,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -581,15 +580,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         return connections;
     }
 
-    void putConnection(IBinder binder, ArrayList<ConnectionRecord> clist) {
-        connections.put(binder, clist);
-        // if we have a process attached, add bound client uids of this connection to it
+    void addConnection(IBinder binder, ConnectionRecord c) {
+        ArrayList<ConnectionRecord> clist = connections.get(binder);
+        if (clist == null) {
+            clist = new ArrayList<>();
+            connections.put(binder, clist);
+        }
+        clist.add(c);
+
+        // if we have a process attached, add bound client uid of this connection to it
         if (app != null) {
-            ArraySet<Integer> boundClientUids = new ArraySet<>();
-            for (int i = 0; i < clist.size(); i++) {
-                boundClientUids.add(clist.get(i).clientUid);
-            }
-            app.addBoundClientUids(boundClientUids);
+            app.addBoundClientUid(c.clientUid);
         }
     }
 
