@@ -26,7 +26,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.DeviceConfig;
-import android.provider.DeviceConfig.OnPropertyChangedListener;
+import android.provider.DeviceConfig.OnPropertiesChangedListener;
+import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -315,23 +316,25 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final Uri ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS_URI =
             Settings.Global.getUriFor(Settings.Global.ENABLE_AUTOMATIC_SYSTEM_SERVER_HEAP_DUMPS);
 
-    private final OnPropertyChangedListener mOnDeviceConfigChangedListener =
-            new OnPropertyChangedListener() {
+    private final OnPropertiesChangedListener mOnDeviceConfigChangedListener =
+            new OnPropertiesChangedListener() {
                 @Override
-                public void onPropertyChanged(String namespace, String name, String value) {
-                    if (name == null) {
-                        return;
-                    }
-                    switch (name) {
-                        case KEY_MAX_CACHED_PROCESSES:
-                            updateMaxCachedProcesses();
-                            break;
-                        case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
-                        case KEY_BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST:
-                            updateBackgroundActivityStarts();
-                            break;
-                        default:
-                            break;
+                public void onPropertiesChanged(Properties properties) {
+                    for (String name : properties.getKeyset()) {
+                        if (name == null) {
+                            return;
+                        }
+                        switch (name) {
+                            case KEY_MAX_CACHED_PROCESSES:
+                                updateMaxCachedProcesses();
+                                break;
+                            case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
+                            case KEY_BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST:
+                                updateBackgroundActivityStarts();
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             };
@@ -362,7 +365,7 @@ final class ActivityManagerConstants extends ContentObserver {
         if (mSystemServerAutomaticHeapDumpEnabled) {
             updateEnableAutomaticSystemServerHeapDumps();
         }
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(),
                 mOnDeviceConfigChangedListener);
         updateMaxCachedProcesses();

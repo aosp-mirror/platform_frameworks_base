@@ -93,10 +93,10 @@ public final class SmartReplyConstants {
     }
 
     private void registerDeviceConfigListener() {
-        DeviceConfig.addOnPropertyChangedListener(
+        DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 this::postToHandler,
-                this::onDeviceConfigPropertyChanged);
+                (properties) -> onDeviceConfigPropertiesChanged(properties.getNamespace()));
     }
 
     private void postToHandler(Runnable r) {
@@ -104,10 +104,10 @@ public final class SmartReplyConstants {
     }
 
     @VisibleForTesting
-    void onDeviceConfigPropertyChanged(String namespace, String name, String value) {
+    void onDeviceConfigPropertiesChanged(String namespace) {
         if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
             Log.e(TAG, "Received update from DeviceConfig for unrelated namespace: "
-                    + namespace + " " + name + "=" + value);
+                    + namespace);
             return;
         }
 
