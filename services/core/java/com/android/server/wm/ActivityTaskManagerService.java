@@ -108,12 +108,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_TASK_ID;
 import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
@@ -216,7 +214,6 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -266,6 +263,7 @@ import com.android.server.am.UserState;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
@@ -348,6 +346,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
+    private PermissionPolicyInternal mPermissionPolicyInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     PowerManagerInternal mPowerManagerInternal;
@@ -5784,6 +5783,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         }
         return mPmInternal;
+    }
+
+    PermissionPolicyInternal getPermissionPolicyInternal() {
+        if (mPermissionPolicyInternal == null) {
+            mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
+        }
+        return mPermissionPolicyInternal;
     }
 
     AppWarnings getAppWarningsLocked() {

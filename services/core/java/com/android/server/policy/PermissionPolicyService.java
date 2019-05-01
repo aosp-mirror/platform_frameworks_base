@@ -25,6 +25,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -37,6 +39,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManagerInternal;
+import android.provider.Telephony;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -59,6 +62,8 @@ public final class PermissionPolicyService extends SystemService {
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
+
+        LocalServices.addService(PermissionPolicyInternal.class, new Internal());
     }
 
     @Override
@@ -465,6 +470,48 @@ public final class PermissionPolicyService extends SystemService {
                 this.packageName = packageName;
                 this.fgPermissionName = fgPermissionName;
                 this.bgPermissionName = bgPermissionName;
+            }
+        }
+    }
+
+    private class Internal extends PermissionPolicyInternal {
+
+        @Override
+        public boolean checkStartActivity(@NonNull Intent intent, int callingUid,
+                @NonNull String callingPackage) {
+            if (isActionRemovedForCallingPackage(intent.getAction(), callingPackage)) {
+                Slog.w(LOG_TAG, "Action Removed: starting " + intent.toString() + " from "
+                        + callingPackage + " (uid=" + callingUid + ")");
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * Check if the intent action is removed for the calling package (often based on target SDK
+         * version). If the action is removed, we'll silently cancel the activity launch.
+         */
+        private boolean isActionRemovedForCallingPackage(@Nullable String action,
+                @NonNull String callingPackage) {
+            if (action == null) {
+                return false;
+            }
+            switch (action) {
+                case Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT: {
+                    ApplicationInfo applicationInfo;
+                    try {
+                        applicationInfo = getContext().getPackageManager().getApplicationInfo(
+                                callingPackage, 0);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Slog.i(LOG_TAG, "Cannot find application info for " + callingPackage);
+                        return false;
+                    }
+                    // Applications targeting Q should use RoleManager.createRequestRoleIntent()
+                    // instead.
+                    return applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q;
+                }
+                default:
+                    return false;
             }
         }
     }

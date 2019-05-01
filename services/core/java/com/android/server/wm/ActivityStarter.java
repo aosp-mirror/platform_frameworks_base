@@ -759,6 +759,8 @@ class ActivityStarter {
                 inTask != null, callerApp, resultRecord, resultStack);
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
+        abort |= !mService.getPermissionPolicyInternal().checkStartActivity(intent, callingUid,
+                callingPackage);
 
         boolean abortBackgroundStart = false;
         if (!abort) {

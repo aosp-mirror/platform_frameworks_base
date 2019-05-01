@@ -70,6 +70,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentController;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.utils.MockTracker;
 
@@ -407,6 +408,7 @@ class ActivityTestsBase {
 
     protected class TestActivityTaskManagerService extends ActivityTaskManagerService {
         private PackageManagerInternal mPmInternal;
+        private PermissionPolicyInternal mPermissionPolicyInternal;
 
         // ActivityStackSupervisor may be created more than once while setting up AMS and ATMS.
         // We keep the reference in order to prevent creating it twice.
@@ -510,6 +512,16 @@ class ActivityTestsBase {
                         .isPermissionsReviewRequired(anyString(), anyInt());
             }
             return mPmInternal;
+        }
+
+        @Override
+        PermissionPolicyInternal getPermissionPolicyInternal() {
+            if (mPermissionPolicyInternal == null) {
+                mPermissionPolicyInternal = mock(PermissionPolicyInternal.class);
+                doReturn(true).when(mPermissionPolicyInternal).checkStartActivity(any(), anyInt(),
+                        any());
+            }
+            return mPermissionPolicyInternal;
         }
     }
 
