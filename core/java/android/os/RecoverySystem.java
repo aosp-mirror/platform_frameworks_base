@@ -866,8 +866,8 @@ public class RecoverySystem {
             if (storageManager.needsCheckpoint()) {
                 Log.i(TAG, "Rescue Party requested wipe. Aborting update instead.");
                 storageManager.abortChanges("rescueparty", false);
+                return;
             }
-            return;
         } catch (RemoteException e) {
             Log.i(TAG, "Failed to handle with checkpointing. Continuing with wipe.");
         }
