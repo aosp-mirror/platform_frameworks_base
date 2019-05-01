@@ -38,7 +38,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -84,7 +83,6 @@ public class DozeTriggersTest extends SysuiTestCase {
         mSensors = new FakeSensorManager(mContext);
         mWakeLock = new WakeLockFake();
         mDockManagerFake = spy(new DockManagerFake());
-        mContext.putComponent(DockManager.class, mDockManagerFake);
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, mConfig, mParameters,
                 mSensors, Handler.createAsync(Looper.myLooper()), mWakeLock, true,
