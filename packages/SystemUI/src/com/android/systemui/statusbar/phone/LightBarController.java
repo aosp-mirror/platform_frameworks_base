@@ -79,6 +79,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private final Rect mLastDockedBounds = new Rect();
     private boolean mQsCustomizing;
 
+    private boolean mDirectReplying;
+    private boolean mNavbarColorManagedByIme;
+
     @Inject
     public LightBarController(Context ctx, DarkIconDispatcher darkIconDispatcher,
             BatteryController batteryController) {
@@ -100,7 +103,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     public void onSystemUiVisibilityChanged(int fullscreenStackVis, int dockedStackVis,
             int mask, Rect fullscreenStackBounds, Rect dockedStackBounds, boolean sbModeChanged,
-            int statusBarMode) {
+            int statusBarMode, boolean navbarColorManagedByIme) {
         int oldFullscreen = mFullscreenStackVisibility;
         int newFullscreen = (oldFullscreen & ~mask) | (fullscreenStackVis & mask);
         int diffFullscreen = newFullscreen ^ oldFullscreen;
@@ -122,12 +125,13 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mFullscreenStackVisibility = newFullscreen;
         mDockedStackVisibility = newDocked;
         mLastStatusBarMode = statusBarMode;
+        mNavbarColorManagedByIme = navbarColorManagedByIme;
         mLastFullscreenBounds.set(fullscreenStackBounds);
         mLastDockedBounds.set(dockedStackBounds);
     }
 
     public void onNavigationVisibilityChanged(int vis, int mask, boolean nbModeChanged,
-            int navigationBarMode) {
+            int navigationBarMode, boolean navbarColorManagedByIme) {
         int oldVis = mSystemUiVisibility;
         int newVis = (oldVis & ~mask) | (vis & mask);
         int diffVis = newVis ^ oldVis;
@@ -136,26 +140,39 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             boolean last = mNavigationLight;
             mHasLightNavigationBar = isLight(vis, navigationBarMode,
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            mNavigationLight = mHasLightNavigationBar && !mForceDarkForScrim && !mQsCustomizing;
+            mNavigationLight = mHasLightNavigationBar
+                    && (mDirectReplying && mNavbarColorManagedByIme || !mForceDarkForScrim)
+                    && !mQsCustomizing;
             if (mNavigationLight != last) {
                 updateNavigation();
             }
         }
         mSystemUiVisibility = newVis;
         mLastNavigationBarMode = navigationBarMode;
+        mNavbarColorManagedByIme = navbarColorManagedByIme;
     }
 
     private void reevaluate() {
         onSystemUiVisibilityChanged(mFullscreenStackVisibility,
                 mDockedStackVisibility, 0 /* mask */, mLastFullscreenBounds, mLastDockedBounds,
-                true /* sbModeChange*/, mLastStatusBarMode);
+                true /* sbModeChange*/, mLastStatusBarMode, mNavbarColorManagedByIme);
         onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */, true /* nbModeChanged */,
-                mLastNavigationBarMode);
+                mLastNavigationBarMode, mNavbarColorManagedByIme);
     }
 
     public void setQsCustomizing(boolean customizing) {
         if (mQsCustomizing == customizing) return;
         mQsCustomizing = customizing;
+        reevaluate();
+    }
+
+    /**
+     * Sets whether the direct-reply is in use or not.
+     * @param directReplying {@code true} when the direct-reply is in-use.
+     */
+    public void setDirectReplying(boolean directReplying) {
+        if (mDirectReplying == directReplying) return;
+        mDirectReplying = directReplying;
         reevaluate();
     }
 
@@ -260,7 +277,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         pw.print(" mLastNavigationBarMode="); pw.println(mLastNavigationBarMode);
 
         pw.print(" mForceDarkForScrim="); pw.print(mForceDarkForScrim);
-        pw.print(" mQsCustomizing="); pw.println(mQsCustomizing);
+        pw.print(" mQsCustomizing="); pw.print(mQsCustomizing);
+        pw.print(" mDirectReplying="); pw.println(mDirectReplying);
+        pw.print(" mNavbarColorManagedByIme="); pw.println(mNavbarColorManagedByIme);
 
         pw.println();
 

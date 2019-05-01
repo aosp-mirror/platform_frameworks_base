@@ -50,9 +50,11 @@ oneway interface IStatusBar
      * @param mask which flags to change
      * @param fullscreenBounds the current bounds of the fullscreen stack, in screen coordinates
      * @param dockedBounds the current bounds of the docked stack, in screen coordinates
+     * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
      */
     void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, in Rect fullscreenBounds, in Rect dockedBounds);
+            int mask, in Rect fullscreenBounds, in Rect dockedBounds,
+            boolean navbarColorManagedByIme);
 
     void topAppWindowChanged(int displayId, boolean menuVisible);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,

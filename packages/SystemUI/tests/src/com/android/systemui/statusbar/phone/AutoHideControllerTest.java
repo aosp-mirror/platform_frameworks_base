@@ -70,7 +70,7 @@ public class AutoHideControllerTest extends SysuiTestCase {
 
     @Test
     public void testSetSystemUiVisibilityEarlyReturnWithDifferentDisplay() {
-        mAutoHideController.setSystemUiVisibility(1, 1, 2, 3, 4, null, new Rect());
+        mAutoHideController.setSystemUiVisibility(1, 1, 2, 3, 4, null, new Rect(), false);
 
         verify(mAutoHideController, never()).notifySystemUiVisibilityChanged(anyInt());
     }
@@ -78,7 +78,8 @@ public class AutoHideControllerTest extends SysuiTestCase {
     @Test
     public void testSetSystemUiVisibilityEarlyReturnWithSameVisibility() {
         mAutoHideController
-                .setSystemUiVisibility(DEFAULT_DISPLAY, View.VISIBLE, 2, 3, 4, null, new Rect());
+                .setSystemUiVisibility(
+                        DEFAULT_DISPLAY, View.VISIBLE, 2, 3, 4, null, new Rect(), false);
 
         verify(mAutoHideController, never()).notifySystemUiVisibilityChanged(anyInt());
     }
@@ -92,7 +93,7 @@ public class AutoHideControllerTest extends SysuiTestCase {
                 View.SYSTEM_UI_FLAG_FULLSCREEN | View.STATUS_BAR_UNHIDE;
 
         mAutoHideController.setSystemUiVisibility(
-                DEFAULT_DISPLAY, expectedStatus, 2, 3, FULL_MASK, null, new Rect());
+                DEFAULT_DISPLAY, expectedStatus, 2, 3, FULL_MASK, null, new Rect(), false);
 
         assertEquals("System UI visibility should not be changed",
                 expectedStatus, mAutoHideController.mSystemUiVisibility);
@@ -109,7 +110,7 @@ public class AutoHideControllerTest extends SysuiTestCase {
 
         mAutoHideController.setSystemUiVisibility(
                 DEFAULT_DISPLAY, View.STATUS_BAR_UNHIDE | View.NAVIGATION_BAR_UNHIDE,
-                2, 3, FULL_MASK, null, new Rect());
+                2, 3, FULL_MASK, null, new Rect(), false);
 
         int expectedStatus = View.VISIBLE;
         assertEquals(expectedStatus, mAutoHideController.mSystemUiVisibility);
