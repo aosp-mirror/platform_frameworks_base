@@ -16,9 +16,12 @@
 package com.android.systemui.bubbles;
 
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
+
 import android.os.UserHandle;
 import android.view.LayoutInflater;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -40,15 +43,24 @@ class Bubble {
     public NotificationEntry entry;
     BubbleView iconView;
     BubbleExpandedView expandedView;
+    private long mLastUpdated;
+    private long mLastAccessed;
 
     private static String groupId(NotificationEntry entry) {
         UserHandle user = entry.notification.getUser();
-        return user.getIdentifier() + '|' + entry.notification.getPackageName();
+        return user.getIdentifier() + "|" + entry.notification.getPackageName();
+    }
+
+    /** Used in tests when no UI is required. */
+    @VisibleForTesting(visibility = PRIVATE)
+    Bubble(NotificationEntry e) {
+        this (e, null);
     }
 
     Bubble(NotificationEntry e, BubbleExpandedView.OnBubbleBlockedListener listener) {
         entry = e;
         mKey = e.key;
+        mLastUpdated = e.notification.getPostTime();
         mGroupId = groupId(e);
         mListener = listener;
     }
@@ -101,10 +113,35 @@ class Bubble {
 
     void setEntry(NotificationEntry entry) {
         this.entry = entry;
+        mLastUpdated = entry.notification.getPostTime();
         if (mInflated) {
             iconView.update(entry);
             expandedView.update(entry);
         }
+    }
+
+    public long getLastActivity() {
+        return Math.max(mLastUpdated, mLastAccessed);
+    }
+
+    /**
+     * Should be invoked whenever a Bubble is accessed (selected while expanded).
+     */
+    void markAsAccessedAt(long lastAccessedMillis) {
+        mLastAccessed = lastAccessedMillis;
+        entry.setShowInShadeWhenBubble(false);
+    }
+
+    /**
+     * @return whether bubble is from a notification associated with a foreground service.
+     */
+    public boolean isOngoing() {
+        return entry.isForegroundService();
+    }
+
+    @Override
+    public String toString() {
+        return "Bubble{" + mKey + '}';
     }
 
     @Override
