@@ -263,6 +263,7 @@ public class NetworkPolicyManagerServiceTest {
     private static final int INVALID_CARRIER_CONFIG_VALUE = -9999;
     private long mDefaultWarningBytes; // filled in with the actual default before tests are run
     private long mDefaultLimitBytes; // filled in with the actual default before tests are run
+    private PersistableBundle mCarrierConfig = CarrierConfigManager.getDefaultConfig();
 
     private static final int APP_ID_A = android.os.Process.FIRST_APPLICATION_UID + 4;
     private static final int APP_ID_B = android.os.Process.FIRST_APPLICATION_UID + 8;
@@ -408,6 +409,9 @@ public class NetworkPolicyManagerServiceTest {
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
         doNothing().when(mConnectivityManager)
                 .registerNetworkCallback(any(), mNetworkCallbackCaptor.capture());
+
+        // Create the expected carrier config
+        mCarrierConfig.putBoolean(CarrierConfigManager.KEY_CARRIER_CONFIG_APPLIED_BOOL, true);
 
         // Prepare NPMS.
         mService.systemReady(mService.networkScoreAndNetworkManagementServiceReady());
@@ -1084,6 +1088,25 @@ public class NetworkPolicyManagerServiceTest {
                     DataUnit.MEGABYTES.toBytes(1800 - 1799));
             verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_WARNING),
                     isA(Notification.class), eq(UserHandle.ALL));
+        }
+
+        // Push over warning, but with a config that isn't from an identified carrier
+        {
+            history.clear();
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+            expectDefaultCarrierConfig();
+
+            mService.updateNetworks();
+
+            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
+                    DataUnit.MEGABYTES.toBytes(1800 - 1799));
+            // Since this isn't from the identified carrier, there should be no notifications
+            verify(mNotifManager, never()).notifyAsUser(any(), anyInt(), any(), any());
         }
 
         // Push over limit
@@ -1812,7 +1835,7 @@ public class NetworkPolicyManagerServiceTest {
 
     private void expectNetworkState(boolean roaming) throws Exception {
         when(mCarrierConfigManager.getConfigForSubId(eq(TEST_SUB_ID)))
-                .thenReturn(CarrierConfigManager.getDefaultConfig());
+                .thenReturn(mCarrierConfig);
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
                 new NetworkState(buildNetworkInfo(),
                         buildLinkProperties(TEST_IFACE),
@@ -1821,10 +1844,16 @@ public class NetworkPolicyManagerServiceTest {
         });
     }
 
+    private void expectDefaultCarrierConfig() throws Exception {
+        when(mCarrierConfigManager.getConfigForSubId(eq(TEST_SUB_ID)))
+                .thenReturn(CarrierConfigManager.getDefaultConfig());
+    }
+
     private void expectMobileDefaults() throws Exception {
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(
                 new int[] { TEST_SUB_ID });
         when(mTelephonyManager.getSubscriberId(TEST_SUB_ID)).thenReturn(TEST_IMSI);
+        doNothing().when(mTelephonyManager).setPolicyDataEnabled(anyBoolean(), anyInt());
         expectNetworkState(false /* roaming */);
     }
 
