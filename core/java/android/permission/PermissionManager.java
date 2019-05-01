@@ -23,11 +23,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
-import android.content.pm.PermissionInfo;
 import android.os.RemoteException;
 
 import com.android.internal.annotations.Immutable;
@@ -107,11 +104,11 @@ public final class PermissionManager {
     /**
      * Get set of permissions that have been split into more granular or dependent permissions.
      *
-     * <p>E.g. before {@link android.os.Build.VERSION_CODES#P0} an app that was granted
+     * <p>E.g. before {@link android.os.Build.VERSION_CODES#Q} an app that was granted
      * {@link Manifest.permission#ACCESS_COARSE_LOCATION} could access he location while it was in
-     * foreground and background. On platforms after {@link android.os.Build.VERSION_CODES#P0}
+     * foreground and background. On platforms after {@link android.os.Build.VERSION_CODES#Q}
      * the location permission only grants location access while the app is in foreground. This
-     * would break apps that target before {@link android.os.Build.VERSION_CODES#P0}. Hence whenever
+     * would break apps that target before {@link android.os.Build.VERSION_CODES#Q}. Hence whenever
      * such an old app asks for a location permission (i.e. the
      * {@link SplitPermissionInfo#getSplitPermission()}), then the
      * {@link Manifest.permission#ACCESS_BACKGROUND_LOCATION} permission (inside
