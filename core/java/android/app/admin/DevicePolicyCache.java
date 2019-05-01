@@ -44,6 +44,12 @@ public abstract class DevicePolicyCache {
     public abstract boolean getScreenCaptureDisabled(@UserIdInt int userHandle);
 
     /**
+     * Caches {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)} of the
+     * given user with {@code null} passed in as argument.
+     */
+    public abstract int getPasswordQuality(@UserIdInt int userHandle);
+
+    /**
      * Empty implementation.
      */
     private static class EmptyDevicePolicyCache extends DevicePolicyCache {
@@ -52,6 +58,11 @@ public abstract class DevicePolicyCache {
         @Override
         public boolean getScreenCaptureDisabled(int userHandle) {
             return false;
+        }
+
+        @Override
+        public int getPasswordQuality(int userHandle) {
+            return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         }
     }
 }
