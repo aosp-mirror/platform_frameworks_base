@@ -329,6 +329,31 @@ public class RecoverableKeyStoreDbTest {
         assertEquals(serialNumber, mRecoverableKeyStoreDb.getUserSerialNumbers().get(userId));
     }
 
+    @Test
+    public void setPlatformKeyGenerationId_invalidatesExistingKeysForUser() {
+        int userId = 42;
+        int generationId = 110;
+        int uid = 1009;
+        int status = 120;
+        String alias = "test";
+        byte[] nonce = getUtf8Bytes("nonce");
+        byte[] keyMaterial = getUtf8Bytes("keymaterial");
+        byte[] keyMetadata = null;
+
+        WrappedKey wrappedKey =
+                new WrappedKey(nonce, keyMaterial, keyMetadata, generationId, status);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
+
+        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
+        assertThat(retrievedKey.getRecoveryStatus()).isEqualTo(status);
+
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId + 1);
+
+        retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
+        assertThat(retrievedKey.getRecoveryStatus())
+                .isEqualTo(RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE);
+    }
+
 
     @Test
     public void removeUserFromAllTables_removesData() throws Exception {
@@ -439,7 +464,7 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
-    public void testInvalidateKeysWithOldGenerationId_withSingleKey() {
+    public void testInvalidateKeysForUser_withSingleKey() {
         int userId = 12;
         int uid = 1009;
         int generationId = 6;
@@ -458,7 +483,7 @@ public class RecoverableKeyStoreDbTest {
         assertThat(retrievedKey.getRecoveryStatus()).isEqualTo(status);
 
         mRecoverableKeyStoreDb.setRecoveryStatus(uid, alias, status2);
-        mRecoverableKeyStoreDb.invalidateKeysWithOldGenerationId(userId, generationId + 1);
+        mRecoverableKeyStoreDb.invalidateKeysForUser(userId);
 
         retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
         assertThat(retrievedKey.getRecoveryStatus())
