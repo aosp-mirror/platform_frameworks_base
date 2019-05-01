@@ -24,7 +24,6 @@ import static android.app.StatusBarManager.windowStateToString;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
-import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
@@ -194,12 +193,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
             // Hide the notifications panel when quick step starts
             mStatusBar.collapsePanel(true /* animate */);
-        }
-
-        @Override
-        public void onInteractionFlagsChanged(@InteractionType int flags) {
-            mNavigationBarView.updateStates();
-            updateScreenPinningGestures();
         }
 
         @Override

@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 
@@ -637,10 +636,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // as they are used for exiting.
         final boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         if (mOverviewProxyService.isEnabled()) {
-            // Use interaction flags to show/hide navigation buttons but will be shown if required
-            // to exit screen pinning.
-            final int flags = mOverviewProxyService.getInteractionFlags();
-            disableRecent |= (flags & FLAG_SHOW_OVERVIEW_BUTTON) == 0;
             if (pinningActive) {
                 disableBack = disableHome = false;
             }
