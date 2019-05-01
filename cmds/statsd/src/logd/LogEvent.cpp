@@ -678,7 +678,8 @@ void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {
     writeFieldValueTreeToStream(mTagId, getValues(), &protoOutput);
 }
 
-void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::vector<uint8_t>* protoOut) {
+void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds,
+                               std::vector<uint8_t>* protoOut) {
     ProtoOutputStream proto;
     for (const auto& expId : experimentIds) {
         proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
