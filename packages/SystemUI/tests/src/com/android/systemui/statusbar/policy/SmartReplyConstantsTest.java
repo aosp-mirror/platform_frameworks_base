@@ -229,8 +229,7 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     }
 
     private void triggerConstantsOnChange() {
-        mConstants.onDeviceConfigPropertyChanged(DeviceConfig.NAMESPACE_SYSTEMUI,
-                "" /* name */, "" /* value */);
+        mConstants.onDeviceConfigPropertiesChanged(DeviceConfig.NAMESPACE_SYSTEMUI);
     }
 
     private void resetAllDeviceConfigFlags() {

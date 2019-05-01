@@ -102,10 +102,10 @@ final class AssistantSettings extends ContentObserver {
     }
 
     private void registerDeviceConfigs() {
-        DeviceConfig.addOnPropertyChangedListener(
+        DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 this::postToHandler,
-                this::onDeviceConfigPropertyChanged);
+                (properties) -> onDeviceConfigPropertiesChanged(properties.getNamespace()));
 
         // Update the fields in this class from the current state of the device config.
         updateFromDeviceConfigFlags();
@@ -116,10 +116,10 @@ final class AssistantSettings extends ContentObserver {
     }
 
     @VisibleForTesting
-    void onDeviceConfigPropertyChanged(String namespace, String name, String value) {
+    void onDeviceConfigPropertiesChanged(String namespace) {
         if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
             Log.e(LOG_TAG, "Received update from DeviceConfig for unrelated namespace: "
-                    + namespace + " " + name + "=" + value);
+                    + namespace);
             return;
         }
 
