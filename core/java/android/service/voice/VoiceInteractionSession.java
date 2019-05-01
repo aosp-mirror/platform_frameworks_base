@@ -1995,7 +1995,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         }
 
         /**
-         * @return the index of the activity that this state is for.
+         * @return the index of the activity that this state is for or -1
+         *     if there was no assist data captured.
          */
         public @IntRange(from = -1) int getIndex() {
             return mIndex;
@@ -2048,7 +2049,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
     }
 
     /**
-     * Represents the id of an assist source activity.
+     * Represents the id of an assist source activity. You can use
+     * {@link #equals(Object)} to compare instances of this class.
      */
     public static class ActivityId {
         private final int mTaskId;
