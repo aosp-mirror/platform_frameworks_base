@@ -3296,7 +3296,10 @@ message BinaryPushStateChanged {
         INSTALL_STAGED_NOT_READY = 3;
         INSTALL_STAGED_READY = 4;
         INSTALL_SUCCESS = 5;
-        INSTALL_FAILURE = 6;
+        // Replaced by INSTALL_FAILURE_DOWNLOAD, INSTALL_FAILURE_STATE_MISMATCH,
+        // and INSTALL_FAILURE_COMMIT.
+        INSTALL_FAILURE = 6  [deprecated = true];
+        // This enum is for installs that are manually cancelled via the Manual Update UI.
         INSTALL_CANCELLED = 7;
         INSTALLER_ROLLBACK_REQUESTED = 8;
         INSTALLER_ROLLBACK_INITIATED = 9;
@@ -3313,6 +3316,9 @@ message BinaryPushStateChanged {
         INSTALL_STAGED_CANCEL_REQUESTED = 20;
         INSTALL_STAGED_CANCEL_SUCCESS = 21;
         INSTALL_STAGED_CANCEL_FAILURE = 22;
+        INSTALL_FAILURE_DOWNLOAD = 23;
+        INSTALL_FAILURE_STATE_MISMATCH = 24;
+        INSTALL_FAILURE_COMMIT = 25;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
@@ -5863,7 +5869,10 @@ message TrainInfo {
         INSTALL_STAGED_NOT_READY = 3;
         INSTALL_STAGED_READY = 4;
         INSTALL_SUCCESS = 5;
-        INSTALL_FAILURE = 6;
+        // Replaced by INSTALL_FAILURE_DOWNLOAD, INSTALL_FAILURE_STATE_MISMATCH,
+        // and INSTALL_FAILURE_COMMIT.
+        INSTALL_FAILURE = 6  [deprecated = true];
+        // This enum is for installs that are manually cancelled via the Manual Update UI.
         INSTALL_CANCELLED = 7;
         INSTALLER_ROLLBACK_REQUESTED = 8;
         INSTALLER_ROLLBACK_INITIATED = 9;
@@ -5880,6 +5889,9 @@ message TrainInfo {
         INSTALL_STAGED_CANCEL_REQUESTED = 20;
         INSTALL_STAGED_CANCEL_SUCCESS = 21;
         INSTALL_STAGED_CANCEL_FAILURE = 22;
+        INSTALL_FAILURE_DOWNLOAD = 23;
+        INSTALL_FAILURE_STATE_MISMATCH = 24;
+        INSTALL_FAILURE_COMMIT = 25;
     }
     optional Status status = 4;
 }
