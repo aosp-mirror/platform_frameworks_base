@@ -175,9 +175,11 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          * @param fullscreenStackBounds The current bounds of the fullscreen stack, in screen
          *                              coordinates.
          * @param dockedStackBounds The current bounds of the docked stack, in screen coordinates.
+         * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
          */
         default void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-                int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+                int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+                boolean navbarColorManagedByIme) {
         }
 
         /**
@@ -459,7 +461,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
     @Override
     public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         synchronized (mLock) {
             // Don't coalesce these, since it might have one time flags set such as
             // STATUS_BAR_UNHIDE which might get lost.
@@ -469,6 +472,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
             args.argi3 = fullscreenStackVis;
             args.argi4 = dockedStackVis;
             args.argi5 = mask;
+            args.argi6 = navbarColorManagedByIme ? 1 : 0;
             args.arg1 = fullscreenStackBounds;
             args.arg2 = dockedStackBounds;
             mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, args).sendToTarget();
@@ -879,7 +883,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     args = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).setSystemUiVisibility(args.argi1, args.argi2, args.argi3,
-                                args.argi4, args.argi5, (Rect) args.arg1, (Rect) args.arg2);
+                                args.argi4, args.argi5, (Rect) args.arg1, (Rect) args.arg2,
+                                args.argi6 == 1);
                     }
                     args.recycle();
                     break;
