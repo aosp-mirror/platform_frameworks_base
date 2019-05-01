@@ -102,7 +102,8 @@ public class AgingHelperTest {
     public void testNoSnoozingOnPost() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         StatusBarNotification sbn = generateSbn(channel.getId());
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
 
 
         mAgingHelper.onNotificationPosted(entry);
@@ -113,7 +114,8 @@ public class AgingHelperTest {
     public void testPostResetsSnooze() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         StatusBarNotification sbn = generateSbn(channel.getId());
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
 
 
         mAgingHelper.onNotificationPosted(entry);
@@ -124,7 +126,8 @@ public class AgingHelperTest {
     public void testSnoozingOnSeen() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         StatusBarNotification sbn = generateSbn(channel.getId());
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
         entry.setSeen();
         when(mCategorizer.getCategory(entry)).thenReturn(NotificationCategorizer.CATEGORY_PEOPLE);
 
@@ -137,7 +140,8 @@ public class AgingHelperTest {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         channel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = generateSbn(channel.getId());
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
         when(mCategorizer.getCategory(entry)).thenReturn(NotificationCategorizer.CATEGORY_PEOPLE);
 
         mAgingHelper.onNotificationSeen(entry);

@@ -468,8 +468,10 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
     @Test
     public void testAssistantNeverIncreasesImportanceWhenSuggestingSilent() throws Exception {
         StatusBarNotification sbn = generateSbn(PKG1, UID1, P1C3, "min notif!", null);
-        Adjustment adjust = mAssistant.createEnqueuedNotificationAdjustment(new NotificationEntry(
-                mPackageManager, sbn, P1C3, mSmsHelper), new ArrayList<>(), new ArrayList<>());
+        Adjustment adjust = mAssistant.createEnqueuedNotificationAdjustment(
+                new NotificationEntry(mContext, mPackageManager, sbn, P1C3, mSmsHelper),
+                new ArrayList<>(),
+                new ArrayList<>());
         assertEquals(IMPORTANCE_MIN, adjust.getSignals().getInt(Adjustment.KEY_IMPORTANCE));
     }
 }
