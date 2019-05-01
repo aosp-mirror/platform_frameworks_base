@@ -24,6 +24,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
+import android.app.admin.DevicePolicyEventLogger;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -69,6 +71,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         verifyCallingPackage(callingPackage);
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CROSS_PROFILE_APPS_GET_TARGET_USER_PROFILES)
+                .setStrings(new String[] {callingPackage})
+                .write();
+
         return getTargetUserProfilesUnchecked(
                 callingPackage, mInjector.getCallingUserId());
     }
@@ -84,6 +91,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         Preconditions.checkNotNull(component);
 
         verifyCallingPackage(callingPackage);
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CROSS_PROFILE_APPS_START_ACTIVITY_AS_USER)
+                .setStrings(new String[] {callingPackage})
+                .write();
 
         final int callerUserId = mInjector.getCallingUserId();
         final int callingUid = mInjector.getCallingUid();
