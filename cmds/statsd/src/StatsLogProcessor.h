@@ -89,11 +89,11 @@ public:
     void WriteDataToDisk(const DumpReportReason dumpReportReason,
                          const DumpLatency dumpLatency);
 
-    /* Persist metric activation status onto disk. */
-    void WriteMetricsActivationToDisk(int64_t currentTimeNs);
+    /* Persist configs containing metrics with active activations to disk. */
+    void SaveActiveConfigsToDisk(int64_t currentTimeNs);
 
-    /* Load metric activation status from disk. */
-    void LoadMetricsActivationFromDisk();
+    /* Load configs containing metrics with active activations from disk. */
+    void LoadActiveConfigsFromDisk();
 
     // Reset all configs.
     void resetConfigs();
@@ -221,6 +221,9 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
+    FRIEND_TEST(StatsLogProcessorTest,
+            TestActivationOnBootMultipleActivationsDifferentActivationTypes);
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2);

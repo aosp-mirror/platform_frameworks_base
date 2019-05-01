@@ -54,6 +54,11 @@ const int FIELD_ID_ANNOTATIONS = 7;
 const int FIELD_ID_ANNOTATIONS_INT64 = 1;
 const int FIELD_ID_ANNOTATIONS_INT32 = 2;
 
+// for ActiveConfig
+const int FIELD_ID_ACTIVE_CONFIG_ID = 1;
+const int FIELD_ID_ACTIVE_CONFIG_UID = 2;
+const int FIELD_ID_ACTIVE_CONFIG_METRIC = 3;
+
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const int64_t timeBaseNs, const int64_t currentTimeNs,
                                const sp<UidMap>& uidMap,
@@ -503,24 +508,40 @@ size_t MetricsManager::byteSize() {
     return totalSize;
 }
 
-void MetricsManager::setActiveMetrics(ActiveConfig config, int64_t currentTimeNs) {
-    if (config.active_metric_size() == 0) {
+void MetricsManager::loadActiveConfig(const ActiveConfig& config, int64_t currentTimeNs) {
+    if (config.metric_size() == 0) {
         ALOGW("No active metric for config %s", mConfigKey.ToString().c_str());
         return;
     }
 
-    for (int i = 0; i < config.active_metric_size(); i++) {
-        for (int metric : mMetricIndexesWithActivation) {
-            if (mAllMetricProducers[metric]->getMetricId() == config.active_metric(i).metric_id()) {
-                VLOG("Setting active metric: %lld",
-                     (long long)mAllMetricProducers[metric]->getMetricId());
-                mAllMetricProducers[metric]->setActive(
-                        currentTimeNs, config.active_metric(i).time_to_live_nanos());
-                mIsActive = true;
+    for (int i = 0; i < config.metric_size(); i++) {
+        const auto& activeMetric = config.metric(i);
+        for (int metricIndex : mMetricIndexesWithActivation) {
+            const auto& metric = mAllMetricProducers[metricIndex];
+            if (metric->getMetricId() == activeMetric.id()) {
+                VLOG("Setting active metric: %lld", (long long)metric->getMetricId());
+                metric->loadActiveMetric(activeMetric, currentTimeNs);
+                mIsActive |= metric->isActive();
             }
         }
     }
 }
+
+void MetricsManager::writeActiveConfigToProtoOutputStream(
+        int64_t currentTimeNs, ProtoOutputStream* proto) {
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_CONFIG_ID, (long long)mConfigKey.GetId());
+    proto->write(FIELD_TYPE_INT32 | FIELD_ID_ACTIVE_CONFIG_UID, mConfigKey.GetUid());
+    for (int metricIndex : mMetricIndexesWithActivation) {
+        const auto& metric = mAllMetricProducers[metricIndex];
+        const uint64_t metricToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                FIELD_ID_ACTIVE_CONFIG_METRIC);
+        metric->writeActiveMetricToProtoOutputStream(currentTimeNs, proto);
+        proto->end(metricToken);
+    }
+}
+
+
+
 
 }  // namespace statsd
 }  // namespace os

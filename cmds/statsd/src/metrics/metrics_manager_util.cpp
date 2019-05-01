@@ -727,7 +727,6 @@ bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
             return false;
         }
         const sp<MetricProducer>& metric = allMetricProducers[metricTrackerIndex];
-        metric->setActivationType(metric_activation.activation_type());
         metricsWithActivation.push_back(metricTrackerIndex);
         for (int j = 0; j < metric_activation.event_activation_size(); ++j) {
             const EventActivation& activation = metric_activation.event_activation(j);
@@ -740,6 +739,13 @@ bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
             activationAtomTrackerToMetricMap[atomMatcherIndex].push_back(
                 metricTrackerIndex);
 
+            ActivationType activationType;
+            if (activation.has_activation_type()) {
+                activationType = activation.activation_type();
+            } else {
+                activationType = metric_activation.activation_type();
+            }
+
             if (activation.has_deactivation_atom_matcher_id()) {
                 auto deactivationAtomMatcherIt =
                         logEventTrackerMap.find(activation.deactivation_atom_matcher_id());
@@ -750,10 +756,10 @@ bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
                 const int deactivationMatcherIndex = deactivationAtomMatcherIt->second;
                 deactivationAtomTrackerToMetricMap[deactivationMatcherIndex]
                         .push_back(metricTrackerIndex);
-                metric->addActivation(atomMatcherIndex, activation.ttl_seconds(),
+                metric->addActivation(atomMatcherIndex, activationType, activation.ttl_seconds(),
                                       deactivationMatcherIndex);
             } else {
-                metric->addActivation(atomMatcherIndex, activation.ttl_seconds());
+                metric->addActivation(atomMatcherIndex, activationType, activation.ttl_seconds());
             }
         }
     }
