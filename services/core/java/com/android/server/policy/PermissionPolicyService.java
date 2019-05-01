@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManagerInternal;
 import android.provider.Telephony;
+import android.telecom.TelecomManager;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -497,6 +498,7 @@ public final class PermissionPolicyService extends SystemService {
                 return false;
             }
             switch (action) {
+                case TelecomManager.ACTION_CHANGE_DEFAULT_DIALER:
                 case Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT: {
                     ApplicationInfo applicationInfo;
                     try {
