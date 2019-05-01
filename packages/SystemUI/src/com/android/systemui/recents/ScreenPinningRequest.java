@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents;
 
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
@@ -139,7 +138,6 @@ public class ScreenPinningRequest implements View.OnClickListener,
         if (v.getId() == R.id.screen_pinning_ok_button || mRequestWindow == v) {
             try {
                 ActivityTaskManager.getService().startSystemLockTaskMode(taskId);
-                mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING, true);
             } catch (RemoteException e) {}
         }
         clearPrompt();
