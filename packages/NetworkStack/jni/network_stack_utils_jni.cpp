@@ -31,7 +31,7 @@
 #include <string>
 
 #include <nativehelper/JNIHelp.h>
-#include <utils/Log.h>
+#include <android/log.h>
 
 namespace android {
 constexpr const char NETWORKSTACKUTILS_PKG_NAME[] = "android/net/util/NetworkStackUtils";
@@ -249,7 +249,7 @@ static const JNINativeMethod gNetworkStackUtilsMethods[] = {
 extern "C" jint JNI_OnLoad(JavaVM* vm, void*) {
     JNIEnv *env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        ALOGE("ERROR: GetEnv failed");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "ERROR: GetEnv failed");
         return JNI_ERR;
     }
 
