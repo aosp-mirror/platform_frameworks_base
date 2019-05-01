@@ -891,7 +891,31 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWillBeRemovedReturnsFalseBeforeBind() throws Exception {
+    public void testCloseControls_withoutHittingApply() throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                (Runnable saveImportance, StatusBarNotification sbn) -> {
+                    saveImportance.run();
+                }, null, null, true, false, IMPORTANCE_LOW, false
+        );
+
+        mNotificationInfo.findViewById(R.id.alert).performClick();
+
+        assertFalse(mNotificationInfo.shouldBeSaved());
+    }
+
+    @Test
+    public void testWillBeRemovedReturnsFalse() throws Exception {
+        assertFalse(mNotificationInfo.willBeRemoved());
+
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn,
+                (Runnable saveImportance, StatusBarNotification sbn) -> {
+                    saveImportance.run();
+                }, null, null, true, false, IMPORTANCE_LOW, false
+        );
+
         assertFalse(mNotificationInfo.willBeRemoved());
     }
 }
