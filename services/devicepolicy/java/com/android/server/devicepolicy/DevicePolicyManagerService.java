@@ -242,6 +242,7 @@ import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
@@ -1667,111 +1668,115 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             info = deviceAdminInfo;
         }
 
-        void dump(String prefix, PrintWriter pw) {
-            pw.print(prefix); pw.print("uid="); pw.println(getUid());
-            pw.print(prefix); pw.print("testOnlyAdmin=");
+        void dump(IndentingPrintWriter pw) {
+            pw.print("uid="); pw.println(getUid());
+            pw.print("testOnlyAdmin=");
             pw.println(testOnlyAdmin);
-            pw.print(prefix); pw.println("policies:");
+            pw.println("policies:");
             ArrayList<DeviceAdminInfo.PolicyInfo> pols = info.getUsedPolicies();
             if (pols != null) {
+                pw.increaseIndent();
                 for (int i=0; i<pols.size(); i++) {
-                    pw.print(prefix); pw.print("  "); pw.println(pols.get(i).tag);
+                    pw.println(pols.get(i).tag);
                 }
+                pw.decreaseIndent();
             }
-            pw.print(prefix); pw.print("passwordQuality=0x");
+            pw.print("passwordQuality=0x");
                     pw.println(Integer.toHexString(minimumPasswordMetrics.quality));
-            pw.print(prefix); pw.print("minimumPasswordLength=");
+            pw.print("minimumPasswordLength=");
                     pw.println(minimumPasswordMetrics.length);
-            pw.print(prefix); pw.print("passwordHistoryLength=");
+            pw.print("passwordHistoryLength=");
                     pw.println(passwordHistoryLength);
-            pw.print(prefix); pw.print("minimumPasswordUpperCase=");
+            pw.print("minimumPasswordUpperCase=");
                     pw.println(minimumPasswordMetrics.upperCase);
-            pw.print(prefix); pw.print("minimumPasswordLowerCase=");
+            pw.print("minimumPasswordLowerCase=");
                     pw.println(minimumPasswordMetrics.lowerCase);
-            pw.print(prefix); pw.print("minimumPasswordLetters=");
+            pw.print("minimumPasswordLetters=");
                     pw.println(minimumPasswordMetrics.letters);
-            pw.print(prefix); pw.print("minimumPasswordNumeric=");
+            pw.print("minimumPasswordNumeric=");
                     pw.println(minimumPasswordMetrics.numeric);
-            pw.print(prefix); pw.print("minimumPasswordSymbols=");
+            pw.print("minimumPasswordSymbols=");
                     pw.println(minimumPasswordMetrics.symbols);
-            pw.print(prefix); pw.print("minimumPasswordNonLetter=");
+            pw.print("minimumPasswordNonLetter=");
                     pw.println(minimumPasswordMetrics.nonLetter);
-            pw.print(prefix); pw.print("maximumTimeToUnlock=");
+            pw.print("maximumTimeToUnlock=");
                     pw.println(maximumTimeToUnlock);
-            pw.print(prefix); pw.print("strongAuthUnlockTimeout=");
+            pw.print("strongAuthUnlockTimeout=");
                     pw.println(strongAuthUnlockTimeout);
-            pw.print(prefix); pw.print("maximumFailedPasswordsForWipe=");
+            pw.print("maximumFailedPasswordsForWipe=");
                     pw.println(maximumFailedPasswordsForWipe);
-            pw.print(prefix); pw.print("specifiesGlobalProxy=");
+            pw.print("specifiesGlobalProxy=");
                     pw.println(specifiesGlobalProxy);
-            pw.print(prefix); pw.print("passwordExpirationTimeout=");
+            pw.print("passwordExpirationTimeout=");
                     pw.println(passwordExpirationTimeout);
-            pw.print(prefix); pw.print("passwordExpirationDate=");
+            pw.print("passwordExpirationDate=");
                     pw.println(passwordExpirationDate);
             if (globalProxySpec != null) {
-                pw.print(prefix); pw.print("globalProxySpec=");
+                pw.print("globalProxySpec=");
                         pw.println(globalProxySpec);
             }
             if (globalProxyExclusionList != null) {
-                pw.print(prefix); pw.print("globalProxyEclusionList=");
+                pw.print("globalProxyEclusionList=");
                         pw.println(globalProxyExclusionList);
             }
-            pw.print(prefix); pw.print("encryptionRequested=");
+            pw.print("encryptionRequested=");
                     pw.println(encryptionRequested);
-            pw.print(prefix); pw.print("disableCamera=");
+            pw.print("disableCamera=");
                     pw.println(disableCamera);
-            pw.print(prefix); pw.print("disableCallerId=");
+            pw.print("disableCallerId=");
                     pw.println(disableCallerId);
-            pw.print(prefix); pw.print("disableContactsSearch=");
+            pw.print("disableContactsSearch=");
                     pw.println(disableContactsSearch);
-            pw.print(prefix); pw.print("disableBluetoothContactSharing=");
+            pw.print("disableBluetoothContactSharing=");
                     pw.println(disableBluetoothContactSharing);
-            pw.print(prefix); pw.print("disableScreenCapture=");
+            pw.print("disableScreenCapture=");
                     pw.println(disableScreenCapture);
-            pw.print(prefix); pw.print("requireAutoTime=");
+            pw.print("requireAutoTime=");
                     pw.println(requireAutoTime);
-            pw.print(prefix); pw.print("forceEphemeralUsers=");
+            pw.print("forceEphemeralUsers=");
                     pw.println(forceEphemeralUsers);
-            pw.print(prefix); pw.print("isNetworkLoggingEnabled=");
+            pw.print("isNetworkLoggingEnabled=");
                     pw.println(isNetworkLoggingEnabled);
-            pw.print(prefix); pw.print("disabledKeyguardFeatures=");
+            pw.print("disabledKeyguardFeatures=");
                     pw.println(disabledKeyguardFeatures);
-            pw.print(prefix); pw.print("crossProfileWidgetProviders=");
+            pw.print("crossProfileWidgetProviders=");
                     pw.println(crossProfileWidgetProviders);
             if (permittedAccessiblityServices != null) {
-                pw.print(prefix); pw.print("permittedAccessibilityServices=");
+                pw.print("permittedAccessibilityServices=");
                     pw.println(permittedAccessiblityServices);
             }
             if (permittedInputMethods != null) {
-                pw.print(prefix); pw.print("permittedInputMethods=");
+                pw.print("permittedInputMethods=");
                     pw.println(permittedInputMethods);
             }
             if (permittedNotificationListeners != null) {
-                pw.print(prefix); pw.print("permittedNotificationListeners=");
+                pw.print("permittedNotificationListeners=");
                 pw.println(permittedNotificationListeners);
             }
             if (keepUninstalledPackages != null) {
-                pw.print(prefix); pw.print("keepUninstalledPackages=");
+                pw.print("keepUninstalledPackages=");
                     pw.println(keepUninstalledPackages);
             }
-            pw.print(prefix); pw.print("organizationColor=");
+            pw.print("organizationColor=");
                     pw.println(organizationColor);
             if (organizationName != null) {
-                pw.print(prefix); pw.print("organizationName=");
+                pw.print("organizationName=");
                     pw.println(organizationName);
             }
-            pw.print(prefix); pw.println("userRestrictions:");
-            UserRestrictionsUtils.dumpRestrictions(pw, prefix + "  ", userRestrictions);
-            pw.print(prefix); pw.print("defaultEnabledRestrictionsAlreadySet=");
+            pw.println("userRestrictions:");
+            UserRestrictionsUtils.dumpRestrictions(pw, "  ", userRestrictions);
+            pw.print("defaultEnabledRestrictionsAlreadySet=");
                     pw.println(defaultEnabledRestrictionsAlreadySet);
-            pw.print(prefix); pw.print("isParent=");
+            pw.print("isParent=");
                     pw.println(isParent);
             if (parentAdmin != null) {
-                pw.print(prefix);  pw.println("parentAdmin:");
-                parentAdmin.dump(prefix + "  ", pw);
+                pw.println("parentAdmin:");
+                pw.increaseIndent();
+                parentAdmin.dump(pw);
+                pw.decreaseIndent();
             }
             if (mCrossProfileCalendarPackages != null) {
-                pw.print(prefix); pw.print("mCrossProfileCalendarPackages=");
+                pw.print("mCrossProfileCalendarPackages=");
                 pw.println(mCrossProfileCalendarPackages);
             }
         }
@@ -8843,46 +8848,62 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void dumpDevicePolicyData(IndentingPrintWriter pw) {
+        int userCount = mUserData.size();
+        for (int u = 0; u < userCount; u++) {
+            DevicePolicyData policy = getUserData(mUserData.keyAt(u));
+            pw.println();
+            pw.println("Enabled Device Admins (User " + policy.mUserHandle
+                    + ", provisioningState: " + policy.mUserProvisioningState + "):");
+            final int n = policy.mAdminList.size();
+            for (int i = 0; i < n; i++) {
+                ActiveAdmin ap = policy.mAdminList.get(i);
+                if (ap != null) {
+                    pw.increaseIndent();
+                    pw.print(ap.info.getComponent().flattenToShortString());
+                    pw.println(":");
+                    pw.increaseIndent();
+                    ap.dump(pw);
+                    pw.decreaseIndent();
+                    pw.decreaseIndent();
+                }
+            }
+            if (!policy.mRemovingAdmins.isEmpty()) {
+                pw.increaseIndent();
+                pw.println("Removing Device Admins (User " + policy.mUserHandle + "): "
+                        + policy.mRemovingAdmins);
+                pw.decreaseIndent();
+            }
+            pw.println();
+            pw.increaseIndent();
+            pw.print("mPasswordOwner="); pw.println(policy.mPasswordOwner);
+            pw.decreaseIndent();
+        }
+    }
+
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
+    protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, printWriter)) return;
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
 
         synchronized (getLockObject()) {
             pw.println("Current Device Policy Manager state:");
+            pw.increaseIndent();
 
-            mOwners.dump("  ", pw);
-            mDeviceAdminServiceController.dump("  ", pw);
-            int userCount = mUserData.size();
-            for (int u = 0; u < userCount; u++) {
-                DevicePolicyData policy = getUserData(mUserData.keyAt(u));
-                pw.println();
-                pw.println("  Enabled Device Admins (User " + policy.mUserHandle
-                        + ", provisioningState: " + policy.mUserProvisioningState + "):");
-                final int N = policy.mAdminList.size();
-                for (int i=0; i<N; i++) {
-                    ActiveAdmin ap = policy.mAdminList.get(i);
-                    if (ap != null) {
-                        pw.print("    "); pw.print(ap.info.getComponent().flattenToShortString());
-                                pw.println(":");
-                        ap.dump("      ", pw);
-                    }
-                }
-                if (!policy.mRemovingAdmins.isEmpty()) {
-                    pw.println("    Removing Device Admins (User " + policy.mUserHandle + "): "
-                            + policy.mRemovingAdmins);
-                }
+            mOwners.dump(pw);
+            pw.println();
+            mDeviceAdminServiceController.dump(pw);
+            pw.println();
+            dumpDevicePolicyData(pw);
+            pw.println();
+            mConstants.dump(pw);
+            pw.println();
+            mStatLogger.dump(pw);
+            pw.println();
 
-                pw.println(" ");
-                pw.print("    mPasswordOwner="); pw.println(policy.mPasswordOwner);
-            }
+            pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
             pw.println();
-            mConstants.dump("  ", pw);
-            pw.println();
-            mStatLogger.dump(pw, "  ");
-            pw.println();
-            pw.println("  Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
-            pw.println();
-            mPolicyCache.dump("  ", pw);
+            mPolicyCache.dump(pw);
         }
     }
 

@@ -22,8 +22,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-
-import java.io.PrintWriter;
+import com.android.internal.util.IndentingPrintWriter;
 
 /**
  * Implementation of {@link DevicePolicyCache}, to which {@link DevicePolicyManagerService} pushes
@@ -80,9 +79,11 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     /** Dump content */
-    public void dump(String prefix, PrintWriter pw) {
-        pw.println("Device policy cache");
-        pw.println(prefix + "Screen capture disabled: " + mScreenCaptureDisabled.toString());
-        pw.println(prefix + "Password quality: " + mPasswordQuality.toString());
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("Device policy cache:");
+        pw.increaseIndent();
+        pw.println("Screen capture disabled: " + mScreenCaptureDisabled.toString());
+        pw.println("Password quality: " + mPasswordQuality.toString());
+        pw.decreaseIndent();
     }
 }
