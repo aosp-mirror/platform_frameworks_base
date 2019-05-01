@@ -37,7 +37,7 @@ public class ContextualButtonGroup extends ButtonDispatcher {
     /**
      * Add a contextual button to the group. The order of adding increases in its priority. The
      * priority is used to determine which button should be visible when setting multiple button's
-     * visibility {@see setButtonVisiblity}.
+     * visibility {@see setButtonVisibility}.
      * @param button the button added to the group
      */
     public void addButton(@NonNull ContextualButton button) {
@@ -71,7 +71,7 @@ public class ContextualButtonGroup extends ButtonDispatcher {
      * @return if the button is visible after operation
      * @throws RuntimeException if the input id does not match any of the ids in the group
      */
-    public int setButtonVisiblity(@IdRes int buttonResId, boolean visible) {
+    public int setButtonVisibility(@IdRes int buttonResId, boolean visible) {
         final int index = getContextButtonIndex(buttonResId);
         if (index == INVALID_INDEX) {
             throw new RuntimeException("Cannot find the button id of " + buttonResId
