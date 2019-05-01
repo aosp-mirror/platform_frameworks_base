@@ -56,15 +56,24 @@ cc_library_shared {
     srcs: [
         "jni/network_stack_utils_jni.cpp"
     ],
-
+    sdk_version: "current",
     shared_libs: [
         "liblog",
-        "libcutils",
-        "libnativehelper",
+        "libnativehelper_compat_libc++",
     ],
-    static_libs: [
-        "libpcap",
-    ],
+
+    // We cannot use plain "libc++" here to link libc++ dynamically because it results in:
+    //   java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found
+    // even if "libc++" is added into jni_libs below. Adding "libc++_shared" into jni_libs doesn't
+    // build because soong complains of:
+    //   module NetworkStack missing dependencies: libc++_shared
+    //
+    // So, link libc++ statically. This means that we also need to ensure that all the C++ libraries
+    // we depend on do not dynamically link libc++. This is currently the case, because liblog is
+    // C-only and libnativehelper_compat_libc also uses stl: "c++_static".
+    //
+    // TODO: find a better solution for this in R.
+    stl: "c++_static",
     cflags: [
         "-Wall",
         "-Werror",
@@ -79,7 +88,10 @@ java_defaults {
     static_libs: [
         "NetworkStackBase",
     ],
-    jni_libs: ["libnetworkstackutilsjni"],
+    jni_libs: [
+        "libnativehelper_compat_libc++",
+        "libnetworkstackutilsjni",
+    ],
     // Resources already included in NetworkStackBase
     resource_dirs: [],
     jarjar_rules: "jarjar-rules-shared.txt",
