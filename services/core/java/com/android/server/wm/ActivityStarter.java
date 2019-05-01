@@ -1038,6 +1038,12 @@ class ActivityStarter {
                 }
             }
         }
+        // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
+        if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
+            Slog.w(TAG, "Background activity start for " + callingPackage
+                    + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
+            return false;
+        }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
