@@ -57,7 +57,8 @@ public class RegisterStatusBarResultTest {
                 0x80 /* dockedStackSysUiVisibility */,
                 new Binder() /* imeToken */,
                 new Rect(0x100, 0x200, 0x400, 0x800) /* fullscreenStackBounds */,
-                new Rect(0x1000, 0x2000, 0x4000, 0x8000) /* dockedStackBounds */);
+                new Rect(0x1000, 0x2000, 0x4000, 0x8000) /* dockedStackBounds */,
+                true /* navbarColorManagedByIme */);
 
         final RegisterStatusBarResult copy = clone(original);
 
@@ -80,6 +81,7 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeToken).isSameAs(original.mImeToken);
         assertThat(copy.mFullscreenStackBounds).isEqualTo(original.mFullscreenStackBounds);
         assertThat(copy.mDockedStackBounds).isEqualTo(original.mDockedStackBounds);
+        assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
     }
 
     private RegisterStatusBarResult clone(RegisterStatusBarResult original) {
