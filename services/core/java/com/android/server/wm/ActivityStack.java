@@ -5438,7 +5438,7 @@ class ActivityStack extends ConfigurationContainer {
             if (isAttached()) {
                 getDisplay().positionChildAtBottom(this);
             }
-            if (!isActivityTypeHome() || getDisplay().isRemoved()) {
+            if (!isActivityTypeHome() || !isAttached()) {
                 remove();
             }
         }
