@@ -26,6 +26,7 @@ import android.content.rollback.RollbackManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -54,6 +55,8 @@ public class StagedRollbackTest {
             "com.android.tests.rollback.testapex.RollbackTestApexV1.apex";
     private static final String TEST_APEX_V2 =
             "com.android.tests.rollback.testapex.RollbackTestApexV2.apex";
+    private static final String TEST_APEX_V3 =
+            "com.android.tests.rollback.testapex.RollbackTestApexV3.apex";
 
     /**
      * Adopts common shell permissions needed for rollback tests.
@@ -145,26 +148,13 @@ public class StagedRollbackTest {
 
     /**
      * Test rollbacks of staged installs an apk and an apex.
-     * Prepare apex (and apk) phase.
-     */
-    @Test
-    public void testApkAndApexPrepare() throws Exception {
-        RollbackTestUtils.uninstall(TEST_APP_A);
-        assertEquals(-1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
-
-        // Note: can't uninstall the apex. See note in #testApexOnlyPrepareApex().
-        RollbackTestUtils.installStaged(false, TEST_APP_A_V1, TEST_APEX_V1);
-
-        // At this point, the host test driver will reboot the device and run
-        // testApkAndApexEnableRollback().
-    }
-
-    /**
-     * Test rollbacks of staged installs an apk and an apex.
      * Enable rollback phase.
      */
     @Test
     public void testApkAndApexEnableRollback() throws Exception {
+        RollbackTestUtils.uninstall(TEST_APP_A);
+        RollbackTestUtils.install(TEST_APP_A_V1, false);
+
         assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
         assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
@@ -225,22 +215,6 @@ public class StagedRollbackTest {
 
     /**
      * Test rollbacks of staged installs involving only apex.
-     * Prepare apex phase.
-     */
-    @Test
-    public void testApexOnlyPrepareApex() throws Exception {
-        // Note: We can't uninstall the apex if it is already on device,
-        // because that isn't supported yet (b/123667725). As long as nothing
-        // is failing, this should be fine because we don't expect the tests
-        // to leave the device with v2 of the apex installed.
-        RollbackTestUtils.installStaged(false, TEST_APEX_V1);
-
-        // At this point, the host test driver will reboot the device and run
-        // testApexOnlyEnableRollback().
-    }
-
-    /**
-     * Test rollbacks of staged installs involving only apex.
      * Enable rollback phase.
      */
     @Test
@@ -290,5 +264,52 @@ public class StagedRollbackTest {
     @Test
     public void testApexOnlyConfirmRollback() throws Exception {
         assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+    }
+
+    /**
+     * Tests that apex update expires existing rollbacks for that apex.
+     * Enable rollback phase.
+     */
+    @Test
+    public void testApexRollbackExpirationEnableRollback() throws Exception {
+        assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+        RollbackTestUtils.installStaged(true, TEST_APEX_V2);
+
+        // At this point, the host test driver will reboot the device and run
+        // testApexRollbackExpirationUpdateApex().
+    }
+
+    /**
+     * Tests that apex update expires existing rollbacks for that apex.
+     * Update apex phase.
+     */
+    @Test
+    public void testApexRollbackExpirationUpdateApex() throws Exception {
+        assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+        RollbackTestUtils.installStaged(false, TEST_APEX_V3);
+
+        // At this point, the host test driver will reboot the device and run
+        // testApexRollbackExpirationConfirmExpiration().
+    }
+
+    /**
+     * Tests that apex update expires existing rollbacks for that apex.
+     * Confirm expiration phase.
+     */
+    @Test
+    public void testApexRollbackExpirationConfirmExpiration() throws Exception {
+        assertEquals(3, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APEX_PKG));
+    }
+
+    /**
+     * Helper function called by the host test to install v1 of the test apex,
+     * assuming the test apex is not installed.
+     */
+    @Test
+    public void installTestApexV1() throws Exception {
+        RollbackTestUtils.installStaged(false, TEST_APEX_V1);
     }
 }
