@@ -181,6 +181,7 @@ public class BubbleClockController implements ClockPlugin {
     @Override
     public void setDarkAmount(float darkAmount) {
         mClockPosition.setDarkAmount(darkAmount);
+        mView.setDarkAmount(darkAmount);
     }
 
     @Override

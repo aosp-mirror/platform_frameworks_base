@@ -189,6 +189,7 @@ public class AnalogClockController implements ClockPlugin {
     @Override
     public void setDarkAmount(float darkAmount) {
         mClockPosition.setDarkAmount(darkAmount);
+        mBigClockView.setDarkAmount(darkAmount);
     }
 
     @Override
