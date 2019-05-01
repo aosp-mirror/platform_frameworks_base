@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_RRO_THEME := DisplayCutoutEmulationWide
-LOCAL_CERTIFICATE := platform
+
 
 LOCAL_PRODUCT_MODULE := true
 
