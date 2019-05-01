@@ -227,8 +227,6 @@ TEST(StatsdStatsTest, TestAtomLog) {
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 1);
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 2);
     stats.noteAtomLogged(android::util::APP_CRASH_OCCURRED, now + 3);
-    // pulled event, should ignore
-    stats.noteAtomLogged(android::util::WIFI_BYTES_TRANSFER, now + 4);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
@@ -251,6 +249,39 @@ TEST(StatsdStatsTest, TestAtomLog) {
 
     EXPECT_TRUE(dropboxAtomGood);
     EXPECT_TRUE(sensorAtomGood);
+}
+
+TEST(StatsdStatsTest, TestNonPlatformAtomLog) {
+    StatsdStats stats;
+    time_t now = time(nullptr);
+    int newAtom1 = android::util::kMaxPushedAtomId + 1;
+    int newAtom2 = android::util::kMaxPushedAtomId + 2;
+
+    stats.noteAtomLogged(newAtom1, now + 1);
+    stats.noteAtomLogged(newAtom1, now + 2);
+    stats.noteAtomLogged(newAtom2, now + 3);
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(2, report.atom_stats_size());
+    bool newAtom1Good = false;
+    bool newAtom2Good = false;
+
+    for (const auto& atomStats : report.atom_stats()) {
+        if (atomStats.tag() == newAtom1 && atomStats.count() == 2) {
+            newAtom1Good = true;
+        }
+        if (atomStats.tag() == newAtom2 && atomStats.count() == 1) {
+            newAtom2Good = true;
+        }
+    }
+
+    EXPECT_TRUE(newAtom1Good);
+    EXPECT_TRUE(newAtom2Good);
 }
 
 TEST(StatsdStatsTest, TestPullAtomStats) {
