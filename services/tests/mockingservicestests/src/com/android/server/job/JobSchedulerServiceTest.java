@@ -183,15 +183,188 @@ public class JobSchedulerServiceTest {
         assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
 
-        advanceElapsedClock(45 * MINUTE_IN_MILLIS); // now + 55 minutes
+        advanceElapsedClock(20 * MINUTE_IN_MILLIS); // now + 30 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(job);
         assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
 
+        advanceElapsedClock(25 * MINUTE_IN_MILLIS); // now + 55 minutes
+
+        rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        // Shifted because it's close to the end of the window.
+        assertEquals(nextWindowStartTime + 5 * MINUTE_IN_MILLIS,
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
         advanceElapsedClock(4 * MINUTE_IN_MILLIS); // now + 59 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        // Shifted because it's close to the end of the window.
+        assertEquals(nextWindowStartTime + 9 * MINUTE_IN_MILLIS,
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+    }
+
+    /**
+     * Confirm that {@link JobSchedulerService#getRescheduleJobForPeriodic(JobStatus)} returns a job
+     * with an extra delay and correct deadline constraint if the periodic job is completed near the
+     * end of its expected running window.
+     */
+    @Test
+    public void testGetRescheduleJobForPeriodic_closeToEndOfWindow() {
+        JobStatus frequentJob = createJobStatus(
+                "testGetRescheduleJobForPeriodic_closeToEndOfWindow",
+                createJobInfo().setPeriodic(15 * MINUTE_IN_MILLIS));
+        long now = sElapsedRealtimeClock.millis();
+        long nextWindowStartTime = now + 15 * MINUTE_IN_MILLIS;
+        long nextWindowEndTime = now + 30 * MINUTE_IN_MILLIS;
+
+        // At the beginning of the window. Next window should be unaffected.
+        JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(frequentJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Halfway through window. Next window should be unaffected.
+        advanceElapsedClock((long) (7.5 * MINUTE_IN_MILLIS));
+        rescheduledJob = mService.getRescheduleJobForPeriodic(frequentJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // In last 1/6 of window. Next window start time should be shifted slightly.
+        advanceElapsedClock(6 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(frequentJob);
+        assertEquals(nextWindowStartTime + MINUTE_IN_MILLIS,
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        JobStatus mediumJob = createJobStatus("testGetRescheduleJobForPeriodic_closeToEndOfWindow",
+                createJobInfo().setPeriodic(HOUR_IN_MILLIS));
+        now = sElapsedRealtimeClock.millis();
+        nextWindowStartTime = now + HOUR_IN_MILLIS;
+        nextWindowEndTime = now + 2 * HOUR_IN_MILLIS;
+
+        // At the beginning of the window. Next window should be unaffected.
+        rescheduledJob = mService.getRescheduleJobForPeriodic(mediumJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Halfway through window. Next window should be unaffected.
+        advanceElapsedClock(30 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(mediumJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // At the edge 1/6 of window. Next window should be unaffected.
+        advanceElapsedClock(20 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(mediumJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // In last 1/6 of window. Next window start time should be shifted slightly.
+        advanceElapsedClock(6 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(mediumJob);
+        assertEquals(nextWindowStartTime + (6 * MINUTE_IN_MILLIS),
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        JobStatus longJob = createJobStatus("testGetRescheduleJobForPeriodic_closeToEndOfWindow",
+                createJobInfo().setPeriodic(6 * HOUR_IN_MILLIS));
+        now = sElapsedRealtimeClock.millis();
+        nextWindowStartTime = now + 6 * HOUR_IN_MILLIS;
+        nextWindowEndTime = now + 12 * HOUR_IN_MILLIS;
+
+        // At the beginning of the window. Next window should be unaffected.
+        rescheduledJob = mService.getRescheduleJobForPeriodic(longJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Halfway through window. Next window should be unaffected.
+        advanceElapsedClock(3 * HOUR_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(longJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // At the edge 1/6 of window. Next window should be unaffected.
+        advanceElapsedClock(2 * HOUR_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(longJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // In last 1/6 of window. Next window should be unaffected since we're over the shift cap.
+        advanceElapsedClock(15 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(longJob);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // In last 1/6 of window. Next window start time should be shifted slightly.
+        advanceElapsedClock(30 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(longJob);
+        assertEquals(nextWindowStartTime + (30 * MINUTE_IN_MILLIS),
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Flex duration close to period duration.
+        JobStatus gameyFlex = createJobStatus("testGetRescheduleJobForPeriodic_closeToEndOfWindow",
+                createJobInfo().setPeriodic(HOUR_IN_MILLIS, 59 * MINUTE_IN_MILLIS));
+        now = sElapsedRealtimeClock.millis();
+        nextWindowStartTime = now + HOUR_IN_MILLIS + MINUTE_IN_MILLIS;
+        nextWindowEndTime = now + 2 * HOUR_IN_MILLIS;
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+
+        // At the beginning of the window. Next window should be unaffected.
+        rescheduledJob = mService.getRescheduleJobForPeriodic(gameyFlex);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Halfway through window. Next window should be unaffected.
+        advanceElapsedClock(29 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(gameyFlex);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // At the edge 1/6 of window. Next window should be unaffected.
+        advanceElapsedClock(20 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(gameyFlex);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // In last 1/6 of window. Next window start time should be shifted slightly.
+        advanceElapsedClock(6 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(gameyFlex);
+        assertEquals(nextWindowStartTime + (5 * MINUTE_IN_MILLIS),
+                rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Very short flex duration compared to period duration.
+        JobStatus superFlex = createJobStatus("testGetRescheduleJobForPeriodic_closeToEndOfWindow",
+                createJobInfo().setPeriodic(HOUR_IN_MILLIS, 10 * MINUTE_IN_MILLIS));
+        now = sElapsedRealtimeClock.millis();
+        nextWindowStartTime = now + HOUR_IN_MILLIS + 50 * MINUTE_IN_MILLIS;
+        nextWindowEndTime = now + 2 * HOUR_IN_MILLIS;
+        advanceElapsedClock(MINUTE_IN_MILLIS);
+
+        // At the beginning of the window. Next window should be unaffected.
+        rescheduledJob = mService.getRescheduleJobForPeriodic(superFlex);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // Halfway through window. Next window should be unaffected.
+        advanceElapsedClock(29 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(superFlex);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // At the edge 1/6 of window. Next window should be unaffected.
+        advanceElapsedClock(20 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(superFlex);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+
+        // In last 1/6 of window. Next window should be unaffected since the flex duration pushes
+        // the next window start time far enough away.
+        advanceElapsedClock(6 * MINUTE_IN_MILLIS);
+        rescheduledJob = mService.getRescheduleJobForPeriodic(superFlex);
         assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
     }
@@ -265,7 +438,9 @@ public class JobSchedulerServiceTest {
         advanceElapsedClock(10 * MINUTE_IN_MILLIS); // now + 55 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
-        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        // Shifted because it's close to the end of the window.
+        assertEquals(nextWindowStartTime + 5 * MINUTE_IN_MILLIS,
+                rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
 
         advanceElapsedClock(2 * MINUTE_IN_MILLIS); // now + 57 minutes
@@ -273,7 +448,9 @@ public class JobSchedulerServiceTest {
         advanceElapsedClock(2 * MINUTE_IN_MILLIS); // now + 59 minutes
 
         rescheduledJob = mService.getRescheduleJobForPeriodic(failedJob);
-        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        // Shifted because it's close to the end of the window.
+        assertEquals(nextWindowStartTime + 9 * MINUTE_IN_MILLIS,
+                rescheduledJob.getEarliestRunTime());
         assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
     }
 
