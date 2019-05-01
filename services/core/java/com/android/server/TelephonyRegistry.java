@@ -66,6 +66,7 @@ import com.android.internal.telephony.PhoneConstantConversions;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
@@ -1164,36 +1165,33 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void notifyCarrierNetworkChange(boolean active) {
-        // only CarrierService with carrier privilege rule should have the permission.
-        int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        try {
-            subId = Arrays.stream(SubscriptionManager.from(mContext)
+        // only CarrierService with carrier privilege rule should have the permission
+        int[] subIds = Arrays.stream(SubscriptionManager.from(mContext)
                     .getActiveSubscriptionIdList())
-                    .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(i))
-                    .findFirst().getAsInt();
-        } catch (NoSuchElementException ex) {
+                    .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(i)).toArray();
+        if (ArrayUtils.isEmpty(subIds)) {
             loge("notifyCarrierNetworkChange without carrier privilege");
-        }
-        // the active subId does not have carrier privilege. 
-        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            // the active subId does not have carrier privilege.
             throw new SecurityException("notifyCarrierNetworkChange without carrier privilege");
-        }
-        int phoneId = SubscriptionManager.getPhoneId(subId);
-
-        if (VDBG) {
-            log("notifyCarrierNetworkChange: active=" + active + "subId: " + subId);
         }
 
         synchronized (mRecords) {
             mCarrierNetworkChangeState = active;
-            for (Record r : mRecords) {
-                if (r.matchPhoneStateListenerEvent(
-                        PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE) &&
-                        idMatch(r.subId, subId, phoneId)) {
-                    try {
-                        r.callback.onCarrierNetworkChange(active);
-                    } catch (RemoteException ex) {
-                        mRemoveList.add(r.binder);
+            for (int subId : subIds) {
+                int phoneId = SubscriptionManager.getPhoneId(subId);
+
+                if (VDBG) {
+                    log("notifyCarrierNetworkChange: active=" + active + "subId: " + subId);
+                }
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE) &&
+                            idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onCarrierNetworkChange(active);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
                     }
                 }
             }

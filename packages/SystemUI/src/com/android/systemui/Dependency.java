@@ -35,6 +35,7 @@ import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -296,6 +297,7 @@ public class Dependency extends SystemUI {
     @Inject Lazy<PackageManagerWrapper> mPackageManagerWrapper;
     @Inject Lazy<SensorPrivacyController> mSensorPrivacyController;
     @Inject Lazy<DumpController> mDumpController;
+    @Inject Lazy<DockManager> mDockManager;
 
     @Inject
     public Dependency() {
@@ -470,6 +472,7 @@ public class Dependency extends SystemUI {
         mProviders.put(PackageManagerWrapper.class, mPackageManagerWrapper::get);
         mProviders.put(SensorPrivacyController.class, mSensorPrivacyController::get);
         mProviders.put(DumpController.class, mDumpController::get);
+        mProviders.put(DockManager.class, mDockManager::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

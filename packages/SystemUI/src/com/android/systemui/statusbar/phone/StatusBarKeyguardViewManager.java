@@ -25,8 +25,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.transition.Fade;
-import android.transition.TransitionManager;
 import android.util.StatsLog;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,10 +38,8 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.animation.AppearAnimationUtils;
-import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dock.DockManager;
@@ -51,6 +47,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -158,7 +155,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastPulsing;
     private int mLastBiometricMode;
     private boolean mGoingToSleepVisibleNotOccluded;
-    private int mLastLockVisibility = -1;
+    private boolean mLastLockVisible;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
@@ -213,6 +210,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mStatusBar = statusBar;
         mContainer = container;
         mLockIconContainer = lockIconContainer;
+        if (mLockIconContainer != null) {
+            mLastLockVisible = mLockIconContainer.getVisibility() == View.VISIBLE;
+        }
         mBiometricUnlockController = biometricUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
@@ -261,21 +261,20 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
         boolean keyguardWithoutQs = mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mNotificationPanelView.isQsExpanded();
-        int lockVisibility = (mBouncer.isShowing() || keyguardWithoutQs)
-                && !mBouncer.isAnimatingAway() ? View.VISIBLE : View.INVISIBLE;
+        boolean lockVisible = (mBouncer.isShowing() || keyguardWithoutQs)
+                && !mBouncer.isAnimatingAway();
 
-        if (mLastLockVisibility != lockVisibility) {
-            mLastLockVisibility = lockVisibility;
-
-            Fade transition = new Fade();
-            boolean appearing = lockVisibility == View.VISIBLE;
-            transition.setDuration(appearing ? AppearAnimationUtils.DEFAULT_APPEAR_DURATION
-                    : DisappearAnimationUtils.DEFAULT_APPEAR_DURATION / 2);
-            transition.setInterpolator(appearing ? Interpolators.ALPHA_IN
-                    : Interpolators.ALPHA_OUT);
-            TransitionManager.beginDelayedTransition((ViewGroup) mLockIconContainer.getParent(),
-                    transition);
-            mLockIconContainer.setVisibility(lockVisibility);
+        if (mLastLockVisible != lockVisible) {
+            mLastLockVisible = lockVisible;
+            if (lockVisible) {
+                CrossFadeHelper.fadeIn(mLockIconContainer,
+                        AppearAnimationUtils.DEFAULT_APPEAR_DURATION /* duration */,
+                        0 /* delay */);
+            } else {
+                CrossFadeHelper.fadeOut(mLockIconContainer,
+                        AppearAnimationUtils.DEFAULT_APPEAR_DURATION / 2 /* duration */,
+                        0 /* delay */, null /* runnable */);
+            }
         }
     }
 

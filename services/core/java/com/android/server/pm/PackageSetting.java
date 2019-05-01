@@ -185,16 +185,18 @@ public final class PackageSetting extends PackageSettingBase {
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
         proto.write(PackageProto.UID, appId);
         proto.write(PackageProto.VERSION_CODE, versionCode);
-        proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
         proto.write(PackageProto.INSTALL_TIME_MS, firstInstallTime);
         proto.write(PackageProto.UPDATE_TIME_MS, lastUpdateTime);
         proto.write(PackageProto.INSTALLER_NAME, installerPackageName);
 
         if (pkg != null) {
+            proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
+
             long splitToken = proto.start(PackageProto.SPLITS);
             proto.write(PackageProto.SplitProto.NAME, "base");
             proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.baseRevisionCode);
             proto.end(splitToken);
+
             if (pkg.splitNames != null) {
                 for (int i = 0; i < pkg.splitNames.length; i++) {
                     splitToken = proto.start(PackageProto.SPLITS);

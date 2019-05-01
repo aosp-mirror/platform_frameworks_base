@@ -80,7 +80,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
 
     @Test
     public void testSetButtonVisibility() throws Exception {
-        assertFalse("By default the group should be invisible.", mGroup.isVisible());
+        assertTrue("By default the group should be visible.", mGroup.isVisible());
 
         // Set button 1 to be visible, make sure it is the only visible button
         showButton(mBtn1);
@@ -89,7 +89,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
         assertFalse(mBtn2.isVisible());
 
         // Hide button 1 and make sure the group is also invisible
-        assertNotEquals(mGroup.setButtonVisiblity(BUTTON_1_ID, false /* visible */), View.VISIBLE);
+        assertNotEquals(mGroup.setButtonVisibility(BUTTON_1_ID, false /* visible */), View.VISIBLE);
         assertFalse("No buttons are visible, group should also be hidden", mGroup.isVisible());
         assertNull("No buttons should be visible", mGroup.getVisibleContextButton());
     }
@@ -97,7 +97,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
     @Test(expected = RuntimeException.class)
     public void testSetButtonVisibilityUnaddedButton() throws Exception {
         int id = mBtn2.getId() + 1;
-        mGroup.setButtonVisiblity(id, true /* visible */);
+        mGroup.setButtonVisibility(id, true /* visible */);
         fail("Did not throw when setting a button with an invalid id");
     }
 
@@ -120,17 +120,17 @@ public class NavigationBarContextTest extends SysuiTestCase {
         assertTrue(mGroup.isButtonVisibleWithinGroup(mBtn2.getId()));
 
         // Hide button 2
-        assertNotEquals(mGroup.setButtonVisiblity(BUTTON_2_ID, false /* visible */), View.VISIBLE);
+        assertNotEquals(mGroup.setButtonVisibility(BUTTON_2_ID, false /* visible */), View.VISIBLE);
         assertEquals("Hiding button 2 should show button 1", mBtn1,
                 mGroup.getVisibleContextButton());
 
         // Hide button 1
-        assertNotEquals(mGroup.setButtonVisiblity(BUTTON_1_ID, false /* visible */), View.VISIBLE);
+        assertNotEquals(mGroup.setButtonVisibility(BUTTON_1_ID, false /* visible */), View.VISIBLE);
         assertEquals("Hiding button 1 should show button 0", mBtn0,
                 mGroup.getVisibleContextButton());
 
         // Hide button 0, all buttons are now invisible
-        assertNotEquals(mGroup.setButtonVisiblity(BUTTON_0_ID, false /* visible */), View.VISIBLE);
+        assertNotEquals(mGroup.setButtonVisibility(BUTTON_0_ID, false /* visible */), View.VISIBLE);
         assertFalse("No buttons are visible, group should also be invisible", mGroup.isVisible());
         assertNull(mGroup.getVisibleContextButton());
         assertFalse(mGroup.isButtonVisibleWithinGroup(mBtn0.getId()));
@@ -144,7 +144,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
         showButton(mBtn2);
 
         // Show button 1
-        assertNotEquals(mGroup.setButtonVisiblity(BUTTON_1_ID, true /* visible */), View.VISIBLE);
+        assertNotEquals(mGroup.setButtonVisibility(BUTTON_1_ID, true /* visible */), View.VISIBLE);
         assertTrue("Showing button 1 lower priority should be hidden but visible underneath",
                 mGroup.isButtonVisibleWithinGroup(BUTTON_1_ID));
         assertFalse(mBtn0.isVisible());
@@ -152,7 +152,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
         assertTrue(mBtn2.isVisible());
 
         // Hide button 1
-        assertNotEquals(mGroup.setButtonVisiblity(BUTTON_1_ID, false /* visible */), View.VISIBLE);
+        assertNotEquals(mGroup.setButtonVisibility(BUTTON_1_ID, false /* visible */), View.VISIBLE);
         assertFalse("Hiding button 1 with lower priority hides itself underneath",
                 mGroup.isButtonVisibleWithinGroup(BUTTON_1_ID));
         assertTrue("A button still visible, group should also be visible", mGroup.isVisible());
@@ -180,9 +180,9 @@ public class NavigationBarContextTest extends SysuiTestCase {
         final Drawable d = mock(Drawable.class);
         final ContextualButton button = spy(mBtn0);
         final KeyButtonDrawable kbd1 = spy(new KeyButtonDrawable(d, unusedColor, unusedColor,
-                false /* horizontalFlip */));
+                false /* horizontalFlip */, false /* hasOvalBg */));
         final KeyButtonDrawable kbd2 = spy(new KeyButtonDrawable(d, unusedColor, unusedColor,
-                false /* horizontalFlip */));
+                false /* horizontalFlip */, false /* hasOvalBg */));
         kbd1.setDarkIntensity(TEST_DARK_INTENSITY);
         kbd2.setDarkIntensity(0f);
 
@@ -198,7 +198,7 @@ public class NavigationBarContextTest extends SysuiTestCase {
     }
 
     private void showButton(ContextualButton button) {
-        assertEquals(View.VISIBLE, mGroup.setButtonVisiblity(button.getId(), true /* visible */));
+        assertEquals(View.VISIBLE, mGroup.setButtonVisibility(button.getId(), true /* visible */));
         assertTrue("After set a button visible, group should also be visible", mGroup.isVisible());
         assertEquals(button, mGroup.getVisibleContextButton());
     }

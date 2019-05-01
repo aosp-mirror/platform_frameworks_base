@@ -37,9 +37,12 @@ class BubbleTouchHandler implements View.OnTouchListener {
     /** Velocity required to dismiss a bubble without dragging it into the dismiss target. */
     private static final float DISMISS_MIN_VELOCITY = 4000f;
 
+    private static final String TAG = "BubbleTouchHandler";
+
     private final PointF mTouchDown = new PointF();
     private final PointF mViewPositionOnTouchDown = new PointF();
     private final BubbleStackView mStack;
+    private final BubbleData mBubbleData;
 
     private BubbleController mController = Dependency.get(BubbleController.class);
     private PipDismissViewController mDismissViewController;
@@ -60,10 +63,12 @@ class BubbleTouchHandler implements View.OnTouchListener {
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
 
-    BubbleTouchHandler(Context context, BubbleStackView stackView) {
+    BubbleTouchHandler(BubbleStackView stackView,
+            BubbleData bubbleData, Context context) {
         final int touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mTouchSlopSquared = touchSlop * touchSlop;
         mDismissViewController = new PipDismissViewController(context);
+        mBubbleData = bubbleData;
         mStack = stackView;
     }
 
@@ -80,7 +85,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
         // If this is an ACTION_OUTSIDE event, or the stack reported that we aren't touching
         // anything, collapse the stack.
         if (action == MotionEvent.ACTION_OUTSIDE || mTouchedView == null) {
-            mStack.collapseStack();
+            mBubbleData.setExpanded(false);
             resetForNextGesture();
             return false;
         }
@@ -151,8 +156,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     mStack.onDragFinishAsDismiss();
                 } else if (isFlyout) {
                     // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
-                    if (!mStack.isExpanded() && !mMovedEnough) {
-                        mStack.expandStack();
+                    if (!mBubbleData.isExpanded() && !mMovedEnough) {
+                        mBubbleData.setExpanded(true);
                     }
                 } else if (mMovedEnough) {
                     mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
@@ -170,15 +175,13 @@ class BubbleTouchHandler implements View.OnTouchListener {
                         }
                     }
                 } else if (mTouchedView == mStack.getExpandedBubbleView()) {
-                    mStack.collapseStack();
+                    mBubbleData.setExpanded(false);
                 } else if (isStack) {
-                    if (mStack.isExpanded()) {
-                        mStack.collapseStack();
-                    } else {
-                        mStack.expandStack();
-                    }
+                    // Toggle expansion
+                    mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 } else {
-                    mStack.setExpandedBubble(((BubbleView) mTouchedView).getKey());
+                    final String key = ((BubbleView) mTouchedView).getKey();
+                    mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
                 }
 
                 resetForNextGesture();
