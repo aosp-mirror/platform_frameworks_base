@@ -4212,6 +4212,15 @@
         android:description="@string/permdesc_bindCarrierServices"
         android:protectionLevel="signature|privileged" />
 
+    <!--
+        Allows the holder to start the permission usage screen for an app.
+        <p>Protection level: signature|installer
+    -->
+    <permission android:name="android.permission.START_VIEW_PERMISSION_USAGE"
+        android:label="@string/permlab_startViewPermissionUsage"
+        android:description="@string/permdesc_startViewPermissionUsage"
+        android:protectionLevel="signature|installer" />
+
     <!-- Allows an application to query whether DO_NOT_ASK_CREDENTIALS_ON_BOOT
          flag is set.
          @hide -->
