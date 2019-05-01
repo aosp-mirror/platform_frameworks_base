@@ -56,7 +56,7 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.shared.system.NavigationBarCompat;
+import com.android.systemui.shared.system.QuickStepContract;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
     private static final String TAG = KeyButtonView.class.getSimpleName();
@@ -244,11 +244,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 y = (int)ev.getRawY();
 
                 boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) > (mIsVertical
-                        ? NavigationBarCompat.getQuickScrubTouchSlopPx()
-                        : NavigationBarCompat.getQuickStepTouchSlopPx());
+                        ? QuickStepContract.getQuickScrubTouchSlopPx()
+                        : QuickStepContract.getQuickStepTouchSlopPx());
                 boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) > (mIsVertical
-                        ? NavigationBarCompat.getQuickStepTouchSlopPx()
-                        : NavigationBarCompat.getQuickScrubTouchSlopPx());
+                        ? QuickStepContract.getQuickStepTouchSlopPx()
+                        : QuickStepContract.getQuickScrubTouchSlopPx());
                 if (exceededTouchSlopX || exceededTouchSlopY) {
                     // When quick step is enabled, prevent animating the ripple triggered by
                     // setPressed and decide to run it on touch up
