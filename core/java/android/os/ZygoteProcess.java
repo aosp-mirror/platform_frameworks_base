@@ -881,6 +881,7 @@ public class ZygoteProcess {
 
             maybeSetApiBlacklistExemptions(primaryZygoteState, false);
             maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
+            maybeSetHiddenApiAccessStatslogSampleRate(primaryZygoteState);
         }
     }
 
@@ -896,6 +897,7 @@ public class ZygoteProcess {
 
             maybeSetApiBlacklistExemptions(secondaryZygoteState, false);
             maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
+            maybeSetHiddenApiAccessStatslogSampleRate(secondaryZygoteState);
         }
     }
 
