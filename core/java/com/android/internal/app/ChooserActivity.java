@@ -2586,6 +2586,20 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            int viewType = getItemViewType(position);
+            if (viewType == VIEW_TYPE_CONTENT_PREVIEW) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public int getCount() {
             return (int) (
                     getContentPreviewRowCount()
