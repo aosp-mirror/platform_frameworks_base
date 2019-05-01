@@ -180,9 +180,16 @@ public class SoundTriggerService extends SystemService {
                 Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
             }
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("startRecognition(): Uuid : "
+                    + parcelUuid));
+
             GenericSoundModel model = getSoundModel(parcelUuid);
             if (model == null) {
                 Slog.e(TAG, "Null model in database for id: " + parcelUuid);
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "startRecognition(): Null model in database for id: " + parcelUuid));
+
                 return STATUS_ERROR;
             }
 
@@ -196,6 +203,10 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "stopRecognition(): Uuid : " + parcelUuid);
             }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("stopRecognition(): Uuid : "
+                    + parcelUuid));
+
             if (!isInitialized()) return STATUS_ERROR;
             return mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(), callback);
         }
@@ -206,6 +217,10 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "getSoundModel(): id = " + soundModelId);
             }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("getSoundModel(): id = "
+                    + soundModelId));
+
             SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(
                     soundModelId.getUuid());
             return model;
@@ -217,6 +232,10 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "updateSoundModel(): model = " + soundModel);
             }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("updateSoundModel(): model = "
+                    + soundModel));
+
             mDbHelper.updateGenericSoundModel(soundModel);
         }
 
@@ -226,6 +245,10 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "deleteSoundModel(): id = " + soundModelId);
             }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("deleteSoundModel(): id = "
+                    + soundModelId));
+
             // Unload the model if it is loaded.
             mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
             mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
@@ -237,11 +260,19 @@ public class SoundTriggerService extends SystemService {
             if (!isInitialized()) return STATUS_ERROR;
             if (soundModel == null || soundModel.uuid == null) {
                 Slog.e(TAG, "Invalid sound model");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "loadGenericSoundModel(): Invalid sound model"));
+
                 return STATUS_ERROR;
             }
             if (DEBUG) {
                 Slog.i(TAG, "loadGenericSoundModel(): id = " + soundModel.uuid);
             }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("loadGenericSoundModel(): id = "
+                    + soundModel.uuid));
+
             synchronized (mLock) {
                 SoundModel oldModel = mLoadedModels.get(soundModel.uuid);
                 // If the model we're loading is actually different than what we had loaded, we
@@ -264,15 +295,28 @@ public class SoundTriggerService extends SystemService {
             if (!isInitialized()) return STATUS_ERROR;
             if (soundModel == null || soundModel.uuid == null) {
                 Slog.e(TAG, "Invalid sound model");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "loadKeyphraseSoundModel(): Invalid sound model"));
+
                 return STATUS_ERROR;
             }
             if (soundModel.keyphrases == null || soundModel.keyphrases.length != 1) {
                 Slog.e(TAG, "Only one keyphrase per model is currently supported.");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "loadKeyphraseSoundModel(): Only one keyphrase per model"
+                        + " is currently supported."));
+
                 return STATUS_ERROR;
             }
             if (DEBUG) {
                 Slog.i(TAG, "loadKeyphraseSoundModel(): id = " + soundModel.uuid);
             }
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("loadKeyphraseSoundModel(): id = "
+                    + soundModel.uuid));
+
             synchronized (mLock) {
                 SoundModel oldModel = mLoadedModels.get(soundModel.uuid);
                 // If the model we're loading is actually different than what we had loaded, we
@@ -303,6 +347,9 @@ public class SoundTriggerService extends SystemService {
                 Slog.i(TAG, "startRecognition(): id = " + soundModelId);
             }
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                    "startRecognitionForService(): id = " + soundModelId));
+
             IRecognitionStatusCallback callback =
                     new RemoteSoundTriggerDetectionService(soundModelId.getUuid(), params,
                             detectionService, Binder.getCallingUserHandle(), config);
@@ -311,6 +358,10 @@ public class SoundTriggerService extends SystemService {
                 SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                 if (soundModel == null) {
                     Slog.e(TAG, soundModelId + " is not loaded");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "startRecognitionForService():" + soundModelId + " is not loaded"));
+
                     return STATUS_ERROR;
                 }
                 IRecognitionStatusCallback existingCallback = null;
@@ -319,6 +370,11 @@ public class SoundTriggerService extends SystemService {
                 }
                 if (existingCallback != null) {
                     Slog.e(TAG, soundModelId + " is already running");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "startRecognitionForService():"
+                            + soundModelId + " is already running"));
+
                     return STATUS_ERROR;
                 }
                 int ret;
@@ -329,11 +385,19 @@ public class SoundTriggerService extends SystemService {
                         break;
                     default:
                         Slog.e(TAG, "Unknown model type");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "startRecognitionForService(): Unknown model type"));
+
                         return STATUS_ERROR;
                 }
 
                 if (ret != STATUS_OK) {
                     Slog.e(TAG, "Failed to start model: " + ret);
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "startRecognitionForService(): Failed to start model:"));
+
                     return ret;
                 }
                 synchronized (mCallbacksLock) {
@@ -351,10 +415,18 @@ public class SoundTriggerService extends SystemService {
                 Slog.i(TAG, "stopRecognition(): id = " + soundModelId);
             }
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                    "stopRecognitionForService(): id = " + soundModelId));
+
             synchronized (mLock) {
                 SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                 if (soundModel == null) {
                     Slog.e(TAG, soundModelId + " is not loaded");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "stopRecognitionForService(): " + soundModelId
+                            + " is not loaded"));
+
                     return STATUS_ERROR;
                 }
                 IRecognitionStatusCallback callback = null;
@@ -363,6 +435,11 @@ public class SoundTriggerService extends SystemService {
                 }
                 if (callback == null) {
                     Slog.e(TAG, soundModelId + " is not running");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "stopRecognitionForService(): " + soundModelId
+                            + " is not running"));
+
                     return STATUS_ERROR;
                 }
                 int ret;
@@ -372,11 +449,19 @@ public class SoundTriggerService extends SystemService {
                         break;
                     default:
                         Slog.e(TAG, "Unknown model type");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "stopRecognitionForService(): Unknown model type"));
+
                         return STATUS_ERROR;
                 }
 
                 if (ret != STATUS_OK) {
                     Slog.e(TAG, "Failed to stop model: " + ret);
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "stopRecognitionForService(): Failed to stop model: " + ret));
+
                     return ret;
                 }
                 synchronized (mCallbacksLock) {
@@ -394,10 +479,17 @@ public class SoundTriggerService extends SystemService {
                 Slog.i(TAG, "unloadSoundModel(): id = " + soundModelId);
             }
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("unloadSoundModel(): id = "
+                    + soundModelId));
+
             synchronized (mLock) {
                 SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                 if (soundModel == null) {
                     Slog.e(TAG, soundModelId + " is not loaded");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "unloadSoundModel(): " + soundModelId + " is not loaded"));
+
                     return STATUS_ERROR;
                 }
                 int ret;
@@ -411,10 +503,18 @@ public class SoundTriggerService extends SystemService {
                         break;
                     default:
                         Slog.e(TAG, "Unknown model type");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "unloadSoundModel(): Unknown model type"));
+
                         return STATUS_ERROR;
                 }
                 if (ret != STATUS_OK) {
                     Slog.e(TAG, "Failed to unload model");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                            "unloadSoundModel(): Failed to unload model"));
+
                     return ret;
                 }
                 mLoadedModels.remove(soundModelId.getUuid());
@@ -444,10 +544,17 @@ public class SoundTriggerService extends SystemService {
                 Slog.i(TAG, "getModelState(): id = " + soundModelId);
             }
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): id = "
+                    + soundModelId));
+
             synchronized (mLock) {
                 SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
                 if (soundModel == null) {
                     Slog.e(TAG, soundModelId + " is not loaded");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent("getModelState(): "
+                            + soundModelId + " is not loaded"));
+
                     return ret;
                 }
                 switch (soundModel.type) {
@@ -459,6 +566,10 @@ public class SoundTriggerService extends SystemService {
                         break;
                     default:
                         Slog.e(TAG, "Unknown model type");
+
+                        sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                                "getModelState(): Unknown model type"));
+
                         break;
                 }
 
@@ -708,6 +819,10 @@ public class SoundTriggerService extends SystemService {
                     mService.removeClient(mPuuid);
                 } catch (Exception e) {
                     Slog.e(TAG, mPuuid + ": Cannot remove client", e);
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                            + ": Cannot remove client"));
+
                 }
 
                 mService = null;
@@ -729,6 +844,8 @@ public class SoundTriggerService extends SystemService {
          */
         private void destroy() {
             if (DEBUG) Slog.v(TAG, mPuuid + ": destroy");
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + ": destroy"));
 
             synchronized (mRemoteServiceLock) {
                 disconnectLocked();
@@ -761,6 +878,10 @@ public class SoundTriggerService extends SystemService {
                         } catch (Exception e) {
                             Slog.e(TAG, mPuuid + ": Could not stop operation "
                                     + mRunningOpIds.valueAt(i), e);
+
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                    + ": Could not stop operation " + mRunningOpIds.valueAt(i)));
+
                         }
                     }
 
@@ -786,6 +907,10 @@ public class SoundTriggerService extends SystemService {
 
                 if (ri == null) {
                     Slog.w(TAG, mPuuid + ": " + mServiceName + " not found");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                            + ": " + mServiceName + " not found"));
+
                     return;
                 }
 
@@ -793,6 +918,11 @@ public class SoundTriggerService extends SystemService {
                         .equals(ri.serviceInfo.permission)) {
                     Slog.w(TAG, mPuuid + ": " + mServiceName + " does not require "
                             + BIND_SOUND_TRIGGER_DETECTION_SERVICE);
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                            + ": " + mServiceName + " does not require "
+                            + BIND_SOUND_TRIGGER_DETECTION_SERVICE));
+
                     return;
                 }
 
@@ -803,6 +933,10 @@ public class SoundTriggerService extends SystemService {
                     mRemoteServiceWakeLock.acquire();
                 } else {
                     Slog.w(TAG, mPuuid + ": Could not bind to " + mServiceName);
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                            + ": Could not bind to " + mServiceName));
+
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -820,6 +954,9 @@ public class SoundTriggerService extends SystemService {
                 if (mIsDestroyed || mDestroyOnceRunningOpsDone) {
                     Slog.w(TAG, mPuuid + ": Dropped operation as already destroyed or marked for "
                             + "destruction");
+
+                    sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                            + ":Dropped operation as already destroyed or marked for destruction"));
 
                     op.drop();
                     return;
@@ -847,11 +984,20 @@ public class SoundTriggerService extends SystemService {
                             if (DEBUG || opsAllowed + 10 > opsAdded) {
                                 Slog.w(TAG, mPuuid + ": Dropped operation as too many operations "
                                         + "were run in last 24 hours");
+
+                                sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": Dropped operation as too many operations "
+                                        + "were run in last 24 hours"));
+
                             }
 
                             op.drop();
                         } catch (Exception e) {
                             Slog.e(TAG, mPuuid + ": Could not drop operation", e);
+
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": Could not drop operation"));
+
                         }
                     } else {
                         mNumOps.addOp(currentTime);
@@ -866,10 +1012,17 @@ public class SoundTriggerService extends SystemService {
                         try {
                             if (DEBUG) Slog.v(TAG, mPuuid + ": runOp " + opId);
 
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": runOp " + opId));
+
                             op.run(opId, mService);
                             mRunningOpIds.add(opId);
                         } catch (Exception e) {
                             Slog.e(TAG, mPuuid + ": Could not run operation " + opId, e);
+
+                            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                                        + ": Could not run operation " + opId));
+
                         }
                     }
 
@@ -897,6 +1050,10 @@ public class SoundTriggerService extends SystemService {
         public void onKeyphraseDetected(SoundTrigger.KeyphraseRecognitionEvent event) {
             Slog.w(TAG, mPuuid + "->" + mServiceName + ": IGNORED onKeyphraseDetected(" + event
                     + ")");
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid + "->" + mServiceName
+                    + ": IGNORED onKeyphraseDetected(" + event + ")"));
+
         }
 
         /**
@@ -928,6 +1085,8 @@ public class SoundTriggerService extends SystemService {
                             : AudioFormat.CHANNEL_IN_MONO,
                     captureFormat.getEncoding());
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent("createAudioRecordForEvent"));
+
             return new AudioRecord(attributes, captureFormat, bufferSize,
                     event.getCaptureSession());
         }
@@ -935,6 +1094,9 @@ public class SoundTriggerService extends SystemService {
         @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": Generic sound trigger event: " + event);
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + ": Generic sound trigger event: " + event));
 
             runOrAddOperation(new Operation(
                     // always execute:
@@ -966,6 +1128,9 @@ public class SoundTriggerService extends SystemService {
         public void onError(int status) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": onError: " + status);
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + ": onError: " + status));
+
             runOrAddOperation(
                     new Operation(
                             // always execute:
@@ -985,16 +1150,27 @@ public class SoundTriggerService extends SystemService {
         @Override
         public void onRecognitionPaused() {
             Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionPaused");
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + "->" + mServiceName + ": IGNORED onRecognitionPaused"));
+
         }
 
         @Override
         public void onRecognitionResumed() {
             Slog.i(TAG, mPuuid + "->" + mServiceName + ": IGNORED onRecognitionResumed");
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + "->" + mServiceName + ": IGNORED onRecognitionResumed"));
+
         }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceConnected(" + service + ")");
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + ": onServiceConnected(" + service + ")"));
 
             synchronized (mRemoteServiceLock) {
                 mService = ISoundTriggerDetectionService.Stub.asInterface(service);
@@ -1016,6 +1192,9 @@ public class SoundTriggerService extends SystemService {
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": onServiceDisconnected");
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + ": onServiceDisconnected"));
+
             synchronized (mRemoteServiceLock) {
                 mService = null;
             }
@@ -1025,6 +1204,9 @@ public class SoundTriggerService extends SystemService {
         public void onBindingDied(ComponentName name) {
             if (DEBUG) Slog.v(TAG, mPuuid + ": onBindingDied");
 
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(mPuuid
+                    + ": onBindingDied"));
+
             synchronized (mRemoteServiceLock) {
                 destroy();
             }
@@ -1033,6 +1215,9 @@ public class SoundTriggerService extends SystemService {
         @Override
         public void onNullBinding(ComponentName name) {
             Slog.w(TAG, name + " for model " + mPuuid + " returned a null binding");
+
+            sEventLogger.log(new SoundTriggerLogger.StringEvent(name + " for model "
+                    + mPuuid + " returned a null binding"));
 
             synchronized (mRemoteServiceLock) {
                 disconnectLocked();
@@ -1082,11 +1267,17 @@ public class SoundTriggerService extends SystemService {
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!isInitialized()) return;
             mSoundTriggerHelper.dump(fd, pw, args);
+            // log
+            sEventLogger.dump(pw);
         }
 
         private synchronized boolean isInitialized() {
             if (mSoundTriggerHelper == null ) {
                 Slog.e(TAG, "SoundTriggerHelper not initialized.");
+
+                sEventLogger.log(new SoundTriggerLogger.StringEvent(
+                        "SoundTriggerHelper not initialized."));
+
                 return false;
             }
             return true;
@@ -1099,4 +1290,11 @@ public class SoundTriggerService extends SystemService {
             throw new SecurityException("Caller does not hold the permission " + permission);
         }
     }
+
+    //=================================================================
+    // For logging
+
+    private static final SoundTriggerLogger sEventLogger = new SoundTriggerLogger(200,
+            "SoundTrigger activity");
+
 }
