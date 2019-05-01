@@ -2432,14 +2432,19 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    private boolean shouldAnimate(int transit) {
+
+    @VisibleForTesting
+    boolean shouldAnimate(int transit) {
         final boolean isSplitScreenPrimary =
                 getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
         final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
 
-        // Don't animate when the task runs recents animation.
+        // Don't animate while the task runs recents animation but only if we are in the mode
+        // where we cancel with deferred screenshot, which means that the controller has
+        // transformed the task.
         final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
-        if (controller != null && controller.isAnimatingTask(getTask())) {
+        if (controller != null && controller.isAnimatingTask(getTask())
+                && controller.shouldCancelWithDeferredScreenshot()) {
             return false;
         }
 
