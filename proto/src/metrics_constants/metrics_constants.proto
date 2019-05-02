@@ -4183,6 +4183,8 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
     // Tag FIELD_AUTOFILL_NUMBER_REQUESTS: number of requests made to the service (each request
     //     is logged by a separate AUTOFILL_REQUEST metric)
+    // NOTE: starting on OS Q, it also added the following fields:
+    // TAg FIELD_AUTOFILL_AUGMENTED_ONLY: if the session was used just for augmented autofill
     AUTOFILL_SESSION_FINISHED = 919;
 
     // meta-event: a reader has checkpointed the log here.
@@ -7221,6 +7223,45 @@ message MetricsEvent {
     //    For OPEN, the subtype is the innovation type for the assistant.
     // OS: Q
     ASSISTANT = 1716;
+
+    // Field indicating that an autofill session was created just for augmented autofill purposes.
+    // OS: Q
+    // Value: 1 for true, absent when false
+    FIELD_AUTOFILL_AUGMENTED_ONLY = 1717;
+
+    // The augmented autofill service set its whitelisted packages and activities.
+    // OS: Q
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the augmented autofill service that processed the
+    // request
+    // Tag FIELD_AUTOFILL_NUMBER_PACKAGES: Number of whitelisted packages.
+    // Tag FIELD_AUTOFILL_NUMBER_ACTIVITIES: Number of whitelisted activities.
+    AUTOFILL_AUGMENTED_WHITELIST_REQUEST = 1718;
+
+    // Generic field used to indicate the number of packages in an Autofill metric (typically a
+    // whitelist request).
+    // OS: Q
+    FIELD_AUTOFILL_NUMBER_PACKAGES = 1719;
+
+    // Generic field used to indicate the number of activities in an Autofill metric (typically a
+    // whitelist request).
+    // OS: Q
+    FIELD_AUTOFILL_NUMBER_ACTIVITIES = 1720;
+
+    // Reports the result of a request made to the augmented autofill service
+    // OS: Q
+    // Type TYPE_UNKNOWN: if the type of response could not be determined
+    // Type TYPE_SUCCESS: service called onSucess() passing null
+    // Type TYPE_OPEN: service shown the UI
+    // Type TYPE_CLOSE: service hid the UI
+    // Type TYPE_ERROR: service timed out responding
+
+    // Tag FIELD_CLASS_NAME: Class name of the activity that is autofilled.
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the augmented autofill service that processed the
+    // request
+    // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric
+    // Tag FIELD_AUTOFILL_DURATION: how long it took (in ms) to the service to respond, or -1 if the
+    // type of response could not be determined
+    AUTOFILL_AUGMENTED_RESPONSE = 1721;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.augmented.Helper.logResponse;
+
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -47,6 +49,7 @@ import android.view.autofill.IAutoFillManagerClient;
 import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.concurrent.CancellationException;
@@ -181,12 +184,14 @@ final class RemoteAugmentedAutofillService
                     if (err instanceof CancellationException) {
                         dispatchCancellation(cancellationRef.get());
                     } else if (err instanceof TimeoutException) {
-                        // TODO(b/122858578): must update the logged AUTOFILL_AUGMENTED_REQUEST with
-                        // the timeout
                         Slog.w(TAG, "PendingAutofillRequest timed out (" + mRequestTimeoutMs
                                 + "ms) for " + RemoteAugmentedAutofillService.this);
                         // NOTE: so far we don't need notify RemoteAugmentedAutofillServiceCallbacks
                         dispatchCancellation(cancellationRef.get());
+                        if (mComponentName != null) {
+                            logResponse(MetricsEvent.TYPE_ERROR, mComponentName.getPackageName(),
+                                    activityComponent, sessionId, mRequestTimeoutMs);
+                        }
                     } else if (err != null) {
                         Slog.e(TAG, "exception handling getAugmentedAutofillClient() for "
                                 + sessionId + ": ", err);

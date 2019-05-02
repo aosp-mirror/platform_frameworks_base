@@ -50,8 +50,10 @@ public final class FillCallback {
     public void onSuccess(@Nullable FillResponse response) {
         if (sDebug) Log.d(TAG, "onSuccess(): " + response);
 
-        mProxy.report(AutofillProxy.REPORT_EVENT_ON_SUCCESS);
-        if (response == null) return;
+        if (response == null) {
+            mProxy.report(AutofillProxy.REPORT_EVENT_NO_RESPONSE);
+            return;
+        }
 
         final FillWindow fillWindow = response.getFillWindow();
         if (fillWindow != null) {
