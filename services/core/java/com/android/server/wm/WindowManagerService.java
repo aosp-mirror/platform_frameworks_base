@@ -1880,7 +1880,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     // We need to report touchable region changes to accessibility.
                     if (mAccessibilityController != null
-                            && w.getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+                            && (w.getDisplayContent().getDisplayId() == DEFAULT_DISPLAY
+                                    || w.getDisplayContent().getParentWindow() != null)) {
                         mAccessibilityController.onSomeWindowResizedOrMovedLocked();
                     }
                 }
@@ -2012,7 +2013,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
                         && (mAccessibilityController != null)
-                        && (win.getDisplayId() == DEFAULT_DISPLAY)) {
+                        && (win.getDisplayId() == DEFAULT_DISPLAY
+                                || win.getDisplayContent().getParentWindow() != null)) {
                     // No move or resize, but the controller checks for title changes as well
                     mAccessibilityController.onSomeWindowResizedOrMovedLocked();
                 }
@@ -6703,6 +6705,61 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void checkCallerOwnsDisplay(int displayId) {
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            throw new IllegalArgumentException(
+                    "Cannot find display for non-existent displayId: " + displayId);
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int displayOwnerUid = display.getOwnerUid();
+        if (callingUid != displayOwnerUid) {
+            throw new SecurityException("The caller doesn't own the display.");
+        }
+    }
+
+    /** @see Session#reparentDisplayContent(IWindow, SurfaceControl, int)  */
+    void reparentDisplayContent(IWindow client, SurfaceControl sc, int displayId) {
+        checkCallerOwnsDisplay(displayId);
+
+        synchronized (mGlobalLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final WindowState win = windowForClientLocked(null, client, false);
+                if (win == null) {
+                    Slog.w(TAG_WM, "Bad requesting window " + client);
+                    return;
+                }
+                getDisplayContentOrCreate(displayId, null).reparentDisplayContent(win, sc);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    /** @see Session#updateDisplayContentLocation(IWindow, int, int, int)  */
+    void updateDisplayContentLocation(IWindow client, int x, int y, int displayId) {
+        checkCallerOwnsDisplay(displayId);
+
+        synchronized (mGlobalLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final WindowState win = windowForClientLocked(null, client, false);
+                if (win == null) {
+                    Slog.w(TAG_WM, "Bad requesting window " + client);
+                    return;
+                }
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent != null) {
+                    displayContent.updateLocation(win, x, y);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
     /**
      * Update a tap exclude region in the window identified by the provided id. Touches down on this
      * region will not:
@@ -7533,31 +7590,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             if (mPolicy.setAodShowing(aodShowing)) {
                 mWindowPlacerLocked.performSurfacePlacement();
-            }
-        }
-    }
-
-    @Override
-    public void reparentDisplayContent(int displayId, SurfaceControl sc) {
-        final Display display = mDisplayManager.getDisplay(displayId);
-        if (display == null) {
-            throw new IllegalArgumentException(
-                    "Can't reparent display for non-existent displayId: " + displayId);
-        }
-
-        final int callingUid = Binder.getCallingUid();
-        final int displayOwnerUid = display.getOwnerUid();
-        if (callingUid != displayOwnerUid) {
-            throw new SecurityException("Only owner of the display can reparent surfaces to it.");
-        }
-
-        synchronized (mGlobalLock) {
-            long token = Binder.clearCallingIdentity();
-            try {
-                DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-                displayContent.reparentDisplayContent(sc);
-            } finally {
-                Binder.restoreCallingIdentity(token);
             }
         }
     }

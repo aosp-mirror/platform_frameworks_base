@@ -257,6 +257,31 @@ interface IWindowSession {
     void updatePointerIcon(IWindow window);
 
     /**
+     * Reparent the top layers for a display to the requested SurfaceControl. The display that is
+     * going to be re-parented (the displayId passed in) needs to have been created by the same
+     * process that is requesting the re-parent. This is to ensure clients can't just re-parent
+     * display content info to any SurfaceControl, as this would be a security issue.
+     *
+     * @param window The window which owns the SurfaceControl. This indicates the z-order of the
+     *               windows of this display against the windows on the parent display.
+     * @param sc The SurfaceControl that the top level layers for the display should be re-parented
+     *           to.
+     * @param displayId The id of the display to be re-parented.
+     */
+    void reparentDisplayContent(IWindow window, in SurfaceControl sc, int displayId);
+
+    /**
+     * Update the location of a child display in its parent window. This enables windows in the
+     * child display to compute the global transformation matrix.
+     *
+     * @param window The parent window of the display.
+     * @param x The x coordinate in the parent window.
+     * @param y The y coordinate in the parent window.
+     * @param displayId The id of the display to be notified.
+     */
+    void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
+
+    /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.
