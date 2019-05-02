@@ -1509,11 +1509,6 @@ public class PackageInstaller {
          * state of the permission can be determined only at install time and cannot be
          * changed on updated or at a later point via the package manager APIs.
          *
-         * <p>The whitelisted non-immutably restricted permissions would be added to
-         * the {@link PackageManager#FLAG_PERMISSION_WHITELIST_INSTALLER installer whitelist}
-         * while the immutably restricted permissions would be added to the {@link
-         * PackageManager#FLAG_PERMISSION_WHITELIST_SYSTEM system whitelist}
-         *
          * @see PackageManager#addWhitelistedRestrictedPermission(String, String, int)
          * @see PackageManager#removeWhitelistedRestrictedPermission(String, String, int)
          */
