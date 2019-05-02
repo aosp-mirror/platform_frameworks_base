@@ -68,7 +68,8 @@ public class ThemeOverlayController extends SystemUI {
         mThemeManager = new ThemeOverlayManager(
                 mContext.getSystemService(OverlayManager.class),
                 AsyncTask.THREAD_POOL_EXECUTOR,
-                mContext.getString(R.string.launcher_overlayable_package));
+                mContext.getString(R.string.launcher_overlayable_package),
+                mContext.getString(R.string.themepicker_overlayable_package));
         final Handler bgHandler = Dependency.get(Dependency.BG_HANDLER);
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
