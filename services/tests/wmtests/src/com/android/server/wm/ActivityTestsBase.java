@@ -72,6 +72,7 @@ import com.android.server.am.PendingIntentController;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.TaskRecord.TaskRecordFactory;
 import com.android.server.wm.utils.MockTracker;
 
 import org.junit.After;
@@ -157,6 +158,19 @@ class ActivityTestsBase {
         final TestActivityDisplay display = createNewActivityDisplay(info);
         mRootActivityContainer.addChild(display, position);
         return display;
+    }
+
+    /**
+     * Delegates task creation to {@link #TaskBuilder} to avoid the dependency of window hierarchy
+     * when starting activity in unit tests.
+     */
+    void mockTaskRecordFactory() {
+        final TaskRecord task = new TaskBuilder(mSupervisor).setCreateStack(false).build();
+        final TaskRecordFactory factory = mock(TaskRecordFactory.class);
+        TaskRecord.setTaskRecordFactory(factory);
+        doReturn(task).when(factory).create(any() /* service */, anyInt() /* taskId */,
+                any() /* info */, any() /* intent */, any() /* voiceSession */,
+                any() /* voiceInteractor */);
     }
 
     /**
