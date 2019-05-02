@@ -649,8 +649,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 // hasn't actually been updated.
                 onPackageReplaced(apexPackageName);
             }
-
-            mPackageHealthObserver.onBootCompleted();
+            mPackageHealthObserver.onBootCompletedAsync();
         });
     }
 
