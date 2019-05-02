@@ -79,7 +79,6 @@ import android.view.Gravity;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
-import com.android.server.wm.TaskRecord.TaskRecordFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -330,21 +329,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
                 anyBoolean(), anyBoolean(), any(), any(), any());
 
-        // instrument the stack and task used.
-        final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final TaskRecord task = new TaskBuilder(mSupervisor)
-                .setCreateStack(false)
-                .build();
-
-        // use factory that only returns spy task.
-        final TaskRecordFactory factory = mock(TaskRecordFactory.class);
-        TaskRecord.setTaskRecordFactory(factory);
-
-        // return task when created.
-        doReturn(task).when(factory).create(any(), anyInt(), any(), any(), any(), any());
+        // Use factory that only returns spy task.
+        mockTaskRecordFactory();
 
         if (mockGetLaunchStack) {
+            // Instrument the stack and task used.
+            final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
             // Direct starter to use spy stack.
             doReturn(stack).when(mRootActivityContainer)
                     .getLaunchStack(any(), any(), any(), anyBoolean());
