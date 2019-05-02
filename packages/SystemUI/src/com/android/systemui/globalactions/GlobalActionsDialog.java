@@ -1583,13 +1583,20 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private int getGlobalActionsLayoutId(Context context) {
-            if (isForceGridEnabled(context) || shouldUsePanel()) {
-                if (RotationUtils.getRotation(context) == RotationUtils.ROTATION_SEASCAPE) {
+            boolean useGridLayout = isForceGridEnabled(context) || shouldUsePanel();
+            if (RotationUtils.getRotation(context) == RotationUtils.ROTATION_SEASCAPE) {
+                if (useGridLayout) {
                     return com.android.systemui.R.layout.global_actions_grid_seascape;
+                } else {
+                    return com.android.systemui.R.layout.global_actions_column_seascape;
                 }
-                return com.android.systemui.R.layout.global_actions_grid;
+            } else {
+                if (useGridLayout) {
+                    return com.android.systemui.R.layout.global_actions_grid;
+                } else {
+                    return com.android.systemui.R.layout.global_actions_column;
+                }
             }
-            return com.android.systemui.R.layout.global_actions_wrapped;
         }
 
         @Override
@@ -1712,7 +1719,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         public void onRotate(int from, int to) {
-            if (mShowing && (shouldUsePanel() || isForceGridEnabled(mContext))) {
+            if (mShowing) {
                 refreshDialog();
             }
         }

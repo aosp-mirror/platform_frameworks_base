@@ -45,11 +45,6 @@ public abstract class MultiListLayout extends LinearLayout {
     protected abstract ViewGroup getListView();
 
     /**
-     * Removes all child items from the separated and list views, if they exist.
-     */
-    protected abstract void removeAllItems();
-
-    /**
      * Sets the divided view, which may have a differently-colored background.
      */
     public abstract void setDivisionView(View v);
@@ -108,6 +103,25 @@ public abstract class MultiListLayout extends LinearLayout {
             throw new IllegalStateException("mAdapter must be set before calling updateList");
         }
         onUpdateList();
+    }
+
+    protected void removeAllSeparatedViews() {
+        ViewGroup separated = getSeparatedView();
+        if (separated != null) {
+            separated.removeAllViews();
+        }
+    }
+
+    protected void removeAllListViews() {
+        ViewGroup list = getListView();
+        if (list != null) {
+            list.removeAllViews();
+        }
+    }
+
+    protected void removeAllItems() {
+        removeAllListViews();
+        removeAllSeparatedViews();
     }
 
     protected void onUpdateList() {
