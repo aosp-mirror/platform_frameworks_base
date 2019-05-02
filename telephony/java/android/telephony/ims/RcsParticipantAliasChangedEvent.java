@@ -70,7 +70,7 @@ public final class RcsParticipantAliasChangedEvent extends RcsEvent {
      */
     @Override
     void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
-        rcsControllerCall.call(iRcs -> iRcs.createParticipantAliasChangedEvent(
-                getTimestamp(), getParticipant().getId(), getNewAlias()));
+        rcsControllerCall.call((iRcs, callingPackage) -> iRcs.createParticipantAliasChangedEvent(
+                getTimestamp(), getParticipant().getId(), getNewAlias(), callingPackage));
     }
 }

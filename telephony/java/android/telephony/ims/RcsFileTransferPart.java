@@ -137,7 +137,9 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public void setFileTransferSessionId(String sessionId) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setFileTransferSessionId(mId, sessionId));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setFileTransferSessionId(mId, sessionId,
+                        callingPackage));
     }
 
     /**
@@ -146,7 +148,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public String getFileTransferSessionId() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferSessionId(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferSessionId(mId, callingPackage));
     }
 
     /**
@@ -159,7 +162,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setContentUri(Uri contentUri) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setFileTransferContentUri(mId, contentUri));
+                (iRcs, callingPackage) -> iRcs.setFileTransferContentUri(mId, contentUri,
+                        callingPackage));
     }
 
     /**
@@ -169,7 +173,8 @@ public class RcsFileTransferPart {
     @Nullable
     @WorkerThread
     public Uri getContentUri() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferContentUri(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferContentUri(mId, callingPackage));
     }
 
     /**
@@ -182,7 +187,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setContentMimeType(String contentMimeType) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setFileTransferContentType(mId, contentMimeType));
+                (iRcs, callingPackage) -> iRcs.setFileTransferContentType(mId, contentMimeType,
+                        callingPackage));
     }
 
     /**
@@ -192,7 +198,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     @Nullable
     public String getContentMimeType() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferContentType(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferContentType(mId, callingPackage));
     }
 
     /**
@@ -204,7 +211,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setFileSize(long contentLength) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setFileTransferFileSize(mId, contentLength));
+                (iRcs, callingPackage) -> iRcs.setFileTransferFileSize(mId, contentLength,
+                        callingPackage));
     }
 
     /**
@@ -213,7 +221,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public long getFileSize() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferFileSize(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferFileSize(mId, callingPackage));
     }
 
     /**
@@ -227,7 +236,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setTransferOffset(long transferOffset) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setFileTransferTransferOffset(mId, transferOffset));
+                (iRcs, callingPackage) -> iRcs.setFileTransferTransferOffset(mId, transferOffset,
+                        callingPackage));
     }
 
     /**
@@ -236,7 +246,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public long getTransferOffset() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferTransferOffset(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferTransferOffset(mId, callingPackage));
     }
 
     /**
@@ -248,7 +259,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setFileTransferStatus(@RcsFileTransferStatus int status)
             throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setFileTransferStatus(mId, status));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setFileTransferStatus(mId, status, callingPackage));
     }
 
     /**
@@ -257,7 +269,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public @RcsFileTransferStatus int getFileTransferStatus() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferStatus(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferStatus(mId, callingPackage));
     }
 
     /**
@@ -266,7 +279,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public int getWidth() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferWidth(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferWidth(mId, callingPackage));
     }
 
     /**
@@ -277,7 +291,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public void setWidth(int width) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setFileTransferWidth(mId, width));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setFileTransferWidth(mId, width, callingPackage));
     }
 
     /**
@@ -286,7 +301,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public int getHeight() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferHeight(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferHeight(mId, callingPackage));
     }
 
     /**
@@ -297,7 +313,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public void setHeight(int height) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setFileTransferHeight(mId, height));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setFileTransferHeight(mId, height, callingPackage));
     }
 
     /**
@@ -306,7 +323,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public long getLength() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferLength(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferLength(mId, callingPackage));
     }
 
     /**
@@ -317,7 +335,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public void setLength(long length) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setFileTransferLength(mId, length));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setFileTransferLength(mId, length, callingPackage));
     }
 
     /**
@@ -327,7 +346,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public Uri getPreviewUri() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferPreviewUri(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferPreviewUri(mId, callingPackage));
     }
 
     /**
@@ -339,7 +359,8 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setPreviewUri(Uri previewUri) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setFileTransferPreviewUri(mId, previewUri));
+                (iRcs, callingPackage) -> iRcs.setFileTransferPreviewUri(mId, previewUri,
+                        callingPackage));
     }
 
     /**
@@ -348,7 +369,8 @@ public class RcsFileTransferPart {
      */
     @WorkerThread
     public String getPreviewMimeType() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getFileTransferPreviewType(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getFileTransferPreviewType(mId, callingPackage));
     }
 
     /**
@@ -360,6 +382,7 @@ public class RcsFileTransferPart {
     @WorkerThread
     public void setPreviewMimeType(String previewMimeType) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setFileTransferPreviewType(mId, previewMimeType));
+                (iRcs, callingPackage) -> iRcs.setFileTransferPreviewType(mId, previewMimeType,
+                        callingPackage));
     }
 }

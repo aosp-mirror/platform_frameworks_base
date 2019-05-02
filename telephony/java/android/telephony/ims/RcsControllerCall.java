@@ -40,7 +40,7 @@ class RcsControllerCall {
         }
 
         try {
-            return serviceCall.methodOnIRcs(iRcs);
+            return serviceCall.methodOnIRcs(iRcs, mContext.getOpPackageName());
         } catch (RemoteException exception) {
             throw new RcsMessageStoreException(exception.getMessage());
         }
@@ -48,17 +48,17 @@ class RcsControllerCall {
 
     void callWithNoReturn(RcsServiceCallWithNoReturn serviceCall)
             throws RcsMessageStoreException {
-        call(iRcs -> {
-            serviceCall.methodOnIRcs(iRcs);
+        call((iRcs, callingPackage) -> {
+            serviceCall.methodOnIRcs(iRcs, callingPackage);
             return null;
         });
     }
 
     interface RcsServiceCall<R> {
-        R methodOnIRcs(IRcs iRcs) throws RemoteException;
+        R methodOnIRcs(IRcs iRcs, String callingPackage) throws RemoteException;
     }
 
     interface RcsServiceCallWithNoReturn {
-        void methodOnIRcs(IRcs iRcs) throws RemoteException;
+        void methodOnIRcs(IRcs iRcs, String callingPackage) throws RemoteException;
     }
 }
