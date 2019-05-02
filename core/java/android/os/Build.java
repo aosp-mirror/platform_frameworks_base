@@ -979,11 +979,6 @@ public class Build {
          */
         public static final int Q = CUR_DEVELOPMENT;
 
-        /**
-         * Stub for a potential new API level after P.
-         * @hide
-         */
-        public static final int P0 = Q;
     }
 
     /** The type of build, like "user" or "eng". */
