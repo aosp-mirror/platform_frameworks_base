@@ -476,4 +476,21 @@ public class WindowStateTests extends WindowTestsBase {
         root.prepareWindowToDisplayDuringRelayout(wasVisible /*wasVisible*/);
         verify(sPowerManagerWrapper).wakeUp(anyLong(), anyInt(), anyString());
     }
+
+    @Test
+    public void testVisibilityChangeSwitchUser() {
+        final WindowState window = createWindow(null, TYPE_APPLICATION, "app");
+        window.mHasSurface = true;
+        window.setShowToOwnerOnlyLocked(true);
+
+        mWm.mCurrentUserId = 1;
+        window.switchUser();
+        assertFalse(window.isVisible());
+        assertFalse(window.isVisibleByPolicy());
+
+        mWm.mCurrentUserId = 0;
+        window.switchUser();
+        assertTrue(window.isVisible());
+        assertTrue(window.isVisibleByPolicy());
+    }
 }
