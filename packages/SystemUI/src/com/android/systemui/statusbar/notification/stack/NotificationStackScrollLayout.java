@@ -6355,13 +6355,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         @Override
         public boolean canChildBeDismissedInDirection(View v, boolean isRightOrDown) {
-            boolean isValidDirection;
-            if (NotificationUtils.useNewInterruptionModel(mContext)) {
-                isValidDirection = mDismissRtl ? !isRightOrDown : isRightOrDown;
-            } else {
-                isValidDirection = true;
-            }
-            return isValidDirection && canChildBeDismissed(v);
+            //TODO: b/131242807 for why this doesn't do anything with direction
+            return canChildBeDismissed(v);
         }
     };
 
