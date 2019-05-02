@@ -23,7 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.mtp.MtpConstants;
 
-import libcore.net.MimeUtils;
+import libcore.net.MimeMap;
 
 import java.util.HashMap;
 
@@ -31,10 +31,10 @@ import java.util.HashMap;
  * MediaScanner helper class.
  * <p>
  * This heavily relies upon extension to MIME type mappings which are maintained
- * in {@link MimeUtils}, to ensure consistency across the OS.
+ * in {@link MimeMap}, to ensure consistency across the OS.
  * <p>
  * When adding a new file type, first add the MIME type mapping to
- * {@link MimeUtils}, and then add the MTP format mapping here.
+ * {@link MimeMap}, and then add the MTP format mapping here.
  *
  * @hide
  */
@@ -287,7 +287,8 @@ public class MediaFile {
 
     @UnsupportedAppUsage
     public static @NonNull String getMimeTypeForFile(@Nullable String path) {
-        final String mimeType = MimeUtils.guessMimeTypeFromExtension(getFileExtension(path));
+        String ext = getFileExtension(path);
+        final String mimeType = MimeMap.getDefault().guessMimeTypeFromExtension(ext);
         return (mimeType != null) ? mimeType : MIME_TYPE_DEFAULT;
     }
 
@@ -349,10 +350,11 @@ public class MediaFile {
      * ".flac" to "audio/flac".
      */
     private static @NonNull String normalizeMimeType(@Nullable String mimeType) {
-        final String extension = MimeUtils.guessExtensionFromMimeType(mimeType);
+        MimeMap mimeMap = MimeMap.getDefault();
+        final String extension = mimeMap.guessExtensionFromMimeType(mimeType);
         if (extension != null) {
-            final String extensionMimeType = MimeUtils.guessMimeTypeFromExtension(extension);
-            if ( extensionMimeType != null) {
+            final String extensionMimeType = mimeMap.guessMimeTypeFromExtension(extension);
+            if (extensionMimeType != null) {
                 return extensionMimeType;
             }
         }
