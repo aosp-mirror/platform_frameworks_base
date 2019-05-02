@@ -30,7 +30,8 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.provider.DeviceConfig;
-import android.provider.DeviceConfig.OnPropertyChangedListener;
+import android.provider.DeviceConfig.OnPropertiesChangedListener;
+import android.provider.DeviceConfig.Properties;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
@@ -126,29 +127,31 @@ public final class AppCompactor {
     private final ArrayList<ProcessRecord> mPendingCompactionProcesses =
             new ArrayList<ProcessRecord>();
     private final ActivityManagerService mAm;
-    private final OnPropertyChangedListener mOnFlagsChangedListener =
-            new OnPropertyChangedListener() {
+    private final OnPropertiesChangedListener mOnFlagsChangedListener =
+            new OnPropertiesChangedListener() {
                 @Override
-                public void onPropertyChanged(String namespace, String name, String value) {
+                public void onPropertiesChanged(Properties properties) {
                     synchronized (mPhenotypeFlagLock) {
-                        if (KEY_USE_COMPACTION.equals(name)) {
-                            updateUseCompaction();
-                        } else if (KEY_COMPACT_ACTION_1.equals(name)
-                                || KEY_COMPACT_ACTION_2.equals(name)) {
-                            updateCompactionActions();
-                        } else if (KEY_COMPACT_THROTTLE_1.equals(name)
-                                || KEY_COMPACT_THROTTLE_2.equals(name)
-                                || KEY_COMPACT_THROTTLE_3.equals(name)
-                                || KEY_COMPACT_THROTTLE_4.equals(name)) {
-                            updateCompactionThrottles();
-                        } else if (KEY_COMPACT_STATSD_SAMPLE_RATE.equals(name)) {
-                            updateStatsdSampleRate();
-                        } else if (KEY_COMPACT_FULL_RSS_THROTTLE_KB.equals(name)) {
-                            updateFullRssThrottle();
-                        } else if (KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB.equals(name)) {
-                            updateFullDeltaRssThrottle();
-                        } else if (KEY_COMPACT_PROC_STATE_THROTTLE.equals(name)) {
-                            updateProcStateThrottle();
+                        for (String name : properties.getKeyset()) {
+                            if (KEY_USE_COMPACTION.equals(name)) {
+                                updateUseCompaction();
+                            } else if (KEY_COMPACT_ACTION_1.equals(name)
+                                    || KEY_COMPACT_ACTION_2.equals(name)) {
+                                updateCompactionActions();
+                            } else if (KEY_COMPACT_THROTTLE_1.equals(name)
+                                    || KEY_COMPACT_THROTTLE_2.equals(name)
+                                    || KEY_COMPACT_THROTTLE_3.equals(name)
+                                    || KEY_COMPACT_THROTTLE_4.equals(name)) {
+                                updateCompactionThrottles();
+                            } else if (KEY_COMPACT_STATSD_SAMPLE_RATE.equals(name)) {
+                                updateStatsdSampleRate();
+                            } else if (KEY_COMPACT_FULL_RSS_THROTTLE_KB.equals(name)) {
+                                updateFullRssThrottle();
+                            } else if (KEY_COMPACT_FULL_DELTA_RSS_THROTTLE_KB.equals(name)) {
+                                updateFullDeltaRssThrottle();
+                            } else if (KEY_COMPACT_PROC_STATE_THROTTLE.equals(name)) {
+                                updateProcStateThrottle();
+                            }
                         }
                     }
                     if (mTestCallback != null) {
@@ -229,7 +232,7 @@ public final class AppCompactor {
      * starts the background thread if necessary.
      */
     public void init() {
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(), mOnFlagsChangedListener);
         synchronized (mPhenotypeFlagLock) {
             updateUseCompaction();

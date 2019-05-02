@@ -25,6 +25,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.os.ServiceManager;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.service.textclassifier.TextClassifierService;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
@@ -199,7 +200,7 @@ public final class TextClassificationManager {
                 getApplicationContext().getContentResolver()
                         .unregisterContentObserver(mSettingsObserver);
                 if (ConfigParser.ENABLE_DEVICE_CONFIG) {
-                    DeviceConfig.removeOnPropertyChangedListener(mSettingsObserver);
+                    DeviceConfig.removeOnPropertiesChangedListener(mSettingsObserver);
                 }
             }
         } finally {
@@ -286,7 +287,7 @@ public final class TextClassificationManager {
     }
 
     private static final class SettingsObserver extends ContentObserver
-            implements DeviceConfig.OnPropertyChangedListener {
+            implements DeviceConfig.OnPropertiesChangedListener {
 
         private final WeakReference<TextClassificationManager> mTcm;
 
@@ -298,7 +299,7 @@ public final class TextClassificationManager {
                     false /* notifyForDescendants */,
                     this);
             if (ConfigParser.ENABLE_DEVICE_CONFIG) {
-                DeviceConfig.addOnPropertyChangedListener(
+                DeviceConfig.addOnPropertiesChangedListener(
                         DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
                         ActivityThread.currentApplication().getMainExecutor(),
                         this);
@@ -311,7 +312,7 @@ public final class TextClassificationManager {
         }
 
         @Override
-        public void onPropertyChanged(String namespace, String name, String value) {
+        public void onPropertiesChanged(Properties properties) {
             invalidateSettings();
         }
 
