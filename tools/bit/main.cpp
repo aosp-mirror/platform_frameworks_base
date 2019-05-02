@@ -290,8 +290,14 @@ TestResults::OnTestStatus(TestStatus& status)
                 m_currentAction->target->name.c_str(), className.c_str(),
                 testName.c_str(), g_escapeEndColor);
 
-        string stack = get_bundle_string(results, &found, "stack", NULL);
-        if (found) {
+        bool stackFound;
+        string stack = get_bundle_string(results, &stackFound, "stack", NULL);
+        if (status.has_logcat()) {
+            const string logcat = status.logcat();
+            if (logcat.length() > 0) {
+                printf("%s\n", logcat.c_str());
+            }
+        } else if (stackFound) {
             printf("%s\n", stack.c_str());
         }
     }
