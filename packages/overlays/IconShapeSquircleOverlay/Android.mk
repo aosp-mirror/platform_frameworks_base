@@ -18,7 +18,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_RRO_THEME := IconShapeSquircle
-LOCAL_CERTIFICATE := platform
+
 LOCAL_PRODUCT_MODULE := true
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)

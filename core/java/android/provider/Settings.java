@@ -6053,9 +6053,8 @@ public final class Settings {
                 "unknown_sources_default_reversed";
 
         /**
-         * Comma-separated list of location providers that are accessible. Do not rely on
-         * this value being present or correct, or on ContentObserver notifications on the
-         * corresponding Uri.
+         * Comma-separated list of location providers that are enabled. Do not rely on this value
+         * being present or correct, or on ContentObserver notifications on the corresponding Uri.
          *
          * @deprecated The preferred methods for checking provider status and listening for changes
          * are via {@link LocationManager#isProviderEnabled(String)} and
@@ -6098,17 +6097,14 @@ public final class Settings {
 
         /**
          * Location mode is off.
-         *
-         * @deprecated See {@link #LOCATION_MODE}.
          */
-        @Deprecated
         public static final int LOCATION_MODE_OFF = 0;
 
         /**
          * This mode no longer has any distinct meaning, but is interpreted as the location mode is
          * on.
          *
-         * @deprecated See {@link #LOCATION_MODE_ON}.
+         * @deprecated See {@link #LOCATION_MODE}.
          */
         @Deprecated
         public static final int LOCATION_MODE_SENSORS_ONLY = 1;
@@ -6117,7 +6113,7 @@ public final class Settings {
          * This mode no longer has any distinct meaning, but is interpreted as the location mode is
          * on.
          *
-         * @deprecated See {@link #LOCATION_MODE_ON}.
+         * @deprecated See {@link #LOCATION_MODE}.
          */
         @Deprecated
         public static final int LOCATION_MODE_BATTERY_SAVING = 2;
@@ -6126,7 +6122,7 @@ public final class Settings {
          * This mode no longer has any distinct meaning, but is interpreted as the location mode is
          * on.
          *
-         * @deprecated See {@link #LOCATION_MODE_ON}.
+         * @deprecated See {@link #LOCATION_MODE}.
          */
         @Deprecated
         public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
@@ -6134,9 +6130,9 @@ public final class Settings {
         /**
          * Location mode is on.
          *
-         * @deprecated See {@link #LOCATION_MODE}.
+         * @hide
          */
-        @Deprecated
+        @SystemApi
         public static final int LOCATION_MODE_ON = LOCATION_MODE_HIGH_ACCURACY;
 
         /**

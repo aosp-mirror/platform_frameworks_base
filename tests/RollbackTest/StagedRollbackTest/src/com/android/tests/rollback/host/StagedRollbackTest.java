@@ -18,6 +18,7 @@ package com.android.tests.rollback.host;
 
 import static org.junit.Assert.assertTrue;
 
+import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
@@ -29,6 +30,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedRollbackTest extends BaseHostJUnit4Test {
+
+    private static final String TEST_APEX_PKG = "com.android.tests.rollback.testapex";
 
     /**
      * Runs the given phase of a test by calling into the device.
@@ -59,8 +62,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testApexOnly() throws Exception {
-        runPhase("testApexOnlyPrepareApex");
-        getDevice().reboot();
+        installTestApexV1();
         runPhase("testApexOnlyEnableRollback");
         getDevice().reboot();
         runPhase("testApexOnlyCommitRollback");
@@ -73,12 +75,45 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testApkAndApex() throws Exception {
-        runPhase("testApkAndApexPrepare");
-        getDevice().reboot();
+        installTestApexV1();
         runPhase("testApkAndApexEnableRollback");
         getDevice().reboot();
         runPhase("testApkAndApexCommitRollback");
         getDevice().reboot();
         runPhase("testApkAndApexConfirmRollback");
+    }
+
+    /**
+     * Tests that apex update expires existing rollbacks for that apex.
+     */
+    @Test
+    public void testApexRollbackExpiration() throws Exception {
+        installTestApexV1();
+        runPhase("testApexRollbackExpirationEnableRollback");
+        getDevice().reboot();
+        runPhase("testApexRollbackExpirationUpdateApex");
+        getDevice().reboot();
+        runPhase("testApexRollbackExpirationConfirmExpiration");
+    }
+
+    /**
+     * Do whatever is necessary to get version 1 of the test apex installed on
+     * the device. Try to do so without extra reboots where possible to keep
+     * the test execution time down.
+     */
+    private void installTestApexV1() throws Exception {
+        for (ITestDevice.ApexInfo apexInfo : getDevice().getActiveApexes()) {
+            if (TEST_APEX_PKG.equals(apexInfo.name)) {
+                if (apexInfo.versionCode == 1) {
+                    return;
+                }
+                getDevice().uninstallPackage(TEST_APEX_PKG);
+                getDevice().reboot();
+                break;
+            }
+        }
+
+        runPhase("installTestApexV1");
+        getDevice().reboot();
     }
 }

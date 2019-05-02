@@ -31,10 +31,13 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.policy.AccessibilityController;
@@ -62,6 +65,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private final UnlockMethodCache mUnlockMethodCache;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final AccessibilityController mAccessibilityController;
+    private final DockManager mDockManager;
 
     private int mLastState = 0;
     private boolean mTransientBiometricsError;
@@ -72,13 +76,26 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mPulsing;
     private boolean mDozing;
     private boolean mBouncerVisible;
+    private boolean mDocked;
     private boolean mLastDozing;
     private boolean mLastPulsing;
     private boolean mLastBouncerVisible;
     private int mIconColor;
+    private float mDozeAmount;
 
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
-    private float mDozeAmount;
+    private final DockManager.DockEventListener mDockEventListener =
+            new DockManager.DockEventListener() {
+                @Override
+                public void onEvent(int event) {
+                    boolean docked = event == DockManager.STATE_DOCKED
+                            || event == DockManager.STATE_DOCKED_HIDE;
+                    if (docked != mDocked) {
+                        mDocked = docked;
+                        update(true /* force */);
+                    }
+        }
+    };
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -115,7 +132,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     public LockIcon(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
-            AccessibilityController accessibilityController) {
+            AccessibilityController accessibilityController,
+            @Nullable DockManager dockManager) {
         super(context, attrs);
         mContext = context;
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
@@ -123,6 +141,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mAccessibilityController = accessibilityController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
+        mDockManager = dockManager;
     }
 
     @Override
@@ -132,6 +151,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mConfigurationController.addCallback(this);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.addListener(this);
+        if (mDockManager != null) {
+            mDockManager.addListener(mDockEventListener);
+        }
         onThemeChanged();
     }
 
@@ -142,6 +164,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mConfigurationController.removeCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.removeListener(this);
+        if (mDockManager != null) {
+            mDockManager.removeListener(mDockEventListener);
+        }
     }
 
     @Override
@@ -237,7 +262,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             mLastBouncerVisible = mBouncerVisible;
         }
 
-        setVisibility(mDozing && !mPulsing ? INVISIBLE : VISIBLE);
+        boolean invisible = mDozing && (!mPulsing || mDocked);
+        setVisibility(invisible ? INVISIBLE : VISIBLE);
         updateClickability();
     }
 

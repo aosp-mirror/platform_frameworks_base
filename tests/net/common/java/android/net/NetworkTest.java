@@ -155,4 +155,12 @@ public class NetworkTest {
     private static <T> void assertNotEqual(T t1, T t2) {
         assertFalse(Objects.equals(t1, t2));
     }
+
+    @Test
+    public void testGetPrivateDnsBypassingCopy() {
+        final Network copy = mNetwork.getPrivateDnsBypassingCopy();
+        assertEquals(mNetwork.netId, copy.netId);
+        assertNotEqual(copy.netId, copy.getNetIdForResolv());
+        assertNotEqual(mNetwork.getNetIdForResolv(), copy.getNetIdForResolv());
+    }
 }

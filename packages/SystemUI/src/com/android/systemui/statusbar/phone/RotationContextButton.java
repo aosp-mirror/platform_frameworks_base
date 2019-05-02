@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
+
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
 
 import android.animation.Animator;
@@ -45,6 +47,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -52,7 +55,9 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class RotationContextButton extends ContextualButton {
+/** Containing logic for the rotation button in nav bar. */
+public class RotationContextButton extends ContextualButton implements
+        NavigationModeController.ModeChangedListener {
     public static final boolean DEBUG_ROTATION = false;
 
     private static final int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
@@ -76,6 +81,7 @@ public class RotationContextButton extends ContextualButton {
             () -> mPendingRotationSuggestion = false;
     private Animator mRotateHideAnimator;
     private boolean mAccessibilityFeedbackEnabled;
+    private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final ViewRippler mViewRippler = new ViewRippler();
@@ -304,7 +310,8 @@ public class RotationContextButton extends ContextualButton {
     @Override
     protected KeyButtonDrawable getNewDrawable() {
         Context context = new ContextThemeWrapper(getContext().getApplicationContext(), mStyleRes);
-        return KeyButtonDrawable.create(context, mIconResId, false /* shadow */);
+        return KeyButtonDrawable.create(context, mIconResId, false /* shadow */,
+                QuickStepContract.isGesturalMode(mNavBarMode));
     }
 
     @Override
@@ -390,9 +397,9 @@ public class RotationContextButton extends ContextualButton {
     }
 
     private int computeRotationProposalTimeout() {
-        if (mAccessibilityFeedbackEnabled) return 20000;
-        if (mHoveringRotationSuggestion) return 16000;
-        return 10000;
+        if (mAccessibilityFeedbackEnabled) return 10000;
+        if (mHoveringRotationSuggestion) return 8000;
+        return 5000;
     }
 
     private boolean isRotateSuggestionIntroduced() {
@@ -412,6 +419,11 @@ public class RotationContextButton extends ContextualButton {
             Settings.Secure.putInt(cr, Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
                     numSuggestions + 1);
         }
+    }
+
+    @Override
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
     }
 
     private class TaskStackListenerImpl extends TaskStackChangeListener {

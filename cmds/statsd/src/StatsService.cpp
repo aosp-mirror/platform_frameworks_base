@@ -1202,9 +1202,10 @@ Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& p
     return Status::ok();
 }
 
-Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainName,
-                                                    int64_t trainVersionCode, int options,
-                                                    int32_t state,
+Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainNameIn,
+                                                    const int64_t trainVersionCodeIn,
+                                                    const int options,
+                                                    const int32_t state,
                                                     const std::vector<int64_t>& experimentIdsIn) {
     uid_t uid = IPCThreadState::self()->getCallingUid();
     // For testing
@@ -1224,34 +1225,64 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     // TODO: add verifier permission
 
     bool readTrainInfoSuccess = false;
-    InstallTrainInfo trainInfo;
-    if (trainVersionCode == -1 || experimentIdsIn.empty() || trainName.size() == 0) {
-        readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfo);
-    }
+    InstallTrainInfo trainInfoOnDisk;
+    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
 
-    if (trainVersionCode == -1 && readTrainInfoSuccess) {
-        trainVersionCode = trainInfo.trainVersionCode;
+    bool resetExperimentIds = false;
+    int64_t trainVersionCode = trainVersionCodeIn;
+    std::string trainNameUtf8 = std::string(String8(trainNameIn).string());
+    if (readTrainInfoSuccess) {
+        // Keep the old train version if we received an empty version.
+        if (trainVersionCodeIn == -1) {
+            trainVersionCode = trainInfoOnDisk.trainVersionCode;
+        } else if (trainVersionCodeIn != trainInfoOnDisk.trainVersionCode) {
+        // Reset experiment ids if we receive a new non-empty train version.
+            resetExperimentIds = true;
+        }
+
+        // Keep the old train name if we received an empty train name.
+        if (trainNameUtf8.size() == 0) {
+            trainNameUtf8 = trainInfoOnDisk.trainName;
+        } else if (trainNameUtf8 != trainInfoOnDisk.trainName) {
+            // Reset experiment ids if we received a new valid train name.
+            resetExperimentIds = true;
+        }
+
+        // Reset if we received a different experiment id.
+        if (!experimentIdsIn.empty() &&
+                (trainInfoOnDisk.experimentIds.empty() ||
+                 experimentIdsIn[0] != trainInfoOnDisk.experimentIds[0])) {
+            resetExperimentIds = true;
+        }
     }
 
     // Find the right experiment IDs
     std::vector<int64_t> experimentIds;
-    if (readTrainInfoSuccess && experimentIdsIn.empty()) {
-        experimentIds = trainInfo.experimentIds;
-    } else {
+    if (resetExperimentIds || !readTrainInfoSuccess) {
         experimentIds = experimentIdsIn;
+    } else {
+        experimentIds = trainInfoOnDisk.experimentIds;
+    }
+
+    if (!experimentIds.empty()) {
+        int64_t firstId = experimentIds[0];
+        switch (state) {
+            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
+                experimentIds.push_back(firstId + 1);
+                break;
+            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
+                experimentIds.push_back(firstId + 2);
+                break;
+            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
+                experimentIds.push_back(firstId + 3);
+                break;
+        }
     }
 
     // Flatten the experiment IDs to proto
     vector<uint8_t> experimentIdsProtoBuffer;
     writeExperimentIdsToProto(experimentIds, &experimentIdsProtoBuffer);
-
-    // Find the right train name
-    std::string trainNameUtf8;
-    if (readTrainInfoSuccess && trainName.size() == 0) {
-        trainNameUtf8 = trainInfo.trainName;
-    } else {
-        trainNameUtf8 = std::string(String8(trainName).string());
-    }
+    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
 
     userid_t userId = multiuser_get_user_id(uid);
     bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
@@ -1260,7 +1291,6 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
                    requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
     mProcessor->OnLogEvent(&event);
-    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
     return Status::ok();
 }
 

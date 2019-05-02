@@ -28,7 +28,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
@@ -39,7 +38,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -196,29 +194,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(KeyguardBouncer.EXPANSION_VISIBLE,
                 false /* tracking */);
         verify(mBouncer, never()).setExpansion(anyFloat());
-    }
-
-    @Test
-    public void onQsExpansionChanged_lockVisibleOnlyWhenCollapsed() {
-        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
-        mStatusBarKeyguardViewManager.onQsExpansionChanged(0);
-        verify(mLockIconContainer).setVisibility(eq(View.VISIBLE));
-
-        reset(mNotificationPanelView);
-        when(mNotificationPanelView.isQsExpanded()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onQsExpansionChanged(1f);
-        verify(mLockIconContainer).setVisibility(eq(View.INVISIBLE));
-    }
-
-    @Test
-    public void onQsExpansionChanged_lockInvisibleWhenAnimatingAway() {
-        when(mBouncer.isShowing()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onQsExpansionChanged(0);
-        verify(mLockIconContainer).setVisibility(eq(View.VISIBLE));
-
-        when(mBouncer.isAnimatingAway()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onQsExpansionChanged(0f);
-        verify(mLockIconContainer).setVisibility(eq(View.INVISIBLE));
     }
 
     private class TestableStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {
