@@ -59,7 +59,7 @@ public class TextClassifierTest {
     // TODO: Implement TextClassifierService testing.
 
     private static final TextClassificationConstants TC_CONSTANTS =
-            TextClassificationConstants.loadFromString("");
+            new TextClassificationConstants(() -> "");
     private static final LocaleList LOCALES = LocaleList.forLanguageTags("en-US");
     private static final String NO_TYPE = null;
 
