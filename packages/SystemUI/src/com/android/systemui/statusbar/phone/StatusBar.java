@@ -711,7 +711,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         setSystemUiVisibility(mDisplayId, result.mSystemUiVisibility,
                 result.mFullscreenStackSysUiVisibility, result.mDockedStackSysUiVisibility,
-                0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds);
+                0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds,
+                result.mNavbarColorManagedByIme);
         topAppWindowChanged(mDisplayId, result.mMenuVisible);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
@@ -2078,7 +2079,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override // CommandQueue
     public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -2115,7 +2117,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
         mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
-                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
+                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode,
+                navbarColorManagedByIme);
     }
 
     @Override
@@ -2236,11 +2239,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
             setSystemUiVisibility(mDisplayId, 0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
-                    mLastFullscreenStackBounds, mLastDockedStackBounds);
+                    mLastFullscreenStackBounds, mLastDockedStackBounds,
+                    false /* navbarColorManagedByIme */);
         } else {
             setSystemUiVisibility(mDisplayId, View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
                     View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
-                    mLastDockedStackBounds);
+                    mLastDockedStackBounds, false /* navbarColorManagedByIme */);
         }
     }
 

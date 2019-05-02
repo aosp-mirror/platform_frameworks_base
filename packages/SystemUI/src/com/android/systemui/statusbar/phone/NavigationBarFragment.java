@@ -505,12 +505,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mAutoHideController.touchAutoHide();
 
         mLightBarController.onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */,
-                true /* nbModeChanged */, mNavigationBarMode);
+                true /* nbModeChanged */, mNavigationBarMode, false /* navbarColorManagedByIme */);
     }
 
     @Override
     public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -538,7 +539,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             }
         }
         mLightBarController.onNavigationVisibilityChanged(
-                vis, mask, nbModeChanged, mNavigationBarMode);
+                vis, mask, nbModeChanged, mNavigationBarMode, navbarColorManagedByIme);
     }
 
     private @TransitionMode int computeBarMode(int oldVis, int newVis) {
