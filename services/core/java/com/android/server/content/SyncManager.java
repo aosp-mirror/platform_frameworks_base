@@ -3375,7 +3375,8 @@ public class SyncManager {
             }
 
             scheduleSyncOperationH(op);
-            mSyncStorageEngine.reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+            mSyncStorageEngine.reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS,
+                    target.userId);
         }
 
         /**
@@ -3877,7 +3878,8 @@ public class SyncManager {
             EventLog.writeEvent(2720,
                     syncOperation.toEventLog(SyncStorageEngine.EVENT_STOP));
             mSyncStorageEngine.stopSyncEvent(rowId, elapsedTime,
-                    resultMessage, downstreamActivity, upstreamActivity);
+                    resultMessage, downstreamActivity, upstreamActivity,
+                    syncOperation.target.userId);
         }
     }
 

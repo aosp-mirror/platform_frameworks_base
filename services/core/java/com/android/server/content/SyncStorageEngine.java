@@ -43,6 +43,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
@@ -54,6 +55,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IntPair;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -588,9 +590,10 @@ public class SyncStorageEngine {
         return mSyncRandomOffset;
     }
 
-    public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
+    public void addStatusChangeListener(int mask, int userId, ISyncStatusObserver callback) {
         synchronized (mAuthorities) {
-            mChangeListeners.register(callback, mask);
+            final long cookie = IntPair.of(userId, mask);
+            mChangeListeners.register(callback, cookie);
         }
     }
 
@@ -622,14 +625,16 @@ public class SyncStorageEngine {
         }
     }
 
-    void reportChange(int which) {
+    void reportChange(int which, int callingUserId) {
         ArrayList<ISyncStatusObserver> reports = null;
         synchronized (mAuthorities) {
             int i = mChangeListeners.beginBroadcast();
             while (i > 0) {
                 i--;
-                Integer mask = (Integer)mChangeListeners.getBroadcastCookie(i);
-                if ((which & mask.intValue()) == 0) {
+                final long cookie = (long) mChangeListeners.getBroadcastCookie(i);
+                final int userId = IntPair.first(cookie);
+                final int mask = IntPair.second(cookie);
+                if ((which & mask) == 0 || callingUserId != userId) {
                     continue;
                 }
                 if (reports == null) {
@@ -719,7 +724,7 @@ public class SyncStorageEngine {
                     new Bundle(),
                     syncExemptionFlag, callingUid, callingPid);
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, userId);
         queueBackup();
     }
 
@@ -787,7 +792,7 @@ public class SyncStorageEngine {
             requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle(),
                     ContentResolver.SYNC_EXEMPTION_NONE, callingUid, callingPid);
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, target.userId);
     }
 
     public Pair<Long, Long> getBackoff(EndPoint info) {
@@ -833,7 +838,7 @@ public class SyncStorageEngine {
             }
         }
         if (changed) {
-            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, info.userId);
         }
     }
 
@@ -871,7 +876,7 @@ public class SyncStorageEngine {
     }
 
     public void clearAllBackoffsLocked() {
-        boolean changed = false;
+        final ArraySet<Integer> changedUserIds = new ArraySet<>();
         synchronized (mAuthorities) {
             // Clear backoff for all sync adapters.
             for (AccountInfo accountInfo : mAccounts.values()) {
@@ -888,14 +893,14 @@ public class SyncStorageEngine {
                         }
                         authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
                         authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
-                        changed = true;
+                        changedUserIds.add(accountInfo.accountAndUser.userId);
                     }
                 }
             }
         }
 
-        if (changed) {
-            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        for (int i = changedUserIds.size() - 1; i > 0; i--) {
+            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, changedUserIds.valueAt(i));
         }
     }
 
@@ -921,7 +926,7 @@ public class SyncStorageEngine {
             }
             authority.delayUntil = delayUntil;
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, info.userId);
     }
 
     /**
@@ -964,7 +969,7 @@ public class SyncStorageEngine {
                     new Bundle(),
                     syncExemptionFlag, callingUid, callingPid);
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, userId);
         mContext.sendBroadcast(ContentResolver.ACTION_SYNC_CONN_STATUS_CHANGED);
         queueBackup();
     }
@@ -1015,7 +1020,7 @@ public class SyncStorageEngine {
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = pendingValue;
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING, info.userId);
     }
 
     /**
@@ -1103,7 +1108,7 @@ public class SyncStorageEngine {
                     activeSyncContext.mStartTime);
             getCurrentSyncs(authorityInfo.target.userId).add(syncInfo);
         }
-        reportActiveChange();
+        reportActiveChange(activeSyncContext.mSyncOperation.target.userId);
         return syncInfo;
     }
 
@@ -1120,14 +1125,14 @@ public class SyncStorageEngine {
             getCurrentSyncs(userId).remove(syncInfo);
         }
 
-        reportActiveChange();
+        reportActiveChange(userId);
     }
 
     /**
      * To allow others to send active change reports, to poke clients.
      */
-    public void reportActiveChange() {
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
+    public void reportActiveChange(int userId) {
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE, userId);
     }
 
     /**
@@ -1162,12 +1167,12 @@ public class SyncStorageEngine {
             if (Log.isLoggable(TAG, Log.VERBOSE)) Slog.v(TAG, "returning historyId " + id);
         }
 
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS, op.target.userId);
         return id;
     }
 
     public void stopSyncEvent(long historyId, long elapsedTime, String resultMessage,
-                              long downstreamActivity, long upstreamActivity) {
+                              long downstreamActivity, long upstreamActivity, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Slog.v(TAG, "stopSyncEvent: historyId=" + historyId);
@@ -1307,7 +1312,7 @@ public class SyncStorageEngine {
             }
         }
 
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS, userId);
     }
 
     /**
