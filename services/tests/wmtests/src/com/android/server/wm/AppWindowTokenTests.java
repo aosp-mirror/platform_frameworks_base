@@ -153,7 +153,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @FlakyTest(bugId = 131005232)
     public void testLandscapeSeascapeRotationByApp() {
         // Some plumbing to get the service ready for rotation updates.
-        mWm.mDisplayReady = true;
         mWm.mDisplayEnabled = true;
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
@@ -186,7 +185,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testLandscapeSeascapeRotationByPolicy() {
         // Some plumbing to get the service ready for rotation updates.
-        mWm.mDisplayReady = true;
         mWm.mDisplayEnabled = true;
 
         final DisplayRotation spiedRotation = spy(mDisplayContent.getDisplayRotation());
