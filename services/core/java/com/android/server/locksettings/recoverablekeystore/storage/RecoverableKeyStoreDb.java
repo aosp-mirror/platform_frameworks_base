@@ -333,6 +333,7 @@ public class RecoverableKeyStoreDb {
         String[] selectionArguments = new String[] {String.valueOf(userId)};
 
         ensureUserMetadataEntryExists(userId);
+        invalidateKeysForUser(userId);
         return db.update(UserMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
     }
 
@@ -394,16 +395,13 @@ public class RecoverableKeyStoreDb {
     /**
      * Updates status of old keys to {@code RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE}.
      */
-    public void invalidateKeysWithOldGenerationId(int userId, int newGenerationId) {
+    public void invalidateKeysForUser(int userId) {
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS,
                 RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE);
-        String selection =
-                KeysEntry.COLUMN_NAME_USER_ID + " = ? AND "
-                + KeysEntry.COLUMN_NAME_GENERATION_ID + " < ?";
-        db.update(KeysEntry.TABLE_NAME, values, selection,
-            new String[] {String.valueOf(userId), String.valueOf(newGenerationId)});
+        String selection = KeysEntry.COLUMN_NAME_USER_ID + " = ?";
+        db.update(KeysEntry.TABLE_NAME, values, selection, new String[] {String.valueOf(userId)});
     }
 
     /**
