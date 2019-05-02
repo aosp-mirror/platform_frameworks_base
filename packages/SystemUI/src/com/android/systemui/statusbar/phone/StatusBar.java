@@ -436,7 +436,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onUserSetupChanged() {
             final boolean userSetup = mDeviceProvisionedController.isUserSetup(
                     mDeviceProvisionedController.getCurrentUser());
-            // STOPSHIP(kozynski, b/129405675) Remove log
             Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for user "
                     + mDeviceProvisionedController.getCurrentUser());
             if (MULTIUSER_DEBUG) {
