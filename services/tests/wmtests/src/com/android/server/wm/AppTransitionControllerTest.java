@@ -105,6 +105,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testTransitWithinTask() {
         synchronized (mWm.mGlobalLock) {
             final AppWindowToken opening = createAppWindowToken(mDisplayContent,
