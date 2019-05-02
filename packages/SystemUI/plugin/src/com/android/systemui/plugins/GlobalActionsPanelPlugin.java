@@ -26,8 +26,8 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
  * Plugin which provides a "Panel" {@link View} to be rendered inside of the GlobalActions menu.
  *
  * Implementations should construct a new {@link PanelViewController} with the given
- * {@link Callbacks} instance inside of {@link #onPanelShown(Callbacks)}, and should not hold onto
- * a reference, instead allowing Global Actions to manage the lifetime of the object.
+ * {@link Callbacks} instance inside of {@link #onPanelShown(Callbacks, boolean)}, and should not
+ * hold onto a reference, instead allowing Global Actions to manage the lifetime of the object.
  *
  * Under this assumption, {@link PanelViewController} represents the lifetime of a single invocation
  * of the Global Actions menu. The {@link View} for the Panel is generated when the
@@ -50,9 +50,10 @@ public interface GlobalActionsPanelPlugin extends Plugin {
      *
      * @param callbacks {@link Callbacks} instance that can be used by the Panel to interact with
      *                  the Global Actions menu.
+     * @param deviceLocked Indicates whether or not the device is currently locked.
      * @return A {@link PanelViewController} instance used to receive Global Actions events.
      */
-    PanelViewController onPanelShown(Callbacks callbacks);
+    PanelViewController onPanelShown(Callbacks callbacks, boolean deviceLocked);
 
     /**
      * Provides methods to interact with the Global Actions menu.
@@ -92,5 +93,10 @@ public interface GlobalActionsPanelPlugin extends Plugin {
          * {@link #getPanelContent()}) is dismissed.
          */
         void onDismissed();
+
+        /**
+         * Invoked when the device is either locked or unlocked.
+         */
+        void onDeviceLockStateChanged(boolean locked);
     }
 }
