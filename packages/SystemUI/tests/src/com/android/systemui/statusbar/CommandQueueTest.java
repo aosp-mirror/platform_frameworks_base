@@ -128,20 +128,6 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testTopAppWindowChanged() {
-        mCommandQueue.topAppWindowChanged(DEFAULT_DISPLAY, true);
-        waitForIdleSync();
-        verify(mCallbacks).topAppWindowChanged(eq(DEFAULT_DISPLAY), eq(true));
-    }
-
-    @Test
-    public void testTopAppWindowChangedForSecondaryDisplay() {
-        mCommandQueue.topAppWindowChanged(SECONDARY_DISPLAY, true);
-        waitForIdleSync();
-        verify(mCallbacks).topAppWindowChanged(eq(SECONDARY_DISPLAY), eq(true));
-    }
-
-    @Test
     public void testShowImeButton() {
         mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
