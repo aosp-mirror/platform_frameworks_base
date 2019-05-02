@@ -11866,6 +11866,7 @@ public final class Settings {
          * sync_adapter_duration            (long)
          * exempted_sync_duration           (long)
          * system_interaction_duration      (long)
+         * initial_foreground_service_start_duration (long)
          * stable_charging_threshold        (long)
          *
          * idle_duration        (long) // This is deprecated and used to circumvent b/26355386.
