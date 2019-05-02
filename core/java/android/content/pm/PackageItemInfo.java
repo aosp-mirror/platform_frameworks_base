@@ -62,6 +62,7 @@ public class PackageItemInfo {
      *
      * @deprecated Use {@link TextUtils#SAFE_STRING_FLAG_TRIM} instead
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
@@ -75,6 +76,7 @@ public class PackageItemInfo {
      *
      * @deprecated Use {@link TextUtils#SAFE_STRING_FLAG_SINGLE_LINE} instead
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
@@ -88,6 +90,7 @@ public class PackageItemInfo {
      *
      * @deprecated Use {@link TextUtils#SAFE_STRING_FLAG_FIRST_LINE} instead
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
