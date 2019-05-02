@@ -16,7 +16,7 @@
 
 package com.android.server.biometrics;
 
-public interface Metrics {
+public interface Constants {
     /** The log tag */
     String logTag();
 
@@ -31,4 +31,6 @@ public interface Metrics {
     /** Integers for MetricsLogger.action() */
     int actionBiometricAuth();
     int actionBiometricEnroll();
+
+    int acquireVendorCode();
 }

@@ -138,7 +138,7 @@ public abstract class BiometricServiceBase extends SystemService
     /**
      * @return the metrics constants for a biometric implementation.
      */
-    protected abstract Metrics getMetrics();
+    protected abstract Constants getConstants();
 
     /**
      * @param userId
@@ -220,7 +220,7 @@ public abstract class BiometricServiceBase extends SystemService
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation) {
-            super(context, getMetrics(), daemon, halDeviceId, token, listener, targetUserId,
+            super(context, getConstants(), daemon, halDeviceId, token, listener, targetUserId,
                     groupId, opId, restricted, owner, cookie, requireConfirmation);
         }
 
@@ -283,7 +283,7 @@ public abstract class BiometricServiceBase extends SystemService
                 IBinder token, ServiceListener listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner,
                 final int[] disabledFeatures) {
-            super(context, getMetrics(), daemon, halDeviceId, token, listener,
+            super(context, getConstants(), daemon, halDeviceId, token, listener,
                     userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
                     disabledFeatures);
         }
@@ -302,7 +302,7 @@ public abstract class BiometricServiceBase extends SystemService
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int templateId, int groupId, int userId,
                 boolean restricted, String owner) {
-            super(context, getMetrics(), daemon, halDeviceId, token, listener, templateId, groupId,
+            super(context, getConstants(), daemon, halDeviceId, token, listener, templateId, groupId,
                     userId, restricted, owner, getBiometricUtils());
         }
 
@@ -329,7 +329,7 @@ public abstract class BiometricServiceBase extends SystemService
                 ServiceListener listener, int groupId, int userId, boolean restricted,
                 String owner, List<? extends BiometricAuthenticator.Identifier> enrolledList,
                 BiometricUtils utils) {
-            super(context, getMetrics(), daemon, halDeviceId, token, listener, groupId, userId,
+            super(context, getConstants(), daemon, halDeviceId, token, listener, groupId, userId,
                     restricted, owner);
             mEnrolledList = enrolledList;
             mUtils = utils;
@@ -655,7 +655,7 @@ public abstract class BiometricServiceBase extends SystemService
     @Override
     public void serviceDied(long cookie) {
         Slog.e(getTag(), "HAL died");
-        mMetricsLogger.count(getMetrics().tagHalDied(), 1);
+        mMetricsLogger.count(getConstants().tagHalDied(), 1);
         mHALDeathCount++;
         mCurrentUserId = UserHandle.USER_NULL;
         handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
@@ -845,7 +845,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         mHandler.post(() -> {
-            mMetricsLogger.histogram(getMetrics().tagAuthToken(), opId != 0L ? 1 : 0);
+            mMetricsLogger.histogram(getConstants().tagAuthToken(), opId != 0L ? 1 : 0);
 
             // Get performance stats object for this user.
             HashMap<Integer, PerformanceStats> pmap
