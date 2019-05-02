@@ -159,6 +159,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
 
     /**
+     * Definitions for properties related to Content Suggestions.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_INTELLIGENCE_CONTENT_SUGGESTIONS =
+            "intelligence_content_suggestions";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide

@@ -18,7 +18,6 @@
 package com.android.internal.app;
 
 import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,9 +27,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.metrics.LogMaker;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -67,10 +64,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
 
     private static final float RECENCY_MULTIPLIER = 2.f;
 
-    // message types
-    private static final int RESOLVER_RANKER_SERVICE_RESULT = 0;
-    private static final int RESOLVER_RANKER_RESULT_TIMEOUT = 1;
-
     // timeout for establishing connections with a ResolverRankerService.
     private static final int CONNECTION_COST_TIMEOUT_MILLIS = 200;
     // timeout for establishing connections with a ResolverRankerService, collecting features and
@@ -93,57 +86,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     private Context mContext;
     private CountDownLatch mConnectSignal;
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case RESOLVER_RANKER_SERVICE_RESULT:
-                    if (DEBUG) {
-                        Log.d(TAG, "RESOLVER_RANKER_SERVICE_RESULT");
-                    }
-                    if (mHandler.hasMessages(RESOLVER_RANKER_RESULT_TIMEOUT)) {
-                        if (msg.obj != null) {
-                            final List<ResolverTarget> receivedTargets =
-                                    (List<ResolverTarget>) msg.obj;
-                            if (receivedTargets != null && mTargets != null
-                                    && receivedTargets.size() == mTargets.size()) {
-                                final int size = mTargets.size();
-                                boolean isUpdated = false;
-                                for (int i = 0; i < size; ++i) {
-                                    final float predictedProb =
-                                            receivedTargets.get(i).getSelectProbability();
-                                    if (predictedProb != mTargets.get(i).getSelectProbability()) {
-                                        mTargets.get(i).setSelectProbability(predictedProb);
-                                        isUpdated = true;
-                                    }
-                                }
-                                if (isUpdated) {
-                                    mRankerServiceName = mResolvedRankerName;
-                                }
-                            } else {
-                                Log.e(TAG, "Sizes of sent and received ResolverTargets diff.");
-                            }
-                        } else {
-                            Log.e(TAG, "Receiving null prediction results.");
-                        }
-                        mHandler.removeMessages(RESOLVER_RANKER_RESULT_TIMEOUT);
-                        afterCompute();
-                    }
-                    break;
-
-                case RESOLVER_RANKER_RESULT_TIMEOUT:
-                    if (DEBUG) {
-                        Log.d(TAG, "RESOLVER_RANKER_RESULT_TIMEOUT; unbinding services");
-                    }
-                    mHandler.removeMessages(RESOLVER_RANKER_SERVICE_RESULT);
-                    afterCompute();
-                    break;
-
-                default:
-                    super.handleMessage(msg);
-            }
-        }
-    };
-
     public ResolverRankerServiceResolverComparator(Context context, Intent intent,
                 String referrerPackage, AfterCompute afterCompute) {
         super(context, intent);
@@ -159,11 +101,35 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         setCallBack(afterCompute);
     }
 
+    @Override
+    public void handleResultMessage(Message msg) {
+        if (msg.what != RANKER_SERVICE_RESULT) {
+            return;
+        }
+        final List<ResolverTarget> receivedTargets = (List<ResolverTarget>) msg.obj;
+        if (receivedTargets != null && mTargets != null
+                    && receivedTargets.size() == mTargets.size()) {
+            final int size = mTargets.size();
+            boolean isUpdated = false;
+            for (int i = 0; i < size; ++i) {
+                final float predictedProb =
+                        receivedTargets.get(i).getSelectProbability();
+                if (predictedProb != mTargets.get(i).getSelectProbability()) {
+                    mTargets.get(i).setSelectProbability(predictedProb);
+                    isUpdated = true;
+                }
+            }
+            if (isUpdated) {
+                mRankerServiceName = mResolvedRankerName;
+            }
+        } else {
+            Log.e(TAG, "Sizes of sent and received ResolverTargets diff.");
+        }
+    }
+
     // compute features for each target according to usage stats of targets.
     @Override
-    public void compute(List<ResolvedComponentInfo> targets) {
-        reset();
-
+    public void doCompute(List<ResolvedComponentInfo> targets) {
         final long recentSinceTime = mCurrentTime - RECENCY_TIME_PERIOD;
 
         float mostRecencyScore = 1.0f;
@@ -322,8 +288,8 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     // unbind the service and clear unhandled messges.
     @Override
     public void destroy() {
-        mHandler.removeMessages(RESOLVER_RANKER_SERVICE_RESULT);
-        mHandler.removeMessages(RESOLVER_RANKER_RESULT_TIMEOUT);
+        mHandler.removeMessages(RANKER_SERVICE_RESULT);
+        mHandler.removeMessages(RANKER_RESULT_TIMEOUT);
         if (mConnection != null) {
             mContext.unbindService(mConnection);
             mConnection.destroy();
@@ -417,15 +383,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         return null;
     }
 
-    // set a watchdog, to avoid waiting for ranking service for too long.
-    private void startWatchDog(int timeOutLimit) {
-        if (DEBUG) Log.d(TAG, "Setting watchdog timer for " + timeOutLimit + "ms");
-        if (mHandler == null) {
-            Log.d(TAG, "Error: Handler is Null; Needs to be initialized.");
-        }
-        mHandler.sendEmptyMessageDelayed(RESOLVER_RANKER_RESULT_TIMEOUT, timeOutLimit);
-    }
-
     private class ResolverRankerServiceConnection implements ServiceConnection {
         private final CountDownLatch mConnectSignal;
 
@@ -442,7 +399,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
                 }
                 synchronized (mLock) {
                     final Message msg = Message.obtain();
-                    msg.what = RESOLVER_RANKER_SERVICE_RESULT;
+                    msg.what = RANKER_SERVICE_RESULT;
                     msg.obj = targets;
                     mHandler.sendMessage(msg);
                 }
@@ -477,12 +434,13 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
         }
     }
 
-    private void reset() {
+    @Override
+    void beforeCompute() {
+        super.beforeCompute();
         mTargetsDict.clear();
         mTargets = null;
         mRankerServiceName = new ComponentName(mContext, this.getClass());
         mResolvedRankerName = null;
-        startWatchDog(WATCHDOG_TIMEOUT_MILLIS);
         initRanker(mContext);
     }
 

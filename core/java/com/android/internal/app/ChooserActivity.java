@@ -114,6 +114,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ImageUtils;
+import com.android.internal.widget.ResolverDrawerLayout;
 
 import com.google.android.collect.Lists;
 
@@ -142,6 +143,8 @@ public class ChooserActivity extends ResolverActivity {
      */
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
+
+    private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 
     private static final boolean DEBUG = false;
 
@@ -502,6 +505,21 @@ public class ChooserActivity extends ResolverActivity {
                     chooserHeader.setElevation(defaultElevation);
                 }
             });
+
+            mResolverDrawerLayout.setOnCollapsedChangedListener(
+                    new ResolverDrawerLayout.OnCollapsedChangedListener() {
+
+                        // Only consider one expansion per activity creation
+                        private boolean mWrittenOnce = false;
+
+                        @Override
+                        public void onCollapsedChanged(boolean isCollapsed) {
+                            if (!isCollapsed && !mWrittenOnce) {
+                                incrementNumSheetExpansions();
+                                mWrittenOnce = true;
+                            }
+                        }
+                    });
         }
 
         if (DEBUG) {
@@ -879,6 +897,15 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         return CONTENT_PREVIEW_TEXT;
+    }
+
+    private int getNumSheetExpansions() {
+        return getPreferences(Context.MODE_PRIVATE).getInt(PREF_NUM_SHEET_EXPANSIONS, 0);
+    }
+
+    private void incrementNumSheetExpansions() {
+        getPreferences(Context.MODE_PRIVATE).edit().putInt(PREF_NUM_SHEET_EXPANSIONS,
+                getNumSheetExpansions() + 1).apply();
     }
 
     @Override
@@ -2030,7 +2057,8 @@ public class ChooserActivity extends ResolverActivity {
         public static final int TARGET_STANDARD_AZ = 3;
 
         private static final int MAX_SUGGESTED_APP_TARGETS = 4;
-        private static final int MAX_TARGETS_PER_SERVICE = 2;
+        private static final int MAX_CHOOSER_TARGETS_PER_APP = 2;
+        private static final int MAX_SHORTCUT_TARGETS_PER_APP = 8;
 
         private static final int MAX_SERVICE_TARGETS = 8;
 
@@ -2356,9 +2384,11 @@ public class ChooserActivity extends ResolverActivity {
             final float baseScore = getBaseScore(origTarget, isShortcutResult);
             Collections.sort(targets, mBaseTargetComparator);
 
+            final int maxTargets = isShortcutResult ? MAX_SHORTCUT_TARGETS_PER_APP
+                                       : MAX_CHOOSER_TARGETS_PER_APP;
             float lastScore = 0;
             boolean shouldNotify = false;
-            for (int i = 0, N = Math.min(targets.size(), MAX_TARGETS_PER_SERVICE); i < N; i++) {
+            for (int i = 0, count = Math.min(targets.size(), maxTargets); i < count; i++) {
                 final ChooserTarget target = targets.get(i);
                 float targetScore = target.getScore();
                 targetScore *= baseScore;
@@ -2491,18 +2521,24 @@ public class ChooserActivity extends ResolverActivity {
 
         private DirectShareViewHolder mDirectShareViewHolder;
         private int mChooserTargetWidth = 0;
+        private boolean mShowAzLabelIfPoss;
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
         private static final int VIEW_TYPE_PROFILE = 3;
+        private static final int VIEW_TYPE_AZ_LABEL = 4;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
 
+        private static final int NUM_EXPANSIONS_TO_HIDE_AZ_LABEL = 20;
+
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
+
+            mShowAzLabelIfPoss = getNumSheetExpansions() < NUM_EXPANSIONS_TO_HIDE_AZ_LABEL;
 
             wrappedAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
@@ -2556,6 +2592,7 @@ public class ChooserActivity extends ResolverActivity {
                             + getProfileRowCount()
                             + getServiceTargetRowCount()
                             + getCallerAndRankedTargetRowCount()
+                            + getAzLabelRowCount()
                             + Math.ceil(
                             (float) mChooserListAdapter.getAlphaTargetCount()
                                     / getMaxTargetsPerRow())
@@ -2593,6 +2630,11 @@ public class ChooserActivity extends ResolverActivity {
             return 0;
         }
 
+        public int getAzLabelRowCount() {
+            // Only show a label if the a-z list is showing
+            return (mShowAzLabelIfPoss && mChooserListAdapter.getAlphaTargetCount() > 0) ? 1 : 0;
+        }
+
         @Override
         public Object getItem(int position) {
             // We have nothing useful to return here.
@@ -2617,6 +2659,10 @@ public class ChooserActivity extends ResolverActivity {
                 return createProfileView(convertView, parent);
             }
 
+            if (viewType == VIEW_TYPE_AZ_LABEL) {
+                return createAzLabelView(parent);
+            }
+
             if (convertView == null) {
                 holder = createViewHolder(viewType, parent);
             } else {
@@ -2630,27 +2676,29 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0 && getContentPreviewRowCount() == 1) {
-                return VIEW_TYPE_CONTENT_PREVIEW;
-            }
+            int count;
 
-            if (getProfileRowCount() == 1 && position == getContentPreviewRowCount()) {
-                return VIEW_TYPE_PROFILE;
-            }
+            int countSum = (count = getContentPreviewRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_CONTENT_PREVIEW;
 
-            final int start = getFirstRowPosition(position);
-            final int startType = mChooserListAdapter.getPositionTargetType(start);
+            countSum += (count = getProfileRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_PROFILE;
 
-            if (startType == ChooserListAdapter.TARGET_SERVICE) {
-                return VIEW_TYPE_DIRECT_SHARE;
-            }
+            countSum += (count = getServiceTargetRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_DIRECT_SHARE;
+
+            countSum += (count = getCallerAndRankedTargetRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_NORMAL;
+
+            countSum += (count = getAzLabelRowCount());
+            if (count > 0 && position < countSum) return VIEW_TYPE_AZ_LABEL;
 
             return VIEW_TYPE_NORMAL;
         }
 
         @Override
         public int getViewTypeCount() {
-            return 4;
+            return 5;
         }
 
         private ViewGroup createContentPreviewView(View convertView, ViewGroup parent) {
@@ -2675,6 +2723,10 @@ public class ChooserActivity extends ResolverActivity {
             mProfileView.setOnClickListener(ChooserActivity.this::onProfileClick);
             bindProfileView();
             return profileRow;
+        }
+
+        private View createAzLabelView(ViewGroup parent) {
+            return mLayoutInflater.inflate(R.layout.chooser_az_label_row, parent, false);
         }
 
         private RowViewHolder loadViewsIntoRow(RowViewHolder holder) {
@@ -2775,13 +2827,21 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         /**
-         * Need to merge CALLER + ranked STANDARD into a single row. All other types
-         * are placed into their own row as determined by their target type, and dividers
-         * are added in the list to separate each type.
+         * Need to merge CALLER + ranked STANDARD into a single row and prevent a separator from
+         * showing on top of the AZ list if the AZ label is visible. All other types are placed into
+         * their own row as determined by their target type, and dividers are added in the list to
+         * separate each type.
          */
         int getRowType(int rowPosition) {
+            // Merge caller and ranked standard into a single row
             int positionType = mChooserListAdapter.getPositionTargetType(rowPosition);
             if (positionType == ChooserListAdapter.TARGET_CALLER) {
+                return ChooserListAdapter.TARGET_STANDARD;
+            }
+
+            // If an the A-Z label is shown, prevent a separator from appearing by making the A-Z
+            // row type the same as the suggestion row type
+            if (getAzLabelRowCount() > 0 && positionType == ChooserListAdapter.TARGET_STANDARD_AZ) {
                 return ChooserListAdapter.TARGET_STANDARD;
             }
 
@@ -2863,6 +2923,8 @@ public class ChooserActivity extends ResolverActivity {
             if (row < callerAndRankedRows + serviceRows) {
                 return serviceCount + (row - serviceRows) * getMaxTargetsPerRow();
             }
+
+            row -= getAzLabelRowCount();
 
             return callerAndRankedCount + serviceCount
                     + (row - callerAndRankedRows - serviceRows) * getMaxTargetsPerRow();

@@ -284,10 +284,5 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mUnlockMethodCache).addListener(eq(mController));
         verify(mStatusBarStateController).addCallback(eq(mController));
         verify(mKeyguardUpdateMonitor, times(2)).registerCallback(any());
-
-        mController.destroy();
-        verify(mUnlockMethodCache).removeListener(eq(mController));
-        verify(mStatusBarStateController).removeCallback(eq(mController));
-        verify(mKeyguardUpdateMonitor, times(2)).removeCallback(any());
     }
 }

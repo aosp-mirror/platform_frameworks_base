@@ -51,7 +51,7 @@ public class ContextualButton extends ButtonDispatcher {
      * Reload the drawable from resource id, should reapply the previous dark intensity.
      */
     public void updateIcon() {
-        if (getCurrentView() == null || !getCurrentView().isAttachedToWindow()) {
+        if (getCurrentView() == null || !getCurrentView().isAttachedToWindow() || mIconResId == 0) {
             return;
         }
         final KeyButtonDrawable currentDrawable = getImageDrawable();
@@ -92,7 +92,7 @@ public class ContextualButton extends ButtonDispatcher {
             setVisibility(View.VISIBLE);
             return true;
         }
-        return mGroup.setButtonVisiblity(getId(), true /* visible */) == View.VISIBLE;
+        return mGroup.setButtonVisibility(getId(), true /* visible */) == View.VISIBLE;
     }
 
     /**
@@ -104,7 +104,7 @@ public class ContextualButton extends ButtonDispatcher {
             setVisibility(View.INVISIBLE);
             return false;
         }
-        return mGroup.setButtonVisiblity(getId(), false /* visible */) != View.VISIBLE;
+        return mGroup.setButtonVisibility(getId(), false /* visible */) != View.VISIBLE;
     }
 
     /**

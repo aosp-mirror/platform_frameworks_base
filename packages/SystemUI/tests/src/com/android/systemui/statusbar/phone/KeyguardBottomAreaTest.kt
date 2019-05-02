@@ -22,8 +22,6 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
 
     @Mock
     private lateinit var mStatusBar: StatusBar
-    @Mock
-    private lateinit var mKeyguardIndicationController: KeyguardIndicationController
     private lateinit var mKeyguardBottomArea: KeyguardBottomAreaView
 
     @Before
@@ -32,7 +30,6 @@ class KeyguardBottomAreaTest : SysuiTestCase() {
         mKeyguardBottomArea = LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_bottom_area, null, false) as KeyguardBottomAreaView
         mKeyguardBottomArea.setStatusBar(mStatusBar)
-        mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController)
     }
 
     @Test

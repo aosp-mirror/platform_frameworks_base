@@ -189,8 +189,11 @@ public:
      * Binder call to log BinaryPushStateChanged atom.
      */
     virtual Status sendBinaryPushStateChangedAtom(
-            const android::String16& trainName, int64_t trainVersionCode, int options,
-            int32_t state, const std::vector<int64_t>& experimentIds) override;
+            const android::String16& trainNameIn,
+            const int64_t trainVersionCodeIn,
+            const int options,
+            const int32_t state,
+            const std::vector<int64_t>& experimentIdsIn) override;
 
     /**
      * Binder call to get registered experiment IDs.
@@ -326,6 +329,11 @@ private:
      * StatsLog.write(APP_BREADCRUMB_REPORTED).
      */
     status_t cmd_log_app_breadcrumb(int outFd, const Vector<String8>& args);
+
+    /**
+     * Write an BinaryPushStateChanged event, as if calling StatsLog.logBinaryPushStateChanged().
+     */
+    status_t cmd_log_binary_push(int outFd, const Vector<String8>& args);
 
     /**
      * Print contents of a pulled metrics source.

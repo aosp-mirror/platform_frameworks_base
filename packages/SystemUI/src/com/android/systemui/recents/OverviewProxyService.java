@@ -22,9 +22,6 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
-import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
-import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
-import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INPUT_MONITOR;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
@@ -35,6 +32,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import android.annotation.FloatRange;
+import android.app.ActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -60,7 +58,6 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Prefs;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -102,10 +99,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     // Max backoff caps at 5 mins
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
-    // Default interaction flags if swipe up is disabled before connecting to launcher
-    private static final int DEFAULT_DISABLE_SWIPE_UP_STATE = FLAG_DISABLE_SWIPE_UP
-            | FLAG_SHOW_OVERVIEW_BUTTON;
-
     private final Context mContext;
     private final Handler mHandler;
     private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
@@ -118,7 +111,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
-    private @InteractionType int mInteractionFlags;
     private @SystemUiStateFlags int mSysUiStateFlags;
     private boolean mBound;
     private boolean mIsEnabled;
@@ -143,6 +135,25 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                             StatusBar.class);
                     if (statusBar != null) {
                         statusBar.showScreenPinningRequest(taskId, false /* allowCancel */);
+                    }
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void stopScreenPinning() {
+            if (!verifyCaller("stopScreenPinning")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> {
+                    try {
+                        ActivityTaskManager.getService().stopSystemLockTaskMode();
+                    } catch (RemoteException e) {
+                        Log.e(TAG_OPS, "Failed to stop screen pinning");
                     }
                 });
             } finally {
@@ -208,27 +219,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     }
                 });
             } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public void setInteractionState(@InteractionType int flags) {
-            if (!verifyCaller("setInteractionState")) {
-                return;
-            }
-            long token = Binder.clearCallingIdentity();
-            try {
-                if (mInteractionFlags != flags) {
-                    mInteractionFlags = flags;
-                    mHandler.post(() -> {
-                        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-                            mConnectionCallbacks.get(i).onInteractionFlagsChanged(flags);
-                        }
-                    });
-                }
-            } finally {
-                Prefs.putInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS, mInteractionFlags);
                 Binder.restoreCallingIdentity(token);
             }
         }
@@ -360,12 +350,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public void onReceive(Context context, Intent intent) {
             updateEnabledState();
 
-            // When launcher service is disabled, reset interaction flags because it is inactive
-            if (!isEnabled()) {
-                mInteractionFlags = getDefaultInteractionFlags();
-                Prefs.remove(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS);
-            }
-
             // Reconnect immediately, instead of waiting for resume to arrive.
             startConnectionToCurrentUser();
         }
@@ -459,8 +443,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
-        mInteractionFlags = Prefs.getInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS,
-                getDefaultInteractionFlags());
         mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources());
         mSupportsRoundedCornersOnWindows = ScreenDecorationsUtils
                 .supportsRoundedCornersOnWindows(mContext.getResources());
@@ -633,7 +615,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void addCallback(OverviewProxyListener listener) {
         mConnectionCallbacks.add(listener);
         listener.onConnectionChanged(mOverviewProxy != null);
-        listener.onInteractionFlagsChanged(mInteractionFlags);
         listener.onBackButtonAlphaChanged(mBackButtonAlpha, false);
     }
 
@@ -643,7 +624,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public boolean shouldShowSwipeUpUI() {
-        return isEnabled() && ((mInteractionFlags & FLAG_DISABLE_SWIPE_UP) == 0);
+        return isEnabled() && !QuickStepContract.isLegacyMode(mNavBarMode);
     }
 
     public boolean isEnabled() {
@@ -652,10 +633,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public IOverviewProxy getProxy() {
         return mOverviewProxy;
-    }
-
-    public int getInteractionFlags() {
-        return mInteractionFlags;
     }
 
     private void disconnectFromLauncherService() {
@@ -671,13 +648,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             notifyBackButtonAlphaChanged(1f, false /* animate */);
             notifyConnectionChanged();
         }
-    }
-
-    private int getDefaultInteractionFlags() {
-        // If there is no settings available use device default or get it from settings
-        return QuickStepContract.isLegacyMode(mNavBarMode)
-                ? DEFAULT_DISABLE_SWIPE_UP_STATE
-                : 0;
     }
 
     private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
@@ -745,7 +715,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  isCurrentUserSetup="); pw.println(mDeviceProvisionedController
                 .isCurrentUserSetup());
         pw.print("  connectionBackoffAttempts="); pw.println(mConnectionBackoffAttempts);
-        pw.print("  interactionFlags="); pw.println(mInteractionFlags);
 
         pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
@@ -755,7 +724,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
         default void onQuickStepStarted() {}
-        default void onInteractionFlagsChanged(@InteractionType int flags) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
         default void onBackButtonAlphaChanged(float alpha, boolean animate) {}

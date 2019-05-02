@@ -183,7 +183,6 @@ public abstract class ExplicitHealthCheckService extends Service {
      */
     @SystemApi
     public static final class PackageConfig implements Parcelable {
-        // TODO: Receive from DeviceConfig flag
         private static final long DEFAULT_HEALTH_CHECK_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(1);
 
         private final String mPackageName;

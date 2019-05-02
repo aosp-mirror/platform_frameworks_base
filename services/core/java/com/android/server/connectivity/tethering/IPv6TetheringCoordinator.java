@@ -16,7 +16,6 @@
 
 package com.android.server.connectivity.tethering;
 
-import android.net.ConnectivityManager;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -164,11 +163,6 @@ public class IPv6TetheringCoordinator {
     }
 
     private LinkProperties getInterfaceIPv6LinkProperties(IpServer ipServer) {
-        if (ipServer.interfaceType() == ConnectivityManager.TETHERING_BLUETOOTH) {
-            // TODO: Figure out IPv6 support on PAN interfaces.
-            return null;
-        }
-
         final Downstream ds = findDownstream(ipServer);
         if (ds == null) return null;
 

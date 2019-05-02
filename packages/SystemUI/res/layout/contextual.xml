@@ -42,16 +42,10 @@
         android:layout_height="match_parent"
         android:visibility="invisible"
     />
-    <com.android.systemui.statusbar.policy.KeyButtonView
-        android:id="@+id/rotate_suggestion"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="0"
-        android:scaleType="center"
-        android:visibility="invisible"
-        android:contentDescription="@string/accessibility_rotate_button"
-        android:paddingStart="@dimen/navigation_key_padding"
-        android:paddingEnd="@dimen/navigation_key_padding"
+    <include layout="@layout/rotate_suggestion"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:visibility="invisible"
     />
     <com.android.systemui.statusbar.policy.KeyButtonView
         android:id="@+id/accessibility_button"

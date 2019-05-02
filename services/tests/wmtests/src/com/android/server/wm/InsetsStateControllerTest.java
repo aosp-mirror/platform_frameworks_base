@@ -58,6 +58,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testStripForDispatch_notOwn() {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "parentWindow");

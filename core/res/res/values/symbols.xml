@@ -3678,7 +3678,6 @@
 
   <!-- For Secondary Launcher -->
   <java-symbol type="string" name="config_secondaryHomeComponent" />
-  <java-symbol type="bool" name="config_useSystemProvidedLauncherForSecondary" />
 
   <java-symbol type="string" name="battery_saver_notification_channel_name" />
   <java-symbol type="string" name="battery_saver_sticky_disabled_notification_title" />
@@ -3772,4 +3771,6 @@
   <java-symbol type="color" name="chooser_gradient_highlight" />
   <java-symbol type="drawable" name="chooser_direct_share_label_placeholder" />
   <java-symbol type="dimen" name="chooser_direct_share_label_placeholder_max_width" />
+  <java-symbol type="layout" name="chooser_az_label_row" />
+  <java-symbol type="string" name="chooser_all_apps_button_label" />
 </resources>

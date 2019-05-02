@@ -38,11 +38,6 @@ interface ISystemUiProxy {
     void startScreenPinning(int taskId) = 1;
 
     /**
-     * Enables/disables launcher/overview interaction features {@link InteractionType}.
-     */
-    void setInteractionState(int flags) = 4;
-
-    /**
      * Notifies SystemUI that split screen has been invoked.
      */
     void onSplitScreenInvoked() = 5;
@@ -96,4 +91,9 @@ interface ISystemUiProxy {
      * Notifies that the accessibility button in the system's navigation area has been long clicked
      */
     void notifyAccessibilityButtonLongClicked() = 16;
+
+    /**
+     * Ends the system screen pinning.
+     */
+    void stopScreenPinning() = 17;
 }

@@ -28,6 +28,7 @@
 
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
+#include <android-base/strings.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/PermissionController.h>
@@ -394,6 +395,10 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
             return cmd_log_app_breadcrumb(out, args);
         }
 
+        if (!args[0].compare(String8("log-binary-push"))) {
+            return cmd_log_binary_push(out, args);
+        }
+
         if (!args[0].compare(String8("clear-puller-cache"))) {
             return cmd_clear_puller_cache(out);
         }
@@ -461,6 +466,21 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  STATE         Integer in [0, 3], as per atoms.proto.\n");
     dprintf(out, "\n");
     dprintf(out, "\n");
+    dprintf(out,
+            "usage: adb shell cmd stats log-binary-push NAME VERSION STAGING ROLLBACK_ENABLED "
+            "LOW_LATENCY STATE EXPERIMENT_IDS\n");
+    dprintf(out, "  Log a binary push state changed event.\n");
+    dprintf(out, "  NAME                The train name.\n");
+    dprintf(out, "  VERSION             The train version code.\n");
+    dprintf(out, "  STAGING             If this train requires a restart.\n");
+    dprintf(out, "  ROLLBACK_ENABLED    If rollback should be enabled for this install.\n");
+    dprintf(out, "  LOW_LATENCY         If the train requires low latency monitoring.\n");
+    dprintf(out, "  STATE               The status of the train push.\n");
+    dprintf(out, "                      Integer value of the enum in atoms.proto.\n");
+    dprintf(out, "  EXPERIMENT_IDS      Comma separated list of experiment ids.\n");
+    dprintf(out, "                      Leave blank for none.\n");
+    dprintf(out, "\n");
+    dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats config remove [UID] [NAME]\n");
     dprintf(out, "usage: adb shell cmd stats config update [UID] NAME\n");
     dprintf(out, "\n");
@@ -506,7 +526,6 @@ void StatsService::print_cmd_help(int out) {
     dprintf(out, "  --configs     Send the list of configs in the name list instead of\n");
     dprintf(out, "                the currently active configs\n");
     dprintf(out, "  NAME LIST     List of configuration names to be included in the broadcast.\n");
-
     dprintf(out, "\n");
     dprintf(out, "\n");
     dprintf(out, "usage: adb shell cmd stats print-stats\n");
@@ -821,6 +840,39 @@ status_t StatsService::cmd_log_app_breadcrumb(int out, const Vector<String8>& ar
     return NO_ERROR;
 }
 
+status_t StatsService::cmd_log_binary_push(int out, const Vector<String8>& args) {
+    // Security checks are done in the sendBinaryPushStateChanged atom.
+    const int argCount = args.size();
+    if (argCount != 7 && argCount != 8) {
+        dprintf(out, "Incorrect number of argument supplied\n");
+        return UNKNOWN_ERROR;
+    }
+    android::String16 trainName = android::String16(args[1].c_str());
+    int64_t trainVersion = strtoll(args[2].c_str(), nullptr, 10);
+    int options = 0;
+    if (args[3] == "1") {
+        options = options | IStatsManager::FLAG_REQUIRE_STAGING;
+    }
+    if (args[4] == "1") {
+        options = options | IStatsManager::FLAG_ROLLBACK_ENABLED;
+    }
+    if (args[5] == "1") {
+        options = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
+    }
+    int32_t state = atoi(args[6].c_str());
+    vector<int64_t> experimentIds;
+    if (argCount == 8) {
+        vector<string> experimentIdsString = android::base::Split(string(args[7].c_str()), ",");
+        for (string experimentIdString : experimentIdsString) {
+            int64_t experimentId = strtoll(experimentIdString.c_str(), nullptr, 10);
+            experimentIds.push_back(experimentId);
+        }
+    }
+    dprintf(out, "Logging BinaryPushStateChanged\n");
+    sendBinaryPushStateChangedAtom(trainName, trainVersion, options, state, experimentIds);
+    return NO_ERROR;
+}
+
 status_t StatsService::cmd_print_pulled_metrics(int out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
     vector<shared_ptr<LogEvent> > stats;
@@ -986,7 +1038,7 @@ Status StatsService::informDeviceShutdown() {
     ENFORCE_UID(AID_SYSTEM);
     VLOG("StatsService::informDeviceShutdown");
     mProcessor->WriteDataToDisk(DEVICE_SHUTDOWN, FAST);
-    mProcessor->WriteMetricsActivationToDisk(getElapsedRealtimeNs());
+    mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
     return Status::ok();
 }
 
@@ -1021,14 +1073,14 @@ Status StatsService::statsCompanionReady() {
 
 void StatsService::Startup() {
     mConfigManager->Startup();
-    mProcessor->LoadMetricsActivationFromDisk();
+    mProcessor->LoadActiveConfigsFromDisk();
 }
 
 void StatsService::Terminate() {
     ALOGI("StatsService::Terminating");
     if (mProcessor != nullptr) {
         mProcessor->WriteDataToDisk(TERMINATION_SIGNAL_RECEIVED, FAST);
-        mProcessor->WriteMetricsActivationToDisk(getElapsedRealtimeNs());
+        mProcessor->SaveActiveConfigsToDisk(getElapsedRealtimeNs());
     }
 }
 
@@ -1202,56 +1254,90 @@ Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& p
     return Status::ok();
 }
 
-Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainName,
-                                                    int64_t trainVersionCode, int options,
-                                                    int32_t state,
+Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& trainNameIn,
+                                                    const int64_t trainVersionCodeIn,
+                                                    const int options,
+                                                    const int32_t state,
                                                     const std::vector<int64_t>& experimentIdsIn) {
+    // Note: We skip the usage stats op check here since we do not have a package name.
+    // This is ok since we are overloading the usage_stats permission.
+    // This method only sends data, it does not receive it.
+    pid_t pid = IPCThreadState::self()->getCallingPid();
     uid_t uid = IPCThreadState::self()->getCallingUid();
-    // For testing
-    if (uid == AID_ROOT || uid == AID_SYSTEM || uid == AID_SHELL) {
-        return ok();
+        // Root, system, and shell always have access
+    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
+        // Caller must be granted these permissions
+        if (!checkCallingPermission(String16(kPermissionDump))) {
+            return exception(binder::Status::EX_SECURITY,
+                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
+                                          kPermissionDump));
+        }
+        if (!checkCallingPermission(String16(kPermissionUsage))) {
+            return exception(binder::Status::EX_SECURITY,
+                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
+                                          kPermissionUsage));
+        }
     }
-
-    // Caller must be granted these permissions
-    if (!checkCallingPermission(String16(kPermissionDump))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionDump));
-    }
-    if (!checkCallingPermission(String16(kPermissionUsage))) {
-        return exception(binder::Status::EX_SECURITY,
-                         StringPrintf("UID %d lacks permission %s", uid, kPermissionUsage));
-    }
-    // TODO: add verifier permission
 
     bool readTrainInfoSuccess = false;
-    InstallTrainInfo trainInfo;
-    if (trainVersionCode == -1 || experimentIdsIn.empty() || trainName.size() == 0) {
-        readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfo);
-    }
+    InstallTrainInfo trainInfoOnDisk;
+    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
 
-    if (trainVersionCode == -1 && readTrainInfoSuccess) {
-        trainVersionCode = trainInfo.trainVersionCode;
+    bool resetExperimentIds = false;
+    int64_t trainVersionCode = trainVersionCodeIn;
+    std::string trainNameUtf8 = std::string(String8(trainNameIn).string());
+    if (readTrainInfoSuccess) {
+        // Keep the old train version if we received an empty version.
+        if (trainVersionCodeIn == -1) {
+            trainVersionCode = trainInfoOnDisk.trainVersionCode;
+        } else if (trainVersionCodeIn != trainInfoOnDisk.trainVersionCode) {
+        // Reset experiment ids if we receive a new non-empty train version.
+            resetExperimentIds = true;
+        }
+
+        // Keep the old train name if we received an empty train name.
+        if (trainNameUtf8.size() == 0) {
+            trainNameUtf8 = trainInfoOnDisk.trainName;
+        } else if (trainNameUtf8 != trainInfoOnDisk.trainName) {
+            // Reset experiment ids if we received a new valid train name.
+            resetExperimentIds = true;
+        }
+
+        // Reset if we received a different experiment id.
+        if (!experimentIdsIn.empty() &&
+                (trainInfoOnDisk.experimentIds.empty() ||
+                 experimentIdsIn[0] != trainInfoOnDisk.experimentIds[0])) {
+            resetExperimentIds = true;
+        }
     }
 
     // Find the right experiment IDs
     std::vector<int64_t> experimentIds;
-    if (readTrainInfoSuccess && experimentIdsIn.empty()) {
-        experimentIds = trainInfo.experimentIds;
-    } else {
+    if (resetExperimentIds || !readTrainInfoSuccess) {
         experimentIds = experimentIdsIn;
+    } else {
+        experimentIds = trainInfoOnDisk.experimentIds;
+    }
+
+    if (!experimentIds.empty()) {
+        int64_t firstId = experimentIds[0];
+        switch (state) {
+            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
+                experimentIds.push_back(firstId + 1);
+                break;
+            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
+                experimentIds.push_back(firstId + 2);
+                break;
+            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
+                experimentIds.push_back(firstId + 3);
+                break;
+        }
     }
 
     // Flatten the experiment IDs to proto
     vector<uint8_t> experimentIdsProtoBuffer;
     writeExperimentIdsToProto(experimentIds, &experimentIdsProtoBuffer);
-
-    // Find the right train name
-    std::string trainNameUtf8;
-    if (readTrainInfoSuccess && trainName.size() == 0) {
-        trainNameUtf8 = trainInfo.trainName;
-    } else {
-        trainNameUtf8 = std::string(String8(trainName).string());
-    }
+    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
 
     userid_t userId = multiuser_get_user_id(uid);
     bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
@@ -1260,7 +1346,6 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
                    requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
     mProcessor->OnLogEvent(&event);
-    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIds);
     return Status::ok();
 }
 

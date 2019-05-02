@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.Message;
 import android.os.UserHandle;
 import android.view.textclassifier.Log;
 
@@ -73,7 +74,7 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
     }
 
     @Override
-    void compute(List<ResolvedComponentInfo> targets) {
+    void doCompute(List<ResolvedComponentInfo> targets) {
         List<AppTarget> appTargets = new ArrayList<>();
         for (ResolvedComponentInfo target : targets) {
             appTargets.add(new AppTarget.Builder(new AppTargetId(target.name.flattenToString()))
@@ -82,12 +83,21 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
         mAppPredictor.sortTargets(appTargets, mContext.getMainExecutor(),
                 sortedAppTargets -> {
-                    for (int i = 0; i < sortedAppTargets.size(); i++) {
-                        mTargetRanks.put(new ComponentName(sortedAppTargets.get(i).getPackageName(),
-                                sortedAppTargets.get(i).getClassName()), i);
-                    }
-                    afterCompute();
+                    Message msg =
+                            Message.obtain(mHandler, RANKER_SERVICE_RESULT, sortedAppTargets);
+                    msg.sendToTarget();
                 });
+    }
+
+    @Override
+    void handleResultMessage(Message msg) {
+        if (msg.what == RANKER_SERVICE_RESULT) {
+            final List<AppTarget> sortedAppTargets = (List<AppTarget>) msg.obj;
+            for (int i = 0; i < sortedAppTargets.size(); i++) {
+                mTargetRanks.put(new ComponentName(sortedAppTargets.get(i).getPackageName(),
+                        sortedAppTargets.get(i).getClassName()), i);
+            }
+        }
     }
 
     @Override
@@ -110,10 +120,5 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                         componentName.getPackageName(), mUser)
                         .setClassName(componentName.getClassName()).build(),
                     ACTION_LAUNCH).build());
-    }
-
-    @Override
-    void destroy() {
-        // Do nothing. App Predictor destruction is handled by caller.
     }
 }
