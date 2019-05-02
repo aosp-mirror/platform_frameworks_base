@@ -919,6 +919,8 @@ public class ChooserActivity extends ResolverActivity {
         mChooserHandler.removeMessages(LIST_VIEW_UPDATE_MESSAGE);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
+        mChooserHandler.removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
+        mChooserHandler.removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
         if (mAppPredictor != null) {
             mAppPredictor.unregisterPredictionUpdates(mAppPredictorCallback);
             mAppPredictor.destroy();
