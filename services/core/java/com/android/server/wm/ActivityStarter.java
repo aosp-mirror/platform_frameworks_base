@@ -2081,8 +2081,8 @@ class ActivityStarter {
             final ActivityRecord curTop = (focusStack == null)
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
             final TaskRecord topTask = curTop != null ? curTop.getTaskRecord() : null;
-            differentTopTask = topTask != null
-                    && (topTask != intentActivity.getTaskRecord() || topTask != focusStack.topTask());
+            differentTopTask = topTask != intentActivity.getTaskRecord()
+                    || (focusStack != null && topTask != focusStack.topTask());
         } else {
             // The existing task should always be different from those in other displays.
             differentTopTask = true;
