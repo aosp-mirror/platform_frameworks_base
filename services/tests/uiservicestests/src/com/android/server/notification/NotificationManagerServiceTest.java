@@ -86,6 +86,7 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.RemoteInput;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
@@ -4523,6 +4524,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Person person = new Person.Builder()
                 .setName("bubblebot")
                 .build();
+        // It needs remote input to be bubble-able
+        RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
+        PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
+        Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
+                inputIntent).addRemoteInput(remoteInput)
+                .build();
         // Make it messaging style
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
@@ -4535,6 +4543,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         .addMessage("Is it me you're looking for?",
                                 SystemClock.currentThreadTimeMillis(), person)
                 )
+                .setActions(replyAction)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, null, mUid, 0,
