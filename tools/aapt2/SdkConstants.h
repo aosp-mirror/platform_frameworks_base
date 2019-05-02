@@ -54,7 +54,6 @@ enum : ApiVersion {
   SDK_O = 26,
   SDK_O_MR1 = 27,
   SDK_P = 28,
-  SDK_Q = 29,
 };
 
 ApiVersion FindAttributeSdkLevel(const ResourceId& id);
