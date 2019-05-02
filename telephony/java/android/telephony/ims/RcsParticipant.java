@@ -47,7 +47,9 @@ public class RcsParticipant {
     @Nullable
     @WorkerThread
     public String getCanonicalAddress() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getRcsParticipantCanonicalAddress(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getRcsParticipantCanonicalAddress(mId,
+                        callingPackage));
     }
 
     /**
@@ -59,7 +61,8 @@ public class RcsParticipant {
     @Nullable
     @WorkerThread
     public String getAlias() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getRcsParticipantAlias(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getRcsParticipantAlias(mId, callingPackage));
     }
 
     /**
@@ -72,7 +75,8 @@ public class RcsParticipant {
      */
     @WorkerThread
     public void setAlias(String alias) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setRcsParticipantAlias(mId, alias));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setRcsParticipantAlias(mId, alias, callingPackage));
     }
 
     /**
@@ -84,7 +88,8 @@ public class RcsParticipant {
     @Nullable
     @WorkerThread
     public String getContactId() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getRcsParticipantContactId(mId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getRcsParticipantContactId(mId, callingPackage));
     }
 
     /**
@@ -98,7 +103,8 @@ public class RcsParticipant {
     @WorkerThread
     public void setContactId(String contactId) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setRcsParticipantContactId(mId, contactId));
+                (iRcs, callingPackage) -> iRcs.setRcsParticipantContactId(mId, contactId,
+                        callingPackage));
     }
 
     @Override
