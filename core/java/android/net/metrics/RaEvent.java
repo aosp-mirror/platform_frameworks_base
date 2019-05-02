@@ -97,6 +97,18 @@ public final class RaEvent implements IpConnectivityLog.Event {
                 .toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(RaEvent.class))) return false;
+        final RaEvent other = (RaEvent) obj;
+        return routerLifetime == other.routerLifetime
+                && prefixValidLifetime == other.prefixValidLifetime
+                && prefixPreferredLifetime == other.prefixPreferredLifetime
+                && routeInfoLifetime == other.routeInfoLifetime
+                && rdnssLifetime == other.rdnssLifetime
+                && dnsslLifetime == other.dnsslLifetime;
+    }
+
     /** @hide */
     public static final @android.annotation.NonNull Parcelable.Creator<RaEvent> CREATOR = new Parcelable.Creator<RaEvent>() {
         public RaEvent createFromParcel(Parcel in) {
