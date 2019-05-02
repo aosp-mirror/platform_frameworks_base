@@ -951,12 +951,10 @@ public class CarStatusBar extends StatusBar implements
         return mContext.getDrawable(com.android.internal.R.drawable.default_wallpaper);
     }
 
-    /** Returns true if the current user makes it through the setup wizard, false otherwise. */
-    private boolean getIsUserSetup() {
-        return mUserSetup;
-    }
-
     private void setNotificationViewClipBounds(int height) {
+        if (height > mNotificationView.getHeight()) {
+            height = mNotificationView.getHeight();
+        }
         Rect clipBounds = new Rect();
         clipBounds.set(0, 0, mNotificationView.getWidth(), height);
         // Sets the clip region on the notification list view.
@@ -980,7 +978,6 @@ public class CarStatusBar extends StatusBar implements
         }
     }
 
-    private static final int SWIPE_UP_MIN_DISTANCE = 75;
     private static final int SWIPE_DOWN_MIN_DISTANCE = 25;
     private static final int SWIPE_MAX_OFF_PATH = 75;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
