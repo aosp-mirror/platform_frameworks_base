@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.ComponentName;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -155,6 +156,11 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
     @UnsupportedAppUsage
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) throws RemoteException {
+        if (Binder.getCallingPid() != android.os.Process.myPid()
+                && snapshot != null && snapshot.getSnapshot() != null) {
+            // Preemptively clear any reference to the buffer
+            snapshot.getSnapshot().destroy();
+        }
     }
 
     @Override
