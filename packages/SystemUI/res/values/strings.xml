@@ -2414,6 +2414,8 @@
     <!-- Text for asking the user whether bubbles (floating app content) should be enabled for an
          app. [CHAR LIMIT=NONE] -->
     <string name="bubbles_prompt">Allow bubbles from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+    <!-- The text for the manage bubbles link. [CHAR LIMIT=NONE] -->
+    <string name="manage_bubbles_text">Manage</string>
     <!-- Text used for button allowing user to opt out of bubbles [CHAR LIMIT=20] -->
     <string name="no_bubbles">Deny</string>
     <!-- Text used for button allowing user to approve / enable bubbles [CHAR LIMIT=20] -->
