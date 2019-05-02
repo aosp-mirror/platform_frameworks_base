@@ -275,6 +275,22 @@ public final class ApfStats implements IpConnectivityLog.Event {
                 .toString();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(ApfStats.class))) return false;
+        final ApfStats other = (ApfStats) obj;
+        return durationMs == other.durationMs
+                && receivedRas == other.receivedRas
+                && matchingRas == other.matchingRas
+                && droppedRas == other.droppedRas
+                && zeroLifetimeRas == other.zeroLifetimeRas
+                && parseErrors == other.parseErrors
+                && programUpdates == other.programUpdates
+                && programUpdatesAll == other.programUpdatesAll
+                && programUpdatesAllowingMulticast == other.programUpdatesAllowingMulticast
+                && maxProgramSize == other.maxProgramSize;
+    }
+
     /** @hide */
     public static final @android.annotation.NonNull Parcelable.Creator<ApfStats> CREATOR = new Parcelable.Creator<ApfStats>() {
         public ApfStats createFromParcel(Parcel in) {
