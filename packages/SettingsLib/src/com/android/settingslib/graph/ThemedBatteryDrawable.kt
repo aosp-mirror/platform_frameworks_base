@@ -44,6 +44,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     //    doesn't touch the walls
     private val perimeterPath = Path()
     private val scaledPerimeter = Path()
+    private val errorPerimeterPath = Path()
+    private val scaledErrorPerimeter = Path()
     // Fill will cover the whole bounding rect of the fillMask, and be masked by the path
     private val fillMask = Path()
     private val scaledFill = Path()
@@ -242,7 +244,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             }
         } else if (powerSaveEnabled) {
             // If power save is enabled draw the perimeter path with colorError
-            c.drawPath(scaledPerimeter, errorPaint)
+            c.drawPath(scaledErrorPerimeter, errorPaint)
             // And draw the plus sign on top of the fill
             c.drawPath(scaledPlus, errorPaint)
         }
@@ -364,6 +366,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         }
 
         perimeterPath.transform(scaleMatrix, scaledPerimeter)
+        errorPerimeterPath.transform(scaleMatrix, scaledErrorPerimeter)
         fillMask.transform(scaleMatrix, scaledFill)
         scaledFill.computeBounds(fillRect, true)
         boltPath.transform(scaleMatrix, scaledBolt)
@@ -382,8 +385,12 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         val pathString = context.resources.getString(
                 com.android.internal.R.string.config_batterymeterPerimeterPath)
         perimeterPath.set(PathParser.createPathFromPathData(pathString))
-        val b = RectF()
-        perimeterPath.computeBounds(b, true)
+        perimeterPath.computeBounds(RectF(), true)
+
+        val errorPathString = context.resources.getString(
+                com.android.internal.R.string.config_batterymeterErrorPerimeterPath)
+        errorPerimeterPath.set(PathParser.createPathFromPathData(errorPathString))
+        errorPerimeterPath.computeBounds(RectF(), true)
 
         val fillMaskString = context.resources.getString(
                 com.android.internal.R.string.config_batterymeterFillMask)
