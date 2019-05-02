@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -164,6 +165,25 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // animation.
         mController.mRecentScreenshotAnimator.cancelAnimation();
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true, false);
+    }
+
+    @Test
+    public void testShouldAnimateWhenNoCancelWithDeferredScreenshot() {
+        mWm.setRecentsAnimationController(mController);
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win1);
+        assertEquals(appWindow.getTask().getTopVisibleAppToken(), appWindow);
+        assertEquals(appWindow.findMainWindow(), win1);
+
+        mController.addAnimation(appWindow.getTask(), false /* isRecentTaskInvisible */);
+        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+
+        // Assume appWindow transition should animate when no
+        // IRecentsAnimationController#setCancelWithDeferredScreenshot called.
+        assertFalse(mController.shouldCancelWithDeferredScreenshot());
+        assertTrue(appWindow.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

@@ -110,6 +110,7 @@ public class PersisterQueueTests {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testProcessOneItem_Flush() throws Exception {
         mFactory.setExpectedProcessedItemNumber(1);
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);

@@ -4562,7 +4562,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         token2.mOwnerCanManageAppTokens) ? -1 : 1;
 
         private final Predicate<WindowState> mGetOrientingWindow = w -> {
-            if (!w.isVisibleLw() || !w.mPolicyVisibilityAfterAnim) {
+            if (!w.isVisibleLw() || !w.mLegacyPolicyVisibilityAfterAnim) {
                 return false;
             }
             final int req = w.mAttrs.screenOrientation;

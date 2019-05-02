@@ -57,6 +57,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
+import android.service.autofill.SaveInfo;
 import android.service.autofill.UserData;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -595,8 +596,8 @@ final class AutofillManagerServiceImpl
         ArrayList<Session> previousSessions = null;
         for (int i = 0; i < size; i++) {
             final Session previousSession = mSessions.valueAt(i);
-            // TODO(b/113281366): only return sessions asked to be kept alive / add CTS test
-            if (previousSession.taskId == session.taskId && previousSession.id != session.id) {
+            if (previousSession.taskId == session.taskId && previousSession.id != session.id
+                    && (previousSession.getSaveInfoFlagsLocked() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
                 if (previousSessions == null) {
                     previousSessions = new ArrayList<>(size);
                 }

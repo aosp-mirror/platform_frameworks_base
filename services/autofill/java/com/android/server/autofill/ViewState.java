@@ -214,7 +214,7 @@ final class ViewState {
         if (mDatasetId != null) {
             builder.append(", datasetId:" ).append(mDatasetId);
         }
-        builder.append("state:" ).append(getStateAsString());
+        builder.append(", state:").append(getStateAsString());
         if (mCurrentValue != null) {
             builder.append(", currentValue:" ).append(mCurrentValue);
         }

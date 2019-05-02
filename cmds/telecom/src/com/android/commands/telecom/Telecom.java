@@ -95,7 +95,8 @@ public final class Telecom extends BaseCommand {
                 + "telecom set-phone-account-disabled: Disables the given phone account, if it \n"
                 + " has already been registered with telecom.\n"
                 + "\n"
-                + "telecom set-default-dialer: Sets the default dialer to the given component. \n"
+                + "telecom set-default-dialer: Sets the override default dialer to the given "
+                + "component; this will override whatever the dialer role is set to. \n"
                 + "\n"
                 + "telecom get-default-dialer: Displays the current default dialer. \n"
                 + "\n"
@@ -254,13 +255,8 @@ public final class Telecom extends BaseCommand {
 
     private void runSetDefaultDialer() throws RemoteException {
         final String packageName = nextArgRequired();
-        final boolean success = mTelecomService.setDefaultDialer(packageName);
-        if (success) {
-            System.out.println("Success - " + packageName + " set as default dialer.");
-        } else {
-            System.out.println("Error - " + packageName + " is not an installed Dialer app, \n"
-                    + " or is already the default dialer.");
-        }
+        mTelecomService.setTestDefaultDialer(packageName);
+        System.out.println("Success - " + packageName + " set as override default dialer.");
     }
 
     private void runGetDefaultDialer() throws RemoteException {

@@ -20,6 +20,7 @@ import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -42,6 +43,8 @@ public class ClockLayout extends FrameLayout {
      */
     private int mBurnInPreventionOffsetX;
     private int mBurnInPreventionOffsetY;
+
+    private float mDarkAmount;
 
     public ClockLayout(Context context) {
         this(context, null);
@@ -78,11 +81,21 @@ public class ClockLayout extends FrameLayout {
         positionChildren();
     }
 
+    /**
+     * See {@link com.android.systemui.plugins.ClockPlugin#setDarkAmount(float)}.
+     */
+    void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
+        positionChildren();
+    }
+
     private void positionChildren() {
-        final float offsetX = getBurnInOffset(mBurnInPreventionOffsetX * 2, true)
-                - mBurnInPreventionOffsetX;
-        final float offsetY = getBurnInOffset(mBurnInPreventionOffsetY * 2, false)
-                - mBurnInPreventionOffsetY;
+        final float offsetX = MathUtils.lerp(0f,
+                getBurnInOffset(mBurnInPreventionOffsetX * 2, true) - mBurnInPreventionOffsetX,
+                mDarkAmount);
+        final float offsetY = MathUtils.lerp(0f,
+                getBurnInOffset(mBurnInPreventionOffsetY * 2, false) - mBurnInPreventionOffsetY,
+                mDarkAmount);
 
         // Put the analog clock in the middle of the screen.
         if (mAnalogClock != null) {

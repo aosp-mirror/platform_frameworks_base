@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.util.Base64;
 import android.util.Slog;
@@ -138,18 +139,19 @@ public class GpuService extends SystemService {
         }
     }
 
-    private final class DeviceConfigListener implements DeviceConfig.OnPropertyChangedListener {
+    private final class DeviceConfigListener implements DeviceConfig.OnPropertiesChangedListener {
 
         DeviceConfigListener() {
             super();
-            DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_GAME_DRIVER,
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_GAME_DRIVER,
                     mContext.getMainExecutor(), this);
         }
         @Override
-        public void onPropertyChanged(String namespace, String name, String value) {
+        public void onPropertiesChanged(Properties properties) {
             synchronized (mDeviceConfigLock) {
-                if (Settings.Global.GAME_DRIVER_BLACKLISTS.equals(name)) {
-                    parseBlacklists(value != null ? value : "");
+                if (properties.getKeyset().contains(Settings.Global.GAME_DRIVER_BLACKLISTS)) {
+                    parseBlacklists(
+                            properties.getString(Settings.Global.GAME_DRIVER_BLACKLISTS, ""));
                     setBlacklist();
                 }
             }

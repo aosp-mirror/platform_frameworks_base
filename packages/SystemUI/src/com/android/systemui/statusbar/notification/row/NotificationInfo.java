@@ -40,8 +40,11 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -88,6 +91,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     // standard controls
     private static final int ACTION_ALERT = 5;
 
+    private static final int BUTTON_ANIM_TIME_MS = 200;
+
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
     private MetricsLogger mMetricsLogger;
@@ -102,6 +107,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private boolean mWasShownHighPriority;
     private boolean mShowOnLockscreen;
     private boolean mShowInStatusBar;
+    private boolean mPressedApply;
+
     /**
      * The last importance level chosen by the user.  Null if the user has not chosen an importance
      * level; non-null once the user takes an action which indicates an explicit preference.
@@ -132,7 +139,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnAlert = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         mChosenImportance = IMPORTANCE_DEFAULT;
-        setImportanceSummary(ACTION_ALERT);
+        setImportanceSummary(ACTION_ALERT, true);
         updateButtons(ACTION_ALERT);
     };
 
@@ -140,12 +147,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnSilent = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
         mChosenImportance = IMPORTANCE_LOW;
-        setImportanceSummary(ACTION_TOGGLE_SILENT);
+        setImportanceSummary(ACTION_TOGGLE_SILENT, true);
         updateButtons(ACTION_TOGGLE_SILENT);
     };
 
     // used by standard ui
     private OnClickListener mOnDismissSettings = v -> {
+        mPressedApply = true;
         closeControls(v);
     };
 
@@ -294,7 +302,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         mShowInStatusBar = !mINotificationManager.shouldHideSilentStatusIcons(
                 mContext.getPackageName());
-        // TODO: b/128445911 use show on lockscreen setting
+        mShowOnLockscreen = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0) == 1;
 
         bindHeader();
         bindChannelDetails();
@@ -334,6 +343,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             findViewById(R.id.non_configurable_multichannel_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
             ((TextView) findViewById(R.id.done)).setText(R.string.inline_done_button);
+            findViewById(R.id.turn_off_notifications).setVisibility(GONE);
         } else if (mNumUniqueChannelsInRow > 1) {
             findViewById(R.id.non_configurable_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(GONE);
@@ -360,10 +370,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         if (mWasShownHighPriority) {
             updateButtons(ACTION_ALERT);
-            setImportanceSummary(ACTION_ALERT);
+            setImportanceSummary(ACTION_ALERT, false);
         } else {
             updateButtons(ACTION_TOGGLE_SILENT);
-            setImportanceSummary(ACTION_TOGGLE_SILENT);
+            setImportanceSummary(ACTION_TOGGLE_SILENT, false);
         }
     }
 
@@ -484,14 +494,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
-    private boolean hasImportanceChanged() {
-        return mSingleNotificationChannel != null
-                && mChosenImportance != null
-                && (mStartingChannelImportance == IMPORTANCE_UNSPECIFIED
-                        || (mWasShownHighPriority && mChosenImportance < IMPORTANCE_DEFAULT)
-                        || (!mWasShownHighPriority && mChosenImportance >= IMPORTANCE_DEFAULT));
-    }
-
     private void saveImportance() {
         if (!mIsNonblockable
                 || mExitReason != NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS) {
@@ -526,8 +528,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void updateButtons(int blockState) {
-        TextView silence = findViewById(R.id.silence);
-        TextView alert = findViewById(R.id.alert);
+        View silence = findViewById(R.id.silence);
+        View alert = findViewById(R.id.alert);
         TextView done = findViewById(R.id.done);
         switch (blockState) {
             case ACTION_TOGGLE_SILENT:
@@ -549,22 +551,28 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
-    private void updateButtons(TextView selected, TextView unselected) {
+    private void updateButtons(View selected, View unselected) {
         selected.setBackground(mSelectedBackground);
         selected.setSelected(true);
-        selected.setTextAppearance(
-                R.style.TextAppearance_NotificationImportanceButton_Selected);
         unselected.setBackground(mUnselectedBackground);
         unselected.setSelected(false);
-        unselected.setTextAppearance(
-                R.style.TextAppearance_NotificationImportanceButton_Unselected);
     }
 
-    void setImportanceSummary(int blockState) {
-        TextView view = findViewById(R.id.description);
+    void setImportanceSummary(int blockState, boolean userTriggered) {
+        if (userTriggered) {
+            AutoTransition transition = new AutoTransition();
+            transition.setDuration(BUTTON_ANIM_TIME_MS);
+            TransitionManager.beginDelayedTransition(this, transition);
+        }
         if (blockState == ACTION_ALERT) {
+            TextView view = findViewById(R.id.alert_summary);
+            view.setVisibility(VISIBLE);
+            findViewById(R.id.silence_summary).setVisibility(GONE);
             view.setText(R.string.notification_channel_summary_default);
         } else {
+            TextView view = findViewById(R.id.silence_summary);
+            view.setVisibility(VISIBLE);
+            findViewById(R.id.alert_summary).setVisibility(GONE);
             if (mShowInStatusBar) {
                 if (mShowOnLockscreen) {
                     view.setText(R.string.notification_channel_summary_low_status_lock);
@@ -742,12 +750,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean willBeRemoved() {
-        return hasImportanceChanged();
+        return false;
     }
 
     @Override
     public boolean shouldBeSaved() {
-        return hasImportanceChanged();
+        return mPressedApply;
     }
 
     @Override

@@ -78,6 +78,7 @@ import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
+import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
@@ -638,8 +639,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // If we are being set visible, and the starting window is not yet displayed,
                 // then make sure it doesn't get displayed.
                 if (startingWindow != null && !startingWindow.isDrawnLw()) {
-                    startingWindow.mPolicyVisibility = false;
-                    startingWindow.mPolicyVisibilityAfterAnim = false;
+                    startingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
+                    startingWindow.mLegacyPolicyVisibilityAfterAnim = false;
                 }
 
                 // We are becoming visible, so better freeze the screen with the windows that are
@@ -1932,7 +1933,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                         + ", isAnimationSet=" + isSelfAnimating());
                 if (!w.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
-                            + " pv=" + w.mPolicyVisibility
+                            + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + hiddenRequested
                             + " a=" + isSelfAnimating());
@@ -2432,14 +2433,19 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    private boolean shouldAnimate(int transit) {
+
+    @VisibleForTesting
+    boolean shouldAnimate(int transit) {
         final boolean isSplitScreenPrimary =
                 getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
         final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
 
-        // Don't animate when the task runs recents animation.
+        // Don't animate while the task runs recents animation but only if we are in the mode
+        // where we cancel with deferred screenshot, which means that the controller has
+        // transformed the task.
         final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
-        if (controller != null && controller.isAnimatingTask(getTask())) {
+        if (controller != null && controller.isAnimatingTask(getTask())
+                && controller.shouldCancelWithDeferredScreenshot()) {
             return false;
         }
 

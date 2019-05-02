@@ -634,7 +634,7 @@ public final class ActiveServices {
         }
 
         if (allowBackgroundActivityStarts) {
-            r.hasStartedWhitelistingBgActivityStarts = true;
+            r.setHasStartedWhitelistingBgActivityStarts(true);
             scheduleCleanUpHasStartedWhitelistingBgActivityStartsLocked(r);
         }
 
@@ -760,11 +760,6 @@ public final class ActiveServices {
                     SystemClock.uptimeMillis());
         }
         service.callStart = false;
-
-        // the service will not necessarily be brought down, so only clear the whitelisting state
-        // for start-based bg activity starts now, and drop any existing future cleanup callback
-        service.setHasStartedWhitelistingBgActivityStarts(false);
-        mAm.mHandler.removeCallbacks(service.startedWhitelistingBgActivityStartsCleanUp);
 
         bringDownServiceIfNeededLocked(service, false, false);
     }
@@ -1768,12 +1763,7 @@ public final class ActiveServices {
                     callerApp.uid, callerApp.processName, callingPackage);
 
             IBinder binder = connection.asBinder();
-            ArrayList<ConnectionRecord> clist = s.getConnections().get(binder);
-            if (clist == null) {
-                clist = new ArrayList<ConnectionRecord>();
-                s.putConnection(binder, clist);
-            }
-            clist.add(c);
+            s.addConnection(binder, c);
             b.connections.add(c);
             if (activity != null) {
                 activity.addConnection(c);
@@ -1792,9 +1782,9 @@ public final class ActiveServices {
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app, c, true);
             }
-            clist = mServiceConnections.get(binder);
+            ArrayList<ConnectionRecord> clist = mServiceConnections.get(binder);
             if (clist == null) {
-                clist = new ArrayList<ConnectionRecord>();
+                clist = new ArrayList<>();
                 mServiceConnections.put(binder, clist);
             }
             clist.add(c);
@@ -3828,8 +3818,8 @@ public final class ActiveServices {
     public PendingIntent getRunningServiceControlPanelLocked(ComponentName name) {
         int userId = UserHandle.getUserId(Binder.getCallingUid());
         ServiceRecord r = getServiceByNameLocked(name, userId);
-        ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections = r.getConnections();
         if (r != null) {
+            ArrayMap<IBinder, ArrayList<ConnectionRecord>> connections = r.getConnections();
             for (int conni = connections.size() - 1; conni >= 0; conni--) {
                 ArrayList<ConnectionRecord> conn = connections.valueAt(conni);
                 for (int i=0; i<conn.size(); i++) {

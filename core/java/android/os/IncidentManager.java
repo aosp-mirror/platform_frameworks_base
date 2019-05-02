@@ -519,6 +519,13 @@ public class IncidentManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS
     })
     public @Nullable IncidentReport getIncidentReport(Uri uri) {
+        final String id = uri.getQueryParameter(URI_PARAM_REPORT_ID);
+        if (id == null) {
+            // If there's no report id, it's a bug report, so we can't return the incident
+            // report.
+            return null;
+        }
+
         final String pkg = uri.getQueryParameter(URI_PARAM_CALLING_PACKAGE);
         if (pkg == null) {
             throw new RuntimeException("Invalid URI: No "
@@ -531,13 +538,6 @@ public class IncidentManager {
                     + URI_PARAM_RECEIVER_CLASS + " parameter. " + uri);
         }
 
-        final String id = uri.getQueryParameter(URI_PARAM_REPORT_ID);
-        if (cls == null) {
-            // If there's no report id, it's a bug report, so we can't return the incident
-            // report.
-            return null;
-        }
-    
         try {
             return getCompanionServiceLocked().getIncidentReport(pkg, cls, id);
         } catch (RemoteException ex) {

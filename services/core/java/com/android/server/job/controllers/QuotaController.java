@@ -34,9 +34,12 @@ import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.Handler;
@@ -44,8 +47,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -57,6 +62,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
 
@@ -354,6 +360,7 @@ public final class QuotaController extends StateController {
     private final AlarmManager mAlarmManager;
     private final ChargingTracker mChargeTracker;
     private final Handler mHandler;
+    private final QcConstants mQcConstants;
 
     private volatile boolean mInParole;
 
@@ -489,6 +496,7 @@ public final class QuotaController extends StateController {
         mChargeTracker.startTracking();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        mQcConstants = new QcConstants(mHandler);
 
         final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         mContext.registerReceiverAsUser(mPackageAddedReceiver, UserHandle.ALL, filter, null, null);
@@ -506,7 +514,12 @@ public final class QuotaController extends StateController {
             // ignored; both services live in system_server
         }
 
-        onConstantsUpdatedLocked();
+        mShouldThrottle = !mConstants.USE_HEARTBEATS;
+    }
+
+    @Override
+    public void onSystemServicesReady() {
+        mQcConstants.start(mContext.getContentResolver());
     }
 
     @Override
@@ -581,89 +594,9 @@ public final class QuotaController extends StateController {
 
     @Override
     public void onConstantsUpdatedLocked() {
-        boolean changed = false;
         if (mShouldThrottle == mConstants.USE_HEARTBEATS) {
             mShouldThrottle = !mConstants.USE_HEARTBEATS;
-            changed = true;
-        }
-        long newAllowedTimeMs = Math.min(MAX_PERIOD_MS,
-                Math.max(MINUTE_IN_MILLIS, mConstants.QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS));
-        if (mAllowedTimePerPeriodMs != newAllowedTimeMs) {
-            mAllowedTimePerPeriodMs = newAllowedTimeMs;
-            mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
-            changed = true;
-        }
-        long newQuotaBufferMs = Math.max(0,
-                Math.min(5 * MINUTE_IN_MILLIS, mConstants.QUOTA_CONTROLLER_IN_QUOTA_BUFFER_MS));
-        if (mQuotaBufferMs != newQuotaBufferMs) {
-            mQuotaBufferMs = newQuotaBufferMs;
-            mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
-            mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
-            changed = true;
-        }
-        long newActivePeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                Math.min(MAX_PERIOD_MS, mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_ACTIVE_MS));
-        if (mBucketPeriodsMs[ACTIVE_INDEX] != newActivePeriodMs) {
-            mBucketPeriodsMs[ACTIVE_INDEX] = newActivePeriodMs;
-            changed = true;
-        }
-        long newWorkingPeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                Math.min(MAX_PERIOD_MS, mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_WORKING_MS));
-        if (mBucketPeriodsMs[WORKING_INDEX] != newWorkingPeriodMs) {
-            mBucketPeriodsMs[WORKING_INDEX] = newWorkingPeriodMs;
-            changed = true;
-        }
-        long newFrequentPeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                Math.min(MAX_PERIOD_MS, mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_FREQUENT_MS));
-        if (mBucketPeriodsMs[FREQUENT_INDEX] != newFrequentPeriodMs) {
-            mBucketPeriodsMs[FREQUENT_INDEX] = newFrequentPeriodMs;
-            changed = true;
-        }
-        long newRarePeriodMs = Math.max(mAllowedTimePerPeriodMs,
-                Math.min(MAX_PERIOD_MS, mConstants.QUOTA_CONTROLLER_WINDOW_SIZE_RARE_MS));
-        if (mBucketPeriodsMs[RARE_INDEX] != newRarePeriodMs) {
-            mBucketPeriodsMs[RARE_INDEX] = newRarePeriodMs;
-            changed = true;
-        }
-        long newMaxExecutionTimeMs = Math.max(60 * MINUTE_IN_MILLIS,
-                Math.min(MAX_PERIOD_MS, mConstants.QUOTA_CONTROLLER_MAX_EXECUTION_TIME_MS));
-        if (mMaxExecutionTimeMs != newMaxExecutionTimeMs) {
-            mMaxExecutionTimeMs = newMaxExecutionTimeMs;
-            mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
-            changed = true;
-        }
-        int newMaxCountPerAllowedPeriod = Math.max(10,
-                mConstants.QUOTA_CONTROLLER_MAX_JOB_COUNT_PER_ALLOWED_TIME);
-        if (mMaxJobCountPerAllowedTime != newMaxCountPerAllowedPeriod) {
-            mMaxJobCountPerAllowedTime = newMaxCountPerAllowedPeriod;
-            changed = true;
-        }
-        int newActiveMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                Math.max(MIN_BUCKET_JOB_COUNT, mConstants.QUOTA_CONTROLLER_MAX_JOB_COUNT_ACTIVE));
-        if (mMaxBucketJobCounts[ACTIVE_INDEX] != newActiveMaxJobCount) {
-            mMaxBucketJobCounts[ACTIVE_INDEX] = newActiveMaxJobCount;
-            changed = true;
-        }
-        int newWorkingMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                Math.max(MIN_BUCKET_JOB_COUNT, mConstants.QUOTA_CONTROLLER_MAX_JOB_COUNT_WORKING));
-        if (mMaxBucketJobCounts[WORKING_INDEX] != newWorkingMaxJobCount) {
-            mMaxBucketJobCounts[WORKING_INDEX] = newWorkingMaxJobCount;
-            changed = true;
-        }
-        int newFrequentMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                Math.max(MIN_BUCKET_JOB_COUNT, mConstants.QUOTA_CONTROLLER_MAX_JOB_COUNT_FREQUENT));
-        if (mMaxBucketJobCounts[FREQUENT_INDEX] != newFrequentMaxJobCount) {
-            mMaxBucketJobCounts[FREQUENT_INDEX] = newFrequentMaxJobCount;
-            changed = true;
-        }
-        int newRareMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                Math.max(MIN_BUCKET_JOB_COUNT, mConstants.QUOTA_CONTROLLER_MAX_JOB_COUNT_RARE));
-        if (mMaxBucketJobCounts[RARE_INDEX] != newRareMaxJobCount) {
-            mMaxBucketJobCounts[RARE_INDEX] = newRareMaxJobCount;
-            changed = true;
-        }
 
-        if (changed) {
             // Update job bookkeeping out of band.
             BackgroundThread.getHandler().post(() -> {
                 synchronized (mLock) {
@@ -1891,6 +1824,311 @@ public final class QuotaController extends StateController {
         }
     }
 
+    @VisibleForTesting
+    class QcConstants extends ContentObserver {
+        private ContentResolver mResolver;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        private static final String KEY_ALLOWED_TIME_PER_PERIOD_MS = "allowed_time_per_period_ms";
+        private static final String KEY_IN_QUOTA_BUFFER_MS = "in_quota_buffer_ms";
+        private static final String KEY_WINDOW_SIZE_ACTIVE_MS = "window_size_active_ms";
+        private static final String KEY_WINDOW_SIZE_WORKING_MS = "window_size_working_ms";
+        private static final String KEY_WINDOW_SIZE_FREQUENT_MS = "window_size_frequent_ms";
+        private static final String KEY_WINDOW_SIZE_RARE_MS = "window_size_rare_ms";
+        private static final String KEY_MAX_EXECUTION_TIME_MS = "max_execution_time_ms";
+        private static final String KEY_MAX_JOB_COUNT_ACTIVE = "max_job_count_active";
+        private static final String KEY_MAX_JOB_COUNT_WORKING = "max_job_count_working";
+        private static final String KEY_MAX_JOB_COUNT_FREQUENT = "max_job_count_frequent";
+        private static final String KEY_MAX_JOB_COUNT_RARE = "max_job_count_rare";
+        private static final String KEY_MAX_JOB_COUNT_PER_ALLOWED_TIME =
+                "max_count_per_allowed_time";
+
+        private static final long DEFAULT_ALLOWED_TIME_PER_PERIOD_MS =
+                10 * 60 * 1000L; // 10 minutes
+        private static final long DEFAULT_IN_QUOTA_BUFFER_MS =
+                30 * 1000L; // 30 seconds
+        private static final long DEFAULT_WINDOW_SIZE_ACTIVE_MS =
+                10 * 60 * 1000L; // 10 minutes for ACTIVE -- ACTIVE apps can run jobs at any time
+        private static final long DEFAULT_WINDOW_SIZE_WORKING_MS =
+                2 * 60 * 60 * 1000L; // 2 hours
+        private static final long DEFAULT_WINDOW_SIZE_FREQUENT_MS =
+                8 * 60 * 60 * 1000L; // 8 hours
+        private static final long DEFAULT_WINDOW_SIZE_RARE_MS =
+                24 * 60 * 60 * 1000L; // 24 hours
+        private static final long DEFAULT_MAX_EXECUTION_TIME_MS =
+                4 * 60 * 60 * 1000L; // 4 hours
+        private static final int DEFAULT_MAX_JOB_COUNT_ACTIVE =
+                200; // 1200/hr
+        private static final int DEFAULT_MAX_JOB_COUNT_WORKING =
+                1200; // 600/hr
+        private static final int DEFAULT_MAX_JOB_COUNT_FREQUENT =
+                1800; // 225/hr
+        private static final int DEFAULT_MAX_JOB_COUNT_RARE =
+                2400; // 100/hr
+        private static final int DEFAULT_MAX_JOB_COUNT_PER_ALLOWED_TIME = 20;
+
+        /** How much time each app will have to run jobs within their standby bucket window. */
+        public long ALLOWED_TIME_PER_PERIOD_MS = DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
+
+        /**
+         * How much time the package should have before transitioning from out-of-quota to in-quota.
+         * This should not affect processing if the package is already in-quota.
+         */
+        public long IN_QUOTA_BUFFER_MS = DEFAULT_IN_QUOTA_BUFFER_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long WINDOW_SIZE_ACTIVE_MS = DEFAULT_WINDOW_SIZE_ACTIVE_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long WINDOW_SIZE_WORKING_MS = DEFAULT_WINDOW_SIZE_WORKING_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long WINDOW_SIZE_FREQUENT_MS = DEFAULT_WINDOW_SIZE_FREQUENT_MS;
+
+        /**
+         * The quota window size of the particular standby bucket. Apps in this standby bucket are
+         * expected to run only {@link #ALLOWED_TIME_PER_PERIOD_MS} within the past
+         * WINDOW_SIZE_MS.
+         */
+        public long WINDOW_SIZE_RARE_MS = DEFAULT_WINDOW_SIZE_RARE_MS;
+
+        /**
+         * The maximum amount of time an app can have its jobs running within a 24 hour window.
+         */
+        public long MAX_EXECUTION_TIME_MS = DEFAULT_MAX_EXECUTION_TIME_MS;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int MAX_JOB_COUNT_ACTIVE = DEFAULT_MAX_JOB_COUNT_ACTIVE;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int MAX_JOB_COUNT_WORKING = DEFAULT_MAX_JOB_COUNT_WORKING;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int MAX_JOB_COUNT_FREQUENT = DEFAULT_MAX_JOB_COUNT_FREQUENT;
+
+        /**
+         * The maximum number of jobs an app can run within this particular standby bucket's
+         * window size.
+         */
+        public int MAX_JOB_COUNT_RARE = DEFAULT_MAX_JOB_COUNT_RARE;
+
+        /**
+         * The maximum number of jobs that can run within the past
+         * {@link #ALLOWED_TIME_PER_PERIOD_MS}.
+         */
+        public int MAX_JOB_COUNT_PER_ALLOWED_TIME = DEFAULT_MAX_JOB_COUNT_PER_ALLOWED_TIME;
+
+        QcConstants(Handler handler) {
+            super(handler);
+        }
+
+        private void start(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS), false, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            final String constants = Settings.Global.getString(
+                    mResolver, Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS);
+
+            try {
+                mParser.setString(constants);
+            } catch (Exception e) {
+                // Failed to parse the settings string, log this and move on with defaults.
+                Slog.e(TAG, "Bad jobscheduler quota controller settings", e);
+            }
+
+            ALLOWED_TIME_PER_PERIOD_MS = mParser.getDurationMillis(
+                    KEY_ALLOWED_TIME_PER_PERIOD_MS, DEFAULT_ALLOWED_TIME_PER_PERIOD_MS);
+            IN_QUOTA_BUFFER_MS = mParser.getDurationMillis(
+                    KEY_IN_QUOTA_BUFFER_MS, DEFAULT_IN_QUOTA_BUFFER_MS);
+            WINDOW_SIZE_ACTIVE_MS = mParser.getDurationMillis(
+                    KEY_WINDOW_SIZE_ACTIVE_MS, DEFAULT_WINDOW_SIZE_ACTIVE_MS);
+            WINDOW_SIZE_WORKING_MS = mParser.getDurationMillis(
+                    KEY_WINDOW_SIZE_WORKING_MS, DEFAULT_WINDOW_SIZE_WORKING_MS);
+            WINDOW_SIZE_FREQUENT_MS = mParser.getDurationMillis(
+                    KEY_WINDOW_SIZE_FREQUENT_MS, DEFAULT_WINDOW_SIZE_FREQUENT_MS);
+            WINDOW_SIZE_RARE_MS = mParser.getDurationMillis(
+                    KEY_WINDOW_SIZE_RARE_MS, DEFAULT_WINDOW_SIZE_RARE_MS);
+            MAX_EXECUTION_TIME_MS = mParser.getDurationMillis(
+                    KEY_MAX_EXECUTION_TIME_MS, DEFAULT_MAX_EXECUTION_TIME_MS);
+            MAX_JOB_COUNT_ACTIVE = mParser.getInt(
+                    KEY_MAX_JOB_COUNT_ACTIVE, DEFAULT_MAX_JOB_COUNT_ACTIVE);
+            MAX_JOB_COUNT_WORKING = mParser.getInt(
+                    KEY_MAX_JOB_COUNT_WORKING, DEFAULT_MAX_JOB_COUNT_WORKING);
+            MAX_JOB_COUNT_FREQUENT = mParser.getInt(
+                    KEY_MAX_JOB_COUNT_FREQUENT, DEFAULT_MAX_JOB_COUNT_FREQUENT);
+            MAX_JOB_COUNT_RARE = mParser.getInt(
+                    KEY_MAX_JOB_COUNT_RARE, DEFAULT_MAX_JOB_COUNT_RARE);
+            MAX_JOB_COUNT_PER_ALLOWED_TIME = mParser.getInt(
+                    KEY_MAX_JOB_COUNT_PER_ALLOWED_TIME, DEFAULT_MAX_JOB_COUNT_PER_ALLOWED_TIME);
+
+            updateConstants();
+        }
+
+        @VisibleForTesting
+        void updateConstants() {
+            synchronized (mLock) {
+                boolean changed = false;
+
+                long newAllowedTimeMs = Math.min(MAX_PERIOD_MS,
+                        Math.max(MINUTE_IN_MILLIS, ALLOWED_TIME_PER_PERIOD_MS));
+                if (mAllowedTimePerPeriodMs != newAllowedTimeMs) {
+                    mAllowedTimePerPeriodMs = newAllowedTimeMs;
+                    mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
+                    changed = true;
+                }
+                long newQuotaBufferMs = Math.max(0,
+                        Math.min(5 * MINUTE_IN_MILLIS, IN_QUOTA_BUFFER_MS));
+                if (mQuotaBufferMs != newQuotaBufferMs) {
+                    mQuotaBufferMs = newQuotaBufferMs;
+                    mAllowedTimeIntoQuotaMs = mAllowedTimePerPeriodMs - mQuotaBufferMs;
+                    mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
+                    changed = true;
+                }
+                long newActivePeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_ACTIVE_MS));
+                if (mBucketPeriodsMs[ACTIVE_INDEX] != newActivePeriodMs) {
+                    mBucketPeriodsMs[ACTIVE_INDEX] = newActivePeriodMs;
+                    changed = true;
+                }
+                long newWorkingPeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_WORKING_MS));
+                if (mBucketPeriodsMs[WORKING_INDEX] != newWorkingPeriodMs) {
+                    mBucketPeriodsMs[WORKING_INDEX] = newWorkingPeriodMs;
+                    changed = true;
+                }
+                long newFrequentPeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_FREQUENT_MS));
+                if (mBucketPeriodsMs[FREQUENT_INDEX] != newFrequentPeriodMs) {
+                    mBucketPeriodsMs[FREQUENT_INDEX] = newFrequentPeriodMs;
+                    changed = true;
+                }
+                long newRarePeriodMs = Math.max(mAllowedTimePerPeriodMs,
+                        Math.min(MAX_PERIOD_MS, WINDOW_SIZE_RARE_MS));
+                if (mBucketPeriodsMs[RARE_INDEX] != newRarePeriodMs) {
+                    mBucketPeriodsMs[RARE_INDEX] = newRarePeriodMs;
+                    changed = true;
+                }
+                long newMaxExecutionTimeMs = Math.max(60 * MINUTE_IN_MILLIS,
+                        Math.min(MAX_PERIOD_MS, MAX_EXECUTION_TIME_MS));
+                if (mMaxExecutionTimeMs != newMaxExecutionTimeMs) {
+                    mMaxExecutionTimeMs = newMaxExecutionTimeMs;
+                    mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
+                    changed = true;
+                }
+                int newMaxCountPerAllowedPeriod = Math.max(10,
+                        MAX_JOB_COUNT_PER_ALLOWED_TIME);
+                if (mMaxJobCountPerAllowedTime != newMaxCountPerAllowedPeriod) {
+                    mMaxJobCountPerAllowedTime = newMaxCountPerAllowedPeriod;
+                    changed = true;
+                }
+                int newActiveMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
+                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_ACTIVE));
+                if (mMaxBucketJobCounts[ACTIVE_INDEX] != newActiveMaxJobCount) {
+                    mMaxBucketJobCounts[ACTIVE_INDEX] = newActiveMaxJobCount;
+                    changed = true;
+                }
+                int newWorkingMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
+                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_WORKING));
+                if (mMaxBucketJobCounts[WORKING_INDEX] != newWorkingMaxJobCount) {
+                    mMaxBucketJobCounts[WORKING_INDEX] = newWorkingMaxJobCount;
+                    changed = true;
+                }
+                int newFrequentMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
+                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_FREQUENT));
+                if (mMaxBucketJobCounts[FREQUENT_INDEX] != newFrequentMaxJobCount) {
+                    mMaxBucketJobCounts[FREQUENT_INDEX] = newFrequentMaxJobCount;
+                    changed = true;
+                }
+                int newRareMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
+                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_RARE));
+                if (mMaxBucketJobCounts[RARE_INDEX] != newRareMaxJobCount) {
+                    mMaxBucketJobCounts[RARE_INDEX] = newRareMaxJobCount;
+                    changed = true;
+                }
+
+                if (changed && mShouldThrottle) {
+                    // Update job bookkeeping out of band.
+                    BackgroundThread.getHandler().post(() -> {
+                        synchronized (mLock) {
+                            maybeUpdateAllConstraintsLocked();
+                        }
+                    });
+                }
+            }
+        }
+
+        private void dump(IndentingPrintWriter pw) {
+            pw.println();
+            pw.println("QuotaController:");
+            pw.increaseIndent();
+            pw.printPair(KEY_ALLOWED_TIME_PER_PERIOD_MS, ALLOWED_TIME_PER_PERIOD_MS).println();
+            pw.printPair(KEY_IN_QUOTA_BUFFER_MS, IN_QUOTA_BUFFER_MS).println();
+            pw.printPair(KEY_WINDOW_SIZE_ACTIVE_MS, WINDOW_SIZE_ACTIVE_MS).println();
+            pw.printPair(KEY_WINDOW_SIZE_WORKING_MS, WINDOW_SIZE_WORKING_MS).println();
+            pw.printPair(KEY_WINDOW_SIZE_FREQUENT_MS, WINDOW_SIZE_FREQUENT_MS).println();
+            pw.printPair(KEY_WINDOW_SIZE_RARE_MS, WINDOW_SIZE_RARE_MS).println();
+            pw.printPair(KEY_MAX_EXECUTION_TIME_MS, MAX_EXECUTION_TIME_MS).println();
+            pw.printPair(KEY_MAX_JOB_COUNT_ACTIVE, MAX_JOB_COUNT_ACTIVE).println();
+            pw.printPair(KEY_MAX_JOB_COUNT_WORKING, MAX_JOB_COUNT_WORKING).println();
+            pw.printPair(KEY_MAX_JOB_COUNT_FREQUENT, MAX_JOB_COUNT_FREQUENT).println();
+            pw.printPair(KEY_MAX_JOB_COUNT_RARE, MAX_JOB_COUNT_RARE).println();
+            pw.printPair(KEY_MAX_JOB_COUNT_PER_ALLOWED_TIME, MAX_JOB_COUNT_PER_ALLOWED_TIME)
+                    .println();
+            pw.decreaseIndent();
+        }
+
+        private void dump(ProtoOutputStream proto) {
+            final long qcToken = proto.start(ConstantsProto.QUOTA_CONTROLLER);
+            proto.write(ConstantsProto.QuotaController.ALLOWED_TIME_PER_PERIOD_MS,
+                    ALLOWED_TIME_PER_PERIOD_MS);
+            proto.write(ConstantsProto.QuotaController.IN_QUOTA_BUFFER_MS, IN_QUOTA_BUFFER_MS);
+            proto.write(ConstantsProto.QuotaController.ACTIVE_WINDOW_SIZE_MS,
+                    WINDOW_SIZE_ACTIVE_MS);
+            proto.write(ConstantsProto.QuotaController.WORKING_WINDOW_SIZE_MS,
+                    WINDOW_SIZE_WORKING_MS);
+            proto.write(ConstantsProto.QuotaController.FREQUENT_WINDOW_SIZE_MS,
+                    WINDOW_SIZE_FREQUENT_MS);
+            proto.write(ConstantsProto.QuotaController.RARE_WINDOW_SIZE_MS, WINDOW_SIZE_RARE_MS);
+            proto.write(ConstantsProto.QuotaController.MAX_EXECUTION_TIME_MS,
+                    MAX_EXECUTION_TIME_MS);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_ACTIVE, MAX_JOB_COUNT_ACTIVE);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_WORKING,
+                    MAX_JOB_COUNT_WORKING);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_FREQUENT,
+                    MAX_JOB_COUNT_FREQUENT);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_RARE, MAX_JOB_COUNT_RARE);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_PER_ALLOWED_TIME,
+                    MAX_JOB_COUNT_PER_ALLOWED_TIME);
+            proto.end(qcToken);
+        }
+    }
+
     //////////////////////// TESTING HELPERS /////////////////////////////
 
     @VisibleForTesting
@@ -1941,6 +2179,12 @@ public final class QuotaController extends StateController {
     @Nullable
     List<TimingSession> getTimingSessions(int userId, String packageName) {
         return mTimingSessions.get(userId, packageName);
+    }
+
+    @VisibleForTesting
+    @NonNull
+    QcConstants getQcConstants() {
+        return mQcConstants;
     }
 
     //////////////////////////// DATA DUMP //////////////////////////////
@@ -2187,5 +2431,15 @@ public final class QuotaController extends StateController {
 
         proto.end(mToken);
         proto.end(token);
+    }
+
+    @Override
+    public void dumpConstants(IndentingPrintWriter pw) {
+        mQcConstants.dump(pw);
+    }
+
+    @Override
+    public void dumpConstants(ProtoOutputStream proto) {
+        mQcConstants.dump(proto);
     }
 }

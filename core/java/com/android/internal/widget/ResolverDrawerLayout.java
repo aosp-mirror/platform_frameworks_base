@@ -104,6 +104,7 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     private OnDismissedListener mOnDismissedListener;
     private RunOnDismissedListener mRunOnDismissedListener;
+    private OnCollapsedChangedListener mOnCollapsedChangedListener;
 
     private boolean mDismissLocked;
 
@@ -265,6 +266,10 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     private boolean isDismissable() {
         return mOnDismissedListener != null && !mDismissLocked;
+    }
+
+    public void setOnCollapsedChangedListener(OnCollapsedChangedListener listener) {
+        mOnCollapsedChangedListener = listener;
     }
 
     @Override
@@ -547,6 +552,10 @@ public class ResolverDrawerLayout extends ViewGroup {
 
         if (mScrollIndicatorDrawable != null) {
             setWillNotDraw(!isCollapsed);
+        }
+
+        if (mOnCollapsedChangedListener != null) {
+            mOnCollapsedChangedListener.onCollapsedChanged(isCollapsed);
         }
     }
 
@@ -1078,8 +1087,25 @@ public class ResolverDrawerLayout extends ViewGroup {
         };
     }
 
+    /**
+     * Listener for sheet dismissed events.
+     */
     public interface OnDismissedListener {
-        public void onDismissed();
+        /**
+         * Callback when the sheet is dismissed by the user.
+         */
+        void onDismissed();
+    }
+
+    /**
+     * Listener for sheet collapsed / expanded events.
+     */
+    public interface OnCollapsedChangedListener {
+        /**
+         * Callback when the sheet is either fully expanded or collapsed.
+         * @param isCollapsed true when collapsed, false when expanded.
+         */
+        void onCollapsedChanged(boolean isCollapsed);
     }
 
     private class RunOnDismissedListener implements Runnable {

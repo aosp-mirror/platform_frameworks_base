@@ -22,12 +22,19 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /**
  * Represents a abstract action that can be perform on this app. This are requested from
- * outside the app's UI (eg by SystemUI or assistant).
+ * outside the app's UI (eg by SystemUI or assistant). The semantics of these actions are
+ * not specified by the OS. This allows open-ended and scalable approach for defining how
+ * an app interacts with components that expose alternative interaction models to the user
+ * such as the assistant, SystemUI, etc. You can use {@link #equals(Object)} to compare
+ * instances of this class.
  */
 public final class DirectAction implements Parcelable {
 
@@ -91,7 +98,7 @@ public final class DirectAction implements Parcelable {
     }
 
     /**
-     * Returns the ID for this action.
+     * @return the ID for this action.
      */
     @NonNull
     public String getId() {
@@ -99,7 +106,7 @@ public final class DirectAction implements Parcelable {
     }
 
     /**
-     * Returns any extras associated with this action.
+     * @return any extras associated with this action.
      */
     @Nullable
     public Bundle getExtras() {
@@ -107,7 +114,7 @@ public final class DirectAction implements Parcelable {
     }
 
     /**
-     * Returns the LocusId for the current state for the app
+     * @return the LocusId for the current state for the app
      */
     @Nullable
     public LocusId getLocusId() {
@@ -117,6 +124,28 @@ public final class DirectAction implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return mID.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
+
+        if (other == this) {
+            return true;
+        }
+
+        if (getClass() != other.getClass()) {
+            return false;
+        }
+
+        return mID.equals(((DirectAction) other).mID);
     }
 
     @Override
@@ -139,7 +168,8 @@ public final class DirectAction implements Parcelable {
         /**
          * Creates a new instance.
          *
-         * @param id The mandatory action id.
+         * @param id The mandatory action id which must be unique in the
+         *     current application state.
          */
         public Builder(@NonNull String id) {
             Preconditions.checkNotNull(id);
@@ -147,7 +177,9 @@ public final class DirectAction implements Parcelable {
         }
 
         /**
-         * Sets the optional action extras.
+         * Sets the optional action extras. These extras are action specific
+         * and their semantics are open-ended potentially representing how
+         * the action is visualized, interpreted, what its arguments are, etc.
          *
          * @param extras The extras.
          * @return This builder.
@@ -158,7 +190,9 @@ public final class DirectAction implements Parcelable {
         }
 
         /**
-         * Sets the optional locus id.
+         * Sets the optional locus id. This is an identifier of the application
+         * state from a user perspective. For example, a specific chat in a
+         * messaging app.
          *
          * @param locusId The locus id.
          * @return This builder.
