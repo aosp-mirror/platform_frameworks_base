@@ -60,7 +60,7 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:clickable="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless">
+        style="?attr/borderlessButtonStyle">
 
       <ImageView
           android:layout_width="24dp"
