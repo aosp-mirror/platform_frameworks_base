@@ -22,58 +22,23 @@ import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.HardwareBgDrawable;
-import com.android.systemui.MultiListLayout;
-import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * Grid-based implementation of the button layout created by the global actions dialog.
  */
-public class GlobalActionsGridLayout extends MultiListLayout {
-
-    boolean mBackgroundsSet;
-
+public class GlobalActionsGridLayout extends GlobalActionsLayout {
     public GlobalActionsGridLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    private void setBackgrounds() {
-        int gridBackgroundColor = getResources().getColor(
-                com.android.systemui.R.color.global_actions_grid_background, null);
-        int separatedBackgroundColor = getResources().getColor(
-                com.android.systemui.R.color.global_actions_separated_background, null);
-        HardwareBgDrawable listBackground  = new HardwareBgDrawable(true, true, getContext());
-        HardwareBgDrawable separatedBackground = new HardwareBgDrawable(true, true, getContext());
-        listBackground.setTint(gridBackgroundColor);
-        separatedBackground.setTint(separatedBackgroundColor);
-        getListView().setBackground(listBackground);
-        getSeparatedView().setBackground(separatedBackground);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-        // backgrounds set only once, the first time onMeasure is called after inflation
-        if (getListView() != null && !mBackgroundsSet) {
-            setBackgrounds();
-            mBackgroundsSet = true;
-        }
-    }
-
     @VisibleForTesting
-    protected int getCurrentRotation() {
-        return RotationUtils.getRotation(mContext);
-    }
-
-    @VisibleForTesting
-    protected void setupListView(ListGridLayout listView, int itemCount) {
-        listView.setExpectedCount(itemCount);
+    protected void setupListView() {
+        ListGridLayout listView = getListView();
+        listView.setExpectedCount(mAdapter.countListItems());
         listView.setReverseSublists(shouldReverseSublists());
         listView.setReverseItems(shouldReverseListItems());
         listView.setSwapRowsAndColumns(shouldSwapRowsAndColumns());
@@ -81,29 +46,8 @@ public class GlobalActionsGridLayout extends MultiListLayout {
 
     @Override
     public void onUpdateList() {
+        setupListView();
         super.onUpdateList();
-
-        ViewGroup separatedView = getSeparatedView();
-        ListGridLayout listView = getListView();
-        setupListView(listView, mAdapter.countListItems());
-
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            // generate the view item
-            View v;
-            boolean separated = mAdapter.shouldBeSeparated(i);
-            if (separated) {
-                v = mAdapter.getView(i, null, separatedView);
-            } else {
-                v = mAdapter.getView(i, null, listView);
-            }
-            Log.d("GlobalActionsGridLayout", "View: " + v);
-
-            if (separated) {
-                separatedView.addView(v);
-            } else {
-                listView.addItem(v);
-            }
-        }
         updateSeparatedItemSize();
     }
 
@@ -111,7 +55,8 @@ public class GlobalActionsGridLayout extends MultiListLayout {
      * If the separated view contains only one item, expand the bounds of that item to take up the
      * entire view, so that the whole thing is touch-able.
      */
-    private void updateSeparatedItemSize() {
+    @VisibleForTesting
+    protected void updateSeparatedItemSize() {
         ViewGroup separated = getSeparatedView();
         if (separated.getChildCount() == 0) {
             return;
@@ -129,13 +74,24 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     }
 
     @Override
-    protected ViewGroup getSeparatedView() {
-        return findViewById(com.android.systemui.R.id.separated_button);
+    protected ListGridLayout getListView() {
+        return (ListGridLayout) super.getListView();
     }
 
     @Override
-    protected ListGridLayout getListView() {
-        return findViewById(android.R.id.list);
+    protected void removeAllListViews() {
+        ListGridLayout list = getListView();
+        if (list != null) {
+            list.removeAllItems();
+        }
+    }
+
+    @Override
+    protected void addToListView(View v, boolean reverse) {
+        ListGridLayout list = getListView();
+        if (list != null) {
+            list.addItem(v);
+        }
     }
 
     @Override
@@ -174,12 +130,7 @@ public class GlobalActionsGridLayout extends MultiListLayout {
         return true;
     }
 
-    /**
-     * Determines whether the ListGridLayout should reverse the ordering of items within sublists.
-     * Used for RTL languages to ensure that items appear in the same positions, without having to
-     * override layoutDirection, which breaks Talkback ordering.
-     */
-    @VisibleForTesting
+    @Override
     protected boolean shouldReverseListItems() {
         int rotation = getCurrentRotation();
         boolean reverse = false; // should we add items to parents in the reverse order?
@@ -187,20 +138,13 @@ public class GlobalActionsGridLayout extends MultiListLayout {
                 || rotation == ROTATION_SEASCAPE) {
             reverse = !reverse; // if we're in portrait or seascape, reverse items
         }
-        if (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+        if (getCurrentLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
             reverse = !reverse; // if we're in an RTL language, reverse items (again)
         }
         return reverse;
     }
 
-    /**
-     * Not ued in this implementation of the Global Actions Menu, but necessary for some others.
-     */
-    @Override
-    public void setDivisionView(View v) {
-        // do nothing
-    }
-
+    @VisibleForTesting
     protected float getAnimationDistance() {
         int rows = getListView().getRowCount();
         float gridItemSize = getContext().getResources().getDimension(
