@@ -33,7 +33,7 @@ import com.android.internal.util.Preconditions;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
@@ -148,7 +148,6 @@ public final class BugreportManager {
             @NonNull BugreportParams params,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BugreportCallback callback) {
-        File tmpScreenshotFile = null;
         try {
             Preconditions.checkNotNull(bugreportFd);
             Preconditions.checkNotNull(params);
@@ -157,13 +156,10 @@ public final class BugreportManager {
 
             if (screenshotFd == null) {
                 // Binder needs a valid File Descriptor to be passed
-                tmpScreenshotFile = File.createTempFile("tmp", ".png");
-                screenshotFd = ParcelFileDescriptor.open(tmpScreenshotFile,
+                screenshotFd = ParcelFileDescriptor.open(new File("/dev/null"),
                         ParcelFileDescriptor.MODE_READ_ONLY);
             }
-            DumpstateListener dsListener = new DumpstateListener(executor,
-                    callback, tmpScreenshotFile);
-
+            DumpstateListener dsListener = new DumpstateListener(executor, callback);
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
@@ -171,13 +167,9 @@ public final class BugreportManager {
                     screenshotFd.getFileDescriptor(),
                     params.getMode(), dsListener);
         } catch (RemoteException e) {
-            deleteFile(tmpScreenshotFile);
             throw e.rethrowFromSystemServer();
-        } catch (IOException e) {
-            // Need to delete the file if it was created but failed while trying to get fd
-            deleteFile(tmpScreenshotFile);
-            Log.e(TAG, "Not able to create/open temporary screenshot file ", e);
-            callback.onError(BugreportCallback.BUGREPORT_ERROR_RUNTIME);
+        } catch (FileNotFoundException e) {
+            Log.wtf(TAG, "Not able to find /dev/null file: ", e);
         } finally {
             // We can close the file descriptors here because binder would have duped them.
             IoUtils.closeQuietly(bugreportFd);
@@ -199,26 +191,13 @@ public final class BugreportManager {
         }
     }
 
-    private void deleteFile(@Nullable File tmpScreenshotFile) {
-        try {
-            if (tmpScreenshotFile != null && tmpScreenshotFile.exists()) {
-                tmpScreenshotFile.delete();
-            }
-        } catch (SecurityException e) {
-            Log.e(TAG, "Not able to delete temporary screenshot file ", e);
-        }
-    }
-
     private final class DumpstateListener extends IDumpstateListener.Stub {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
-        private final File mTmpScreenshotFile;
 
-        DumpstateListener(Executor executor, BugreportCallback callback,
-                @Nullable File tmpScreenshotFile) {
+        DumpstateListener(Executor executor, BugreportCallback callback) {
             mExecutor = executor;
             mCallback = callback;
-            mTmpScreenshotFile = tmpScreenshotFile;
         }
 
         @Override
@@ -242,7 +221,6 @@ public final class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                deleteFile(mTmpScreenshotFile);
             }
         }
 
@@ -255,7 +233,6 @@ public final class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                deleteFile(mTmpScreenshotFile);
             }
         }
 
