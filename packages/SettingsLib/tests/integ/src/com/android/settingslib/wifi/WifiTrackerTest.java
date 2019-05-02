@@ -314,7 +314,8 @@ public class WifiTrackerTest {
 
     private List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>>
             createPasspointMatchingWifiConfigWithScanResults(
-            List<ScanResult> homeList, List<ScanResult> roamingList) {
+            List<ScanResult> homeList, List<ScanResult> roamingList,
+            String fqdn, String friendlyName) {
         List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> matchingList =
                 new ArrayList<>();
         Map<Integer, List<ScanResult>> mapping = new HashMap<>();
@@ -326,7 +327,7 @@ public class WifiTrackerTest {
             mapping.put(WifiManager.PASSPOINT_ROAMING_NETWORK, roamingList);
         }
 
-        matchingList.add(new Pair(buildPasspointConfiguration(FQDN_1, PROVIDER_FRIENDLY_NAME_1),
+        matchingList.add(new Pair(buildPasspointConfiguration(fqdn, friendlyName),
                 mapping));
 
         return matchingList;
@@ -1077,7 +1078,7 @@ public class WifiTrackerTest {
 
         List<AccessPoint> passpointAccessPointsFirstUpdate = tracker.updatePasspointAccessPoints(
                 createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
-                        null), new ArrayList<>());
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_1), new ArrayList<>());
         List<AccessPoint> cachedAccessPoints = new ArrayList<>(passpointAccessPointsFirstUpdate);
 
         int prevRssi = result.level;
@@ -1086,7 +1087,7 @@ public class WifiTrackerTest {
 
         List<AccessPoint> passpointAccessPointsSecondUpdate = tracker.updatePasspointAccessPoints(
                 createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
-                        null), cachedAccessPoints);
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_1), cachedAccessPoints);
 
         // Verify second update AP is the same object as the first update AP
         assertThat(passpointAccessPointsFirstUpdate.get(0))
@@ -1094,6 +1095,28 @@ public class WifiTrackerTest {
         // Verify second update AP has the average of the first and second update RSSIs
         assertThat(passpointAccessPointsSecondUpdate.get(0).getRssi())
                 .isEqualTo((prevRssi + newRssi) / 2);
+    }
+
+    /**
+     * Verifies that the internal WifiConfiguration of a Passpoint AccessPoint is updated
+     */
+    @Test
+    public void updatePasspointAccessPoints_updatesConfig() {
+        WifiTracker tracker = createMockedWifiTracker();
+
+        ScanResult result = buildScanResult1();
+
+        List<AccessPoint> passpointAccessPoints = tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_1), new ArrayList<>());
+
+        AccessPoint ap = passpointAccessPoints.get(0);
+        assertEquals(ap.getTitle(), PROVIDER_FRIENDLY_NAME_1);
+
+        tracker.updatePasspointAccessPoints(
+                createPasspointMatchingWifiConfigWithScanResults(Arrays.asList(result),
+                        null, FQDN_1, PROVIDER_FRIENDLY_NAME_2), passpointAccessPoints);
+        assertEquals(ap.getTitle(), PROVIDER_FRIENDLY_NAME_2);
     }
 
     /**
