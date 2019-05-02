@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.systemui.classifier;
@@ -49,7 +49,7 @@ import java.io.PrintWriter;
  *
  * It does not collect touch events when the bouncer shows up.
  */
-public class FalsingManager implements SensorEventListener, StateListener {
+public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager {
     private static final String ENFORCE_BOUNCER = "falsing_manager_enforce_bouncer";
 
     private static final int[] CLASSIFIER_SENSORS = new int[] {
@@ -75,8 +75,6 @@ public class FalsingManager implements SensorEventListener, StateListener {
     private final AccessibilityManager mAccessibilityManager;
     private final UiOffloadThread mUiOffloadThread;
 
-    private static FalsingManager sInstance = null;
-
     private boolean mEnforceBouncer = false;
     private boolean mBouncerOn = false;
     private boolean mBouncerOffOnDown = false;
@@ -89,6 +87,33 @@ public class FalsingManager implements SensorEventListener, StateListener {
     private int mIsFalseTouchCalls;
     private MetricsLogger mMetricsLogger;
 
+    private SensorEventListener mSensorEventListener = new SensorEventListener() {
+        @Override
+        public synchronized void onSensorChanged(SensorEvent event) {
+            mDataCollector.onSensorChanged(event);
+            mHumanInteractionClassifier.onSensorChanged(event);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            mDataCollector.onAccuracyChanged(sensor, accuracy);
+        }
+    };
+
+    public StateListener mStatusBarStateListener = new StateListener() {
+        @Override
+        public void onStateChanged(int newState) {
+            if (FalsingLog.ENABLED) {
+                FalsingLog.i("setStatusBarState", new StringBuilder()
+                        .append("from=").append(StatusBarState.toShortString(mState))
+                        .append(" to=").append(StatusBarState.toShortString(newState))
+                        .toString());
+            }
+            mState = newState;
+            updateSessionActive();
+        }
+    };
+
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
@@ -96,7 +121,7 @@ public class FalsingManager implements SensorEventListener, StateListener {
         }
     };
 
-    private FalsingManager(Context context) {
+    FalsingManagerImpl(Context context) {
         mContext = context;
         mSensorManager = Dependency.get(AsyncSensorManager.class);
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -112,14 +137,7 @@ public class FalsingManager implements SensorEventListener, StateListener {
                 UserHandle.USER_ALL);
 
         updateConfiguration();
-        Dependency.get(StatusBarStateController.class).addCallback(this);
-    }
-
-    public static FalsingManager getInstance(Context context) {
-        if (sInstance == null) {
-            sInstance = new FalsingManager(context);
-        }
-        return sInstance;
+        Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
     }
 
     private void updateConfiguration() {
@@ -128,13 +146,14 @@ public class FalsingManager implements SensorEventListener, StateListener {
     }
 
     private boolean shouldSessionBeActive() {
-        if (FalsingLog.ENABLED && FalsingLog.VERBOSE)
+        if (FalsingLog.ENABLED && FalsingLog.VERBOSE) {
             FalsingLog.v("shouldBeActive", new StringBuilder()
                     .append("enabled=").append(isEnabled() ? 1 : 0)
                     .append(" mScreenOn=").append(mScreenOn ? 1 : 0)
                     .append(" mState=").append(StatusBarState.toShortString(mState))
                     .toString()
             );
+        }
         return isEnabled() && mScreenOn && (mState == StatusBarState.KEYGUARD) && !mShowingAod;
     }
 
@@ -160,7 +179,7 @@ public class FalsingManager implements SensorEventListener, StateListener {
 
             // This can be expensive, and doesn't need to happen on the main thread.
             mUiOffloadThread.submit(() -> {
-                mSensorManager.unregisterListener(this);
+                mSensorManager.unregisterListener(mSensorEventListener);
             });
         }
     }
@@ -200,7 +219,8 @@ public class FalsingManager implements SensorEventListener, StateListener {
 
                 // This can be expensive, and doesn't need to happen on the main thread.
                 mUiOffloadThread.submit(() -> {
-                    mSensorManager.registerListener(this, s, SensorManager.SENSOR_DELAY_GAME);
+                    mSensorManager.registerListener(
+                            mSensorEventListener, s, SensorManager.SENSOR_DELAY_GAME);
                 });
             }
         }
@@ -284,16 +304,6 @@ public class FalsingManager implements SensorEventListener, StateListener {
         }
     }
 
-    @Override
-    public synchronized void onSensorChanged(SensorEvent event) {
-        mDataCollector.onSensorChanged(event);
-        mHumanInteractionClassifier.onSensorChanged(event);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        mDataCollector.onAccuracyChanged(sensor, accuracy);
-    }
 
     public boolean shouldEnforceBouncer() {
         return mEnforceBouncer;
@@ -301,18 +311,6 @@ public class FalsingManager implements SensorEventListener, StateListener {
 
     public void setShowingAod(boolean showingAod) {
         mShowingAod = showingAod;
-        updateSessionActive();
-    }
-
-    @Override
-    public void onStateChanged(int newState) {
-        if (FalsingLog.ENABLED) {
-            FalsingLog.i("setStatusBarState", new StringBuilder()
-                    .append("from=").append(StatusBarState.toShortString(mState))
-                    .append(" to=").append(StatusBarState.toShortString(newState))
-                    .toString());
-        }
-        mState = newState;
         updateSessionActive();
     }
 
@@ -399,8 +397,8 @@ public class FalsingManager implements SensorEventListener, StateListener {
         if (FalsingLog.ENABLED) {
             FalsingLog.i("onTrackingStarted", "");
         }
-        mHumanInteractionClassifier.setType(secure ?
-                Classifier.BOUNCER_UNLOCK : Classifier.UNLOCK);
+        mHumanInteractionClassifier.setType(secure
+                ? Classifier.BOUNCER_UNLOCK : Classifier.UNLOCK);
         mDataCollector.onTrackingStarted();
     }
 
