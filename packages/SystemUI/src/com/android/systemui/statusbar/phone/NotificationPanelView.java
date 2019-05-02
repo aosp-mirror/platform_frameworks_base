@@ -833,6 +833,11 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
+        // Do not let touches go to shade or QS if the bouncer is visible,
+        // but still let user swipe down to expand the panel, dismissing the bouncer.
+        if (mStatusBar.isBouncerShowing()) {
+            return true;
+        }
         if (mBar.panelEnabled() && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
             mIsExpansionFromHeadsUp = true;
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
@@ -1000,6 +1005,13 @@ public class NotificationPanelView extends PanelView implements
         if (mBlockTouches || (mQs != null && mQs.isCustomizing())) {
             return false;
         }
+
+        // Do not allow panel expansion if bouncer is scrimmed, otherwise user would be able to
+        // pull down QS or expand the shade.
+        if (mStatusBar.isBouncerShowingScrimmed()) {
+            return false;
+        }
+
         initDownStates(event);
         // Make sure the next touch won't the blocked after the current ends.
         if (event.getAction() == MotionEvent.ACTION_UP
