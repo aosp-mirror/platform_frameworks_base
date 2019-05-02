@@ -50,9 +50,10 @@
             />
         <ImageView
             android:id="@+id/btn_clear_all"
-            android:visibility="gone"
             android:layout_width="@dimen/notification_section_header_height"
             android:layout_height="@dimen/notification_section_header_height"
+            android:layout_marginRight="4dp"
+            android:src="@drawable/status_bar_notification_section_header_clear_btn"
             android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
             />
     </LinearLayout>
