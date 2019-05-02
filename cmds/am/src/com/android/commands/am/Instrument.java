@@ -38,6 +38,7 @@ import android.view.IWindowManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,7 +63,14 @@ import java.util.Locale;
  * other: Failure
  */
 public class Instrument {
+    private static final String TAG = "am";
+
     public static final String DEFAULT_LOG_DIR = "instrument-logs";
+
+    private static final int STATUS_TEST_PASSED = 0;
+    private static final int STATUS_TEST_STARTED = 1;
+    private static final int STATUS_TEST_FAILED_ASSERTION = -1;
+    private static final int STATUS_TEST_FAILED_OTHER = -2;
 
     private final IActivityManager mAm;
     private final IPackageManager mPm;
@@ -207,6 +215,8 @@ public class Instrument {
 
         private File mLog;
 
+        private long mTestStartMs;
+
         ProtoStatusReporter() {
             if (protoFile) {
                 if (logPath == null) {
@@ -241,10 +251,22 @@ public class Instrument {
                 Bundle results) {
             final ProtoOutputStream proto = new ProtoOutputStream();
 
-            final long token = proto.start(InstrumentationData.Session.TEST_STATUS);
+            final long testStatusToken = proto.start(InstrumentationData.Session.TEST_STATUS);
+
             proto.write(InstrumentationData.TestStatus.RESULT_CODE, resultCode);
             writeBundle(proto, InstrumentationData.TestStatus.RESULTS, results);
-            proto.end(token);
+
+            if (resultCode == STATUS_TEST_STARTED) {
+                // Logcat -T takes wall clock time (!?)
+                mTestStartMs = System.currentTimeMillis();
+            } else {
+                if (mTestStartMs > 0) {
+                    proto.write(InstrumentationData.TestStatus.LOGCAT, readLogcat(mTestStartMs));
+                }
+                mTestStartMs = 0;
+            }
+
+            proto.end(testStatusToken);
 
             outputProto(proto);
         }
@@ -254,12 +276,12 @@ public class Instrument {
                 Bundle results) {
             final ProtoOutputStream proto = new ProtoOutputStream();
 
-            final long token = proto.start(InstrumentationData.Session.SESSION_STATUS);
+            final long sessionStatusToken = proto.start(InstrumentationData.Session.SESSION_STATUS);
             proto.write(InstrumentationData.SessionStatus.STATUS_CODE,
                     InstrumentationData.SESSION_FINISHED);
             proto.write(InstrumentationData.SessionStatus.RESULT_CODE, resultCode);
             writeBundle(proto, InstrumentationData.SessionStatus.RESULTS, results);
-            proto.end(token);
+            proto.end(sessionStatusToken);
 
             outputProto(proto);
         }
@@ -268,11 +290,11 @@ public class Instrument {
         public void onError(String errorText, boolean commandError) {
             final ProtoOutputStream proto = new ProtoOutputStream();
 
-            final long token = proto.start(InstrumentationData.Session.SESSION_STATUS);
+            final long sessionStatusToken = proto.start(InstrumentationData.Session.SESSION_STATUS);
             proto.write(InstrumentationData.SessionStatus.STATUS_CODE,
                     InstrumentationData.SESSION_ABORTED);
             proto.write(InstrumentationData.SessionStatus.ERROR_TEXT, errorText);
-            proto.end(token);
+            proto.end(sessionStatusToken);
 
             outputProto(proto);
         }
@@ -512,6 +534,44 @@ public class Instrument {
             if (oldAnims != null) {
                 mWm.setAnimationScales(oldAnims);
             }
+        }
+    }
+
+    private static String readLogcat(long startTimeMs) {
+        try {
+            // Figure out the timestamp arg for logcat.
+            final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            final String timestamp = format.format(new Date(startTimeMs));
+
+            // Start the process
+            final Process process = new ProcessBuilder()
+                    .command("logcat", "-d", "-v threadtime,uid", "-T", timestamp)
+                    .start();
+
+            // Nothing to write. Don't let the command accidentally block.
+            process.getOutputStream().close();
+
+            // Read the output
+            final StringBuilder str = new StringBuilder();
+            final InputStreamReader reader = new InputStreamReader(process.getInputStream());
+            char[] buffer = new char[4096];
+            int amt;
+            while ((amt = reader.read(buffer, 0, buffer.length)) >= 0) {
+                if (amt > 0) {
+                    str.append(buffer, 0, amt);
+                }
+            }
+
+            try {
+                process.waitFor();
+            } catch (InterruptedException ex) {
+                // We already have the text, drop the exception.
+            }
+
+            return str.toString();
+
+        } catch (IOException ex) {
+            return "Error reading logcat command:\n" + ex.toString();
         }
     }
 }
