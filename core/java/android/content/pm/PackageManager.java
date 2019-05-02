@@ -6178,15 +6178,7 @@ public abstract class PackageManager {
      * @param activity The component name of the activity that is to be preferred.
      *
      * @hide
-     *
-     * @deprecated This function no longer does anything. It is the platform's
-     * responsibility to assign preferred activities and this cannot be modified
-     * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
-     * an app to be responsible for a particular role and to check current role
-     * holders, see {@link android.app.role.RoleManager}.
      */
-    @Deprecated
     @SystemApi
     public void replacePreferredActivity(@NonNull IntentFilter filter, int match,
             @NonNull List<ComponentName> set, @NonNull ComponentName activity) {
