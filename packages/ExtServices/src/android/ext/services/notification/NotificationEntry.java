@@ -28,18 +28,23 @@ import android.app.NotificationChannel;
 import android.app.Person;
 import android.app.RemoteInput;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.os.Build;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Holds data about notifications.
@@ -47,6 +52,10 @@ import java.util.Objects;
 public class NotificationEntry {
     static final String TAG = "NotificationEntry";
 
+    // Copied from hidden definitions in Notification.TvExtender
+    private static final String EXTRA_TV_EXTENDER = "android.tv.EXTENSIONS";
+
+    private final Context mContext;
     private final StatusBarNotification mSbn;
     private final IPackageManager mPackageManager;
     private int mTargetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -60,15 +69,76 @@ public class NotificationEntry {
 
     private final Object mLock = new Object();
 
-    public NotificationEntry(IPackageManager packageManager, StatusBarNotification sbn,
-            NotificationChannel channel, SmsHelper smsHelper) {
-        mSbn = sbn;
+    public NotificationEntry(Context applicationContext, IPackageManager packageManager,
+            StatusBarNotification sbn, NotificationChannel channel, SmsHelper smsHelper) {
+        mContext = applicationContext;
+        mSbn = cloneStatusBarNotificationLight(sbn);
         mChannel = channel;
         mPackageManager = packageManager;
         mPreChannelsNotification = isPreChannelsNotification();
         mAttributes = calculateAudioAttributes();
         mImportance = calculateInitialImportance();
         mSmsHelper = smsHelper;
+    }
+
+    /** Adapted from {@code Notification.lightenPayload}. */
+    @SuppressWarnings("nullness")
+    private static void lightenNotificationPayload(Notification notification) {
+        notification.tickerView = null;
+        notification.contentView = null;
+        notification.bigContentView = null;
+        notification.headsUpContentView = null;
+        notification.largeIcon = null;
+        if (notification.extras != null && !notification.extras.isEmpty()) {
+            final Set<String> keyset = notification.extras.keySet();
+            final int keysetSize = keyset.size();
+            final String[] keys = keyset.toArray(new String[keysetSize]);
+            for (int i = 0; i < keysetSize; i++) {
+                final String key = keys[i];
+                if (EXTRA_TV_EXTENDER.equals(key)
+                        || Notification.EXTRA_MESSAGES.equals(key)
+                        || Notification.EXTRA_MESSAGING_PERSON.equals(key)
+                        || Notification.EXTRA_PEOPLE_LIST.equals(key)) {
+                    continue;
+                }
+                final Object obj = notification.extras.get(key);
+                if (obj != null
+                        && (obj instanceof Parcelable
+                        || obj instanceof Parcelable[]
+                        || obj instanceof SparseArray
+                        || obj instanceof ArrayList)) {
+                    notification.extras.remove(key);
+                }
+            }
+        }
+    }
+
+    /** An interpretation of {@code Notification.cloneInto} with heavy=false. */
+    private Notification cloneNotificationLight(Notification notification) {
+        // We can't just use clone() here because the only way to remove the icons is with the
+        // builder, which we can only create with a Context.
+        Notification lightNotification =
+                Notification.Builder.recoverBuilder(mContext, notification)
+                        .setSmallIcon(0)
+                        .setLargeIcon((Icon) null)
+                        .build();
+        lightenNotificationPayload(lightNotification);
+        return lightNotification;
+    }
+
+    /** Adapted from {@code StatusBarNotification.cloneLight}. */
+    public StatusBarNotification cloneStatusBarNotificationLight(StatusBarNotification sbn) {
+        return new StatusBarNotification(
+                sbn.getPackageName(),
+                sbn.getOpPkg(),
+                sbn.getId(),
+                sbn.getTag(),
+                sbn.getUid(),
+                /*initialPid=*/ 0,
+                /*score=*/ 0,
+                cloneNotificationLight(sbn.getNotification()),
+                sbn.getUser(),
+                sbn.getPostTime());
     }
 
     private boolean isPreChannelsNotification() {

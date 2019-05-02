@@ -23,6 +23,7 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -71,6 +72,7 @@ import java.util.concurrent.Executors;
 /**
  * Notification assistant that provides guidance on notification channel blocking
  */
+@SuppressLint("OverrideAbstract")
 public class Assistant extends NotificationAssistantService {
     private static final String TAG = "ExtAssistant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -238,7 +240,7 @@ public class Assistant extends NotificationAssistantService {
         }
         mSingleThreadExecutor.submit(() -> {
             NotificationEntry entry =
-                    new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+                    new NotificationEntry(getContext(), mPackageManager, sbn, channel, mSmsHelper);
             SmartActionsHelper.SmartSuggestions suggestions = mSmartActionsHelper.suggest(entry);
             if (DEBUG) {
                 Log.d(TAG, String.format(
@@ -295,7 +297,7 @@ public class Assistant extends NotificationAssistantService {
             }
             Ranking ranking = getRanking(sbn.getKey(), rankingMap);
             if (ranking != null && ranking.getChannel() != null) {
-                NotificationEntry entry = new NotificationEntry(mPackageManager,
+                NotificationEntry entry = new NotificationEntry(getContext(), mPackageManager,
                         sbn, ranking.getChannel(), mSmsHelper);
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
