@@ -1872,17 +1872,44 @@ public class TelephonyManager {
     /**
      * Returns the Network Access Identifier (NAI). Return null if NAI is not available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then null is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getNai() {
         return getNaiBySubscriberId(getSubId());
     }
 
     /**
      * Returns the NAI. Return null if NAI is not available.
+     *
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then null is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
      *
      *  @param slotIndex of which Nai is returned
      */
