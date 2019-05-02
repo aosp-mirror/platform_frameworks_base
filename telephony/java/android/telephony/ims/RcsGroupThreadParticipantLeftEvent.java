@@ -60,8 +60,8 @@ public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEven
     @Override
     void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
         rcsControllerCall.call(
-                iRcs -> iRcs.createGroupThreadParticipantLeftEvent(getTimestamp(),
+                (iRcs, callingPackage) -> iRcs.createGroupThreadParticipantLeftEvent(getTimestamp(),
                         getRcsGroupThread().getThreadId(), getOriginatingParticipant().getId(),
-                        getLeavingParticipant().getId()));
+                        getLeavingParticipant().getId(), callingPackage));
     }
 }
