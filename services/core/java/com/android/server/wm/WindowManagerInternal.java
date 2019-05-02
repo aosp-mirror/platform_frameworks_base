@@ -481,7 +481,7 @@ public abstract class WindowManagerInternal {
     public abstract int getTopFocusedDisplayId();
 
     /**
-     * Checks whether this display should support showing system decorations.
+     * Checks if this display is configured and allowed to show system decorations.
      */
     public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
 }
