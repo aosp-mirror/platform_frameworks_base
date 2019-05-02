@@ -43,7 +43,7 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
     private static final boolean DEBUG = false;
     private static final String TAG = "AbstractResolverComp";
 
-    private AfterCompute mAfterCompute;
+    protected AfterCompute mAfterCompute;
     protected final PackageManager mPm;
     protected final UsageStatsManager mUsm;
     protected String[] mAnnotations;
@@ -70,11 +70,7 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
                         Log.d(TAG, "RANKER_SERVICE_RESULT");
                     }
                     if (mHandler.hasMessages(RANKER_RESULT_TIMEOUT)) {
-                        if (msg.obj != null) {
-                            handleResultMessage(msg);
-                        } else {
-                            Log.e(TAG, "Receiving null prediction results.");
-                        }
+                        handleResultMessage(msg);
                         mHandler.removeMessages(RANKER_RESULT_TIMEOUT);
                         afterCompute();
                     }
@@ -99,7 +95,6 @@ abstract class AbstractResolverComparator implements Comparator<ResolvedComponen
         mHttp = "http".equals(scheme) || "https".equals(scheme);
         mContentType = intent.getType();
         getContentAnnotations(intent);
-
         mPm = context.getPackageManager();
         mUsm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         mDefaultBrowserPackageName = mHttp
