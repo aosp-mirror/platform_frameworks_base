@@ -70,9 +70,11 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
 @RunWith(AndroidJUnit4.class)
 public class SmartActionsHelperTest {
-    private static final String NOTIFICATION_KEY = "key";
     private static final String RESULT_ID = "id";
     private static final float SCORE = 0.7f;
     private static final CharSequence SMART_REPLY = "Home";
@@ -87,7 +89,6 @@ public class SmartActionsHelperTest {
     IPackageManager mIPackageManager;
     @Mock
     private TextClassifier mTextClassifier;
-    @Mock
     private StatusBarNotification mStatusBarNotification;
     @Mock
     private SmsHelper mSmsHelper;
@@ -107,9 +108,6 @@ public class SmartActionsHelperTest {
         when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
                 .thenReturn(new ConversationActions(Arrays.asList(REPLY_ACTION), RESULT_ID));
 
-        when(mStatusBarNotification.getPackageName()).thenReturn("random.app");
-        when(mStatusBarNotification.getUser()).thenReturn(Process.myUserHandle());
-        when(mStatusBarNotification.getKey()).thenReturn(NOTIFICATION_KEY);
         mNotificationBuilder = new Notification.Builder(mContext, "channel");
         mSettings = AssistantSettings.createForTesting(
                 null, null, Process.myUserHandle().getIdentifier(), null);
@@ -118,10 +116,15 @@ public class SmartActionsHelperTest {
         mSmartActionsHelper = new SmartActionsHelper(mContext, mSettings);
     }
 
+    private void setStatusBarNotification(Notification n) {
+        mStatusBarNotification = new StatusBarNotification("random.app", "random.app", 0,
+        "tag", Process.myUid(), Process.myPid(), n, Process.myUserHandle(), null, 0);
+    }
+
     @Test
     public void testSuggest_notMessageNotification() {
         Notification notification = mNotificationBuilder.setContentText(MESSAGE).build();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
 
@@ -136,7 +139,7 @@ public class SmartActionsHelperTest {
                         .setContentText(MESSAGE)
                         .setCategory(Notification.CATEGORY_MESSAGE)
                         .build();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         ConversationActions.Request request = runSuggestAndCaptureRequest();
 
@@ -153,7 +156,7 @@ public class SmartActionsHelperTest {
         mSettings.mGenerateActions = false;
         mSettings.mGenerateReplies = false;
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
 
@@ -166,7 +169,7 @@ public class SmartActionsHelperTest {
         mSettings.mGenerateReplies = true;
         mSettings.mGenerateActions = false;
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         ConversationActions.Request request = runSuggestAndCaptureRequest();
 
@@ -183,7 +186,7 @@ public class SmartActionsHelperTest {
         mSettings.mGenerateReplies = false;
         mSettings.mGenerateActions = true;
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         ConversationActions.Request request = runSuggestAndCaptureRequest();
 
@@ -199,7 +202,7 @@ public class SmartActionsHelperTest {
     @Test
     public void testSuggest_nonMessageStyleMessageNotification() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         List<ConversationActions.Message> messages =
                 runSuggestAndCaptureRequest().getConversation();
@@ -232,7 +235,7 @@ public class SmartActionsHelperTest {
                         .setStyle(style)
                         .setActions(createReplyAction())
                         .build();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         List<ConversationActions.Message> messages =
                 runSuggestAndCaptureRequest().getConversation();
@@ -287,7 +290,7 @@ public class SmartActionsHelperTest {
                         .setStyle(style)
                         .setActions(createReplyAction())
                         .build();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
 
@@ -306,7 +309,7 @@ public class SmartActionsHelperTest {
                         .setStyle(style)
                         .setActions(createReplyAction())
                         .build();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
 
@@ -317,11 +320,11 @@ public class SmartActionsHelperTest {
     @Test
     public void testOnSuggestedReplySent() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
-        mSmartActionsHelper.onSuggestedReplySent(
-                NOTIFICATION_KEY, SMART_REPLY, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+        mSmartActionsHelper.onSuggestedReplySent(mStatusBarNotification.getKey(), SMART_REPLY,
+                NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
@@ -337,7 +340,7 @@ public class SmartActionsHelperTest {
     @Test
     public void testOnSuggestedReplySent_anotherNotification() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onSuggestedReplySent(
@@ -352,11 +355,11 @@ public class SmartActionsHelperTest {
         when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
                 .thenReturn(new ConversationActions(Collections.singletonList(REPLY_ACTION), null));
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
-        mSmartActionsHelper.onSuggestedReplySent(
-                NOTIFICATION_KEY, SMART_REPLY, NotificationAssistantService.SOURCE_FROM_ASSISTANT);
+        mSmartActionsHelper.onSuggestedReplySent(mStatusBarNotification.getKey(), SMART_REPLY,
+                NotificationAssistantService.SOURCE_FROM_ASSISTANT);
 
         verify(mTextClassifier, never()).onTextClassifierEvent(any(TextClassifierEvent.class));
     }
@@ -364,10 +367,10 @@ public class SmartActionsHelperTest {
     @Test
     public void testOnNotificationDirectReply() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
-        mSmartActionsHelper.onNotificationDirectReplied(NOTIFICATION_KEY);
+        mSmartActionsHelper.onNotificationDirectReplied(mStatusBarNotification.getKey());
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
@@ -380,7 +383,7 @@ public class SmartActionsHelperTest {
     @Test
     public void testOnNotificationExpansionChanged() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), true);
@@ -396,7 +399,7 @@ public class SmartActionsHelperTest {
     @Test
     public void testOnNotificationsSeen_notExpanded() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false);
@@ -408,7 +411,7 @@ public class SmartActionsHelperTest {
     @Test
     public void testOnNotifications_expanded() {
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
         mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), true);
@@ -437,7 +440,7 @@ public class SmartActionsHelperTest {
                                 Collections.singletonList(conversationAction), null));
 
         Notification notification = createMessageNotification();
-        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        setStatusBarNotification(notification);
         SmartActionsHelper.SmartSuggestions suggestions =
                 mSmartActionsHelper.suggest(createNotificationEntry());
 
@@ -476,7 +479,8 @@ public class SmartActionsHelperTest {
     private NotificationEntry createNotificationEntry() {
         NotificationChannel channel =
                 new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
-        return new NotificationEntry(mIPackageManager, mStatusBarNotification, channel, mSmsHelper);
+        return new NotificationEntry(
+                mContext, mIPackageManager, mStatusBarNotification, channel, mSmsHelper);
     }
 
     private Notification createMessageNotification() {
