@@ -214,7 +214,6 @@ public class RestoreSession {
      *
      * @deprecated use {@link RestoreSession#restorePackages(long, RestoreObserver,
      *   BackupManagerMonitor, Set)} instead.
-     * @removed
      */
     @Deprecated
     public int restoreSome(long token, RestoreObserver observer, BackupManagerMonitor monitor,
@@ -241,7 +240,6 @@ public class RestoreSession {
      *
      * @deprecated use {@link RestoreSession#restorePackages(long, RestoreObserver, Set)}
      *   instead.
-     * @removed
      */
     @Deprecated
     public int restoreSome(long token, RestoreObserver observer, String[] packages) {
