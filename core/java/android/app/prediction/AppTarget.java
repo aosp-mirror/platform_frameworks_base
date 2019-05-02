@@ -206,7 +206,6 @@ public final class AppTarget implements Parcelable {
         /**
          * @deprecated Use the other Builder constructors.
          * @hide
-         * @removed
          */
         @Deprecated
         @SystemApi
@@ -245,7 +244,6 @@ public final class AppTarget implements Parcelable {
 
         /**
          * @deprecated Use the appropriate constructor.
-         * @removed
          */
         @NonNull
         @Deprecated
@@ -260,7 +258,6 @@ public final class AppTarget implements Parcelable {
 
         /**
          * @deprecated Use the appropriate constructor.
-         * @removed
          */
         @NonNull
         @Deprecated
