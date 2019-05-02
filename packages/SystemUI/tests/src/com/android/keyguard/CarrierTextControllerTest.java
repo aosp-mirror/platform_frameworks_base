@@ -118,6 +118,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor);
         // This should not start listening on any of the real dependencies
         mCarrierTextController.setListening(mCarrierTextCallback);
+        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText(false);
     }
 
     @Test
@@ -358,7 +359,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
             .thenReturn(IccCardConstants.State.READY);
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
-        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText();
+        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText(true);
         when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -385,11 +386,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         public void setListening(CarrierTextCallback callback) {
             super.setListening(callback);
             mKeyguardUpdateMonitor = mKUM;
-        }
-
-        @Override
-        public void updateDisplayOpportunisticSubscriptionCarrierText() {
-            mDisplayOpportunisticSubscriptionCarrierText = true;
         }
     }
 }
