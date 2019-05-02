@@ -161,8 +161,14 @@ final class ContentCapturePerUserService
     @Override // from PerUserSystemService
     @GuardedBy("mLock")
     protected boolean updateLocked(boolean disabled) {
-        destroyLocked();
         final boolean disabledStateChanged = super.updateLocked(disabled);
+        if (disabledStateChanged) {
+            // update session content capture enabled state.
+            for (int i = 0; i < mSessions.size(); i++) {
+                mSessions.valueAt(i).setContentCaptureEnabledLocked(!disabled);
+            }
+        }
+        destroyLocked();
         updateRemoteServiceLocked(disabled);
         return disabledStateChanged;
     }
@@ -542,7 +548,8 @@ final class ContentCapturePerUserService
                 Slog.v(TAG, "setContentCaptureWhitelist(" + (packages == null
                         ? "null_packages" : packages.size() + " packages")
                         + ", " + (activities == null
-                        ? "null_activities" : activities.size() + " activities") + ")");
+                        ? "null_activities" : activities.size() + " activities") + ")"
+                        + " for user " + mUserId);
             }
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
         }
