@@ -591,6 +591,8 @@
     <dimen name="keyguard_clock_notifications_margin">30dp</dimen>
     <!-- Minimum margin between clock and status bar -->
     <dimen name="keyguard_clock_top_margin">36dp</dimen>
+    <!-- The margin between top of clock and bottom of lock icon. -->
+    <dimen name="keyguard_clock_lock_margin">16dp</dimen>
 
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
 
