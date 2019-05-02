@@ -112,6 +112,7 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DeviceAdminInfo;
@@ -4843,15 +4844,33 @@ public class NotificationManagerService extends SystemService {
                 : null;
         boolean isForegroundCall = CATEGORY_CALL.equals(notification.category)
                 && (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
-        // OR message style (which always has a person)
+        // OR message style (which always has a person) with any remote input
         Class<? extends Notification.Style> style = notification.getNotificationStyle();
         boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
-        boolean notificationAppropriateToBubble = isMessageStyle
+        boolean notificationAppropriateToBubble =
+                (isMessageStyle && hasValidRemoteInput(notification))
                 || (peopleList != null && !peopleList.isEmpty() && isForegroundCall);
+
         // OR something that was previously a bubble & still exists
         boolean bubbleUpdate = oldRecord != null
                 && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0;
         return canBubble && (notificationAppropriateToBubble || appIsForeground || bubbleUpdate);
+    }
+
+    private boolean hasValidRemoteInput(Notification n) {
+        // Also check for inline reply
+        Notification.Action[] actions = n.actions;
+        if (actions != null) {
+            // Get the remote inputs
+            for (int i = 0; i < actions.length; i++) {
+                Notification.Action action = actions[i];
+                RemoteInput[] inputs = action.getRemoteInputs();
+                if (inputs != null && inputs.length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void doChannelWarningToast(CharSequence toastText) {
