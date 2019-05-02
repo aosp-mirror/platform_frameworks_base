@@ -94,6 +94,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Entry point service for autofill management.
@@ -192,9 +193,9 @@ public final class AutofillManagerService
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
         mAm = LocalServices.getService(ActivityManagerInternal.class);
 
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_AUTOFILL,
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_AUTOFILL,
                 ActivityThread.currentApplication().getMainExecutor(),
-                (namespace, key, value) -> onDeviceConfigChange(key));
+                (properties) -> onDeviceConfigChange(properties.getKeyset()));
 
         setLogLevelFromSettings();
         setMaxPartitionsFromSettings();
@@ -270,15 +271,17 @@ public final class AutofillManagerService
         }
     }
 
-    private void onDeviceConfigChange(@NonNull String key) {
-        switch (key) {
-            case AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES:
-            case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
-            case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
-                setDeviceConfigProperties();
-                break;
-            default:
-                Slog.i(mTag, "Ignoring change on " + key);
+    private void onDeviceConfigChange(@NonNull Set<String> keys) {
+        for (String key : keys) {
+            switch (key) {
+                case AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES:
+                case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
+                case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
+                    setDeviceConfigProperties();
+                    break;
+                default:
+                    Slog.i(mTag, "Ignoring change on " + key);
+            }
         }
     }
 
