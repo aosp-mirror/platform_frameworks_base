@@ -23,7 +23,7 @@
               android:minHeight="100dp"
               android:gravity="center"
               android:paddingTop="24dp"
-              android:paddingBottom="8dp"
+              android:paddingBottom="12dp"
               android:paddingLeft="12dp"
               android:paddingRight="12dp"
               android:focusable="true"
