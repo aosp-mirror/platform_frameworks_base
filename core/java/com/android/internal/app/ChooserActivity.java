@@ -2072,6 +2072,8 @@ public class ChooserActivity extends ResolverActivity {
 
         private static final int MAX_SERVICE_TARGETS = 8;
 
+        private int mNumShortcutResults = 0;
+
         // Reserve spots for incoming direct share targets by adding placeholders
         private ChooserTargetInfo mPlaceHolderTargetInfo = new PlaceHolderTargetInfo();
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
@@ -2407,8 +2409,14 @@ public class ChooserActivity extends ResolverActivity {
                     // This incents ChooserTargetServices to define what's truly better.
                     targetScore = lastScore * 0.95f;
                 }
-                shouldNotify |= insertServiceTarget(
+                boolean isInserted = insertServiceTarget(
                         new SelectableTargetInfo(origTarget, target, targetScore));
+
+                if (isInserted && isShortcutResult) {
+                    mNumShortcutResults++;
+                }
+
+                shouldNotify |= isInserted;
 
                 if (DEBUG) {
                     Log.d(TAG, " => " + target.toString() + " score=" + targetScore
@@ -2423,6 +2431,10 @@ public class ChooserActivity extends ResolverActivity {
             if (shouldNotify) {
                 notifyDataSetChanged();
             }
+        }
+
+        private int getNumShortcutResults() {
+            return mNumShortcutResults;
         }
 
         /**
@@ -2955,7 +2967,15 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public void handleScroll(View v, int y, int oldy) {
-            if (mDirectShareViewHolder != null) {
+            // Only expand direct share area if there is a minimum number of shortcuts,
+            // which will help reduce the amount of visible shuffling due to older-style
+            // direct share targets.
+            int orientation = getResources().getConfiguration().orientation;
+            boolean canExpandDirectShare =
+                    mChooserListAdapter.getNumShortcutResults() > getMaxTargetsPerRow()
+                    && orientation == Configuration.ORIENTATION_PORTRAIT;
+
+            if (mDirectShareViewHolder != null && canExpandDirectShare) {
                 mDirectShareViewHolder.handleScroll(mAdapterView, y, oldy, getMaxTargetsPerRow());
             }
         }
