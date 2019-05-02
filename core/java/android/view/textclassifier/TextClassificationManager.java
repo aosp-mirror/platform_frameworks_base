@@ -45,6 +45,9 @@ public final class TextClassificationManager {
 
     private static final String LOG_TAG = "TextClassificationManager";
 
+    private static final TextClassificationConstants sDefaultSettings =
+            new TextClassificationConstants(() ->  null);
+
     private final Object mLock = new Object();
     private final TextClassificationSessionFactory mDefaultSessionFactory =
             classificationContext -> new TextClassificationSession(
@@ -129,9 +132,10 @@ public final class TextClassificationManager {
     private TextClassificationConstants getSettings() {
         synchronized (mLock) {
             if (mSettings == null) {
-                mSettings = TextClassificationConstants.loadFromString(Settings.Global.getString(
-                        getApplicationContext().getContentResolver(),
-                        Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+                mSettings = new TextClassificationConstants(
+                        () ->  Settings.Global.getString(
+                                getApplicationContext().getContentResolver(),
+                                Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
             }
             return mSettings;
         }
@@ -251,7 +255,11 @@ public final class TextClassificationManager {
 
     /** @hide */
     @VisibleForTesting
-    public void invalidate() {
+    public void invalidateForTesting() {
+        invalidate();
+    }
+
+    private void invalidate() {
         synchronized (mLock) {
             mSettings = null;
             mLocalTextClassifier = null;
@@ -280,9 +288,8 @@ public final class TextClassificationManager {
         if (tcm != null) {
             return tcm.getSettings();
         } else {
-            return TextClassificationConstants.loadFromString(Settings.Global.getString(
-                    context.getApplicationContext().getContentResolver(),
-                    Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+            // Use default settings if there is no tcm.
+            return sDefaultSettings;
         }
     }
 

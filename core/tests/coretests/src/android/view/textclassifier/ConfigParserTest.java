@@ -26,16 +26,17 @@ import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ConfigParserTest {
-    private static final String SETTINGS = "int=42,float=12.3,boolean=true,string=abc";
+    private static final Supplier<String> SETTINGS =
+            () -> "int=42,float=12.3,boolean=true,string=abc";
     private static final String CLEAR_DEVICE_CONFIG_KEY_CMD =
             "device_config delete " + DeviceConfig.NAMESPACE_TEXTCLASSIFIER;
     private static final String[] DEVICE_CONFIG_KEYS = new String[]{
@@ -59,7 +60,6 @@ public class ConfigParserTest {
     }
 
     @Test
-    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getBoolean_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
@@ -79,7 +79,6 @@ public class ConfigParserTest {
     }
 
     @Test
-    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getInt_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
@@ -97,7 +96,6 @@ public class ConfigParserTest {
     }
 
     @Test
-    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getFloat_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
@@ -115,7 +113,6 @@ public class ConfigParserTest {
     }
 
     @Test
-    @Ignore // TODO: Re-enable once ConfigParser#ENABLE_DEVICE_CONFIG is finalized
     public void getString_deviceConfig() {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
