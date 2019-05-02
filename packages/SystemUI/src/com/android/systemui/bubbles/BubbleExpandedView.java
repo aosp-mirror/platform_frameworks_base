@@ -40,11 +40,8 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
-import android.graphics.drawable.AdaptiveIconDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -66,6 +63,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
+import com.android.systemui.statusbar.AlphaOptimizedButton;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
@@ -80,7 +78,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private View mPointerView;
     private int mPointerMargin;
 
-    private ImageView mSettingsIcon;
+    private AlphaOptimizedButton mSettingsIcon;
 
     // Permission view
     private View mPermissionView;
@@ -100,8 +98,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private int mSettingsIconHeight;
     private int mBubbleHeight;
     private int mPermissionHeight;
-    private int mIconInset;
-    private Drawable mSettingsIconDrawable;
     private int mPointerWidth;
     private int mPointerHeight;
 
@@ -218,10 +214,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
         mSettingsIcon = findViewById(R.id.settings_button);
-        mIconInset = getResources().getDimensionPixelSize(R.dimen.bubble_icon_inset);
         mSettingsIcon.setOnClickListener(this);
-        // Save initial drawable to create adaptive icons that will take its place.
-        mSettingsIconDrawable = mSettingsIcon.getDrawable();
 
         mPermissionHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_permission_height);
@@ -376,16 +369,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         int backgroundColor = ta.getColor(0, Color.WHITE /* default */);
         int foregroundColor = ta.getColor(1, Color.BLACK /* default */);
         ta.recycle();
-
-        // Must clear tint first - otherwise tint updates inconsistently.
-        mSettingsIconDrawable.setTintList(null);
-        mSettingsIconDrawable.setTint(foregroundColor);
-
-        InsetDrawable foreground = new InsetDrawable(mSettingsIconDrawable, mIconInset);
-        ColorDrawable background = new ColorDrawable(backgroundColor);
-        AdaptiveIconDrawable adaptiveIcon = new AdaptiveIconDrawable(background,
-                foreground);
-        mSettingsIcon.setImageDrawable(adaptiveIcon);
 
         // Update permission prompt color.
         mPermissionView.setBackground(createPermissionBackground(backgroundColor));
@@ -649,11 +632,12 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     }
 
     private Intent getSettingsIntent(String packageName, final int appUid) {
-        final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
         intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
