@@ -52,6 +52,7 @@ please see themes_device_defaults.xml.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
         <item name="colorError">@color/error_color_material_dark</item>
+        <item name="colorPopupBackground">?attr/colorBackground</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
@@ -422,6 +423,7 @@ please see themes_device_defaults.xml.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_light</item>
         <item name="backgroundDimAmount">0.6</item>
         <item name="colorError">@color/error_color_material_light</item>
+        <item name="colorPopupBackground">?attr/colorBackground</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
