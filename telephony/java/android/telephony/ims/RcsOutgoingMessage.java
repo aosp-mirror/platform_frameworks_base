@@ -46,7 +46,7 @@ public class RcsOutgoingMessage extends RcsMessage {
         List<RcsOutgoingMessageDelivery> messageDeliveries = new ArrayList<>();
 
         deliveryParticipants = mRcsControllerCall.call(
-                iRcs -> iRcs.getMessageRecipients(mId));
+                (iRcs, callingPackage) -> iRcs.getMessageRecipients(mId, callingPackage));
 
         if (deliveryParticipants != null) {
             for (Integer deliveryParticipant : deliveryParticipants) {
