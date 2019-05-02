@@ -134,31 +134,23 @@ class LockSettingsShellCommand extends ShellCommand {
                 mLockPatternUtils.isSyntheticPasswordEnabled()));
     }
 
-    private void runSetPattern() {
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.saveLockPattern(stringToPattern(mNew), oldBytes, mCurrentUserId);
+    private void runSetPattern() throws RemoteException {
+        mLockPatternUtils.saveLockPattern(stringToPattern(mNew), mOld, mCurrentUserId);
         getOutPrintWriter().println("Pattern set to '" + mNew + "'");
     }
 
-    private void runSetPassword() {
-        byte[] newBytes = mNew != null ? mNew.getBytes() : null;
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.saveLockPassword(newBytes, oldBytes, PASSWORD_QUALITY_ALPHABETIC,
-                mCurrentUserId);
+    private void runSetPassword() throws RemoteException {
+        mLockPatternUtils.saveLockPassword(mNew, mOld, PASSWORD_QUALITY_ALPHABETIC, mCurrentUserId);
         getOutPrintWriter().println("Password set to '" + mNew + "'");
     }
 
-    private void runSetPin() {
-        byte[] newBytes = mNew != null ? mNew.getBytes() : null;
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.saveLockPassword(newBytes, oldBytes, PASSWORD_QUALITY_NUMERIC,
-                mCurrentUserId);
+    private void runSetPin() throws RemoteException {
+        mLockPatternUtils.saveLockPassword(mNew, mOld, PASSWORD_QUALITY_NUMERIC, mCurrentUserId);
         getOutPrintWriter().println("Pin set to '" + mNew + "'");
     }
 
-    private void runClear() {
-        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
-        mLockPatternUtils.clearLock(oldBytes, mCurrentUserId);
+    private void runClear() throws RemoteException {
+        mLockPatternUtils.clearLock(mOld, mCurrentUserId);
         getOutPrintWriter().println("Lock credential cleared");
     }
 
@@ -185,8 +177,7 @@ class LockSettingsShellCommand extends ShellCommand {
             try {
                 final boolean result;
                 if (havePassword) {
-                    byte[] passwordBytes = mOld != null ? mOld.getBytes() : null;
-                    result = mLockPatternUtils.checkPassword(passwordBytes, mCurrentUserId);
+                    result = mLockPatternUtils.checkPassword(mOld, mCurrentUserId);
                 } else {
                     result = mLockPatternUtils.checkPattern(stringToPattern(mOld), mCurrentUserId);
                 }

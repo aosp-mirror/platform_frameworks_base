@@ -49,11 +49,7 @@ public abstract class LockSettingsInternal {
      */
     public abstract boolean isEscrowTokenActive(long handle, int userId);
 
-    /**
-     * Set the lock credential.
-     * @return true if password is set.
-     */
-    public abstract boolean setLockCredentialWithToken(byte[] credential, int type,
+    public abstract boolean setLockCredentialWithToken(String credential, int type,
             long tokenHandle, byte[] token, int requestedQuality, int userId);
 
     public abstract boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId);
