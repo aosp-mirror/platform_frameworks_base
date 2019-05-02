@@ -3215,6 +3215,7 @@ package android.view {
     method public default void setShouldShowIme(int, boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
+    method public default boolean shouldShowIme(int);
     method public default boolean shouldShowSystemDecors(int);
   }
 

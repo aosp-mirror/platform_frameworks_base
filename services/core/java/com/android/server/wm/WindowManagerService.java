@@ -6921,7 +6921,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         + displayId);
                 return false;
             }
-            return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
+            final Display display = displayContent.getDisplay();
+            if (isUntrustedVirtualDisplay(display)) {
+                return false;
+            }
+            return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
+                    || mForceDesktopModeOnExternalDisplays;
         }
     }
 
@@ -7363,6 +7368,14 @@ public class WindowManagerService extends IWindowManager.Stub
         public boolean shouldShowSystemDecorOnDisplay(int displayId) {
             synchronized (mGlobalLock) {
                 return WindowManagerService.this.shouldShowSystemDecors(displayId);
+            }
+        }
+
+        @Override
+        public boolean shouldShowIme(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
             }
         }
     }
