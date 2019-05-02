@@ -68,4 +68,7 @@ interface IInputMethodManager {
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight();
+
+    void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
+            in float[] matrixValues);
 }

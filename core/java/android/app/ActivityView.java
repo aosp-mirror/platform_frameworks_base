@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Insets;
+import android.graphics.Matrix;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -51,6 +52,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.inputmethod.InputMethodManager;
 
 import dalvik.system.CloseGuard;
 
@@ -320,6 +322,14 @@ public class ActivityView extends ViewGroup {
         updateLocationAndTapExcludeRegion();
     }
 
+    private void clearActivityViewGeometryForIme() {
+        if (mVirtualDisplay == null) {
+            return;
+        }
+        final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
+        mContext.getSystemService(InputMethodManager.class).reportActivityView(displayId, null);
+    }
+
     @Override
     public void onLayout(boolean changed, int l, int t, int r, int b) {
         mSurfaceView.layout(0 /* left */, 0 /* top */, r - l /* right */, b - t /* bottom */);
@@ -347,8 +357,17 @@ public class ActivityView extends ViewGroup {
             if (x != mLocationInWindow[0] || y != mLocationInWindow[1]) {
                 x = mLocationInWindow[0];
                 y = mLocationInWindow[1];
+                final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
                 WindowManagerGlobal.getWindowSession().updateDisplayContentLocation(
-                        getWindow(), x, y, mVirtualDisplay.getDisplay().getDisplayId());
+                        getWindow(), x, y, displayId);
+
+                // Also report this geometry information to InputMethodManagerService.
+                // TODO(b/115693908): Unify this logic into the above WMS-based one.
+                final Matrix matrix = new Matrix();
+                matrix.set(getMatrix());
+                matrix.postTranslate(x, y);
+                mContext.getSystemService(InputMethodManager.class)
+                        .reportActivityView(displayId, matrix);
             }
             updateTapExcludeRegion(x, y);
         } catch (RemoteException e) {
@@ -408,6 +427,7 @@ public class ActivityView extends ViewGroup {
             if (mVirtualDisplay != null) {
                 mVirtualDisplay.setDisplayState(false);
             }
+            clearActivityViewGeometryForIme();
             cleanTapExcludeRegion();
         }
     }
