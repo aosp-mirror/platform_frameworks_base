@@ -3642,6 +3642,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }
 
+            if (!mIgnoreSettingsPackageWhitelist.isEmpty()) {
+                pw.println("  Bypass Whitelisted Packages:");
+                for (String packageName : mIgnoreSettingsPackageWhitelist) {
+                    pw.println("    " + packageName);
+                }
+            }
+
             if (mLocationFudger != null) {
                 pw.append("  fudger: ");
                 mLocationFudger.dump(fd, pw, args);
