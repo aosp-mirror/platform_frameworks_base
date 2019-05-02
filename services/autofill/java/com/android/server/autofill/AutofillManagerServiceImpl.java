@@ -1051,6 +1051,14 @@ final class AutofillManagerServiceImpl
         }
     }
 
+    @GuardedBy("mLock")
+    void destroySessionsForAugmentedAutofillOnlyLocked() {
+        final int sessionCount = mSessions.size();
+        for (int i = sessionCount - 1; i >= 0; i--) {
+            mSessions.valueAt(i).forceRemoveSelfIfForAugmentedAutofillOnlyLocked();
+        }
+    }
+
     // TODO(b/64940307): remove this method if SaveUI is refactored to be attached on activities
     @GuardedBy("mLock")
     void destroyFinishedSessionsLocked() {
@@ -1070,9 +1078,18 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void listSessionsLocked(ArrayList<String> output) {
         final int numSessions = mSessions.size();
+        if (numSessions <= 0) return;
+
+        final String fmt = "%d:%s:%s";
         for (int i = 0; i < numSessions; i++) {
-            output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
-                    : null) + ":" + mSessions.keyAt(i));
+            final int id = mSessions.keyAt(i);
+            final String service = mInfo == null
+                    ? "no_svc"
+                    : mInfo.getServiceInfo().getComponentName().flattenToShortString();
+            final String augmentedService = mRemoteAugmentedAutofillServiceInfo == null
+                    ? "no_aug"
+                    : mRemoteAugmentedAutofillServiceInfo.getComponentName().flattenToShortString();
+            output.add(String.format(fmt, id, service, augmentedService));
         }
     }
 
@@ -1136,6 +1153,7 @@ final class AutofillManagerServiceImpl
                     Slog.v(TAG, "updateRemoteAugmentedAutofillService(): "
                             + "destroying old remote service");
                 }
+                destroySessionsForAugmentedAutofillOnlyLocked();
                 mRemoteAugmentedAutofillService.destroy();
                 mRemoteAugmentedAutofillService = null;
                 mRemoteAugmentedAutofillServiceInfo = null;

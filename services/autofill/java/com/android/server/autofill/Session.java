@@ -3268,6 +3268,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @GuardedBy("mLock")
+    void forceRemoveSelfIfForAugmentedAutofillOnlyLocked() {
+        if (sVerbose) {
+            Slog.v(TAG, "forceRemoveSelfIfForAugmentedAutofillOnly(" + this.id + "): "
+                    + mForAugmentedAutofillOnly);
+        }
+        if (!mForAugmentedAutofillOnly) return;
+
+        forceRemoveSelfLocked();
+    }
+
+    @GuardedBy("mLock")
     void forceRemoveSelfLocked(int clientState) {
         if (sVerbose) Slog.v(TAG, "forceRemoveSelfLocked(): " + mPendingSaveUi);
 
