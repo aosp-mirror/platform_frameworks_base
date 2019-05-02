@@ -426,6 +426,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void reparentDisplayContent(IWindow window, SurfaceControl sc, int displayId) {
+        mService.reparentDisplayContent(window, sc, displayId);
+    }
+
+    @Override
+    public void updateDisplayContentLocation(IWindow window, int x, int y, int displayId) {
+        mService.updateDisplayContentLocation(window, x, y, displayId);
+    }
+
+    @Override
     public void updateTapExcludeRegion(IWindow window, int regionId, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {

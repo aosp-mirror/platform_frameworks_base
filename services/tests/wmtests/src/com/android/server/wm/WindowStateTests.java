@@ -493,4 +493,30 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(window.isVisible());
         assertTrue(window.isVisibleByPolicy());
     }
+
+    @Test
+    public void testGetTransformationMatrix() {
+        synchronized (mWm.mGlobalLock) {
+            final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
+            win0.getFrameLw().offsetTo(1, 0);
+
+            final DisplayContent dc = createNewDisplay();
+            dc.reparentDisplayContent(win0, win0.getSurfaceControl());
+            dc.updateLocation(win0, 2, 0);
+
+            final float[] values = new float[9];
+            final Matrix matrix = new Matrix();
+            final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+            final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
+            win1.mHasSurface = true;
+            win1.mSurfaceControl = mock(SurfaceControl.class);
+            win1.getFrameLw().offsetTo(3, 0);
+            win1.updateSurfacePosition(t);
+            win1.getTransformationMatrix(values, matrix);
+
+            matrix.getValues(values);
+            assertEquals(6f, values[Matrix.MTRANS_X], 0f);
+            assertEquals(0f, values[Matrix.MTRANS_Y], 0f);
+        }
+    }
 }
