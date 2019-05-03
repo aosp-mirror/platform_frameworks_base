@@ -77,6 +77,7 @@ public class QSCarrierGroup extends LinearLayout implements
 
     @Override
     public void onClick(View v) {
+        if (!v.isVisibleToUser()) return;
         mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                 Settings.ACTION_WIRELESS_SETTINGS), 0);
     }
