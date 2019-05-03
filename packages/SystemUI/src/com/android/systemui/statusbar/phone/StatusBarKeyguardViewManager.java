@@ -192,7 +192,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
-        mLastGesturalNav = QuickStepContract.isGesturalMode(
+        mGesturalNav = QuickStepContract.isGesturalMode(
                 Dependency.get(NavigationModeController.class).addListener(this));
         mDockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
         if (mDockManager != null) {
