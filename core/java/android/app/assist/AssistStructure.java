@@ -699,6 +699,7 @@ public class AssistStructure implements Parcelable {
         static final int AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS =             0x100;
         static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS =             0x200;
         static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH =          0x400;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_SESSION_ID =      0x800;
 
         int mFlags;
         int mAutofillFlags;
@@ -753,6 +754,9 @@ public class AssistStructure implements Parcelable {
                         mAutofillId = new AutofillId(autofillViewId, in.readInt());
                     } else {
                         mAutofillId = new AutofillId(autofillViewId);
+                    }
+                    if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_SESSION_ID) != 0) {
+                        mAutofillId.setSessionId(in.readInt());
                     }
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE) != 0) {
@@ -899,6 +903,9 @@ public class AssistStructure implements Parcelable {
                 if (mAutofillId.isVirtualInt()) {
                     autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID;
                 }
+                if (mAutofillId.hasSession()) {
+                    autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_SESSION_ID;
+                }
             }
             if (mAutofillValue != null) {
                 autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE;
@@ -965,7 +972,9 @@ public class AssistStructure implements Parcelable {
                     if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID) != 0) {
                         out.writeInt(mAutofillId.getVirtualChildIntId());
                     }
-                    // TODO(b/113593220): write session id as well
+                    if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_SESSION_ID) != 0) {
+                        out.writeInt(mAutofillId.getSessionId());
+                    }
                 }
                 if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE) != 0) {
                     out.writeInt(mAutofillType);

@@ -297,6 +297,9 @@ final class SaveUi {
         // First apply the unconditional transformations (if any) to the templates.
         final ArrayList<Pair<Integer, InternalTransformation>> transformations =
                 customDescription.getTransformations();
+        if (sVerbose) {
+            Slog.v(TAG, "applyCustomDescription(): transformations = " + transformations);
+        }
         if (transformations != null) {
             if (!InternalTransformation.batchApply(valueFinder, template, transformations)) {
                 Slog.w(TAG, "could not apply main transformations on custom description");
@@ -345,6 +348,10 @@ final class SaveUi {
             // Apply batch updates (if any).
             final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
                     customDescription.getUpdates();
+            if (sVerbose) {
+                Slog.v(TAG, "applyCustomDescription(): view = " + customSubtitleView
+                        + " updates=" + updates);
+            }
             if (updates != null) {
                 final int size = updates.size();
                 if (sDebug) Slog.d(TAG, "custom description has " + size + " batch updates");
