@@ -38,6 +38,7 @@ import static android.os.Process.setProcessGroup;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
@@ -60,8 +61,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import android.app.ActivityManager;
 import android.app.usage.UsageEvents;
 import android.content.Context;
-import android.os.Binder;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -78,6 +79,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowProcessController;
 
@@ -148,6 +150,12 @@ public final class OomAdjuster {
     /** Track all uids that have actively running processes. */
     ActiveUids mActiveUids;
 
+    /**
+     * The handler to execute {@link #setProcessGroup} (it may be heavy if the process has many
+     * threads) for reducing the time spent in {@link #applyOomAdjLocked}.
+     */
+    private final Handler mProcessGroupHandler;
+
     private final ArraySet<BroadcastQueue> mTmpBroadcastQueue = new ArraySet();
 
     private final ActivityManagerService mService;
@@ -161,6 +169,28 @@ public final class OomAdjuster {
         mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
         mConstants = mService.mConstants;
         mAppCompact = new AppCompactor(mService);
+
+        // The process group is usually critical to the response time of foreground app, so the
+        // setter should apply it as soon as possible.
+        final ServiceThread adjusterThread = new ServiceThread(TAG, TOP_APP_PRIORITY_BOOST,
+                false /* allowIo */);
+        adjusterThread.start();
+        Process.setThreadGroupAndCpuset(adjusterThread.getThreadId(), THREAD_GROUP_TOP_APP);
+        mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setProcessGroup");
+            final int pid = msg.arg1;
+            final int group = msg.arg2;
+            try {
+                setProcessGroup(pid, group);
+            } catch (Exception e) {
+                if (DEBUG_ALL) {
+                    Slog.w(TAG, "Failed setting process group of " + pid + " to " + group, e);
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            }
+            return true;
+        });
     }
 
     void initSettings() {
@@ -1726,9 +1756,9 @@ public final class OomAdjuster {
                         processGroup = THREAD_GROUP_DEFAULT;
                         break;
                 }
-                long oldId = Binder.clearCallingIdentity();
+                mProcessGroupHandler.sendMessage(mProcessGroupHandler.obtainMessage(
+                        0 /* unused */, app.pid, processGroup));
                 try {
-                    setProcessGroup(app.pid, processGroup);
                     if (curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
                         // do nothing if we already switched to RT
                         if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
@@ -1791,13 +1821,9 @@ public final class OomAdjuster {
                         }
                     }
                 } catch (Exception e) {
-                    if (false) {
-                        Slog.w(TAG, "Failed setting process group of " + app.pid
-                                + " to " + app.getCurrentSchedulingGroup());
-                        Slog.w(TAG, "at location", e);
+                    if (DEBUG_ALL) {
+                        Slog.w(TAG, "Failed setting thread priority of " + app.pid, e);
                     }
-                } finally {
-                    Binder.restoreCallingIdentity(oldId);
                 }
             }
         }
