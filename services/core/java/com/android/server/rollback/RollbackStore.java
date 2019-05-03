@@ -194,7 +194,7 @@ class RollbackStore {
      * Creates a new RollbackData instance for a non-staged rollback with
      * backupDir assigned.
      */
-    RollbackData createNonStagedRollback(int rollbackId) throws IOException {
+    RollbackData createNonStagedRollback(int rollbackId) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
         return new RollbackData(rollbackId, backupDir, -1);
     }
@@ -203,8 +203,7 @@ class RollbackStore {
      * Creates a new RollbackData instance for a staged rollback with
      * backupDir assigned.
      */
-    RollbackData createStagedRollback(int rollbackId, int stagedSessionId)
-            throws IOException {
+    RollbackData createStagedRollback(int rollbackId, int stagedSessionId) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
         return new RollbackData(rollbackId, backupDir, stagedSessionId);
     }
