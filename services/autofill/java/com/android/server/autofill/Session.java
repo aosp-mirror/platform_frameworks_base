@@ -26,7 +26,6 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 import static android.view.autofill.AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
 import static android.view.autofill.AutofillManager.getSmartSuggestionModeToString;
-import static android.view.autofill.Helper.toList;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.autofill.Helper.getNumericValue;
@@ -283,7 +282,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * on autofilling the app.
      */
     @GuardedBy("mLock")
-    private ArraySet<AutofillId> mAugmentedAutofillableIds;
+    private ArrayList<AutofillId> mAugmentedAutofillableIds;
 
     /**
      * When {@code true}, the session was created only to handle Augmented Autofill requests (i.e.,
@@ -334,6 +333,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     wtf(e, "Exception lazy loading assist structure for %s: %s",
                             structure.getActivityComponent(), e);
                     return;
+                }
+
+                final ArrayList<AutofillId> ids = Helper.getAutofillIds(structure,
+                        /* autofillableOnly= */false);
+                for (int i = 0; i < ids.size(); i++) {
+                    ids.get(i).setSessionId(Session.this.id);
                 }
 
                 // Flags used to start the session.
@@ -2259,6 +2264,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        id.setSessionId(this.id);
         if (sVerbose) {
             Slog.v(TAG, "updateLocked(" + this.id + "): id=" + id + ", action="
                     + actionAsString(action) + ", flags=" + flags);
@@ -2528,14 +2534,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private void notifyUnavailableToClient(int sessionFinishedState,
-            @Nullable ArraySet<AutofillId> autofillableIds) {
+            @Nullable ArrayList<AutofillId> autofillableIds) {
         synchronized (mLock) {
             if (mCurrentViewId == null) return;
             try {
                 if (mHasCallback) {
                     mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinishedState);
                 } else if (sessionFinishedState != 0) {
-                    mClient.setSessionFinished(sessionFinishedState, toList(autofillableIds));
+                    mClient.setSessionFinished(sessionFinishedState, autofillableIds);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
@@ -2661,10 +2667,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         final FillContext context = getFillContextByRequestIdLocked(requestId);
 
-        final ArraySet<AutofillId> autofillableIds;
+        final ArrayList<AutofillId> autofillableIds;
         if (context != null) {
             final AssistStructure structure = context.getStructure();
-            autofillableIds = Helper.getAutofillableIds(structure);
+            autofillableIds = Helper.getAutofillIds(structure, /* autofillableOnly= */true);
         } else {
             Slog.w(TAG, "processNullResponseLocked(): no context for req " + requestId);
             autofillableIds = null;
@@ -2770,7 +2776,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 remoteService.getComponentName().getPackageName());
         mAugmentedRequestsLogs.add(log);
 
-        remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName, mCurrentViewId,
+        final AutofillId focusedId = AutofillId.withoutSession(mCurrentViewId);
+
+        remoteService.onRequestAutofillLocked(id, mClient, taskId, mComponentName, focusedId,
                 currentValue);
 
         if (mAugmentedAutofillDestroyer == null) {

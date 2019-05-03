@@ -1139,6 +1139,7 @@ public final class AutofillManager {
         if (mEnteredIds == null) {
             mEnteredIds = new ArraySet<>(1);
         }
+        id.resetSessionId();
         mEnteredIds.add(id);
     }
 
@@ -2177,6 +2178,9 @@ public final class AutofillManager {
     private void setTrackedViews(int sessionId, @Nullable AutofillId[] trackedIds,
             boolean saveOnAllViewsInvisible, boolean saveOnFinish,
             @Nullable AutofillId[] fillableIds, @Nullable AutofillId saveTriggerId) {
+        if (saveTriggerId != null) {
+            saveTriggerId.resetSessionId();
+        }
         synchronized (mLock) {
             if (sVerbose) {
                 Log.v(TAG, "setTrackedViews(): sessionId=" + sessionId
@@ -2202,6 +2206,7 @@ public final class AutofillManager {
                         mFillableIds = new ArraySet<>(fillableIds.length);
                     }
                     for (AutofillId id : fillableIds) {
+                        id.resetSessionId();
                         mFillableIds.add(id);
                     }
                 }
@@ -2264,6 +2269,11 @@ public final class AutofillManager {
      *  session when they're entered.
      */
     private void setSessionFinished(int newState, @Nullable List<AutofillId> autofillableIds) {
+        if (autofillableIds != null) {
+            for (int i = 0; i < autofillableIds.size(); i++) {
+                autofillableIds.get(i).resetSessionId();
+            }
+        }
         synchronized (mLock) {
             if (sVerbose) {
                 Log.v(TAG, "setSessionFinished(): from " + getStateAsStringLocked() + " to "
@@ -2879,6 +2889,7 @@ public final class AutofillManager {
                 final int numIds = trackedIds.length;
                 for (int i = 0; i < numIds; i++) {
                     final AutofillId id = trackedIds[i];
+                    id.resetSessionId();
 
                     if (isVisible[i]) {
                         mVisibleTrackedIds = addToSet(mVisibleTrackedIds, id);
