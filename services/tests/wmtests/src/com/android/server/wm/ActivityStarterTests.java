@@ -699,6 +699,36 @@ public class ActivityStarterTests extends ActivityTestsBase {
     }
 
     /**
+     * This test ensures that {@link ActivityStarter#setTargetStackAndMoveToFrontIfNeeded} will
+     * move the existing task to front if the current focused stack doesn't have running task.
+     */
+    @Test
+    public void testBringTaskToFrontWhenFocusedStackIsFinising() {
+        // Put 2 tasks in the same stack (simulate the behavior of home stack).
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setCreateTask(true).build();
+        new ActivityBuilder(mService)
+                .setStack(activity.getActivityStack())
+                .setCreateTask(true).build();
+
+        // Create a top finishing activity.
+        final ActivityRecord finishingTopActivity = new ActivityBuilder(mService)
+                .setCreateTask(true).build();
+        finishingTopActivity.getActivityStack().moveToFront("finishingTopActivity");
+
+        assertEquals(finishingTopActivity, mRootActivityContainer.topRunningActivity());
+        finishingTopActivity.finishing = true;
+
+        // Launch the bottom task of the target stack.
+        prepareStarter(FLAG_ACTIVITY_NEW_TASK, false /* mockGetLaunchStack */)
+                .setReason("testBringTaskToFrontWhenTopStackIsFinising")
+                .setIntent(activity.intent)
+                .execute();
+        // The hierarchies of the activity should move to front.
+        assertEquals(activity, mRootActivityContainer.topRunningActivity());
+    }
+
+    /**
      * This test ensures that when starting an existing single task activity on secondary display
      * which is not the top focused display, it should deliver new intent to the activity and not
      * create a new stack.
