@@ -16,10 +16,12 @@
 
 package com.android.server.biometrics.fingerprint;
 
-import com.android.internal.logging.nano.MetricsProto;
-import com.android.server.biometrics.Metrics;
+import android.hardware.fingerprint.FingerprintManager;
 
-public class FingerprintMetrics implements Metrics {
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.biometrics.Constants;
+
+public class FingerprintConstants implements Constants {
 
     @Override
     public String logTag() {
@@ -64,5 +66,10 @@ public class FingerprintMetrics implements Metrics {
     @Override
     public int actionBiometricEnroll() {
         return MetricsProto.MetricsEvent.ACTION_FINGERPRINT_ENROLL;
+    }
+
+    @Override
+    public int acquireVendorCode() {
+        return FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR;
     }
 }

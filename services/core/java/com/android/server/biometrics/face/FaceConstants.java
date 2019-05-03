@@ -16,10 +16,12 @@
 
 package com.android.server.biometrics.face;
 
-import com.android.internal.logging.nano.MetricsProto;
-import com.android.server.biometrics.Metrics;
+import android.hardware.face.FaceManager;
 
-public class FaceMetrics implements Metrics {
+import com.android.internal.logging.nano.MetricsProto;
+import com.android.server.biometrics.Constants;
+
+public class FaceConstants implements Constants {
     @Override
     public String logTag() {
         return FaceService.TAG;
@@ -63,5 +65,10 @@ public class FaceMetrics implements Metrics {
     @Override
     public int actionBiometricEnroll() {
         return MetricsProto.MetricsEvent.ACTION_FACE_ENROLL;
+    }
+
+    @Override
+    public int acquireVendorCode() {
+        return FaceManager.FACE_ACQUIRED_VENDOR;
     }
 }
