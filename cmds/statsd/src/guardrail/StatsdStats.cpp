@@ -432,12 +432,13 @@ void StatsdStats::notePullExceedMaxDelay(int pullAtomId) {
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
-    if (atomId > android::util::kMaxPushedAtomId) {
-        ALOGW("not interested in atom %d", atomId);
-        return;
+    if (atomId <= android::util::kMaxPushedAtomId) {
+        mPushedAtomStats[atomId]++;
+    } else {
+        if (mNonPlatformPushedAtomStats.size() < kMaxNonPlatformPushedAtoms) {
+            mNonPlatformPushedAtomStats[atomId]++;
+        }
     }
-
-    mPushedAtomStats[atomId]++;
 }
 
 void StatsdStats::noteSystemServerRestart(int32_t timeSec) {
@@ -551,6 +552,7 @@ void StatsdStats::resetInternalLocked() {
     mStartTimeSec = getWallClockSec();
     mIceBox.clear();
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
+    mNonPlatformPushedAtomStats.clear();
     mAnomalyAlarmRegisteredStats = 0;
     mPeriodicAlarmRegisteredStats = 0;
     mSystemServerRestartSec.clear();
@@ -704,6 +706,9 @@ void StatsdStats::dumpStats(int out) const {
         if (mPushedAtomStats[i] > 0) {
             dprintf(out, "Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
         }
+    }
+    for (const auto& pair : mNonPlatformPushedAtomStats) {
+        dprintf(out, "Atom %lu->%d\n", (unsigned long)pair.first, pair.second);
     }
 
     dprintf(out, "********Pulled Atom stats***********\n");
@@ -888,6 +893,14 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
             proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_COUNT, mPushedAtomStats[i]);
             proto.end(token);
         }
+    }
+
+    for (const auto& pair : mNonPlatformPushedAtomStats) {
+        uint64_t token =
+                proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOM_STATS | FIELD_COUNT_REPEATED);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_TAG, pair.first);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_ATOM_STATS_COUNT, pair.second);
+        proto.end(token);
     }
 
     for (const auto& pair : mPulledAtomStats) {
