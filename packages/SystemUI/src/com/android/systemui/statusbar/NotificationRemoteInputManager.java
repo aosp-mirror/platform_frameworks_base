@@ -51,6 +51,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -348,21 +349,15 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         ViewParent p = view.getParent();
         RemoteInputView riv = null;
+        ExpandableNotificationRow row = null;
         while (p != null) {
             if (p instanceof View) {
                 View pv = (View) p;
                 if (pv.isRootNamespace()) {
                     riv = findRemoteInputView(pv);
+                    row = (ExpandableNotificationRow) pv.getTag(R.id.row_tag_for_content_view);
                     break;
                 }
-            }
-            p = p.getParent();
-        }
-        ExpandableNotificationRow row = null;
-        while (p != null) {
-            if (p instanceof ExpandableNotificationRow) {
-                row = (ExpandableNotificationRow) p;
-                break;
             }
             p = p.getParent();
         }
@@ -391,10 +386,13 @@ public class NotificationRemoteInputManager implements Dumpable {
             if (riv == null) {
                 return false;
             }
-            if (!row.getPrivateLayout().getExpandedChild().isShown()) {
-                mCallback.onMakeExpandedVisibleForRemoteInput(row, view);
-                return true;
-            }
+        }
+        if (riv == row.getPrivateLayout().getExpandedRemoteInput()
+                && !row.getPrivateLayout().getExpandedChild().isShown()) {
+            // The expanded layout is selected, but it's not shown yet, let's wait on it to
+            // show before we do the animation.
+            mCallback.onMakeExpandedVisibleForRemoteInput(row, view);
+            return true;
         }
 
         int width = view.getWidth();
