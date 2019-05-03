@@ -1,0 +1,53 @@
+<resources>
+    <!-- LiveDisplay -->
+    <string-array name="live_display_entries" translatable="false">
+        <item>@string/live_display_auto</item>
+        <item>@string/live_display_off</item>
+        <item>@string/live_display_day</item>
+        <item>@string/live_display_night</item>
+        <item>@string/live_display_outdoor</item>
+    </string-array>
+
+    <string-array name="live_display_summaries" translatable="false">
+        <item>@string/live_display_auto_summary</item>
+        <item>@string/live_display_off_summary</item>
+        <item>@string/live_display_day_summary</item>
+        <item>@string/live_display_night_summary</item>
+        <item>@string/live_display_outdoor_summary</item>
+    </string-array>
+
+    <string-array name="live_display_values" translatable="false">
+        <item>2</item>
+        <item>0</item>
+        <item>4</item>
+        <item>1</item>
+        <item>3</item>
+    </string-array>
+
+    <!-- LiveDisplay drawables -->
+    <string-array name="live_display_drawables" translatable="false">
+        <item>@drawable/ic_livedisplay_auto</item>
+        <item>@drawable/ic_livedisplay_off</item>
+        <item>@drawable/ic_livedisplay_day</item>
+        <item>@drawable/ic_livedisplay_night</item>
+        <item>@drawable/ic_livedisplay_outdoor</item>
+    </string-array>
+
+    <!-- LiveDisplay description-->
+    <string-array name="live_display_description" translatable="false">
+        <item>@string/accessibility_quick_settings_live_display_auto</item>
+        <item>@string/accessibility_quick_settings_live_display_off</item>
+        <item>@string/accessibility_quick_settings_live_display_day</item>
+        <item>@string/accessibility_quick_settings_live_display_night</item>
+        <item>@string/accessibility_quick_settings_live_display_outdoor</item>
+    </string-array>
+
+    <!-- LiveDisplay announcement-->
+    <string-array name="live_display_announcement" translatable="false">
+        <item>@string/accessibility_quick_settings_live_display_changed_auto</item>
+        <item>@string/accessibility_quick_settings_live_display_changed_off</item>
+        <item>@string/accessibility_quick_settings_live_display_changed_day</item>
+        <item>@string/accessibility_quick_settings_live_display_changed_night</item>
+        <item>@string/accessibility_quick_settings_live_display_changed_outdoor</item>
+    </string-array>
+</resources>

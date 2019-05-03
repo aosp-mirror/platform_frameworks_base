@@ -6,4 +6,28 @@
     <!-- Long-press back kill application -->
     <string name="app_killed_message">Application killed</string>
 
+    <!-- LiveDisplay strings -->
+    <string name="live_display_title" translatable="false">LiveDisplay</string>
+    <string name="live_display_auto">Automatic</string>
+    <string name="live_display_auto_summary">Automatically adjust color temperature of screen after sunset and sunrise</string>
+    <string name="live_display_off">Off</string>
+    <string name="live_display_off_summary">Disable all adjustments</string>
+    <string name="live_display_day">Day</string>
+    <string name="live_display_day_summary">Use day settings only</string>
+    <string name="live_display_night">Night</string>
+    <string name="live_display_night_summary">Use night settings only</string>
+    <string name="live_display_outdoor">Outdoor (bright sun)</string>
+    <string name="live_display_outdoor_summary">Use outdoor settings only</string>
+    <string name="live_display_hint">LiveDisplay can help reduce eyestrain and help you sleep at night. Click here to try it out!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay off.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: auto mode.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: day mode.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: night mode.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: outdoor mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay turned off.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay changed to auto mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay changed to day mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay changed to night mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay changed to outdoor mode.</string>
+
 </resources>
