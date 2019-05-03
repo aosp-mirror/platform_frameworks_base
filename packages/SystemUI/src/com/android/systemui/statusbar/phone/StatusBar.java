@@ -713,7 +713,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 result.mFullscreenStackSysUiVisibility, result.mDockedStackSysUiVisibility,
                 0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds,
                 result.mNavbarColorManagedByIme);
-        topAppWindowChanged(mDisplayId, result.mMenuVisible);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
                 result.mImeBackDisposition, result.mShowImeSwitcher);
@@ -727,11 +726,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (DEBUG) {
             Log.d(TAG, String.format(
-                    "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
+                    "init: icons=%d disabled=0x%08x lights=0x%08x imeButton=0x%08x",
                     numIcons,
                     result.mDisabledFlags1,
                     result.mSystemUiVisibility,
-                    result.mMenuVisible ? 1 : 0,
                     result.mImeWindowVis));
         }
 
@@ -2233,31 +2231,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
-    }
-
-    public void setLightsOn(boolean on) {
-        Log.v(TAG, "setLightsOn(" + on + ")");
-        if (on) {
-            setSystemUiVisibility(mDisplayId, 0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
-                    mLastFullscreenStackBounds, mLastDockedStackBounds,
-                    false /* navbarColorManagedByIme */);
-        } else {
-            setSystemUiVisibility(mDisplayId, View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
-                    mLastDockedStackBounds, false /* navbarColorManagedByIme */);
-        }
-    }
-
-    @Override
-    public void topAppWindowChanged(int displayId, boolean showMenu) {
-        if (mDisplayId != displayId) return;
-        if (SPEW) {
-            Log.d(TAG, "display#" + displayId + ": "
-                    + (showMenu ? "showing" : "hiding") + " the MENU button");
-        }
-
-        // See above re: lights-out policy for legacy apps.
-        if (showMenu) setLightsOn(true);
     }
 
     public static String viewInfo(View v) {
