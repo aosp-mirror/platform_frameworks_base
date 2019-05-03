@@ -2556,7 +2556,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     // Only apply corner radius to animation if we're not in multi window mode.
                     // We don't want rounded corners when in pip or split screen.
                     final float windowCornerRadius = !inMultiWindowMode()
-                            ? getWindowCornerRadiusForAnimation()
+                            ? getDisplayContent().getWindowCornerRadius()
                             : 0;
                     adapter = new LocalAnimationAdapter(
                             new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
