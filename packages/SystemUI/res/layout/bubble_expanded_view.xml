@@ -27,35 +27,14 @@
         android:layout_height="@dimen/bubble_pointer_height"
     />
 
-    <FrameLayout
-        android:id="@+id/permission_or_settings"
-        android:layout_width="match_parent"
+    <com.android.systemui.statusbar.AlphaOptimizedButton
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:id="@+id/settings_button"
+        android:layout_gravity="end"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true">
-
-        <com.android.systemui.statusbar.AlphaOptimizedButton
-            style="@android:style/Widget.Material.Button.Borderless"
-            android:id="@+id/settings_button"
-            android:layout_gravity="end"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:focusable="true"
-            android:text="@string/manage_bubbles_text"
-            android:textColor="?attr/wallpaperTextColor"/>
-
-        <include layout="@layout/bubble_permission_view"
-                 android:id="@+id/permission_layout"
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-        />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="bottom"
-            android:background="?android:attr/dividerHorizontal"/>
-
-    </FrameLayout>
+        android:focusable="true"
+        android:text="@string/manage_bubbles_text"
+        android:textColor="?attr/wallpaperTextColor"/>
 
 </com.android.systemui.bubbles.BubbleExpandedView>
