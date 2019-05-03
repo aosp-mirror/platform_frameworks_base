@@ -40,7 +40,7 @@ import java.util.List;
  * used to initiate rollback of those packages for a limited time period after
  * upgrade.
  *
- * @see PackageInstaller.SessionParams#setEnableRollback()
+ * @see PackageInstaller.SessionParams#setEnableRollback(boolean)
  * @hide
  */
 @SystemApi @TestApi
@@ -52,7 +52,7 @@ public final class RollbackManager {
     /**
      * Lifetime duration of rollback packages in millis. A rollback will be available for
      * at most that duration of time after a package is installed with
-     * {@link PackageInstaller.SessionParams#setEnableRollback()}.
+     * {@link PackageInstaller.SessionParams#setEnableRollback(boolean)}.
      *
      * <p>If flag value is negative, the default value will be assigned.
      *

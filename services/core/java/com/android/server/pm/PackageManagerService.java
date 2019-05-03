@@ -1744,6 +1744,15 @@ public class PackageManagerService extends IPackageManager.Stub
                         Trace.asyncTraceEnd(
                                 TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
                         params.handleRollbackEnabled();
+                        Intent rollbackTimeoutIntent = new Intent(
+                                Intent.ACTION_CANCEL_ENABLE_ROLLBACK);
+                        rollbackTimeoutIntent.putExtra(
+                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
+                                enableRollbackToken);
+                        rollbackTimeoutIntent.addFlags(
+                                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
+                                android.Manifest.permission.PACKAGE_ROLLBACK_AGENT);
                     }
                     break;
                 }

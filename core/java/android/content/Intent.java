@@ -2445,6 +2445,18 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_ENABLE_ROLLBACK =
             "android.intent.action.PACKAGE_ENABLE_ROLLBACK";
     /**
+     * Broadcast Action: Sent to the system rollback manager when the rollback for a certain
+     * package needs to be cancelled.
+     *
+     * <p class="note">This intent is sent by PackageManagerService to notify RollbackManager
+     * that enabling a specific rollback has timed out.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CANCEL_ENABLE_ROLLBACK =
+            "android.intent.action.CANCEL_ENABLE_ROLLBACK";
+    /**
      * Broadcast Action: A rollback has been committed.
      *
      * <p class="note">This is a protected intent that can only be sent
