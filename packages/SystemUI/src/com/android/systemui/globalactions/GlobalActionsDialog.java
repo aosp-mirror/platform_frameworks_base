@@ -413,6 +413,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 },
                                 mKeyguardManager.isDeviceLocked())
                         : null;
+
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
