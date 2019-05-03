@@ -15,6 +15,9 @@
  */
 package com.android.systemui.statusbar.notification;
 
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_ERROR;
+
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
@@ -30,6 +33,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -82,6 +86,7 @@ public class NotificationEntryManager implements
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
             = new ArrayList<>();
     private final List<NotificationEntryListener> mNotificationEntryListeners = new ArrayList<>();
+    private NotificationRemoveInterceptor mRemoveInterceptor;
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -115,6 +120,11 @@ public class NotificationEntryManager implements
         mNotificationEntryListeners.add(listener);
     }
 
+    /** Sets the {@link NotificationRemoveInterceptor}. */
+    public void setNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
+        mRemoveInterceptor = interceptor;
+    }
+
     /**
      * Our dependencies can have cyclic references, so some need to be lazy
      */
@@ -146,7 +156,7 @@ public class NotificationEntryManager implements
     /** Adds a {@link NotificationLifetimeExtender}. */
     public void addNotificationLifetimeExtender(NotificationLifetimeExtender extender) {
         mNotificationLifetimeExtenders.add(extender);
-        extender.setCallback(key -> removeNotification(key, mLatestRankingMap));
+        extender.setCallback(key -> removeNotification(key, mLatestRankingMap, 0));
     }
 
     public NotificationData getNotificationData() {
@@ -158,10 +168,18 @@ public class NotificationEntryManager implements
         updateNotifications();
     }
 
-    public void performRemoveNotification(StatusBarNotification n) {
+    /**
+     * Requests a notification to be removed.
+     *
+     * @param n the notification to remove.
+     * @param reason why it is being removed e.g. {@link NotificationListenerService#REASON_CANCEL},
+     *               or 0 if unknown.
+     */
+    public void performRemoveNotification(StatusBarNotification n, int reason) {
         final NotificationVisibility nv = obtainVisibility(n.getKey());
         removeNotificationInternal(
-                n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */);
+                n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */,
+                reason);
     }
 
     private NotificationVisibility obtainVisibility(String key) {
@@ -193,7 +211,8 @@ public class NotificationEntryManager implements
     @Override
     public void handleInflationException(StatusBarNotification n, Exception e) {
         removeNotificationInternal(
-                n.getKey(), null, null, true /* forceRemove */, false /* removedByUser */);
+                n.getKey(), null, null, true /* forceRemove */, false /* removedByUser */,
+                REASON_ERROR);
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onInflationError(n, e);
         }
@@ -228,9 +247,10 @@ public class NotificationEntryManager implements
     }
 
     @Override
-    public void removeNotification(String key, NotificationListenerService.RankingMap ranking) {
+    public void removeNotification(String key, NotificationListenerService.RankingMap ranking,
+            int reason) {
         removeNotificationInternal(key, ranking, obtainVisibility(key), false /* forceRemove */,
-                false /* removedByUser */);
+                false /* removedByUser */, reason);
     }
 
     private void removeNotificationInternal(
@@ -238,7 +258,15 @@ public class NotificationEntryManager implements
             @Nullable NotificationListenerService.RankingMap ranking,
             @Nullable NotificationVisibility visibility,
             boolean forceRemove,
-            boolean removedByUser) {
+            boolean removedByUser,
+            int reason) {
+
+        if (mRemoveInterceptor != null
+                && mRemoveInterceptor.onNotificationRemoveRequested(key, reason)) {
+            // Remove intercepted; skip
+            return;
+        }
+
         final NotificationEntry entry = mNotificationData.get(key);
 
         abortExistingInflation(key);
@@ -342,7 +370,8 @@ public class NotificationEntryManager implements
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
         // Construct the expanded view.
-        requireBinder().inflateViews(entry, () -> performRemoveNotification(notification));
+        requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
+                REASON_CANCEL));
 
         abortExistingInflation(key);
 
@@ -383,7 +412,8 @@ public class NotificationEntryManager implements
             listener.onPreEntryUpdated(entry);
         }
 
-        requireBinder().inflateViews(entry, () -> performRemoveNotification(notification));
+        requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
+                REASON_CANCEL));
         updateNotifications();
 
         if (DEBUG) {
