@@ -77,15 +77,13 @@ public class SmartActionsHelper {
             new ConversationActions(Collections.emptyList(), null);
 
     private Context mContext;
-    private TextClassifier mTextClassifier;
+    private TextClassificationManager mTextClassificationManager;
     private AssistantSettings mSettings;
     private LruCache<String, Session> mSessionCache = new LruCache<>(MAX_RESULT_ID_TO_CACHE);
 
     SmartActionsHelper(Context context, AssistantSettings settings) {
         mContext = context;
-        TextClassificationManager textClassificationManager =
-                mContext.getSystemService(TextClassificationManager.class);
-        mTextClassifier = textClassificationManager.getTextClassifier();
+        mTextClassificationManager = mContext.getSystemService(TextClassificationManager.class);
         mSettings = settings;
     }
 
@@ -244,7 +242,7 @@ public class SmartActionsHelper {
                                 .map(ConversationAction::getType)
                                 .toArray(String[]::new))
                         .build();
-        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
+        getTextClassifier().onTextClassifierEvent(textClassifierEvent);
     }
 
     /**
@@ -286,7 +284,7 @@ public class SmartActionsHelper {
                         .setTypeConfig(typeConfigBuilder.build())
                         .build();
         ConversationActions conversationActions =
-                mTextClassifier.suggestConversationActions(request);
+                getTextClassifier().suggestConversationActions(request);
         reportActionsGenerated(
                 conversationActions.getId(), conversationActions.getConversationActions());
         return conversationActions;
@@ -310,7 +308,7 @@ public class SmartActionsHelper {
                         TextClassifierEvent.TYPE_ACTIONS_SHOWN, session.resultId)
                         .build();
         // TODO: If possible, report which replies / actions are actually seen by user.
-        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
+        getTextClassifier().onTextClassifierEvent(textClassifierEvent);
     }
 
     void onNotificationDirectReplied(String key) {
@@ -322,7 +320,7 @@ public class SmartActionsHelper {
                 createTextClassifierEventBuilder(
                         TextClassifierEvent.TYPE_MANUAL_REPLY, session.resultId)
                         .build();
-        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
+        getTextClassifier().onTextClassifierEvent(textClassifierEvent);
     }
 
     void onSuggestedReplySent(String key, CharSequence reply,
@@ -340,7 +338,7 @@ public class SmartActionsHelper {
                         .setEntityTypes(ConversationAction.TYPE_TEXT_REPLY)
                         .setScores(session.repliesScores.getOrDefault(reply, 0f))
                         .build();
-        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
+        getTextClassifier().onTextClassifierEvent(textClassifierEvent);
     }
 
     void onActionClicked(String key, Notification.Action action,
@@ -361,7 +359,7 @@ public class SmartActionsHelper {
                         TextClassifierEvent.TYPE_SMART_ACTION, session.resultId)
                         .setEntityTypes(actionType)
                         .build();
-        mTextClassifier.onTextClassifierEvent(textClassifierEvent);
+        getTextClassifier().onTextClassifierEvent(textClassifierEvent);
     }
 
     private Notification.Action createNotificationActionFromRemoteAction(
@@ -469,6 +467,10 @@ public class SmartActionsHelper {
             }
         }
         return new ArrayList<>(extractMessages);
+    }
+
+    private TextClassifier getTextClassifier() {
+        return mTextClassificationManager.getTextClassifier();
     }
 
     private static boolean arePersonsEqual(Person left, Person right) {
