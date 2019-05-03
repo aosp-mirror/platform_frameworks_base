@@ -510,7 +510,7 @@ public final class InputMethodManager {
             return null;
         }
         final InputMethodManager fallbackImm =
-                viewRootImpl.mDisplayContext.getSystemService(InputMethodManager.class);
+                viewRootImpl.mContext.getSystemService(InputMethodManager.class);
         if (fallbackImm == null) {
             Log.e(TAG, "b/117267690: Failed to get non-null fallback IMM. view=" + view);
             return null;
@@ -2885,6 +2885,16 @@ public final class InputMethodManager {
         if (mImeInsetsConsumer != null) {
             mImeInsetsConsumer.onServedEditorChanged(tba);
         }
+    }
+
+    /**
+     * <p>This is used for CTS test only. Do not use this method outside of CTS package.<p/>
+     * @return the ID of this display which this {@link InputMethodManager} resides
+     * @hide
+     */
+    @TestApi
+    public int getDisplayId() {
+        return mDisplayId;
     }
 
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
