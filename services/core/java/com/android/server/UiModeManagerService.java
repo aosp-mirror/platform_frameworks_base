@@ -33,6 +33,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -45,7 +47,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
-import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -87,6 +89,7 @@ final class UiModeManagerService extends SystemService {
     private boolean mVrHeadset;
     private boolean mComputedNightMode;
     private int mCarModeEnableFlags;
+    private boolean mSetupWizardComplete;
 
     // flag set by resource, whether to enable Car dock launch when starting car mode.
     private boolean mEnableCarDockLaunch = true;
@@ -196,6 +199,29 @@ final class UiModeManagerService extends SystemService {
         }
     };
 
+    private final ContentObserver mSetupWizardObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            // setup wizard is done now so we can unblock
+            if (setupWizardCompleteForCurrentUser()) {
+                mSetupWizardComplete = true;
+                getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
+                // update night mode
+                Context context = getContext();
+                updateNightModeFromSettings(context, context.getResources(),
+                        UserHandle.getCallingUserId());
+                updateLocked(0, 0);
+            }
+        }
+    };
+
+    @Override
+    public void onSwitchUser(int userHandle) {
+        super.onSwitchUser(userHandle);
+        getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
+        verifySetupWizardCompleted();
+    }
+
     @Override
     public void onStart() {
         final Context context = getContext();
@@ -203,6 +229,10 @@ final class UiModeManagerService extends SystemService {
         final PowerManager powerManager =
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
+
+        // If setup isn't complete for this user listen for completion so we can unblock
+        // being able to send a night mode configuration change event
+        verifySetupWizardCompleted();
 
         context.registerReceiver(mDockModeReceiver,
                 new IntentFilter(Intent.ACTION_DOCK_EVENT));
@@ -262,6 +292,25 @@ final class UiModeManagerService extends SystemService {
         context.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
     }
 
+    // Records whether setup wizard has happened or not and adds an observer for this user if not.
+    private void verifySetupWizardCompleted() {
+        final Context context = getContext();
+        final int userId = UserHandle.getCallingUserId();
+        if (!setupWizardCompleteForCurrentUser()) {
+            mSetupWizardComplete = false;
+            context.getContentResolver().registerContentObserver(
+                    Secure.getUriFor(
+                            Secure.USER_SETUP_COMPLETE), false, mSetupWizardObserver, userId);
+        } else {
+            mSetupWizardComplete = true;
+        }
+    }
+
+    private boolean setupWizardCompleteForCurrentUser() {
+        return Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.USER_SETUP_COMPLETE, 0, UserHandle.getCallingUserId()) == 1;
+    }
+
     /**
      * Updates the night mode setting in Settings.Global and returns if the value was successfully
      * changed.
@@ -274,8 +323,12 @@ final class UiModeManagerService extends SystemService {
         final int defaultNightMode = res.getInteger(
                 com.android.internal.R.integer.config_defaultNightMode);
         int oldNightMode = mNightMode;
-        mNightMode = Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.UI_NIGHT_MODE, defaultNightMode, userId);
+        if (mSetupWizardComplete) {
+            mNightMode = Secure.getIntForUser(context.getContentResolver(),
+                    Secure.UI_NIGHT_MODE, defaultNightMode, userId);
+        } else {
+            mNightMode = defaultNightMode;
+        }
 
         // false if night mode stayed the same, true otherwise.
         return !(oldNightMode == mNightMode);
@@ -340,6 +393,10 @@ final class UiModeManagerService extends SystemService {
                 Slog.e(TAG, "Night mode locked, requires MODIFY_DAY_NIGHT_MODE permission");
                 return;
             }
+            if (!mSetupWizardComplete) {
+                Slog.d(TAG, "Night mode cannot be changed before setup wizard completes.");
+                return;
+            }
             switch (mode) {
                 case UiModeManager.MODE_NIGHT_NO:
                 case UiModeManager.MODE_NIGHT_YES:
@@ -356,8 +413,8 @@ final class UiModeManagerService extends SystemService {
                     if (mNightMode != mode) {
                         // Only persist setting if not in car mode
                         if (!mCarModeEnabled) {
-                            Settings.Secure.putIntForUser(getContext().getContentResolver(),
-                                    Settings.Secure.UI_NIGHT_MODE, mode, user);
+                            Secure.putIntForUser(getContext().getContentResolver(),
+                                    Secure.UI_NIGHT_MODE, mode, user);
                         }
 
                         mNightMode = mode;
