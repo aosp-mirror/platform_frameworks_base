@@ -33,6 +33,7 @@ import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
@@ -133,7 +134,7 @@ message Atom {
         PhoneStateChanged phone_state_changed = 95;
         LowMemReported low_mem_reported = 81;
         ThermalThrottlingStateChanged thermal_throttling = 86;
-        NetworkDnsEventReported network_dns_event_reported = 116;
+        NetworkDnsEventReported network_dns_event_reported = 116 [(log_from_module) = "resolv"];
         DataStallEvent data_stall_event = 121 [(log_from_module) = "network_stack"];
         BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
         BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
@@ -2794,51 +2795,37 @@ message Temperature {
 }
 
 /**
- * Logs the latency period(in microseconds) and the return code of
- * the DNS(Domain Name System) lookups.
- * These 4 methods(GETADDRINFO,GETHOSTBYNAME,GETHOSTBYADDR,RES_NSEND)
- * to get info(address or hostname) from DNS server(or DNS cache).
- * Logged from:
- *   /system/netd/server/DnsProxyListener.cpp
+ * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
+ * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
+ *
+ * The NetworkDnsEventReported message represents the entire lookup operation, which may
+ * result one or more queries to the recursive DNS resolvers. Those are individually logged
+ * in DnsQueryEvents to enable computing error rates and network latency and timeouts
+ * broken up by query type, transport, network interface, etc.
  */
 message NetworkDnsEventReported {
-    // The types of the DNS lookups, as defined in
-    //system/netd/server/binder/android/net/metrics/INetdEventListener.aidl
-    enum EventType {
-        EVENT_UNKNOWN = 0;
-        EVENT_GETADDRINFO = 1;
-        EVENT_GETHOSTBYNAME = 2;
-        EVENT_GETHOSTBYADDR = 3;
-        EVENT_RES_NSEND = 4;
-    }
-    optional EventType event_type = 1;
+    optional android.stats.dnsresolver.EventType event_type = 1;
 
-    // The return value of the DNS resolver for each DNS lookups.
-    //bionic/libc/include/netdb.h
-    //system/netd/resolv/include/netd_resolv/resolv.h
-    enum ReturnCode {
-        EAI_NO_ERROR = 0;
-        EAI_ADDRFAMILY = 1;
-        EAI_AGAIN = 2;
-        EAI_BADFLAGS = 3;
-        EAI_FAIL = 4;
-        EAI_FAMILY = 5;
-        EAI_MEMORY = 6;
-        EAI_NODATA = 7;
-        EAI_NONAME = 8;
-        EAI_SERVICE = 9;
-        EAI_SOCKTYPE = 10;
-        EAI_SYSTEM = 11;
-        EAI_BADHINTS = 12;
-        EAI_PROTOCOL = 13;
-        EAI_OVERFLOW = 14;
-        RESOLV_TIMEOUT = 255;
-        EAI_MAX = 256;
-    }
-    optional ReturnCode return_code = 2;
+    optional android.stats.dnsresolver.ReturnCode return_code = 2;
 
-    // The latency period(in microseconds) it took for this DNS lookup to complete.
+    // The latency in microseconds of the entire DNS lookup operation.
     optional int32 latency_micros = 3;
+
+    // Only valid for event_type = EVENT_GETADDRINFO.
+    optional int32 hints_ai_flags = 4;
+
+    // Flags passed to android_res_nsend() defined in multinetwork.h
+    // Only valid for event_type = EVENT_RESNSEND.
+    optional int32 res_nsend_flags = 5;
+
+    optional android.stats.dnsresolver.Transport network_type = 6;
+
+    // The DNS over TLS mode on a specific netId.
+    optional android.stats.dnsresolver.PrivateDnsModes private_dns_modes = 7;
+
+    // Additional pass-through fields opaque to statsd.
+    // The DNS resolver Mainline module can add new fields here without requiring an OS update.
+    optional android.stats.dnsresolver.DnsQueryEvents dns_query_events = 8 [(log_mode) = MODE_BYTES];
 }
 
 /**
