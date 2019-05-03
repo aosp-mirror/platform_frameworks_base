@@ -1906,7 +1906,8 @@ public class WifiConfiguration implements Parcelable {
         if (this.meteredOverride != METERED_OVERRIDE_NONE) {
             sbuf.append(" meteredOverride ").append(meteredOverride).append("\n");
         }
-        sbuf.append(" macRandomizationSetting ").append(macRandomizationSetting).append("\n");
+        sbuf.append(" macRandomizationSetting: ").append(macRandomizationSetting).append("\n");
+        sbuf.append(" mRandomizedMacAddress: ").append(mRandomizedMacAddress).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
