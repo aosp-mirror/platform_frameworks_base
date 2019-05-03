@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -32,6 +33,7 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_P
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.content.ComponentName;
@@ -68,6 +70,36 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         final RecentTasks recentTasks = mService.getRecentTasks();
         spyOn(recentTasks);
         doReturn(mRecentsComponent).when(recentTasks).getRecentsComponent();
+    }
+
+    @Test
+    public void testRecentsActivityVisiblility() {
+        ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        ActivityStack recentsStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        ActivityRecord recentActivity = new ActivityBuilder(mService)
+                .setComponent(mRecentsComponent)
+                .setCreateTask(true)
+                .setStack(recentsStack)
+                .build();
+        ActivityRecord topActivity = new ActivityBuilder(mService).setCreateTask(true).build();
+        topActivity.fullscreen = true;
+        topActivity.getActivityStack().moveToFront("testRecentsActivityVisiblility");
+
+        doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(
+                any() /* starting */, anyInt() /* configChanges */,
+                anyBoolean() /* preserveWindows */);
+
+        RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
+                mRecentsComponent, true /* getRecentsAnimation */);
+        // The launch-behind state should make the recents activity visible.
+        assertTrue(recentActivity.visible);
+
+        // Simulate the animation is cancelled without changing the stack order.
+        recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, true /* runSychronously */,
+                false /* sendUserLeaveHint */);
+        // The non-top recents activity should be invisible by the restored launch-behind state.
+        assertFalse(recentActivity.visible);
     }
 
     @Test
