@@ -24,30 +24,30 @@ public class TestOnlyInsecureCertificateHelperTest {
     @Test
     public void testDoesCredentailSupportInsecureMode_forNonWhitelistedPassword() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345".getBytes())).isFalse();
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345")).isFalse();
         assertThat(mHelper.doesCredentialSupportInsecureMode(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234".getBytes())).isFalse();
+                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234")).isFalse();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_forWhitelistedPassword() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isTrue();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isTrue();
 
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                (TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12").getBytes())).isTrue();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12")).isTrue();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_Pattern() throws Exception {
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isFalse();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
         assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX.getBytes())).isFalse();
+                TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
     }
 
     @Test

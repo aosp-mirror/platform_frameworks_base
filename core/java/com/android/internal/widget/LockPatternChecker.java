@@ -150,30 +150,9 @@ public final class LockPatternChecker {
      * @param challenge The challenge to verify against the pattern.
      * @param userId The user to check against the pattern.
      * @param callback The callback to be invoked with the verification result.
-     *
-     * @deprecated Pass the password as a byte array.
      */
-    @Deprecated
     public static AsyncTask<?, ?, ?> verifyPassword(final LockPatternUtils utils,
             final String password,
-            final long challenge,
-            final int userId,
-            final OnVerifyCallback callback) {
-        byte[] passwordBytes = password != null ? password.getBytes() : null;
-        return verifyPassword(utils, passwordBytes, challenge, userId, callback);
-    }
-
-    /**
-     * Verify a password asynchronously.
-     *
-     * @param utils The LockPatternUtils instance to use.
-     * @param password The password to check.
-     * @param challenge The challenge to verify against the pattern.
-     * @param userId The user to check against the pattern.
-     * @param callback The callback to be invoked with the verification result.
-     */
-    public static AsyncTask<?, ?, ?> verifyPassword(final LockPatternUtils utils,
-            final byte[] password,
             final long challenge,
             final int userId,
             final OnVerifyCallback callback) {
@@ -209,7 +188,7 @@ public final class LockPatternChecker {
      * @param callback The callback to be invoked with the verification result.
      */
     public static AsyncTask<?, ?, ?> verifyTiedProfileChallenge(final LockPatternUtils utils,
-            final byte[] password,
+            final String password,
             final boolean isPattern,
             final long challenge,
             final int userId,
@@ -243,27 +222,9 @@ public final class LockPatternChecker {
      * @param password The password to check.
      * @param userId The user to check against the pattern.
      * @param callback The callback to be invoked with the check result.
-     * @deprecated Pass passwords as byte[]
      */
-    @Deprecated
     public static AsyncTask<?, ?, ?> checkPassword(final LockPatternUtils utils,
             final String password,
-            final int userId,
-            final OnCheckCallback callback) {
-        byte[] passwordBytes = password != null ? password.getBytes() : null;
-        return checkPassword(utils, passwordBytes, userId, callback);
-    }
-
-    /**
-     * Checks a password asynchronously.
-     *
-     * @param utils The LockPatternUtils instance to use.
-     * @param passwordBytes The password to check.
-     * @param userId The user to check against the pattern.
-     * @param callback The callback to be invoked with the check result.
-     */
-    public static AsyncTask<?, ?, ?> checkPassword(final LockPatternUtils utils,
-            final byte[] passwordBytes,
             final int userId,
             final OnCheckCallback callback) {
         AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
@@ -272,7 +233,7 @@ public final class LockPatternChecker {
             @Override
             protected Boolean doInBackground(Void... args) {
                 try {
-                    return utils.checkPassword(passwordBytes, userId, callback::onEarlyMatched);
+                    return utils.checkPassword(password, userId, callback::onEarlyMatched);
                 } catch (RequestThrottledException ex) {
                     mThrottleTimeout = ex.getTimeoutMs();
                     return false;
