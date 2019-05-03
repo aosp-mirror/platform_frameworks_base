@@ -337,19 +337,9 @@ public final class BluetoothHeadset implements BluetoothProfile {
                 public void onBluetoothStateChange(boolean up) {
                     if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
                     if (!up) {
-                        if (VDBG) Log.d(TAG, "Unbinding service...");
                         doUnbind();
                     } else {
-                        synchronized (mConnection) {
-                            try {
-                                if (mService == null) {
-                                    if (VDBG) Log.d(TAG, "Binding service...");
-                                    doBind();
-                                }
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
+                        doBind();
                     }
                 }
             };
@@ -374,24 +364,32 @@ public final class BluetoothHeadset implements BluetoothProfile {
         doBind();
     }
 
-    boolean doBind() {
-        try {
-            return mAdapter.getBluetoothManager().bindBluetoothProfileService(
-                    BluetoothProfile.HEADSET, mConnection);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Unable to bind HeadsetService", e);
+    private boolean doBind() {
+        synchronized (mConnection) {
+            if (mService == null) {
+                if (VDBG) Log.d(TAG, "Binding service...");
+                try {
+                    return mAdapter.getBluetoothManager().bindBluetoothProfileService(
+                            BluetoothProfile.HEADSET, mConnection);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to bind HeadsetService", e);
+                }
+            }
         }
         return false;
     }
 
-    void doUnbind() {
+    private void doUnbind() {
         synchronized (mConnection) {
             if (mService != null) {
+                if (VDBG) Log.d(TAG, "Unbinding service...");
                 try {
                     mAdapter.getBluetoothManager().unbindBluetoothProfileService(
                             BluetoothProfile.HEADSET, mConnection);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to unbind HeadsetService", e);
+                } finally {
+                    mService = null;
                 }
             }
         }
@@ -411,8 +409,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
         if (mgr != null) {
             try {
                 mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (Exception e) {
-                Log.e(TAG, "", e);
+            } catch (RemoteException re) {
+                Log.e(TAG, "", re);
             }
         }
         mServiceListener = null;
@@ -1169,7 +1167,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
         @Override
         public void onServiceDisconnected(ComponentName className) {
             if (DBG) Log.d(TAG, "Proxy object disconnected");
-            mService = null;
+            doUnbind();
             mHandler.sendMessage(mHandler.obtainMessage(
                     MESSAGE_HEADSET_SERVICE_DISCONNECTED));
         }
