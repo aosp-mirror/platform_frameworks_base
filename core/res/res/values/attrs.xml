@@ -87,6 +87,8 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
+        <!-- Color of background imagery used for popup windows. -->
+        <attr name="colorPopupBackground" format="color" />
 
         <!-- =========== -->
         <!-- Text styles -->
