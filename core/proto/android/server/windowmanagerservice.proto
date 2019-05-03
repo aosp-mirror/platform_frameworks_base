@@ -159,6 +159,9 @@ message DisplayContentProto {
     optional int32 surface_size = 14 [deprecated=true];
     optional string focused_app = 15;
     optional AppTransitionProto app_transition = 16;
+    repeated IdentifierProto opening_apps = 17;
+    repeated IdentifierProto closing_apps = 18;
+    repeated IdentifierProto changing_apps = 19;
 }
 
 /* represents DisplayFrames */

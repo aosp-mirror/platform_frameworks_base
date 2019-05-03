@@ -90,6 +90,9 @@ import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
+import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
+import static com.android.server.wm.DisplayContentProto.CHANGING_APPS;
+import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -2735,6 +2738,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAppTransition.writeToProto(proto, APP_TRANSITION);
         if (mFocusedApp != null) {
             mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
+        }
+        for (int i = mOpeningApps.size() - 1; i >= 0; i--) {
+            mOpeningApps.valueAt(i).mActivityRecord.writeIdentifierToProto(proto, OPENING_APPS);
+        }
+        for (int i = mClosingApps.size() - 1; i >= 0; i--) {
+            mClosingApps.valueAt(i).mActivityRecord.writeIdentifierToProto(proto, CLOSING_APPS);
+        }
+        for (int i = mChangingApps.size() - 1; i >= 0; i--) {
+            mChangingApps.valueAt(i).mActivityRecord.writeIdentifierToProto(proto, CHANGING_APPS);
         }
         proto.end(token);
     }
