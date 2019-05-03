@@ -938,7 +938,7 @@ public class FaceService extends BiometricServiceBase {
             try {
                 userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
-                    final File baseDir = Environment.getDataVendorCeDirectory(userId);
+                    final File baseDir = Environment.getDataVendorDeDirectory(userId);
                     final File faceDir = new File(baseDir, FACE_DATA_DIR);
                     if (!faceDir.exists()) {
                         if (!faceDir.mkdir()) {
