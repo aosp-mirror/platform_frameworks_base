@@ -63,9 +63,12 @@ public class DisplayWhiteBalanceFactory {
                 createColorTemperatureSensor(handler, sensorManager, resources);
         final AmbientFilter colorTemperatureFilter = createColorTemperatureFilter(resources);
         final DisplayWhiteBalanceThrottler throttler = createThrottler(resources);
-        final float lowLightAmbientBrightnessThreshold = getFloat(resources,
-                com.android.internal.R.dimen
-                .config_displayWhiteBalanceLowLightAmbientBrightnessThreshold);
+        final float[] displayWhiteBalanceLowLightAmbientBrightnesses = getFloatArray(resources,
+                com.android.internal.R.array
+                .config_displayWhiteBalanceLowLightAmbientBrightnesses);
+        final float[] displayWhiteBalanceLowLightAmbientBiases = getFloatArray(resources,
+                com.android.internal.R.array
+                .config_displayWhiteBalanceLowLightAmbientBiases);
         final float lowLightAmbientColorTemperature = getFloat(resources,
                 com.android.internal.R.dimen
                 .config_displayWhiteBalanceLowLightAmbientColorTemperature);
@@ -75,7 +78,8 @@ public class DisplayWhiteBalanceFactory {
                 com.android.internal.R.array.config_displayWhiteBalanceDisplayColorTemperatures);
         final DisplayWhiteBalanceController controller = new DisplayWhiteBalanceController(
                 brightnessSensor, brightnessFilter, colorTemperatureSensor, colorTemperatureFilter,
-                throttler, lowLightAmbientBrightnessThreshold, lowLightAmbientColorTemperature,
+                throttler, displayWhiteBalanceLowLightAmbientBrightnesses,
+                displayWhiteBalanceLowLightAmbientBiases, lowLightAmbientColorTemperature,
                 ambientColorTemperatures, displayColorTempeartures);
         brightnessSensor.setCallbacks(controller);
         colorTemperatureSensor.setCallbacks(controller);
