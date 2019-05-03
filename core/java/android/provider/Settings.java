@@ -6484,6 +6484,21 @@ public final class Settings {
                 new SettingsValidators.ComponentNameListValidator(":");
 
         /**
+         * Whether the Global Actions Panel is enabled.
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_PANEL_ENABLED = "global_actions_panel_enabled";
+
+        private static final Validator GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether the Global Actions Panel can be toggled on or off in Settings.
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_PANEL_AVAILABLE =
+                "global_actions_panel_available";
+
+        /**
          * Whether the hush gesture has ever been used
          * @hide
          */
@@ -8922,7 +8937,8 @@ public final class Settings {
             SILENCE_NOTIFICATION_GESTURE_COUNT,
             SILENCE_CALL_GESTURE_COUNT,
             SILENCE_TIMER_GESTURE_COUNT,
-            DARK_MODE_DIALOG_SEEN
+            DARK_MODE_DIALOG_SEEN,
+            GLOBAL_ACTIONS_PANEL_ENABLED
         };
 
         /**
@@ -9106,6 +9122,7 @@ public final class Settings {
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
             VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
             VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);
+            VALIDATORS.put(GLOBAL_ACTIONS_PANEL_ENABLED, GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR);
         }
 
         /**
