@@ -61,7 +61,6 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
         mSettingsObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri, int userId) {
-                // STOPSHIP(kozynski, b/129405675) Remove log
                 Log.d(TAG, "Setting change: " + uri);
                 if (mUserSetupUri.equals(uri)) {
                     notifySetupChanged();
