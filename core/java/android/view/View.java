@@ -7178,10 +7178,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private FrameMetricsObserver findFrameMetricsObserver(
             Window.OnFrameMetricsAvailableListener listener) {
-        for (int i = 0; i < mFrameMetricsObservers.size(); i++) {
-            FrameMetricsObserver observer = mFrameMetricsObservers.get(i);
-            if (observer.mListener == listener) {
-                return observer;
+        if (mFrameMetricsObservers != null) {
+            for (int i = 0; i < mFrameMetricsObservers.size(); i++) {
+                FrameMetricsObserver observer = mFrameMetricsObservers.get(i);
+                if (observer.mListener == listener) {
+                    return observer;
+                }
             }
         }
 
