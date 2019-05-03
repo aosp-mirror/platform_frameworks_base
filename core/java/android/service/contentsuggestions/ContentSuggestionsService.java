@@ -30,6 +30,7 @@ import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -62,11 +63,15 @@ public abstract class ContentSuggestionsService extends Service {
     private final IContentSuggestionsService mInterface = new IContentSuggestionsService.Stub() {
         @Override
         public void provideContextImage(int taskId, GraphicBuffer contextImage,
-                Bundle imageContextRequestExtras) {
+                int colorSpaceId, Bundle imageContextRequestExtras) {
 
             Bitmap wrappedBuffer = null;
             if (contextImage != null) {
-                wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, null);
+                ColorSpace colorSpace = null;
+                if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
+                    colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
+                }
+                wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, colorSpace);
             }
 
             mHandler.sendMessage(

@@ -68,9 +68,9 @@ public class RemoteContentSuggestionsService extends
     }
 
     void provideContextImage(int taskId, @Nullable GraphicBuffer contextImage,
-            @NonNull Bundle imageContextRequestExtras) {
+            int colorSpaceId, @NonNull Bundle imageContextRequestExtras) {
         scheduleAsyncRequest((s) -> s.provideContextImage(taskId, contextImage,
-                imageContextRequestExtras));
+                colorSpaceId, imageContextRequestExtras));
     }
 
     void suggestContentSelections(
