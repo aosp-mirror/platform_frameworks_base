@@ -177,7 +177,7 @@ public class ChooserActivity extends ResolverActivity {
      */
     private static final int NO_DIRECT_SHARE_ANIM_IN_MILLIS = 200;
 
-    private static final float DIRECT_SHARE_EXPANSION_RATE = 0.7f;
+    private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
 
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
@@ -2037,21 +2037,29 @@ public class ChooserActivity extends ResolverActivity {
                     return;
                 }
 
-                int lastHeight = 0;
+                int directShareHeight = 0;
                 rowsToShow = Math.min(4, rowsToShow);
                 for (int i = 0; i < Math.min(rowsToShow, mAdapterView.getChildCount()); i++) {
-                    lastHeight = mAdapterView.getChildAt(i).getHeight();
-                    offset += lastHeight;
+                    View child = mAdapterView.getChildAt(i);
+                    int height = child.getHeight();
+                    offset += height;
+
+                    if (child.getTag() != null
+                            && (child.getTag() instanceof DirectShareViewHolder)) {
+                        directShareHeight = height;
+                    }
                 }
 
                 boolean isPortrait = getResources().getConfiguration().orientation
                                          == Configuration.ORIENTATION_PORTRAIT;
-                if (lastHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
+                if (directShareHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
                     // make sure to leave room for direct share 4->8 expansion
-                    int expansionArea =
-                            (int) (mResolverDrawerLayout.getAlwaysShowHeight()
-                                    / DIRECT_SHARE_EXPANSION_RATE);
-                    offset = Math.min(offset, bottom - top - lastHeight - expansionArea);
+                    int requiredExpansionHeight =
+                            (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
+                    int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
+                                        - requiredExpansionHeight;
+
+                    offset = Math.min(offset, minHeight);
                 }
 
                 mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
