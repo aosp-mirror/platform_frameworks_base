@@ -419,26 +419,36 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         Preconditions.checkNotNull(cr);
         Preconditions.checkNotNull(notifyUris);
 
-        setNotificationUris(cr, notifyUris, cr.getUserId());
+        setNotificationUris(cr, notifyUris, cr.getUserId(), true);
     }
 
-    /** @hide - set the notification uri but with an observer for a particular user's view */
-    public void setNotificationUris(ContentResolver cr, List<Uri> notifyUris, int userHandle) {
+    /**
+     * Set the notification uri but with an observer for a particular user's view. Also allows
+     * disabling the use of a self observer, which is sensible if either
+     * a) the cursor's owner calls {@link #onChange(boolean)} whenever the content changes, or
+     * b) the cursor is known not to have any content observers.
+     * @hide
+     */
+    public void setNotificationUris(ContentResolver cr, List<Uri> notifyUris, int userHandle,
+            boolean registerSelfObserver) {
         synchronized (mSelfObserverLock) {
             mNotifyUris = notifyUris;
             mNotifyUri = mNotifyUris.get(0);
             mContentResolver = cr;
             if (mSelfObserver != null) {
                 mContentResolver.unregisterContentObserver(mSelfObserver);
+                mSelfObserverRegistered = false;
             }
-            mSelfObserver = new SelfContentObserver(this);
-            final int size = mNotifyUris.size();
-            for (int i = 0; i < size; ++i) {
-                final Uri notifyUri = mNotifyUris.get(i);
-                mContentResolver.registerContentObserver(
-                        notifyUri, true, mSelfObserver, userHandle);
+            if (registerSelfObserver) {
+                mSelfObserver = new SelfContentObserver(this);
+                final int size = mNotifyUris.size();
+                for (int i = 0; i < size; ++i) {
+                    final Uri notifyUri = mNotifyUris.get(i);
+                    mContentResolver.registerContentObserver(
+                            notifyUri, true, mSelfObserver, userHandle);
+                }
+                mSelfObserverRegistered = true;
             }
-            mSelfObserverRegistered = true;
         }
     }
 
