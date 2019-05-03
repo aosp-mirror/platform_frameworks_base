@@ -1822,7 +1822,8 @@ class ActivityStack extends ConfigurationContainer {
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
-                    addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */);
+                    addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */,
+                            "completePauseLocked");
                 }
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "App died during pause, not stopping: " + prev);
@@ -1883,8 +1884,11 @@ class ActivityStack extends ConfigurationContainer {
         mRootActivityContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
+    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed,
+            String reason) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
+            EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, r.mUserId,
+                    System.identityHashCode(r), r.shortComponentName, reason);
             mStackSupervisor.mStoppingActivities.add(r);
         }
 
@@ -2433,7 +2437,7 @@ class ActivityStack extends ConfigurationContainer {
                 case PAUSING:
                 case PAUSED:
                     addToStopping(r, true /* scheduleIdle */,
-                            canEnterPictureInPicture /* idleDelayed */);
+                            canEnterPictureInPicture /* idleDelayed */, "makeInvisible");
                     break;
 
                 default:
@@ -4098,7 +4102,8 @@ class ActivityStack extends ConfigurationContainer {
         if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
                 && next != null && !next.nowVisible && !isFloating) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */);
+                addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */,
+                        "finishCurrentActivityLocked");
             }
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to STOPPING: "+ r + " (finish requested)");
