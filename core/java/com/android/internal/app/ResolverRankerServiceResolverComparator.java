@@ -315,7 +315,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     }
 
     // connect to a ranking service.
-    void initRanker(Context context) {
+    private void initRanker(Context context) {
         synchronized (mLock) {
             if (mConnection != null && mRanker != null) {
                 if (DEBUG) {
