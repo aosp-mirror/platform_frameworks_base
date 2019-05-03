@@ -4087,4 +4087,8 @@
     <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
     </integer-array>
 
+    <!-- The component name for the default profile supervisor, which can be set as a profile owner
+    even after user setup is complete. The defined component should be used for supervision purposes
+    only. The component must be part of a system app. -->
+    <string name="config_defaultSupervisionProfileOwnerComponent" translatable="false"></string>
 </resources>
