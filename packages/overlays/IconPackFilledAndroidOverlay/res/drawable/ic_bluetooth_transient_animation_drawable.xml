@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp"
+        android:width="24dp" android:viewportHeight="24"
+        android:viewportWidth="24">
+    <group android:name="_R_G">
+        <group android:name="_R_G_L_2_G" android:translateX="3.099"
+               android:translateY="1.6400000000000006">
+            <path android:name="_R_G_L_2_G_D_0_P_0" android:fillColor="#000000"
+                  android:fillAlpha="1" android:fillType="nonZero"
+                  android:pathData=" M10.41 10.36 C10.41,10.36 14.16,6.62 14.16,6.62 C14.57,6.21 14.57,5.55 14.16,5.14 C14.16,5.14 9.69,0.67 9.69,0.67 C9.69,0.67 9.66,0.64 9.66,0.64 C9.24,0.25 8.58,0.27 8.18,0.69 C8,0.88 7.9,1.14 7.9,1.4 C7.9,1.4 7.9,7.84 7.9,7.84 C7.9,7.84 3.85,3.79 3.85,3.79 C3.44,3.38 2.79,3.38 2.38,3.79 C1.97,4.2 1.97,4.85 2.38,5.26 C2.38,5.26 7.47,10.36 7.47,10.36 C7.47,10.36 2.38,15.45 2.38,15.45 C1.97,15.86 1.97,16.51 2.38,16.92 C2.79,17.33 3.44,17.33 3.85,16.92 C3.85,16.92 7.9,12.87 7.9,12.87 C7.9,12.87 7.9,19.32 7.9,19.32 C7.9,19.89 8.37,20.36 8.94,20.36 C9.2,20.36 9.46,20.26 9.65,20.08 C9.65,20.08 9.7,20.03 9.7,20.03 C9.7,20.03 14.16,15.57 14.16,15.57 C14.57,15.16 14.57,14.5 14.16,14.09 C14.16,14.09 10.41,10.36 10.41,10.36c  M9.89 3.73 C9.89,3.73 12.04,5.88 12.04,5.88 C12.04,5.88 9.89,8.03 9.89,8.03 C9.89,8.03 9.89,3.73 9.89,3.73c  M9.89 16.98 C9.89,16.98 9.89,12.68 9.89,12.68 C9.89,12.68 12.04,14.83 12.04,14.83 C12.04,14.83 9.89,16.98 9.89,16.98c "/>
+        </group>
+        <group android:name="_R_G_L_1_G" android:translateX="3.099"
+               android:translateY="1.6400000000000006">
+            <path android:name="_R_G_L_1_G_D_0_P_0" android:fillColor="#000000"
+                  android:fillAlpha="1" android:fillType="nonZero"
+                  android:pathData=" M16.96 9.3 C16.95,9.3 16.95,9.29 16.95,9.28 C16.36,8.71 15.42,8.72 14.84,9.3 C14.84,9.3 14.83,9.31 14.83,9.31 C14.25,9.9 14.25,10.84 14.84,11.42 C15.42,12.01 16.37,12.01 16.96,11.42 C17.55,10.84 17.55,9.89 16.96,9.3c "/>
+        </group>
+        <group android:name="_R_G_L_0_G" android:translateX="3.099"
+               android:translateY="1.6400000000000006">
+            <path android:name="_R_G_L_0_G_D_0_P_0" android:fillColor="#000000"
+                  android:fillAlpha="1" android:fillType="nonZero"
+                  android:pathData=" M2.96 9.3 C2.96,9.3 2.95,9.29 2.95,9.29 C2.36,8.71 1.42,8.71 0.84,9.3 C0.84,9.3 0.83,9.31 0.83,9.31 C0.25,9.9 0.25,10.84 0.84,11.42 C1.42,12.01 2.37,12.01 2.96,11.42 C3.55,10.83 3.55,9.89 2.96,9.3c "/>
+        </group>
+    </group>
+    <group android:name="time_group"/>
+</vector>

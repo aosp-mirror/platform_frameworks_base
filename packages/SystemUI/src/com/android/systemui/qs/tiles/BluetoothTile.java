@@ -144,7 +144,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         mContext.getString(R.string.accessibility_bluetooth_name, state.label)
                                 + ", " + state.secondaryLabel;
             } else if (state.isTransient) {
-                state.icon = ResourceIcon.get(R.drawable.ic_bluetooth_transient_animation);
+                state.icon = ResourceIcon.get(
+                        com.android.internal.R.drawable.ic_bluetooth_transient_animation);
                 state.contentDescription = state.secondaryLabel;
             } else {
                 state.icon =

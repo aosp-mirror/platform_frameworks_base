@@ -186,7 +186,8 @@ public class WifiTile extends QSTileImpl<SignalState> {
         final StringBuffer minimalContentDescription = new StringBuffer();
         final Resources r = mContext.getResources();
         if (isTransient) {
-            state.icon = ResourceIcon.get(R.drawable.ic_signal_wifi_transient_animation);
+            state.icon = ResourceIcon.get(
+                    com.android.internal.R.drawable.ic_signal_wifi_transient_animation);
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else if (!state.value) {
             state.slash.isSlashed = true;
