@@ -80,16 +80,6 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
     }
 
     @Override
-    public void removeAllItems() {
-        if (mList != null) {
-            mList.removeAllViews();
-        }
-        if (mSeparatedView != null) {
-            mSeparatedView.removeAllViews();
-        }
-    }
-
-    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         updateSettings();

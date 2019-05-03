@@ -3240,6 +3240,7 @@
 
   <java-symbol type="string" name="config_icon_mask" />
   <java-symbol type="string" name="config_batterymeterPerimeterPath" />
+  <java-symbol type="string" name="config_batterymeterErrorPerimeterPath" />
   <java-symbol type="string" name="config_batterymeterFillMask" />
   <java-symbol type="string" name="config_batterymeterBoltPath" />
   <java-symbol type="string" name="config_batterymeterPowersavePath" />
@@ -3771,4 +3772,6 @@
   <java-symbol type="color" name="chooser_gradient_highlight" />
   <java-symbol type="drawable" name="chooser_direct_share_label_placeholder" />
   <java-symbol type="dimen" name="chooser_direct_share_label_placeholder_max_width" />
+  <java-symbol type="layout" name="chooser_az_label_row" />
+  <java-symbol type="string" name="chooser_all_apps_button_label" />
 </resources>

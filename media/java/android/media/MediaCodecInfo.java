@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -1105,7 +1106,11 @@ public final class MediaCodecInfo {
             mBitrateRange = Range.create(0, Integer.MAX_VALUE);
             mMaxInputChannelCount = MAX_INPUT_CHANNEL_COUNT;
             // mBitrateRange = Range.create(1, 320000);
-            mSampleRateRanges = new Range[] { Range.create(8000, 96000) };
+            final int minSampleRate = SystemProperties.
+                getInt("ro.mediacodec.min_sample_rate", 7350);
+            final int maxSampleRate = SystemProperties.
+                getInt("ro.mediacodec.max_sample_rate", 192000);
+            mSampleRateRanges = new Range[] { Range.create(minSampleRate, maxSampleRate) };
             mSampleRates = null;
         }
 
@@ -1675,6 +1680,13 @@ public final class MediaCodecInfo {
                     info += ", " + blockWidth + "x" + blockHeight + " blocks";
                 }
                 return "PerformancePoint(" + info + ")";
+            }
+
+            @Override
+            public int hashCode() {
+                // only max frame rate must equal between performance points that equal to one
+                // another
+                return mMaxFrameRate;
             }
 
             /**

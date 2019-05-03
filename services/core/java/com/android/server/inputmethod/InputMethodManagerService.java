@@ -1409,7 +1409,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        mImeDisplayValidator = mWindowManagerInternal::shouldShowSystemDecorOnDisplay;
+        mImeDisplayValidator = displayId -> mWindowManagerInternal.shouldShowIme(displayId);
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {
@@ -2139,7 +2139,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
             return FALLBACK_DISPLAY_ID;
         }
-        // Show IME window on fallback display when the display is not allowed.
+
+        // Show IME window on fallback display when the display doesn't support system decorations
+        // or the display is virtual and isn't owned by system for security concern.
         return checker.displayCanShowIme(displayId) ? displayId : FALLBACK_DISPLAY_ID;
     }
 

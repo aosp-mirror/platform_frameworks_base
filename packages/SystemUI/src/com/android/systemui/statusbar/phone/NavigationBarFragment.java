@@ -24,11 +24,9 @@ import static android.app.StatusBarManager.windowStateToString;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
-import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -197,12 +195,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
 
         @Override
-        public void onInteractionFlagsChanged(@InteractionType int flags) {
-            mNavigationBarView.updateStates();
-            updateScreenPinningGestures();
-        }
-
-        @Override
         public void startAssistant(Bundle bundle) {
             mAssistManager.startAssist(bundle);
         }
@@ -335,7 +327,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
         notifyNavigationBarScreenOn();
+
         mOverviewProxyService.addCallback(mOverviewProxyListener);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NAV_BAR_HIDDEN,
+                !isNavBarWindowVisible(), mDisplayId);
 
         // Currently there is no accelerometer sensor on non-default display.
         if (mIsOnDefaultDisplay) {
@@ -471,7 +466,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
 
             mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NAV_BAR_HIDDEN,
-                    !isNavBarWindowVisible());
+                    !isNavBarWindowVisible(), mDisplayId);
             mNavigationBarView.getRotateSuggestionButton()
                     .onNavigationBarWindowVisibilityChange(isNavBarWindowVisible());
         }
@@ -512,12 +507,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mAutoHideController.touchAutoHide();
 
         mLightBarController.onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */,
-                true /* nbModeChanged */, mNavigationBarMode);
+                true /* nbModeChanged */, mNavigationBarMode, false /* navbarColorManagedByIme */);
     }
 
     @Override
     public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -545,7 +541,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             }
         }
         mLightBarController.onNavigationVisibilityChanged(
-                vis, mask, nbModeChanged, mNavigationBarMode);
+                vis, mask, nbModeChanged, mNavigationBarMode, navbarColorManagedByIme);
     }
 
     private @TransitionMode int computeBarMode(int oldVis, int newVis) {
@@ -831,7 +827,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                     activityManager.stopSystemLockTaskMode();
                     // When exiting refresh disabled flags.
                     mNavigationBarView.updateNavButtonIcons();
-                    mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING, false);
                 }
             }
 
@@ -883,9 +878,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         boolean clickable = (flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
         mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable);
         mOverviewProxyService.setSystemUiStateFlag(
-                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable);
+                SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable, mDisplayId);
+        mOverviewProxyService.setSystemUiStateFlag(
+                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable, mDisplayId);
     }
 
     /**

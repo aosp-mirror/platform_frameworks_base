@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -80,6 +81,7 @@ public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testContainerRemoved() {
         final AppWindowToken window1 = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);

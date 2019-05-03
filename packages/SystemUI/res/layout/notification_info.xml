@@ -103,7 +103,6 @@ asked for it -->
         android:id="@+id/channel_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/notification_guts_button_spacing"
         android:paddingEnd="@*android:dimen/notification_content_margin_end"
         android:gravity="center"
         android:orientation="vertical">
@@ -127,6 +126,7 @@ asked for it -->
         android:id="@+id/blocking_helper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/notification_guts_button_spacing"
         android:layout_marginBottom="@dimen/notification_guts_button_spacing"
         android:paddingEnd="@*android:dimen/notification_content_margin_end"
         android:clipChildren="false"
@@ -216,67 +216,107 @@ asked for it -->
             android:id="@+id/interruptiveness_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/buttons"
+            <RelativeLayout
+                android:id="@+id/alert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/alert"
-                    android:minWidth="@dimen/notification_importance_button_width"
+                android:padding="@dimen/notification_importance_button_padding"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:id="@+id/alert_icon"
+                    android:src="@drawable/ic_notification_interruptive"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:minHeight="@dimen/notification_importance_toggle_size"
-                    android:paddingStart="@dimen/notification_importance_button_horiz_padding"
-                    android:paddingEnd="@dimen/notification_importance_button_horiz_padding"
-                    android:drawablePadding="@dimen/notification_importance_drawable_padding"
-                    android:foreground="@drawable/button_ripple_radius"
-                    android:drawableLeft="@drawable/ic_notification_interruptive"
-                    android:text="@string/notification_alert_title" />
-
-                <Button
-                    android:id="@+id/silence"
-                    android:minWidth="@dimen/notification_importance_button_width"
-                    android:layout_width="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"/>
+                <TextView
+                    android:id="@+id/alert_label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="@dimen/notification_importance_toggle_size"
-                    android:paddingStart="@dimen/notification_importance_button_horiz_padding"
-                    android:paddingEnd="@dimen/notification_importance_button_horiz_padding"
-                    android:drawablePadding="@dimen/notification_importance_drawable_padding"
-                    android:foreground="@drawable/button_ripple_radius"
-                    android:layout_marginStart="@dimen/notification_importance_button_separation"
-                    android:drawableLeft="@drawable/ic_notification_gentle"
-                    android:text="@string/notification_silence_title" />
-            </LinearLayout>
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:layout_toEndOf="@id/alert_icon"
+                    android:layout_marginStart="@dimen/notification_importance_drawable_padding"
+                    android:textAppearance="@style/TextAppearance.NotificationImportanceButton.Unselected"
+                    android:text="@string/notification_alert_title"/>
+                <TextView
+                    android:id="@+id/alert_summary"
+                    android:paddingTop="@dimen/notification_importance_button_padding"
+                    android:text="@string/notification_channel_summary_default"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:layout_below="@id/alert_icon"
+                    android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
+            </RelativeLayout>
 
-            <TextView
-                android:id="@+id/description"
+            <RelativeLayout
+                android:id="@+id/silence"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/notification_alert_title"
-                android:gravity="center"
-                android:layout_marginTop="@dimen/notification_importance_text_marginTop"
-                android:paddingStart="@dimen/notification_importance_description_padding"
-                android:paddingEnd="@dimen/notification_importance_description_padding"
-                android:textAppearance="@style/TextAppearance.NotificationImportanceDetail" />
+                android:padding="@dimen/notification_importance_button_padding"
+                android:layout_marginTop="@dimen/notification_importance_button_separation"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:id="@+id/silence_icon"
+                    android:src="@drawable/ic_notification_gentle"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"/>
+                <TextView
+                    android:id="@+id/silence_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:layout_toEndOf="@id/silence_icon"
+                    android:layout_marginStart="@dimen/notification_importance_drawable_padding"
+                    android:textAppearance="@style/TextAppearance.NotificationImportanceButton.Unselected"
+                    android:text="@string/notification_silence_title"/>
+                <TextView
+                    android:id="@+id/silence_summary"
+                    android:paddingTop="@dimen/notification_importance_button_padding"
+                    android:text="@string/notification_channel_summary_default"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:layout_below="@id/silence_icon"
+                    android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
+            </RelativeLayout>
+
         </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/bottom_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/notification_guts_button_spacing" >
+            android:layout_marginTop="@dimen/notification_guts_button_spacing" >
             <TextView
                 android:id="@+id/turn_off_notifications"
                 android:text="@string/inline_turn_off_notifications"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
                 android:minWidth="@dimen/notification_importance_toggle_size"
                 android:minHeight="@dimen/notification_importance_toggle_size"
                 android:maxWidth="200dp"
@@ -286,11 +326,11 @@ asked for it -->
                 android:text="@string/inline_ok_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical|end"
                 android:maxWidth="125dp"
                 android:minWidth="@dimen/notification_importance_toggle_size"
                 android:minHeight="@dimen/notification_importance_toggle_size"
-                android:layout_alignParentEnd="true"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
         </RelativeLayout>
 

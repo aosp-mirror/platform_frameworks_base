@@ -77,7 +77,8 @@ public interface StatusBarManagerInternal {
     void onCameraLaunchGestureDetected(int source);
     void topAppWindowChanged(int displayId, boolean menuVisible);
     void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenBounds, Rect dockedBounds, String cause);
+            int mask, Rect fullscreenBounds, Rect dockedBounds, boolean isNavbarColorManagedByIme,
+            String cause);
     void toggleSplitScreen();
     void appTransitionFinished(int displayId);
 

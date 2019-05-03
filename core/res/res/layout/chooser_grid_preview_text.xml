@@ -44,6 +44,7 @@
         android:layout_toStartOf="@id/copy_button"
         android:layout_centerVertical="true"
         android:ellipsize="end"
+        android:fontFamily="@android:string/config_headlineFontFamily"
         android:textColor="?android:attr/textColorPrimary"
         android:maxLines="2"/>
 
@@ -112,8 +113,8 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="2"
-        android:textSize="20sp"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:textAppearance="@style/TextAppearance.DeviceDefault.WindowTitle"
+        android:fontFamily="@android:string/config_headlineFontFamily"/>
   </LinearLayout>
 </LinearLayout>
 

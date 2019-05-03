@@ -1825,14 +1825,28 @@ public class AudioService extends IAudioService.Stub
                             && streamTypeAlias == AudioSystem.STREAM_MUSIC
                             // vol change on a full volume device
                             && ((device & mFullVolumeDevices) != 0)) {
-                        int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
-                                KeyEvent.KEYCODE_VOLUME_UP;
-                        final long ident = Binder.clearCallingIdentity();
-                        try {
-                            mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
-                            mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
-                        } finally {
-                            Binder.restoreCallingIdentity(ident);
+                        int keyCode = KeyEvent.KEYCODE_UNKNOWN;
+                        switch (direction) {
+                            case AudioManager.ADJUST_RAISE:
+                                keyCode = KeyEvent.KEYCODE_VOLUME_UP;
+                                break;
+                            case AudioManager.ADJUST_LOWER:
+                                keyCode = KeyEvent.KEYCODE_VOLUME_DOWN;
+                                break;
+                            case AudioManager.ADJUST_TOGGLE_MUTE:
+                                keyCode = KeyEvent.KEYCODE_VOLUME_MUTE;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (keyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                            final long ident = Binder.clearCallingIdentity();
+                            try {
+                                mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
+                                mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
                         }
                     }
 

@@ -112,11 +112,8 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
     }
 
     @Test
-    public void testNoAppOpsInSlowSwipe_newInterruptionModel() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
-
-        NotificationMenuRow row = new NotificationMenuRow(mContext);
+    public void testNoAppOpsInSlowSwipe_biDirectionalSwipe() {
+        NotificationMenuRow row = new NotificationMenuRow(mContext, true);
         row.createMenu(mRow, null);
 
         ViewGroup container = (ViewGroup) row.getMenuView();

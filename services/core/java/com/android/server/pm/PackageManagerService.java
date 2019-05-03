@@ -939,6 +939,7 @@ public class PackageManagerService extends IPackageManager.Stub
     ComponentName mCustomResolverComponentName;
 
     boolean mResolverReplaced = false;
+    boolean mOkToReplacePersistentPackages = false;
 
     private final @Nullable ComponentName mIntentFilterVerifierComponent;
     private final @Nullable IntentFilterVerifier<ActivityIntentInfo> mIntentFilterVerifier;
@@ -2374,6 +2375,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
+        mApexManager = LocalServices.getService(ApexManager.class);
+
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "create package manager");
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
@@ -2470,7 +2473,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
-        mApexManager = new ApexManager(context);
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
@@ -2921,28 +2923,50 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Remove disable package settings for updated system apps that were
                 // removed via an OTA. If the update is no longer present, remove the
                 // app completely. Otherwise, revoke their system privileges.
-                for (String deletedAppName : possiblyDeletedUpdatedSystemApps) {
-                    PackageParser.Package deletedPkg = mPackages.get(deletedAppName);
-                    mSettings.removeDisabledSystemPackageLPw(deletedAppName);
+                for (int i = possiblyDeletedUpdatedSystemApps.size() - 1; i >= 0; --i) {
+                    final String packageName = possiblyDeletedUpdatedSystemApps.get(i);
+                    final PackageParser.Package pkg = mPackages.get(packageName);
                     final String msg;
-                    if (deletedPkg == null) {
+
+                    // remove from the disabled system list; do this first so any future
+                    // scans of this package are performed without this state
+                    mSettings.removeDisabledSystemPackageLPw(packageName);
+
+                    if (pkg == null) {
                         // should have found an update, but, we didn't; remove everything
-                        msg = "Updated system package " + deletedAppName
+                        msg = "Updated system package " + packageName
                                 + " no longer exists; removing its data";
                         // Actual deletion of code and data will be handled by later
                         // reconciliation step
                     } else {
                         // found an update; revoke system privileges
-                        msg = "Updated system package + " + deletedAppName
-                                + " no longer exists; revoking system privileges";
+                        msg = "Updated system package " + packageName
+                                + " no longer exists; rescanning package on data";
 
-                        // Don't do anything if a stub is removed from the system image. If
-                        // we were to remove the uncompressed version from the /data partition,
-                        // this is where it'd be done.
+                        // NOTE: We don't do anything special if a stub is removed from the
+                        // system image. But, if we were [like removing the uncompressed
+                        // version from the /data partition], this is where it'd be done.
 
-                        final PackageSetting deletedPs = mSettings.mPackages.get(deletedAppName);
-                        deletedPkg.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
-                        deletedPs.pkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
+                        // remove the package from the system and re-scan it without any
+                        // special privileges
+                        removePackageLI(pkg, true);
+                        try {
+                            final File codePath = new File(pkg.applicationInfo.getCodePath());
+                            scanPackageTracedLI(codePath, 0, scanFlags, 0, null);
+                        } catch (PackageManagerException e) {
+                            Slog.e(TAG, "Failed to parse updated, ex-system package: "
+                                    + e.getMessage());
+                        }
+                    }
+
+                    // one final check. if we still have a package setting [ie. it was
+                    // previously scanned and known to the system], but, we don't have
+                    // a package [ie. there was an error scanning it from the /data
+                    // partition], completely remove the package data.
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null && mPackages.get(packageName) == null) {
+                        removePackageDataLIF(ps, null, null, 0, false);
+
                     }
                     logCriticalInfo(Log.WARN, msg);
                 }
@@ -17324,7 +17348,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                         + " target SDK " + oldTargetSdk + " does.");
                     }
                     // Prevent persistent apps from being updated
-                    if ((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0) {
+                    if (((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0)
+                            && !mOkToReplacePersistentPackages) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_INVALID_APK,
                                 "Package " + oldPackage.packageName + " is a persistent app. "
                                         + "Persistent apps are not updateable.");
@@ -18759,6 +18784,7 @@ public class PackageManagerService extends IPackageManager.Stub
         boolean installedStateChanged = false;
         if (deletedPs != null) {
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                final SparseBooleanArray changedUsers = new SparseBooleanArray();
                 synchronized (mPackages) {
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                     clearDefaultBrowserIfNeeded(packageName);
@@ -18790,10 +18816,9 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
                     }
+                    clearPackagePreferredActivitiesLPw(
+                            deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 }
-                final SparseBooleanArray changedUsers = new SparseBooleanArray();
-                clearPackagePreferredActivitiesLPw(
-                        deletedPs.name, changedUsers, UserHandle.USER_ALL);
                 if (changedUsers.size() > 0) {
                     updateDefaultHomeNotLocked(changedUsers);
                     postPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
@@ -21462,7 +21487,6 @@ public class PackageManagerService extends IPackageManager.Stub
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
-        mApexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
         getStorageManagerInternal().addExternalStoragePolicy(
@@ -21505,10 +21529,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mModuleInfoProvider.systemReady();
 
+        mOkToReplacePersistentPackages = true;
         // Installer service might attempt to install some packages that have been staged for
         // installation on reboot. Make sure this is the last component to be call since the
         // installation might require other components to be ready.
         mInstallerService.restoreAndApplyStagedSessionIfNeeded();
+        mOkToReplacePersistentPackages = false;
     }
 
     public void waitForAppDataPrepared() {

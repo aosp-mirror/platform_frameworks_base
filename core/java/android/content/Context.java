@@ -3009,7 +3009,14 @@ public abstract class Context {
     /**
      * Variation of {@link #bindService} that, in the specific case of isolated
      * services, allows the caller to generate multiple instances of a service
-     * from a single component declaration.
+     * from a single component declaration.  In other words, you can use this to bind
+     * to a service that has specified {@link android.R.attr#isolatedProcess} and, in
+     * addition to the existing behavior of running in an isolated process, you can
+     * also through the arguments here have the system bring up multiple concurrent
+     * processes hosting their own instances of that service.  The <var>instanceName</var>
+     * you provide here identifies the different instances, and you can use
+     * {@link #updateServiceGroup(ServiceConnection, int, int)} to tell the system how it
+     * should manage each of these instances.
      *
      * @param service Identifies the service to connect to.  The Intent must
      *      specify an explicit component name.
@@ -3027,6 +3034,8 @@ public abstract class Context {
      * @throws IllegalArgumentException If the instanceName is invalid.
      *
      * @see #bindService
+     * @see #updateServiceGroup
+     * @see android.R.attr#isolatedProcess
      */
     public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
             @BindServiceFlags int flags, @NonNull String instanceName,
@@ -3082,10 +3091,16 @@ public abstract class Context {
      *              are considered to be related.  Supplying 0 reverts to the default behavior
      *              of not grouping.
      * @param importance Additional importance of the processes within a group.  Upon calling
-     *                   here, this will override any previous group that was set for that
-     *                   process.  This fine-tunes process killing of all processes within
-     *                   a related groups -- higher importance values will be killed before
-     *                   lower ones.
+     *                   here, this will override any previous importance that was set for that
+     *                   process.  The most important process is 0, and higher values are
+     *                   successively less important.  You can view this as describing how
+     *                   to order the processes in an array, with the processes at the end of
+     *                   the array being the least important.  This value has no meaning besides
+     *                   indicating how processes should be ordered in that array one after the
+     *                   other.  This provides a way to fine-tune the system's process killing,
+     *                   guiding it to kill processes at the end of the array first.
+     *
+     * @see #bindIsolatedService
      */
     public void updateServiceGroup(@NonNull ServiceConnection conn, int group,
             int importance) {

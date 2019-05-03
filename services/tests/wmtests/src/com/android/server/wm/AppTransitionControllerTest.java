@@ -31,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -52,6 +53,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testTranslucentOpen() {
         synchronized (mWm.mGlobalLock) {
             final AppWindowToken behind = createAppWindowToken(mDisplayContent,
@@ -69,6 +71,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testTranslucentClose() {
         synchronized (mWm.mGlobalLock) {
             final AppWindowToken behind = createAppWindowToken(mDisplayContent,
@@ -84,6 +87,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testChangeIsNotOverwritten() {
         synchronized (mWm.mGlobalLock) {
             final AppWindowToken behind = createAppWindowToken(mDisplayContent,

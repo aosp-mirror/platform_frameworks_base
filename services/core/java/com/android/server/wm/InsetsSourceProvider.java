@@ -29,12 +29,11 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsSource;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.InsetsSource;
-import android.view.InsetsSourceControl;
-import android.view.ViewRootImpl;
 
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -142,7 +141,7 @@ class InsetsSourceProvider {
                 mStateController.notifyControlChanged(mControllingWin);
             }
         }
-        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.mPolicyVisibility
+        setServerVisible(mWin.wouldBeVisibleIfPolicyIgnored() && mWin.isVisibleByPolicy()
                 && !mWin.mGivenInsetsPending);
     }
 

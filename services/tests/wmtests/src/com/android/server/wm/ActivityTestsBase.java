@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -413,12 +414,18 @@ class ActivityTestsBase {
         ActivityStackSupervisor mTestStackSupervisor;
 
         ActivityDisplay mDefaultDisplay;
+        AppOpsService mAppOpsService;
 
         TestActivityTaskManagerService(Context context) {
             super(context);
             spyOn(this);
 
             mUgmInternal = mock(UriGrantsManagerInternal.class);
+            mAppOpsService = mock(AppOpsService.class);
+
+            // Make sure permission checks aren't overridden.
+            doReturn(AppOpsManager.MODE_DEFAULT)
+                    .when(mAppOpsService).noteOperation(anyInt(), anyInt(), anyString());
 
             mSupportsMultiWindow = true;
             mSupportsMultiDisplay = true;
@@ -479,6 +486,11 @@ class ActivityTestsBase {
         @Override
         int handleIncomingUser(int callingPid, int callingUid, int userId, String name) {
             return userId;
+        }
+
+        @Override
+        AppOpsService getAppOpsService() {
+            return mAppOpsService;
         }
 
         @Override

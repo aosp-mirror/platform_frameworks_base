@@ -26,6 +26,7 @@ import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
+import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
@@ -111,6 +112,7 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.UriGrantsManager;
 import android.app.admin.DeviceAdminInfo;
@@ -1811,14 +1813,15 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void registerDeviceConfigChange() {
-        DeviceConfig.addOnPropertyChangedListener(
+        DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 getContext().getMainExecutor(),
-                (namespace, name, value) -> {
-                    if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
+                (properties) -> {
+                    if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(properties.getNamespace())) {
                         return;
                     }
-                    if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
+                    if (properties.getKeyset()
+                            .contains(SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE)) {
                         mAssistants.resetDefaultAssistantsIfNecessary();
                     }
                 });
@@ -3753,7 +3756,7 @@ public class NotificationManagerService extends SystemService {
                             pkg, userId, true, granted);
 
                     getContext().sendBroadcastAsUser(new Intent(
-                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                            ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(pkg)
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT),
                             UserHandle.of(userId), null);
@@ -3913,7 +3916,7 @@ public class NotificationManagerService extends SystemService {
                             userId, true, granted);
 
                     getContext().sendBroadcastAsUser(new Intent(
-                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                            ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
                                     .setPackage(listener.getPackageName())
                                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
                             UserHandle.of(userId), null);
@@ -3929,7 +3932,9 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
                 int userId, boolean granted) {
             checkCallerIsSystemOrSystemUiOrShell();
-            mAssistants.setUserSet(userId, true);
+            for (UserInfo ui : mUm.getEnabledProfiles(userId)) {
+                mAssistants.setUserSet(ui.id, true);
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
@@ -4143,30 +4148,36 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void setNotificationAssistantAccessGrantedForUserInternal(
-            ComponentName assistant, int userId, boolean granted) {
-        if (assistant == null) {
-            ComponentName allowedAssistant = CollectionUtils.firstOrNull(
-                    mAssistants.getAllowedComponents(userId));
-            if (allowedAssistant != null) {
-                setNotificationAssistantAccessGrantedForUserInternal(
-                        allowedAssistant, userId, false);
+            ComponentName assistant, int baseUserId, boolean granted) {
+        List<UserInfo> users = mUm.getEnabledProfiles(baseUserId);
+        if (users != null) {
+            for (UserInfo user : users) {
+                int userId = user.id;
+                if (assistant == null) {
+                    ComponentName allowedAssistant = CollectionUtils.firstOrNull(
+                            mAssistants.getAllowedComponents(userId));
+                    if (allowedAssistant != null) {
+                        setNotificationAssistantAccessGrantedForUserInternal(
+                                allowedAssistant, userId, false);
+                    }
+                    continue;
+                }
+                if (!granted || mAllowedManagedServicePackages.test(assistant.getPackageName(),
+                        userId, mAssistants.getRequiredPermission())) {
+                    mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
+                            userId, false, granted);
+                    mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                            userId, true, granted);
+
+                    getContext().sendBroadcastAsUser(
+                            new Intent(ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                                    .setPackage(assistant.getPackageName())
+                                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                            UserHandle.of(userId), null);
+
+                    handleSavePolicyFile();
+                }
             }
-            return;
-        }
-        if (!granted || mAllowedManagedServicePackages.test(assistant.getPackageName(), userId,
-                mAssistants.getRequiredPermission())) {
-            mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
-                    userId, false, granted);
-            mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
-                    userId, true, granted);
-
-            getContext().sendBroadcastAsUser(new Intent(
-                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                            .setPackage(assistant.getPackageName())
-                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                    UserHandle.of(userId), null);
-
-            handleSavePolicyFile();
         }
     }
 
@@ -4833,15 +4844,33 @@ public class NotificationManagerService extends SystemService {
                 : null;
         boolean isForegroundCall = CATEGORY_CALL.equals(notification.category)
                 && (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
-        // OR message style (which always has a person)
+        // OR message style (which always has a person) with any remote input
         Class<? extends Notification.Style> style = notification.getNotificationStyle();
         boolean isMessageStyle = Notification.MessagingStyle.class.equals(style);
-        boolean notificationAppropriateToBubble = isMessageStyle
+        boolean notificationAppropriateToBubble =
+                (isMessageStyle && hasValidRemoteInput(notification))
                 || (peopleList != null && !peopleList.isEmpty() && isForegroundCall);
+
         // OR something that was previously a bubble & still exists
         boolean bubbleUpdate = oldRecord != null
                 && (oldRecord.getNotification().flags & FLAG_BUBBLE) != 0;
         return canBubble && (notificationAppropriateToBubble || appIsForeground || bubbleUpdate);
+    }
+
+    private boolean hasValidRemoteInput(Notification n) {
+        // Also check for inline reply
+        Notification.Action[] actions = n.actions;
+        if (actions != null) {
+            // Get the remote inputs
+            for (int i = 0; i < actions.length; i++) {
+                Notification.Action action = actions[i];
+                RemoteInput[] inputs = action.getRemoteInputs();
+                if (inputs != null && inputs.length > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void doChannelWarningToast(CharSequence toastText) {

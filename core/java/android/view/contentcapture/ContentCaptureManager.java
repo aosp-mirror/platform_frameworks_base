@@ -484,8 +484,17 @@ public final class ContentCaptureManager {
             Log.d(TAG, "setContentCaptureEnabled(): setting to " + enabled + " for " + mContext);
         }
 
+        MainContentCaptureSession mainSession;
         synchronized (mLock) {
-            mFlags |= enabled ? 0 : ContentCaptureContext.FLAG_DISABLED_BY_APP;
+            if (enabled) {
+                mFlags &= ~ContentCaptureContext.FLAG_DISABLED_BY_APP;
+            } else {
+                mFlags |= ContentCaptureContext.FLAG_DISABLED_BY_APP;
+            }
+            mainSession = mMainSession;
+        }
+        if (mainSession != null) {
+            mainSession.setDisabled(!enabled);
         }
     }
 
