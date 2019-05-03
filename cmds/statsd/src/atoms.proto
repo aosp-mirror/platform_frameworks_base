@@ -6250,6 +6250,6 @@ message IntelligenceEventReported {
   optional android.stats.intelligence.Status status = 2;
   // How many times the event occured (to report a batch of high frequency events).
   optional int32 count = 3;
-  // How long the event took (averaged for batches).
+  // How long the event took (sum of durations if count > 1)
   optional int64 duration_millis = 4;
 }
