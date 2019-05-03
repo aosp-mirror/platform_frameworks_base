@@ -449,13 +449,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     @Override
-    public void topAppWindowChanged(int displayId, boolean showMenu) {
-        if (displayId == mDisplayId && mNavigationBarView != null) {
-            mNavigationBarView.setMenuVisibility(showMenu);
-        }
-    }
-
-    @Override
     public void setWindowState(
             int displayId, @WindowType int window, @WindowVisibleState int state) {
         if (displayId == mDisplayId
