@@ -271,6 +271,7 @@ public final class DeviceConfig {
      * Namespace for TextClassifier related features.
      *
      * @hide
+     * @see android.provider.Settings.Global.TEXT_CLASSIFIER_CONSTANTS
      */
     @SystemApi
     public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
