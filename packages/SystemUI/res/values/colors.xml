@@ -95,6 +95,7 @@
     <color name="notification_guts_header_text_color">@color/GM2_grey_900</color>
     <color name="notification_silence_color">#FF32c1de</color>
     <color name="notification_alert_color">#FFF87B2B</color>
+    <color name="notification_guts_button_color">@color/GM2_blue_700</color>
 
     <color name="assist_orb_color">#ffffff</color>
 
@@ -176,6 +177,9 @@
 
     <color name="GM2_red_300">#F28B82</color>
     <color name="GM2_red_500">#B71C1C</color>
+
+    <color name="GM2_blue_200">#AECBFA</color>
+    <color name="GM2_blue_700">#1967D2</color>
 
     <color name="GM2_yellow_500">#FFFBBC04</color>
     <color name="GM2_green_500">#FF34A853</color>

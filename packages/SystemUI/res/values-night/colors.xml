@@ -37,16 +37,17 @@
     <color name="notification_ripple_untinted_color">#30ffffff</color>
 
     <!-- The "inside" of a notification, reached via longpress -->
-    <color name="notification_guts_bg_color">@*android:color/notification_material_background_color</color>
+    <color name="notification_guts_bg_color">@color/GM2_grey_900</color>
 
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
 
-    <color name="notification_guts_selection_bg">#202124</color>
-    <color name="notification_guts_selection_border">#669DF6</color>
-    <color name="notification_guts_link_icon_tint">@color/GM2_grey_200</color>
+    <color name="notification_guts_selection_bg">@color/GM2_grey_800</color>
+    <color name="notification_guts_selection_border">@color/GM2_grey_700</color>
+    <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
     <color name="notification_guts_sub_text_color">@color/GM2_grey_200</color>
-    <color name="notification_guts_header_text_color">@color/GM2_grey_100</color>
+    <color name="notification_guts_header_text_color">@color/GM2_grey_200</color>
+    <color name="notification_guts_button_color">@color/GM2_blue_200</color>
 
     <!-- The color of the background in the top part of QSCustomizer -->
     <color name="qs_customize_background">@color/GM2_grey_900</color>
