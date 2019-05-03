@@ -277,7 +277,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(frac, expanded);
         updateScrimFraction();
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
-            mBar.getNavigationBarView().onPanelExpandedChange(expanded);
+            mBar.getNavigationBarView().onPanelExpandedChange();
         }
     }
 
