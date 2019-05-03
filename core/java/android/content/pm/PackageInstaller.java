@@ -1318,6 +1318,8 @@ public class PackageInstaller {
         public boolean isMultiPackage;
         /** {@hide} */
         public boolean isStaged;
+        /** {@hide} */
+        public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
 
         /**
          * Construct parameters for a new package install session.
@@ -1350,6 +1352,7 @@ public class PackageInstaller {
             installerPackageName = source.readString();
             isMultiPackage = source.readBoolean();
             isStaged = source.readBoolean();
+            requiredInstalledVersionCode = source.readLong();
         }
 
         /** {@hide} */
@@ -1372,6 +1375,7 @@ public class PackageInstaller {
             ret.installerPackageName = installerPackageName;
             ret.isMultiPackage = isMultiPackage;
             ret.isStaged = isStaged;
+            ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
             return ret;
         }
 
@@ -1562,6 +1566,19 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Require the given version of the package be installed.
+         * The install will only be allowed if the existing version code of
+         * the package installed on the device matches the given version code.
+         * Use {@link * PackageManager#VERSION_CODE_HIGHEST} to allow
+         * installation regardless of the currently installed package version.
+         *
+         * @hide
+         */
+        public void setRequiredInstalledVersionCode(long versionCode) {
+            requiredInstalledVersionCode = versionCode;
+        }
+
         /** {@hide} */
         public void setInstallFlagsForcePermissionPrompt() {
             installFlags |= PackageManager.INSTALL_FORCE_PERMISSION_PROMPT;
@@ -1703,6 +1720,7 @@ public class PackageInstaller {
             pw.printPair("installerPackageName", installerPackageName);
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
+            pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.println();
         }
 
@@ -1731,6 +1749,7 @@ public class PackageInstaller {
             dest.writeString(installerPackageName);
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
+            dest.writeLong(requiredInstalledVersionCode);
         }
 
         public static final Parcelable.Creator<SessionParams>
