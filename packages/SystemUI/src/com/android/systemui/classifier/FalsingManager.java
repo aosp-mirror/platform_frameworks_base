@@ -32,6 +32,7 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
@@ -62,6 +63,8 @@ public class FalsingManager implements SensorEventListener, StateListener {
             Sensor.TYPE_LIGHT,
             Sensor.TYPE_ROTATION_VECTOR,
     };
+    private static final String FALSING_REMAIN_LOCKED = "falsing_failure_after_attempts";
+    private static final String FALSING_SUCCESS = "falsing_success_after_attempts";
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
@@ -83,6 +86,8 @@ public class FalsingManager implements SensorEventListener, StateListener {
     private boolean mScreenOn;
     private boolean mShowingAod;
     private Runnable mPendingWtf;
+    private int mIsFalseTouchCalls;
+    private MetricsLogger mMetricsLogger;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -99,6 +104,7 @@ public class FalsingManager implements SensorEventListener, StateListener {
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
         mUiOffloadThread = Dependency.get(UiOffloadThread.class);
         mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
+        mMetricsLogger = new MetricsLogger();
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(ENFORCE_BOUNCER), false,
@@ -143,6 +149,14 @@ public class FalsingManager implements SensorEventListener, StateListener {
     private void sessionExitpoint(boolean force) {
         if (mSessionActive && (force || !shouldSessionBeActive())) {
             mSessionActive = false;
+            if (mIsFalseTouchCalls != 0) {
+                if (FalsingLog.ENABLED) {
+                    FalsingLog.i(
+                            "isFalseTouchCalls", "Calls before failure: " + mIsFalseTouchCalls);
+                }
+                mMetricsLogger.histogram(FALSING_REMAIN_LOCKED, mIsFalseTouchCalls);
+                mIsFalseTouchCalls = 0;
+            }
 
             // This can be expensive, and doesn't need to happen on the main thread.
             mUiOffloadThread.submit(() -> {
@@ -166,6 +180,7 @@ public class FalsingManager implements SensorEventListener, StateListener {
         }
         mBouncerOn = false;
         mSessionActive = true;
+        mIsFalseTouchCalls = 0;
 
         if (mHumanInteractionClassifier.isEnabled()) {
             registerSensors(CLASSIFIER_SENSORS);
@@ -250,7 +265,16 @@ public class FalsingManager implements SensorEventListener, StateListener {
             // anti-falsed.
             return false;
         }
-        return mHumanInteractionClassifier.isFalseTouch();
+        mIsFalseTouchCalls++;
+        boolean isFalse = mHumanInteractionClassifier.isFalseTouch();
+        if (!isFalse) {
+            if (FalsingLog.ENABLED) {
+                FalsingLog.i("isFalseTouchCalls", "Calls before success: " + mIsFalseTouchCalls);
+            }
+            mMetricsLogger.histogram(FALSING_SUCCESS, mIsFalseTouchCalls);
+            mIsFalseTouchCalls = 0;
+        }
+        return isFalse;
     }
 
     private void clearPendingWtf() {
