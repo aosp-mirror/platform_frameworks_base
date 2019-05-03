@@ -546,7 +546,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             if (CC_LIKELY(transform.isPureTranslate())) {
                 // snap/round the computed bounds, so they match the rounding behavior
                 // of the clear done in SurfaceView#draw().
-                bounds.snapToPixelBoundaries();
+                bounds.snapGeometryToPixelBoundaries(false);
             } else {
                 // Conservatively round out so the punched hole (in the ZOrderOnTop = true case)
                 // doesn't extend beyond the other window
