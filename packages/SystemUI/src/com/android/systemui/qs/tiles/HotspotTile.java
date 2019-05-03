@@ -130,7 +130,8 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
         state.isTransient = isTransient;
         state.slash.isSlashed = !state.value && !state.isTransient;
         if (state.isTransient) {
-            state.icon = ResourceIcon.get(R.drawable.ic_hotspot_transient_animation);
+            state.icon = ResourceIcon.get(
+                    com.android.internal.R.drawable.ic_hotspot_transient_animation);
         }
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
