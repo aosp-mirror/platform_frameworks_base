@@ -24,6 +24,7 @@ java_library {
         "frameworks-net-testutils",
         "junit",
         "mockito-target-minus-junit4",
+        "platform-test-annotations",
     ],
     libs: [
         "android.test.base.stubs",

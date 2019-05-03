@@ -25,6 +25,7 @@ import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.Network;
+import android.platform.test.annotations.AppModeFull;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -74,6 +75,7 @@ public class NetworkTest {
     }
 
     @Test
+    @AppModeFull(reason = "Socket cannot bind in instant app mode")
     public void testBindSocketOfConnectedDatagramSocketThrows() throws Exception {
         final DatagramSocket mDgramSocket = new DatagramSocket(0, (InetAddress) Inet6Address.ANY);
         mDgramSocket.connect((InetAddress) Inet6Address.LOOPBACK, 53);
