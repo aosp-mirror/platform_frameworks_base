@@ -274,10 +274,20 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                // Mark smart replies as sent whenever a notification is updated - otherwise the
+                // smart replies are never marked as sent.
+                mSmartReplyController.stopSending(entry);
+            }
+
+            @Override
             public void onEntryRemoved(
                     @Nullable NotificationEntry entry,
                     NotificationVisibility visibility,
                     boolean removedByUser) {
+                // We're removing the notification, the smart controller can forget about it.
+                mSmartReplyController.stopSending(entry);
+
                 if (removedByUser && entry != null) {
                     onPerformRemoveNotification(entry, entry.key);
                 }
