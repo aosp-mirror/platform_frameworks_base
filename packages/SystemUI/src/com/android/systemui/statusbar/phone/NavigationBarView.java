@@ -714,10 +714,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
-    public void onPanelExpandedChange(boolean expanded) {
+    public void onPanelExpandedChange() {
         updateSlippery();
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
-                expanded, getContext().getDisplayId());
+                mPanelView.isFullyExpanded(), getContext().getDisplayId());
     }
 
     public void updateStates() {
