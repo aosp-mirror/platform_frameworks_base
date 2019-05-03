@@ -160,6 +160,10 @@ class ActivityStarter {
     private int mCallingUid;
     private ActivityOptions mOptions;
 
+    // If it is true, background activity can only be started in an existing task that contains
+    // an activity with same uid.
+    private boolean mRestrictedBgActivity;
+
     private int mLaunchMode;
     private boolean mLaunchTaskBehind;
     private int mLaunchFlags;
@@ -455,6 +459,7 @@ class ActivityStarter {
         mIntent = starter.mIntent;
         mCallingUid = starter.mCallingUid;
         mOptions = starter.mOptions;
+        mRestrictedBgActivity = starter.mRestrictedBgActivity;
 
         mLaunchTaskBehind = starter.mLaunchTaskBehind;
         mLaunchFlags = starter.mLaunchFlags;
@@ -551,7 +556,8 @@ class ActivityStarter {
             mLastStartActivityTimeMs = System.currentTimeMillis();
             mLastStartActivityRecord[0] = r;
             mLastStartActivityResult = startActivity(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask, mLastStartActivityRecord);
+                    startFlags, doResume, options, inTask, mLastStartActivityRecord,
+                    false /* restrictedBgActivity */);
             mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(mLastStartActivityResult,
                     mLastStartActivityRecord[0]);
             return mLastStartActivityResult;
@@ -760,21 +766,16 @@ class ActivityStarter {
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
-        boolean abortBackgroundStart = false;
+        boolean restrictedBgActivity = false;
         if (!abort) {
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                         "shouldAbortBackgroundActivityStart");
-                abortBackgroundStart = shouldAbortBackgroundActivityStart(callingUid,
+                restrictedBgActivity = shouldAbortBackgroundActivityStart(callingUid,
                         callingPid, callingPackage, realCallingUid, realCallingPid, callerApp,
                         originatingPendingIntent, allowBackgroundActivityStart, intent);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            }
-            abort |= (abortBackgroundStart && !mService.isBackgroundActivityStartsEnabled());
-            // TODO: remove this toast after feature development is done
-            if (abortBackgroundStart) {
-                showBackgroundActivityBlockedToast(abort, callingPackage);
             }
         }
 
@@ -918,8 +919,10 @@ class ActivityStarter {
                 || stack.getResumedActivity().info.applicationInfo.uid != realCallingUid)) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
-                mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
-                        sourceRecord, startFlags, stack, callerApp));
+                if (!restrictedBgActivity) {
+                    mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
+                            sourceRecord, startFlags, stack, callerApp));
+                }
                 ActivityOptions.abort(checkedOptions);
                 return ActivityManager.START_SWITCHES_CANCELED;
             }
@@ -929,7 +932,7 @@ class ActivityStarter {
         mController.doPendingActivityLaunches(false);
 
         final int res = startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
-                true /* doResume */, checkedOptions, inTask, outActivity);
+                true /* doResume */, checkedOptions, inTask, outActivity, restrictedBgActivity);
         mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outActivity[0]);
         return res;
     }
@@ -1401,13 +1404,13 @@ class ActivityStarter {
     private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
                 IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
                 int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-                ActivityRecord[] outActivity) {
+                ActivityRecord[] outActivity, boolean restrictedBgActivity) {
         int result = START_CANCELED;
         final ActivityStack startedActivityStack;
         try {
             mService.mWindowManager.deferSurfaceLayout();
             result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask, outActivity);
+                    startFlags, doResume, options, inTask, outActivity, restrictedBgActivity);
         } finally {
             final ActivityStack currentStack = r.getActivityStack();
             startedActivityStack = currentStack != null ? currentStack : mTargetStack;
@@ -1443,14 +1446,40 @@ class ActivityStarter {
         return result;
     }
 
+    /**
+     * Return true if background activity is really aborted.
+     *
+     * TODO(b/131748165): Refactor the logic so we don't need to call this method everywhere.
+     */
+    private boolean handleBackgroundActivityAbort(ActivityRecord r) {
+        // TODO(b/131747138): Remove toast and refactor related code in Q release.
+        boolean abort = !mService.isBackgroundActivityStartsEnabled();
+        showBackgroundActivityBlockedToast(abort, r.launchedFromPackage);
+        if (!abort) {
+            return false;
+        }
+        ActivityRecord resultRecord = r.resultTo;
+        String resultWho = r.resultWho;
+        int requestCode = r.requestCode;
+        if (resultRecord != null) {
+            ActivityStack resultStack = resultRecord.getActivityStack();
+            resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
+                    RESULT_CANCELED, null);
+        }
+        // We pretend to the caller that it was really started to make it backward compatible, but
+        // they will just get a cancel result.
+        ActivityOptions.abort(r.pendingOptions);
+        return true;
+    }
+
     // Note: This method should only be called from {@link startActivity}.
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-            ActivityRecord[] outActivity) {
-
+            ActivityRecord[] outActivity, boolean restrictedBgActivity) {
         setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
-                voiceInteractor);
+                voiceInteractor, restrictedBgActivity);
+
         final int preferredWindowingMode = mLaunchParams.mWindowingMode;
 
         computeLaunchingTaskFlags();
@@ -1658,7 +1687,7 @@ class ActivityStarter {
         } else {
             // This not being started from an existing activity, and not part of a new task...
             // just put it in the top task, though these days this case should never happen.
-            setTaskToCurrentTopOrCreateNewTask();
+            result = setTaskToCurrentTopOrCreateNewTask();
         }
         if (result != START_SUCCESS) {
             return result;
@@ -1731,6 +1760,7 @@ class ActivityStarter {
         mIntent = null;
         mCallingUid = -1;
         mOptions = null;
+        mRestrictedBgActivity = false;
 
         mLaunchTaskBehind = false;
         mLaunchFlags = 0;
@@ -1770,7 +1800,8 @@ class ActivityStarter {
 
     private void setInitialState(ActivityRecord r, ActivityOptions options, TaskRecord inTask,
             boolean doResume, int startFlags, ActivityRecord sourceRecord,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            boolean restrictedBgActivity) {
         reset(false /* clearRequest */);
 
         mStartActivity = r;
@@ -1780,6 +1811,7 @@ class ActivityStarter {
         mSourceRecord = sourceRecord;
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
+        mRestrictedBgActivity = restrictedBgActivity;
 
         mLaunchParams.reset();
 
@@ -1880,6 +1912,11 @@ class ActivityStarter {
         }
 
         mNoAnimation = (mLaunchFlags & FLAG_ACTIVITY_NO_ANIMATION) != 0;
+
+        if (restrictedBgActivity) {
+            mAvoidMoveToFront = true;
+            mDoResume = false;
+        }
     }
 
     private void sendNewTaskResultRequestIfNeeded() {
@@ -2277,6 +2314,9 @@ class ActivityStarter {
         // isLockTaskModeViolation fails below.
 
         if (mReuseTask == null) {
+            if (mRestrictedBgActivity && handleBackgroundActivityAbort(mStartActivity)) {
+                return START_ABORTED;
+            }
             final TaskRecord task = mTargetStack.createTaskRecord(
                     mSupervisor.getNextTaskIdForUserLocked(mStartActivity.mUserId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
@@ -2289,6 +2329,11 @@ class ActivityStarter {
             if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                     + " in new task " + mStartActivity.getTaskRecord());
         } else {
+            if (mRestrictedBgActivity && !mReuseTask.containsAppUid(mCallingUid)) {
+                if (handleBackgroundActivityAbort(mStartActivity)) {
+                    return START_ABORTED;
+                }
+            }
             addOrReparentStartingActivity(mReuseTask, "setTaskFromReuseOrCreateNewTask");
         }
 
@@ -2328,6 +2373,12 @@ class ActivityStarter {
 
         final TaskRecord sourceTask = mSourceRecord.getTaskRecord();
         final ActivityStack sourceStack = mSourceRecord.getActivityStack();
+        if (mRestrictedBgActivity && !sourceTask.containsAppUid(mCallingUid)) {
+            if (handleBackgroundActivityAbort(mStartActivity)) {
+                return START_ABORTED;
+            }
+            return START_ABORTED;
+        }
         // We only want to allow changing stack in two cases:
         // 1. If the target task is not the top one. Otherwise we would move the launching task to
         //    the other side, rather than show two side by side.
@@ -2489,20 +2540,33 @@ class ActivityStarter {
         }
     }
 
-    private void setTaskToCurrentTopOrCreateNewTask() {
+    private int setTaskToCurrentTopOrCreateNewTask() {
         mTargetStack = computeStackFocus(mStartActivity, false, mLaunchFlags, mOptions);
         if (mDoResume) {
             mTargetStack.moveToFront("addingToTopTask");
         }
         final ActivityRecord prev = mTargetStack.getTopActivity();
+        if (mRestrictedBgActivity && prev == null) {
+            if (handleBackgroundActivityAbort(mStartActivity)) {
+                return START_ABORTED;
+            }
+            return START_ABORTED;
+        }
         final TaskRecord task = (prev != null)
                 ? prev.getTaskRecord() : mTargetStack.createTaskRecord(
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.mUserId), mStartActivity.info,
                 mIntent, null, null, true, mStartActivity, mSourceRecord, mOptions);
+        if (mRestrictedBgActivity && !task.containsAppUid(mCallingUid)) {
+            if (handleBackgroundActivityAbort(mStartActivity)) {
+                return START_ABORTED;
+            }
+            return START_ABORTED;
+        }
         addOrReparentStartingActivity(task, "setTaskToCurrentTopOrCreateNewTask");
         mTargetStack.positionChildWindowContainerAtTop(task);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                 + " in new guessed " + mStartActivity.getTaskRecord());
+        return START_SUCCESS;
     }
 
     private void addOrReparentStartingActivity(TaskRecord parent, String reason) {
