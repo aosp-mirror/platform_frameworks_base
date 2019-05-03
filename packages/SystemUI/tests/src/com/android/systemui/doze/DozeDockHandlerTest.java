@@ -73,8 +73,6 @@ public class DozeDockHandlerTest extends SysuiTestCase {
         doReturn(false).when(mConfig).alwaysOnEnabled(anyInt());
 
         mDockManagerFake = spy(new DockManagerFake());
-        mContext.putComponent(DockManager.class, mDockManagerFake);
-
         mDockHandler = new DozeDockHandler(mContext, mMachine, mHost, mConfig,
                 Handler.createAsync(Looper.myLooper()), mDockManagerFake);
     }
