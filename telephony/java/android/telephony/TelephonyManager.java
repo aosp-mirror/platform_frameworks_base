@@ -4897,24 +4897,20 @@ public class TelephonyManager {
             boolean notifyNow = (getITelephony() != null);
             ITelephonyRegistry registry = getTelephonyRegistry();
             if (registry != null) {
-                int subId;
-                // subId from phonestatelistner is deprecated Q on forward, use the subId from
-                // TelephonyManager instance.
-                if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q
-                        || listener.mSubId == null) {
-                    subId = mSubId;
-                } else {
+                // subId from PhoneStateListener is deprecated Q on forward, use the subId from
+                // TelephonyManager instance. keep using subId from PhoneStateListener for pre-Q.
+                int subId = mSubId;
+                if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) {
+                    // since mSubId in PhoneStateListener is deprecated from Q on forward, this is
+                    // the only place to set mSubId and its for "informational" only.
+                    //  TODO: remove this once we completely get rid of mSubId in PhoneStateListener
+                    listener.mSubId = (events == PhoneStateListener.LISTEN_NONE)
+                            ? SubscriptionManager.INVALID_SUBSCRIPTION_ID : subId;
+                } else if (listener.mSubId != null) {
                     subId = listener.mSubId;
                 }
-
                 registry.listenForSubscriber(subId, getOpPackageName(),
                         listener.callback, events, notifyNow);
-                // TODO: remove this once we remove PhoneStateListener constructor with subId.
-                if (events == PhoneStateListener.LISTEN_NONE) {
-                    listener.mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-                } else {
-                    listener.mSubId = subId;
-                }
             } else {
                 Rlog.w(TAG, "telephony registry not ready.");
             }
