@@ -61,6 +61,7 @@ import android.util.Pair;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.app.ResolverActivity;
+import com.android.server.wm.ActivityStack.ActivityState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -391,6 +392,52 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         // Verify the target stack should resume its activity.
         verify(targetStack, times(1)).resumeTopActivityUncheckedLocked(
                 eq(activity), eq(null /* targetOptions */));
+    }
+
+    /**
+     * Verify that a lingering transition is being executed in case the activity to be resumed is
+     * already resumed
+     */
+    @Test
+    public void testResumeActivityLingeringTransition() {
+        // Create a stack at top.
+        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final ActivityStack targetStack = spy(display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, false /* onTop */));
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
+        activity.setState(ActivityState.RESUMED, "test");
+
+        // Assume the stack is at the topmost position
+        assertTrue(targetStack.isTopStackOnDisplay());
+
+        // Use the stack as target to resume.
+        mRootActivityContainer.resumeFocusedStacksTopActivities();
+
+        // Verify the lingering app transition is being executed because it's already resumed
+        verify(targetStack, times(1)).executeAppTransition(any());
+    }
+
+    @Test
+    public void testResumeActivityLingeringTransition_notExecuted() {
+        // Create a stack at bottom.
+        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final ActivityStack targetStack = spy(display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, false /* onTop */));
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
+        activity.setState(ActivityState.RESUMED, "test");
+        display.positionChildAtBottom(targetStack);
+
+        // Assume the stack is at the topmost position
+        assertFalse(targetStack.isTopStackOnDisplay());
+        doReturn(targetStack).when(mRootActivityContainer).getTopDisplayFocusedStack();
+
+        // Use the stack as target to resume.
+        mRootActivityContainer.resumeFocusedStacksTopActivities();
+
+        // Verify the lingering app transition is being executed because it's already resumed
+        verify(targetStack, never()).executeAppTransition(any());
     }
 
     /**
