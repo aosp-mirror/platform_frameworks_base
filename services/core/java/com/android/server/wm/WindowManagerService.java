@@ -6891,6 +6891,10 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: " + displayId);
                 return;
             }
+            if (displayContent.isUntrustedVirtualDisplay()) {
+                throw new SecurityException("Attempted to set system decors flag to an untrusted "
+                        + "virtual display: " + displayId);
+            }
 
             mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
 
@@ -6931,6 +6935,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "Attempted to set IME flag to a display that does not exist: "
                         + displayId);
                 return;
+            }
+            if (displayContent.isUntrustedVirtualDisplay()) {
+                throw new SecurityException("Attempted to set IME flag to an untrusted "
+                        + "virtual display: " + displayId);
             }
 
             mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
