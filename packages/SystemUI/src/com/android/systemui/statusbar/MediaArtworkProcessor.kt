@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar
 
-import android.annotation.ColorInt
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -28,6 +27,7 @@ import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
 import android.util.MathUtils
 import com.android.internal.graphics.ColorUtils
+import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,7 +42,7 @@ class MediaArtworkProcessor @Inject constructor() {
     private val mTmpSize = Point()
     private var mArtworkCache: Bitmap? = null
 
-    fun processArtwork(context: Context, artwork: Bitmap, @ColorInt color: Int): Bitmap {
+    fun processArtwork(context: Context, artwork: Bitmap): Bitmap {
         if (mArtworkCache != null) {
             return mArtworkCache!!
         }
@@ -71,13 +71,15 @@ class MediaArtworkProcessor @Inject constructor() {
         blur.forEach(output)
         output.copyTo(outBitmap)
 
+        val swatch = MediaNotificationProcessor.findBackgroundSwatch(artwork)
+
         input.destroy()
         output.destroy()
         inBitmap.recycle()
         blur.destroy()
 
         val canvas = Canvas(outBitmap)
-        canvas.drawColor(ColorUtils.setAlphaComponent(color, COLOR_ALPHA))
+        canvas.drawColor(ColorUtils.setAlphaComponent(swatch.rgb, COLOR_ALPHA))
         return outBitmap
     }
 
