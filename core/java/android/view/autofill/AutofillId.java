@@ -16,6 +16,7 @@
 package android.view.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -169,6 +170,17 @@ public final class AutofillId implements Parcelable {
         if (mVirtualIntId != other.mVirtualIntId) return false;
         if (mVirtualLongId != other.mVirtualLongId) return false;
         if (mSessionId != other.mSessionId) return false;
+        return true;
+    }
+
+    /** @hide */
+    @TestApi
+    public boolean equalsIgnoreSession(@Nullable AutofillId other) {
+        if (this == other) return true;
+        if (other == null) return false;
+        if (mViewId != other.mViewId) return false;
+        if (mVirtualIntId != other.mVirtualIntId) return false;
+        if (mVirtualLongId != other.mVirtualLongId) return false;
         return true;
     }
 
