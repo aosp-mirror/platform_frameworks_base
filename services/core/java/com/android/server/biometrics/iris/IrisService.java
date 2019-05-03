@@ -23,7 +23,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.Metrics;
+import com.android.server.biometrics.Constants;
 
 import java.util.List;
 
@@ -75,7 +75,7 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected Metrics getMetrics() {
+    protected Constants getConstants() {
         return null;
     }
 
