@@ -775,6 +775,42 @@ public class RollbackTest {
         }
     }
 
+    /**
+     * Test failure to enable rollback for multi-package installs.
+     * If any one of the packages fail to enable rollback, we shouldn't enable
+     * rollback for any package.
+     */
+    @Test
+    public void testMultiPackageEnableFail() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.uninstall(TEST_APP_B);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+
+            // We should fail to enable rollback here because TestApp B is not
+            // already installed.
+            RollbackTestUtils.installMultiPackage(true,
+                    "RollbackTestAppAv2.apk",
+                    "RollbackTestAppBv2.apk");
+
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            assertNull(getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A));
+            assertNull(getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
     @Test
     @Ignore("b/120200473")
     /**
