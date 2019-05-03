@@ -3252,7 +3252,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Starts a given operation for a particular application.");
         pw.println("  stop [--user <USER_ID>] <PACKAGE | UID> <OP> ");
         pw.println("    Stops a given operation for a particular application.");
-        pw.println("  set [--user <USER_ID>] <--uid PACKAGE | PACKAGE | UID> <OP> <MODE>");
+        pw.println("  set [--user <USER_ID>] <[--uid] PACKAGE | UID> <OP> <MODE>");
         pw.println("    Set the mode for a particular application and operation.");
         pw.println("  get [--user <USER_ID>] <PACKAGE | UID> [<OP>]");
         pw.println("    Return the mode for a particular application and optional operation.");
@@ -3265,12 +3265,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("  read-settings");
         pw.println("    Read the last written settings, replacing current state in RAM.");
         pw.println("  options:");
-        pw.println("    <PACKAGE> an Android package name.");
+        pw.println("    <PACKAGE> an Android package name or its UID if prefixed by --uid");
         pw.println("    <OP>      an AppOps operation.");
         pw.println("    <MODE>    one of allow, ignore, deny, or default");
         pw.println("    <USER_ID> the user id under which the package is installed. If --user is not");
         pw.println("              specified, the current user is assumed.");
-        pw.println("    --uid PACKAGE refer to the UID of the package");
     }
 
     static int onShellCommand(Shell shell, String cmd) {
