@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.util.Map;
@@ -58,7 +59,9 @@ public interface SharedPreferences {
          * <p>This callback will be run on your main thread.
          *
          * <p><em>Note: This callback will not be triggered when preferences are cleared via
-         * {@link Editor#clear()}.</em>
+         * {@link Editor#clear()}. However, from {@link android.os.Build.VERSION_CODES#R Android R}
+         * onwards, you can use {@link OnSharedPreferencesClearListener} to register for
+         * {@link Editor#clear()} callbacks.</em>
          *
          * @param sharedPreferences The {@link SharedPreferences} that received
          *            the change.
@@ -67,7 +70,23 @@ public interface SharedPreferences {
          */
         void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key);
     }
-    
+
+    /**
+     * Interface definition for a callback to be invoked when shared preferences are cleared.
+     */
+    public interface OnSharedPreferencesClearListener {
+        /**
+         * Called when shared preferences are cleared via {@link Editor#clear()}.
+         *
+         * <p>This callback will be run on your main thread.
+         *
+         * @param sharedPreferences The {@link SharedPreferences} that received the change.
+         * @param keys The set of keys that were cleared.
+         */
+        void onSharedPreferencesClear(@NonNull SharedPreferences sharedPreferences,
+                @NonNull Set<String> keys);
+    }
+
     /**
      * Interface used for modifying values in a {@link SharedPreferences}
      * object.  All changes you make in an editor are batched, and not copied
@@ -378,12 +397,43 @@ public interface SharedPreferences {
      * @see #unregisterOnSharedPreferenceChangeListener
      */
     void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener);
-    
+
     /**
      * Unregisters a previous callback.
-     * 
+     *
      * @param listener The callback that should be unregistered.
      * @see #registerOnSharedPreferenceChangeListener
      */
     void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener);
+
+    /**
+     * Registers a callback to be invoked when preferences are cleared via {@link Editor#clear()}.
+     *
+     * <p class="caution"><strong>Caution:</strong> The preference manager does
+     * not currently store a strong reference to the listener. You must store a
+     * strong reference to the listener, or it will be susceptible to garbage
+     * collection. We recommend you keep a reference to the listener in the
+     * instance data of an object that will exist as long as you need the
+     * listener.</p>
+     *
+     * @param listener The callback that will run.
+     * @see #unregisterOnSharedPreferencesClearListener
+     */
+    default void registerOnSharedPreferencesClearListener(
+            @NonNull OnSharedPreferencesClearListener listener) {
+        throw new UnsupportedOperationException(
+                "registerOnSharedPreferencesClearListener not implemented");
+    }
+
+    /**
+     * Unregisters a previous callback for {@link Editor#clear()}.
+     *
+     * @param listener The callback that should be unregistered.
+     * @see #registerOnSharedPreferencesClearListener
+     */
+    default void unregisterOnSharedPreferencesClearListener(
+            @NonNull OnSharedPreferencesClearListener listener) {
+        throw new UnsupportedOperationException(
+                "unregisterOnSharedPreferencesClearListener not implemented");
+    }
 }

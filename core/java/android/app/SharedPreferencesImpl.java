@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.SharedPreferences;
@@ -25,6 +26,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.system.StructTimespec;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -91,6 +93,10 @@ final class SharedPreferencesImpl implements SharedPreferences {
     @GuardedBy("mLock")
     private final WeakHashMap<OnSharedPreferenceChangeListener, Object> mListeners =
             new WeakHashMap<OnSharedPreferenceChangeListener, Object>();
+
+    @GuardedBy("mLock")
+    private final WeakHashMap<OnSharedPreferencesClearListener, Object> mClearListeners =
+            new WeakHashMap<>();
 
     /** Current memory state (always increasing) */
     @GuardedBy("this")
@@ -252,6 +258,28 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @Override
+    public void registerOnSharedPreferencesClearListener(
+            @NonNull OnSharedPreferencesClearListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null.");
+        }
+        synchronized (mLock) {
+            mClearListeners.put(listener, CONTENT);
+        }
+    }
+
+    @Override
+    public void unregisterOnSharedPreferencesClearListener(
+            @NonNull OnSharedPreferencesClearListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null.");
+        }
+        synchronized (mLock) {
+            mClearListeners.remove(listener);
+        }
+    }
+
     @GuardedBy("mLock")
     private void awaitLoadedLocked() {
         if (!mLoaded) {
@@ -361,7 +389,9 @@ final class SharedPreferencesImpl implements SharedPreferences {
     private static class MemoryCommitResult {
         final long memoryStateGeneration;
         @Nullable final List<String> keysModified;
+        @Nullable final Set<String> keysCleared;
         @Nullable final Set<OnSharedPreferenceChangeListener> listeners;
+        @Nullable final Set<OnSharedPreferencesClearListener> clearListeners;
         final Map<String, Object> mapToWriteToDisk;
         final CountDownLatch writtenToDiskLatch = new CountDownLatch(1);
 
@@ -371,10 +401,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
         private MemoryCommitResult(long memoryStateGeneration, @Nullable List<String> keysModified,
                 @Nullable Set<OnSharedPreferenceChangeListener> listeners,
+                @Nullable Set<String> keysCleared,
+                @Nullable Set<OnSharedPreferencesClearListener> clearListeners,
                 Map<String, Object> mapToWriteToDisk) {
             this.memoryStateGeneration = memoryStateGeneration;
             this.keysModified = keysModified;
             this.listeners = listeners;
+            this.keysCleared = keysCleared;
+            this.clearListeners = clearListeners;
             this.mapToWriteToDisk = mapToWriteToDisk;
         }
 
@@ -492,13 +526,16 @@ final class SharedPreferencesImpl implements SharedPreferences {
             // SharedPreferences instance back, which has the
             // changes reflected in memory.
             notifyListeners(mcr);
+            notifyClearListeners(mcr);
         }
 
         // Returns true if any changes were made
         private MemoryCommitResult commitToMemory() {
             long memoryStateGeneration;
             List<String> keysModified = null;
+            Set<String> keysCleared = null;
             Set<OnSharedPreferenceChangeListener> listeners = null;
+            Set<OnSharedPreferencesClearListener> clearListeners = null;
             Map<String, Object> mapToWriteToDisk;
 
             synchronized (SharedPreferencesImpl.this.mLock) {
@@ -520,12 +557,20 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     keysModified = new ArrayList<String>();
                     listeners = new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
                 }
+                boolean hasClearListeners = !mClearListeners.isEmpty();
+                if (hasClearListeners) {
+                    keysCleared = new ArraySet<>();
+                    clearListeners = new HashSet<>(mClearListeners.keySet());
+                }
 
                 synchronized (mEditorLock) {
                     boolean changesMade = false;
 
                     if (mClear) {
                         if (!mapToWriteToDisk.isEmpty()) {
+                            if (hasClearListeners) {
+                                keysCleared.addAll(mapToWriteToDisk.keySet());
+                            }
                             changesMade = true;
                             mapToWriteToDisk.clear();
                         }
@@ -569,7 +614,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 }
             }
             return new MemoryCommitResult(memoryStateGeneration, keysModified, listeners,
-                    mapToWriteToDisk);
+                    keysCleared, clearListeners, mapToWriteToDisk);
         }
 
         @Override
@@ -596,6 +641,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 }
             }
             notifyListeners(mcr);
+            notifyClearListeners(mcr);
             return mcr.writeToDiskResult;
         }
 
@@ -616,6 +662,24 @@ final class SharedPreferencesImpl implements SharedPreferences {
             } else {
                 // Run this function on the main thread.
                 ActivityThread.sMainThreadHandler.post(() -> notifyListeners(mcr));
+            }
+        }
+
+        private void notifyClearListeners(final MemoryCommitResult mcr) {
+            if (mcr.clearListeners == null || mcr.keysCleared == null
+                    || mcr.keysCleared.isEmpty()) {
+                return;
+            }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                for (OnSharedPreferencesClearListener listener : mcr.clearListeners) {
+                    if (listener != null) {
+                        listener.onSharedPreferencesClear(SharedPreferencesImpl.this,
+                                mcr.keysCleared);
+                    }
+                }
+            } else {
+                // Run this function on the main thread.
+                ActivityThread.sMainThreadHandler.post(() -> notifyClearListeners(mcr));
             }
         }
     }
