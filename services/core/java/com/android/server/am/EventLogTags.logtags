@@ -144,3 +144,6 @@ option java_package com.android.server.am
 30064 am_on_top_resumed_gained_called (User|1|5),(Component Name|3),(Reason|3)
 # The activity's onTopResumedActivityChanged(false) has been called.
 30065 am_on_top_resumed_lost_called (User|1|5),(Component Name|3),(Reason|3)
+
+# An activity been add into stopping list
+30066 am_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
