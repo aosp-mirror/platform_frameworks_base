@@ -354,7 +354,7 @@ public class BubbleData {
             return false;
         }
         if (mExpanded && bubble != null) {
-            mSelectedBubble.markAsAccessedAt(mTimeSource.currentTimeMillis());
+            bubble.markAsAccessedAt(mTimeSource.currentTimeMillis());
         }
         mSelectedBubble = bubble;
         dispatchOnSelectionChanged(mSelectedBubble);
