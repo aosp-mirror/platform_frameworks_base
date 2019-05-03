@@ -7213,6 +7213,9 @@ message MetricsEvent {
     //       confirmation)
     DIALOG_DELETE_SIM_PROGRESS = 1714;
 
+    // Settings > Apps and notifications > Notifications > Gentle notifications
+    GENTLE_NOTIFICATIONS_SCREEN = 1715;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
