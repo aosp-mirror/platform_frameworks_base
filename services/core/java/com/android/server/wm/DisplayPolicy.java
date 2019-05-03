@@ -2720,11 +2720,18 @@ public class DisplayPolicy {
     private void updateCurrentUserResources() {
         final int userId = mService.mAmInternal.getCurrentUserId();
         final Context uiContext = getSystemUiContext();
+
+        if (userId == UserHandle.USER_SYSTEM) {
+            // Skip the (expensive) recreation of resources for the system user below and just
+            // use the resources from the system ui context
+            mCurrentUserResources = uiContext.getResources();
+            return;
+        }
+
+        // For non-system users, ensure that the resources are loaded from the current
+        // user's package info (see ContextImpl.createDisplayContext)
         final LoadedApk pi = ActivityThread.currentActivityThread().getPackageInfo(
                 uiContext.getPackageName(), null, 0, userId);
-
-        // Create the resources from the current-user package info
-        // (see ContextImpl.createDisplayContext)
         mCurrentUserResources = ResourcesManager.getInstance().getResources(null,
                 pi.getResDir(),
                 null /* splitResDirs */,
