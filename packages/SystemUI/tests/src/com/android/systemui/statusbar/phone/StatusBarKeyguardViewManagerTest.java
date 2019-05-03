@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -194,6 +195,17 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(KeyguardBouncer.EXPANSION_VISIBLE,
                 false /* tracking */);
         verify(mBouncer, never()).setExpansion(anyFloat());
+    }
+
+    @Test
+    public void setOccluded_animatesPanelExpansion_onlyIfBouncerHidden() {
+        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
+        verify(mStatusBar).animateKeyguardUnoccluding();
+
+        when(mBouncer.isShowing()).thenReturn(true);
+        clearInvocations(mStatusBar);
+        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
+        verify(mStatusBar, never()).animateKeyguardUnoccluding();
     }
 
     private class TestableStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {
