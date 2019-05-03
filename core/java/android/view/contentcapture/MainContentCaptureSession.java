@@ -593,7 +593,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     /**
-     * Called by ContentCaptureManager.setContentCaptureEnabled
+     * Sets the disabled state of content capture.
      *
      * @return whether disabled state was changed.
      */
