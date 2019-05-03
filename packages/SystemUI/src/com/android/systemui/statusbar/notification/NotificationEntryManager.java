@@ -67,6 +67,13 @@ public class NotificationEntryManager implements
     private static final String TAG = "NotificationEntryMgr";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    /**
+     * Used when a notification is removed and it doesn't have a reason that maps to one of the
+     * reasons defined in NotificationListenerService
+     * (e.g. {@link NotificationListenerService.REASON_CANCEL})
+     */
+    public static final int UNDEFINED_DISMISS_REASON = 0;
+
     @VisibleForTesting
     protected final HashMap<String, NotificationEntry> mPendingNotifications = new HashMap<>();
 
@@ -156,7 +163,8 @@ public class NotificationEntryManager implements
     /** Adds a {@link NotificationLifetimeExtender}. */
     public void addNotificationLifetimeExtender(NotificationLifetimeExtender extender) {
         mNotificationLifetimeExtenders.add(extender);
-        extender.setCallback(key -> removeNotification(key, mLatestRankingMap, 0));
+        extender.setCallback(key -> removeNotification(key, mLatestRankingMap,
+                UNDEFINED_DISMISS_REASON));
     }
 
     public NotificationData getNotificationData() {
