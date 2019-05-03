@@ -117,8 +117,13 @@ public class KeyguardClockPositionAlgorithm {
     public void loadDimens(Resources res) {
         mClockNotificationsMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_clock_notifications_margin);
-        mContainerTopPadding = res.getDimensionPixelSize(
-                R.dimen.keyguard_clock_top_margin);
+        // Consider the lock icon when determining the minimum top padding between the status bar
+        // and top of the clock.
+        mContainerTopPadding = Math.max(res.getDimensionPixelSize(
+                R.dimen.keyguard_clock_top_margin),
+                res.getDimensionPixelSize(R.dimen.keyguard_lock_height)
+                        + res.getDimensionPixelSize(R.dimen.keyguard_lock_padding)
+                        + res.getDimensionPixelSize(R.dimen.keyguard_clock_lock_margin));
         mBurnInPreventionOffsetX = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_x);
         mBurnInPreventionOffsetY = res.getDimensionPixelSize(
