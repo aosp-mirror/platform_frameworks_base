@@ -2168,7 +2168,7 @@ public class ChooserActivity extends ResolverActivity {
         protected void onBindView(View view, TargetInfo info) {
             super.onBindView(view, info);
 
-            // If target is loading, show a special placeholder shape in the label
+            // If target is loading, show a special placeholder shape in the label, make unclickable
             final ViewHolder holder = (ViewHolder) view.getTag();
             if (info instanceof PlaceHolderTargetInfo) {
                 final int maxWidth = getResources().getDimensionPixelSize(
@@ -2176,9 +2176,12 @@ public class ChooserActivity extends ResolverActivity {
                 holder.text.setMaxWidth(maxWidth);
                 holder.text.setBackground(getResources().getDrawable(
                         R.drawable.chooser_direct_share_label_placeholder, getTheme()));
+                // Prevent rippling by removing background containing ripple
+                holder.itemView.setBackground(null);
             } else {
                 holder.text.setMaxWidth(Integer.MAX_VALUE);
                 holder.text.setBackground(null);
+                holder.itemView.setBackground(holder.defaultItemViewBackground);
             }
         }
 
