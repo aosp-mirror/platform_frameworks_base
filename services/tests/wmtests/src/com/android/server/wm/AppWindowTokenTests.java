@@ -505,14 +505,14 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     private void assertHasStartingWindow(AppWindowToken atoken) {
         assertNotNull(atoken.startingSurface);
-        assertNotNull(atoken.startingData);
+        assertNotNull(atoken.mStartingData);
         assertNotNull(atoken.startingWindow);
     }
 
     private void assertNoStartingWindow(AppWindowToken atoken) {
         assertNull(atoken.startingSurface);
         assertNull(atoken.startingWindow);
-        assertNull(atoken.startingData);
+        assertNull(atoken.mStartingData);
         atoken.forAllWindows(windowState -> {
             assertFalse(windowState.getBaseType() == TYPE_APPLICATION_STARTING);
         }, true);

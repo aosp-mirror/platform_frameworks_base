@@ -478,7 +478,7 @@ public class AppTransitionController {
                     outReasons.put(windowingMode,  APP_TRANSITION_WINDOWS_DRAWN);
                 } else {
                     outReasons.put(windowingMode,
-                            wtoken.startingData instanceof SplashScreenStartingData
+                            wtoken.mStartingData instanceof SplashScreenStartingData
                                     ? APP_TRANSITION_SPLASH_SCREEN
                                     : APP_TRANSITION_SNAPSHOT);
                 }
