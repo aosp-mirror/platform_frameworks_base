@@ -64,6 +64,9 @@ class ThemeOverlayManager {
     @VisibleForTesting
     static final String OVERLAY_CATEGORY_ICON_LAUNCHER =
             "android.theme.customization.icon_pack.launcher";
+    @VisibleForTesting
+    static final String OVERLAY_CATEGORY_ICON_THEME_PICKER =
+            "android.theme.customization.icon_pack.themepicker";
 
     /*
      * All theme customization categories used by the system, in order that they should be applied,
@@ -76,7 +79,8 @@ class ThemeOverlayManager {
             OVERLAY_CATEGORY_COLOR,
             OVERLAY_CATEGORY_ICON_ANDROID,
             OVERLAY_CATEGORY_ICON_SYSUI,
-            OVERLAY_CATEGORY_ICON_SETTINGS);
+            OVERLAY_CATEGORY_ICON_SETTINGS,
+            OVERLAY_CATEGORY_ICON_THEME_PICKER);
 
     /* Categories that need to applied to the current user as well as the system user. */
     @VisibleForTesting
@@ -94,12 +98,14 @@ class ThemeOverlayManager {
     private final OverlayManager mOverlayManager;
     private final Executor mExecutor;
     private final String mLauncherPackage;
+    private final String mThemePickerPackage;
 
     ThemeOverlayManager(OverlayManager overlayManager, Executor executor,
-            String launcherPackage) {
+            String launcherPackage, String themePickerPackage) {
         mOverlayManager = overlayManager;
         mExecutor = executor;
         mLauncherPackage = launcherPackage;
+        mThemePickerPackage = themePickerPackage;
         mTargetPackageToCategories.put(ANDROID_PACKAGE, Sets.newHashSet(
                 OVERLAY_CATEGORY_COLOR, OVERLAY_CATEGORY_FONT,
                 OVERLAY_CATEGORY_SHAPE, OVERLAY_CATEGORY_ICON_ANDROID));
@@ -109,6 +115,8 @@ class ThemeOverlayManager {
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_SETTINGS));
         mTargetPackageToCategories.put(mLauncherPackage,
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_LAUNCHER));
+        mTargetPackageToCategories.put(mThemePickerPackage,
+                Sets.newHashSet(OVERLAY_CATEGORY_ICON_THEME_PICKER));
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_COLOR, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_FONT, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_SHAPE, ANDROID_PACKAGE);
@@ -116,6 +124,7 @@ class ThemeOverlayManager {
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_SYSUI, SYSUI_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_SETTINGS, SETTINGS_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_LAUNCHER, mLauncherPackage);
+        mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_THEME_PICKER, mThemePickerPackage);
     }
 
     /**
