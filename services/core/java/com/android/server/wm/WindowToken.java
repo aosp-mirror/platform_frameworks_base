@@ -345,8 +345,4 @@ class WindowToken extends WindowContainer<WindowState> {
                 mOwnerCanManageAppTokens);
         return mOwnerCanManageAppTokens && (layer > navLayer);
     }
-
-    float getWindowCornerRadiusForAnimation() {
-        return mDisplayContent.isDefaultDisplay ? mWmService.mWindowCornerRadius : 0;
-    }
 }

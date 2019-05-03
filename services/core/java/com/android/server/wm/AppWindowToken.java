@@ -2558,7 +2558,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                                     getDisplayContent().mAppTransition.canSkipFirstFrame(),
                                     appStackClipMode,
                                     true /* isAppAnimation */,
-                                    getWindowCornerRadiusForAnimation()),
+                                    getDisplayContent().getWindowCornerRadius()),
                             mWmService.mSurfaceAnimationRunner);
                     if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                         mNeedsZBoost = true;
