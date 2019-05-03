@@ -17,15 +17,11 @@
 package android.bluetooth;
 
 import android.annotation.UnsupportedAppUsage;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -367,73 +363,22 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     public static final int CALL_ACCEPT_HOLD = 1;
     public static final int CALL_ACCEPT_TERMINATE = 2;
 
-    private Context mContext;
-    private ServiceListener mServiceListener;
-    private volatile IBluetoothHeadsetClient mService;
     private BluetoothAdapter mAdapter;
-
-    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
-            new IBluetoothStateChangeCallback.Stub() {
+    private final BluetoothProfileConnector<IBluetoothHeadsetClient> mProfileConnector =
+            new BluetoothProfileConnector(this, BluetoothProfile.HEADSET_CLIENT,
+                    "BluetoothHeadsetClient", IBluetoothHeadsetClient.class.getName()) {
                 @Override
-                public void onBluetoothStateChange(boolean up) {
-                    if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
-                    if (!up) {
-                        if (VDBG) Log.d(TAG, "Unbinding service...");
-                        synchronized (mConnection) {
-                            try {
-                                mService = null;
-                                mContext.unbindService(mConnection);
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
-                    } else {
-                        synchronized (mConnection) {
-                            try {
-                                if (mService == null) {
-                                    if (VDBG) Log.d(TAG, "Binding service...");
-                                    Intent intent = new Intent(
-                                            IBluetoothHeadsetClient.class.getName());
-                                    doBind();
-                                }
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
-                    }
+                public IBluetoothHeadsetClient getServiceInterface(IBinder service) {
+                    return IBluetoothHeadsetClient.Stub.asInterface(Binder.allowBlocking(service));
                 }
-            };
+    };
 
     /**
      * Create a BluetoothHeadsetClient proxy object.
      */
-    /*package*/ BluetoothHeadsetClient(Context context, ServiceListener l) {
-        mContext = context;
-        mServiceListener = l;
+    /*package*/ BluetoothHeadsetClient(Context context, ServiceListener listener) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-        }
-
-        doBind();
-    }
-
-    boolean doBind() {
-        Intent intent = new Intent(IBluetoothHeadsetClient.class.getName());
-        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-        intent.setComponent(comp);
-        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                UserHandle.CURRENT_OR_SELF)) {
-            Log.e(TAG, "Could not bind to Bluetooth Headset Client Service with " + intent);
-            return false;
-        }
-        return true;
+        mProfileConnector.connect(context, listener);
     }
 
     /**
@@ -444,27 +389,11 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     /*package*/ void close() {
         if (VDBG) log("close()");
+        mProfileConnector.disconnect();
+    }
 
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (Exception e) {
-                Log.e(TAG, "", e);
-            }
-        }
-
-        synchronized (mConnection) {
-            if (mService != null) {
-                try {
-                    mService = null;
-                    mContext.unbindService(mConnection);
-                } catch (Exception re) {
-                    Log.e(TAG, "", re);
-                }
-            }
-        }
-        mServiceListener = null;
+    private IBluetoothHeadsetClient getService() {
+        return mProfileConnector.getService();
     }
 
     /**
@@ -481,7 +410,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @UnsupportedAppUsage
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.connect(device);
@@ -504,7 +434,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @UnsupportedAppUsage
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.disconnect(device);
@@ -525,7 +456,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getConnectedDevices();
@@ -548,7 +480,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getDevicesMatchingConnectionStates(states);
@@ -570,7 +503,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getConnectionState(" + device + ")");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.getConnectionState(device);
@@ -590,7 +524,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             if (priority != BluetoothProfile.PRIORITY_OFF
                     && priority != BluetoothProfile.PRIORITY_ON) {
@@ -612,7 +547,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.getPriority(device);
@@ -638,7 +574,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean startVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("startVoiceRecognition()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.startVoiceRecognition(device);
@@ -663,7 +600,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean stopVoiceRecognition(BluetoothDevice device) {
         if (DBG) log("stopVoiceRecognition()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.stopVoiceRecognition(device);
@@ -683,7 +621,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public List<BluetoothHeadsetClientCall> getCurrentCalls(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.getCurrentCalls(device);
@@ -703,7 +642,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
         if (DBG) log("getCurrentCalls()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.getCurrentAgEvents(device);
@@ -727,7 +667,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @UnsupportedAppUsage
     public boolean acceptCall(BluetoothDevice device, int flag) {
         if (DBG) log("acceptCall()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.acceptCall(device, flag);
@@ -748,7 +689,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean holdCall(BluetoothDevice device) {
         if (DBG) log("holdCall()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.holdCall(device);
@@ -774,7 +716,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @UnsupportedAppUsage
     public boolean rejectCall(BluetoothDevice device) {
         if (DBG) log("rejectCall()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.rejectCall(device);
@@ -804,7 +747,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean terminateCall(BluetoothDevice device, BluetoothHeadsetClientCall call) {
         if (DBG) log("terminateCall()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.terminateCall(device, call);
@@ -832,7 +776,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean enterPrivateMode(BluetoothDevice device, int index) {
         if (DBG) log("enterPrivateMode()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.enterPrivateMode(device, index);
@@ -859,7 +804,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean explicitCallTransfer(BluetoothDevice device) {
         if (DBG) log("explicitCallTransfer()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.explicitCallTransfer(device);
@@ -882,7 +828,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public BluetoothHeadsetClientCall dial(BluetoothDevice device, String number) {
         if (DBG) log("dial()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.dial(device, number);
@@ -906,7 +853,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean sendDTMF(BluetoothDevice device, byte code) {
         if (DBG) log("sendDTMF()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.sendDTMF(device, code);
@@ -932,7 +880,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean getLastVoiceTagNumber(BluetoothDevice device) {
         if (DBG) log("getLastVoiceTagNumber()");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.getLastVoiceTagNumber(device);
@@ -952,7 +901,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
     @UnsupportedAppUsage
     public int getAudioState(BluetoothDevice device) {
         if (VDBG) log("getAudioState");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getAudioState(device);
@@ -975,7 +925,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public void setAudioRouteAllowed(BluetoothDevice device, boolean allowed) {
         if (VDBG) log("setAudioRouteAllowed");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 service.setAudioRouteAllowed(device, allowed);
@@ -997,7 +948,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      */
     public boolean getAudioRouteAllowed(BluetoothDevice device) {
         if (VDBG) log("getAudioRouteAllowed");
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getAudioRouteAllowed(device);
@@ -1021,7 +973,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * otherwise; upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED} intent;
      */
     public boolean connectAudio(BluetoothDevice device) {
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.connectAudio(device);
@@ -1045,7 +998,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * otherwise; upon completion HFP sends {@link #ACTION_AUDIO_STATE_CHANGED} intent;
      */
     public boolean disconnectAudio(BluetoothDevice device) {
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.disconnectAudio(device);
@@ -1066,7 +1020,8 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return bundle of AG features; null if no service or AG not connected
      */
     public Bundle getCurrentAgFeatures(BluetoothDevice device) {
-        final IBluetoothHeadsetClient service = mService;
+        final IBluetoothHeadsetClient service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getCurrentAgFeatures(device);
@@ -1079,29 +1034,6 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
         }
         return null;
     }
-
-
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothHeadsetClient.Stub.asInterface(Binder.allowBlocking(service));
-
-            if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.HEADSET_CLIENT,
-                        BluetoothHeadsetClient.this);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            if (DBG) Log.d(TAG, "Proxy object disconnected");
-            mService = null;
-            if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.HEADSET_CLIENT);
-            }
-        }
-    };
 
     private boolean isEnabled() {
         return mAdapter.getState() == BluetoothAdapter.STATE_ON;
