@@ -32,7 +32,6 @@ import android.view.LayoutInflater;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Observer;
 
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
@@ -89,6 +88,7 @@ public final class ClockManager {
     private final Observer<Integer> mCurrentUserObserver = (newUserId) -> reload();
 
     private final PluginManager mPluginManager;
+    @Nullable private final DockManager mDockManager;
 
     /**
      * Observe changes to dock state to know when to switch the clock face.
@@ -102,7 +102,6 @@ public final class ClockManager {
                     reload();
                 }
             };
-    @Nullable private DockManager mDockManager;
 
     /**
      * When docked, the DOCKED_CLOCK_FACE setting will be checked for the custom clock face
@@ -125,21 +124,24 @@ public final class ClockManager {
 
     @Inject
     public ClockManager(Context context, InjectionInflationController injectionInflater,
-            PluginManager pluginManager, SysuiColorExtractor colorExtractor) {
+            PluginManager pluginManager, SysuiColorExtractor colorExtractor,
+            @Nullable DockManager dockManager) {
         this(context, injectionInflater, pluginManager, colorExtractor,
                 context.getContentResolver(), new CurrentUserObservable(context),
-                new SettingsWrapper(context.getContentResolver()));
+                new SettingsWrapper(context.getContentResolver()), dockManager);
     }
 
+    @VisibleForTesting
     ClockManager(Context context, InjectionInflationController injectionInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor,
             ContentResolver contentResolver, CurrentUserObservable currentUserObservable,
-            SettingsWrapper settingsWrapper) {
+            SettingsWrapper settingsWrapper, DockManager dockManager) {
         mContext = context;
         mPluginManager = pluginManager;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
         mCurrentUserObservable = currentUserObservable;
+        mDockManager = dockManager;
         mPreviewClocks = new AvailableClocks();
 
         Resources res = context.getResources();
@@ -223,9 +225,6 @@ public final class ClockManager {
                 Settings.Secure.getUriFor(Settings.Secure.DOCKED_CLOCK_FACE),
                 false, mContentObserver, UserHandle.USER_ALL);
         mCurrentUserObservable.getCurrentUser().observeForever(mCurrentUserObserver);
-        if (mDockManager == null) {
-            mDockManager = SysUiServiceProvider.getComponent(mContext, DockManager.class);
-        }
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
         }

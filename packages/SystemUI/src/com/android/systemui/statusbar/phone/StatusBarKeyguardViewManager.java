@@ -40,7 +40,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -194,7 +193,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         Dependency.get(ConfigurationController.class).addCallback(this);
         mGesturalNav = QuickStepContract.isGesturalMode(
                 Dependency.get(NavigationModeController.class).addListener(this));
-        mDockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
+        mDockManager = Dependency.get(DockManager.class);
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
