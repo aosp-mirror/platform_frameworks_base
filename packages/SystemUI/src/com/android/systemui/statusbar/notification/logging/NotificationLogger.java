@@ -270,6 +270,8 @@ public class NotificationLogger implements StateListener {
         }
     }
 
+    // TODO: This method has side effects, it is NOT just logging that a notification
+    // was cleared, it also actually removes the notification
     private void logNotificationClear(String key, StatusBarNotification notification,
             NotificationVisibility nv) {
         final String pkg = notification.getPackageName();
