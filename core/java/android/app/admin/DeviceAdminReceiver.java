@@ -920,10 +920,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
-     * @param newUser The {@link UserHandle} of the user that has just been added.
+     * @param addedUser The {@link UserHandle} of the user that has just been added.
      */
     public void onUserAdded(@NonNull Context context, @NonNull Intent intent,
-            @NonNull UserHandle newUser) {
+            @NonNull UserHandle addedUser) {
     }
 
     /**
