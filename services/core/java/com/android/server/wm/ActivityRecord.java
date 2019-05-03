@@ -916,8 +916,12 @@ final class ActivityRecord extends ConfigurationContainer {
         }
     }
 
+    static boolean isResolverActivity(String className) {
+        return ResolverActivity.class.getName().equals(className);
+    }
+
     boolean isResolverActivity() {
-        return ResolverActivity.class.getName().equals(mActivityComponent.getClassName());
+        return isResolverActivity(mActivityComponent.getClassName());
     }
 
     boolean isResolverOrChildActivity() {
