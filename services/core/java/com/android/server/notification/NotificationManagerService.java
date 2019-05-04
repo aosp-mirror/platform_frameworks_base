@@ -7380,8 +7380,7 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_USER_SET = "user_set";
-        // TODO: STOPSHIP (b/127994217) switch to final value when onboarding flow is implemented
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments_tmp2";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
@@ -7394,7 +7393,6 @@ public class NotificationManagerService extends SystemService {
                 IPackageManager pm) {
             super(context, lock, up, pm);
 
-            // TODO: STOPSHIP (b/127994217) remove when the onboarding flow is implemented
             // Add all default allowed adjustment types. Will be overwritten by values in xml,
             // if they exist
             for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
@@ -7463,9 +7461,9 @@ public class NotificationManagerService extends SystemService {
         protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {
             if (TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
                 final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
-                if (!TextUtils.isEmpty(types)) {
-                    synchronized (mLock) {
-                        mAllowedAdjustments.clear();
+                synchronized (mLock) {
+                    mAllowedAdjustments.clear();
+                    if (!TextUtils.isEmpty(types)) {
                         mAllowedAdjustments.addAll(Arrays.asList(types.split(",")));
                     }
                 }
