@@ -3401,6 +3401,7 @@ package android.view.contentcapture {
 package android.view.inputmethod {
 
   public final class InputMethodManager {
+    method public int getDisplayId();
     method public boolean isInputMethodPickerShown();
   }
 
