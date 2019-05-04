@@ -163,6 +163,22 @@ public class StagingManager {
                 continue;
             }
             long activeVersion = activePackage.applicationInfo.longVersionCode;
+            if (session.params.requiredInstalledVersionCode
+                    != PackageManager.VERSION_CODE_HIGHEST) {
+                if (activeVersion != session.params.requiredInstalledVersionCode) {
+                    session.setStagedSessionFailed(
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "Installed version of APEX package " + newPackage.packageName
+                            + " does not match required. Active version: " + activeVersion
+                            + " required: " + session.params.requiredInstalledVersionCode);
+
+                    if (!mApexManager.abortActiveSession()) {
+                        Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                    }
+                    return false;
+                }
+            }
+
             boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
                     session.params.installFlags, activePackage.applicationInfo.flags);
             if (activeVersion > newPackage.versionCode && !allowsDowngrade) {
