@@ -62,7 +62,7 @@ static jmethodID method_reportNmea;
 static jmethodID method_setTopHalCapabilities;
 static jmethodID method_setGnssYearOfHardware;
 static jmethodID method_setGnssHardwareModelName;
-static jmethodID method_xtraDownloadRequest;
+static jmethodID method_psdsDownloadRequest;
 static jmethodID method_reportNiNotification;
 static jmethodID method_requestLocation;
 static jmethodID method_requestRefLocation;
@@ -802,7 +802,7 @@ class GnssXtraCallback : public IGnssXtraCallback {
  */
 Return<void> GnssXtraCallback::downloadRequestCb() {
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_xtraDownloadRequest);
+    env->CallVoidMethod(mCallbacksObj, method_psdsDownloadRequest);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
@@ -1525,7 +1525,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
     method_setGnssHardwareModelName = env->GetMethodID(clazz, "setGnssHardwareModelName",
             "(Ljava/lang/String;)V");
-    method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
+    method_psdsDownloadRequest = env->GetMethodID(clazz, "psdsDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
             "(IIIIILjava/lang/String;Ljava/lang/String;II)V");
     method_requestLocation = env->GetMethodID(clazz, "requestLocation", "(ZZ)V");
@@ -2190,12 +2190,12 @@ static void android_location_GnssLocationProvider_inject_location(JNIEnv* /* env
     }
 }
 
-static jboolean android_location_GnssLocationProvider_supports_xtra(
+static jboolean android_location_GnssLocationProvider_supports_psds(
         JNIEnv* /* env */, jobject /* obj */) {
     return (gnssXtraIface != nullptr) ? JNI_TRUE : JNI_FALSE;
 }
 
-static void android_location_GnssLocationProvider_inject_xtra_data(JNIEnv* env, jobject /* obj */,
+static void android_location_GnssLocationProvider_inject_psds_data(JNIEnv* env, jobject /* obj */,
         jbyteArray data, jint length) {
     if (gnssXtraIface == nullptr) {
         ALOGE("XTRA Interface not supported");
@@ -3047,10 +3047,10 @@ static const JNINativeMethod sMethods[] = {
             android_location_GnssLocationProvider_inject_best_location)},
     {"native_inject_location", "(DDF)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_inject_location)},
-    {"native_supports_xtra", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_supports_xtra)},
-    {"native_inject_xtra_data", "([BI)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_inject_xtra_data)},
+    {"native_supports_psds", "()Z", reinterpret_cast<void *>(
+            android_location_GnssLocationProvider_supports_psds)},
+    {"native_inject_psds_data", "([BI)V", reinterpret_cast<void *>(
+            android_location_GnssLocationProvider_inject_psds_data)},
     {"native_agps_set_id", "(ILjava/lang/String;)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_agps_set_id)},
     {"native_agps_set_ref_location_cellid", "(IIIII)V", reinterpret_cast<void *>(
