@@ -22,6 +22,8 @@ import static android.service.notification.NotificationListenerService.REASON_AP
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 
+import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -228,7 +230,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Since the notif is dismissed, once the bubble is removed, performRemoveNotification gets
         // called to really remove the notif
         verify(mNotificationEntryManager, times(1)).performRemoveNotification(
-                mRow.getEntry().notification, 0);
+                mRow.getEntry().notification, UNDEFINED_DISMISS_REASON);
         assertFalse(mBubbleController.hasBubbles());
     }
 
