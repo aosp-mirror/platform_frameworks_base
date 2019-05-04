@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.systemui.R;
 
 /**
@@ -101,7 +102,7 @@ public class BadgedImageView extends ImageView {
      * The colour to use for the dot.
      */
     public void setDotColor(int color) {
-        mUpdateDotColor = color;
+        mUpdateDotColor = ColorUtils.setAlphaComponent(color, 255 /* alpha */);
         invalidate();
     }
 
