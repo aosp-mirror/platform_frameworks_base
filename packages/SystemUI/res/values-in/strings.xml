@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Layar dipasangi pin"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh &amp; tahan tombol Kembali dan Ringkasan untuk melepas pin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh &amp; tahan tombol Kembali dan Beranda untuk melepas pin."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Ringkasan untuk melepas pin."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh dan tahan tombol Beranda untuk melepas pin."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk melepas pin layar ini, sentuh &amp; tahan tombol Kembali dan Ringkasan"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Terus tampilkan notifikasi dari aplikasi ini?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Senyap"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Diprioritaskan"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Selalu senyap. Ditampilkan di bayangan pull-down."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Selalu senyap. Ditampilkan di bayangan pull-down &amp; status bar."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Selalu senyap. Ditampilkan di bayangan pull-down &amp; di layar kunci."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Selalu senyap. Ditampilkan di bayangan pull-down, status bar &amp; di layar kunci."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Mengeluarkan suara dan ditampilkan di bayangan pull-down, status bar &amp; di layar kunci."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Membantu Anda berfokus hanya pada notifikasi di bayangan pull-down. Selalu senyap."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Ditampilkan di bawah notifikasi prioritas. Selalu senyap."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Ditampilkan di bawah notifikasi prioritas. Selalu senyap."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Ditampilkan di bawah notifikasi prioritas. Selalu senyap."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Menarik perhatian Anda dengan suara &amp; ikon status bar. Ditampilkan di layar kunci."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Notifikasi ini tidak dapat diubah."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Grup notifikasi ini tidak dapat dikonfigurasi di sini"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Notifikasi proxy"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Aplikasi ini sedang menggunakan kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Aplikasi ini sedang menggunakan mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Aplikasi ini ditampilkan di atas aplikasi lain di layar."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Buka <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Setelan untuk balon <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Izinkan balon dari <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Tolak"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Izinkan"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Nanti saja"</string>

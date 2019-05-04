@@ -530,6 +530,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ecranul este fixat"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunile Înapoi și Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunile Înapoi și Acasă pentru a anula fixarea."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunea Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunea Acasă pentru a anula fixarea."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Pentru a anula fixarea acestui ecran, atingeți lung butoanele Înapoi și Recente"</string>
@@ -641,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Doriți să continuați afișarea notificărilor de la această aplicație?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Discret"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Cu prioritate"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Întotdeauna silențios. Se afișează în fereastra trasă în jos."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Întotdeauna silențios. Se afișează în fereastra trasă în jos și în bara de stare."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Întotdeauna silențios. Se afișează în fereastra trasă în jos și pe ecranul de blocare."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Întotdeauna silențios. Se afișează în fereastra trasă în jos, bara de stare și ecranul de blocare."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Emite un sunet și se afișează în fereastra trasă în jos, în bara de stare și pe ecranul de blocare."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Vă ajută să vă concentrați cu notificări doar în fereastra trasă în jos. Întotdeauna silențios."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Se afișează sub notificările prioritare. Întotdeauna silențios."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Se afișează sub notificările prioritare. Întotdeauna silențios."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Se afișează sub notificările prioritare. Întotdeauna silențios."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Vă atrage atenția cu sunete și o pictogramă în bara de stare. Se afișează pe ecranul de blocare."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Aceste notificări nu pot fi modificate."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Acest grup de notificări nu poate fi configurat aici"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Notificare prin proxy"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Această aplicație folosește camera foto."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Această aplicație folosește microfonul."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Această aplicație se afișează pe alte aplicații de pe ecran."</string>
@@ -901,7 +902,7 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Economisirea bateriei se va activa automat imediat ce bateria scade sub <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Setări"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Date SysUI memorie"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Extrageți memoria SysUI"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> folosește <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Aplicațiile folosesc <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -916,6 +917,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Accesați <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Setări pentru baloanele <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Permiteți baloanele de la <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Refuzați"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permiteți"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Întreabă-mă mai târziu"</string>

@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"화면 고정됨"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 홈을 길게 터치하세요."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 홈을 길게 터치하세요."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"이 화면을 고정 해제하려면 뒤로 및 최근 사용 버튼을 길게 터치하세요."</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"조용히 표시됨"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"우선순위 지정됨"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"항상 음소거됩니다. 풀다운 창에 표시됩니다."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"항상 음소거됩니다. 풀다운 창 및 상태 표시줄에 표시됩니다."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"항상 음소거됩니다. 풀다운 창 및 잠금 화면에 표시됩니다."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"항상 음소거됩니다. 풀다운 창, 상태 표시줄, 잠금 화면에 표시됩니다."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"풀다운 창, 상태 표시줄, 잠금 화면에 소리와 함께 표시됩니다."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"풀다운 창에만 알림을 표시하여 집중에 방해가 되지 않습니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"소리 및 상태 표시줄 아이콘으로 주의를 끕니다. 잠금 화면에 표시됩니다."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"프록시를 통한 알림"</string>
     <string name="appops_camera" msgid="8100147441602585776">"앱이 카메라를 사용 중입니다."</string>
     <string name="appops_microphone" msgid="741508267659494555">"앱이 마이크를 사용 중입니다."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"앱이 화면의 다른 앱 위에 표시되고 있습니다."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> 열기"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 풍선 설정"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 알림 풍선을 허용하시겠습니까?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"거부"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"허용"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"나중에 알림"</string>

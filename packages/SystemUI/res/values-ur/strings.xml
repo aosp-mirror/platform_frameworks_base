@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے اور مجموعی جائزہ بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے مجموعی جائزہ بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"ہوم\" بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"مجموعی جائزہ\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
@@ -638,15 +640,19 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"اس ایپ کی طرف سے اطلاعات دکھانا جاری رکھیں؟"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"لطیف"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ترجیح دی گئی"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ میں ڈسپلے کرتا ہے۔"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ اور اسٹیٹس بار پر ڈسپلے کرتا ہے۔"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ اور مقفل اسکرین پر ڈسپلے کرتا ہے۔"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ہمیشہ خاموش رکھیں۔ نیچے کی طرف کھینچیں شیڈ، اسٹیٹس بار اور مقفل اسکرین پر ڈسپلے کرتا ہے۔"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"نیچے کی طرف کھینچیں شیڈ، اسٹیٹس بار اور مقفل اسکرین پر آواز اور ڈسپلے کرتا ہے۔"</string>
+    <!-- no translation found for notification_channel_summary_low (1065819618107531284) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status (2702170424808743755) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_lock (7966605244472624458) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status_lock (7012562768950012739) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (3847289783382316019) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"پراکسی اطلاع"</string>
     <string name="appops_camera" msgid="8100147441602585776">"یہ ایپ کیمرے کا استعمال کر رہی ہے۔"</string>
     <string name="appops_microphone" msgid="741508267659494555">"یہ ایپ مائیکروفون کا استعمال کر رہی ہے۔"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"یہ ایپ آپ کی اسکرین پر دیگر ایپس پر ڈسپلے کر رہی ہے۔"</string>
@@ -911,6 +917,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> کھولیں"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> بلبلوں کے لیے ترتیبات"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> کی جانب سے بلبلوں کو اجازت دیں؟"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"مسترد کریں"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"اجازت دیں"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"مجھ سے بعد میں پوچھیں"</string>

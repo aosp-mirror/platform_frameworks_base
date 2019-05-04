@@ -530,6 +530,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je zakačen"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Pregled da biste ga otkačili."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Nazad i Početna da biste ga otkačili."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Pregled da biste ga otkačili."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Na ovaj način se ovo stalno prikazuje dok ga ne otkačite. Dodirnite i zadržite Početna da biste ga otkačili."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Da biste otkačili ovaj ekran, dodirnite i zadržite dugmad Nazad i Pregled"</string>
@@ -641,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite li da se obaveštenja iz ove aplikacije i dalje prikazuju?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Diskretno"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritetno"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Uvek nečujno. Prikazuje se na padajućoj traci."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Uvek nečujno. Prikazuje se na padajućoj traci i statusnoj traci."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Uvek nečujno. Prikazuje se na padajućoj traci i zaključanom ekranu."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Uvek nečujno. Prikazuje se na padajućoj traci, statusnoj traci i zaključanom ekranu."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Prikazuje se na padajućoj traci, statusnoj traci i zaključanom ekranu uz zvučno obaveštenje."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Pomaže vam da se fokusirate. Obaveštenja su samo na padajućoj traci. Uvek nečujno."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Prikazuje se ispod prioritetnih obaveštenja. Uvek nečujno."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Prikazuje se ispod prioritetnih obaveštenja. Uvek nečujno."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Prikazuje se ispod prioritetnih obaveštenja. Uvek nečujno."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Privlači vam pažnju pomoću zvuka i ikone statusne trake. Prikazuje se na zaključanom ekranu."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ova obaveštenja ne mogu da se menjaju."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ova grupa obaveštenja ne može da se konfiguriše ovde"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Obaveštenje preko proksija"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ova aplikacija koristi kameru."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ova aplikacija koristi mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ova aplikacija se prikazuje preko drugih aplikacija na ekranu."</string>
@@ -916,6 +917,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Otvorite <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Podešavanja za <xliff:g id="APP_NAME">%1$s</xliff:g> oblačiće"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Želite li da omogućite oblačiće iz aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Odbij"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Dozvoli"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Pitaj me kasnije"</string>

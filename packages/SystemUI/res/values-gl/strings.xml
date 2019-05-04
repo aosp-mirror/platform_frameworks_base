@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Activar USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar ata ocupar todo"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. pantalla"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Gardouse a captura de pantalla"</string>
@@ -366,7 +366,7 @@
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Luz nocturna"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Activación ao solpor"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Ata o amencer"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Activación (<xliff:g id="TIME">%s</xliff:g>)"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Desde: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Ata: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema escuro"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"A pantalla está fixada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Atrás e Visión xeral."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Atrás e Inicio."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Visión xeral."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Inicio."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Para soltar a pantalla, mantén premidos os botóns Volver e Visión xeral"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Queres seguir mostrando as notificacións desta aplicación?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Discretas"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritarias"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Sempre en silencio. Móstrase na lista despregable."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Sempre en silencio. Móstrase na lista despregable e na barra de estado."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Sempre en silencio. Móstrase na lista despregable e na pantalla de bloqueo."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Sempre en silencio. Móstrase na lista despregable, na barra de estado e na pantalla de bloqueo."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Reproduce un son e móstrase na lista despregable, na barra de estado e na pantalla de bloqueo."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Permíteche centrarte con notificacións só na lista despregable. Sempre en silencio."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Chama a túa atención cun son e cunha icona na barra de estado Móstrase na pantalla de bloqueo."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Estas notificacións non se poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquí non se pode configurar este grupo de notificacións"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Notificación mediante proxy"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Esta aplicación está utilizando a cámara."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Esta aplicación está utilizando o micrófono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Esta aplicación móstrase sobre outras aplicacións da pantalla."</string>
@@ -859,7 +860,7 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"Mensaxes xerais"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Almacenamento"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Consellos"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"Aplicacións instantáneas"</string>
+    <string name="instant_apps" msgid="6647570248119804907">"Aplicacións Instantáneas"</string>
     <string name="instant_apps_title" msgid="8738419517367449783">"Estase executando <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="instant_apps_message" msgid="1183313016396018086">"Abriuse a aplicación sen ter que instalala."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Abriuse a aplicación sen ter que instalala. Tocar para obter máis información."</string>
@@ -909,8 +910,10 @@
     <string name="music_controls_no_title" msgid="5236895307087002011">"Sen título"</string>
     <string name="restart_button_description" msgid="2035077840254950187">"Toca o botón para reiniciar esta aplicación e abrila en pantalla completa."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abre a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Configuración dos globos de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8807968030159469710">"Queres permitir que se mostren os globos de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Configuración das burbullas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="8807968030159469710">"Queres permitir que se mostren as burbullas de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Denegar"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Preguntarme máis tarde"</string>

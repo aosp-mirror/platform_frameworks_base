@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"A képernyő rögzítve van"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és a Kezdőképernyő elemet."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Kezdőképernyő elemet."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"A képernyő rögzítésének feloldásához tartsa lenyomva a Vissza és az Áttekintés gombot"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Továbbra is megjelenjenek az alkalmazás értesítései?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Diszkrét"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritásos"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Mindig némítva. A lehúzható értesítési felületen jelenik meg."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Mindig némítva. A lehúzható értesítési felületen és az állapotsoron jelenik meg."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Mindig némítva. A lehúzható értesítési felületen és a lezárási képernyőn jelenik meg."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Mindig némítva. A lehúzható értesítési felületen, az állapotsoron és a lezárási képernyőn jelenik meg."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Hangot ad, és megjelenik a lehúzható értesítési felületen, az állapotsoron és a lezárási képernyőn."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Segítségével a fontos dolgokra koncentrálhat, az értesítések csak a lehúzható értesítési felületen jelennek meg. Mindig némítva van."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Az elsőbbségi értesítések alatt jelenik meg. Mindig némítva van."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Az elsőbbségi értesítések alatt jelenik meg. Mindig némítva van."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Az elsőbbségi értesítések alatt jelenik meg. Mindig némítva van."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Figyelemfelkeltő a hangjelzésnek és az állapotsávon megjelenő ikonnak köszönhetően. Megjelenik a lezárási képernyőn."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ezeket az értesítéseket nem lehet módosítani."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Az értesítések jelen csoportját itt nem lehet beállítani"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Továbbított értesítés"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ez az alkalmazás használja a kamerát."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ez az alkalmazás használja a mikrofont."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ez az alkalmazás a képernyőn lévő egyéb alkalmazások előtt jelenik meg."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> megnyitása"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g>-buborékok beállításai"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Engedélyezi a(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazásból származó buborékokat?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Tiltás"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Engedélyezés"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Kérdezzen rá később"</string>

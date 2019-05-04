@@ -539,6 +539,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"تم تثبيت الشاشة"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"الشاشة الرئيسية\" لإزالة التثبيت."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"الشاشة الرئيسية\" لإزالة التثبيت."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"لإزالة تثبيت هذه الشاشة، يمكنك أن تلمس مع الاستمرار زرّي \"رجوع\" و\"نظرة عامة\"."</string>
@@ -650,15 +652,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"الإشعارات الهادئة"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"له الأولوية"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"كتم الصوت دائمًا: يظهر هذا الإعداد في خيار منسدل."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"كتم الصوت دائمًا: سيظهر هذا الإعداد في خيار منسدل وفي شريط الحالة."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"كتم الصوت دائمًا: يظهر هذا الاختيار في خيار منسدِل وعلى شاشة التأمين."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"كتم الصوت دائمًا: يظهر هذا الإعداد في خيار منسدل وفي شريط الحالة وفي شاشة التأمين."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"ستسمع صوتًا وسيظهر لك هذا الإعداد في خيار منسدل وفي شريط الحالة وفي شاشة التأمين."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"لمساعدتك على التركيز، يتم عرض هذه الإشعارات ضمن \"مركز الإشعارات\" فقط. كتم الصوت دائمًا."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"يتم عرض هذه الإشعارات أسفل الإشعارات ذات الأولوية. كتم الصوت دائمًا."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"يتم عرض هذه الإشعارات أسفل الإشعارات ذات الأولوية. كتم الصوت دائمًا."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"يتم عرض هذه الإشعارات أسفل الإشعارات ذات الأولوية. كتم الصوت دائمًا."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"تلفت هذه الإشعارات انتباهك وذلك باستخدام الصوت ورمز \"شريط الحالة\". يتم عرض هذه الإشعارات على \"شاشة التأمين\"."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"إشعار مستند إلى خادم وكيل"</string>
     <string name="appops_camera" msgid="8100147441602585776">"يستخدم هذا التطبيق الكاميرا."</string>
     <string name="appops_microphone" msgid="741508267659494555">"يستخدم هذا التطبيق الميكروفون."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك."</string>
@@ -931,6 +932,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"فتح <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"إعداد الفقاعات التفسيرية على <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"هل تريد السماح بالفقاعات التفسيرية من <xliff:g id="APP_NAME">%1$s</xliff:g>؟"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"رفض"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"سماح"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"اسألني لاحقًا"</string>

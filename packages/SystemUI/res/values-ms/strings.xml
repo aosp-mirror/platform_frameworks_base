@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skrin telah disemat"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Kembali dan Ikhtisar untuk menyahsemat."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Kembali dan Skrin Utama untuk menyahsemat."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Ikhtisar untuk menyahsemat."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Tindakan ini memastikan skrin kelihatan sehingga anda menyahsemat. Sentuh &amp; tahan Skrin Utama untuk menyahsemat."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Untuk menyahsemat skrin ini, sentuh &amp; tahan butang Kembali dan Ikhtisar"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Terus tunjukkan pemberitahuan daripada apl ini?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Lembut"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Diutamakan"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Sentiasa senyap. Dipaparkan dalam bidai tarik turun."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Sentiasa senyap. Dipaparkan dalam bidai tarik turun &amp; bar status."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Sentiasa senyap. Dipaparkan dalam bidai tarik turun &amp; pada skrin kunci."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Sentiasa senyap. Dipaparkan dalam bidai tarik turun, bar status &amp; pada skrin kunci."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Berbunyi dan dipaparkan dalam bidai tarik turun, bar status &amp; pada skrin kunci."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Membantu anda fokus dengan memaparkan pemberitahuan sahaja dalam bidai tarik turun. Sentiasa senyap."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Dipaparkan di bawah pemberitahuan keutamaan. Sentiasa senyap."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Dipaparkan di bawah pemberitahuan keutamaan. Sentiasa senyap."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Dipaparkan di bawah pemberitahuan keutamaan. Sentiasa senyap."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Menarik perhatian anda dengan bunyi &amp; ikon bar status. Ditunjukkan pada skrin kunci."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Pemberitahuan ini tidak boleh diubah suai."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Kumpulan pemberitahuan ini tidak boleh dikonfigurasikan di sini"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Pemberitahuan berproksi"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Apl ini sedang menggunakan kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Apl ini sedang menggunakan mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Apl ini dipaparkan di atas apl lain pada skrin anda."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Buka <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Tetapan untuk gelembung <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Benarkan gelembung daripada <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Tolak"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Benarkan"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Tanya saya kemudian"</string>
