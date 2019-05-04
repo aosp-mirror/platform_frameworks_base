@@ -32,26 +32,26 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A class for downloading GPS XTRA data.
+ * A class for downloading GPS PSDS data.
  *
  * {@hide}
  */
-public class GpsXtraDownloader {
+public class GpsPsdsDownloader {
 
-    private static final String TAG = "GpsXtraDownloader";
+    private static final String TAG = "GpsPsdsDownloader";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long MAXIMUM_CONTENT_LENGTH_BYTES = 1000000;  // 1MB.
     private static final String DEFAULT_USER_AGENT = "Android";
     private static final int CONNECTION_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(30);
     private static final int READ_TIMEOUT_MS = (int) TimeUnit.SECONDS.toMillis(60);
 
-    private final String[] mXtraServers;
+    private final String[] mPsdsServers;
     // to load balance our server requests
     private int mNextServerIndex;
     private final String mUserAgent;
 
-    GpsXtraDownloader(Properties properties) {
-        // read XTRA servers from the Properties object
+    GpsPsdsDownloader(Properties properties) {
+        // read PSDS servers from the Properties object
         int count = 0;
         String server1 = properties.getProperty("XTRA_SERVER_1");
         String server2 = properties.getProperty("XTRA_SERVER_2");
@@ -69,14 +69,14 @@ public class GpsXtraDownloader {
         }
 
         if (count == 0) {
-            Log.e(TAG, "No XTRA servers were specified in the GPS configuration");
-            mXtraServers = null;
+            Log.e(TAG, "No PSDS servers were specified in the GPS configuration");
+            mPsdsServers = null;
         } else {
-            mXtraServers = new String[count];
+            mPsdsServers = new String[count];
             count = 0;
-            if (server1 != null) mXtraServers[count++] = server1;
-            if (server2 != null) mXtraServers[count++] = server2;
-            if (server3 != null) mXtraServers[count++] = server3;
+            if (server1 != null) mPsdsServers[count++] = server1;
+            if (server2 != null) mPsdsServers[count++] = server2;
+            if (server3 != null) mPsdsServers[count++] = server3;
 
             // randomize first server
             Random random = new Random();
@@ -84,11 +84,11 @@ public class GpsXtraDownloader {
         }
     }
 
-    byte[] downloadXtraData() {
+    byte[] downloadPsdsData() {
         byte[] result = null;
         int startIndex = mNextServerIndex;
 
-        if (mXtraServers == null) {
+        if (mPsdsServers == null) {
             return null;
         }
 
@@ -97,14 +97,14 @@ public class GpsXtraDownloader {
             final int oldTag = TrafficStats.getAndSetThreadStatsTag(
                     TrafficStatsConstants.TAG_SYSTEM_GPS);
             try {
-                result = doDownload(mXtraServers[mNextServerIndex]);
+                result = doDownload(mPsdsServers[mNextServerIndex]);
             } finally {
                 TrafficStats.setThreadStatsTag(oldTag);
             }
 
             // increment mNextServerIndex and wrap around if necessary
             mNextServerIndex++;
-            if (mNextServerIndex == mXtraServers.length) {
+            if (mNextServerIndex == mPsdsServers.length) {
                 mNextServerIndex = 0;
             }
             // break if we have tried all the servers
@@ -115,7 +115,7 @@ public class GpsXtraDownloader {
     }
 
     protected byte[] doDownload(String url) {
-        if (DEBUG) Log.d(TAG, "Downloading XTRA data from " + url);
+        if (DEBUG) Log.d(TAG, "Downloading PSDS data from " + url);
 
         HttpURLConnection connection = null;
         try {
@@ -132,7 +132,7 @@ public class GpsXtraDownloader {
             connection.connect();
             int statusCode = connection.getResponseCode();
             if (statusCode != HttpURLConnection.HTTP_OK) {
-                if (DEBUG) Log.d(TAG, "HTTP error downloading gps XTRA: " + statusCode);
+                if (DEBUG) Log.d(TAG, "HTTP error downloading gps PSDS: " + statusCode);
                 return null;
             }
 
@@ -143,14 +143,14 @@ public class GpsXtraDownloader {
                 while ((count = in.read(buffer)) != -1) {
                     bytes.write(buffer, 0, count);
                     if (bytes.size() > MAXIMUM_CONTENT_LENGTH_BYTES) {
-                        if (DEBUG) Log.d(TAG, "XTRA file too large");
+                        if (DEBUG) Log.d(TAG, "PSDS file too large");
                         return null;
                     }
                 }
                 return bytes.toByteArray();
             }
         } catch (IOException ioe) {
-            if (DEBUG) Log.d(TAG, "Error downloading gps XTRA: ", ioe);
+            if (DEBUG) Log.d(TAG, "Error downloading gps PSDS: ", ioe);
         } finally {
             if (connection != null) {
                 connection.disconnect();
