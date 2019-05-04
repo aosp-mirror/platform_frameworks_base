@@ -200,32 +200,40 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
     private boolean canSeekMedia() {
         if (mMediaController == null || mMediaController.getPlaybackState() == null) {
+            Log.d(TAG, "Cannot seek media because the controller is invalid");
             return false;
         }
 
         long actions = mMediaController.getPlaybackState().getActions();
+        Log.d(TAG, "Playback state actions are " + actions);
         return (actions == 0 || (actions & PlaybackState.ACTION_SEEK_TO) != 0);
     }
 
     protected final Runnable mUpdatePlaybackUi = new Runnable() {
         @Override
         public void run() {
-            if (mMediaController != null && mMediaController.getMetadata() != null
-                    && mSeekBar != null) {
-                long position = mMediaController.getPlaybackState().getPosition();
-                long duration = mMediaController.getMetadata().getLong(
-                        MediaMetadata.METADATA_KEY_DURATION);
+            if (mMediaController != null && mSeekBar != null) {
+                MediaMetadata metadata = mMediaController.getMetadata();
+                PlaybackState playbackState = mMediaController.getPlaybackState();
 
-                if (mDuration != duration) {
-                    mDuration = duration;
-                    mSeekBar.setMax((int) mDuration);
-                    mSeekBarTotalTime.setText(millisecondsToTimeString(duration));
+                if (metadata != null && playbackState != null) {
+                    long position = playbackState.getPosition();
+                    long duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+
+                    if (mDuration != duration) {
+                        mDuration = duration;
+                        mSeekBar.setMax((int) mDuration);
+                        mSeekBarTotalTime.setText(millisecondsToTimeString(duration));
+                    }
+                    mSeekBar.setProgress((int) position);
+
+                    mSeekBarElapsedTime.setText(millisecondsToTimeString(position));
+                } else {
+                    Log.d(TAG, "Controller missing data " + metadata + " " + playbackState);
+                    clearTimer();
                 }
-                mSeekBar.setProgress((int) position);
-
-                mSeekBarElapsedTime.setText(millisecondsToTimeString(position));
             } else {
-                // We no longer have a media session / notification
+                Log.d(TAG, "No longer have a valid media controller");
                 clearTimer();
             }
         }
