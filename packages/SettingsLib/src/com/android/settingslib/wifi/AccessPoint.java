@@ -1111,7 +1111,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * Return true if this AccessPoint represents a Passpoint provider configuration.
      */
     public boolean isPasspointConfig() {
-        return mFqdn != null;
+        return mFqdn != null && mConfig == null;
     }
 
     /**
