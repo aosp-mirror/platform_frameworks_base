@@ -326,8 +326,8 @@ public final class PermissionPolicyService extends SystemService {
                 return;
             }
 
-            final boolean applyRestriction = PackageManager.RESTRICTED_PERMISSIONS_ENABLED
-                    && (mPackageManager.getPermissionFlags(permission, pkg.packageName,
+            final boolean applyRestriction =
+                    (mPackageManager.getPermissionFlags(permission, pkg.packageName,
                     mContext.getUser()) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
 
             if (permissionInfo.isHardRestricted()) {
