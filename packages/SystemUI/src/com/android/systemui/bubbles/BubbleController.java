@@ -16,6 +16,10 @@
 
 package com.android.systemui.bubbles;
 
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.INVISIBLE;
@@ -53,13 +57,13 @@ import androidx.annotation.MainThread;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
@@ -210,6 +214,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
+        mNotificationEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
 
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
@@ -389,6 +394,46 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     @SuppressWarnings("FieldCanBeLocal")
+    private final NotificationRemoveInterceptor mRemoveInterceptor =
+            new NotificationRemoveInterceptor() {
+            @Override
+            public boolean onNotificationRemoveRequested(String key, int reason) {
+                if (!mBubbleData.hasBubbleWithKey(key)) {
+                    return false;
+                }
+                NotificationEntry entry = mBubbleData.getBubbleWithKey(key).entry;
+
+                final boolean isClearAll = reason == REASON_CANCEL_ALL;
+                final boolean isUserDimiss = reason == REASON_CANCEL;
+                final boolean isAppCancel = reason == REASON_APP_CANCEL
+                        || reason == REASON_APP_CANCEL_ALL;
+
+                // Need to check for !appCancel here because the notification may have
+                // previously been dismissed & entry.isRowDismissed would still be true
+                boolean userRemovedNotif = (entry.isRowDismissed() && !isAppCancel)
+                        || isClearAll || isUserDimiss;
+
+                // The bubble notification sticks around in the data as long as the bubble is
+                // not dismissed and the app hasn't cancelled the notification.
+                boolean bubbleExtended = entry.isBubble() && !entry.isBubbleDismissed()
+                        && userRemovedNotif;
+                if (bubbleExtended) {
+                    entry.setShowInShadeWhenBubble(false);
+                    if (mStackView != null) {
+                        mStackView.updateDotVisibility(entry.key);
+                    }
+                    mNotificationEntryManager.updateNotifications();
+                    return true;
+                } else if (!userRemovedNotif && !entry.isBubbleDismissed()) {
+                    // This wasn't a user removal so we should remove the bubble as well
+                    mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
+                    return false;
+                }
+                return false;
+            }
+        };
+
+    @SuppressWarnings("FieldCanBeLocal")
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
@@ -396,7 +441,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 return;
             }
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)) {
-                // TODO: handle group summaries?
                 updateShowInShadeForSuppressNotification(entry);
             }
         }
@@ -426,23 +470,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 updateBubble(entry);
             }
         }
-
-        @Override
-        public void onEntryRemoved(NotificationEntry entry,
-                @Nullable NotificationVisibility visibility,
-                boolean removedByUser) {
-            if (!areBubblesEnabled(mContext)) {
-                return;
-            }
-            entry.setShowInShadeWhenBubble(false);
-            if (mStackView != null) {
-                mStackView.updateDotVisibility(entry.key);
-            }
-            if (!removedByUser) {
-                // This was a cancel so we should remove the bubble
-                removeBubble(entry.key, DISMISS_NOTIF_CANCEL);
-            }
-        }
     };
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -455,13 +482,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
 
         @Override
-        public void onBubbleRemoved(Bubble bubble, int reason) {
+        public void onBubbleRemoved(Bubble bubble, @DismissReason int reason) {
             if (mStackView != null) {
                 mStackView.removeBubble(bubble);
             }
-            if (!bubble.entry.showInShadeWhenBubble()) {
-                // The notification is gone & bubble is gone, time to actually remove it
-                mNotificationEntryManager.performRemoveNotification(bubble.entry.notification);
+            if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
+                    && !bubble.entry.showInShadeWhenBubble()) {
+                // The bubble is gone & the notification is gone, time to actually remove it
+                mNotificationEntryManager.performRemoveNotification(bubble.entry.notification,
+                        0 /* reason */);
             } else {
                 // The notification is still in the shade but we've removed the bubble so
                 // lets make sure NoMan knows it's not a bubble anymore

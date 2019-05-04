@@ -46,6 +46,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -5586,7 +5587,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             setDismissAllInProgress(false);
             for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
                 if (canChildBeDismissed(rowToRemove)) {
-                    mEntryManager.removeNotification(rowToRemove.getEntry().key, null);
+                    mEntryManager.removeNotification(rowToRemove.getEntry().key, null /* ranking */,
+                            NotificationListenerService.REASON_CANCEL_ALL);
                 } else {
                     rowToRemove.resetTranslation();
                 }
