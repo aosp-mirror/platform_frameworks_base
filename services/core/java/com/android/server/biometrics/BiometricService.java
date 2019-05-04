@@ -1313,6 +1313,10 @@ public class BiometricService extends SystemService {
         }
 
         if (acquiredInfo != BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
+            if (message == null) {
+                Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
+                return;
+            }
             try {
                 mStatusBarService.onBiometricHelp(message);
             } catch (RemoteException e) {

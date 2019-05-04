@@ -22,10 +22,14 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Outline;
+import android.graphics.drawable.Animatable2;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
@@ -54,6 +58,64 @@ public class FaceDialogView extends BiometricDialogView {
     private int mSize;
     private float mIconOriginalY;
     private DialogOutlineProvider mOutlineProvider = new DialogOutlineProvider();
+    private IconController mIconController;
+    private boolean mDialogAnimatedIn;
+
+    /**
+     * Class that handles the biometric icon animations.
+     */
+    private final class IconController extends Animatable2.AnimationCallback {
+
+        private boolean mLastPulseDirection; // false = dark to light, true = light to dark
+
+        int mState;
+
+        IconController() {
+            mState = STATE_IDLE;
+        }
+
+        public void animateOnce(int iconRes) {
+            animateIcon(iconRes, false);
+        }
+
+        public void startPulsing() {
+            mLastPulseDirection = false;
+            animateIcon(R.drawable.face_dialog_pulse_dark_to_light, true);
+        }
+
+        public void showIcon(int iconRes) {
+            final Drawable drawable = mContext.getDrawable(iconRes);
+            mBiometricIcon.setImageDrawable(drawable);
+        }
+
+        private void animateIcon(int iconRes, boolean repeat) {
+            final AnimatedVectorDrawable icon =
+                    (AnimatedVectorDrawable) mContext.getDrawable(iconRes);
+            mBiometricIcon.setImageDrawable(icon);
+            icon.forceAnimationOnUI();
+            if (repeat) {
+                icon.registerAnimationCallback(this);
+            }
+            icon.start();
+        }
+
+        private void pulseInNextDirection() {
+            int iconRes = mLastPulseDirection ? R.drawable.face_dialog_pulse_dark_to_light
+                    : R.drawable.face_dialog_pulse_light_to_dark;
+            animateIcon(iconRes, true /* repeat */);
+            mLastPulseDirection = !mLastPulseDirection;
+        }
+
+        @Override
+        public void onAnimationEnd(Drawable drawable) {
+            super.onAnimationEnd(drawable);
+
+            if (mState == STATE_AUTHENTICATING) {
+                // Still authenticating, pulse the icon
+                pulseInNextDirection();
+            }
+        }
+    }
 
     private final class DialogOutlineProvider extends ViewOutlineProvider {
 
@@ -79,9 +141,15 @@ public class FaceDialogView extends BiometricDialogView {
         }
     }
 
+    private final Runnable mErrorToIdleAnimationRunnable = () -> {
+        updateState(STATE_IDLE);
+        mErrorText.setVisibility(View.INVISIBLE);
+    };
+
     public FaceDialogView(Context context,
             DialogViewCallback callback) {
         super(context, callback);
+        mIconController = new IconController();
     }
 
     private void updateSize(int newSize) {
@@ -212,18 +280,9 @@ public class FaceDialogView extends BiometricDialogView {
 
 
     @Override
-    protected void handleClearMessage(boolean requireTryAgain) {
-        // Clears the temporary message and shows the help message. If requireTryAgain is true,
-        // we will start the authenticating state again.
-        if (!requireTryAgain) {
-            updateState(STATE_AUTHENTICATING);
-            mErrorText.setText(getHintStringResourceId());
-            mErrorText.setTextColor(mTextColor);
-            mErrorText.setVisibility(View.VISIBLE);
-        } else {
-            updateState(STATE_IDLE);
-            mErrorText.setVisibility(View.INVISIBLE);
-        }
+    protected void handleClearMessage() {
+        mErrorText.setText(getHintStringResourceId());
+        mErrorText.setTextColor(mTextColor);
     }
 
     @Override
@@ -270,14 +329,19 @@ public class FaceDialogView extends BiometricDialogView {
     }
 
     @Override
-    public void showErrorMessage(String error) {
-        super.showErrorMessage(error);
-
+    public void onErrorReceived(String error) {
+        super.onErrorReceived(error);
         // All error messages will cause the dialog to go from small -> big. Error messages
         // are messages such as lockout, auth failed, etc.
         if (mSize == SIZE_SMALL) {
             updateSize(SIZE_BIG);
         }
+    }
+
+    @Override
+    public void onAuthenticationFailed(String message) {
+        super.onAuthenticationFailed(message);
+        showTryAgainButton(true);
     }
 
     @Override
@@ -321,27 +385,39 @@ public class FaceDialogView extends BiometricDialogView {
     }
 
     @Override
-    protected boolean shouldAnimateForTransition(int oldState, int newState) {
-        if (oldState == STATE_ERROR && newState == STATE_IDLE) {
-            return true;
-        } else if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
-            return false;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
-            return true;
-        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
-            return true;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_PENDING_CONFIRMATION) {
-            return true;
+    protected void updateIcon(int oldState, int newState) {
+        mIconController.mState = newState;
+
+        if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
+            if (mDialogAnimatedIn) {
+                mIconController.startPulsing();
+                mErrorText.setVisibility(View.VISIBLE);
+            } else {
+                mIconController.showIcon(R.drawable.face_dialog_pulse_dark_to_light);
+            }
         } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
-            return true;
+            mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
+        } else if (oldState == STATE_ERROR && newState == STATE_IDLE) {
+            mIconController.animateOnce(R.drawable.face_dialog_error_to_idle);
+        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
+            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
+            mIconController.startPulsing();
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
+            mIconController.animateOnce(R.drawable.face_dialog_dark_to_error);
+            mHandler.postDelayed(mErrorToIdleAnimationRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
-            return true;
-        } else if (oldState == STATE_ERROR && newState == STATE_PENDING_CONFIRMATION) {
-            return true;
-        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
-            return true;
+            mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
+        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_PENDING_CONFIRMATION) {
+            mIconController.animateOnce(R.drawable.face_dialog_wink_from_dark);
+        } else {
+            Log.w(TAG, "Unknown animation from " + oldState + " -> " + newState);
         }
-        return false;
+    }
+
+    @Override
+    public void onDialogAnimatedIn() {
+        mDialogAnimatedIn = true;
+        mIconController.startPulsing();
     }
 
     @Override
@@ -355,33 +431,6 @@ public class FaceDialogView extends BiometricDialogView {
             return false;
         }
         return true;
-    }
-
-    @Override
-    protected Drawable getAnimationForTransition(int oldState, int newState) {
-        int iconRes;
-        if (oldState == STATE_ERROR && newState == STATE_IDLE) {
-            iconRes = R.drawable.face_dialog_error_to_face;
-        } else if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
-            iconRes = R.drawable.face_dialog_face_to_error;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
-            iconRes = R.drawable.face_dialog_face_to_error;
-        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
-            iconRes = R.drawable.face_dialog_error_to_face;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_PENDING_CONFIRMATION) {
-            iconRes = R.drawable.face_dialog_face_gray_to_face_blue;
-        } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
-            iconRes = R.drawable.face_dialog_face_blue_to_checkmark;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
-            iconRes = R.drawable.face_dialog_face_gray_to_checkmark;
-        } else if (oldState == STATE_ERROR && newState == STATE_PENDING_CONFIRMATION) {
-            iconRes = R.drawable.face_dialog_face_gray_to_face_blue;
-        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
-            iconRes = R.drawable.face_dialog_face_blue_to_checkmark;
-        } else {
-            return null;
-        }
-        return mContext.getDrawable(iconRes);
     }
 
     private float dpToPixels(float dp) {
