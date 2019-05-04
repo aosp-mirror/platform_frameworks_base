@@ -16,12 +16,15 @@
 
 package com.android.server.display;
 
+import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
+import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
-import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
@@ -1979,6 +1982,18 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
+            // Sometimes users can have sensitive information in system decoration windows. An app
+            // could create a virtual display with system decorations support and read the user info
+            // from the surface.
+            // We should only allow adding flag VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+            // to virtual displays that are owned by the system.
+            if (callingUid != Process.SYSTEM_UID
+                    && (flags & VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+                if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "createVirtualDisplay()")) {
+                    throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+                }
+            }
+
             final long token = Binder.clearCallingIdentity();
             try {
                 return createVirtualDisplayInternal(callback, projection, callingUid, packageName,
@@ -2279,9 +2294,7 @@ public final class DisplayManagerService extends SystemService {
                     Slog.e(TAG, "Unable to query projection service for permissions", e);
                 }
             }
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (checkCallingPermission(CAPTURE_VIDEO_OUTPUT, "canProjectVideo()")) {
                 return true;
             }
             return canProjectSecureVideo(projection);
@@ -2297,9 +2310,17 @@ public final class DisplayManagerService extends SystemService {
                     Slog.e(TAG, "Unable to query projection service for permissions", e);
                 }
             }
-            return mContext.checkCallingPermission(
-                    android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
-                    == PackageManager.PERMISSION_GRANTED;
+            return checkCallingPermission(CAPTURE_SECURE_VIDEO_OUTPUT, "canProjectSecureVideo()");
+        }
+
+        private boolean checkCallingPermission(String permission, String func) {
+            if (mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            final String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid() + " requires " + permission;
+            Slog.w(TAG, msg);
+            return false;
         }
     }
 
