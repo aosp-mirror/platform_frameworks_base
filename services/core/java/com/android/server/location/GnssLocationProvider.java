@@ -1597,8 +1597,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private void reportGnssServiceDied() {
         if (DEBUG) Log.d(TAG, "reportGnssServiceDied");
         mHandler.post(() -> {
-            class_init_native();
-            setupNativeGnssService();
+            setupNativeGnssService(/* reinitializeGnssServiceHandle = */ true);
             if (isEnabled()) {
                 synchronized (mLock) {
                     mEnabled = false;
@@ -2052,7 +2051,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
          * this handler.
          */
         private void handleInitialize() {
-            setupNativeGnssService();
+            // class_init_native() already initializes the GNSS service handle during class loading.
+            setupNativeGnssService(/* reinitializeGnssServiceHandle = */ false);
 
             if (native_is_gnss_visibility_control_supported()) {
                 mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper);
@@ -2214,8 +2214,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         pw.append(s);
     }
 
-    private void setupNativeGnssService() {
-        native_init_once();
+    private void setupNativeGnssService(boolean reinitializeGnssServiceHandle) {
+        native_init_once(reinitializeGnssServiceHandle);
 
         /*
          * A cycle of native_init() and native_cleanup() is needed so that callbacks are
@@ -2244,7 +2244,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private static native boolean native_is_gnss_visibility_control_supported();
 
-    private static native void native_init_once();
+    private static native void native_init_once(boolean reinitializeGnssServiceHandle);
 
     private native boolean native_init();
 

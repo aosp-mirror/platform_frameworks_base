@@ -1495,7 +1495,8 @@ struct GnssBatchingCallback_V2_0 : public IGnssBatchingCallback_V2_0 {
     }
 };
 
-static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
+/* Initializes the GNSS service handle. */
+static void android_location_GnssLocationProvider_set_gps_service_handle() {
     gnssHal_V2_0 = IGnss_V2_0::getService();
     if (gnssHal_V2_0 != nullptr) {
         gnssHal = gnssHal_V2_0;
@@ -1514,7 +1515,12 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     gnssHal = IGnss_V1_0::getService();
 }
 
-static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass clazz) {
+/* One time initialization at system boot */
+static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
+    // Initialize the top level gnss HAL handle.
+    android_location_GnssLocationProvider_set_gps_service_handle();
+
+    // Cache methodIDs and class IDs.
     method_reportLocation = env->GetMethodID(clazz, "reportLocation",
             "(ZLandroid/location/Location;)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
@@ -1638,13 +1644,21 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             (jclass) env->NewGlobalRef(gnssConfiguration_halInterfaceVersionClass);
     method_halInterfaceVersionCtor =
             env->GetMethodID(class_gnssConfiguration_halInterfaceVersion, "<init>", "(II)V");
+}
 
+/* Initialization needed at system boot and whenever GNSS service dies. */
+static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass clazz,
+        jboolean reinitializeGnssServiceHandle) {
     /*
      * Save a pointer to JVM.
      */
     jint jvmStatus = env->GetJavaVM(&sJvm);
     if (jvmStatus != JNI_OK) {
         LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
+    }
+
+    if (reinitializeGnssServiceHandle) {
+        android_location_GnssLocationProvider_set_gps_service_handle();
     }
 
     if (gnssHal == nullptr) {
@@ -1871,6 +1885,7 @@ static jobject android_location_GnssConfiguration_get_gnss_configuration_version
     return createHalInterfaceVersionJavaObject(env, major, minor);
 }
 
+/* Initialization needed each time the GPS service is shutdown. */
 static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject obj) {
     /*
      * This must be set before calling into the HAL library.
@@ -3026,7 +3041,7 @@ static const JNINativeMethod sMethods[] = {
             android_location_GnssLocationProvider_class_init_native)},
     {"native_is_supported", "()Z", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_is_supported)},
-    {"native_init_once", "()V", reinterpret_cast<void *>(
+    {"native_init_once", "(Z)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_init_once)},
     {"native_init", "()Z", reinterpret_cast<void *>(android_location_GnssLocationProvider_init)},
     {"native_cleanup", "()V", reinterpret_cast<void *>(
