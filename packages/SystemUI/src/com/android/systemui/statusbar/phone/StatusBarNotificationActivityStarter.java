@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.service.notification.NotificationListenerService.REASON_CLICK;
+
 import static com.android.systemui.statusbar.phone.StatusBar.getActivityOptions;
 
 import android.app.ActivityManager;
@@ -483,7 +485,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         // We have to post it to the UI thread for synchronization
         mMainThreadHandler.post(() -> {
             Runnable removeRunnable =
-                    () -> mEntryManager.performRemoveNotification(notification);
+                    () -> mEntryManager.performRemoveNotification(notification, REASON_CLICK);
             if (mPresenter.isCollapsing()) {
                 // To avoid lags we're only performing the remove
                 // after the shade was collapsed

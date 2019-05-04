@@ -268,8 +268,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // Set up the context group of buttons
         mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
-        final ContextualButton menuButton = new ContextualButton(R.id.menu,
-                R.drawable.ic_sysbar_menu);
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
                 R.drawable.ic_ime_switcher_default);
         final RotationContextButton rotateSuggestionButton = new RotationContextButton(
@@ -278,7 +276,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final ContextualButton accessibilityButton =
                 new ContextualButton(R.id.accessibility_button,
                         R.drawable.ic_sysbar_accessibility_button);
-        mContextualButtonGroup.addButton(menuButton);
         mContextualButtonGroup.addButton(imeSwitcherButton);
         if (!isGesturalMode) {
             mContextualButtonGroup.addButton(rotateSuggestionButton);
@@ -306,7 +303,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
         mButtonDispatchers.put(R.id.home_handle, new ButtonDispatcher(R.id.home_handle));
         mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
-        mButtonDispatchers.put(R.id.menu, menuButton);
         mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
         mButtonDispatchers.put(R.id.accessibility_button, accessibilityButton);
         mButtonDispatchers.put(R.id.rotate_suggestion, rotateSuggestionButton);
@@ -404,10 +400,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public ButtonDispatcher getRecentsButton() {
         return mButtonDispatchers.get(R.id.recent_apps);
-    }
-
-    public ButtonDispatcher getMenuButton() {
-        return mButtonDispatchers.get(R.id.menu);
     }
 
     public ButtonDispatcher getBackButton() {
@@ -722,10 +714,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
-    public void onPanelExpandedChange(boolean expanded) {
+    public void onPanelExpandedChange() {
         updateSlippery();
         mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
-                expanded);
+                mPanelView.isFullyExpanded(), getContext().getDisplayId());
     }
 
     public void updateStates() {
@@ -793,10 +785,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         } else {
             mTintController.stop();
         }
-    }
-
-    public void setMenuVisibility(final boolean show) {
-        mContextualButtonGroup.setButtonVisibility(R.id.menu, show);
     }
 
     public void setAccessibilityButtonState(final boolean visible, final boolean longClickable) {
@@ -1154,16 +1142,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                         visibilityToString(getCurrentView().getVisibility()),
                         getCurrentView().getAlpha()));
 
-        pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s darkIntensity=%.2f",
+        pw.println(String.format("      disabled=0x%08x vertical=%s darkIntensity=%.2f",
                         mDisabledFlags,
                         mIsVertical ? "true" : "false",
-                        getMenuButton().isVisible() ? "true" : "false",
                         getLightTransitionsController().getCurrentDarkIntensity()));
 
         dumpButton(pw, "back", getBackButton());
         dumpButton(pw, "home", getHomeButton());
         dumpButton(pw, "rcnt", getRecentsButton());
-        dumpButton(pw, "menu", getMenuButton());
         dumpButton(pw, "rota", getRotateSuggestionButton());
         dumpButton(pw, "a11y", getAccessibilityButton());
 

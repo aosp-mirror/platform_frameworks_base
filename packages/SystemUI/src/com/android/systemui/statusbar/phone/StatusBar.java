@@ -148,7 +148,8 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
-import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -436,7 +437,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onUserSetupChanged() {
             final boolean userSetup = mDeviceProvisionedController.isUserSetup(
                     mDeviceProvisionedController.getCurrentUser());
-            // STOPSHIP(kozynski, b/129405675) Remove log
             Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for user "
                     + mDeviceProvisionedController.getCurrentUser());
             if (MULTIUSER_DEBUG) {
@@ -593,6 +593,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updateScrimController();
             };
     private ActivityIntentHelper mActivityIntentHelper;
+    private ShadeController mShadeController;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -710,8 +711,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         setSystemUiVisibility(mDisplayId, result.mSystemUiVisibility,
                 result.mFullscreenStackSysUiVisibility, result.mDockedStackSysUiVisibility,
-                0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds);
-        topAppWindowChanged(mDisplayId, result.mMenuVisible);
+                0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds,
+                result.mNavbarColorManagedByIme);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
                 result.mImeBackDisposition, result.mShowImeSwitcher);
@@ -725,11 +726,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (DEBUG) {
             Log.d(TAG, String.format(
-                    "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
+                    "init: icons=%d disabled=0x%08x lights=0x%08x imeButton=0x%08x",
                     numIcons,
                     result.mDisabledFlags1,
                     result.mSystemUiVisibility,
-                    result.mMenuVisible ? 1 : 0,
                     result.mImeWindowVis));
         }
 
@@ -761,7 +761,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         putComponent(DozeHost.class, mDozeServiceHost);
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
-        mFalsingManager = FalsingManager.getInstance(mContext);
+        mFalsingManager = FalsingManagerFactory.getInstance(mContext);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
@@ -1062,7 +1062,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback =
                 (StatusBarRemoteInputCallback) Dependency.get(
                         NotificationRemoteInputManager.Callback.class);
-        final ShadeController shadeController = Dependency.get(ShadeController.class);
+        mShadeController = Dependency.get(ShadeController.class);
         final ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
 
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
@@ -1070,7 +1070,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
                 mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
-                mLockscreenUserManager, shadeController, mKeyguardMonitor,
+                mLockscreenUserManager, mShadeController, mKeyguardMonitor,
                 mNotificationInterruptionStateProvider, mMetricsLogger,
                 new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
                 Dependency.get(BG_HANDLER), mActivityIntentHelper, mBubbleController);
@@ -2077,7 +2077,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override // CommandQueue
     public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -2114,7 +2115,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         }
         mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
-                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
+                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode,
+                navbarColorManagedByIme);
     }
 
     @Override
@@ -2229,30 +2231,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
-    }
-
-    public void setLightsOn(boolean on) {
-        Log.v(TAG, "setLightsOn(" + on + ")");
-        if (on) {
-            setSystemUiVisibility(mDisplayId, 0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
-                    mLastFullscreenStackBounds, mLastDockedStackBounds);
-        } else {
-            setSystemUiVisibility(mDisplayId, View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
-                    mLastDockedStackBounds);
-        }
-    }
-
-    @Override
-    public void topAppWindowChanged(int displayId, boolean showMenu) {
-        if (mDisplayId != displayId) return;
-        if (SPEW) {
-            Log.d(TAG, "display#" + displayId + ": "
-                    + (showMenu ? "showing" : "hiding") + " the MENU button");
-        }
-
-        // See above re: lights-out policy for legacy apps.
-        if (showMenu) setLightsOn(true);
     }
 
     public static String viewInfo(View v) {
@@ -2376,7 +2354,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
-        FalsingManager.getInstance(mContext).dump(pw);
+        FalsingManagerFactory.getInstance(mContext).dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");
@@ -3584,7 +3562,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Notify overview proxy service of the new states
         Dependency.get(OverviewProxyService.class).setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING,
-                isBouncerShowing());
+                isBouncerShowing(), mContext.getDisplayId());
     }
 
     /**
@@ -4344,6 +4322,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void startPendingIntentDismissingKeyguard(
             final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback) {
+        startPendingIntentDismissingKeyguard(intent, intentSentUiThreadCallback, null /* row */);
+    }
+
+    @Override
+    public void startPendingIntentDismissingKeyguard(
+            final PendingIntent intent, @Nullable final Runnable intentSentUiThreadCallback,
+            View associatedView) {
         final boolean afterKeyguardGone = intent.isActivity()
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
@@ -4351,7 +4336,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         executeActionDismissingKeyguard(() -> {
             try {
                 intent.send(null, 0, null, null, null, null, getActivityOptions(
-                        null /* animationAdapter */));
+                        mActivityLaunchAnimator.getLaunchAnimation(associatedView,
+                                mShadeController.isOccluded())));
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
                 // Just log the exception message.
@@ -4425,6 +4411,13 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     public boolean isBouncerShowing() {
         return mBouncerShowing;
+    }
+
+    /**
+     * @return Whether the security bouncer from Keyguard is showing.
+     */
+    public boolean isBouncerShowingScrimmed() {
+        return isBouncerShowing() && mStatusBarKeyguardViewManager.bouncerNeedsScrimming();
     }
 
     /**

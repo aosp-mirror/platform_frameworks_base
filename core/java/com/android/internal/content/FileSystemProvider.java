@@ -45,6 +45,7 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
 
@@ -59,9 +60,11 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A helper class for {@link android.provider.DocumentsProvider} to perform file operations on local
@@ -450,7 +453,11 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
     @Override
     public String getDocumentType(String documentId) throws FileNotFoundException {
-        final File file = getFileForDocId(documentId);
+        return getDocumentType(documentId, getFileForDocId(documentId));
+    }
+
+    private String getDocumentType(final String documentId, final File file)
+            throws FileNotFoundException {
         if (file.isDirectory()) {
             return Document.MIME_TYPE_DIR;
         } else {
@@ -532,51 +539,63 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return DocumentsContract.openImageThumbnail(file);
     }
 
-    protected RowBuilder includeFile(MatrixCursor result, String docId, File file)
+    protected RowBuilder includeFile(final MatrixCursor result, String docId, File file)
             throws FileNotFoundException {
+        final String[] columns = result.getColumnNames();
+        final RowBuilder row = result.newRow();
+
         if (docId == null) {
             docId = getDocIdForFile(file);
         } else {
             file = getFileForDocId(docId);
         }
+        final String mimeType = getDocumentType(docId, file);
+        row.add(Document.COLUMN_DOCUMENT_ID, docId);
+        row.add(Document.COLUMN_MIME_TYPE, mimeType);
 
-        int flags = 0;
+        final int flagIndex = ArrayUtils.indexOf(columns, Document.COLUMN_FLAGS);
+        if (flagIndex != -1) {
+            int flags = 0;
+            if (file.canWrite()) {
+                if (mimeType.equals(Document.MIME_TYPE_DIR)) {
+                    flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
+                    flags |= Document.FLAG_SUPPORTS_DELETE;
+                    flags |= Document.FLAG_SUPPORTS_RENAME;
+                    flags |= Document.FLAG_SUPPORTS_MOVE;
+                } else {
+                    flags |= Document.FLAG_SUPPORTS_WRITE;
+                    flags |= Document.FLAG_SUPPORTS_DELETE;
+                    flags |= Document.FLAG_SUPPORTS_RENAME;
+                    flags |= Document.FLAG_SUPPORTS_MOVE;
+                }
+            }
 
-        if (file.canWrite()) {
-            if (file.isDirectory()) {
-                flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
-                flags |= Document.FLAG_SUPPORTS_DELETE;
-                flags |= Document.FLAG_SUPPORTS_RENAME;
-                flags |= Document.FLAG_SUPPORTS_MOVE;
-            } else {
-                flags |= Document.FLAG_SUPPORTS_WRITE;
-                flags |= Document.FLAG_SUPPORTS_DELETE;
-                flags |= Document.FLAG_SUPPORTS_RENAME;
-                flags |= Document.FLAG_SUPPORTS_MOVE;
+            if (mimeType.startsWith("image/")) {
+                flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
+            }
+
+            if (typeSupportsMetadata(mimeType)) {
+                flags |= Document.FLAG_SUPPORTS_METADATA;
+            }
+            row.add(flagIndex, flags);
+        }
+
+        final int displayNameIndex = ArrayUtils.indexOf(columns, Document.COLUMN_DISPLAY_NAME);
+        if (displayNameIndex != -1) {
+            row.add(displayNameIndex, file.getName());
+        }
+
+        final int lastModifiedIndex = ArrayUtils.indexOf(columns, Document.COLUMN_LAST_MODIFIED);
+        if (lastModifiedIndex != -1) {
+            final long lastModified = file.lastModified();
+            // Only publish dates reasonably after epoch
+            if (lastModified > 31536000000L) {
+                row.add(lastModifiedIndex, lastModified);
             }
         }
-
-        final String mimeType = getDocumentType(docId);
-        final String displayName = file.getName();
-        if (mimeType.startsWith("image/")) {
-            flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
-        }
-
-        if (typeSupportsMetadata(mimeType)) {
-            flags |= Document.FLAG_SUPPORTS_METADATA;
-        }
-
-        final RowBuilder row = result.newRow();
-        row.add(Document.COLUMN_DOCUMENT_ID, docId);
-        row.add(Document.COLUMN_DISPLAY_NAME, displayName);
-        row.add(Document.COLUMN_SIZE, file.length());
-        row.add(Document.COLUMN_MIME_TYPE, mimeType);
-        row.add(Document.COLUMN_FLAGS, flags);
-
-        // Only publish dates reasonably after epoch
-        long lastModified = file.lastModified();
-        if (lastModified > 31536000000L) {
-            row.add(Document.COLUMN_LAST_MODIFIED, lastModified);
+        final int sizeIndex = ArrayUtils.indexOf(columns, Document.COLUMN_SIZE);
+        if (sizeIndex != -1) {
+            row.add(sizeIndex, file.length());
         }
 
         // Return the row builder just in case any subclass want to add more stuff to it.
@@ -596,28 +615,28 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return projection == null ? mDefaultProjection : projection;
     }
 
-    private void startObserving(File file, Uri notifyUri) {
+    private void startObserving(File file, Uri notifyUri, DirectoryCursor cursor) {
         synchronized (mObservers) {
             DirectoryObserver observer = mObservers.get(file);
             if (observer == null) {
-                observer = new DirectoryObserver(
-                        file, getContext().getContentResolver(), notifyUri);
+                observer =
+                        new DirectoryObserver(file, getContext().getContentResolver(), notifyUri);
                 observer.startWatching();
                 mObservers.put(file, observer);
             }
-            observer.mRefCount++;
+            observer.mCursors.add(cursor);
 
             if (LOG_INOTIFY) Log.d(TAG, "after start: " + observer);
         }
     }
 
-    private void stopObserving(File file) {
+    private void stopObserving(File file, DirectoryCursor cursor) {
         synchronized (mObservers) {
             DirectoryObserver observer = mObservers.get(file);
             if (observer == null) return;
 
-            observer.mRefCount--;
-            if (observer.mRefCount == 0) {
+            observer.mCursors.remove(cursor);
+            if (observer.mCursors.size() == 0) {
                 mObservers.remove(file);
                 observer.stopWatching();
             }
@@ -633,27 +652,31 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         private final File mFile;
         private final ContentResolver mResolver;
         private final Uri mNotifyUri;
+        private final CopyOnWriteArrayList<DirectoryCursor> mCursors;
 
-        private int mRefCount = 0;
-
-        public DirectoryObserver(File file, ContentResolver resolver, Uri notifyUri) {
+        DirectoryObserver(File file, ContentResolver resolver, Uri notifyUri) {
             super(file.getAbsolutePath(), NOTIFY_EVENTS);
             mFile = file;
             mResolver = resolver;
             mNotifyUri = notifyUri;
+            mCursors = new CopyOnWriteArrayList<>();
         }
 
         @Override
         public void onEvent(int event, String path) {
             if ((event & NOTIFY_EVENTS) != 0) {
                 if (LOG_INOTIFY) Log.d(TAG, "onEvent() " + event + " at " + path);
+                for (DirectoryCursor cursor : mCursors) {
+                    cursor.notifyChanged();
+                }
                 mResolver.notifyChange(mNotifyUri, null, false);
             }
         }
 
         @Override
         public String toString() {
-            return "DirectoryObserver{file=" + mFile.getAbsolutePath() + ", ref=" + mRefCount + "}";
+            String filePath = mFile.getAbsolutePath();
+            return "DirectoryObserver{file=" + filePath + ", ref=" + mCursors.size() + "}";
         }
     }
 
@@ -664,16 +687,22 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             super(columnNames);
 
             final Uri notifyUri = buildNotificationUri(docId);
-            setNotificationUri(getContext().getContentResolver(), notifyUri);
+            boolean registerSelfObserver = false; // Our FileObserver sees all relevant changes.
+            setNotificationUris(getContext().getContentResolver(), Arrays.asList(notifyUri),
+                    getContext().getContentResolver().getUserId(), registerSelfObserver);
 
             mFile = file;
-            startObserving(mFile, notifyUri);
+            startObserving(mFile, notifyUri, this);
+        }
+
+        public void notifyChanged() {
+            onChange(false);
         }
 
         @Override
         public void close() {
             super.close();
-            stopObserving(mFile);
+            stopObserving(mFile, this);
         }
     }
 }

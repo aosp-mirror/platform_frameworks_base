@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.view.Display.TYPE_BUILT_IN;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.InsetsState.TYPE_TOP_GESTURES;
 import static android.view.InsetsState.TYPE_TOP_TAPPABLE_ELEMENT;
@@ -112,7 +113,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.LoadedApk;
 import android.app.ResourcesManager;
@@ -124,6 +124,7 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Handler;
@@ -133,6 +134,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.DisplayCutout;
@@ -157,6 +159,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.function.TriConsumer;
@@ -228,7 +231,6 @@ public class DisplayPolicy {
     private int mBottomGestureAdditionalInset;
     @Px
     private int mSideGestureInset;
-    private boolean mNavigationBarLetsThroughTaps;
 
     private StatusBarManagerInternal getStatusBarManagerInternal() {
         synchronized (mServiceAcquireLock) {
@@ -250,6 +252,8 @@ public class DisplayPolicy {
     private volatile boolean mHasNavigationBar;
     // Can the navigation bar ever move to the side?
     private volatile boolean mNavigationBarCanMove;
+    private volatile boolean mNavigationBarLetsThroughTaps;
+    private volatile boolean mNavigationBarAlwaysShowOnSideGesture;
 
     // Written by vr manager thread, only read in this class.
     private volatile boolean mPersistentVrModeEnabled;
@@ -461,22 +465,31 @@ public class DisplayPolicy {
 
                     @Override
                     public void onSwipeFromBottom() {
-                        if (mNavigationBar != null
-                                && mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
 
                     @Override
                     public void onSwipeFromRight() {
-                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_RIGHT) {
+                        final Region excludedRegion =
+                                mDisplayContent.calculateSystemGestureExclusion();
+                        final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
+                                || mNavigationBarPosition == NAV_BAR_RIGHT;
+                        if (mNavigationBar != null && sideAllowed
+                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion)) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
 
                     @Override
                     public void onSwipeFromLeft() {
-                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_LEFT) {
+                        final Region excludedRegion =
+                                mDisplayContent.calculateSystemGestureExclusion();
+                        final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
+                                || mNavigationBarPosition == NAV_BAR_LEFT;
+                        if (mNavigationBar != null && sideAllowed
+                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion)) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
@@ -2694,6 +2707,8 @@ public class DisplayPolicy {
         mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
         mSideGestureInset = res.getDimensionPixelSize(R.dimen.config_backGestureInset);
         mNavigationBarLetsThroughTaps = res.getBoolean(R.bool.config_navBarTapThrough);
+        mNavigationBarAlwaysShowOnSideGesture =
+                res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
 
         // This should calculate how much above the frame we accept gestures.
         mBottomGestureAdditionalInset = Math.max(0,
@@ -2718,11 +2733,18 @@ public class DisplayPolicy {
     private void updateCurrentUserResources() {
         final int userId = mService.mAmInternal.getCurrentUserId();
         final Context uiContext = getSystemUiContext();
+
+        if (userId == UserHandle.USER_SYSTEM) {
+            // Skip the (expensive) recreation of resources for the system user below and just
+            // use the resources from the system ui context
+            mCurrentUserResources = uiContext.getResources();
+            return;
+        }
+
+        // For non-system users, ensure that the resources are loaded from the current
+        // user's package info (see ContextImpl.createDisplayContext)
         final LoadedApk pi = ActivityThread.currentActivityThread().getPackageInfo(
                 uiContext.getPackageName(), null, 0, userId);
-
-        // Create the resources from the current-user package info
-        // (see ContextImpl.createDisplayContext)
         mCurrentUserResources = ResourcesManager.getInstance().getResources(null,
                 pi.getResDir(),
                 null /* splitResDirs */,
@@ -2868,6 +2890,16 @@ public class DisplayPolicy {
         }
         return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation, uiMode, displayCutout)
                 - statusBarHeight;
+    }
+
+    /**
+     * Return corner radius in pixels that should be used on windows in order to cover the display.
+     * The radius is only valid for built-in displays since the one who configures window corner
+     * radius cannot know the corner radius of non-built-in display.
+     */
+    float getWindowCornerRadius() {
+        return mDisplayContent.getDisplay().getType() == TYPE_BUILT_IN
+                ? ScreenDecorationsUtils.getWindowCornerRadius(mContext.getResources()) : 0f;
     }
 
     boolean isShowingDreamLw() {
@@ -3113,7 +3145,9 @@ public class DisplayPolicy {
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, mNonDockedStackBounds);
         mService.getStackBounds(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, mDockedStackBounds);
-        final int visibility = updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
+        final Pair<Integer, Boolean> result =
+                updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
+        final int visibility = result.first;
         final int diff = visibility ^ mLastSystemUiFlags;
         final int fullscreenDiff = fullscreenVisibility ^ mLastFullscreenStackSysUiFlags;
         final int dockedDiff = dockedVisibility ^ mLastDockedStackSysUiFlags;
@@ -3133,13 +3167,14 @@ public class DisplayPolicy {
         mLastDockedStackBounds.set(mDockedStackBounds);
         final Rect fullscreenStackBounds = new Rect(mNonDockedStackBounds);
         final Rect dockedStackBounds = new Rect(mDockedStackBounds);
+        final boolean isNavbarColorManagedByIme = result.second;
         mHandler.post(() -> {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
                 final int displayId = getDisplayId();
                 statusBar.setSystemUiVisibility(displayId, visibility, fullscreenVisibility,
                         dockedVisibility, 0xffffffff, fullscreenStackBounds,
-                        dockedStackBounds, win.toString());
+                        dockedStackBounds, isNavbarColorManagedByIme, win.toString());
                 statusBar.topAppWindowChanged(displayId, needsMenu);
             }
         });
@@ -3222,7 +3257,7 @@ public class DisplayPolicy {
         return vis;
     }
 
-    private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
+    private Pair<Integer, Boolean> updateSystemBarsLw(WindowState win, int oldVis, int vis) {
         final boolean dockedStackVisible =
                 mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final boolean freeformStackVisible =
@@ -3355,8 +3390,11 @@ public class DisplayPolicy {
         vis = updateLightNavigationBarLw(vis, mTopFullscreenOpaqueWindowState,
                 mTopFullscreenOpaqueOrDimmingWindowState,
                 mDisplayContent.mInputMethodWindow, navColorWin);
+        // Navbar color is controlled by the IME.
+        final boolean isManagedByIme =
+                navColorWin != null && navColorWin == mDisplayContent.mInputMethodWindow;
 
-        return vis;
+        return Pair.create(vis, isManagedByIme);
     }
 
     private boolean drawsBarBackground(int vis, WindowState win, BarController controller,

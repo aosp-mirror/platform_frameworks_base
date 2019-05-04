@@ -62,6 +62,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -85,6 +86,7 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
+import android.app.RemoteInput;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
@@ -96,6 +98,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
@@ -327,6 +330,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
 
+        doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
+
         mService = new TestableNotificationManagerService(mContext);
 
         // Use this testable looper.
@@ -375,20 +380,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
-        try {
-            mService.init(mTestableLooper.getLooper(),
-                    mPackageManager, mPackageManagerClient, mockLightsManager,
-                    mListeners, mAssistants, mConditionProviders,
-                    mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                    mGroupHelper, mAm, mAppUsageStats,
-                    mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                    mAppOpsManager, mUm);
-            mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        mService.init(mTestableLooper.getLooper(),
+                mPackageManager, mPackageManagerClient, mockLightsManager,
+                mListeners, mAssistants, mConditionProviders,
+                mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
+                mGroupHelper, mAm, mAppUsageStats,
+                mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
+                mAppOpsManager, mUm);
+        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
         mService.setAudioManager(mAudioManager);
 
         // Tests call directly into the Binder.
@@ -2080,14 +2081,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetListenerAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationListenerAccessGrantedForUser(
-                    c, user.getIdentifier(), true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        mBinderService.setNotificationListenerAccessGrantedForUser(c, user.getIdentifier(), true);
+
 
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
@@ -2101,15 +2096,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testSetAssistantAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(10);
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        uis.add(ui);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationAssistantAccessGrantedForUser(
-                    c, user.getIdentifier(), true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        when(mUm.getEnabledProfiles(10)).thenReturn(uis);
+
+        mBinderService.setNotificationAssistantAccessGrantedForUser(c, user.getIdentifier(), true);
 
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
@@ -2150,14 +2144,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetDndAccessForUser() throws Exception {
         UserHandle user = UserHandle.of(10);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationPolicyAccessGrantedForUser(
-                    c.getPackageName(), user.getIdentifier(), true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        mBinderService.setNotificationPolicyAccessGrantedForUser(
+                c.getPackageName(), user.getIdentifier(), true);
 
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
@@ -2171,13 +2159,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testSetListenerAccess() throws Exception {
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationListenerAccessGranted(c, true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        mBinderService.setNotificationListenerAccessGranted(c, true);
 
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, true, true);
@@ -2189,14 +2171,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testSetAssistantAccess() throws Exception {
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 0;
+        uis.add(ui);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationAssistantAccessGranted(c, true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, true, true);
@@ -2207,19 +2189,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetAssistantAccess_multiProfile() throws Exception {
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 0;
+        uis.add(ui);
+        UserInfo ui10 = new UserInfo();
+        ui10.id = 10;
+        uis.add(ui10);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+
+        mBinderService.setNotificationAssistantAccessGranted(c, true);
+
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 10, true, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 10, false, true);
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
     public void testSetAssistantAccess_nullWithAllowedAssistant() throws Exception {
         ArrayList<ComponentName> componentList = new ArrayList<>();
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         componentList.add(c);
         when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 0;
+        uis.add(ui);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
 
-        try {
-            mBinderService.setNotificationAssistantAccessGranted(null, true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        mBinderService.setNotificationAssistantAccessGranted(null, true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, true, false);
@@ -2231,23 +2238,23 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testSetAssistantAccessForUser_nullWithAllowedAssistant() throws Exception {
-        UserHandle user = UserHandle.of(10);
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        uis.add(ui);
+        UserHandle user = ui.getUserHandle();
         ArrayList<ComponentName> componentList = new ArrayList<>();
         ComponentName c = ComponentName.unflattenFromString("package/Component");
         componentList.add(c);
         when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
+        when(mUm.getEnabledProfiles(10)).thenReturn(uis);
 
-        try {
-            mBinderService.setNotificationAssistantAccessGrantedForUser(
-                    null, user.getIdentifier(), true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        mBinderService.setNotificationAssistantAccessGrantedForUser(
+                null, user.getIdentifier(), true);
 
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), true, false);
+        verify(mAssistants).setUserSet(10, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false,  false);
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -2255,15 +2262,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetAssistantAccessForUser_workProfile_nullWithAllowedAssistant()
+            throws Exception {
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 0;
+        uis.add(ui);
+        UserInfo ui10 = new UserInfo();
+        ui10.id = 10;
+        uis.add(ui10);
+        UserHandle user = ui.getUserHandle();
+        ArrayList<ComponentName> componentList = new ArrayList<>();
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        componentList.add(c);
+        when(mAssistants.getAllowedComponents(anyInt())).thenReturn(componentList);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
+
+        mBinderService.setNotificationAssistantAccessGrantedForUser(
+                    null, user.getIdentifier(), true);
+
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), user.getIdentifier(), true, false);
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), ui10.id, true, false);
+        verify(mAssistants).setUserSet(0, true);
+        verify(mAssistants).setUserSet(10, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), user.getIdentifier(), false,  false);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), ui10.id, false,  false);
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
     public void testSetDndAccess() throws Exception {
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
 
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.getPackageName(), 0, true, true);
@@ -2291,6 +2327,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testSetAssistantAccess_doesNothingOnLowRam() throws Exception {
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 0;
+        uis.add(ui);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
+
         mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -2320,13 +2362,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationListenerAccessGranted(c, true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        mBinderService.setNotificationListenerAccessGranted(c, true);
 
         verify(mListeners, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), 0, true, true);
@@ -2341,13 +2378,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationAssistantAccessGranted(c, true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+        List<UserInfo> uis = new ArrayList<>();
+        UserInfo ui = new UserInfo();
+        ui.id = 0;
+        uis.add(ui);
+        when(mUm.getEnabledProfiles(ui.id)).thenReturn(uis);
+
+        mBinderService.setNotificationAssistantAccessGranted(c, true);
 
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 anyString(), anyInt(), anyBoolean(), anyBoolean());
@@ -2362,13 +2399,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
         when(mActivityManager.isLowRamDevice()).thenReturn(true);
         ComponentName c = ComponentName.unflattenFromString("package/Component");
-        try {
-            mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
-        } catch (SecurityException e) {
-            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
-                throw e;
-            }
-        }
+
+        mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
 
         verify(mListeners, never()).setPackageOrComponentEnabled(
                 anyString(), anyInt(), anyBoolean(), anyBoolean());
@@ -2991,104 +3023,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertEquals(USER_SENTIMENT_NEGATIVE,
                 r.getUserSentiment());
-    }
-
-    @Test
-    public void testRecents() throws Exception {
-        Set<NotifyingApp> expected = new HashSet<>();
-
-        final NotificationRecord oldest = new NotificationRecord(mContext,
-                generateSbn("p", 1000, 9, 0), mTestNotificationChannel);
-        mService.logRecentLocked(oldest);
-        for (int i = 1; i <= 5; i++) {
-            NotificationRecord r = new NotificationRecord(mContext,
-                    generateSbn("p" + i, i, i*100, 0), mTestNotificationChannel);
-            expected.add(new NotifyingApp()
-                    .setPackage(r.sbn.getPackageName())
-                    .setUid(r.sbn.getUid())
-                    .setLastNotified(r.sbn.getPostTime()));
-            mService.logRecentLocked(r);
-        }
-
-        List<NotifyingApp> apps = mBinderService.getRecentNotifyingAppsForUser(0).getList();
-        assertTrue(apps.size() == 5);
-        for (NotifyingApp actual : apps) {
-            assertTrue("got unexpected result: " + actual, expected.contains(actual));
-        }
-    }
-
-    @Test
-    public void testRecentsNoDuplicatePackages() throws Exception {
-        final NotificationRecord p1 = new NotificationRecord(mContext, generateSbn("p", 1, 1000, 0),
-                mTestNotificationChannel);
-        final NotificationRecord p2 = new NotificationRecord(mContext, generateSbn("p", 1, 2000, 0),
-                mTestNotificationChannel);
-
-        mService.logRecentLocked(p1);
-        mService.logRecentLocked(p2);
-
-        List<NotifyingApp> apps = mBinderService.getRecentNotifyingAppsForUser(0).getList();
-        assertTrue(apps.size() == 1);
-        NotifyingApp expected = new NotifyingApp().setPackage("p").setUid(1).setLastNotified(2000);
-        assertEquals(expected, apps.get(0));
-    }
-
-    @Test
-    public void testRecentsWithDuplicatePackage() throws Exception {
-        Set<NotifyingApp> expected = new HashSet<>();
-
-        final NotificationRecord oldest = new NotificationRecord(mContext,
-                generateSbn("p", 1000, 9, 0), mTestNotificationChannel);
-        mService.logRecentLocked(oldest);
-        for (int i = 1; i <= 5; i++) {
-            NotificationRecord r = new NotificationRecord(mContext,
-                    generateSbn("p" + i, i, i*100, 0), mTestNotificationChannel);
-            expected.add(new NotifyingApp()
-                    .setPackage(r.sbn.getPackageName())
-                    .setUid(r.sbn.getUid())
-                    .setLastNotified(r.sbn.getPostTime()));
-            mService.logRecentLocked(r);
-        }
-        NotificationRecord r = new NotificationRecord(mContext,
-                generateSbn("p" + 3, 3, 300000, 0), mTestNotificationChannel);
-        expected.remove(new NotifyingApp()
-                .setPackage(r.sbn.getPackageName())
-                .setUid(3)
-                .setLastNotified(300));
-        NotifyingApp newest = new NotifyingApp()
-                .setPackage(r.sbn.getPackageName())
-                .setUid(r.sbn.getUid())
-                .setLastNotified(r.sbn.getPostTime());
-        expected.add(newest);
-        mService.logRecentLocked(r);
-
-        List<NotifyingApp> apps = mBinderService.getRecentNotifyingAppsForUser(0).getList();
-        assertTrue(apps.size() == 5);
-        for (NotifyingApp actual : apps) {
-            assertTrue("got unexpected result: " + actual, expected.contains(actual));
-        }
-        assertEquals(newest, apps.get(0));
-    }
-
-    @Test
-    public void testRecentsMultiuser() throws Exception {
-        final NotificationRecord user1 = new NotificationRecord(mContext,
-                generateSbn("p", 1000, 9, 1), mTestNotificationChannel);
-        mService.logRecentLocked(user1);
-
-        final NotificationRecord user2 = new NotificationRecord(mContext,
-                generateSbn("p2", 100000, 9999, 2), mTestNotificationChannel);
-        mService.logRecentLocked(user2);
-
-        assertEquals(0, mBinderService.getRecentNotifyingAppsForUser(0).getList().size());
-        assertEquals(1, mBinderService.getRecentNotifyingAppsForUser(1).getList().size());
-        assertEquals(1, mBinderService.getRecentNotifyingAppsForUser(2).getList().size());
-
-        assertTrue(mBinderService.getRecentNotifyingAppsForUser(2).getList().contains(
-                new NotifyingApp()
-                        .setPackage(user2.sbn.getPackageName())
-                        .setUid(user2.sbn.getUid())
-                        .setLastNotified(user2.sbn.getPostTime())));
     }
 
     @Test
@@ -4492,6 +4426,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Person person = new Person.Builder()
                 .setName("bubblebot")
                 .build();
+        // It needs remote input to be bubble-able
+        RemoteInput remoteInput = new RemoteInput.Builder("reply_key").setLabel("reply").build();
+        PendingIntent inputIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        Icon icon = Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
+        Notification.Action replyAction = new Notification.Action.Builder(icon, "Reply",
+                inputIntent).addRemoteInput(remoteInput)
+                .build();
         // Make it messaging style
         Notification.Builder nb = new Notification.Builder(mContext,
                 mTestNotificationChannel.getId())
@@ -4504,6 +4445,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         .addMessage("Is it me you're looking for?",
                                 SystemClock.currentThreadTimeMillis(), person)
                 )
+                .setActions(replyAction)
                 .setSmallIcon(android.R.drawable.sym_def_app_icon);
 
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, null, mUid, 0,

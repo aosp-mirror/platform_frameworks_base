@@ -36,6 +36,7 @@ import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.graphics.Point;
 import android.media.ExifInterface;
+import android.media.MediaFile;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -1696,6 +1697,18 @@ public final class DocumentsContract {
                 return new AssetFileDescriptor(pfd, thumb[0], thumb[1], extras);
             }
         } catch (IOException e) {
+        }
+
+        // Use ImageDecoder to do full image decode of heif format file
+        // will have right orientation. So, we don't need to add orientation
+        // information into extras.
+        final String mimeType = MediaFile.getMimeTypeForFile(file.getName());
+        if (mimeType.equals("image/heif")
+                || mimeType.equals("image/heif-sequence")
+                || mimeType.equals("image/heic")
+                || mimeType.equals("image/heic-sequence")) {
+            return new AssetFileDescriptor(pfd, 0 /* startOffset */,
+                    AssetFileDescriptor.UNKNOWN_LENGTH, null /* extras */);
         }
 
         return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH, extras);

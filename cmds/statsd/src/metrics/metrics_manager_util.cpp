@@ -766,9 +766,9 @@ bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
     return true;
 }
 
-void prepareFistBucket(const vector<sp<MetricProducer>>& allMetricProducers) {
+void prepareFirstBucket(const vector<sp<MetricProducer>>& allMetricProducers) {
     for (const auto& metric: allMetricProducers) {
-        metric->prepareFistBucket();
+        metric->prepareFirstBucket();
     }
 }
 
@@ -829,7 +829,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         return false;
     }
 
-    prepareFistBucket(allMetricProducers);
+    prepareFirstBucket(allMetricProducers);
 
     return true;
 }

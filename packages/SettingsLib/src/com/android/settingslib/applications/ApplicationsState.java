@@ -198,8 +198,7 @@ public class ApplicationsState {
             mEntriesMap.put(userId, new HashMap<>());
         }
 
-        mThread = new HandlerThread("ApplicationsState.Loader",
-                Process.THREAD_PRIORITY_BACKGROUND);
+        mThread = new HandlerThread("ApplicationsState.Loader");
         mThread.start();
         mBackgroundHandler = new BackgroundHandler(mThread.getLooper());
 

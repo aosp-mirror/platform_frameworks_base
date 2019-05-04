@@ -118,6 +118,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor);
         // This should not start listening on any of the real dependencies
         mCarrierTextController.setListening(mCarrierTextCallback);
+        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText(false);
     }
 
     @Test
@@ -189,10 +190,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
 
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
-
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -217,10 +214,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
 
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
-
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -241,11 +234,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
     public void testCreateInfo_noSubscriptions() {
         reset(mCarrierTextCallback);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(
-                new ArrayList<>());
-
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(
                 new ArrayList<>());
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -270,10 +258,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         list.add(TEST_SUBSCRIPTION);
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
@@ -300,10 +284,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 .thenReturn(IccCardConstants.State.NOT_READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
 
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
-
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -328,10 +308,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
                 .thenReturn(IccCardConstants.State.NOT_READY)
                 .thenReturn(IccCardConstants.State.READY);
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
@@ -361,10 +337,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
 
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
-
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
                 ArgumentCaptor.forClass(
                         CarrierTextController.CarrierTextCallbackInfo.class);
@@ -385,12 +357,9 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         list.add(TEST_SUBSCRIPTION_2);
         when(mKeyguardUpdateMonitor.getSimState(anyInt()))
             .thenReturn(IccCardConstants.State.READY);
-        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
-        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
-        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText();
 
-        // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
-        // same answer as KeyguardUpdateMonitor. Remove when this is addressed
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+        mCarrierTextController.updateDisplayOpportunisticSubscriptionCarrierText(true);
         when(mSubscriptionManager.getActiveSubscriptionInfoList(anyBoolean())).thenReturn(list);
 
         ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
@@ -417,11 +386,6 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         public void setListening(CarrierTextCallback callback) {
             super.setListening(callback);
             mKeyguardUpdateMonitor = mKUM;
-        }
-
-        @Override
-        public void updateDisplayOpportunisticSubscriptionCarrierText() {
-            mDisplayOpportunisticSubscriptionCarrierText = true;
         }
     }
 }

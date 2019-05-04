@@ -2354,4 +2354,14 @@ enum PageId {
 
     // OPEN: Settings > Pick preferred SIM dialog
     DIALOG_PREFERRED_SIM_PICKER = 1709;
+
+    // OPEN: Settings > Network & internet > Mobile network > Delete sim
+    DIALOG_DELETE_SIM_CONFIRMATION = 1713;
+
+    // OPEN: Settings >  Network & internet > Mobile network > Delete sim > (answer yes to
+    //       confirmation)
+    DIALOG_DELETE_SIM_PROGRESS = 1714;
+
+    // Settings > Apps and notifications > Notifications > Gentle notifications
+    GENTLE_NOTIFICATIONS_SCREEN = 1715;
 }

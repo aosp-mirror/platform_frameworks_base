@@ -23,7 +23,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/chooser_view_spacing"
     android:background="?android:attr/colorBackgroundFloating">
 
   <RelativeLayout
@@ -44,6 +43,7 @@
         android:layout_toStartOf="@id/copy_button"
         android:layout_centerVertical="true"
         android:ellipsize="end"
+        android:fontFamily="@android:string/config_headlineFontFamily"
         android:textColor="?android:attr/textColorPrimary"
         android:maxLines="2"/>
 
@@ -59,7 +59,7 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:clickable="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless">
+        style="?attr/borderlessButtonStyle">
 
       <ImageView
           android:layout_width="24dp"
@@ -90,6 +90,7 @@
       android:orientation="horizontal"
       android:layout_marginLeft="@dimen/chooser_edge_margin_normal"
       android:layout_marginRight="@dimen/chooser_edge_margin_normal"
+      android:layout_marginBottom="@dimen/chooser_view_spacing"
       android:minHeight="80dp"
       android:background="@drawable/chooser_content_preview_rounded"
       android:id="@+id/content_preview_title_layout">
@@ -112,8 +113,8 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="2"
-        android:textSize="20sp"
-        android:textColor="?android:attr/textColorPrimary"/>
+        android:textAppearance="@style/TextAppearance.DeviceDefault.WindowTitle"
+        android:fontFamily="@android:string/config_headlineFontFamily"/>
   </LinearLayout>
 </LinearLayout>
 

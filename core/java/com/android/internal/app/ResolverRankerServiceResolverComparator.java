@@ -66,9 +66,6 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
 
     // timeout for establishing connections with a ResolverRankerService.
     private static final int CONNECTION_COST_TIMEOUT_MILLIS = 200;
-    // timeout for establishing connections with a ResolverRankerService, collecting features and
-    // predicting ranking scores.
-    private static final int WATCHDOG_TIMEOUT_MILLIS = 500;
 
     private final Collator mCollator;
     private final Map<String, UsageStats> mStats;
@@ -104,6 +101,10 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
     @Override
     public void handleResultMessage(Message msg) {
         if (msg.what != RANKER_SERVICE_RESULT) {
+            return;
+        }
+        if (msg.obj == null) {
+            Log.e(TAG, "Receiving null prediction results.");
             return;
         }
         final List<ResolverTarget> receivedTargets = (List<ResolverTarget>) msg.obj;

@@ -731,6 +731,7 @@ package android.content.pm {
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public static final int FLAG_REMOVED = 2; // 0x2
     field public static final int PROTECTION_FLAG_APP_PREDICTOR = 2097152; // 0x200000
     field public static final int PROTECTION_FLAG_CONFIGURATOR = 524288; // 0x80000
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
@@ -3215,6 +3216,7 @@ package android.view {
     method public default void setShouldShowIme(int, boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
+    method public default boolean shouldShowIme(int);
     method public default boolean shouldShowSystemDecors(int);
   }
 
@@ -3271,6 +3273,7 @@ package android.view.autofill {
     ctor public AutofillId(@NonNull android.view.autofill.AutofillId, int);
     ctor public AutofillId(int, int);
     ctor public AutofillId(@NonNull android.view.autofill.AutofillId, long, int);
+    method public boolean equalsIgnoreSession(@Nullable android.view.autofill.AutofillId);
   }
 
   public final class AutofillManager {
@@ -3399,6 +3402,7 @@ package android.view.contentcapture {
 package android.view.inputmethod {
 
   public final class InputMethodManager {
+    method public int getDisplayId();
     method public boolean isInputMethodPickerShown();
   }
 

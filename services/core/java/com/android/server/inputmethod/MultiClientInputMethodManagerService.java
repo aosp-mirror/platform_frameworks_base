@@ -79,6 +79,9 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.TransferPipe;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -90,6 +93,8 @@ import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.util.Collections;
 import java.util.List;
@@ -645,6 +650,14 @@ public final class MultiClientInputMethodManagerService {
             mSelfReportedDisplayId = selfReportedDisplayId;
             mClientId = InputMethodClientIdSource.getNext();
         }
+
+        @GuardedBy("PerUserData.mLock")
+        void dumpLocked(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
+            ipw.println("mState=" + mState + ",mBindingSequence=" + mBindingSequence
+                    + ",mWriteChannel=" + mWriteChannel
+                    + ",mInputMethodSession=" + mInputMethodSession
+                    + ",mMSInputMethodSession=" + mMSInputMethodSession);
+        }
     }
 
     private static final class UserDataMap {
@@ -671,6 +684,22 @@ public final class MultiClientInputMethodManagerService {
         PerUserData removeReturnOld(@UserIdInt int userId) {
             synchronized (mMap) {
                 return mMap.removeReturnOld(userId);
+            }
+        }
+
+        @AnyThread
+        void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
+            synchronized (mMap) {
+                for (int i = 0; i < mMap.size(); i++) {
+                    int userId = mMap.keyAt(i);
+                    PerUserData data = mMap.valueAt(i);
+                    ipw.println("userId=" + userId + ", data=");
+                    if (data != null) {
+                        ipw.increaseIndent();
+                        data.dump(fd, ipw, args);
+                        ipw.decreaseIndent();
+                    }
+                }
             }
         }
     }
@@ -967,6 +996,71 @@ public final class MultiClientInputMethodManagerService {
             }
         }
 
+        @AnyThread
+        void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
+            synchronized (mLock) {
+                ipw.println("mState=" + mState
+                        + ",mCurrentInputMethod=" + mCurrentInputMethod
+                        + ",mCurrentInputMethodInfo=" + mCurrentInputMethodInfo);
+
+                if (mCurrentInputMethod != null) {
+                    // indentation will not be kept. So add visual separator here.
+                    ipw.println(">>Dump CurrentInputMethod>>");
+                    ipw.flush();
+                    try {
+                        TransferPipe.dumpAsync(mCurrentInputMethod.asBinder(), fd, args);
+                    } catch (IOException | RemoteException e) {
+                        ipw.println("Failed to dump input method service: " + e);
+                    }
+                    ipw.println("<<Dump CurrentInputMethod<<");
+                }
+
+                ipw.println("mDisplayIdToImeWindowTokenMap=");
+                for (TokenInfo info : mDisplayIdToImeWindowTokenMap) {
+                    ipw.println(" display=" + info.mDisplayId + ",token="
+                            + info.mToken);
+                }
+                ipw.println("mClientMap=");
+                ipw.increaseIndent();
+                for (int i = 0; i < mClientMap.size(); i++) {
+
+                    ipw.println("binder=" + mClientMap.keyAt(i));
+                    ipw.println(" InputMethodClientInfo=");
+                    InputMethodClientInfo info = mClientMap.valueAt(i);
+                    if (info != null) {
+                        ipw.increaseIndent();
+                        info.dumpLocked(fd, ipw, args);
+                        ipw.decreaseIndent();
+                    }
+                }
+                ipw.decreaseIndent();
+                ipw.println("mClientIdToClientMap=");
+                ipw.increaseIndent();
+                for (int i = 0; i < mClientIdToClientMap.size(); i++) {
+                    ipw.println("clientId=" + mClientIdToClientMap.keyAt(i));
+                    ipw.println(" InputMethodClientInfo=");
+                    InputMethodClientInfo info = mClientIdToClientMap.valueAt(i);
+                    if (info != null) {
+                        ipw.increaseIndent();
+                        info.dumpLocked(fd, ipw, args);
+                        ipw.decreaseIndent();
+                    }
+                    if (info.mClient != null) {
+                        // indentation will not be kept. So add visual separator here.
+                        ipw.println(">>DumpClientStart>>");
+                        ipw.flush(); // all writes should be flushed to guarantee order.
+                        try {
+                            TransferPipe.dumpAsync(info.mClient.asBinder(), fd, args);
+                        } catch (IOException | RemoteException e) {
+                            ipw.println(" Failed to dump client:" + e);
+                        }
+                        ipw.println("<<DumpClientEnd<<");
+                    }
+                }
+                ipw.decreaseIndent();
+            }
+        }
+
         private static final class ClientDeathRecipient implements IBinder.DeathRecipient {
             private final PerUserData mPerUserData;
             private final IInputMethodClient mClient;
@@ -1105,6 +1199,16 @@ public final class MultiClientInputMethodManagerService {
                 return Collections.emptyList();
             }
             return Collections.singletonList(info);
+        }
+
+        @AnyThread
+        void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
+            synchronized (mArray) {
+                for (int i = 0; i < mArray.size(); i++) {
+                    ipw.println("userId=" + mArray.keyAt(i));
+                    ipw.println(" InputMethodInfo=" + mArray.valueAt(i));
+                }
+            }
         }
     }
 
@@ -1515,7 +1619,7 @@ public final class MultiClientInputMethodManagerService {
                         return new InputBindResult(
                                 InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
                                 null, null, data.mCurrentInputMethodInfo.getId(),
-                                clientInfo.mBindingSequence);
+                                clientInfo.mBindingSequence, null);
                     case InputMethodClientState.READY_TO_SEND_FIRST_BIND_RESULT:
                     case InputMethodClientState.ALREADY_SENT_BIND_RESULT:
                         clientInfo.mBindingSequence++;
@@ -1538,7 +1642,7 @@ public final class MultiClientInputMethodManagerService {
                                 clientInfo.mInputMethodSession,
                                 clientInfo.mWriteChannel.dup(),
                                 data.mCurrentInputMethodInfo.getId(),
-                                clientInfo.mBindingSequence);
+                                clientInfo.mBindingSequence, null);
                     case InputMethodClientState.UNREGISTERED:
                         Slog.e(TAG, "The client is already unregistered.");
                         return InputBindResult.INVALID_CLIENT;
@@ -1597,9 +1701,30 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
+        public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
+                float[] matrixValues) {
+            reportNotSupported();
+        }
+
+        @BinderThread
+        @Override
         public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
                 @Nullable FileDescriptor err, String[] args, @Nullable ShellCallback callback,
                 ResultReceiver resultReceiver) {
+        }
+
+        @BinderThread
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+            final String prefixChild = "  ";
+            pw.println("Current Multi Client Input Method Manager state:");
+            IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");
+            ipw.println("mUserDataMap=");
+            if (mUserDataMap != null) {
+                ipw.increaseIndent();
+                mUserDataMap.dump(fd, ipw, args);
+            }
         }
     }
 }

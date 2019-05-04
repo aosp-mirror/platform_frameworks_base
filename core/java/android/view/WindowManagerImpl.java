@@ -192,4 +192,13 @@ public final class WindowManagerImpl implements WindowManager {
         } catch (RemoteException e) {
         }
     }
+
+    @Override
+    public boolean shouldShowIme(int displayId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().shouldShowIme(displayId);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
 }

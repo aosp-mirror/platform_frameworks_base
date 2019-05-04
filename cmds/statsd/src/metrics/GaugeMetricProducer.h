@@ -122,7 +122,7 @@ private:
     void flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                   const int64_t& nextBucketStartTimeNs) override;
 
-    void prepareFistBucketLocked() override;
+    void prepareFirstBucketLocked() override;
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
 

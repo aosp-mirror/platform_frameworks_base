@@ -40,12 +40,12 @@ public abstract class EnrollClient extends ClientMonitor {
 
     public abstract boolean shouldVibrate();
 
-    public EnrollClient(Context context, Metrics metrics,
+    public EnrollClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
             final int[] disabledFeatures) {
-        super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
+        super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
@@ -78,7 +78,7 @@ public abstract class EnrollClient extends ClientMonitor {
         if (shouldVibrate()) {
             vibrateSuccess();
         }
-        mMetricsLogger.action(mMetrics.actionBiometricEnroll());
+        mMetricsLogger.action(mConstants.actionBiometricEnroll());
         try {
             final BiometricServiceBase.ServiceListener listener = getListener();
             if (listener != null) {
@@ -105,7 +105,7 @@ public abstract class EnrollClient extends ClientMonitor {
                     disabledFeatures);
             if (result != 0) {
                 Slog.w(getLogTag(), "startEnroll failed, result=" + result);
-                mMetricsLogger.histogram(mMetrics.tagEnrollStartError(), result);
+                mMetricsLogger.histogram(mConstants.tagEnrollStartError(), result);
                 onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
                 return result;

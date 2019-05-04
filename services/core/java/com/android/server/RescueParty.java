@@ -72,8 +72,12 @@ public class RescueParty {
     static final int LEVEL_FACTORY_RESET = 4;
     @VisibleForTesting
     static final String PROP_RESCUE_BOOT_COUNT = "sys.rescue_boot_count";
+    /**
+     * The boot trigger window size must always be greater than Watchdog's deadlock timeout
+     * {@link Watchdog#DEFAULT_TIMEOUT}.
+     */
     @VisibleForTesting
-    static final long BOOT_TRIGGER_WINDOW_MILLIS = 300 * DateUtils.SECOND_IN_MILLIS;
+    static final long BOOT_TRIGGER_WINDOW_MILLIS = 600 * DateUtils.SECOND_IN_MILLIS;
     @VisibleForTesting
     static final long PERSISTENT_APP_CRASH_TRIGGER_WINDOW_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
     @VisibleForTesting

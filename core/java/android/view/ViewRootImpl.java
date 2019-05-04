@@ -302,13 +302,7 @@ public final class ViewRootImpl implements ViewParent,
     @GuardedBy("mWindowCallbacks")
     final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList<>();
     @UnsupportedAppUsage
-    final Context mContext;
-    /**
-     * TODO(b/116349163): Check if we can merge this into {@link #mContext}.
-     * @hide
-     */
-    @NonNull
-    public Context mDisplayContext;
+    public final Context mContext;
 
     @UnsupportedAppUsage
     final IWindowSession mWindowSession;
@@ -618,7 +612,6 @@ public final class ViewRootImpl implements ViewParent,
 
     public ViewRootImpl(Context context, Display display) {
         mContext = context;
-        mDisplayContext = context.createDisplayContext(display);
         mWindowSession = WindowManagerGlobal.getWindowSession();
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
@@ -1403,7 +1396,7 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             mDisplay = preferredDisplay;
         }
-        mDisplayContext = mContext.createDisplayContext(mDisplay);
+        mContext.updateDisplay(mDisplay.getDisplayId());
     }
 
     void pokeDrawLockIfNeeded() {
@@ -2749,7 +2742,7 @@ public final class ViewRootImpl implements ViewParent,
                     .mayUseInputMethod(mWindowAttributes.flags);
             if (imTarget != mLastWasImTarget) {
                 mLastWasImTarget = imTarget;
-                InputMethodManager imm = mDisplayContext.getSystemService(InputMethodManager.class);
+                InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                 if (imm != null && imTarget) {
                     imm.onPreWindowFocus(mView, hasWindowFocus);
                     imm.onPostWindowFocus(mView, mView.findFocus(),
@@ -2929,7 +2922,7 @@ public final class ViewRootImpl implements ViewParent,
             mLastWasImTarget = WindowManager.LayoutParams
                     .mayUseInputMethod(mWindowAttributes.flags);
 
-            InputMethodManager imm = mDisplayContext.getSystemService(InputMethodManager.class);
+            InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
             if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
                 imm.onPreWindowFocus(mView, hasWindowFocus);
             }
@@ -4721,8 +4714,7 @@ public final class ViewRootImpl implements ViewParent,
                     enqueueInputEvent(event, null, 0, true);
                 } break;
                 case MSG_CHECK_FOCUS: {
-                    InputMethodManager imm =
-                            mDisplayContext.getSystemService(InputMethodManager.class);
+                    InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                     if (imm != null) {
                         imm.checkFocus();
                     }
@@ -5267,7 +5259,7 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         protected int onProcess(QueuedInputEvent q) {
             if (mLastWasImTarget && !isInLocalFocusMode()) {
-                InputMethodManager imm = mDisplayContext.getSystemService(InputMethodManager.class);
+                InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
                 if (imm != null) {
                     final InputEvent event = q.mEvent;
                     if (DEBUG_IMF) Log.v(mTag, "Sending input event to IME: " + event);

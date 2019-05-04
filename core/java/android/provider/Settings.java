@@ -7762,6 +7762,9 @@ public final class Settings {
          */
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
+        private static final Validator UI_NIGHT_MODE_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
         /**
          * Whether screensavers are enabled.
          * @hide
@@ -8903,6 +8906,7 @@ public final class Settings {
             ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
             NOTIFICATION_NEW_INTERRUPTION_MODEL,
             TRUST_AGENTS_EXTEND_UNLOCK,
+            UI_NIGHT_MODE,
             LOCK_SCREEN_WHEN_TRUST_LOST,
             SKIP_GESTURE,
             SILENCE_GESTURE,
@@ -9096,6 +9100,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
             VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);
         }
 
         /**
@@ -11861,6 +11866,7 @@ public final class Settings {
          * sync_adapter_duration            (long)
          * exempted_sync_duration           (long)
          * system_interaction_duration      (long)
+         * initial_foreground_service_start_duration (long)
          * stable_charging_threshold        (long)
          *
          * idle_duration        (long) // This is deprecated and used to circumvent b/26355386.
@@ -11956,6 +11962,36 @@ public final class Settings {
         public static final String JOB_SCHEDULER_CONSTANTS = "job_scheduler_constants";
 
         /**
+         * Job scheduler QuotaController specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "max_job_count_working=5,max_job_count_rare=2"
+         *
+         * <p>
+         * Type: string
+         *
+         * @hide
+         * @see com.android.server.job.JobSchedulerService.Constants
+         */
+        public static final String JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS =
+                "job_scheduler_quota_controller_constants";
+
+        /**
+         * Job scheduler TimeController specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "skip_not_ready_jobs=true5,other_key=2"
+         *
+         * <p>
+         * Type: string
+         *
+         * @hide
+         * @see com.android.server.job.JobSchedulerService.Constants
+         */
+        public static final String JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS =
+                "job_scheduler_time_controller_constants";
+
+        /**
          * ShortcutManager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -12003,26 +12039,27 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
-         * smart_linkify_enabled                            (boolean)
-         * system_textclassifier_enabled                    (boolean)
+         * classify_text_max_range_length                   (int)
+         * detect_language_from_text_enabled                (boolean)
+         * entity_list_default                              (String[])
+         * entity_list_editable                             (String[])
+         * entity_list_not_editable                         (String[])
+         * generate_links_log_sample_rate                   (int)
+         * generate_links_max_text_length                   (int)
+         * in_app_conversation_action_types_default         (String[])
+         * lang_id_context_settings                         (float[])
+         * lang_id_threshold_override                       (float)
+         * local_textclassifier_enabled                     (boolean)
          * model_dark_launch_enabled                        (boolean)
-         * smart_selection_enabled                          (boolean)
-         * smart_text_share_enabled                         (boolean)
+         * notification_conversation_action_types_default   (String[])
          * smart_linkify_enabled                            (boolean)
          * smart_select_animation_enabled                   (boolean)
+         * smart_selection_enabled                          (boolean)
+         * smart_text_share_enabled                         (boolean)
          * suggest_selection_max_range_length               (int)
-         * classify_text_max_range_length                   (int)
-         * generate_links_max_text_length                   (int)
-         * generate_links_log_sample_rate                   (int)
-         * entity_list_default                              (String[])
-         * entity_list_not_editable                         (String[])
-         * entity_list_editable                             (String[])
-         * in_app_conversation_action_types_default         (String[])
-         * notification_conversation_action_types_default   (String[])
-         * lang_id_threshold_override                       (float)
+         * system_textclassifier_enabled                    (boolean)
          * template_intent_factory_enabled                  (boolean)
          * translate_in_classification_enabled              (boolean)
-         * detect_language_from_text_enabled                (boolean)
          * </pre>
          *
          * <p>

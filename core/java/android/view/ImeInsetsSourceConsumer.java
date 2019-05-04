@@ -173,6 +173,6 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     private InputMethodManager getImm() {
-        return mController.getViewRoot().mDisplayContext.getSystemService(InputMethodManager.class);
+        return mController.getViewRoot().mContext.getSystemService(InputMethodManager.class);
     }
 }

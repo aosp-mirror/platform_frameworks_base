@@ -28,7 +28,7 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Message;
 import android.os.UserHandle;
-import android.view.textclassifier.Log;
+import android.util.Log;
 
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 
@@ -36,29 +36,47 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 /**
- * Uses an {@link AppPredictor} to sort Resolver targets.
+ * Uses an {@link AppPredictor} to sort Resolver targets. If the AppPredictionService appears to be
+ * disabled by returning an empty sorted target list, {@link AppPredictionServiceResolverComparator}
+ * will fallback to using a {@link ResolverRankerServiceResolverComparator}.
  */
 class AppPredictionServiceResolverComparator extends AbstractResolverComparator {
 
     private static final String TAG = "APSResolverComparator";
+    private static final boolean DEBUG = false;
 
     private final AppPredictor mAppPredictor;
     private final Context mContext;
     private final Map<ComponentName, Integer> mTargetRanks = new HashMap<>();
     private final UserHandle mUser;
+    private final Intent mIntent;
+    private final String mReferrerPackage;
+    // If this is non-null (and this is not destroyed), it means APS is disabled and we should fall
+    // back to using the ResolverRankerService.
+    private ResolverRankerServiceResolverComparator mResolverRankerService;
 
     AppPredictionServiceResolverComparator(
-                Context context, Intent intent, AppPredictor appPredictor, UserHandle user) {
+                Context context,
+                Intent intent,
+                String referrerPackage,
+                AppPredictor appPredictor,
+                UserHandle user) {
         super(context, intent);
         mContext = context;
+        mIntent = intent;
         mAppPredictor = appPredictor;
         mUser = user;
+        mReferrerPackage = referrerPackage;
     }
 
     @Override
     int compare(ResolveInfo lhs, ResolveInfo rhs) {
+        if (mResolverRankerService != null) {
+            return mResolverRankerService.compare(lhs, rhs);
+        }
         Integer lhsRank = mTargetRanks.get(new ComponentName(lhs.activityInfo.packageName,
                 lhs.activityInfo.name));
         Integer rhsRank = mTargetRanks.get(new ComponentName(rhs.activityInfo.packageName,
@@ -75,33 +93,59 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
 
     @Override
     void doCompute(List<ResolvedComponentInfo> targets) {
+        if (targets.isEmpty()) {
+            mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT);
+            return;
+        }
         List<AppTarget> appTargets = new ArrayList<>();
         for (ResolvedComponentInfo target : targets) {
             appTargets.add(new AppTarget.Builder(new AppTargetId(target.name.flattenToString()))
                     .setTarget(target.name.getPackageName(), mUser)
                     .setClassName(target.name.getClassName()).build());
         }
-        mAppPredictor.sortTargets(appTargets, mContext.getMainExecutor(),
+        mAppPredictor.sortTargets(appTargets, Executors.newSingleThreadExecutor(),
                 sortedAppTargets -> {
-                    Message msg =
+                    if (sortedAppTargets.isEmpty()) {
+                        if (DEBUG) {
+                            Log.d(TAG, "AppPredictionService disabled. Using resolver.");
+                        }
+                        // APS for chooser is disabled. Fallback to resolver.
+                        mResolverRankerService =
+                                new ResolverRankerServiceResolverComparator(
+                                    mContext, mIntent, mReferrerPackage,
+                                        () -> mHandler.sendEmptyMessage(RANKER_SERVICE_RESULT));
+                        mResolverRankerService.compute(targets);
+                    } else {
+                        if (DEBUG) {
+                            Log.d(TAG, "AppPredictionService response received");
+                        }
+                        Message msg =
                             Message.obtain(mHandler, RANKER_SERVICE_RESULT, sortedAppTargets);
-                    msg.sendToTarget();
-                });
+                        msg.sendToTarget();
+                    }
+                }
+        );
     }
 
     @Override
     void handleResultMessage(Message msg) {
-        if (msg.what == RANKER_SERVICE_RESULT) {
+        // Null value is okay if we have defaulted to the ResolverRankerService.
+        if (msg.what == RANKER_SERVICE_RESULT && msg.obj != null) {
             final List<AppTarget> sortedAppTargets = (List<AppTarget>) msg.obj;
             for (int i = 0; i < sortedAppTargets.size(); i++) {
                 mTargetRanks.put(new ComponentName(sortedAppTargets.get(i).getPackageName(),
                         sortedAppTargets.get(i).getClassName()), i);
             }
+        } else if (msg.obj == null && mResolverRankerService == null) {
+            Log.e(TAG, "Unexpected null result");
         }
     }
 
     @Override
     float getScore(ComponentName name) {
+        if (mResolverRankerService != null) {
+            return mResolverRankerService.getScore(name);
+        }
         Integer rank = mTargetRanks.get(name);
         if (rank == null) {
             Log.w(TAG, "Score requested for unknown component.");
@@ -113,6 +157,10 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
 
     @Override
     void updateModel(ComponentName componentName) {
+        if (mResolverRankerService != null) {
+            mResolverRankerService.updateModel(componentName);
+            return;
+        }
         mAppPredictor.notifyAppTargetEvent(
                 new AppTargetEvent.Builder(
                     new AppTarget.Builder(
@@ -120,5 +168,13 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
                         componentName.getPackageName(), mUser)
                         .setClassName(componentName.getClassName()).build(),
                     ACTION_LAUNCH).build());
+    }
+
+    @Override
+    void destroy() {
+        if (mResolverRankerService != null) {
+            mResolverRankerService.destroy();
+            mResolverRankerService = null;
+        }
     }
 }

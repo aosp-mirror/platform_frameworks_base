@@ -550,7 +550,8 @@ public final class ImsCallProfile implements Parcelable {
                 + ", emergencyUrns=" + mEmergencyUrns
                 + ", emergencyCallRouting=" + mEmergencyCallRouting
                 + ", emergencyCallTesting=" + mEmergencyCallTesting
-                + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency + " }";
+                + ", hasKnownUserIntentEmergency=" + mHasKnownUserIntentEmergency
+                + ", mRestrictCause=" + mRestrictCause + " }";
     }
 
     @Override
@@ -570,6 +571,7 @@ public final class ImsCallProfile implements Parcelable {
         out.writeInt(mEmergencyCallRouting);
         out.writeBoolean(mEmergencyCallTesting);
         out.writeBoolean(mHasKnownUserIntentEmergency);
+        out.writeInt(mRestrictCause);
     }
 
     private void readFromParcel(Parcel in) {
@@ -582,6 +584,7 @@ public final class ImsCallProfile implements Parcelable {
         mEmergencyCallRouting = in.readInt();
         mEmergencyCallTesting = in.readBoolean();
         mHasKnownUserIntentEmergency = in.readBoolean();
+        mRestrictCause = in.readInt();
     }
 
     public static final @android.annotation.NonNull Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {

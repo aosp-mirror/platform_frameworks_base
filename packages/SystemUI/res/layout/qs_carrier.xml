@@ -42,6 +42,7 @@
         android:layout_weight="1"
         android:textAppearance="@style/TextAppearance.QS.Status"
         android:textDirection="locale"
+        android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
         android:maxEms="7"/>
 

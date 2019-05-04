@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
@@ -62,7 +61,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private static final int ANIMATION_DURATION_SHOW = 250; // ms
     private static final int ANIMATION_DURATION_AWAY = 350; // ms
 
-    private static final int MSG_CLEAR_MESSAGE = 1;
+    protected static final int MSG_CLEAR_MESSAGE = 1;
 
     protected static final int STATE_IDLE = 0;
     protected static final int STATE_AUTHENTICATING = 1;
@@ -78,7 +77,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private final float mAnimationTranslationOffset;
     private final int mErrorColor;
     private final float mDialogWidth;
-    private final DialogViewCallback mCallback;
+    protected final DialogViewCallback mCallback;
 
     protected final ViewGroup mLayout;
     protected final LinearLayout mDialog;
@@ -105,11 +104,10 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected abstract int getHintStringResourceId();
     protected abstract int getAuthenticatedAccessibilityResourceId();
     protected abstract int getIconDescriptionResourceId();
-    protected abstract Drawable getAnimationForTransition(int oldState, int newState);
-    protected abstract boolean shouldAnimateForTransition(int oldState, int newState);
     protected abstract int getDelayAfterAuthenticatedDurationMs();
     protected abstract boolean shouldGrayAreaDismissDialog();
-    protected abstract void handleClearMessage(boolean requireTryAgain);
+    protected abstract void handleClearMessage();
+    protected abstract void updateIcon(int oldState, int newState);
 
     private final Runnable mShowAnimationRunnable = new Runnable() {
         @Override
@@ -125,16 +123,17 @@ public abstract class BiometricDialogView extends LinearLayout {
                     .setDuration(ANIMATION_DURATION_SHOW)
                     .setInterpolator(mLinearOutSlowIn)
                     .withLayer()
+                    .withEndAction(() -> onDialogAnimatedIn())
                     .start();
         }
     };
 
-    private Handler mHandler = new Handler() {
+    protected Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case MSG_CLEAR_MESSAGE:
-                    handleClearMessage((boolean) msg.obj /* requireTryAgain */);
+                    handleClearMessage();
                     break;
                 default:
                     Log.e(TAG, "Unhandled message: " + msg.what);
@@ -224,8 +223,9 @@ public abstract class BiometricDialogView extends LinearLayout {
         });
 
         mTryAgainButton.setOnClickListener((View v) -> {
+            updateState(STATE_AUTHENTICATING);
             showTryAgainButton(false /* show */);
-            handleClearMessage(false /* requireTryAgain */);
+            handleClearMessage();
             mCallback.onTryAgainPressed();
         });
 
@@ -314,25 +314,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         mSkipIntro = false;
     }
 
-    protected void updateIcon(int lastState, int newState) {
-        final Drawable icon = getAnimationForTransition(lastState, newState);
-        if (icon == null) {
-            Log.e(TAG, "Animation not found, " + lastState + " -> " + newState);
-            return;
-        }
-
-        final AnimatedVectorDrawable animation = icon instanceof AnimatedVectorDrawable
-                ? (AnimatedVectorDrawable) icon
-                : null;
-
-        mBiometricIcon.setImageDrawable(icon);
-
-        if (animation != null && shouldAnimateForTransition(lastState, newState)) {
-            animation.forceAnimationOnUI();
-            animation.start();
-        }
-    }
-
     private void setDismissesDialog(View v) {
         v.setClickable(true);
         v.setOnTouchListener((View view, MotionEvent event) -> {
@@ -353,7 +334,7 @@ public abstract class BiometricDialogView extends LinearLayout {
                 mWindowManager.removeView(BiometricDialogView.this);
                 mAnimatingAway = false;
                 // Set the icons / text back to normal state
-                handleClearMessage(false /* requireTryAgain */);
+                handleClearMessage();
                 showTryAgainButton(false /* show */);
                 updateState(STATE_IDLE);
             }
@@ -424,29 +405,44 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     // Shows an error/help message
-    private void showTemporaryMessage(String message, boolean requireTryAgain) {
+    protected void showTemporaryMessage(String message) {
         mHandler.removeMessages(MSG_CLEAR_MESSAGE);
-        updateState(STATE_ERROR);
         mErrorText.setText(message);
         mErrorText.setTextColor(mErrorColor);
         mErrorText.setContentDescription(message);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_MESSAGE, requireTryAgain),
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_MESSAGE),
                 BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
     public void clearTemporaryMessage() {
         mHandler.removeMessages(MSG_CLEAR_MESSAGE);
-        mHandler.obtainMessage(MSG_CLEAR_MESSAGE, false /* requireTryAgain */).sendToTarget();
+        mHandler.obtainMessage(MSG_CLEAR_MESSAGE).sendToTarget();
     }
 
-    public void showHelpMessage(String message, boolean requireTryAgain) {
-        showTemporaryMessage(message, requireTryAgain);
+    /**
+     * Transient help message (acquire) is received, dialog stays showing. Sensor stays in
+     * "authenticating" state.
+     * @param message
+     */
+    public void onHelpReceived(String message) {
+        updateState(STATE_ERROR);
+        showTemporaryMessage(message);
     }
 
-    public void showErrorMessage(String error) {
-        showTemporaryMessage(error, false /* requireTryAgain */);
+    public void onAuthenticationFailed(String message) {
+        updateState(STATE_ERROR);
+        showTemporaryMessage(message);
+    }
+
+    /**
+     * Hard error is received, dialog will be dismissed soon.
+     * @param error
+     */
+    public void onErrorReceived(String error) {
+        updateState(STATE_ERROR);
+        showTemporaryMessage(error);
         showTryAgainButton(false /* show */);
-        mCallback.onErrorShown();
+        mCallback.onErrorShown(); // TODO: Split between fp and face
     }
 
     public void updateState(int newState) {
@@ -469,6 +465,9 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     public void showTryAgainButton(boolean show) {
+    }
+
+    public void onDialogAnimatedIn() {
     }
 
     public void restoreState(Bundle bundle) {

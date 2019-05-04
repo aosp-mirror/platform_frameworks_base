@@ -52,6 +52,13 @@ public abstract class StateController {
     }
 
     /**
+     * Called when the system boot phase has reached
+     * {@link com.android.server.SystemService#PHASE_SYSTEM_SERVICES_READY}.
+     */
+    public void onSystemServicesReady() {
+    }
+
+    /**
      * Implement the logic here to decide whether a job should be tracked by this controller.
      * This logic is put here so the JobManager can be completely agnostic of Controller logic.
      * Also called when updating a task, so implementing controllers have to be aware of
@@ -127,4 +134,12 @@ public abstract class StateController {
             Predicate<JobStatus> predicate);
     public abstract void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
             Predicate<JobStatus> predicate);
+
+    /** Dump any internal constants the Controller may have. */
+    public void dumpConstants(IndentingPrintWriter pw) {
+    }
+
+    /** Dump any internal constants the Controller may have. */
+    public void dumpConstants(ProtoOutputStream proto) {
+    }
 }

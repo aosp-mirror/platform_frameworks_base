@@ -65,6 +65,7 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testKeyguardOverride() {
         mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
@@ -72,6 +73,7 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testKeyguardKeep() {
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
         mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
@@ -172,6 +174,7 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void testLoadAnimationSafely() {
         DisplayContent dc = createNewDisplay(Display.STATE_ON);
         assertNull(dc.mAppTransition.loadAnimationSafely(

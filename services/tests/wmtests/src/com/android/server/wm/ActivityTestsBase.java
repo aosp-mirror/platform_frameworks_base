@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -71,6 +72,7 @@ import com.android.server.am.PendingIntentController;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.TaskRecord.TaskRecordFactory;
 import com.android.server.wm.utils.MockTracker;
 
 import org.junit.After;
@@ -156,6 +158,19 @@ class ActivityTestsBase {
         final TestActivityDisplay display = createNewActivityDisplay(info);
         mRootActivityContainer.addChild(display, position);
         return display;
+    }
+
+    /**
+     * Delegates task creation to {@link #TaskBuilder} to avoid the dependency of window hierarchy
+     * when starting activity in unit tests.
+     */
+    void mockTaskRecordFactory() {
+        final TaskRecord task = new TaskBuilder(mSupervisor).setCreateStack(false).build();
+        final TaskRecordFactory factory = mock(TaskRecordFactory.class);
+        TaskRecord.setTaskRecordFactory(factory);
+        doReturn(task).when(factory).create(any() /* service */, anyInt() /* taskId */,
+                any() /* info */, any() /* intent */, any() /* voiceSession */,
+                any() /* voiceInteractor */);
     }
 
     /**
@@ -413,12 +428,18 @@ class ActivityTestsBase {
         ActivityStackSupervisor mTestStackSupervisor;
 
         ActivityDisplay mDefaultDisplay;
+        AppOpsService mAppOpsService;
 
         TestActivityTaskManagerService(Context context) {
             super(context);
             spyOn(this);
 
             mUgmInternal = mock(UriGrantsManagerInternal.class);
+            mAppOpsService = mock(AppOpsService.class);
+
+            // Make sure permission checks aren't overridden.
+            doReturn(AppOpsManager.MODE_DEFAULT)
+                    .when(mAppOpsService).noteOperation(anyInt(), anyInt(), anyString());
 
             mSupportsMultiWindow = true;
             mSupportsMultiDisplay = true;
@@ -479,6 +500,11 @@ class ActivityTestsBase {
         @Override
         int handleIncomingUser(int callingPid, int callingUid, int userId, String name) {
             return userId;
+        }
+
+        @Override
+        AppOpsService getAppOpsService() {
+            return mAppOpsService;
         }
 
         @Override

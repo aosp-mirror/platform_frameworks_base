@@ -174,6 +174,9 @@ public class CarrierTextController {
         mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
                 Context.TELEPHONY_SERVICE)).getPhoneCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
+        updateDisplayOpportunisticSubscriptionCarrierText(SystemProperties.getBoolean(
+                TelephonyProperties.DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME,
+                false));
     }
 
     /**
@@ -282,10 +285,8 @@ public class CarrierTextController {
      *
      */
     @VisibleForTesting
-    public void updateDisplayOpportunisticSubscriptionCarrierText() {
-        mDisplayOpportunisticSubscriptionCarrierText = SystemProperties
-            .getBoolean(TelephonyProperties
-                .DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME, false);
+    public void updateDisplayOpportunisticSubscriptionCarrierText(boolean isEnable) {
+        mDisplayOpportunisticSubscriptionCarrierText = isEnable;
     }
 
     protected List<SubscriptionInfo> getSubscriptionInfo() {

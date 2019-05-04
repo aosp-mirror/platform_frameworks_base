@@ -1822,7 +1822,8 @@ class ActivityStack extends ConfigurationContainer {
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
-                    addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */);
+                    addToStopping(prev, true /* scheduleIdle */, false /* idleDelayed */,
+                            "completePauseLocked");
                 }
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "App died during pause, not stopping: " + prev);
@@ -1883,8 +1884,11 @@ class ActivityStack extends ConfigurationContainer {
         mRootActivityContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
+    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed,
+            String reason) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
+            EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, r.mUserId,
+                    System.identityHashCode(r), r.shortComponentName, reason);
             mStackSupervisor.mStoppingActivities.add(r);
         }
 
@@ -2433,7 +2437,7 @@ class ActivityStack extends ConfigurationContainer {
                 case PAUSING:
                 case PAUSED:
                     addToStopping(r, true /* scheduleIdle */,
-                            canEnterPictureInPicture /* idleDelayed */);
+                            canEnterPictureInPicture /* idleDelayed */, "makeInvisible");
                     break;
 
                 default:
@@ -3051,21 +3055,7 @@ class ActivityStack extends ConfigurationContainer {
         ActivityOptions.abort(options);
         if (DEBUG_STATES) Slog.d(TAG_STATES,
                 "resumeTopActivityInNextFocusableStack: " + reason + ", go home");
-        if (isActivityTypeHome()) {
-            // resumeTopActivityUncheckedLocked has been prevented to run recursively. Post a
-            // runnable to resume home since we are currently in the process of resuming top
-            // activity in home stack.
-            // See {@link #mInResumeTopActivity}.
-            mService.mH.post(
-                    () -> {
-                        synchronized (mService.mGlobalLock) {
-                            mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
-                        }
-                    });
-            return true;
-        } else {
-            return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
-        }
+        return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
     }
 
     /** Returns the position the input task should be placed in this stack. */
@@ -4098,7 +4088,8 @@ class ActivityStack extends ConfigurationContainer {
         if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
                 && next != null && !next.nowVisible && !isFloating) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */);
+                addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */,
+                        "finishCurrentActivityLocked");
             }
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to STOPPING: "+ r + " (finish requested)");

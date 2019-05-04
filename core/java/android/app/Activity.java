@@ -126,7 +126,6 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
-import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.widget.AdapterView;
@@ -840,7 +839,7 @@ public class Activity extends ContextThemeWrapper
     /** The autofill manager. Always access via {@link #getAutofillManager()}. */
     @Nullable private AutofillManager mAutofillManager;
 
-    /** The content capture manager. Always access via {@link #getContentCaptureManager()}. */
+    /** The content capture manager. Access via {@link #getContentCaptureManager()}. */
     @Nullable private ContentCaptureManager mContentCaptureManager;
 
     private final ArrayList<Application.ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
@@ -1092,12 +1091,11 @@ public class Activity extends ContextThemeWrapper
                 case CONTENT_CAPTURE_START:
                     //TODO(b/111276913): decide whether the InteractionSessionId should be
                     // saved / restored in the activity bundle - probably not
-                    int flags = 0;
-                    if ((getWindow().getAttributes().flags
-                            & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
-                        flags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
+                    final Window window = getWindow();
+                    if (window != null) {
+                        cm.updateWindowAttributes(window.getAttributes());
                     }
-                    cm.onActivityCreated(mToken, getComponentName(), flags);
+                    cm.onActivityCreated(mToken, getComponentName());
                     break;
                 case CONTENT_CAPTURE_RESUME:
                     cm.onActivityResumed();
@@ -2349,7 +2347,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param cancellationSignal A signal to cancel the operation in progress.
      * @param callback The callback to send the action list. The actions list cannot
-     *     contain <code>null</code> elements.
+     *     contain <code>null</code> elements. You can call this on any thread.
      */
     public void onGetDirectActions(@NonNull CancellationSignal cancellationSignal,
             @NonNull Consumer<List<DirectAction>> callback) {
@@ -2360,10 +2358,13 @@ public class Activity extends ContextThemeWrapper
      * This is called to perform an action previously defined by the app.
      * Apps also have access to {@link #getVoiceInteractor()} to follow up on the action.
      *
-     * @param actionId The ID for the action
-     * @param arguments Any additional arguments provided by the caller
+     * @param actionId The ID for the action you previously reported via
+     *     {@link #onGetDirectActions(CancellationSignal, Consumer)}.
+     * @param arguments Any additional arguments provided by the caller that are
+     *     specific to the given action.
      * @param cancellationSignal A signal to cancel the operation in progress.
-     * @param resultListener The callback to provide the result back to the caller
+     * @param resultListener The callback to provide the result back to the caller.
+     *     You can call this on any thread. The result bundle is action specific.
      *
      * @see #onGetDirectActions(CancellationSignal, Consumer)
      */
@@ -3782,6 +3783,9 @@ public class Activity extends ContextThemeWrapper
             View decor = mDecor;
             if (decor != null && decor.getParent() != null) {
                 getWindowManager().updateViewLayout(decor, params);
+                if (mContentCaptureManager != null) {
+                    mContentCaptureManager.updateWindowAttributes(params);
+                }
             }
         }
     }

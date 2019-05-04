@@ -849,6 +849,10 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                 position.width() / (float) mSurfaceWidth,
                 0.0f, 0.0f,
                 position.height() / (float) mSurfaceHeight);
+        if (mViewVisibility) {
+            mRtTransaction.show(surface);
+        }
+
     }
 
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
@@ -915,27 +919,15 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             if (mSurfaceControl == null) {
                 return;
             }
-            if (mRtHandlingPositionUpdates) {
-                mRtHandlingPositionUpdates = false;
-                // This callback will happen while the UI thread is blocked, so we can
-                // safely access other member variables at this time.
-                // So do what the UI thread would have done if RT wasn't handling position
-                // updates.
-                if (!mScreenRect.isEmpty() && !mScreenRect.equals(mRTLastReportedPosition)) {
-                    try {
-                        if (DEBUG) {
-                            Log.d(TAG, String.format("%d updateSurfacePosition, "
-                                            + "postion = [%d, %d, %d, %d]",
-                                    System.identityHashCode(this),
-                                    mScreenRect.left, mScreenRect.top,
-                                    mScreenRect.right, mScreenRect.bottom));
-                        }
-                        setParentSpaceRectangle(mScreenRect, frameNumber);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "Exception configuring surface", ex);
-                    }
-                }
+
+            if (frameNumber > 0) {
+                final ViewRootImpl viewRoot = getViewRootImpl();
+
+                mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
+                        frameNumber);
             }
+            mRtTransaction.hide(mSurfaceControl);
+            mRtTransaction.apply();
         }
     };
 

@@ -494,4 +494,7 @@
     <!-- Launcher package name for overlaying icons. -->
     <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>
 
+    <!-- ThemePicker package name for overlaying icons. -->
+    <string name="themepicker_overlayable_package" translatable="false">com.android.wallpaper</string>
+
 </resources>

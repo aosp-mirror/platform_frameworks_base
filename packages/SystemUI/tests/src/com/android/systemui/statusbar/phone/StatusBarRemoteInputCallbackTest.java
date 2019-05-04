@@ -70,7 +70,8 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mNotificationLockscreenUserManager);
         mDependency.putComponent(CommandQueue.class, mock(CommandQueue.class));
 
-        mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext));
+        mRemoteInputCallback = spy(new StatusBarRemoteInputCallback(mContext,
+                mock(NotificationGroupManager.class)));
         mRemoteInputCallback.mChallengeReceiver = mRemoteInputCallback.new ChallengeReceiver();
     }
 

@@ -13,9 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val TEST_ERROR_CODE = 12345
-/**
- * DHCP Optional Type: DHCP Subnet Mask (Copy from DhcpPacket.java)
- */
+//DHCP Optional Type: DHCP Subnet Mask (Copy from DhcpPacket.java due to it's protected)
 private const val DHCP_SUBNET_MASK = 1
 
 @RunWith(AndroidJUnit4::class)

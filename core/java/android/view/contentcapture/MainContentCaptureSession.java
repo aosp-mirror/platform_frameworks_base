@@ -28,6 +28,7 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APP
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -79,6 +80,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * @hide
      */
     public static final String EXTRA_BINDER = "binder";
+
+    /**
+     * Name of the {@link IResultReceiver} extra used to pass the content capture enabled state.
+     * @hide
+     */
+    public static final String EXTRA_ENABLED_STATE = "enabled";
 
     @NonNull
     private final AtomicBoolean mDisabled = new AtomicBoolean(false);
@@ -155,6 +162,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             public void send(int resultCode, Bundle resultData) {
                 final IBinder binder;
                 if (resultData != null) {
+                    // Change in content capture enabled.
+                    final boolean hasEnabled = resultData.getBoolean(EXTRA_ENABLED_STATE);
+                    if (hasEnabled) {
+                        final boolean disabled = (resultCode == RESULT_CODE_FALSE);
+                        mDisabled.set(disabled);
+                        return;
+                    }
                     binder = resultData.getBinder(EXTRA_BINDER);
                     if (binder == null) {
                         Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
@@ -576,6 +590,15 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // Called by ContentCaptureManager.isContentCaptureEnabled
     boolean isDisabled() {
         return mDisabled.get();
+    }
+
+    /**
+     * Sets the disabled state of content capture.
+     *
+     * @return whether disabled state was changed.
+     */
+    boolean setDisabled(boolean disabled) {
+        return mDisabled.compareAndSet(!disabled, disabled);
     }
 
     // TODO(b/122454205): refactor "notifyXXXX" methods below to a common "Buffer" object that is

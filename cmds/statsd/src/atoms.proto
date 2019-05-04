@@ -41,13 +41,14 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
-import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
+import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
+import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -283,6 +284,16 @@ message Atom {
         ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
         RoleRequestResultReported role_request_result_reported =
             190 [(log_from_module) = "permissioncontroller"];
+        MediametricsAudiopolicyReported mediametrics_audiopolicy_reported = 191;
+        MediametricsAudiorecordReported mediametrics_audiorecord_reported = 192;
+        MediametricsAudiothreadReported mediametrics_audiothread_reported = 193;
+        MediametricsAudiotrackReported mediametrics_audiotrack_reported = 194;
+        MediametricsCodecReported mediametrics_codec_reported = 195;
+        MediametricsDrmWidevineReported mediametrics_drm_widevine_reported = 196;
+        MediametricsExtractorReported mediametrics_extractor_reported = 197;
+        MediametricsMediadrmReported mediametrics_mediadrm_reported = 198;
+        MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
+        MediametricsRecorderReported mediametrics_recorder_reported = 200;
     }
 
     // Pulled events will start at field 10000.
@@ -3296,7 +3307,10 @@ message BinaryPushStateChanged {
         INSTALL_STAGED_NOT_READY = 3;
         INSTALL_STAGED_READY = 4;
         INSTALL_SUCCESS = 5;
-        INSTALL_FAILURE = 6;
+        // Replaced by INSTALL_FAILURE_DOWNLOAD, INSTALL_FAILURE_STATE_MISMATCH,
+        // and INSTALL_FAILURE_COMMIT.
+        INSTALL_FAILURE = 6  [deprecated = true];
+        // This enum is for installs that are manually cancelled via the Manual Update UI.
         INSTALL_CANCELLED = 7;
         INSTALLER_ROLLBACK_REQUESTED = 8;
         INSTALLER_ROLLBACK_INITIATED = 9;
@@ -3313,6 +3327,9 @@ message BinaryPushStateChanged {
         INSTALL_STAGED_CANCEL_REQUESTED = 20;
         INSTALL_STAGED_CANCEL_SUCCESS = 21;
         INSTALL_STAGED_CANCEL_FAILURE = 22;
+        INSTALL_FAILURE_DOWNLOAD = 23;
+        INSTALL_FAILURE_STATE_MISMATCH = 24;
+        INSTALL_FAILURE_COMMIT = 25;
     }
     optional State state = 6;
     // Possible experiment ids for monitoring this push.
@@ -5092,35 +5109,35 @@ message AppCompacted {
  * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
  * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
  *
- * The top-level message represents the entire lookup operation, which may result one or more
- * queries to the recursive DNS resolvers. Those are individually logged in DnsQueryEvent to
- * enable computing error rates and network latency and timeouts broken up by query type,
- * transport, network interface, etc.
+ * The NetworkDnsEventReported message represents the entire lookup operation, which may
+ * result one or more queries to the recursive DNS resolvers. Those are individually logged
+ * in DnsQueryEvents to enable computing error rates and network latency and timeouts
+ * broken up by query type, transport, network interface, etc.
  */
 message NetworkDnsEventReported {
+    optional android.stats.dnsresolver.EventType event_type = 1;
 
-    optional android.stats.connectivity.EventType event_type = 1;
-
-    optional android.stats.connectivity.ReturnCode return_code = 2;
+    optional android.stats.dnsresolver.ReturnCode return_code = 2;
 
     // The latency in microseconds of the entire DNS lookup operation.
     optional int32 latency_micros = 3;
 
-    optional android.stats.connectivity.DnsQueryEventRe dns_query_event_re = 4 [(log_mode) = MODE_BYTES];
+    // Only valid for event_type = EVENT_GETADDRINFO.
+    optional int32 hints_ai_flags = 4;
 
-    // ResNSend flags defined in android/multinetwork.h
-    optional int32 flags = 5;
+    // Flags passed to android_res_nsend() defined in multinetwork.h
+    // Only valid for event_type = EVENT_RESNSEND.
+    optional int32 res_nsend_flags = 5;
 
-    optional android.net.NetworkCapabilitiesProto.Transport network_type = 6;
+    optional android.stats.dnsresolver.Transport network_type = 6;
 
     // The DNS over TLS mode on a specific netId.
-    optional android.stats.connectivity.PrivateDnsModes private_dns_modes = 7;
+    optional android.stats.dnsresolver.PrivateDnsModes private_dns_modes = 7;
 
     // Additional pass-through fields opaque to statsd.
     // The DNS resolver Mainline module can add new fields here without requiring an OS update.
-    optional android.stats.connectivity.DnsCallEvent dns_call_event = 8 [(log_mode) = MODE_BYTES];
+    optional android.stats.dnsresolver.DnsQueryEvents dns_query_events = 8 [(log_mode) = MODE_BYTES];
 }
-
 
 /**
  * Logs when a data stall event occurs.
@@ -5809,6 +5826,160 @@ message ProcessStartTime {
 }
 
 /**
+ * Track Media Codec usage
+ * Logged from:
+ *   frameworks/av/media/libstagefright/MediaCodec.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_codec.cpp
+ */
+message MediametricsCodecReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.CodecData codec_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track Media Extractor (pulling video/audio streams out of containers) usage
+ * Logged from:
+ *   frameworks/av/media/libstagefright/RemoteMediaExtractor.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_extractor.cpp
+ */
+message MediametricsExtractorReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.ExtractorData extractor_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiopolicy.cpp
+ */
+message MediametricsAudiopolicyReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioPolicyData audiopolicy_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone requests.
+ * Logged from
+ *   frameworks/av/media/libaudioclient/AudioRecord.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiorecord.cpp
+ */
+message MediametricsAudiorecordReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioRecordData audiorecord_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/media/libnblog/ReportPerformance.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiothread.cpp
+ */
+message MediametricsAudiothreadReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioThreadData audiothread_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/media/libaudioclient/AudioTrack.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiotrack.cpp
+ */
+message MediametricsAudiotrackReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.AudioTrackData audiotrack_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track information about DRM framework performance
+ * Logged from
+ *   frameworks/av/drm/libmediadrm/DrmHal.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_drm.cpp
+ */
+message MediametricsMediadrmReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    // vendor+description tell about which DRM plugin is in use on this device
+    optional string vendor = 5;
+    optional string description = 6;
+    // from frameworks/av/drm/libmediadrm/protos/metrics.proto
+    optional bytes framework_stats = 7 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track information about the widevine DRM plugin performance
+ * Logged from
+ *   vendor/widevine/libwvdrmengine/cdm/metrics
+ *   frameworks/av/services/mediaanalytics/statsd_drm.cpp
+ */
+message MediametricsDrmWidevineReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional bytes vendor_specific_stats = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track information about recordings (e.g. camcorder)
+ * Logged from
+ *   frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_recorder.cpp
+ */
+message MediametricsRecorderReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.RecorderData recorder_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
+ * Track Media Player usage
+ * Logged from:
+ *   frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_nuplayer.cpp
+ */
+message MediametricsNuPlayerReported {
+    optional int64 timestamp_nanos = 1;
+    optional string package_name = 2;
+    optional int64 package_version_code = 3;
+    optional int64 media_apex_version = 4;
+
+    optional android.stats.mediametrics.NuPlayerData nuplayer_data = 5 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/**
  * State of a dangerous permission requested by a package
  */
 message DangerousPermissionState {
@@ -5863,7 +6034,10 @@ message TrainInfo {
         INSTALL_STAGED_NOT_READY = 3;
         INSTALL_STAGED_READY = 4;
         INSTALL_SUCCESS = 5;
-        INSTALL_FAILURE = 6;
+        // Replaced by INSTALL_FAILURE_DOWNLOAD, INSTALL_FAILURE_STATE_MISMATCH,
+        // and INSTALL_FAILURE_COMMIT.
+        INSTALL_FAILURE = 6  [deprecated = true];
+        // This enum is for installs that are manually cancelled via the Manual Update UI.
         INSTALL_CANCELLED = 7;
         INSTALLER_ROLLBACK_REQUESTED = 8;
         INSTALLER_ROLLBACK_INITIATED = 9;
@@ -5880,6 +6054,9 @@ message TrainInfo {
         INSTALL_STAGED_CANCEL_REQUESTED = 20;
         INSTALL_STAGED_CANCEL_SUCCESS = 21;
         INSTALL_STAGED_CANCEL_FAILURE = 22;
+        INSTALL_FAILURE_DOWNLOAD = 23;
+        INSTALL_FAILURE_STATE_MISMATCH = 24;
+        INSTALL_FAILURE_COMMIT = 25;
     }
     optional Status status = 4;
 }
@@ -6073,6 +6250,6 @@ message IntelligenceEventReported {
   optional android.stats.intelligence.Status status = 2;
   // How many times the event occured (to report a batch of high frequency events).
   optional int32 count = 3;
-  // How long the event took (averaged for batches).
+  // How long the event took (sum of durations if count > 1)
   optional int64 duration_millis = 4;
 }

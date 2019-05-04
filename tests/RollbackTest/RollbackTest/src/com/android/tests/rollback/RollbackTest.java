@@ -775,6 +775,42 @@ public class RollbackTest {
         }
     }
 
+    /**
+     * Test failure to enable rollback for multi-package installs.
+     * If any one of the packages fail to enable rollback, we shouldn't enable
+     * rollback for any package.
+     */
+    @Test
+    public void testMultiPackageEnableFail() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.uninstall(TEST_APP_B);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+
+            // We should fail to enable rollback here because TestApp B is not
+            // already installed.
+            RollbackTestUtils.installMultiPackage(true,
+                    "RollbackTestAppAv2.apk",
+                    "RollbackTestAppBv2.apk");
+
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+
+            assertNull(getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A));
+            assertNull(getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_B));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
     @Test
     @Ignore("b/120200473")
     /**
@@ -868,6 +904,51 @@ public class RollbackTest {
             if (crashCountReceiver != null) {
                 context.unregisterReceiver(crashCountReceiver);
             }
+        }
+    }
+
+    /**
+     * Test race between roll back and roll forward.
+     */
+    @Test
+    public void testRollForwardRace() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
+            assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
+
+            // Install a new version of package A, then immediately rollback
+            // the previous version. We expect the rollback to fail, because
+            // it is no longer available.
+            // There are a couple different ways this could fail depending on
+            // thread interleaving, so don't ignore flaky failures.
+            RollbackTestUtils.install("RollbackTestAppAv3.apk", false);
+            try {
+                RollbackTestUtils.rollback(rollback.getRollbackId());
+                // Note: Don't ignore flaky failures here.
+                fail("Expected rollback to fail, but it did not.");
+            } catch (AssertionError e) {
+                Log.i(TAG, "Note expected failure: ", e);
+                // Expected
+            }
+
+            // Note: Don't ignore flaky failures here.
+            assertEquals(3, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
         }
     }
 

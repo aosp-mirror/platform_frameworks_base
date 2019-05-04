@@ -112,33 +112,19 @@ public class CommandQueueTest extends SysuiTestCase {
     @Test
     public void testSetSystemUiVisibility() {
         Rect r = new Rect();
-        mCommandQueue.setSystemUiVisibility(DEFAULT_DISPLAY, 1, 2, 3, 4, null, r);
+        mCommandQueue.setSystemUiVisibility(DEFAULT_DISPLAY, 1, 2, 3, 4, null, r, false);
         waitForIdleSync();
         verify(mCallbacks).setSystemUiVisibility(eq(DEFAULT_DISPLAY), eq(1), eq(2), eq(3), eq(4),
-                eq(null), eq(r));
+                eq(null), eq(r), eq(false));
     }
 
     @Test
     public void testSetSystemUiVisibilityForSecondaryDisplay() {
         Rect r = new Rect();
-        mCommandQueue.setSystemUiVisibility(SECONDARY_DISPLAY, 1, 2, 3, 4, null, r);
+        mCommandQueue.setSystemUiVisibility(SECONDARY_DISPLAY, 1, 2, 3, 4, null, r, false);
         waitForIdleSync();
         verify(mCallbacks).setSystemUiVisibility(eq(SECONDARY_DISPLAY), eq(1), eq(2), eq(3), eq(4),
-                eq(null), eq(r));
-    }
-
-    @Test
-    public void testTopAppWindowChanged() {
-        mCommandQueue.topAppWindowChanged(DEFAULT_DISPLAY, true);
-        waitForIdleSync();
-        verify(mCallbacks).topAppWindowChanged(eq(DEFAULT_DISPLAY), eq(true));
-    }
-
-    @Test
-    public void testTopAppWindowChangedForSecondaryDisplay() {
-        mCommandQueue.topAppWindowChanged(SECONDARY_DISPLAY, true);
-        waitForIdleSync();
-        verify(mCallbacks).topAppWindowChanged(eq(SECONDARY_DISPLAY), eq(true));
+                eq(null), eq(r), eq(false));
     }
 
     @Test

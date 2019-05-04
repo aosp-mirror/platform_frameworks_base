@@ -316,6 +316,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * value of {@link android.R.attr#permissionFlags}.
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final int FLAG_REMOVED = 1<<1;
 
@@ -360,8 +361,11 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_COSTS_MONEY,
-            FLAG_INSTALLED,
-            FLAG_REMOVED
+            FLAG_REMOVED,
+            FLAG_HARD_RESTRICTED,
+            FLAG_SOFT_RESTRICTED,
+            FLAG_IMMUTABLY_RESTRICTED,
+            FLAG_INSTALLED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}

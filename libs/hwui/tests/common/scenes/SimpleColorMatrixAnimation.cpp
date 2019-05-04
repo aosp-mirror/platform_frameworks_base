@@ -56,7 +56,7 @@ private:
                     // Simple scale/translate case where R, G, and B are all treated equivalently
                     SkColorMatrix cm;
                     cm.setScale(1.1f, 1.1f, 1.1f, 0.5f);
-                    cm.postTranslate255(5.0f, 5.0f, 5.0f, 10.0f);
+                    cm.postTranslate(5.0f/255, 5.0f/255, 5.0f/255, 10.0f/255);
 
                     paint.setColorFilter(SkColorFilters::Matrix(cm));
 

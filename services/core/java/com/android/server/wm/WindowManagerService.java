@@ -35,6 +35,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -163,6 +164,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -238,7 +240,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
-import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
@@ -791,9 +792,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayManager mDisplayManager;
     final ActivityTaskManagerService mAtmService;
 
-    /** Corner radius that windows should have in order to match the display. */
-    final float mWindowCornerRadius;
-
     /** Indicates whether this device supports wide color gamut / HDR rendering */
     private boolean mHasWideColorGamutSupport;
     private boolean mHasHdrSupport;
@@ -1018,7 +1016,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplayWindowSettings = new DisplayWindowSettings(this);
-        mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context.getResources());
 
         mTransactionFactory = transactionFactory;
         mTransaction = mTransactionFactory.make();
@@ -1878,7 +1875,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     // We need to report touchable region changes to accessibility.
                     if (mAccessibilityController != null
-                            && w.getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+                            && (w.getDisplayContent().getDisplayId() == DEFAULT_DISPLAY
+                                    || w.getDisplayContent().getParentWindow() != null)) {
                         mAccessibilityController.onSomeWindowResizedOrMovedLocked();
                     }
                 }
@@ -2010,7 +2008,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
                         && (mAccessibilityController != null)
-                        && (win.getDisplayId() == DEFAULT_DISPLAY)) {
+                        && (win.getDisplayId() == DEFAULT_DISPLAY
+                                || win.getDisplayContent().getParentWindow() != null)) {
                     // No move or resize, but the controller checks for title changes as well
                     mAccessibilityController.onSomeWindowResizedOrMovedLocked();
                 }
@@ -5298,7 +5297,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     ": removed=" + win.mRemoved + " visible=" + win.isVisibleLw() +
                     " mHasSurface=" + win.mHasSurface +
                     " drawState=" + win.mWinAnimator.mDrawState);
-            if (win.mRemoved || !win.mHasSurface || !win.mPolicyVisibility) {
+            if (win.mRemoved || !win.mHasSurface || !win.isVisibleByPolicy()) {
                 // Window has been removed or hidden; no draw will now happen, so stop waiting.
                 if (DEBUG_SCREEN_ON) Slog.w(TAG_WM, "Aborted waiting for drawn: " + win);
                 mWaitingForDrawn.remove(win);
@@ -6701,6 +6700,61 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void checkCallerOwnsDisplay(int displayId) {
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            throw new IllegalArgumentException(
+                    "Cannot find display for non-existent displayId: " + displayId);
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int displayOwnerUid = display.getOwnerUid();
+        if (callingUid != displayOwnerUid) {
+            throw new SecurityException("The caller doesn't own the display.");
+        }
+    }
+
+    /** @see Session#reparentDisplayContent(IWindow, SurfaceControl, int)  */
+    void reparentDisplayContent(IWindow client, SurfaceControl sc, int displayId) {
+        checkCallerOwnsDisplay(displayId);
+
+        synchronized (mGlobalLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final WindowState win = windowForClientLocked(null, client, false);
+                if (win == null) {
+                    Slog.w(TAG_WM, "Bad requesting window " + client);
+                    return;
+                }
+                getDisplayContentOrCreate(displayId, null).reparentDisplayContent(win, sc);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    /** @see Session#updateDisplayContentLocation(IWindow, int, int, int)  */
+    void updateDisplayContentLocation(IWindow client, int x, int y, int displayId) {
+        checkCallerOwnsDisplay(displayId);
+
+        synchronized (mGlobalLock) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final WindowState win = windowForClientLocked(null, client, false);
+                if (win == null) {
+                    Slog.w(TAG_WM, "Bad requesting window " + client);
+                    return;
+                }
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                if (displayContent != null) {
+                    displayContent.updateLocation(win, x, y);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
     /**
      * Update a tap exclude region in the window identified by the provided id. Touches down on this
      * region will not:
@@ -6871,8 +6925,19 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: " + displayId);
                 return false;
             }
+            final Display display = displayContent.getDisplay();
+            if (isUntrustedVirtualDisplay(display)) {
+                return false;
+            }
             return displayContent.supportsSystemDecorations();
         }
+    }
+
+    /**
+     * @return {@code true} if the display is non-system created virtual display.
+     */
+    private static boolean isUntrustedVirtualDisplay(Display display) {
+        return display.getType() == TYPE_VIRTUAL && display.getOwnerUid() != Process.SYSTEM_UID;
     }
 
     @Override
@@ -6908,7 +6973,12 @@ public class WindowManagerService extends IWindowManager.Stub
                         + displayId);
                 return false;
             }
-            return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
+            final Display display = displayContent.getDisplay();
+            if (isUntrustedVirtualDisplay(display)) {
+                return false;
+            }
+            return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
+                    || mForceDesktopModeOnExternalDisplays;
         }
     }
 
@@ -7352,6 +7422,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerService.this.shouldShowSystemDecors(displayId);
             }
         }
+
+        @Override
+        public boolean shouldShowIme(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
@@ -7507,31 +7585,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             if (mPolicy.setAodShowing(aodShowing)) {
                 mWindowPlacerLocked.performSurfacePlacement();
-            }
-        }
-    }
-
-    @Override
-    public void reparentDisplayContent(int displayId, SurfaceControl sc) {
-        final Display display = mDisplayManager.getDisplay(displayId);
-        if (display == null) {
-            throw new IllegalArgumentException(
-                    "Can't reparent display for non-existent displayId: " + displayId);
-        }
-
-        final int callingUid = Binder.getCallingUid();
-        final int displayOwnerUid = display.getOwnerUid();
-        if (callingUid != displayOwnerUid) {
-            throw new SecurityException("Only owner of the display can reparent surfaces to it.");
-        }
-
-        synchronized (mGlobalLock) {
-            long token = Binder.clearCallingIdentity();
-            try {
-                DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
-                displayContent.reparentDisplayContent(sc);
-            } finally {
-                Binder.restoreCallingIdentity(token);
             }
         }
     }

@@ -16,57 +16,38 @@
 
 package android.view.textclassifier;
 
-import android.annotation.Nullable;
-
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 /**
  * TextClassifier specific settings.
- * This is encoded as a key=value list, separated by commas. Ex:
- *
- * <pre>
- * smart_linkify_enabled                            (boolean)
- * system_textclassifier_enabled                    (boolean)
- * model_dark_launch_enabled                        (boolean)
- * smart_selection_enabled                          (boolean)
- * smart_text_share_enabled                         (boolean)
- * smart_linkify_enabled                            (boolean)
- * smart_select_animation_enabled                   (boolean)
- * suggest_selection_max_range_length               (int)
- * classify_text_max_range_length                   (int)
- * generate_links_max_text_length                   (int)
- * generate_links_log_sample_rate                   (int)
- * entity_list_default                              (String[])
- * entity_list_not_editable                         (String[])
- * entity_list_editable                             (String[])
- * in_app_conversation_action_types_default         (String[])
- * notification_conversation_action_types_default   (String[])
- * lang_id_threshold_override                       (float)
- * template_intent_factory_enabled                  (boolean)
- * translate_in_classification_enabled              (boolean)
- * detect_languages_from_text_enabled               (boolean)
- * lang_id_context_settings                         (float[])
- * </pre>
- *
+ * This is encoded as a key=value list, separated by commas.
  * <p>
- * Type: string
- * see also android.provider.Settings.Global.TEXT_CLASSIFIER_CONSTANTS
- *
  * Example of setting the values for testing.
+ * <p>
+ * <pre>
  * adb shell settings put global text_classifier_constants \
  *      model_dark_launch_enabled=true,smart_selection_enabled=true, \
  *      entity_list_default=phone:address, \
  *      lang_id_context_settings=20:1.0:0.4
+ * </pre>
+ * <p>
+ * Settings are also available in device config. These take precedence over those in settings
+ * global.
+ * <p>
+ * <pre>
+ * adb shell cmd device_config put textclassifier system_textclassifier_enabled true
+ * </pre>
+ *
+ * @see android.provider.Settings.Global.TEXT_CLASSIFIER_CONSTANTS
+ * @see android.provider.DeviceConfig.NAMESPACE_TEXTCLASSIFIER
  * @hide
  */
+// TODO: Rename to TextClassifierSettings.
 public final class TextClassificationConstants {
-
-    private static final String LOG_TAG = TextClassifier.DEFAULT_LOG_TAG;
 
     /**
      * Whether the smart linkify feature is enabled.
@@ -188,29 +169,26 @@ public final class TextClassificationConstants {
     private static final int CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT = 10 * 1000;
     private static final int GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT = 100 * 1000;
     private static final int GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT = 100;
-    private static final String STRING_LIST_DELIMITER = ":";
-    private static final String ENTITY_LIST_DEFAULT_VALUE = new StringJoiner(STRING_LIST_DELIMITER)
-            .add(TextClassifier.TYPE_ADDRESS)
-            .add(TextClassifier.TYPE_EMAIL)
-            .add(TextClassifier.TYPE_PHONE)
-            .add(TextClassifier.TYPE_URL)
-            .add(TextClassifier.TYPE_DATE)
-            .add(TextClassifier.TYPE_DATE_TIME)
-            .add(TextClassifier.TYPE_FLIGHT_NUMBER).toString();
-    private static final String CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES =
-            new StringJoiner(STRING_LIST_DELIMITER)
-                    .add(ConversationAction.TYPE_TEXT_REPLY)
-                    .add(ConversationAction.TYPE_CREATE_REMINDER)
-                    .add(ConversationAction.TYPE_CALL_PHONE)
-                    .add(ConversationAction.TYPE_OPEN_URL)
-                    .add(ConversationAction.TYPE_SEND_EMAIL)
-                    .add(ConversationAction.TYPE_SEND_SMS)
-                    .add(ConversationAction.TYPE_TRACK_FLIGHT)
-                    .add(ConversationAction.TYPE_VIEW_CALENDAR)
-                    .add(ConversationAction.TYPE_VIEW_MAP)
-                    .add(ConversationAction.TYPE_ADD_CONTACT)
-                    .add(ConversationAction.TYPE_COPY)
-                    .toString();
+    private static final List<String> ENTITY_LIST_DEFAULT_VALUE = Arrays.asList(
+            TextClassifier.TYPE_ADDRESS,
+            TextClassifier.TYPE_EMAIL,
+            TextClassifier.TYPE_PHONE,
+            TextClassifier.TYPE_URL,
+            TextClassifier.TYPE_DATE,
+            TextClassifier.TYPE_DATE_TIME,
+            TextClassifier.TYPE_FLIGHT_NUMBER);
+    private static final List<String> CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES = Arrays.asList(
+            ConversationAction.TYPE_TEXT_REPLY,
+            ConversationAction.TYPE_CREATE_REMINDER,
+            ConversationAction.TYPE_CALL_PHONE,
+            ConversationAction.TYPE_OPEN_URL,
+            ConversationAction.TYPE_SEND_EMAIL,
+            ConversationAction.TYPE_SEND_SMS,
+            ConversationAction.TYPE_TRACK_FLIGHT,
+            ConversationAction.TYPE_VIEW_CALENDAR,
+            ConversationAction.TYPE_VIEW_MAP,
+            ConversationAction.TYPE_ADD_CONTACT,
+            ConversationAction.TYPE_COPY);
     /**
      * < 0  : Not set. Use value from LangId model.
      * 0 - 1: Override value in LangId model.
@@ -221,259 +199,185 @@ public final class TextClassificationConstants {
     private static final boolean TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT = true;
     private static final boolean TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT = true;
     private static final boolean DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT = true;
-    private static final String LANG_ID_CONTEXT_SETTINGS_DEFAULT =
-            new StringJoiner(STRING_LIST_DELIMITER).add("20").add("1.0").add("0.4").toString();
+    private static final float[] LANG_ID_CONTEXT_SETTINGS_DEFAULT = new float[] {20f, 1.0f, 0.4f};
 
-    private final boolean mSystemTextClassifierEnabled;
-    private final boolean mLocalTextClassifierEnabled;
-    private final boolean mModelDarkLaunchEnabled;
-    private final boolean mSmartSelectionEnabled;
-    private final boolean mSmartTextShareEnabled;
-    private final boolean mSmartLinkifyEnabled;
-    private final boolean mSmartSelectionAnimationEnabled;
-    private final int mSuggestSelectionMaxRangeLength;
-    private final int mClassifyTextMaxRangeLength;
-    private final int mGenerateLinksMaxTextLength;
-    private final int mGenerateLinksLogSampleRate;
-    private final List<String> mEntityListDefault;
-    private final List<String> mEntityListNotEditable;
-    private final List<String> mEntityListEditable;
-    private final List<String> mInAppConversationActionTypesDefault;
-    private final List<String> mNotificationConversationActionTypesDefault;
-    private final float mLangIdThresholdOverride;
-    private final boolean mTemplateIntentFactoryEnabled;
-    private final boolean mTranslateInClassificationEnabled;
-    private final boolean mDetectLanguagesFromTextEnabled;
-    private final float[] mLangIdContextSettings;
+    private final ConfigParser mConfigParser;
 
-    private TextClassificationConstants(@Nullable String settings) {
-        ConfigParser configParser = new ConfigParser(settings);
-        mSystemTextClassifierEnabled =
-                configParser.getBoolean(
-                        SYSTEM_TEXT_CLASSIFIER_ENABLED,
-                        SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
-        mLocalTextClassifierEnabled =
-                configParser.getBoolean(
-                        LOCAL_TEXT_CLASSIFIER_ENABLED,
-                        LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
-        mModelDarkLaunchEnabled =
-                configParser.getBoolean(
-                        MODEL_DARK_LAUNCH_ENABLED,
-                        MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
-        mSmartSelectionEnabled =
-                configParser.getBoolean(
-                        SMART_SELECTION_ENABLED,
-                        SMART_SELECTION_ENABLED_DEFAULT);
-        mSmartTextShareEnabled =
-                configParser.getBoolean(
-                        SMART_TEXT_SHARE_ENABLED,
-                        SMART_TEXT_SHARE_ENABLED_DEFAULT);
-        mSmartLinkifyEnabled =
-                configParser.getBoolean(
-                        SMART_LINKIFY_ENABLED,
-                        SMART_LINKIFY_ENABLED_DEFAULT);
-        mSmartSelectionAnimationEnabled =
-                configParser.getBoolean(
-                        SMART_SELECT_ANIMATION_ENABLED,
-                        SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
-        mSuggestSelectionMaxRangeLength =
-                configParser.getInt(
-                        SUGGEST_SELECTION_MAX_RANGE_LENGTH,
-                        SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT);
-        mClassifyTextMaxRangeLength =
-                configParser.getInt(
-                        CLASSIFY_TEXT_MAX_RANGE_LENGTH,
-                        CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT);
-        mGenerateLinksMaxTextLength =
-                configParser.getInt(
-                        GENERATE_LINKS_MAX_TEXT_LENGTH,
-                        GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
-        mGenerateLinksLogSampleRate =
-                configParser.getInt(
-                        GENERATE_LINKS_LOG_SAMPLE_RATE,
-                        GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
-        mEntityListDefault = parseStringList(
-                configParser.getString(
-                        ENTITY_LIST_DEFAULT,
-                        ENTITY_LIST_DEFAULT_VALUE));
-        mEntityListNotEditable = parseStringList(
-                configParser.getString(
-                        ENTITY_LIST_NOT_EDITABLE,
-                        ENTITY_LIST_DEFAULT_VALUE));
-        mEntityListEditable = parseStringList(
-                configParser.getString(
-                        ENTITY_LIST_EDITABLE,
-                        ENTITY_LIST_DEFAULT_VALUE));
-        mInAppConversationActionTypesDefault = parseStringList(
-                configParser.getString(
-                        IN_APP_CONVERSATION_ACTION_TYPES_DEFAULT,
-                        CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES));
-        mNotificationConversationActionTypesDefault = parseStringList(
-                configParser.getString(
-                        NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT,
-                        CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES));
-        mLangIdThresholdOverride =
-                configParser.getFloat(
-                        LANG_ID_THRESHOLD_OVERRIDE,
-                        LANG_ID_THRESHOLD_OVERRIDE_DEFAULT);
-        mTemplateIntentFactoryEnabled =
-                configParser.getBoolean(
-                        TEMPLATE_INTENT_FACTORY_ENABLED,
-                        TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
-        mTranslateInClassificationEnabled =
-                configParser.getBoolean(
-                        TRANSLATE_IN_CLASSIFICATION_ENABLED,
-                        TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT);
-        mDetectLanguagesFromTextEnabled =
-                configParser.getBoolean(
-                        DETECT_LANGUAGES_FROM_TEXT_ENABLED,
-                        DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT);
-        mLangIdContextSettings = parseFloatArray(
-                configParser,
-                LANG_ID_CONTEXT_SETTINGS,
-                LANG_ID_CONTEXT_SETTINGS_DEFAULT);
-    }
-
-    /** Load from a settings string. */
-    public static TextClassificationConstants loadFromString(String settings) {
-        return new TextClassificationConstants(settings);
+    public TextClassificationConstants(Supplier<String> legacySettingsSupplier) {
+        mConfigParser = new ConfigParser(legacySettingsSupplier);
     }
 
     public boolean isLocalTextClassifierEnabled() {
-        return mLocalTextClassifierEnabled;
+        return mConfigParser.getBoolean(
+                LOCAL_TEXT_CLASSIFIER_ENABLED,
+                LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT);
     }
 
     public boolean isSystemTextClassifierEnabled() {
-        return mSystemTextClassifierEnabled;
+        return mConfigParser.getBoolean(
+                SYSTEM_TEXT_CLASSIFIER_ENABLED,
+                SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT);
     }
 
     public boolean isModelDarkLaunchEnabled() {
-        return mModelDarkLaunchEnabled;
+        return mConfigParser.getBoolean(
+                MODEL_DARK_LAUNCH_ENABLED,
+                MODEL_DARK_LAUNCH_ENABLED_DEFAULT);
     }
 
     public boolean isSmartSelectionEnabled() {
-        return mSmartSelectionEnabled;
+        return mConfigParser.getBoolean(
+                SMART_SELECTION_ENABLED,
+                SMART_SELECTION_ENABLED_DEFAULT);
     }
 
     public boolean isSmartTextShareEnabled() {
-        return mSmartTextShareEnabled;
+        return mConfigParser.getBoolean(
+                SMART_TEXT_SHARE_ENABLED,
+                SMART_TEXT_SHARE_ENABLED_DEFAULT);
     }
 
     public boolean isSmartLinkifyEnabled() {
-        return mSmartLinkifyEnabled;
+        return mConfigParser.getBoolean(
+                SMART_LINKIFY_ENABLED,
+                SMART_LINKIFY_ENABLED_DEFAULT);
     }
 
     public boolean isSmartSelectionAnimationEnabled() {
-        return mSmartSelectionAnimationEnabled;
+        return mConfigParser.getBoolean(
+                SMART_SELECT_ANIMATION_ENABLED,
+                SMART_SELECT_ANIMATION_ENABLED_DEFAULT);
     }
 
     public int getSuggestSelectionMaxRangeLength() {
-        return mSuggestSelectionMaxRangeLength;
+        return mConfigParser.getInt(
+                SUGGEST_SELECTION_MAX_RANGE_LENGTH,
+                SUGGEST_SELECTION_MAX_RANGE_LENGTH_DEFAULT);
     }
 
     public int getClassifyTextMaxRangeLength() {
-        return mClassifyTextMaxRangeLength;
+        return mConfigParser.getInt(
+                CLASSIFY_TEXT_MAX_RANGE_LENGTH,
+                CLASSIFY_TEXT_MAX_RANGE_LENGTH_DEFAULT);
     }
 
     public int getGenerateLinksMaxTextLength() {
-        return mGenerateLinksMaxTextLength;
+        return mConfigParser.getInt(
+                GENERATE_LINKS_MAX_TEXT_LENGTH,
+                GENERATE_LINKS_MAX_TEXT_LENGTH_DEFAULT);
     }
 
     public int getGenerateLinksLogSampleRate() {
-        return mGenerateLinksLogSampleRate;
+        return mConfigParser.getInt(
+                GENERATE_LINKS_LOG_SAMPLE_RATE,
+                GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
     }
 
     public List<String> getEntityListDefault() {
-        return mEntityListDefault;
+        return mConfigParser.getStringList(
+                ENTITY_LIST_DEFAULT,
+                ENTITY_LIST_DEFAULT_VALUE);
     }
 
     public List<String> getEntityListNotEditable() {
-        return mEntityListNotEditable;
+        return mConfigParser.getStringList(
+                ENTITY_LIST_NOT_EDITABLE,
+                ENTITY_LIST_DEFAULT_VALUE);
     }
 
     public List<String> getEntityListEditable() {
-        return mEntityListEditable;
+        return mConfigParser.getStringList(
+                ENTITY_LIST_EDITABLE,
+                ENTITY_LIST_DEFAULT_VALUE);
     }
 
     public List<String> getInAppConversationActionTypes() {
-        return mInAppConversationActionTypesDefault;
+        return mConfigParser.getStringList(
+                IN_APP_CONVERSATION_ACTION_TYPES_DEFAULT,
+                CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES);
     }
 
     public List<String> getNotificationConversationActionTypes() {
-        return mNotificationConversationActionTypesDefault;
+        return mConfigParser.getStringList(
+                NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT,
+                CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES);
     }
 
     public float getLangIdThresholdOverride() {
-        return mLangIdThresholdOverride;
+        return mConfigParser.getFloat(
+                LANG_ID_THRESHOLD_OVERRIDE,
+                LANG_ID_THRESHOLD_OVERRIDE_DEFAULT);
     }
 
     public boolean isTemplateIntentFactoryEnabled() {
-        return mTemplateIntentFactoryEnabled;
+        return mConfigParser.getBoolean(
+                TEMPLATE_INTENT_FACTORY_ENABLED,
+                TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
     }
 
     public boolean isTranslateInClassificationEnabled() {
-        return mTranslateInClassificationEnabled;
+        return mConfigParser.getBoolean(
+                TRANSLATE_IN_CLASSIFICATION_ENABLED,
+                TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT);
     }
 
     public boolean isDetectLanguagesFromTextEnabled() {
-        return mDetectLanguagesFromTextEnabled;
+        return mConfigParser.getBoolean(
+                DETECT_LANGUAGES_FROM_TEXT_ENABLED,
+                DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT);
     }
 
     public float[] getLangIdContextSettings() {
-        return mLangIdContextSettings;
-    }
-
-    private static List<String> parseStringList(String listStr) {
-        return Collections.unmodifiableList(Arrays.asList(listStr.split(STRING_LIST_DELIMITER)));
-    }
-
-    private static float[] parseFloatArray(
-            ConfigParser configParser, String key, String defaultStr) {
-        final String str = configParser.getString(key, defaultStr);
-        final String[] defaultSplit = defaultStr.split(STRING_LIST_DELIMITER);
-        String[] split = str.split(STRING_LIST_DELIMITER);
-        if (split.length != defaultSplit.length) {
-            Log.v(LOG_TAG, "Error parsing " + key + " flag. Using defaults.");
-            split = defaultSplit;
-        }
-        final float[] result = new float[split.length];
-        for (int i = 0; i < split.length; i++) {
-            try {
-                result[i] = Float.parseFloat(split[i]);
-            } catch (NumberFormatException e) {
-                Log.v(LOG_TAG, "Error parsing part of " + key + " flag. Using defaults.");
-                result[i] = Float.parseFloat(defaultSplit[i]);
-            }
-        }
-        return result;
+        return mConfigParser.getFloatArray(
+                LANG_ID_CONTEXT_SETTINGS,
+                LANG_ID_CONTEXT_SETTINGS_DEFAULT);
     }
 
     void dump(IndentingPrintWriter pw) {
         pw.println("TextClassificationConstants:");
         pw.increaseIndent();
-        pw.printPair("isLocalTextClassifierEnabled", mLocalTextClassifierEnabled);
-        pw.printPair("isSystemTextClassifierEnabled", mSystemTextClassifierEnabled);
-        pw.printPair("isModelDarkLaunchEnabled", mModelDarkLaunchEnabled);
-        pw.printPair("isSmartSelectionEnabled", mSmartSelectionEnabled);
-        pw.printPair("isSmartTextShareEnabled", mSmartTextShareEnabled);
-        pw.printPair("isSmartLinkifyEnabled", mSmartLinkifyEnabled);
-        pw.printPair("isSmartSelectionAnimationEnabled", mSmartSelectionAnimationEnabled);
-        pw.printPair("getSuggestSelectionMaxRangeLength", mSuggestSelectionMaxRangeLength);
-        pw.printPair("getClassifyTextMaxRangeLength", mClassifyTextMaxRangeLength);
-        pw.printPair("getGenerateLinksMaxTextLength", mGenerateLinksMaxTextLength);
-        pw.printPair("getGenerateLinksLogSampleRate", mGenerateLinksLogSampleRate);
-        pw.printPair("getEntityListDefault", mEntityListDefault);
-        pw.printPair("getEntityListNotEditable", mEntityListNotEditable);
-        pw.printPair("getEntityListEditable", mEntityListEditable);
-        pw.printPair("getInAppConversationActionTypes", mInAppConversationActionTypesDefault);
-        pw.printPair("getNotificationConversationActionTypes",
-                mNotificationConversationActionTypesDefault);
-        pw.printPair("getLangIdThresholdOverride", mLangIdThresholdOverride);
-        pw.printPair("isTemplateIntentFactoryEnabled", mTemplateIntentFactoryEnabled);
-        pw.printPair("isTranslateInClassificationEnabled", mTranslateInClassificationEnabled);
-        pw.printPair("isDetectLanguageFromTextEnabled", mDetectLanguagesFromTextEnabled);
-        pw.printPair("getLangIdContextSettings", Arrays.toString(mLangIdContextSettings));
+        pw.printPair("classify_text_max_range_length", getClassifyTextMaxRangeLength())
+                .println();
+        pw.printPair("detect_language_from_text_enabled", isDetectLanguagesFromTextEnabled())
+                .println();
+        pw.printPair("entity_list_default", getEntityListDefault())
+                .println();
+        pw.printPair("entity_list_editable", getEntityListEditable())
+                .println();
+        pw.printPair("entity_list_not_editable", getEntityListNotEditable())
+                .println();
+        pw.printPair("generate_links_log_sample_rate", getGenerateLinksLogSampleRate())
+                .println();
+        pw.printPair("generate_links_max_text_length", getGenerateLinksMaxTextLength())
+                .println();
+        pw.printPair("in_app_conversation_action_types_default", getInAppConversationActionTypes())
+                .println();
+        pw.printPair("lang_id_context_settings", Arrays.toString(getLangIdContextSettings()))
+                .println();
+        pw.printPair("lang_id_threshold_override", getLangIdThresholdOverride())
+                .println();
+        pw.printPair("local_textclassifier_enabled", isLocalTextClassifierEnabled())
+                .println();
+        pw.printPair("model_dark_launch_enabled", isModelDarkLaunchEnabled())
+                .println();
+        pw.printPair("notification_conversation_action_types_default",
+                getNotificationConversationActionTypes()).println();
+        pw.printPair("smart_linkify_enabled", isSmartLinkifyEnabled())
+                .println();
+        pw.printPair("smart_select_animation_enabled", isSmartSelectionAnimationEnabled())
+                .println();
+        pw.printPair("smart_selection_enabled", isSmartSelectionEnabled())
+                .println();
+        pw.printPair("smart_text_share_enabled", isSmartTextShareEnabled())
+                .println();
+        pw.printPair("suggest_selection_max_range_length", getSuggestSelectionMaxRangeLength())
+                .println();
+        pw.printPair("system_textclassifier_enabled", isSystemTextClassifierEnabled())
+                .println();
+        pw.printPair("template_intent_factory_enabled", isTemplateIntentFactoryEnabled())
+                .println();
+        pw.printPair("translate_in_classification_enabled", isTranslateInClassificationEnabled())
+                .println();
         pw.decreaseIndent();
-        pw.println();
     }
 }

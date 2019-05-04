@@ -49,7 +49,9 @@ public class RcsMessageStore {
     public RcsThreadQueryResult getRcsThreads(@Nullable RcsThreadQueryParams queryParameters)
             throws RcsMessageStoreException {
         return new RcsThreadQueryResult(mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getRcsThreads(queryParameters)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getRcsThreads(queryParameters,
+                                callingPackage)));
     }
 
     /**
@@ -64,7 +66,9 @@ public class RcsMessageStore {
     public RcsThreadQueryResult getRcsThreads(@NonNull RcsQueryContinuationToken continuationToken)
             throws RcsMessageStoreException {
         return new RcsThreadQueryResult(mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getRcsThreadsWithToken(continuationToken)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getRcsThreadsWithToken(continuationToken,
+                                callingPackage)));
     }
 
     /**
@@ -80,7 +84,9 @@ public class RcsMessageStore {
             @Nullable RcsParticipantQueryParams queryParameters)
             throws RcsMessageStoreException {
         return new RcsParticipantQueryResult(mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getParticipants(queryParameters)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getParticipants(queryParameters,
+                                callingPackage)));
     }
 
     /**
@@ -97,7 +103,9 @@ public class RcsMessageStore {
             @NonNull RcsQueryContinuationToken continuationToken)
             throws RcsMessageStoreException {
         return new RcsParticipantQueryResult(mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getParticipantsWithToken(continuationToken)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getParticipantsWithToken(continuationToken,
+                                callingPackage)));
     }
 
     /**
@@ -112,7 +120,8 @@ public class RcsMessageStore {
     public RcsMessageQueryResult getRcsMessages(
             @Nullable RcsMessageQueryParams queryParams) throws RcsMessageStoreException {
         return new RcsMessageQueryResult(mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getMessages(queryParams)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getMessages(queryParams, callingPackage)));
     }
 
     /**
@@ -127,7 +136,9 @@ public class RcsMessageStore {
     public RcsMessageQueryResult getRcsMessages(
             @NonNull RcsQueryContinuationToken continuationToken) throws RcsMessageStoreException {
         return new RcsMessageQueryResult(mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getMessagesWithToken(continuationToken)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getMessagesWithToken(continuationToken,
+                                callingPackage)));
     }
 
     /**
@@ -141,7 +152,8 @@ public class RcsMessageStore {
     @NonNull
     public RcsEventQueryResult getRcsEvents(
             @Nullable RcsEventQueryParams queryParams) throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getEvents(queryParams))
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getEvents(queryParams, callingPackage))
                 .getRcsEventQueryResult(mRcsControllerCall);
     }
 
@@ -156,7 +168,9 @@ public class RcsMessageStore {
     @NonNull
     public RcsEventQueryResult getRcsEvents(
             @NonNull RcsQueryContinuationToken continuationToken) throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getEventsWithToken(continuationToken))
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getEventsWithToken(continuationToken,
+                        callingPackage))
                 .getRcsEventQueryResult(mRcsControllerCall);
     }
 
@@ -190,7 +204,9 @@ public class RcsMessageStore {
             throws RcsMessageStoreException {
         return new Rcs1To1Thread(
                 mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.createRcs1To1Thread(recipient.getId())));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.createRcs1To1Thread(recipient.getId(),
+                                callingPackage)));
     }
 
     /**
@@ -214,7 +230,8 @@ public class RcsMessageStore {
         int[] finalRecipientIds = recipientIds;
 
         int threadId = mRcsControllerCall.call(
-                iRcs -> iRcs.createGroupThread(finalRecipientIds, groupName, groupIcon));
+                (iRcs, callingPackage) -> iRcs.createGroupThread(finalRecipientIds, groupName,
+                        groupIcon, callingPackage));
 
         return new RcsGroupThread(mRcsControllerCall, threadId);
     }
@@ -232,7 +249,8 @@ public class RcsMessageStore {
         }
 
         boolean isDeleteSucceeded = mRcsControllerCall.call(
-                iRcs -> iRcs.deleteThread(thread.getThreadId(), thread.getThreadType()));
+                (iRcs, callingPackage) -> iRcs.deleteThread(thread.getThreadId(),
+                        thread.getThreadType(), callingPackage));
 
         if (!isDeleteSucceeded) {
             throw new RcsMessageStoreException("Could not delete RcsThread");
@@ -251,6 +269,7 @@ public class RcsMessageStore {
     public RcsParticipant createRcsParticipant(String canonicalAddress, @Nullable String alias)
             throws RcsMessageStoreException {
         return new RcsParticipant(mRcsControllerCall, mRcsControllerCall.call(
-                iRcs -> iRcs.createRcsParticipant(canonicalAddress, alias)));
+                (iRcs, callingPackage) -> iRcs.createRcsParticipant(canonicalAddress, alias,
+                        callingPackage)));
     }
 }

@@ -95,7 +95,8 @@ public class AutoHideController implements CommandQueue.Callbacks {
 
     @Override
     public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -119,7 +120,7 @@ public class AutoHideController implements CommandQueue.Callbacks {
             if (mSystemUiVisibility != newVal) {
                 mCommandQueue.setSystemUiVisibility(mDisplayId, mSystemUiVisibility,
                         fullscreenStackVis, dockedStackVis, mask, fullscreenStackBounds,
-                        dockedStackBounds);
+                        dockedStackBounds, navbarColorManagedByIme);
             }
 
             notifySystemUiVisibilityChanged(mSystemUiVisibility);

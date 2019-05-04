@@ -8034,6 +8034,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             throw new IllegalArgumentException("Component " + who
                     + " not installed for userId:" + userHandle);
         }
+
         final boolean hasIncompatibleAccountsOrNonAdb =
                 hasIncompatibleAccountsOrNonAdbNoLock(userHandle, who);
         synchronized (getLockObject()) {
@@ -8539,9 +8540,30 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         enforceCanManageProfileAndDeviceOwners();
-        if ((mIsWatch || hasUserSetupCompleted(userHandle)) && !isCallerWithSystemUid()) {
-            throw new IllegalStateException("Cannot set the profile owner on a user which is "
-                    + "already set-up");
+
+        if ((mIsWatch || hasUserSetupCompleted(userHandle))) {
+            if (!isCallerWithSystemUid()) {
+                throw new IllegalStateException("Cannot set the profile owner on a user which is "
+                        + "already set-up");
+            }
+
+            if (!mIsWatch) {
+                // Only the default supervision profile owner can be set as profile owner after SUW
+                final String supervisor = mContext.getResources().getString(
+                        com.android.internal.R.string
+                                .config_defaultSupervisionProfileOwnerComponent);
+                if (supervisor == null) {
+                    throw new IllegalStateException("Unable to set profile owner post-setup, no"
+                            + "default supervisor profile owner defined");
+                }
+
+                final ComponentName supervisorComponent = ComponentName.unflattenFromString(
+                        supervisor);
+                if (!owner.equals(supervisorComponent)) {
+                    throw new IllegalStateException("Unable to set non-default profile owner"
+                            + " post-setup " + owner);
+                }
+            }
         }
     }
 

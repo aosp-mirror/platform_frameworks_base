@@ -1635,7 +1635,7 @@ package android.content.pm {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentServicesAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
     method public abstract void registerDexModule(@NonNull String, @Nullable android.content.pm.PackageManager.DexModuleRegisterCallback);
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
-    method @Deprecated public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
+    method public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
     method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(@Nullable String, int);
@@ -6403,14 +6403,10 @@ package android.service.contentsuggestions {
 
   public abstract class ContentSuggestionsService extends android.app.Service {
     ctor public ContentSuggestionsService();
-    method @Deprecated public void classifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
-    method @Deprecated public void notifyInteraction(@NonNull String, @NonNull android.os.Bundle);
-    method public void onClassifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
-    method public void onNotifyInteraction(@NonNull String, @NonNull android.os.Bundle);
-    method public void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
-    method public void onSuggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
-    method @Deprecated public void processContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
-    method @Deprecated public void suggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+    method public abstract void onClassifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public abstract void onNotifyInteraction(@NonNull String, @NonNull android.os.Bundle);
+    method public abstract void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
+    method public abstract void onSuggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
     field public static final String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
   }
 

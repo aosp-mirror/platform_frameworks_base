@@ -59,7 +59,8 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
@@ -348,7 +349,7 @@ public class NotificationPanelView extends PanelView implements
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
-        mFalsingManager = FalsingManager.getInstance(context);
+        mFalsingManager = FalsingManagerFactory.getInstance(context);
         mPowerManager = context.getSystemService(PowerManager.class);
         mWakeUpCoordinator = coordinator;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
@@ -833,6 +834,11 @@ public class NotificationPanelView extends PanelView implements
             return false;
         }
         initDownStates(event);
+        // Do not let touches go to shade or QS if the bouncer is visible,
+        // but still let user swipe down to expand the panel, dismissing the bouncer.
+        if (mStatusBar.isBouncerShowing()) {
+            return true;
+        }
         if (mBar.panelEnabled() && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
             mIsExpansionFromHeadsUp = true;
             MetricsLogger.count(mContext, COUNTER_PANEL_OPEN, 1);
@@ -1000,6 +1006,13 @@ public class NotificationPanelView extends PanelView implements
         if (mBlockTouches || (mQs != null && mQs.isCustomizing())) {
             return false;
         }
+
+        // Do not allow panel expansion if bouncer is scrimmed, otherwise user would be able to
+        // pull down QS or expand the shade.
+        if (mStatusBar.isBouncerShowingScrimmed()) {
+            return false;
+        }
+
         initDownStates(event);
         // Make sure the next touch won't the blocked after the current ends.
         if (event.getAction() == MotionEvent.ACTION_UP
@@ -1304,7 +1317,11 @@ public class NotificationPanelView extends PanelView implements
         } else if (oldState == StatusBarState.SHADE_LOCKED
                 && statusBarState == StatusBarState.KEYGUARD) {
             animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            mQs.animateHeaderSlidingOut();
+            // Only animate header if the header is visible. If not, it will partially animate out
+            // the top of QS
+            if (!mQsExpanded) {
+                mQs.animateHeaderSlidingOut();
+            }
         } else {
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);

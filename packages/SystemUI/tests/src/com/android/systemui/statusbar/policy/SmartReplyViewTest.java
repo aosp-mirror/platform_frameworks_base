@@ -634,7 +634,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any());
+        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any(),
+                any());
     }
 
     @Test
@@ -645,7 +646,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, never()).startPendingIntentDismissingKeyguard(any(), any());
+        verify(mActivityStarter, never()).startPendingIntentDismissingKeyguard(any(), any(), any());
     }
 
     @Test
@@ -657,7 +658,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
         Thread.sleep(delayMs);
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any());
+        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any(),
+                any());
     }
 
     @Test
@@ -668,7 +670,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
-        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any());
+        verify(mActivityStarter, times(1)).startPendingIntentDismissingKeyguard(any(), any(),
+                any());
     }
 
     @Test

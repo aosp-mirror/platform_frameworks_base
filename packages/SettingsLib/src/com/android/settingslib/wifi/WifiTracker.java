@@ -123,7 +123,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     /**
      * Synchronization lock for managing concurrency between main and worker threads.
      *
-     * <p>This lock should be held for all modifications to {@link #mInternalAccessPoints}.
+     * <p>This lock should be held for all modifications to {@link #mInternalAccessPoints} and
+     * {@link #mScanner}.
      */
     private final Object mLock = new Object();
 
@@ -168,6 +169,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private static final String WIFI_SECURITY_OWE = "OWE";
     private static final String WIFI_SECURITY_SUITE_B_192 = "SUITE_B_192";
 
+    @GuardedBy("mLock")
     @VisibleForTesting
     Scanner mScanner;
 
@@ -276,9 +278,11 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * <p>Sets {@link #mStaleScanResults} to true.
      */
     private void pauseScanning() {
-        if (mScanner != null) {
-            mScanner.pause();
-            mScanner = null;
+        synchronized (mLock) {
+            if (mScanner != null) {
+                mScanner.pause();
+                mScanner = null;
+            }
         }
         mStaleScanResults = true;
     }
@@ -289,12 +293,14 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * <p>The score cache should be registered before this method is invoked.
      */
     public void resumeScanning() {
-        if (mScanner == null) {
-            mScanner = new Scanner();
-        }
+        synchronized (mLock) {
+            if (mScanner == null) {
+                mScanner = new Scanner();
+            }
 
-        if (isWifiEnabled()) {
-            mScanner.resume();
+            if (isWifiEnabled()) {
+                mScanner.resume();
+            }
         }
     }
 
@@ -712,6 +718,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         if (accessPoint == null) {
             accessPoint = new AccessPoint(mContext, config, homeScans, roamingScans);
         } else {
+            accessPoint.update(config);
             accessPoint.setScanResultsPasspoint(homeScans, roamingScans);
         }
         return accessPoint;
@@ -743,7 +750,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
-
         /* Sticky broadcasts can call this when wifi is disabled */
         if (!isWifiEnabled()) {
             clearAccessPointsAndConditionallyUpdate();
@@ -880,18 +886,25 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * true.
      */
     private void updateWifiState(int state) {
+        if (isVerboseLoggingEnabled()) {
+            Log.d(TAG, "updateWifiState: " + state);
+        }
         if (state == WifiManager.WIFI_STATE_ENABLED) {
-            if (mScanner != null) {
-                // We only need to resume if mScanner isn't null because
-                // that means we want to be scanning.
-                mScanner.resume();
+            synchronized (mLock) {
+                if (mScanner != null) {
+                    // We only need to resume if mScanner isn't null because
+                    // that means we want to be scanning.
+                    mScanner.resume();
+                }
             }
         } else {
             clearAccessPointsAndConditionallyUpdate();
             mLastInfo = null;
             mLastNetworkInfo = null;
-            if (mScanner != null) {
-                mScanner.pause();
+            synchronized (mLock) {
+                if (mScanner != null) {
+                    mScanner.pause();
+                }
             }
             mStaleScanResults = true;
         }
@@ -919,12 +932,18 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         private int mRetry = 0;
 
         void resume() {
+            if (isVerboseLoggingEnabled()) {
+                Log.d(TAG, "Scanner resume");
+            }
             if (!hasMessages(MSG_SCAN)) {
                 sendEmptyMessage(MSG_SCAN);
             }
         }
 
         void pause() {
+            if (isVerboseLoggingEnabled()) {
+                Log.d(TAG, "Scanner pause");
+            }
             mRetry = 0;
             removeMessages(MSG_SCAN);
         }

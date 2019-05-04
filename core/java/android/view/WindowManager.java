@@ -508,12 +508,23 @@ public interface WindowManager extends ViewManager {
      *
      * @param displayId Display ID.
      * @param shouldShow Indicates that the display should show IME.
-     * @see KeyguardManager#isDeviceSecure()
-     * @see KeyguardManager#isDeviceLocked()
      * @hide
      */
     @TestApi
     default void setShouldShowIme(int displayId, boolean shouldShow) {
+    }
+
+    /**
+     * Indicates that the display should show IME.
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show IME when an input field becomes
+     * focused on it.
+     * @hide
+     */
+    @TestApi
+    default boolean shouldShowIme(int displayId) {
+        return false;
     }
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {

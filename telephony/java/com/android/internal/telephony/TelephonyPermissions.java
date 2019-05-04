@@ -419,7 +419,8 @@ public final class TelephonyPermissions {
         // settings to individually disable the new restrictions for privileged, preloaded
         // non-privileged, and non-preinstalled apps.
         if (!isIdentifierCheckDisabled() && (
-                (!isPreinstalled && !relax3PDeviceIdentifierCheck)
+                (isPrivApp && !relaxPrivDeviceIdentifierCheck)
+                        || (!isPreinstalled && !relax3PDeviceIdentifierCheck)
                         || (isPreinstalled && !isPrivApp && !relaxNonPrivDeviceIdentifierCheck))) {
             // The current package should only be reported in StatsLog if it has not previously been
             // reported for the currently invoked device identifier method.

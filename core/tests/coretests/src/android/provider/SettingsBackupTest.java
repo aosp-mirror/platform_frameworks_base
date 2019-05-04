@@ -294,6 +294,8 @@ public class SettingsBackupTest {
                     Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
+                    Settings.Global.JOB_SCHEDULER_QUOTA_CONTROLLER_CONSTANTS,
+                    Settings.Global.JOB_SCHEDULER_TIME_CONTROLLER_CONSTANTS,
                     Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
                     Settings.Global.KERNEL_CPU_THREAD_READER,
                     Settings.Global.LANG_ID_UPDATE_CONTENT_URL,
@@ -693,7 +695,6 @@ public class SettingsBackupTest {
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
                  Settings.Secure.TV_USER_SETUP_COMPLETE,
-                 Settings.Secure.UI_NIGHT_MODE, // candidate?
                  Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
                  Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,

@@ -42,7 +42,6 @@
     <item>@drawable/ic_power_low</item>
     <item>@drawable/ic_power_saver</item>
     <item>@drawable/ic_qs_bluetooth_connecting</item>
-    <item>@drawable/ic_qs_bluetooth_connecting</item>
     <item>@drawable/ic_qs_cancel</item>
     <item>@drawable/ic_qs_no_sim</item>
     <item>@drawable/ic_qs_wifi_0</item>

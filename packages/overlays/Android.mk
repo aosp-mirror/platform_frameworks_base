@@ -32,14 +32,17 @@ LOCAL_REQUIRED_MODULES := \
 	IconPackCircularLauncherOverlay \
 	IconPackCircularSettingsOverlay \
 	IconPackCircularSystemUIOverlay \
+	IconPackCircularThemePickerOverlay \
 	IconPackFilledAndroidOverlay \
 	IconPackFilledLauncherOverlay \
 	IconPackFilledSettingsOverlay \
 	IconPackFilledSystemUIOverlay \
+	IconPackFilledThemePickerOverlay \
 	IconPackRoundedAndroidOverlay \
 	IconPackRoundedLauncherOverlay \
 	IconPackRoundedSettingsOverlay \
 	IconPackRoundedSystemUIOverlay \
+	IconPackRoundedThemePickerUIOverlay \
 	IconShapeRoundedRectOverlay \
 	IconShapeSquareOverlay \
 	IconShapeSquircleOverlay \

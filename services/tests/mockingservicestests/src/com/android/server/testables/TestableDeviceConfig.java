@@ -137,7 +137,6 @@ public final class TestableDeviceConfig implements TestRule {
             return mKeyValueMap.get(getKey(namespace, name));
         }).when(() -> DeviceConfig.getProperty(anyString(), anyString()));
 
-
         return new TestWatcher() {
             @Override
             protected void succeeded(Description description) {

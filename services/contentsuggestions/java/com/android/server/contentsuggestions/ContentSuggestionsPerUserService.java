@@ -28,6 +28,7 @@ import android.app.contentsuggestions.SelectionsRequest;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -99,11 +100,17 @@ public final class ContentSuggestionsPerUserService extends
             ActivityManager.TaskSnapshot snapshot =
                     mActivityTaskManagerInternal.getTaskSnapshot(taskId, false);
             GraphicBuffer snapshotBuffer = null;
+            int colorSpaceId = 0;
             if (snapshot != null) {
                 snapshotBuffer = snapshot.getSnapshot();
+                ColorSpace colorSpace = snapshot.getColorSpace();
+                if (colorSpace != null) {
+                    colorSpaceId = colorSpace.getId();
+                }
             }
 
-            service.provideContextImage(taskId, snapshotBuffer, imageContextRequestExtras);
+            service.provideContextImage(taskId, snapshotBuffer, colorSpaceId,
+                    imageContextRequestExtras);
         }
     }
 
