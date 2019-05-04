@@ -1123,12 +1123,8 @@
     <dimen name="bubble_stack_starting_offset_y">100dp</dimen>
     <!-- Size of image buttons in the bubble header -->
     <dimen name="bubble_header_icon_size">48dp</dimen>
-    <!-- Size of the app icon shown in the bubble permission view -->
-    <dimen name="bubble_permission_icon_size">24dp</dimen>
     <!-- Space between the pointer triangle and the bubble expanded view -->
     <dimen name="bubble_pointer_margin">8dp</dimen>
-    <!-- Height of the permission prompt shown with bubbles -->
-    <dimen name="bubble_permission_height">120dp</dimen>
 
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
