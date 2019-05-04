@@ -871,6 +871,51 @@ public class RollbackTest {
         }
     }
 
+    /**
+     * Test race between roll back and roll forward.
+     */
+    @Test
+    public void testRollForwardRace() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
+            assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
+
+            // Install a new version of package A, then immediately rollback
+            // the previous version. We expect the rollback to fail, because
+            // it is no longer available.
+            // There are a couple different ways this could fail depending on
+            // thread interleaving, so don't ignore flaky failures.
+            RollbackTestUtils.install("RollbackTestAppAv3.apk", false);
+            try {
+                RollbackTestUtils.rollback(rollback.getRollbackId());
+                // Note: Don't ignore flaky failures here.
+                fail("Expected rollback to fail, but it did not.");
+            } catch (AssertionError e) {
+                Log.i(TAG, "Note expected failure: ", e);
+                // Expected
+            }
+
+            // Note: Don't ignore flaky failures here.
+            assertEquals(3, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
     // Helper function to test that the given rollback info is a rollback for
     // the atomic set {A2, B2} -> {A1, B1}.
     private void assertRollbackInfoForAandB(RollbackInfo rollback) {
