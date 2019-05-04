@@ -20,6 +20,6 @@
     <corners
             android:radius="2dp" />
     <solid
-            android:color="?attr/colorBackground" />
+            android:color="?attr/colorPopupBackground" />
 
 </shape>
