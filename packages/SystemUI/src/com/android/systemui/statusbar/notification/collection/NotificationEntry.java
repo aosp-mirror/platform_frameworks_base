@@ -247,7 +247,7 @@ public final class NotificationEntry {
      */
     public boolean showInShadeWhenBubble() {
         // We always show it in the shade if non-clearable
-        return !isClearable() || mShowInShadeWhenBubble;
+        return !isRowDismissed() && (!isClearable() || mShowInShadeWhenBubble);
     }
 
     /**

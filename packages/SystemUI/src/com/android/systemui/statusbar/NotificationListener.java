@@ -104,7 +104,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
                     // Remove existing notification to avoid stale data.
                     if (isUpdate) {
-                        mEntryManager.removeNotification(key, rankingMap);
+                        mEntryManager.removeNotification(key, rankingMap, 0 /* reason */);
                     } else {
                         mEntryManager.getNotificationData()
                                 .updateRanking(rankingMap);
@@ -121,15 +121,20 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     }
 
     @Override
-    public void onNotificationRemoved(StatusBarNotification sbn,
-            final RankingMap rankingMap) {
-        if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
+            int reason) {
+        if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn + " reason: " + reason);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             final String key = sbn.getKey();
             Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
-                mEntryManager.removeNotification(key, rankingMap);
+                mEntryManager.removeNotification(key, rankingMap, reason);
             });
         }
+    }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
+        onNotificationRemoved(sbn, rankingMap, 0 /* reason */);
     }
 
     @Override
