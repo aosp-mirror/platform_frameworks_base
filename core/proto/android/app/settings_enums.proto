@@ -2361,4 +2361,7 @@ enum PageId {
     // OPEN: Settings >  Network & internet > Mobile network > Delete sim > (answer yes to
     //       confirmation)
     DIALOG_DELETE_SIM_PROGRESS = 1714;
+
+    // Settings > Apps and notifications > Notifications > Gentle notifications
+    GENTLE_NOTIFICATIONS_SCREEN = 1715;
 }
