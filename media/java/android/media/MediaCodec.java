@@ -1659,6 +1659,7 @@ final public class MediaCodec {
     private final Object mListenerLock = new Object();
     private MediaCodecInfo mCodecInfo;
     private final Object mCodecInfoLock = new Object();
+    private MediaCrypto mCrypto;
 
     private static final int EVENT_CALLBACK = 1;
     private static final int EVENT_SET_CALLBACK = 2;
@@ -1858,6 +1859,7 @@ final public class MediaCodec {
     @Override
     protected void finalize() {
         native_finalize();
+        mCrypto = null;
     }
 
     /**
@@ -1873,6 +1875,7 @@ final public class MediaCodec {
     public final void reset() {
         freeAllTrackedBuffers(); // free buffers first
         native_reset();
+        mCrypto = null;
     }
 
     private native final void native_reset();
@@ -1887,6 +1890,7 @@ final public class MediaCodec {
     public final void release() {
         freeAllTrackedBuffers(); // free buffers first
         native_release();
+        mCrypto = null;
     }
 
     private native final void native_release();
@@ -1916,6 +1920,10 @@ final public class MediaCodec {
      * @param crypto  Specify a crypto object to facilitate secure decryption
      *                of the media data. Pass {@code null} as {@code crypto} for
      *                non-secure codecs.
+     *                Please note that {@link MediaCodec} does NOT take ownership
+     *                of the {@link MediaCrypto} object; it is the application's
+     *                responsibility to properly cleanup the {@link MediaCrypto} object
+     *                when not in use.
      * @param flags   Specify {@link #CONFIGURE_FLAG_ENCODE} to configure the
      *                component as an encoder.
      * @throws IllegalArgumentException if the surface has been released (or is invalid),
@@ -2000,6 +2008,7 @@ final public class MediaCodec {
         }
 
         mHasSurface = surface != null;
+        mCrypto = crypto;
 
         native_configure(keys, values, surface, crypto, descramblerBinder, flags);
     }
