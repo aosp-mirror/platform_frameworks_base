@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
+import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_CHILD_NOTIFICATIONS;
 
@@ -104,7 +105,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
                     // Remove existing notification to avoid stale data.
                     if (isUpdate) {
-                        mEntryManager.removeNotification(key, rankingMap, 0 /* reason */);
+                        mEntryManager.removeNotification(key, rankingMap, UNDEFINED_DISMISS_REASON);
                     } else {
                         mEntryManager.getNotificationData()
                                 .updateRanking(rankingMap);
@@ -134,7 +135,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
-        onNotificationRemoved(sbn, rankingMap, 0 /* reason */);
+        onNotificationRemoved(sbn, rankingMap, UNDEFINED_DISMISS_REASON);
     }
 
     @Override
