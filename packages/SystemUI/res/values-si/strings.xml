@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"තීරය අමුණන ලදි"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"මෙම යෙදුම වෙතින් දැනුම්දීම් පෙන්වමින් තබන්නද?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"මෘදු"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ප්‍රමුඛ කළ"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"සැම විටම නිහඬයි. පහළ ඇදීමේ සෙවන තුළ සංදර්ශන කරයි."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"සැම විටම නිහඬයි. පහළ ඇදීමේ සෙවන සහ තත්ත්‍ව තීරුව තුළ සංදර්ශන කරයි."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"සැම විටම නිහඬයි. පහළ ඇදීමේ සෙවන සහ අඟුලු තිරය මත සංදර්ශන කරයි."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"සැම විටම නිහඬයි. පහළ ඇදීමේ සෙවන, තත්ත්‍ව තීරුව තුළ සහ අඟුලු තිරය මත සංදර්ශන කරයි."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"පහළ ඇදීමේ සෙවන, තත්ත්‍ව තීරුව සහ අඟුලු තිරය මත ශබ්ද සහ සංදර්ශන කරයි."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ඔබට පහළට-ඇදීමේ වැස්මේ පමණක් දැනුම්දීම් සමඟ අවධානය යොමු කිරීමට උදවු කරයි. සැම විටම නිහඬයි."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ප්‍රමුඛතා දැනුම්දීම්වලට පහළින් සංදර්ශනය වේ. සැම විටම නිහඬයි."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ප්‍රමුඛතා දැනුම්දීම්වලට පහළින් සංදර්ශනය වේ. සැම විටම නිහඬයි."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ප්‍රමුඛතා දැනුම්දීම්වලට පහළින් සංදර්ශනය වේ. සැම විටම නිහඬයි."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ශබ්දයක් සහ තත්ත්ව තීරු නිරූපකයක් සමඟින් ඔබේ අවධානය ලබා ගනී. අගුළු තිරයෙහි පෙන්වයි."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"මෙම දැනුම්දීම් වෙනස් කළ නොහැක."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"මෙම දැනුම්දීම් සමූහය මෙහි වින්‍යාස කළ නොහැක"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ප්‍රොක්සි කළ දැනුම්දීම"</string>
     <string name="appops_camera" msgid="8100147441602585776">"මෙම යෙදුම කැමරාව භාවිතා කරයි."</string>
     <string name="appops_microphone" msgid="741508267659494555">"මෙම යෙදුම මයික්‍රෆෝනය භාවිතා කරයි."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"මෙම යෙදුම් ඔබගේ තිරය මත අනෙකුත් යෙදුම්වලට උඩින් සංදර්ශනය වේ."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> විවෘත කරන්න"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> බුබුළු සඳහා සැකසීම්"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙතින් බුබුළුවලට ඉඩ දෙන්නේද?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"ප්‍රතික්‍ෂේප කරන්න"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ඉඩ දෙන්න"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"පසුව මගෙන් අසන්න"</string>

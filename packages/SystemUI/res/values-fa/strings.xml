@@ -26,7 +26,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"اعلان‌ها"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"ممکن است باتری به‌زودی تمام شود"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، براساس میزان مصرف شما حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، براساس اشتفاده شما حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است. بهینه‌سازی باتری روشن است."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"‏ازطریق USB شارژ نمی‌شود. از شارژر ارائه‌شده با دستگاه استفاده کنید."</string>
@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"صفحه نمایش پین شد"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"برای برداشتن پین این صفحه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"نمایش اعلان از این برنامه ادامه یابد؟"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"آرام"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"دراولویت"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش و نوار وضعیت نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش و در صفحه قفل نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش، نوار وضعیت در صفحه قفل نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"صدا پخش می‌شود و در کشوی اعلان‌های پایین‌کش، نوار وضعیت و در صفحه قفل نشان داده می‌شود."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"با فقط نمایش اعلان در کشوی اعلان‌های پایین‌کش، به شما کمک می‌کند تمرکزتان را ازدست ندهید همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"با صدا و نماد نوار وضعیت توجه شما را جلب می‌کند. در صفحه قفل نشان داده می‌شود."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"اعلان‌های دارای پراکسی"</string>
     <string name="appops_camera" msgid="8100147441602585776">"این برنامه از دوربین استفاده می‌کند."</string>
     <string name="appops_microphone" msgid="741508267659494555">"این برنامه از میکروفون استفاده می‌کند."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"این برنامه روی برنامه‌های دیگر در صفحه‌نمایش نشان داده می‌شود."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"باز کردن <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"تنظیم برای ابزارک‌های اعلان <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"برای <xliff:g id="APP_NAME">%1$s</xliff:g>، ابزارک‌های اعلان مجاز شوند؟"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"رد کردن"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"اجازه دادن"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"بعداً پرسیده شود"</string>

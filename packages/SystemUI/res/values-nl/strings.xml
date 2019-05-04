@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Scherm is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Tik op Terug en Overzicht en houd deze knoppen vast om dit scherm los te maken"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Meldingen van deze app blijven weergeven?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Vriendelijk"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Met prioriteit"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Altijd stil. Wordt weergegeven in pull-downvenster."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Altijd stil. Wordt weergegeven in pull-downvenster en statusbalk."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Altijd stil. Wordt weergegeven in pull-downvenster en op vergrendelingsscherm."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Altijd stil. Wordt weergegeven in pull-downvenster, statusbalk en op vergrendelingsscherm."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Maakt geluid en wordt weergegeven in pull-downvenster, statusbalk en op vergrendelingsscherm."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Helpt je focussen doordat meldingen alleen in het pull-downvenster worden weergegeven. Altijd stil."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Wordt weergegeven onder de prioriteitsmeldingen. Altijd stil."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Wordt weergegeven onder de prioriteitsmeldingen. Altijd stil."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Wordt weergegeven onder de prioriteitsmeldingen. Altijd stil."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Trekt de aandacht met geluid en een pictogram in de statusbalk. Wordt weergegeven op het vergrendelingsscherm."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Deze meldingen kunnen niet worden aangepast."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Melding via proxy"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Deze app gebruikt de camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Deze app gebruikt de microfoon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Deze app wordt over andere apps op je scherm heen weergegeven."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> openen"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Instellingen voor <xliff:g id="APP_NAME">%1$s</xliff:g>-ballonnen"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Ballonnen van <xliff:g id="APP_NAME">%1$s</xliff:g> toestaan?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Weigeren"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Toestaan"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Later vragen"</string>
