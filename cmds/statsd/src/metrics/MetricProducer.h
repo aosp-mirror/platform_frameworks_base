@@ -236,9 +236,9 @@ public:
     void addActivation(int activationTrackerIndex, const ActivationType& activationType,
             int64_t ttl_seconds, int deactivationTrackerIndex = -1);
 
-    void prepareFistBucket() {
+    void prepareFirstBucket() {
         std::lock_guard<std::mutex> lock(mMutex);
-        prepareFistBucketLocked();
+        prepareFirstBucketLocked();
     }
 
     void flushIfExpire(int64_t elapsedTimestampNs);
@@ -272,7 +272,7 @@ protected:
 
     void loadActiveMetricLocked(const ActiveMetric& activeMetric, int64_t currentTimeNs);
 
-    virtual void prepareFistBucketLocked() {};
+    virtual void prepareFirstBucketLocked() {};
     /**
      * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
        also flush the current partial bucket in memory.
