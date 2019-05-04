@@ -224,7 +224,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcións de teléfono"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Emerxencias"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Emerxencia"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de erros"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Finalizar a sesión"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Volve rexistrar a túa cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Xa non se pode recoñecer a cara. Téntao de novo."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"É moi similar. Cambia a pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Mira a pantalla de forma máis directa."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Mira a pantalla de forma máis directa."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Endereita a cabeza."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"Quita o que haxa entre a túa cabeza e o teléfono."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Limpa a cámara."</string>
@@ -808,7 +810,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Preme Menú para desbloquear ou realizar unha chamada de emerxencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Preme Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Crea o padrón de desbloqueo"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Emerxencias"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Emerxencia"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Volver á chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Téntao de novo"</string>
@@ -1596,7 +1598,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Visualización sen fíos"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Emitir"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectar co dispositivo"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emisión de pantalla no dispositivo"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emitir pantalla en dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Configuración"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Desconectar"</string>
@@ -2028,4 +2030,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ficheiro</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"A función de compartir directamente non está dispoñible"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lista de aplicacións"</string>
 </resources>

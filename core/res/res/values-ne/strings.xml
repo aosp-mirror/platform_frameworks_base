@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"अब उप्रान्त अनुहार पहिचान गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"अनुहार उस्तै भयो, कृपया आफ्नो पोज बदल्नुहोस्।"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"कृपया अझ सीधा गरी स्क्रिनमा हेर्नुहोस्।"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"कृपया अझ सीधा गरी स्क्रिनमा हेर्नुहोस्।"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"कृपया आफ्नो अनुहार ठाडो रूपमा सीधा पार्नुहोस्।"</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"आफ्नो टाउको र फोनका बिचको स्थान हटाउनुहोस्।"</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"कृपया क्यामेरा सफा गर्नुहोस्।"</string>
@@ -1026,8 +1028,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>वर्षमा</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेट अघि</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेट अघि</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेटअघि</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेटअघि</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टा अघि</item>
@@ -2033,4 +2035,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> फाइल</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"सीधै आदान प्रदान गर्ने सुविधा उपलब्ध छैन"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"अनुप्रयोगहरूको सूची"</string>
 </resources>

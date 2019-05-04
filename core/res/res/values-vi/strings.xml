@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Không nhận ra khuôn mặt. Hãy thử lại."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Khuôn mặt quá giống nhau, vui lòng đổi tư thế."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Vui lòng nhìn thẳng vào màn hình."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Vui lòng nhìn thẳng vào màn hình."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Vui lòng giữ thẳng đầu."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"Loại bỏ vật chắn giữa đầu và điện thoại."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Vui lòng lau sạch máy ảnh."</string>
@@ -2027,4 +2029,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tệp</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Không thể chia sẻ trực tiếp"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Danh sách ứng dụng"</string>
 </resources>

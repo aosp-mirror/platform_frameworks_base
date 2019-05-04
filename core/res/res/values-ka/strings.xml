@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"გთხოვთ, ხელახლა დაარეგისტრიროთ თქვენი სახე."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"სახის ამოცნობა ვეღარ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"მეტისმეტად მსგავსია. გთხოვთ, შეცვალოთ პოზა."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"გთხოვთ, უფრო პირდაპირ შეხედოთ ეკრანს."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"გთხოვთ, უფრო პირდაპირ შეხედოთ ეკრანს."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"გთხოვთ, ვერტიკალურად გაასწოროთ თავი."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"გაათავისუფლეთ სივრცე თავსა და ტელეფონს შორის."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"გაწმინდეთ კამერა."</string>
@@ -2027,4 +2029,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ფაილი</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"პირდაპირი გაზიარება მიუწვდომელია"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"აპების სია"</string>
 </resources>
