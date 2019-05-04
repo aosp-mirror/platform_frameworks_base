@@ -79,7 +79,7 @@ TEST(GaugeMetricProducerTest, TestFirstBucket) {
                                       logEventMatcherIndex, eventMatcherWizard,
                                       -1, -1, tagId, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2,
                                       pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
 
     EXPECT_EQ(600500000000, gaugeProducer.mCurrentBucketStartTimeNs);
@@ -126,7 +126,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
                                       tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
 
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -211,7 +211,7 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
                                       logEventMatcherIndex, eventMatcherWizard,
                                       -1 /* -1 means no pulling */, -1, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
@@ -303,7 +303,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
                                       bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
@@ -370,7 +370,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
                                       logEventMatcherIndex, eventMatcherWizard,
                                       tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
     shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
@@ -431,7 +431,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard,
                                       logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
                                       bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
@@ -529,7 +529,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard,
                                       logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
                                       bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     gaugeProducer.onSlicedConditionMayChange(true, bucketStartTimeNs + 8);
 
@@ -583,7 +583,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection) {
                                       logEventMatcherIndex, eventMatcherWizard,
                                       tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     Alert alert;
     alert.set_id(101);
@@ -692,7 +692,7 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
                                       logEventMatcherIndex, eventMatcherWizard,
                                       tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
 
@@ -777,7 +777,7 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
                                       logEventMatcherIndex, eventMatcherWizard,
                                       tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
-    gaugeProducer.prepareFistBucket();
+    gaugeProducer.prepareFirstBucket();
 
     vector<shared_ptr<LogEvent>> allData;
 
