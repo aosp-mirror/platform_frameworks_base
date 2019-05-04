@@ -11735,6 +11735,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!isSingleLine()) {
             info.setMultiLine(true);
         }
+
+        // A view should not be exposed as clickable/long-clickable to a service because of a
+        // LinkMovementMethod.
+        if ((info.isClickable() || info.isLongClickable())
+                && mMovement instanceof LinkMovementMethod) {
+            if (!hasOnClickListeners()) {
+                info.setClickable(false);
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+            }
+            if (!hasOnLongClickListeners()) {
+                info.setLongClickable(false);
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+            }
+        }
     }
 
     @Override

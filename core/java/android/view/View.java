@@ -7067,6 +7067,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return whether this view has an attached OnLongClickListener.  Returns
+     * true if there is a listener, false if there is none.
+     */
+    public boolean hasOnLongClickListeners() {
+        ListenerInfo li = mListenerInfo;
+        return (li != null && li.mOnLongClickListener != null);
+    }
+
+    /**
      * Register a callback to be invoked when this view is context clicked. If the view is not
      * context clickable, it becomes context clickable.
      *
