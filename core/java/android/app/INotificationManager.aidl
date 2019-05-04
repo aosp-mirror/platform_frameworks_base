@@ -102,7 +102,6 @@ interface INotificationManager
     NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
-    ParceledListSlice getRecentNotifyingAppsForUser(int userId);
     int getBlockedAppCount(int userId);
     boolean areChannelsBypassingDnd();
     int getAppsBypassingDndCount(int uid);
