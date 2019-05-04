@@ -7426,8 +7426,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean shouldShowIme(int displayId) {
             synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
+                return WindowManagerService.this.shouldShowIme(displayId);
             }
         }
     }
