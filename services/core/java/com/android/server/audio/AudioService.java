@@ -6720,6 +6720,9 @@ public class AudioService extends IAudioService.Stub
                 Slog.w(TAG, "Audio policy registration failed, could not link to " + pcb +
                         " binder death", e);
                 return null;
+            } catch (IllegalStateException e) {
+                Slog.w(TAG, "Audio policy registration failed for binder " + pcb, e);
+                return null;
             }
         }
         return regId;
@@ -6884,9 +6887,9 @@ public class AudioService extends IAudioService.Stub
             if (app == null){
                 return AudioManager.ERROR;
             }
-            app.addMixes(policyConfig.getMixes());
+            return app.addMixes(policyConfig.getMixes()) == AudioSystem.SUCCESS
+                ? AudioManager.SUCCESS : AudioManager.ERROR;
         }
-        return AudioManager.SUCCESS;
     }
 
     public int removeMixForPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb) {
@@ -6898,9 +6901,9 @@ public class AudioService extends IAudioService.Stub
             if (app == null) {
                 return AudioManager.ERROR;
             }
-            app.removeMixes(policyConfig.getMixes());
+            return app.removeMixes(policyConfig.getMixes()) == AudioSystem.SUCCESS
+                ? AudioManager.SUCCESS : AudioManager.ERROR;
         }
-        return AudioManager.SUCCESS;
     }
 
     /** see AudioPolicy.setUidDeviceAffinity() */
@@ -7189,7 +7192,11 @@ public class AudioService extends IAudioService.Stub
             if (mIsVolumeController) {
                 setExtVolumeController(mPolicyCallback);
             }
-            connectMixes();
+            int status = connectMixes();
+            if (status != AudioSystem.SUCCESS) {
+                release();
+                throw new IllegalStateException("Could not connect mix, error: " + status);
+            }
         }
 
         public void binderDied() {
@@ -7253,28 +7260,29 @@ public class AudioService extends IAudioService.Stub
             return true;
         }
 
-        void addMixes(@NonNull ArrayList<AudioMix> mixes) {
+        int addMixes(@NonNull ArrayList<AudioMix> mixes) {
             // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
                 AudioSystem.registerPolicyMixes(mMixes, false);
                 this.add(mixes);
-                AudioSystem.registerPolicyMixes(mMixes, true);
+                return AudioSystem.registerPolicyMixes(mMixes, true);
             }
         }
 
-        void removeMixes(@NonNull ArrayList<AudioMix> mixes) {
+        int removeMixes(@NonNull ArrayList<AudioMix> mixes) {
             // TODO optimize to not have to unregister the mixes already in place
             synchronized (mMixes) {
                 AudioSystem.registerPolicyMixes(mMixes, false);
                 this.remove(mixes);
-                AudioSystem.registerPolicyMixes(mMixes, true);
+                return AudioSystem.registerPolicyMixes(mMixes, true);
             }
         }
 
-        void connectMixes() {
+        int connectMixes() {
             final long identity = Binder.clearCallingIdentity();
-            AudioSystem.registerPolicyMixes(mMixes, true);
+            int status = AudioSystem.registerPolicyMixes(mMixes, true);
             Binder.restoreCallingIdentity(identity);
+            return status;
         }
 
         int setUidDeviceAffinities(int uid, @NonNull int[] types, @NonNull String[] addresses) {
