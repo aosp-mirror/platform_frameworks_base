@@ -239,9 +239,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }, filter, null, getHandler());
     }
 
+    /**
+     * This method posts a blocking call to the handler thread, so it should not be called from
+     * that same thread.
+     * @throws {@link IllegalStateException} if called from {@link #mHandlerThread}
+     */
     @Override
     public ParceledListSlice getAvailableRollbacks() {
         enforceManageRollbacks("getAvailableRollbacks");
+        if (Thread.currentThread().equals(mHandlerThread)) {
+            Log.wtf(TAG, "Calling getAvailableRollbacks from mHandlerThread "
+                    + "causes a deadlock");
+            throw new IllegalStateException("Cannot call RollbackManager#getAvailableRollbacks "
+                    + "from the handler thread!");
+        }
 
         // Wait for the handler thread to get the list of available rollbacks
         // to get the most up-to-date results. This is intended to reduce test
