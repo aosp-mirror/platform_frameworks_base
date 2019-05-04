@@ -124,6 +124,7 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Handler;
@@ -230,7 +231,6 @@ public class DisplayPolicy {
     private int mBottomGestureAdditionalInset;
     @Px
     private int mSideGestureInset;
-    private boolean mNavigationBarLetsThroughTaps;
 
     private StatusBarManagerInternal getStatusBarManagerInternal() {
         synchronized (mServiceAcquireLock) {
@@ -252,6 +252,8 @@ public class DisplayPolicy {
     private volatile boolean mHasNavigationBar;
     // Can the navigation bar ever move to the side?
     private volatile boolean mNavigationBarCanMove;
+    private volatile boolean mNavigationBarLetsThroughTaps;
+    private volatile boolean mNavigationBarAlwaysShowOnSideGesture;
 
     // Written by vr manager thread, only read in this class.
     private volatile boolean mPersistentVrModeEnabled;
@@ -463,22 +465,31 @@ public class DisplayPolicy {
 
                     @Override
                     public void onSwipeFromBottom() {
-                        if (mNavigationBar != null
-                                && mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
 
                     @Override
                     public void onSwipeFromRight() {
-                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_RIGHT) {
+                        final Region excludedRegion =
+                                mDisplayContent.calculateSystemGestureExclusion();
+                        final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
+                                || mNavigationBarPosition == NAV_BAR_RIGHT;
+                        if (mNavigationBar != null && sideAllowed
+                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion)) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
 
                     @Override
                     public void onSwipeFromLeft() {
-                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_LEFT) {
+                        final Region excludedRegion =
+                                mDisplayContent.calculateSystemGestureExclusion();
+                        final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
+                                || mNavigationBarPosition == NAV_BAR_LEFT;
+                        if (mNavigationBar != null && sideAllowed
+                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion)) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
@@ -2696,6 +2707,8 @@ public class DisplayPolicy {
         mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
         mSideGestureInset = res.getDimensionPixelSize(R.dimen.config_backGestureInset);
         mNavigationBarLetsThroughTaps = res.getBoolean(R.bool.config_navBarTapThrough);
+        mNavigationBarAlwaysShowOnSideGesture =
+                res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
 
         // This should calculate how much above the frame we accept gestures.
         mBottomGestureAdditionalInset = Math.max(0,
