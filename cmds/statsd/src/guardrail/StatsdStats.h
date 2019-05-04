@@ -24,6 +24,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 namespace android {
 namespace os {
@@ -159,6 +160,9 @@ public:
 
     // Max time to do a pull.
     static const int64_t kPullMaxDelayNs = 10 * NS_PER_SEC;
+
+    // Maximum number of pushed atoms statsd stats will track above kMaxPushedAtomId.
+    static const int kMaxNonPlatformPushedAtoms = 100;
 
     // Max platform atom tag number.
     static const int32_t kMaxPlatformAtomTag = 100000;
@@ -508,9 +512,13 @@ private:
 
     // Stores the number of times a pushed atom is logged.
     // The size of the vector is the largest pushed atom id in atoms.proto + 1. Atoms
-    // out of that range will be dropped (it's either pulled atoms or test atoms).
+    // out of that range will be put in mNonPlatformPushedAtomStats.
     // This is a vector, not a map because it will be accessed A LOT -- for each stats log.
     std::vector<int> mPushedAtomStats;
+
+    // Stores the number of times a pushed atom is logged for atom ids above kMaxPushedAtomId.
+    // The max size of the map is kMaxNonPlatformPushedAtoms.
+    std::unordered_map<int, int> mNonPlatformPushedAtomStats;
 
     // Maps PullAtomId to its stats. The size is capped by the puller atom counts.
     std::map<int, PulledAtomStats> mPulledAtomStats;
@@ -587,6 +595,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestConfigRemove);
     FRIEND_TEST(StatsdStatsTest, TestSubStats);
     FRIEND_TEST(StatsdStatsTest, TestAtomLog);
+    FRIEND_TEST(StatsdStatsTest, TestNonPlatformAtomLog);
     FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
     FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
     FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
