@@ -92,13 +92,13 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_APP_USER_LOCKED_FIELDS = "app_user_locked_fields";
     private static final String ATT_ENABLED = "enabled";
     private static final String ATT_USER_ALLOWED = "allowed";
-    private static final String ATT_HIDE_SILENT = "hide_silent";
+    private static final String ATT_HIDE_SILENT = "hide_gentle";
 
     private static final int DEFAULT_PRIORITY = Notification.PRIORITY_DEFAULT;
     private static final int DEFAULT_VISIBILITY = NotificationManager.VISIBILITY_NO_OVERRIDE;
     private static final int DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_UNSPECIFIED;
     @VisibleForTesting
-    static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = true;
+    static final boolean DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
     private static final boolean DEFAULT_ALLOW_BUBBLE = true;
     private static final boolean DEFAULT_OEM_LOCKED_IMPORTANCE  = false;
