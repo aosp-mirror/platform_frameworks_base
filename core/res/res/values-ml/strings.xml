@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ഇനി മുഖം തിരിച്ചറിയാനാവില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"വളരെയധികം സമാനത, നിങ്ങളുടെ പോസ് മാറ്റുക."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"അൽപ്പം കൂടി സ്‌ക്രീനിന് നേരെ നോക്കുക."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"അൽപ്പം കൂടി സ്‌ക്രീനിന് നേരെ നോക്കുക."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"നിങ്ങളുടെ തല ലംബമായി നേരെയാക്കുക"</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"തലയ്ക്കും ഫോണിനുമിടയിലുള്ള തടസ്സം നീക്കുക."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"ക്യാമറ വൃത്തിയാക്കുക."</string>
@@ -2028,4 +2030,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ഫയൽ</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"നേരിട്ടുള്ള പങ്കിടൽ ലഭ്യമല്ല"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ആപ്പുകളുടെ ലിസ്‌റ്റ്"</string>
 </resources>
