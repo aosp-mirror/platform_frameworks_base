@@ -27,6 +27,7 @@ import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -489,7 +490,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     && !bubble.entry.showInShadeWhenBubble()) {
                 // The bubble is gone & the notification is gone, time to actually remove it
                 mNotificationEntryManager.performRemoveNotification(bubble.entry.notification,
-                        0 /* reason */);
+                        UNDEFINED_DISMISS_REASON);
             } else {
                 // The notification is still in the shade but we've removed the bubble so
                 // lets make sure NoMan knows it's not a bubble anymore
