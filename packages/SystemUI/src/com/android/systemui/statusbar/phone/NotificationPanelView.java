@@ -1316,7 +1316,11 @@ public class NotificationPanelView extends PanelView implements
         } else if (oldState == StatusBarState.SHADE_LOCKED
                 && statusBarState == StatusBarState.KEYGUARD) {
             animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-            mQs.animateHeaderSlidingOut();
+            // Only animate header if the header is visible. If not, it will partially animate out
+            // the top of QS
+            if (!mQsExpanded) {
+                mQs.animateHeaderSlidingOut();
+            }
         } else {
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
