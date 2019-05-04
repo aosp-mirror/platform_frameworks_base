@@ -731,6 +731,7 @@ package android.content.pm {
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public static final int FLAG_REMOVED = 2; // 0x2
     field public static final int PROTECTION_FLAG_APP_PREDICTOR = 2097152; // 0x200000
     field public static final int PROTECTION_FLAG_CONFIGURATOR = 524288; // 0x80000
     field public static final int PROTECTION_FLAG_DOCUMENTER = 262144; // 0x40000
