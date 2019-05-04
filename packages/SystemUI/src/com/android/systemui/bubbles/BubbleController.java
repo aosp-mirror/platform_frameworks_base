@@ -27,7 +27,6 @@ import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
-import static com.android.systemui.statusbar.notification.NotificationAlertingManager.alertAgain;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -464,7 +463,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (!shouldBubble && mBubbleData.hasBubbleWithKey(entry.key)) {
                 // It was previously a bubble but no longer a bubble -- lets remove it
                 removeBubble(entry.key, DISMISS_NO_LONGER_BUBBLE);
-            } else if (shouldBubble && alertAgain(entry, entry.notification.getNotification())) {
+            } else if (shouldBubble) {
                 updateShowInShadeForSuppressNotification(entry);
                 entry.setBubbleDismissed(false); // updates come back as bubbles even if dismissed
                 updateBubble(entry);
