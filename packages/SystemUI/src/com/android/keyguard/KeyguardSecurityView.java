@@ -16,6 +16,7 @@
 package com.android.keyguard;
 
 import android.content.res.ColorStateList;
+import android.view.MotionEvent;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -137,4 +138,14 @@ public interface KeyguardSecurityView {
      * @return The View's title.
      */
     CharSequence getTitle();
+
+    /**
+     * If the parent should not be allowed to intercept touch events.
+     * @param event A touch event.
+     * @return {@code true} if touch should be passed forward.
+     * @see android.view.ViewGroup#requestDisallowInterceptTouchEvent(boolean)
+     */
+    default boolean disallowInterceptTouch(MotionEvent event) {
+        return false;
+    }
 }

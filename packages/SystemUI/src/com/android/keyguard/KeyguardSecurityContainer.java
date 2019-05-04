@@ -26,12 +26,18 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.dynamicanimation.animation.SpringAnimation;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -60,6 +66,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     // Bouncer is dismissed due to sim card unlock code entered.
     private static final int BOUNCER_DISMISS_SIM = 4;
 
+    // Make the view move slower than the finger, as if the spring were applying force.
+    private static final float TOUCH_Y_MULTIPLIER = 0.25f;
+    // How much you need to drag the bouncer to trigger an auth retry (in dps.)
+    private static final float MIN_DRAG_SIZE = 10;
+
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
 
@@ -70,10 +81,18 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private SecurityCallback mSecurityCallback;
     private AlertDialog mAlertDialog;
     private InjectionInflationController mInjectionInflationController;
+    private boolean mSwipeUpToRetry;
 
+    private final ViewConfiguration mViewConfiguration;
+    private final SpringAnimation mSpringAnimation;
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final KeyguardUpdateMonitor mUpdateMonitor;
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private float mLastTouchY = -1;
+    private int mActivePointerId = -1;
+    private boolean mIsDragging;
+    private float mStartTouchY = -1;
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
@@ -104,9 +123,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mSecurityModel = new KeyguardSecurityModel(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-
+        mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
         mInjectionInflationController =  new InjectionInflationController(
             SystemUIFactory.getInstance().getRootComponent());
+        mViewConfiguration = ViewConfiguration.get(context);
     }
 
     public void setSecurityCallback(SecurityCallback callback) {
@@ -118,6 +138,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onResume(reason);
         }
+        updateBiometricRetry();
+        updatePaddings();
     }
 
     @Override
@@ -129,6 +151,95 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onPause();
         }
+    }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                int pointerIndex = event.getActionIndex();
+                mStartTouchY = event.getY(pointerIndex);
+                mActivePointerId = event.getPointerId(pointerIndex);
+                mVelocityTracker.clear();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (mIsDragging) {
+                    return true;
+                }
+                if (!mSwipeUpToRetry) {
+                    return false;
+                }
+                // Avoid dragging the pattern view
+                if (mCurrentSecurityView.disallowInterceptTouch(event)) {
+                    return false;
+                }
+                int index = event.findPointerIndex(mActivePointerId);
+                int touchSlop = mViewConfiguration.getScaledTouchSlop();
+                if (mCurrentSecurityView != null
+                        && mStartTouchY - event.getY(index) > touchSlop) {
+                    mIsDragging = true;
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIsDragging = false;
+                break;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        final int action = event.getActionMasked();
+        switch (action) {
+            case MotionEvent.ACTION_MOVE:
+                mVelocityTracker.addMovement(event);
+                int pointerIndex = event.findPointerIndex(mActivePointerId);
+                float y = event.getY(pointerIndex);
+                if (mLastTouchY != -1) {
+                    float dy = y - mLastTouchY;
+                    setTranslationY(getTranslationY() + dy * TOUCH_Y_MULTIPLIER);
+                }
+                mLastTouchY = y;
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mActivePointerId = -1;
+                mLastTouchY = -1;
+                mIsDragging = false;
+                startSpringAnimation(mVelocityTracker.getYVelocity());
+                break;
+            case MotionEvent.ACTION_POINTER_UP:
+                int index = event.getActionIndex();
+                int pointerId = event.getPointerId(index);
+                if (pointerId == mActivePointerId) {
+                    // This was our active pointer going up. Choose a new
+                    // active pointer and adjust accordingly.
+                    final int newPointerIndex = index == 0 ? 1 : 0;
+                    mLastTouchY = event.getY(newPointerIndex);
+                    mActivePointerId = event.getPointerId(newPointerIndex);
+                }
+                break;
+        }
+        if (action == MotionEvent.ACTION_UP) {
+            if (-getTranslationY() > TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    MIN_DRAG_SIZE, getResources().getDisplayMetrics())) {
+                mUpdateMonitor.requestFaceAuth();
+            }
+        }
+        return true;
+    }
+
+    private void startSpringAnimation(float startVelocity) {
+        mSpringAnimation
+            .setStartVelocity(startVelocity)
+            .animateToFinalPosition(0);
     }
 
     public void startAppearAnimation() {
@@ -143,6 +254,18 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     onFinishRunnable);
         }
         return false;
+    }
+
+    /**
+     * Enables/disables swipe up to retry on the bouncer.
+     */
+    private void updateBiometricRetry() {
+        SecurityMode securityMode = getSecurityMode();
+        int userId = KeyguardUpdateMonitor.getCurrentUser();
+        mSwipeUpToRetry = mUpdateMonitor.isUnlockWithFacePossible(userId)
+                && securityMode != SecurityMode.SimPin
+                && securityMode != SecurityMode.SimPuk
+                && securityMode != SecurityMode.None;
     }
 
     public CharSequence getTitle() {
@@ -193,6 +316,20 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mLockPatternUtils = utils;
         mSecurityModel.setLockPatternUtils(utils);
         mSecurityViewFlipper.setLockPatternUtils(mLockPatternUtils);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        updatePaddings();
+    }
+
+    private void updatePaddings() {
+        int bottomPadding = getRootWindowInsets().getSystemWindowInsets().bottom;
+        if (getPaddingBottom() == bottomPadding) {
+            return;
+        }
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), bottomPadding);
     }
 
     private void showDialog(String title, String message) {
@@ -467,7 +604,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
-            KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             if (success) {
                 StatsLog.write(StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED,
                     StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__SUCCESS);
