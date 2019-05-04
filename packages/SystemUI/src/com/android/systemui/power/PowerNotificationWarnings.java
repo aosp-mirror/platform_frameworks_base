@@ -575,10 +575,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             d.setPositiveButton(com.android.internal.R.string.confirm_battery_saver,
                     (dialog, which) -> {
                         final ContentResolver resolver = mContext.getContentResolver();
-                        Secure.putInt(
-                                resolver,
-                                Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
-                                1);
                         Settings.Global.putInt(
                                 resolver,
                                 Global.AUTOMATIC_POWER_SAVE_MODE,
@@ -587,6 +583,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                 resolver,
                                 Global.LOW_POWER_MODE_TRIGGER_LEVEL,
                                 batterySaverTriggerLevel);
+                        Secure.putInt(
+                                resolver,
+                                Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
+                                1);
                     });
         } else {
             d.setTitle(R.string.battery_saver_confirmation_title);
