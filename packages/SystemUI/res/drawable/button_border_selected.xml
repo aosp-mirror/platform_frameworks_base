@@ -19,7 +19,7 @@
     <solid
         android:color="@color/notification_guts_selection_bg" />
     <stroke
-        android:width="2dp"
+        android:width="1dp"
         android:color="@color/GM2_grey_300"/>
     <corners android:radius="@dimen/rect_button_radius" />
 </shape>
