@@ -20067,6 +20067,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final Intent intent = new Intent(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED);
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             try {
                 am.broadcastIntent(null, intent, null, null,
                         0, null, null, null, android.app.AppOpsManager.OP_NONE,
