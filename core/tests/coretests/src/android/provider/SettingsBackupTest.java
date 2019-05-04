@@ -695,7 +695,6 @@ public class SettingsBackupTest {
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
                  Settings.Secure.TV_USER_SETUP_COMPLETE,
-                 Settings.Secure.UI_NIGHT_MODE, // candidate?
                  Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
                  Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,
