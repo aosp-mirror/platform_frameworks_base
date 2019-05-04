@@ -33,7 +33,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -129,8 +129,9 @@ public class SystemUIFactory {
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry, FalsingManager.getInstance(context), expansionCallback,
-                KeyguardUpdateMonitor.getInstance(context), new Handler(Looper.getMainLooper()));
+                dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
+                expansionCallback, KeyguardUpdateMonitor.getInstance(context),
+                new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,

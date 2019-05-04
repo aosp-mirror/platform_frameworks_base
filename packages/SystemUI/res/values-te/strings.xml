@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"స్క్రీన్ పిన్ చేయబడింది"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు స్థూలదృష్టి తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు హోమ్‌ని తాకి &amp; అలాగే పట్టుకోండి."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి స్థూలదృష్టిని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి హోమ్‌ని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు అవలోకనం బటన్‌లను తాకి &amp; అలాగే పట్టుకోండి"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"సాధారణ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ప్రాధాన్యం గలవి"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్‌లో ప్రదర్శింపబడుతుంది."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్ &amp; స్థితి పట్టీ‌లో ప్రదర్శింపబడుంది."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్ &amp; లాక్ స్క్రీన్‌లో ప్రదర్శింపబడుతుంది."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ఎల్లప్పుడూ నిశబ్దంగా ఉంచు. కిందకు-లాగే షేడ్, స్థితి పట్టీ &amp; లాక్ స్క్రీన్‌లో ప్రదర్శింపబడుతుంది."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"శబ్దం చేస్తుంది, కిందకు-లాగే షేడ్, స్థితి పట్టీ &amp; లాక్ స్క్రీన్‌ లో.ప్రదర్శింపబడుతుంది."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"కిందకు-లాగే షేడ్‌లో కనిపించే నోటిఫికేషన్‌ల మాత్రమే ద్వారా దృష్టి కేంద్రీకరించడానికి మీకు సహాయపడుతుంది. ఎల్లప్పుడూ నిశబ్దంగా ఉంచు."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ప్రాధాన్యత గల నోటిఫికేషన్‌ల దిగువన ప్రదర్శిస్తుంది. ఎల్లప్పుడూ నిశబ్దంగా ఉంచు."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ప్రాధాన్యత గల నోటిఫికేషన్‌ల దిగువన ప్రదర్శిస్తుంది. ఎల్లప్పుడూ నిశబ్దంగా ఉంచు."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ప్రాధాన్యత గల నోటిఫికేషన్‌ల దిగువన ప్రదర్శిస్తుంది. ఎల్లప్పుడూ నిశబ్దంగా ఉంచు."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"శబ్దం &amp; స్థితి బార్ చిహ్నం ద్వారా మిమ్మల్ని దృష్టి వహించే విధంగా చేస్తుంది. లాక్ స్క్రీన్‌‌పై చూపుతుంది."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని తెరువు"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్‌ల సెట్టింగ్‌లు"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> నుండి బబుల్‌లను అనుమతించాలా?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"తిరస్కరించు"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"అనుమతించు"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"నన్ను తర్వాత అడగు"</string>

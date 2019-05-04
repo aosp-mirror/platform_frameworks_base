@@ -301,7 +301,7 @@ public final class TextClassifierImpl implements TextClassifier {
             final ZonedDateTime refTime = ZonedDateTime.now();
             final Collection<String> entitiesToIdentify = request.getEntityConfig() != null
                     ? request.getEntityConfig().resolveEntityListModifications(
-                            getEntitiesForHints(request.getEntityConfig().getHints()))
+                    getEntitiesForHints(request.getEntityConfig().getHints()))
                     : mSettings.getEntityListDefault();
             final String localesString = concatenateLocales(request.getDefaultLocales());
             final String detectLanguageTags = detectLanguageTagsFromText(request.getText());
@@ -779,8 +779,8 @@ public final class TextClassifierImpl implements TextClassifier {
         final float moreTextScoreRatio = 1f - subjectTextScoreRatio;
         Log.v(LOG_TAG,
                 String.format(Locale.US, "LangIdContextSettings: "
-                        + "minimumTextSize=%d, penalizeRatio=%.2f, "
-                        + "subjectTextScoreRatio=%.2f, moreTextScoreRatio=%.2f",
+                                + "minimumTextSize=%d, penalizeRatio=%.2f, "
+                                + "subjectTextScoreRatio=%.2f, moreTextScoreRatio=%.2f",
                         minimumTextSize, penalizeRatio, subjectTextScoreRatio, moreTextScoreRatio));
 
         if (end - start < minimumTextSize && penalizeRatio <= 0) {
@@ -903,4 +903,3 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 }
-

@@ -524,7 +524,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (v == mClockView) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     AlarmClock.ACTION_SHOW_ALARMS), 0);
-        } else if (v == mNextAlarmContainer) {
+        } else if (v == mNextAlarmContainer && mNextAlarmContainer.isVisibleToUser()) {
             if (mNextAlarm.getShowIntent() != null) {
                 mActivityStarter.postStartActivityDismissingKeyguard(
                         mNextAlarm.getShowIntent());
@@ -545,7 +545,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                         new Intent(Intent.ACTION_REVIEW_ONGOING_PERMISSION_USAGE), 0);
                 mHost.collapsePanels();
             });
-        } else if (v == mRingerContainer) {
+        } else if (v == mRingerContainer && mRingerContainer.isVisibleToUser()) {
             mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                     Settings.ACTION_SOUND_SETTINGS), 0);
         }

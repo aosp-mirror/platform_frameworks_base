@@ -1174,8 +1174,9 @@ class RootActivityContainer extends ConfigurationContainer
                     resumedOnDisplay |= result;
                     continue;
                 }
-                if (topRunningActivity.isState(RESUMED)) {
-                    // Kick off any lingering app transitions form the MoveTaskToFront operation.
+                if (display.isTopStack(stack) && topRunningActivity.isState(RESUMED)) {
+                    // Kick off any lingering app transitions form the MoveTaskToFront operation,
+                    // but only consider the top task and stack on that display.
                     stack.executeAppTransition(targetOptions);
                 } else {
                     resumedOnDisplay |= topRunningActivity.makeActiveIfNeeded(target);

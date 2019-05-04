@@ -718,6 +718,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         if (accessPoint == null) {
             accessPoint = new AccessPoint(mContext, config, homeScans, roamingScans);
         } else {
+            accessPoint.update(config);
             accessPoint.setScanResultsPasspoint(homeScans, roamingScans);
         }
         return accessPoint;

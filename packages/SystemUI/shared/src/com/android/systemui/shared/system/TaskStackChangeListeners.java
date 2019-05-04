@@ -70,6 +70,15 @@ public class TaskStackChangeListeners extends TaskStackListener {
 
     public void removeListener(TaskStackChangeListener listener) {
         mTaskStackListeners.remove(listener);
+        if (mTaskStackListeners.isEmpty() && mRegistered) {
+            // Unregister mTaskStackListener once we have no more listeners
+            try {
+                ActivityTaskManager.getService().unregisterTaskStackListener(this);
+                mRegistered = false;
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to call unregisterTaskStackListener", e);
+            }
+        }
     }
 
     @Override

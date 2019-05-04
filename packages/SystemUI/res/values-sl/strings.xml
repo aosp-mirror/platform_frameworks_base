@@ -533,6 +533,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Zaslon je pripet"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za pregled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za začetni zaslon."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Če želite odpeti ta zaslon, hkrati pridržite gumba za nazaj in za pregled."</string>
@@ -644,15 +646,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite, da so obvestila te aplikacije še naprej prikazana?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Brez zvočnega opozorila"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prednostno"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili in v vrstici stanja."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili in na zaklenjenem zaslonu."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Vedno tiho. Prikaz na poteznem zaslonu z obvestili, v vrstici stanja in na zaklenjenem zaslonu."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Zvok ter prikaz na poteznem zaslonu z obvestili, v vrstici stanja in na zaklenjenem zaslonu."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Nemoteč prikaz samo na poteznem zaslonu z obvestili. Vedno tiho."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Opozarjanje z zvokom in ikono v vrstici stanja. Prikaz na zaklenjenem zaslonu."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Te skupine obvestil ni mogoče konfigurirati tukaj"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Posredovano obvestilo"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ta aplikacija uporablja fotoaparat."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ta aplikacija uporablja mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ta aplikacija prekriva druge aplikacije na zaslonu."</string>
@@ -921,6 +922,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Odpri aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Nastavitve za oblačke aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Želite dovoliti oblačke iz aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Zavrni"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Dovoli"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Vprašaj me pozneje"</string>

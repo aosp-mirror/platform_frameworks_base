@@ -92,10 +92,6 @@ bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
 // Returns the truncated timestamp.
 int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs);
 
-inline bool isPushedAtom(int atomId) {
-    return atomId <= util::kMaxPushedAtomId && atomId > 1;
-}
-
 inline bool isVendorPulledAtom(int atomId) {
     return atomId >= StatsdStats::kVendorPulledAtomStartTag && atomId < StatsdStats::kMaxAtomTag;
 }

@@ -40,7 +40,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -192,9 +191,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
         mStatusBarStateController.addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
-        mLastGesturalNav = QuickStepContract.isGesturalMode(
+        mGesturalNav = QuickStepContract.isGesturalMode(
                 Dependency.get(NavigationModeController.class).addListener(this));
-        mDockManager = SysUiServiceProvider.getComponent(context, DockManager.class);
+        mDockManager = Dependency.get(DockManager.class);
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
             mIsDocked = mDockManager.isDocked();
@@ -484,7 +483,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
             reset(isOccluding /* hideBouncerWhenShowing*/);
         }
-        if (animate && !occluded && mShowing) {
+        if (animate && !occluded && mShowing && !mBouncer.isShowing()) {
             mStatusBar.animateKeyguardUnoccluding();
         }
     }
@@ -662,7 +661,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public boolean onBackPressed(boolean hideImmediately) {
         if (mBouncer.isShowing()) {
             mStatusBar.endAffordanceLaunch();
-            reset(hideImmediately);
+            // The second condition is for SIM card locked bouncer
+            if (mBouncer.isScrimmed() && !mBouncer.needsFullscreenBouncer()) {
+                hideBouncer(false);
+                updateStates();
+            } else {
+                reset(hideImmediately);
+            }
             return true;
         }
         return false;

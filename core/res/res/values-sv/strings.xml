@@ -296,7 +296,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fysisk aktivitet"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fysiska aktivitet"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"åtkomst till data om fysisk aktivitet"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to åtkomst till data om fysisk aktivitet?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrera ansiktet på nytt."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ansiktet kan inte längre kännas igen. Försök igen."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"För likt. Ändra ansiktsposition."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Titta rakt på skärmen."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Titta rakt på skärmen."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Räta på huvudet vertikalt."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"Se till att ditt ansikte inte skyms för mobilen."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Rengör kameran."</string>
@@ -2027,4 +2029,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fil</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Dela direkt är inte tillgängligt"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Applista"</string>
 </resources>

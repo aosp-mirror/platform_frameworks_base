@@ -30,7 +30,8 @@ import android.view.ViewConfiguration
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
-import com.android.systemui.classifier.FalsingManager
+import com.android.systemui.classifier.FalsingManagerFactory
+import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -81,7 +82,7 @@ constructor(context: Context,
         mMinDragDistance = context.resources.getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance)
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
-        mFalsingManager = FalsingManager.getInstance(context)
+        mFalsingManager = FalsingManagerFactory.getInstance(context)
         mPowerManager = context.getSystemService(PowerManager::class.java)
     }
 

@@ -30,11 +30,11 @@ import java.util.ArrayList;
  * A class to keep track of the enumeration state for a given client.
  */
 public abstract class EnumerateClient extends ClientMonitor {
-    public EnumerateClient(Context context, Metrics metrics,
+    public EnumerateClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int groupId, int userId,
             boolean restricted, String owner) {
-        super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
+        super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
     }
 
@@ -55,7 +55,7 @@ public abstract class EnumerateClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(getLogTag(), "start enumerate for user " + getTargetUserId()
                     + " failed, result=" + result);
-                mMetricsLogger.histogram(mMetrics.tagEnumerateStartError(), result);
+                mMetricsLogger.histogram(mConstants.tagEnumerateStartError(), result);
                 onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
                 return result;

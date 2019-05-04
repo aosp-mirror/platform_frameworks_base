@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"អេក្រង់​ត្រូវ​បាន​ភ្ជាប់"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការ​ដៅ។ សូម​សង្កត់​ប៊ូតុង​ទិដ្ឋភាពរួម​​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុច​ប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ដើម្បី​ដក​ការ​ដៅ​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យ​ជាប់"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"បន្ត​បង្ហាញ​ការជូនដំណឹង​ពីកម្មវិធីនេះ?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ស្ងាត់ៗ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ជា​អាទិភាព"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ។"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ និងរបារ​ស្ថានភាព។"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ និងនៅលើ​អេក្រង់ចាក់សោ។"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"បិទសំឡេង​ជានិច្ច។ បង្ហាញ​នៅក្នុងផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ របារ​ស្ថានភាព និងនៅលើ​អេក្រង់ចាក់សោ។"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"បញ្ចេញ​សំឡេង និង​បង្ហាញ​នៅក្នុង​ផ្ទាំងជូនដំណឹង​ធ្លាក់ចុះ របារ​ស្ថានភាព និង​នៅលើ​អេក្រង់ចាក់សោ។"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ជួយ​ឱ្យអ្នក​ផ្ដោត​តាមរយៈការជូនដំណឹង​តែនៅក្នុង​ផ្ទាំងជូនដំណឹងធ្លាក់ចុះ​ប៉ុណ្ណោះ។ បិទសំឡេង​ជានិច្ច។"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"បង្ហាញ​ការជូនដំណឹង​អាទិភាព​ខាងក្រោម។ បិទសំឡេង​ជានិច្ច។"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"បង្ហាញ​ការជូនដំណឹង​អាទិភាព​ខាងក្រោម។ បិទសំឡេង​ជានិច្ច។"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"បង្ហាញ​ការជូនដំណឹង​អាទិភាព​ខាងក្រោម។ បិទសំឡេង​ជានិច្ច។"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ធ្វើឱ្យអ្នកចាប់អារម្មណ៍តាមរយៈ​សំឡេង និងរូបរបារស្ថានភាព។ បង្ហាញ​នៅលើ​អេក្រង់ចាក់សោ។"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ការជូនដំណឹង​ជា​ប្រូកស៊ី"</string>
     <string name="appops_camera" msgid="8100147441602585776">"កម្មវិធីនេះ​កំពុងប្រើ​កាមេរ៉ា។"</string>
     <string name="appops_microphone" msgid="741508267659494555">"កម្មវិធីនេះ​កំពុងប្រើ​មីក្រូហ្វូន។"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"កម្មវិធីនេះ​កំពុងបង្ហាញ​ពីលើកម្មវិធី​ផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក។"</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"បើក <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"ការកំណត់​សម្រាប់សារលេចឡើង <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"អនុញ្ញាត​សារលេចឡើង​ពី <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"បដិសេធ"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"អនុញ្ញាត"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"សួរខ្ញុំនៅពេលក្រោយ"</string>

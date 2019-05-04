@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.service.notification.NotificationListenerService.REASON_CLICK;
+
 import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -224,7 +226,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 eq(sbn.getKey()), any(NotificationVisibility.class));
 
         // Notification is removed due to FLAG_AUTO_CANCEL
-        verify(mEntryManager).performRemoveNotification(eq(sbn));
+        verify(mEntryManager).performRemoveNotification(eq(sbn), eq(REASON_CLICK));
     }
 
     @Test
@@ -253,7 +255,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyZeroInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn));
+        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), anyInt());
     }
 
     @Test
@@ -283,7 +285,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyZeroInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn));
+        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), anyInt());
     }
 
     @Test
@@ -315,6 +317,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verifyNoMoreInteractions(mContentIntent);
 
         // Notification should not be cancelled.
-        verify(mEntryManager, never()).performRemoveNotification(eq(sbn));
+        verify(mEntryManager, never()).performRemoveNotification(eq(sbn), anyInt());
     }
 }

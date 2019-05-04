@@ -24,6 +24,7 @@ import static android.media.AudioAttributes.USAGE_ALARM;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -34,15 +35,14 @@ import android.app.Person;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableContext;
-
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -52,6 +52,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 public class NotificationEntryTest {
@@ -113,7 +116,8 @@ public class NotificationEntryTest {
         people.add(new Person.Builder().setKey("mailto:testing@android.com").build());
         sbn.getNotification().extras.putParcelableArrayList(Notification.EXTRA_PEOPLE_LIST, people);
 
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
         assertTrue(entry.involvesPeople());
     }
 
@@ -121,7 +125,8 @@ public class NotificationEntryTest {
     public void testNotPerson() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         StatusBarNotification sbn = generateSbn(channel.getId());
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
         assertFalse(entry.involvesPeople());
     }
 
@@ -129,7 +134,8 @@ public class NotificationEntryTest {
     public void testHasPerson_matchesDefaultSmsApp() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         StatusBarNotification sbn = generateSbn(channel.getId(), DEFAULT_SMS_PACKAGE_NAME);
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
         assertTrue(entry.involvesPeople());
     }
 
@@ -137,7 +143,8 @@ public class NotificationEntryTest {
     public void testHasPerson_doesntMatchDefaultSmsApp() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         StatusBarNotification sbn = generateSbn(channel.getId(), "abc");
-        NotificationEntry entry = new NotificationEntry(mPackageManager, sbn, channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, sbn, channel, mSmsHelper);
         assertFalse(entry.involvesPeople());
     }
 
@@ -148,8 +155,8 @@ public class NotificationEntryTest {
         Notification n = new Notification.Builder(mContext, channel.getId())
                 .setStyle(new Notification.InboxStyle())
                 .build();
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, generateSbn(n), channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
         assertTrue(entry.hasStyle(Notification.InboxStyle.class));
     }
 
@@ -160,8 +167,8 @@ public class NotificationEntryTest {
         Notification n = new Notification.Builder(mContext, channel.getId())
                 .setStyle(new Notification.MessagingStyle(""))
                 .build();
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, generateSbn(n), channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
         assertTrue(entry.hasStyle(Notification.MessagingStyle.class));
     }
 
@@ -172,8 +179,8 @@ public class NotificationEntryTest {
         Notification n = new Notification.Builder(mContext, channel.getId())
                 .setStyle(new Notification.BigPictureStyle())
                 .build();
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, generateSbn(n), channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
         assertFalse(entry.hasStyle(Notification.InboxStyle.class));
         assertFalse(entry.hasStyle(Notification.MessagingStyle.class));
     }
@@ -184,7 +191,7 @@ public class NotificationEntryTest {
         channel.setSound(null, new AudioAttributes.Builder().setUsage(USAGE_ALARM).build());
 
         NotificationEntry entry = new NotificationEntry(
-                mPackageManager, generateSbn(channel.getId()), channel, mSmsHelper);
+                mContext, mPackageManager, generateSbn(channel.getId()), channel, mSmsHelper);
 
         assertTrue(entry.isAudioAttributesUsage(USAGE_ALARM));
     }
@@ -193,7 +200,7 @@ public class NotificationEntryTest {
     public void testIsNotAudioAttributes() {
         NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
         NotificationEntry entry = new NotificationEntry(
-                mPackageManager, generateSbn(channel.getId()), channel, mSmsHelper);
+                mContext, mPackageManager, generateSbn(channel.getId()), channel, mSmsHelper);
 
         assertFalse(entry.isAudioAttributesUsage(USAGE_ALARM));
     }
@@ -205,8 +212,8 @@ public class NotificationEntryTest {
         Notification n = new Notification.Builder(mContext, channel.getId())
                 .setCategory(Notification.CATEGORY_EMAIL)
                 .build();
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, generateSbn(n), channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
 
         assertTrue(entry.isCategory(Notification.CATEGORY_EMAIL));
         assertFalse(entry.isCategory(Notification.CATEGORY_MESSAGE));
@@ -219,8 +226,8 @@ public class NotificationEntryTest {
         Notification n = new Notification.Builder(mContext, channel.getId())
                 .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .build();
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, generateSbn(n), channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
 
         assertTrue(entry.isOngoing());
     }
@@ -232,9 +239,28 @@ public class NotificationEntryTest {
         Notification n = new Notification.Builder(mContext, channel.getId())
                 .setFlag(FLAG_CAN_COLORIZE, true)
                 .build();
-        NotificationEntry entry =
-                new NotificationEntry(mPackageManager, generateSbn(n), channel, mSmsHelper);
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
 
         assertFalse(entry.isOngoing());
+    }
+
+    @Test
+    public void testShrinkNotification() {
+        Notification n = new Notification.Builder(mContext, "")
+                .setLargeIcon(Icon.createWithResource(
+                        mContext, android.R.drawable.alert_dark_frame))
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+        n.largeIcon = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
+        NotificationChannel channel = new NotificationChannel("", "", IMPORTANCE_HIGH);
+
+        NotificationEntry entry = new NotificationEntry(
+                mContext, mPackageManager, generateSbn(n), channel, mSmsHelper);
+
+        assertNull(entry.getNotification().getSmallIcon());
+        assertNull(entry.getNotification().getLargeIcon());
+        assertNull(entry.getNotification().largeIcon);
+        assertNull(entry.getNotification().extras.getParcelable(Notification.EXTRA_LARGE_ICON));
     }
 }

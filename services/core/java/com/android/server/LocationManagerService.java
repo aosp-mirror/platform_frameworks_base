@@ -120,7 +120,9 @@ import com.android.server.location.MockProvider;
 import com.android.server.location.PassiveProvider;
 import com.android.server.location.RemoteListenerHelper;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2299,6 +2301,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         private boolean mIsForegroundUid;
         private Location mLastFixBroadcast;
         private long mLastStatusBroadcast;
+        private Throwable mStackTrace;  // for debugging only
 
         /**
          * Note: must be constructed with lock held.
@@ -2310,6 +2313,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             mReceiver = receiver;
             mIsForegroundUid = isImportanceForeground(
                     mActivityManager.getPackageImportance(mReceiver.mCallerIdentity.mPackageName));
+
+            if (D && receiver.mCallerIdentity.mPid == Process.myPid()) {
+                mStackTrace = new Throwable();
+            }
 
             ArrayList<UpdateRecord> records = mRecordsByProvider.get(provider);
             if (records == null) {
@@ -2361,11 +2368,26 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public String toString() {
-            return "UpdateRecord[" + mProvider + " " + mReceiver.mCallerIdentity.mPackageName
-                    + "(" + mReceiver.mCallerIdentity.mUid + (mIsForegroundUid ? " foreground"
-                    : " background")
-                    + ")" + " " + mRealRequest + " "
-                    + mReceiver.mWorkSource + "]";
+            StringBuilder b = new StringBuilder("UpdateRecord[");
+            b.append(mProvider).append(" ");
+            b.append(mReceiver.mCallerIdentity.mPackageName);
+            b.append("(").append(mReceiver.mCallerIdentity.mUid);
+            if (mIsForegroundUid) {
+                b.append(" foreground");
+            } else {
+                b.append(" background");
+            }
+            b.append(") ");
+            b.append(mRealRequest).append(" ").append(mReceiver.mWorkSource);
+
+            if (mStackTrace != null) {
+                ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+                mStackTrace.printStackTrace(new PrintStream(tmp));
+                b.append("\n\n").append(tmp.toString()).append("\n");
+            }
+
+            b.append("]");
+            return b.toString();
         }
     }
 
@@ -3638,6 +3660,13 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (!mBackgroundThrottlePackageWhitelist.isEmpty()) {
                 pw.println("  Throttling Whitelisted Packages:");
                 for (String packageName : mBackgroundThrottlePackageWhitelist) {
+                    pw.println("    " + packageName);
+                }
+            }
+
+            if (!mIgnoreSettingsPackageWhitelist.isEmpty()) {
+                pw.println("  Bypass Whitelisted Packages:");
+                for (String packageName : mIgnoreSettingsPackageWhitelist) {
                     pw.println("    " + packageName);
                 }
             }

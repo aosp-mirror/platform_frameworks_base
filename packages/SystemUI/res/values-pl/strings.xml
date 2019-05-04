@@ -535,6 +535,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran jest przypięty"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Wstecz oraz Przegląd."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Wstecz oraz Ekran główny."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Przegląd."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Aby odpiąć ten ekran, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
@@ -646,15 +648,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Nadal pokazywać powiadomienia z tej aplikacji?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Subtelne"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Priorytetowe"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Zawsze wyciszone. Wyświetlane w obszarze powiadomień."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Zawsze wyciszone. Wyświetlane w obszarze powiadomień i na pasku stanu"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Zawsze wyciszone. Wyświetlane w obszarze powiadomień i na ekranie blokady."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Zawsze wyciszone. Wyświetlane w obszarze powiadomień, na pasku stanu i ekranie blokady."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Sygnalizowane dźwiękiem i wyświetlanie w obszarze powiadomień, na pasku stanu i ekranie blokady."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Pomaga Ci się skupić, wyświetlając powiadomienia tylko w obszarze powiadomień. Zawsze wyciszone."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Wyświetla pod powiadomieniami priorytetowymi. Zawsze wyciszone."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Wyświetla pod powiadomieniami priorytetowymi. Zawsze wyciszone."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Wyświetla pod powiadomieniami priorytetowymi. Zawsze wyciszone."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Zwraca Twoją uwagę dźwiękiem i ikoną na pasku stanu. Wyświetla na ekranie blokady."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Tych powiadomień nie można zmodyfikować."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tej grupy powiadomień nie można tu skonfigurować"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Powiadomienie w zastępstwie"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ta aplikacja używa aparatu."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ta aplikacja używa mikrofonu."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ta aplikacja wyświetla się nad innymi aplikacjami na ekranie."</string>
@@ -923,6 +924,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Otwórz: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Ustawienia dymków aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Zezwolić na dymki z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Odmów"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Zezwól"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Zapytaj później"</string>

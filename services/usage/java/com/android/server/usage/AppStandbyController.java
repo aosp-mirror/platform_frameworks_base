@@ -27,6 +27,7 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_ACTIVE_TIMEOU
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_DOZE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_START;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_NOTIFICATION_SEEN;
@@ -238,6 +239,11 @@ public class AppStandbyController {
     long mUnexemptedSyncScheduledTimeoutMillis;
     /** Maximum time a system interaction should keep the buckets elevated. */
     long mSystemInteractionTimeoutMillis;
+    /**
+     * Maximum time a foreground service start should keep the buckets elevated if the service
+     * start is the first usage of the app
+     */
+    long mInitialForegroundServiceStartTimeoutMillis;
     /** The length of time phone must be charging before considered stable enough to run jobs  */
     long mStableChargingThresholdMillis;
 
@@ -877,7 +883,8 @@ public class AppStandbyController {
                     || event.mEventType == UsageEvents.Event.USER_INTERACTION
                     || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
                     || event.mEventType == UsageEvents.Event.SLICE_PINNED
-                    || event.mEventType == UsageEvents.Event.SLICE_PINNED_PRIV)) {
+                    || event.mEventType == UsageEvents.Event.SLICE_PINNED_PRIV
+                    || event.mEventType == UsageEvents.Event.FOREGROUND_SERVICE_START)) {
 
                 final AppUsageHistory appHistory = mAppIdleHistory.getAppUsageHistory(
                         event.mPackage, userId, elapsedRealtime);
@@ -898,6 +905,13 @@ public class AppStandbyController {
                             STANDBY_BUCKET_ACTIVE, subReason,
                             0, elapsedRealtime + mSystemInteractionTimeoutMillis);
                     nextCheckTime = mSystemInteractionTimeoutMillis;
+                } else if (event.mEventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
+                    // Only elevate bucket if this is the first usage of the app
+                    if (prevBucket != STANDBY_BUCKET_NEVER) return;
+                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
+                            STANDBY_BUCKET_ACTIVE, subReason,
+                            0, elapsedRealtime + mInitialForegroundServiceStartTimeoutMillis);
+                    nextCheckTime = mInitialForegroundServiceStartTimeoutMillis;
                 } else {
                     mAppIdleHistory.reportUsage(appHistory, event.mPackage,
                             STANDBY_BUCKET_ACTIVE, subReason,
@@ -930,6 +944,8 @@ public class AppStandbyController {
             case UsageEvents.Event.NOTIFICATION_SEEN: return REASON_SUB_USAGE_NOTIFICATION_SEEN;
             case UsageEvents.Event.SLICE_PINNED: return REASON_SUB_USAGE_SLICE_PINNED;
             case UsageEvents.Event.SLICE_PINNED_PRIV: return REASON_SUB_USAGE_SLICE_PINNED_PRIV;
+            case UsageEvents.Event.FOREGROUND_SERVICE_START:
+                return REASON_SUB_USAGE_FOREGROUND_SERVICE_START;
             default: return 0;
         }
     }
@@ -1509,6 +1525,9 @@ public class AppStandbyController {
         pw.print("  mSystemInteractionTimeoutMillis=");
         TimeUtils.formatDuration(mSystemInteractionTimeoutMillis, pw);
         pw.println();
+        pw.print("  mInitialForegroundServiceStartTimeoutMillis=");
+        TimeUtils.formatDuration(mInitialForegroundServiceStartTimeoutMillis, pw);
+        pw.println();
 
         pw.print("  mPredictionTimeoutMillis=");
         TimeUtils.formatDuration(mPredictionTimeoutMillis, pw);
@@ -1848,6 +1867,8 @@ public class AppStandbyController {
                 "unexempted_sync_scheduled_duration";
         private static final String KEY_SYSTEM_INTERACTION_HOLD_DURATION =
                 "system_interaction_duration";
+        private static final String KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION =
+                "initial_foreground_service_start_duration";
         private static final String KEY_STABLE_CHARGING_THRESHOLD = "stable_charging_threshold";
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT = 1 * ONE_HOUR;
         public static final long DEFAULT_NOTIFICATION_TIMEOUT = 12 * ONE_HOUR;
@@ -1859,6 +1880,7 @@ public class AppStandbyController {
         public static final long DEFAULT_EXEMPTED_SYNC_START_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_STABLE_CHARGING_THRESHOLD = 10 * ONE_MINUTE;
+        public static final long DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT = 30 * ONE_MINUTE;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -1964,6 +1986,12 @@ public class AppStandbyController {
                 mSystemInteractionTimeoutMillis = mParser.getDurationMillis(
                         KEY_SYSTEM_INTERACTION_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYSTEM_INTERACTION_TIMEOUT);
+
+                mInitialForegroundServiceStartTimeoutMillis = mParser.getDurationMillis(
+                        KEY_INITIAL_FOREGROUND_SERVICE_START_HOLD_DURATION,
+                        COMPRESS_TIME ? ONE_MINUTE :
+                                DEFAULT_INITIAL_FOREGROUND_SERVICE_START_TIMEOUT);
+
                 mStableChargingThresholdMillis = mParser.getDurationMillis(
                         KEY_STABLE_CHARGING_THRESHOLD,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_STABLE_CHARGING_THRESHOLD);

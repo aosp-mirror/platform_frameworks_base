@@ -32,6 +32,7 @@ oneway interface IContentSuggestionsService {
     void provideContextImage(
             int taskId,
             in GraphicBuffer contextImage,
+            int colorSpaceId,
             in Bundle imageContextRequestExtras);
     void suggestContentSelections(
             in SelectionsRequest request,

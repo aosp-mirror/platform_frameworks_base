@@ -84,7 +84,6 @@ public final class ClockManagerTest extends SysuiTestCase {
         when(mMockInjectionInflationController.injectable(any())).thenReturn(inflater);
 
         mFakeDockManager = new DockManagerFake();
-        getContext().putComponent(DockManager.class, mFakeDockManager);
 
         mCurrentUser = new MutableLiveData<>();
         mCurrentUser.setValue(MAIN_USER_ID);
@@ -92,7 +91,7 @@ public final class ClockManagerTest extends SysuiTestCase {
 
         mClockManager = new ClockManager(getContext(), mMockInjectionInflationController,
                 mMockPluginManager, mMockColorExtractor, mMockContentResolver,
-                mMockCurrentUserObserable, mMockSettingsWrapper);
+                mMockCurrentUserObserable, mMockSettingsWrapper, mFakeDockManager);
 
         mClockManager.addOnClockChangedListener(mMockListener1);
         mClockManager.addOnClockChangedListener(mMockListener2);

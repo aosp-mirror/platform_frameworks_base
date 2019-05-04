@@ -542,6 +542,12 @@ public class NotificationContentView extends FrameLayout {
     }
 
     @Override
+    public void onViewAdded(View child) {
+        super.onViewAdded(child);
+        child.setTag(R.id.row_tag_for_content_view, mContainingNotification);
+    }
+
+    @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         updateVisibility();
@@ -1892,5 +1898,9 @@ public class NotificationContentView extends FrameLayout {
             pw.print("null");
         }
         pw.println();
+    }
+
+    public RemoteInputView getExpandedRemoteInput() {
+        return mExpandedRemoteInput;
     }
 }

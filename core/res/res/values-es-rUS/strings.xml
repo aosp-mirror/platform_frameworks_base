@@ -402,7 +402,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite que la aplicación modifique el registro de llamadas de la TV, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite que la aplicación modifique el registro de llamadas del dispositivo, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"acceder a los sensores corporales (como los monitores de frecuencia cardíaca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la app acceda a datos de sensores que monitorean tu estado físico, como el ritmo cardíaco."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la app acceda a datos de sensores que monitorean tu estado físico, como la frecuencia cardíaca."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Leer eventos y detalles del calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Esta app puede leer todos los eventos del calendario de tu tablet y compartir o guardar los datos correspondientes."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Esta app puede leer todos los eventos del calendario de tu TV y compartir o guardar los datos correspondientes."</string>
@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vuelve a registrar tu cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ya no se reconoce la cara. Vuelve a intentarlo."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Es muy similar a la anterior. Haz otra pose."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Mira directamente a la pantalla."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Mira directamente a la pantalla."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Mantén la cabeza en posición vertical."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"Ilumina el espacio entre tu cabeza y el teléfono."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Limpia la cámara."</string>
@@ -2027,4 +2029,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> y <xliff:g id="COUNT_1">%d</xliff:g> archivo más</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"No está disponible el uso compartido directo"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lista de apps"</string>
 </resources>

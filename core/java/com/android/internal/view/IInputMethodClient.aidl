@@ -31,4 +31,5 @@ oneway interface IInputMethodClient {
     void reportFullscreenMode(boolean fullscreen);
     void reportPreRendered(in EditorInfo info);
     void applyImeVisibility(boolean setVisible);
+    void updateActivityViewToScreenMatrix(int bindSequence, in float[] matrixValues);
 }

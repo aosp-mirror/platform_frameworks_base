@@ -36,6 +36,7 @@ import static com.android.internal.util.Preconditions.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A class for describing camera output, which contains a {@link Surface} and its specific
@@ -692,7 +693,8 @@ public final class OutputConfiguration implements Parcelable {
                     mIsShared != other.mIsShared ||
                     mConfiguredFormat != other.mConfiguredFormat ||
                     mConfiguredDataspace != other.mConfiguredDataspace ||
-                    mConfiguredGenerationId != other.mConfiguredGenerationId)
+                    mConfiguredGenerationId != other.mConfiguredGenerationId ||
+                    !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId))
                 return false;
 
             int minLen = Math.min(mSurfaces.size(), other.mSurfaces.size());

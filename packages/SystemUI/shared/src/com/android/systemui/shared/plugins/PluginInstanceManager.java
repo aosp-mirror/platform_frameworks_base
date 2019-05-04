@@ -151,19 +151,34 @@ public class PluginInstanceManager<T extends Plugin> {
         return plugins.size() != 0;
     }
 
-    private void disable(PluginInfo info,
-            @PluginEnabler.DisableReason int reason) {
+    private boolean isPluginWhitelisted(ComponentName pluginName) {
+        for (String componentNameOrPackage : mWhitelistedPlugins) {
+            ComponentName componentName = ComponentName.unflattenFromString(componentNameOrPackage);
+            if (componentName == null) {
+                if (componentNameOrPackage.equals(pluginName.getPackageName())) {
+                    return true;
+                }
+            } else {
+                if (componentName.equals(pluginName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void disable(PluginInfo info, @PluginEnabler.DisableReason int reason) {
         // Live by the sword, die by the sword.
         // Misbehaving plugins get disabled and won't come back until uninstall/reinstall.
 
+        ComponentName pluginComponent = new ComponentName(info.mPackage, info.mClass);
         // If a plugin is detected in the stack of a crash then this will be called for that
         // plugin, if the plugin causing a crash cannot be identified, they are all disabled
         // assuming one of them must be bad.
-        if (mWhitelistedPlugins.contains(info.mPackage)) {
+        if (isPluginWhitelisted(pluginComponent)) {
             // Don't disable whitelisted plugins as they are a part of the OS.
             return;
         }
-        ComponentName pluginComponent = new ComponentName(info.mPackage, info.mClass);
         Log.w(TAG, "Disabling plugin " + pluginComponent.flattenToShortString());
         mManager.getPluginEnabler().setDisabled(pluginComponent, reason);
     }
@@ -288,6 +303,13 @@ public class PluginInstanceManager<T extends Plugin> {
             if (result.size() > 1 && !mAllowMultiple) {
                 // TODO: Show warning.
                 Log.w(TAG, "Multiple plugins found for " + mAction);
+                if (DEBUG) {
+                    for (ResolveInfo info : result) {
+                        ComponentName name = new ComponentName(info.serviceInfo.packageName,
+                                info.serviceInfo.name);
+                        Log.w(TAG, "  " + name);
+                    }
+                }
                 return;
             }
             for (ResolveInfo info : result) {
@@ -305,7 +327,7 @@ public class PluginInstanceManager<T extends Plugin> {
         protected PluginInfo<T> handleLoadPlugin(ComponentName component) {
             // This was already checked, but do it again here to make extra extra sure, we don't
             // use these on production builds.
-            if (!isDebuggable && !mWhitelistedPlugins.contains(component.getPackageName())) {
+            if (!isDebuggable && !isPluginWhitelisted(component)) {
                 // Never ever ever allow these on production builds, they are only for prototyping.
                 Log.w(TAG, "Plugin cannot be loaded on production build: " + component);
                 return null;

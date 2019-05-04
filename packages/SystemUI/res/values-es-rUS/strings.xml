@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantalla fija"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionados los botones Atrás y Recientes."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionados los botones de inicio y Atrás."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionado el botón Recientes."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Esta función mantiene la pantalla visible hasta que dejes de fijarla. Para ello, mantén presionado el botón de inicio."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Para dejar de fijar esta pantalla, mantén presionados los botones Atrás y Recientes"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"¿Quieres seguir viendo las notificaciones de esta app?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Silenciosa"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritaria"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Siempre en silencio. Se muestra en un banner desplegable."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Siempre en silencio. Se muestra en un banner desplegable y la barra de estado."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Siempre en silencio. Se muestra en un banner desplegable y la pantalla bloqueada."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Siempre en silencio. Se muestra en un banner desplegable, la barra de estado y la pantalla bloqueada."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Reproduce sonido y se muestra en un banner desplegable, la barra de estado y la pantalla bloqueada."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Te ayuda a concentrarte, ya que las notificaciones se muestran solo como banner desplegable. Siempre en silencio."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Se muestra debajo de las notificaciones de prioridad. Siempre en silencio."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Se muestra debajo de las notificaciones de prioridad. Siempre en silencio."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Se muestra debajo de las notificaciones de prioridad. Siempre en silencio."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Capta tu atención con un sonido y un ícono en la barra de estado. Se muestra en la pantalla bloqueada."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"No se pueden modificar estas notificaciones."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"No se puede configurar aquí este grupo de notificaciones"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Notificación almacenada en proxy"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Esta app está usando la cámara."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Esta app está usando el micrófono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Esta app se muestra sobre otras apps en la pantalla."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Configuración para cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"¿Quieres permitir cuadros de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Denegar"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Preguntarme más tarde"</string>

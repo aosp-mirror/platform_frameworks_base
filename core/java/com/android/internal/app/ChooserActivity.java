@@ -153,8 +153,8 @@ public class ChooserActivity extends ResolverActivity {
      * {@link AppPredictionManager} will be queried for direct share targets.
      */
     // TODO(b/123089490): Replace with system flag
-    private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = false;
-    private static final boolean USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES = false;
+    private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = true;
+    private static final boolean USE_PREDICTION_MANAGER_FOR_SHARE_ACTIVITIES = true;
     // TODO(b/123088566) Share these in a better way.
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
     public static final String LAUNCH_LOCATON_DIRECT_SHARE = "direct_share";
@@ -177,7 +177,7 @@ public class ChooserActivity extends ResolverActivity {
      */
     private static final int NO_DIRECT_SHARE_ANIM_IN_MILLIS = 200;
 
-    private static final float DIRECT_SHARE_EXPANSION_RATE = 0.7f;
+    private static final float DIRECT_SHARE_EXPANSION_RATE = 0.78f;
 
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
@@ -2037,21 +2037,29 @@ public class ChooserActivity extends ResolverActivity {
                     return;
                 }
 
-                int lastHeight = 0;
+                int directShareHeight = 0;
                 rowsToShow = Math.min(4, rowsToShow);
                 for (int i = 0; i < Math.min(rowsToShow, mAdapterView.getChildCount()); i++) {
-                    lastHeight = mAdapterView.getChildAt(i).getHeight();
-                    offset += lastHeight;
+                    View child = mAdapterView.getChildAt(i);
+                    int height = child.getHeight();
+                    offset += height;
+
+                    if (child.getTag() != null
+                            && (child.getTag() instanceof DirectShareViewHolder)) {
+                        directShareHeight = height;
+                    }
                 }
 
                 boolean isPortrait = getResources().getConfiguration().orientation
                                          == Configuration.ORIENTATION_PORTRAIT;
-                if (lastHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
+                if (directShareHeight != 0 && isSendAction(getTargetIntent()) && isPortrait) {
                     // make sure to leave room for direct share 4->8 expansion
-                    int expansionArea =
-                            (int) (mResolverDrawerLayout.getAlwaysShowHeight()
-                                    / DIRECT_SHARE_EXPANSION_RATE);
-                    offset = Math.min(offset, bottom - top - lastHeight - expansionArea);
+                    int requiredExpansionHeight =
+                            (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
+                    int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
+                                        - requiredExpansionHeight;
+
+                    offset = Math.min(offset, minHeight);
                 }
 
                 mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
@@ -2071,6 +2079,8 @@ public class ChooserActivity extends ResolverActivity {
         private static final int MAX_SHORTCUT_TARGETS_PER_APP = 8;
 
         private static final int MAX_SERVICE_TARGETS = 8;
+
+        private int mNumShortcutResults = 0;
 
         // Reserve spots for incoming direct share targets by adding placeholders
         private ChooserTargetInfo mPlaceHolderTargetInfo = new PlaceHolderTargetInfo();
@@ -2407,8 +2417,14 @@ public class ChooserActivity extends ResolverActivity {
                     // This incents ChooserTargetServices to define what's truly better.
                     targetScore = lastScore * 0.95f;
                 }
-                shouldNotify |= insertServiceTarget(
+                boolean isInserted = insertServiceTarget(
                         new SelectableTargetInfo(origTarget, target, targetScore));
+
+                if (isInserted && isShortcutResult) {
+                    mNumShortcutResults++;
+                }
+
+                shouldNotify |= isInserted;
 
                 if (DEBUG) {
                     Log.d(TAG, " => " + target.toString() + " score=" + targetScore
@@ -2423,6 +2439,10 @@ public class ChooserActivity extends ResolverActivity {
             if (shouldNotify) {
                 notifyDataSetChanged();
             }
+        }
+
+        private int getNumShortcutResults() {
+            return mNumShortcutResults;
         }
 
         /**
@@ -2881,10 +2901,10 @@ public class ChooserActivity extends ResolverActivity {
 
             if (startType != lastStartType
                     || rowPosition == getContentPreviewRowCount() + getProfileRowCount()) {
-                row.setBackground(
+                row.setForeground(
                         getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             } else {
-                row.setBackground(null);
+                row.setForeground(null);
             }
 
             int columnCount = holder.getColumnCount();
@@ -2955,7 +2975,15 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public void handleScroll(View v, int y, int oldy) {
-            if (mDirectShareViewHolder != null) {
+            // Only expand direct share area if there is a minimum number of shortcuts,
+            // which will help reduce the amount of visible shuffling due to older-style
+            // direct share targets.
+            int orientation = getResources().getConfiguration().orientation;
+            boolean canExpandDirectShare =
+                    mChooserListAdapter.getNumShortcutResults() > getMaxTargetsPerRow()
+                    && orientation == Configuration.ORIENTATION_PORTRAIT;
+
+            if (mDirectShareViewHolder != null && canExpandDirectShare) {
                 mDirectShareViewHolder.handleScroll(mAdapterView, y, oldy, getMaxTargetsPerRow());
             }
         }

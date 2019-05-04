@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"더 이상 얼굴을 인식할 수 없습니다. 다시 시도하세요."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"너무 비슷합니다. 다른 포즈를 취해 보세요."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"화면을 더 똑바로 바라보세요."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"화면을 더 똑바로 바라보세요."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"고개를 똑바로 세워 주세요."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"얼굴과 휴대전화 사이의 공간을 비워두세요."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"카메라의 이물질을 제거하세요."</string>
@@ -2027,4 +2029,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> 및 파일 <xliff:g id="COUNT_1">%d</xliff:g>개</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"직접 공유가 지원되지 않음"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"앱 목록"</string>
 </resources>

@@ -44,13 +44,11 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.storage.IStorageManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 
 import java.io.File;
@@ -165,6 +163,22 @@ public class StagingManager {
                 continue;
             }
             long activeVersion = activePackage.applicationInfo.longVersionCode;
+            if (session.params.requiredInstalledVersionCode
+                    != PackageManager.VERSION_CODE_HIGHEST) {
+                if (activeVersion != session.params.requiredInstalledVersionCode) {
+                    session.setStagedSessionFailed(
+                            SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                            "Installed version of APEX package " + newPackage.packageName
+                            + " does not match required. Active version: " + activeVersion
+                            + " required: " + session.params.requiredInstalledVersionCode);
+
+                    if (!mApexManager.abortActiveSession()) {
+                        Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                    }
+                    return false;
+                }
+            }
+
             boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
                     session.params.installFlags, activePackage.applicationInfo.flags);
             if (activeVersion > newPackage.versionCode && !allowsDowngrade) {
@@ -253,21 +267,6 @@ public class StagingManager {
             } catch (RemoteException re) {
                 // Cannot happen, the rollback manager is in the same process.
             }
-        }
-
-        // Make sure we start a filesystem checkpoint on the next boot.
-        try {
-            IStorageManager storageManager = PackageHelper.getStorageManager();
-            if (storageManager.supportsCheckpoint()) {
-                storageManager.startCheckpoint(1 /* numRetries */);
-            }
-        } catch (Exception e) { // TODO(b/130190815) make a RemoteException again
-            // While StorageManager lives in the same process, the native implementation
-            // it calls through lives in 'vold'; so, this call can fail if 'vold' isn't
-            // reachable.
-            // Since we can live without filesystem checkpointing, just warn in this case
-            // and continue.
-            Slog.w(TAG, "Could not start filesystem checkpoint:", e);
         }
 
         session.setStagedSessionReady();

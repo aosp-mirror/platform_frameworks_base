@@ -121,6 +121,8 @@ import android.app.backup.BackupManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.content.BroadcastReceiver;
@@ -258,6 +260,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -413,7 +417,6 @@ public class NotificationManagerService extends SystemService {
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
-    final ArrayMap<Integer, ArrayList<NotifyingApp>> mRecentApps = new ArrayMap<>();
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -2209,7 +2212,6 @@ public class NotificationManagerService extends SystemService {
             mAppUsageStats.reportInterruptiveNotification(r.sbn.getPackageName(),
                     r.getChannel().getId(),
                     getRealUserId(r.sbn.getUserId()));
-            logRecentLocked(r);
             r.setRecordedInterruption(true);
         }
     }
@@ -2827,16 +2829,6 @@ public class NotificationManagerService extends SystemService {
             }
             throw new SecurityException("Pkg " + callingPkg
                     + " cannot read channels for " + targetPkg + " in " + userId);
-        }
-
-        @Override
-        public ParceledListSlice<NotifyingApp> getRecentNotifyingAppsForUser(int userId) {
-            checkCallerIsSystem();
-            synchronized (mNotificationLock) {
-                List<NotifyingApp> apps = new ArrayList<>(
-                        mRecentApps.getOrDefault(userId, new ArrayList<>()));
-                return new ParceledListSlice<>(apps);
-            }
         }
 
         @Override
@@ -5527,38 +5519,6 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
-     * Keeps the last 5 packages that have notified, by user.
-     */
-    @GuardedBy("mNotificationLock")
-    @VisibleForTesting
-    protected void logRecentLocked(NotificationRecord r) {
-        if (r.isUpdate) {
-            return;
-        }
-        ArrayList<NotifyingApp> recentAppsForUser =
-                mRecentApps.getOrDefault(r.getUser().getIdentifier(), new ArrayList<>(6));
-        NotifyingApp na = new NotifyingApp()
-                .setPackage(r.sbn.getPackageName())
-                .setUid(r.sbn.getUid())
-                .setLastNotified(r.sbn.getPostTime());
-        // A new notification gets an app moved to the front of the list
-        for (int i = recentAppsForUser.size() - 1; i >= 0; i--) {
-            NotifyingApp naExisting = recentAppsForUser.get(i);
-            if (na.getPackage().equals(naExisting.getPackage())
-                    && na.getUid() == naExisting.getUid()) {
-                recentAppsForUser.remove(i);
-                break;
-            }
-        }
-        // time is always increasing, so always add to the front of the list
-        recentAppsForUser.add(0, na);
-        if (recentAppsForUser.size() > 5) {
-            recentAppsForUser.remove(recentAppsForUser.size() -1);
-        }
-        mRecentApps.put(r.getUser().getIdentifier(), recentAppsForUser);
-    }
-
-    /**
      * Ensures that grouped notification receive their special treatment.
      *
      * <p>Cancels group children if the new notification causes a group to lose
@@ -7380,8 +7340,7 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_USER_SET = "user_set";
-        // TODO: STOPSHIP (b/127994217) switch to final value when onboarding flow is implemented
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments_tmp2";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
@@ -7394,7 +7353,6 @@ public class NotificationManagerService extends SystemService {
                 IPackageManager pm) {
             super(context, lock, up, pm);
 
-            // TODO: STOPSHIP (b/127994217) remove when the onboarding flow is implemented
             // Add all default allowed adjustment types. Will be overwritten by values in xml,
             // if they exist
             for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
@@ -7463,9 +7421,9 @@ public class NotificationManagerService extends SystemService {
         protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {
             if (TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
                 final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
-                if (!TextUtils.isEmpty(types)) {
-                    synchronized (mLock) {
-                        mAllowedAdjustments.clear();
+                synchronized (mLock) {
+                    mAllowedAdjustments.clear();
+                    if (!TextUtils.isEmpty(types)) {
                         mAllowedAdjustments.addAll(Arrays.asList(types.split(",")));
                     }
                 }

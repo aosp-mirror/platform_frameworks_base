@@ -83,6 +83,7 @@ applications that come with the platform
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SHUTDOWN"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+        <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.mms.service">

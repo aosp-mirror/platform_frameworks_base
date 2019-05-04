@@ -170,7 +170,7 @@ ValueMetricProducer::~ValueMetricProducer() {
     }
 }
 
-void ValueMetricProducer::prepareFistBucketLocked() {
+void ValueMetricProducer::prepareFirstBucketLocked() {
     // Kicks off the puller immediately if condition is true and diff based.
     if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
         pullAndMatchEventsLocked(mCurrentBucketStartTimeNs, mCondition);

@@ -3142,7 +3142,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
-            if (mWmService.mAccessibilityController != null && getDisplayId() == DEFAULT_DISPLAY) {
+            if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
+                    || getDisplayContent().getParentWindow() != null)) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
             }
 
@@ -4207,7 +4208,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         //TODO (multidisplay): Accessibility is supported only for the default display.
-        if (mWmService.mAccessibilityController != null && getDisplayId() == DEFAULT_DISPLAY) {
+        if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
+                || getDisplayContent().getParentWindow() != null)) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
         }
 
@@ -4597,7 +4599,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         anim.scaleCurrentDuration(mWmService.getWindowAnimationScaleLocked());
         final AnimationAdapter adapter = new LocalAnimationAdapter(
                 new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */,
-                        mToken.getWindowCornerRadiusForAnimation()),
+                        0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
         startAnimation(mPendingTransaction, adapter);
         commitPendingTransaction();
@@ -4645,6 +4647,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
         int x = mSurfacePosition.x;
         int y = mSurfacePosition.y;
+
+        // We might be on a display which has been re-parented to a view in another window, so here
+        // computes the global location of our display.
+        DisplayContent dc = getDisplayContent();
+        while (dc != null && dc.getParentWindow() != null) {
+            final WindowState displayParent = dc.getParentWindow();
+            x += displayParent.mWindowFrames.mFrame.left - displayParent.mAttrs.surfaceInsets.left
+                    + (dc.getLocationInParentWindow().x * displayParent.mGlobalScale + 0.5f);
+            y += displayParent.mWindowFrames.mFrame.top - displayParent.mAttrs.surfaceInsets.top
+                    + (dc.getLocationInParentWindow().y * displayParent.mGlobalScale + 0.5f);
+            dc = displayParent.getDisplayContent();
+        }
 
         // If changed, also adjust transformFrameToSurfacePosition
         final WindowContainer parent = getParent();

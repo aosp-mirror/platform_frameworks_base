@@ -14996,12 +14996,14 @@ public class PackageManagerService extends IPackageManager.Stub
         final int installReason;
         @Nullable
         MultiPackageInstallParams mParentInstallParams;
+        final long requiredInstalledVersionCode;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
-                PackageParser.SigningDetails signingDetails, int installReason) {
+                PackageParser.SigningDetails signingDetails, int installReason,
+                long requiredInstalledVersionCode) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -15015,6 +15017,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
+            this.requiredInstalledVersionCode = requiredInstalledVersionCode;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -15045,6 +15048,8 @@ public class PackageManagerService extends IPackageManager.Stub
             whitelistedRestrictedPermissions = activeInstallSession.getSessionParams()
                     .whitelistedRestrictedPermissions;
             signingDetails = activeInstallSession.getSigningDetails();
+            requiredInstalledVersionCode = activeInstallSession.getSessionParams()
+                    .requiredInstalledVersionCode;
         }
 
         @Override
@@ -15070,6 +15075,23 @@ public class PackageManagerService extends IPackageManager.Stub
                     PackageSetting ps = mSettings.mPackages.get(packageName);
                     if (ps != null) {
                         dataOwnerPkg = ps.pkg;
+                    }
+                }
+
+                if (requiredInstalledVersionCode != PackageManager.VERSION_CODE_HIGHEST) {
+                    if (dataOwnerPkg == null) {
+                        Slog.w(TAG, "Required installed version code was "
+                                + requiredInstalledVersionCode
+                                + " but package is not installed");
+                        return PackageHelper.RECOMMEND_FAILED_WRONG_INSTALLED_VERSION;
+                    }
+
+                    if (dataOwnerPkg.getLongVersionCode() != requiredInstalledVersionCode) {
+                        Slog.w(TAG, "Required installed version code was "
+                                + requiredInstalledVersionCode
+                                + " but actual installed version is "
+                                + dataOwnerPkg.getLongVersionCode());
+                        return PackageHelper.RECOMMEND_FAILED_WRONG_INSTALLED_VERSION;
                     }
                 }
 
@@ -15199,6 +15221,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     loc = installLocationPolicy(pkgLite);
                     if (loc == PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE) {
                         ret = PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+                    } else if (loc == PackageHelper.RECOMMEND_FAILED_WRONG_INSTALLED_VERSION) {
+                        ret = PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
                     } else if (!onInt) {
                         // Override install location with flags
                         if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
@@ -20038,6 +20062,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final Intent intent = new Intent(Intent.ACTION_PREFERRED_ACTIVITY_CHANGED);
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             try {
                 am.broadcastIntent(null, intent, null, null,
                         0, null, null, null, android.app.AppOpsManager.OP_NONE,
@@ -23311,7 +23336,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 installerPackageName, volumeUuid, null /*verificationInfo*/, user,
                 packageAbiOverride, null /*grantedPermissions*/,
                 null /*whitelistedRestrictedPermissions*/, PackageParser.SigningDetails.UNKNOWN,
-                PackageManager.INSTALL_REASON_UNKNOWN);
+                PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.VERSION_CODE_HIGHEST);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -23934,6 +23959,18 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (Exception e) {
             }
             return 0;
+        }
+
+        @Override
+        public int getTargetSdkVersionForPackage(String packageName)
+                throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo info = getApplicationInfo(packageName, 0, callingUser);
+            if (info == null) {
+                throw new RemoteException(
+                        "Couldn't get ApplicationInfo for package " + packageName);
+            }
+            return info.targetSdkVersion;
         }
 
         @Override

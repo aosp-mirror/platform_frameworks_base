@@ -312,7 +312,7 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
 }
 
-void GaugeMetricProducer::prepareFistBucketLocked() {
+void GaugeMetricProducer::prepareFirstBucketLocked() {
     if (mIsActive && mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
         pullAndMatchEventsLocked(mCurrentBucketStartTimeNs);
     }

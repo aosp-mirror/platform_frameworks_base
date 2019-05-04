@@ -21,11 +21,11 @@ import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_AR
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
 import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
 
+import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -35,11 +35,13 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -64,8 +66,10 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -108,6 +112,7 @@ public class NotificationMediaManager implements Dumpable {
     private final MediaSessionManager mMediaSessionManager;
     private final ArrayList<MediaListener> mMediaListeners;
     private final MediaArtworkProcessor mMediaArtworkProcessor;
+    private final Set<AsyncTask<?, ?, ?>> mProcessArtworkTasks = new ArraySet<>();
 
     protected NotificationPresenter mPresenter;
     private MediaController mMediaController;
@@ -449,28 +454,37 @@ public class NotificationMediaManager implements Dumpable {
                     + " state=" + mStatusBarStateController.getState());
         }
 
-        Drawable artworkDrawable = null;
+        Bitmap artworkBitmap = null;
         if (mediaMetadata != null) {
-            Bitmap artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
                 artworkBitmap = mediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
-                // might still be null
             }
-            if (artworkBitmap != null) {
-                int notificationColor;
-                synchronized (mEntryManager.getNotificationData()) {
-                    NotificationEntry entry = mEntryManager.getNotificationData()
-                            .get(mMediaNotificationKey);
-                    if (entry == null || entry.getRow() == null) {
-                        notificationColor = Color.TRANSPARENT;
-                    } else {
-                        notificationColor = entry.getRow().calculateBgColor();
-                    }
-                }
-                Bitmap bmp = mMediaArtworkProcessor.processArtwork(mContext, artworkBitmap,
-                        notificationColor);
-                artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), bmp);
+        }
+
+        // Process artwork on a background thread and send the resulting bitmap to
+        // finishUpdateMediaMetaData.
+        if (metaDataChanged) {
+            for (AsyncTask<?, ?, ?> task : mProcessArtworkTasks) {
+                task.cancel(true);
             }
+            mProcessArtworkTasks.clear();
+        }
+        if (artworkBitmap != null) {
+            mProcessArtworkTasks.add(new ProcessArtworkTask(this, metaDataChanged,
+                    allowEnterAnimation).execute(artworkBitmap));
+        } else {
+            finishUpdateMediaMetaData(metaDataChanged, allowEnterAnimation, null);
+        }
+
+        Trace.endSection();
+    }
+
+    private void finishUpdateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation,
+            @Nullable Bitmap bmp) {
+        Drawable artworkDrawable = null;
+        if (bmp != null) {
+            artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), bmp);
         }
         boolean allowWhenShade = false;
         if (ENABLE_LOCKSCREEN_WALLPAPER && artworkDrawable == null) {
@@ -598,7 +612,6 @@ public class NotificationMediaManager implements Dumpable {
                 }
             }
         }
-        Trace.endSection();
     }
 
     public void setup(BackDropView backdrop, ImageView backdropFront, ImageView backdropBack,
@@ -628,6 +641,61 @@ public class NotificationMediaManager implements Dumpable {
             mBackdropFront.setImageDrawable(null);
         }
     };
+
+    private Bitmap processArtwork(Bitmap artwork) {
+        return mMediaArtworkProcessor.processArtwork(mContext, artwork);
+    }
+
+    @MainThread
+    private void removeTask(AsyncTask<?, ?, ?> task) {
+        mProcessArtworkTasks.remove(task);
+    }
+
+    /**
+     * {@link AsyncTask} to prepare album art for use as backdrop on lock screen.
+     */
+    private static final class ProcessArtworkTask extends AsyncTask<Bitmap, Void, Bitmap> {
+
+        private final WeakReference<NotificationMediaManager> mManagerRef;
+        private final boolean mMetaDataChanged;
+        private final boolean mAllowEnterAnimation;
+
+        ProcessArtworkTask(NotificationMediaManager manager, boolean changed,
+                boolean allowAnimation) {
+            mManagerRef = new WeakReference<>(manager);
+            mMetaDataChanged = changed;
+            mAllowEnterAnimation = allowAnimation;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Bitmap... bitmaps) {
+            NotificationMediaManager manager = mManagerRef.get();
+            if (manager == null || bitmaps.length == 0 || isCancelled()) {
+                return null;
+            }
+            return manager.processArtwork(bitmaps[0]);
+        }
+
+        @Override
+        protected void onPostExecute(@Nullable Bitmap result) {
+            NotificationMediaManager manager = mManagerRef.get();
+            if (manager != null && !isCancelled()) {
+                manager.removeTask(this);
+                manager.finishUpdateMediaMetaData(mMetaDataChanged, mAllowEnterAnimation, result);
+            }
+        }
+
+        @Override
+        protected void onCancelled(Bitmap result) {
+            if (result != null) {
+                result.recycle();
+            }
+            NotificationMediaManager manager = mManagerRef.get();
+            if (manager != null) {
+                manager.removeTask(this);
+            }
+        }
+    }
 
     public interface MediaListener {
         void onMetadataChanged(MediaMetadata metadata);

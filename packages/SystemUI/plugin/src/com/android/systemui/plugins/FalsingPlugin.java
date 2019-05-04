@@ -22,7 +22,7 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
  * Used to capture Falsing data (related to unlocking the screen).
  *
  * The intent is that the data can later be analyzed to validate the quality of the
- * {@link com.android.systemui.classifier.FalsingManager}.
+ * {@link com.android.systemui.classifier.FalsingManagerFactory.FalsingManager}.
  */
 @ProvidesInterface(action = FalsingPlugin.ACTION, version = FalsingPlugin.VERSION)
 public interface FalsingPlugin extends Plugin {

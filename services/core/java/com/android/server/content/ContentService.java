@@ -1104,11 +1104,13 @@ public final class ContentService extends IContentService.Stub {
 
     @Override
     public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
+        final int callingUid = Binder.getCallingUid();
         long identityToken = clearCallingIdentity();
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null && callback != null) {
-                syncManager.getSyncStorageEngine().addStatusChangeListener(mask, callback);
+                syncManager.getSyncStorageEngine().addStatusChangeListener(
+                        mask, UserHandle.getUserId(callingUid), callback);
             }
         } finally {
             restoreCallingIdentity(identityToken);

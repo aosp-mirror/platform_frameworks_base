@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:width="24dp" android:viewportHeight="24"
+        android:viewportWidth="24">
+    <group android:name="_R_G">
+        <group android:name="_R_G_L_0_G" android:translateX="0.6440000000000001"
+               android:translateY="2.755000000000001">
+            <path android:name="_R_G_L_0_G_D_0_P_0" android:fillColor="#000000"
+                  android:fillAlpha="0.3" android:fillType="nonZero"
+                  android:pathData=" M12.86 15.75 C12.86,16.58 12.19,17.25 11.36,17.25 C10.53,17.25 9.86,16.58 9.86,15.75 C9.86,14.92 10.53,14.25 11.36,14.25 C12.19,14.25 12.86,14.92 12.86,15.75c "/>
+            <path android:name="_R_G_L_0_G_D_1_P_0" android:fillColor="#000000"
+                  android:fillAlpha="0.3" android:fillType="nonZero"
+                  android:pathData=" M15.61 12.25 C15.42,12.25 15.23,12.17 15.08,12.03 C14.09,11.04 12.76,10.5 11.36,10.5 C9.95,10.5 8.63,11.04 7.63,12.03 C7.34,12.32 6.86,12.32 6.57,12.02 C6.28,11.73 6.28,11.26 6.58,10.96 C7.86,9.7 9.55,9 11.36,9 C13.16,9 14.86,9.7 16.14,10.96 C16.43,11.25 16.43,11.73 16.14,12.02 C16,12.17 15.8,12.25 15.61,12.25c "/>
+            <path android:name="_R_G_L_0_G_D_2_P_0" android:fillColor="#000000"
+                  android:fillAlpha="0.3" android:fillType="nonZero"
+                  android:pathData=" M18.77 9.08 C18.58,9.08 18.39,9.01 18.24,8.86 C16.4,7.02 13.96,6 11.36,6 C8.75,6 6.31,7.02 4.47,8.86 C4.18,9.16 3.7,9.16 3.41,8.86 C3.12,8.57 3.11,8.1 3.41,7.8 C5.53,5.67 8.35,4.5 11.36,4.5 C14.36,4.5 17.18,5.67 19.31,7.8 C19.6,8.1 19.6,8.57 19.3,8.86 C19.16,9.01 18.97,9.08 18.77,9.08c "/>
+            <path android:name="_R_G_L_0_G_D_3_P_0" android:fillColor="#000000"
+                  android:fillAlpha="0.3" android:fillType="nonZero"
+                  android:pathData=" M21.96 5.89 C21.77,5.89 21.58,5.82 21.43,5.67 C18.74,2.98 15.16,1.5 11.36,1.5 C7.55,1.5 3.97,2.98 1.28,5.67 C0.99,5.97 0.51,5.97 0.22,5.67 C-0.07,5.38 -0.07,4.91 0.22,4.61 C3.19,1.64 7.15,0 11.36,0 C15.56,0 19.52,1.64 22.49,4.61 C22.78,4.91 22.78,5.38 22.49,5.67 C22.35,5.82 22.15,5.89 21.96,5.89c "/>
+        </group>
+    </group>
+    <group android:name="time_group"/>
+</vector>
