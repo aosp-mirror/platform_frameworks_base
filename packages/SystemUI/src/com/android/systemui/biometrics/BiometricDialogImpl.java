@@ -76,8 +76,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 }
                 case MSG_BIOMETRIC_HELP: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    handleBiometricHelp((String) args.arg1 /* message */,
-                            (boolean) args.arg2 /* requireTryAgain */);
+                    handleBiometricHelp((String) args.arg1 /* message */);
                     args.recycle();
                     break;
                 }
@@ -182,7 +181,6 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         if (DEBUG) Log.d(TAG, "onBiometricHelp: " + message);
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = message;
-        args.arg2 = false; // requireTryAgain
         mHandler.obtainMessage(MSG_BIOMETRIC_HELP, args).sendToTarget();
     }
 
@@ -257,14 +255,13 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 }, mCurrentDialog.getDelayAfterAuthenticatedDurationMs());
             }
         } else {
-            handleBiometricHelp(failureReason, true /* requireTryAgain */);
-            mCurrentDialog.showTryAgainButton(true /* show */);
+            mCurrentDialog.onAuthenticationFailed(failureReason);
         }
     }
 
-    private void handleBiometricHelp(String message, boolean requireTryAgain) {
+    private void handleBiometricHelp(String message) {
         if (DEBUG) Log.d(TAG, "handleBiometricHelp: " + message);
-        mCurrentDialog.showHelpMessage(message, requireTryAgain);
+        mCurrentDialog.onHelpReceived(message);
     }
 
     private void handleBiometricError(String error) {
@@ -273,7 +270,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
             if (DEBUG) Log.d(TAG, "Dialog already dismissed");
             return;
         }
-        mCurrentDialog.showErrorMessage(error);
+        mCurrentDialog.onErrorReceived(error);
     }
 
     private void handleHideDialog(boolean userCanceled) {
