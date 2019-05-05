@@ -36,6 +36,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
@@ -75,6 +76,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mScreenOn;
     private boolean mLastScreenOn;
     private boolean mIsFaceUnlockState;
+    private boolean mSimLocked;
     private int mDensity;
     private boolean mPulsing;
     private boolean mDozing;
@@ -114,6 +116,14 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                 public void onScreenTurnedOff() {
                     mScreenOn = false;
                     update();
+                }
+
+                @Override
+                public void onSimStateChanged(int subId, int slotId,
+                        IccCardConstants.State simState) {
+                    boolean oldSimLocked = mSimLocked;
+                    mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
+                    update(oldSimLocked != mSimLocked);
                 }
 
                 @Override
@@ -158,6 +168,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mConfigurationController.addCallback(this);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.addListener(this);
+        mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
         if (mDockManager != null) {
             mDockManager.addListener(mDockEventListener);
         }
@@ -362,7 +373,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         if (mTransientBiometricsError) {
             return STATE_BIOMETRICS_ERROR;
-        } else if (mUnlockMethodCache.canSkipBouncer()) {
+        } else if (mUnlockMethodCache.canSkipBouncer() && !mSimLocked) {
             return STATE_LOCK_OPEN;
         } else if (updateMonitor.isFaceDetectionRunning()) {
             return STATE_SCANNING_FACE;
