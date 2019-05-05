@@ -2055,7 +2055,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             setupNativeGnssService();
 
             if (native_is_gnss_visibility_control_supported()) {
-                mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper);
+                mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper, mNIHandler);
             }
 
             // load default GPS configuration
