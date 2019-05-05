@@ -23,6 +23,8 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"नेटवर्कसाठी स्कॅन करू शकत नाही"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"काहीही नाही"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"सेव्ह केले"</string>
+    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
+    <skip />
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"अक्षम"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP कॉन्फिगरेशन अयशस्वी"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"कमी दर्जाच्या नेटवर्कमुळे कनेक्ट केलेले नाही"</string>
@@ -441,8 +443,8 @@
     <string name="status_unavailable" msgid="7862009036663793314">"अनुपलब्ध"</string>
     <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC रँडमाइझ केला आहे"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
-      <item quantity="one">%1$d डिव्हाइस कनेक्ट केले आहे</item>
       <item quantity="other">%1$d डिव्हाइस कनेक्ट केली आहेत</item>
+      <item quantity="one">%1$d डिव्हाइस कनेक्ट केले आहे</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"जास्त वेळ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"कमी वेळ."</string>

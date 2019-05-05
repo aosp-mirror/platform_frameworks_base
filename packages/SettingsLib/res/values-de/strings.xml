@@ -23,6 +23,8 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Netzwerkscan nicht möglich"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Keine"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gespeichert"</string>
+    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
+    <skip />
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiviert"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-Konfigurationsfehler"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Keine Verbindung aufgrund der geringen Netzwerkqualität"</string>
@@ -246,7 +248,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Level für WLAN-Protokollierung erhöhen, in WiFi Picker pro SSID-RSSI anzeigen"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Kostenpflichtig"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Nicht kostenpflichtig"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Kostenlos"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-Puffergrößen"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Größe pro Protokollpuffer wählen"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Speicher der dauerhaften Protokollierung löschen?"</string>
@@ -316,8 +318,8 @@
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU-Debug-Ebenen zulassen"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Debug-Apps das Laden von GPU-Debug-Ebenen erlauben"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Maßstab Fensteranimation"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Maßstab Übergangsanimation"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Maßstab für Animatorzeit"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Übergangsanimationsfaktor"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animationsdauerfaktor"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Sekundäre Displays simulieren"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Aktivitäten nicht speichern"</string>

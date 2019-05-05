@@ -23,6 +23,8 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"सञ्जालका लागि स्क्यान गर्न सक्दैन"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"कुनै पनि होइन"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"सुरक्षित गरियो"</string>
+    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
+    <skip />
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"असक्षम पारियो"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP विन्यास असफल"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"कम गुणस्तरको नेटवर्कका कारण जडान गर्न सकिएन"</string>
