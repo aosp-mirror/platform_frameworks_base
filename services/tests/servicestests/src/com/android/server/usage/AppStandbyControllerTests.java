@@ -16,6 +16,7 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
 import static android.app.usage.UsageEvents.Event.SLICE_PINNED;
 import static android.app.usage.UsageEvents.Event.SLICE_PINNED_PRIV;
@@ -817,6 +818,41 @@ public class AppStandbyControllerTests {
         // Verify bucket moves to RARE after timeout
         mInjector.mElapsedRealtime += 200;
         mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RARE);
+    }
+
+    @Test
+    public void testInitialForegroundServiceTimeout() throws Exception {
+        setChargingState(mController, false);
+
+        mInjector.mElapsedRealtime = 1 * RARE_THRESHOLD + 100;
+        // Make sure app is in NEVER bucket
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
+                REASON_MAIN_FORCED, mInjector.mElapsedRealtime);
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_NEVER);
+
+        mInjector.mElapsedRealtime += 100;
+
+        // Trigger a FOREGROUND_SERVICE_START and verify bucket
+        reportEvent(mController, FOREGROUND_SERVICE_START, mInjector.mElapsedRealtime, PACKAGE_1);
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Verify it's still in ACTIVE close to end of timeout
+        mInjector.mElapsedRealtime += mController.mInitialForegroundServiceStartTimeoutMillis - 100;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Verify bucket moves to RARE after timeout
+        mInjector.mElapsedRealtime += 200;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        // Trigger a FOREGROUND_SERVICE_START again
+        reportEvent(mController, FOREGROUND_SERVICE_START, mInjector.mElapsedRealtime, PACKAGE_1);
+        mController.checkIdleStates(USER_ID);
+        // Bucket should not be immediately elevated on subsequent service starts
         assertBucket(STANDBY_BUCKET_RARE);
     }
 

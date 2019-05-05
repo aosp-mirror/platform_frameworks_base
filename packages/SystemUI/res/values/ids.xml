@@ -108,6 +108,8 @@
 
     <item type="id" name="display_cutout" />
 
+    <item type="id" name="row_tag_for_content_view" />
+
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
 

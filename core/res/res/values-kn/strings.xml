@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ಮುಖ ಗುರುತಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ತುಂಬಾ ಸಮಾನ, ನಿಮ್ಮ ಪೋಸ್ ಬದಲಾಯಿಸಿ."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"ಸ್ಕ್ರೀನ್ ಕಡೆ ಹೆಚ್ಚು ನೇರವಾಗಿ ನೋಡಿ."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"ಸ್ಕ್ರೀನ್ ಕಡೆ ಹೆಚ್ಚು ನೇರವಾಗಿ ನೋಡಿ."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ನಿಮ್ಮ ತಲೆಯನ್ನು ವರ್ಟಿಕಲ್‌ ಆಗಿ ನೇರವಾಗಿಸಿ."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"ನಿಮ್ಮ ತಲೆ ಮತ್ತು ಫೋನ್ ನಡುವಿನ ಅಡಚಣೆಯನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"ಕ್ಯಾಮರಾವನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ."</string>
@@ -2028,4 +2030,5 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ಫೈಲ್‌ಗಳು</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"ನೇರ ಹಂಚಿಕೆ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ಆ್ಯಪ್‌ಗಳ ಪಟ್ಟಿ"</string>
 </resources>

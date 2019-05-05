@@ -30,13 +30,15 @@ import android.os.Message;
 import android.util.Log;
 
 /**
- * A helper class that computes histogram and percentile 85 from a bitmap.
- * Percentile 85 will be computed each time the user picks a new image wallpaper.
+ * A helper class that computes threshold from a bitmap.
+ * Threshold will be computed each time the user picks a new image wallpaper.
  */
 class ImageProcessHelper {
     private static final String TAG = ImageProcessHelper.class.getSimpleName();
-    private static final float DEFAULT_PER85 = 0.8f;
-    private static final int MSG_UPDATE_PER85 = 1;
+    private static final float DEFAULT_THRESHOLD = 0.8f;
+    private static final float DEFAULT_OTSU_THRESHOLD = 0f;
+    private static final float MAX_THRESHOLD = 0.89f;
+    private static final int MSG_UPDATE_THRESHOLD = 1;
 
     /**
      * This color matrix will be applied to each pixel to get luminance from rgb by below formula:
@@ -53,8 +55,8 @@ class ImageProcessHelper {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_UPDATE_PER85:
-                    mPer85 = (float) msg.obj;
+                case MSG_UPDATE_THRESHOLD:
+                    mThreshold = (float) msg.obj;
                     return true;
                 default:
                     return false;
@@ -62,20 +64,20 @@ class ImageProcessHelper {
         }
     });
 
-    private float mPer85 = DEFAULT_PER85;
+    private float mThreshold = DEFAULT_THRESHOLD;
 
-    void startComputingPercentile85(Bitmap bitmap) {
-        new Per85ComputeTask(mHandler).execute(bitmap);
+    void start(Bitmap bitmap) {
+        new ThresholdComputeTask(mHandler).execute(bitmap);
     }
 
-    float getPercentile85() {
-        return mPer85;
+    float getThreshold() {
+        return Math.min(mThreshold, MAX_THRESHOLD);
     }
 
-    private static class Per85ComputeTask extends AsyncTask<Bitmap, Void, Float> {
+    private static class ThresholdComputeTask extends AsyncTask<Bitmap, Void, Float> {
         private Handler mUpdateHandler;
 
-        Per85ComputeTask(Handler handler) {
+        ThresholdComputeTask(Handler handler) {
             super(handler);
             mUpdateHandler = handler;
         }
@@ -84,35 +86,55 @@ class ImageProcessHelper {
         protected Float doInBackground(Bitmap... bitmaps) {
             Bitmap bitmap = bitmaps[0];
             if (bitmap != null) {
-                int[] histogram = processHistogram(bitmap);
-                return computePercentile85(bitmap, histogram);
+                return new Threshold().compute(bitmap);
             }
-            Log.e(TAG, "Per85ComputeTask: Can't get bitmap");
-            return DEFAULT_PER85;
+            Log.e(TAG, "ThresholdComputeTask: Can't get bitmap");
+            return DEFAULT_THRESHOLD;
         }
 
         @Override
         protected void onPostExecute(Float result) {
-            Message msg = mUpdateHandler.obtainMessage(MSG_UPDATE_PER85, result);
+            Message msg = mUpdateHandler.obtainMessage(MSG_UPDATE_THRESHOLD, result);
             mUpdateHandler.sendMessage(msg);
         }
+    }
 
-        private int[] processHistogram(Bitmap bitmap) {
+    private static class Threshold {
+        public float compute(Bitmap bitmap) {
+            Bitmap grayscale = toGrayscale(bitmap);
+            int[] histogram = getHistogram(grayscale);
+            boolean isSolidColor = isSolidColor(grayscale, histogram);
+
+            // We will see gray wallpaper during the transition if solid color wallpaper is set,
+            // please refer to b/130360362#comment16.
+            // As a result, we use Percentile85 rather than Otsus if a solid color wallpaper is set.
+            ThresholdAlgorithm algorithm = isSolidColor ? new Percentile85() : new Otsus();
+            return algorithm.compute(grayscale, histogram);
+        }
+
+        private Bitmap toGrayscale(Bitmap bitmap) {
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
 
-            Bitmap target = Bitmap.createBitmap(width, height, bitmap.getConfig());
-            Canvas canvas = new Canvas(target);
+            Bitmap grayscale = Bitmap.createBitmap(width, height, bitmap.getConfig());
+            Canvas canvas = new Canvas(grayscale);
             ColorMatrix cm = new ColorMatrix(LUMINOSITY_MATRIX);
             Paint paint = new Paint();
             paint.setColorFilter(new ColorMatrixColorFilter(cm));
             canvas.drawBitmap(bitmap, new Matrix(), paint);
 
+            return grayscale;
+        }
+
+        private int[] getHistogram(Bitmap grayscale) {
+            int width = grayscale.getWidth();
+            int height = grayscale.getHeight();
+
             // TODO: Fine tune the performance here, tracking on b/123615079.
             int[] histogram = new int[256];
             for (int row = 0; row < height; row++) {
                 for (int col = 0; col < width; col++) {
-                    int pixel = target.getPixel(col, row);
+                    int pixel = grayscale.getPixel(col, row);
                     int y = Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                     histogram[y]++;
                 }
@@ -121,8 +143,29 @@ class ImageProcessHelper {
             return histogram;
         }
 
-        private float computePercentile85(Bitmap bitmap, int[] histogram) {
-            float per85 = DEFAULT_PER85;
+        private boolean isSolidColor(Bitmap bitmap, int[] histogram) {
+            boolean solidColor = false;
+            int pixels = bitmap.getWidth() * bitmap.getHeight();
+
+            // In solid color case, only one element of histogram has value,
+            // which is pixel counts and the value of other elements should be 0.
+            for (int value : histogram) {
+                if (value != 0 && value != pixels) {
+                    break;
+                }
+                if (value == pixels) {
+                    solidColor = true;
+                    break;
+                }
+            }
+            return solidColor;
+        }
+    }
+
+    private static class Percentile85 implements ThresholdAlgorithm {
+        @Override
+        public float compute(Bitmap bitmap, int[] histogram) {
+            float per85 = DEFAULT_THRESHOLD;
             int pixelCount = bitmap.getWidth() * bitmap.getHeight();
             float[] acc = new float[256];
             for (int i = 0; i < acc.length; i++) {
@@ -140,5 +183,52 @@ class ImageProcessHelper {
             }
             return per85;
         }
+    }
+
+    private static class Otsus implements ThresholdAlgorithm {
+        @Override
+        public float compute(Bitmap bitmap, int[] histogram) {
+            float threshold = DEFAULT_OTSU_THRESHOLD;
+            float maxVariance = 0;
+            float pixelCount = bitmap.getWidth() * bitmap.getHeight();
+            float[] w = new float[2];
+            float[] m = new float[2];
+            float[] u = new float[2];
+
+            for (int i = 0; i < histogram.length; i++) {
+                m[1] += i * histogram[i];
+            }
+
+            w[1] = pixelCount;
+            for (int tonalValue = 0; tonalValue < histogram.length; tonalValue++) {
+                float dU;
+                float variance;
+                float numPixels = histogram[tonalValue];
+                float tmp = numPixels * tonalValue;
+                w[0] += numPixels;
+                w[1] -= numPixels;
+
+                if (w[0] == 0 || w[1] == 0) {
+                    continue;
+                }
+
+                m[0] += tmp;
+                m[1] -= tmp;
+                u[0] = m[0] / w[0];
+                u[1] = m[1] / w[1];
+                dU = u[0] - u[1];
+                variance = w[0] * w[1] * dU * dU;
+
+                if (variance > maxVariance) {
+                    threshold = (tonalValue + 1f) / histogram.length;
+                    maxVariance = variance;
+                }
+            }
+            return threshold;
+        }
+    }
+
+    private interface ThresholdAlgorithm {
+        float compute(Bitmap bitmap, int[] histogram);
     }
 }

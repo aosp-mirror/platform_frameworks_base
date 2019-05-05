@@ -68,18 +68,27 @@ easier.
     <style name="Widget.DeviceDefault.HorizontalScrollView" parent="Widget.Material.HorizontalScrollView"/>
     <style name="Widget.DeviceDefault.Spinner" parent="Widget.Material.Spinner"/>
     <style name="Widget.DeviceDefault.CompoundButton.Star" parent="Widget.Material.CompoundButton.Star"/>
-    <style name="Widget.DeviceDefault.TabWidget" parent="Widget.Material.TabWidget"/>
+    <style name="Widget.DeviceDefault.TabWidget" parent="Widget.Material.TabWidget">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Widget.TabWidget</item>
+    </style>
     <style name="Widget.DeviceDefault.WebTextView" parent="Widget.Material.WebTextView"/>
     <style name="Widget.DeviceDefault.WebView" parent="Widget.Material.WebView"/>
-    <style name="Widget.DeviceDefault.DropDownItem" parent="Widget.Material.DropDownItem"/>
-    <style name="Widget.DeviceDefault.DropDownItem.Spinner" parent="Widget.Material.DropDownItem.Spinner"/>
-    <style name="Widget.DeviceDefault.TextView.SpinnerItem" parent="Widget.Material.TextView.SpinnerItem"/>
+    <style name="Widget.DeviceDefault.DropDownItem" parent="Widget.Material.DropDownItem">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Widget.DropDownItem</item>
+    </style>
+    <style name="Widget.DeviceDefault.DropDownItem.Spinner" parent="Widget.DeviceDefault.DropDownItem"/>
+    <style name="Widget.DeviceDefault.TextView.SpinnerItem" parent="Widget.Material.TextView.SpinnerItem">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Widget.TextView.SpinnerItem</item>
+    </style>
     <style name="Widget.DeviceDefault.ListPopupWindow" parent="Widget.Material.ListPopupWindow"/>
     <style name="Widget.DeviceDefault.PopupMenu" parent="Widget.Material.PopupMenu"/>
     <style name="Widget.DeviceDefault.ActionButton" parent="Widget.Material.ActionButton"/>
     <style name="Widget.DeviceDefault.ActionButton.Overflow" parent="Widget.Material.ActionButton.Overflow"/>
     <style name="Widget.DeviceDefault.ActionButton.TextButton" parent="Widget.Material.ActionButton"/>
-    <style name="Widget.DeviceDefault.ActionMode" parent="Widget.Material.ActionMode"/>
+    <style name="Widget.DeviceDefault.ActionMode" parent="Widget.Material.ActionMode">
+        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionMode.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle</item>
+    </style>
     <style name="Widget.DeviceDefault.ActionButton.CloseMode" parent="Widget.Material.ActionButton.CloseMode"/>
     <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Material.ActionBar"/>
     <style name="Widget.DeviceDefault.Button.Borderless" parent="Widget.Material.Button.Borderless"/>
@@ -108,7 +117,9 @@ easier.
     <style name="Widget.DeviceDefault.AbsListView" parent="Widget.Material.AbsListView"/>
     <style name="Widget.DeviceDefault.Spinner.DropDown.ActionBar" parent="Widget.Material.Spinner.DropDown.ActionBar"/>
     <style name="Widget.DeviceDefault.PopupWindow.ActionMode" parent="Widget.Material.PopupWindow.ActionMode"/>
-    <style name="Widget.DeviceDefault.CompoundButton.Switch" parent="Widget.Material.CompoundButton.Switch"/>
+    <style name="Widget.DeviceDefault.CompoundButton.Switch" parent="Widget.Material.CompoundButton.Switch">
+        <item name="switchTextAppearance">@style/TextAppearance.DeviceDefault.Widget.Switch</item>
+    </style>
     <style name="Widget.DeviceDefault.ExpandableListView.White" parent="Widget.Material.ExpandableListView.White"/>
     <style name="Widget.DeviceDefault.FastScroll" parent="Widget.Material.FastScroll"/>
     <!-- The FragmentBreadCrumbs widget is deprecated starting in API level 21 ({@link android.os.Build.VERSION_CODES#.L}). -->
@@ -146,6 +157,7 @@ easier.
     <style name="Widget.DeviceDefault.TimePicker" parent="Widget.Material.TimePicker"/>
     <style name="Widget.DeviceDefault.Toolbar" parent="Widget.Material.Toolbar">
         <item name="titleTextAppearance">@style/TextAppearance.DeviceDefault.Widget.Toolbar.Title</item>
+        <item name="subtitleTextAppearance">@style/TextAppearance.DeviceDefault.Widget.Toolbar.Subtitle</item>
     </style>
 
     <style name="Widget.DeviceDefault.Light" parent="Widget.Material.Light"/>
@@ -186,12 +198,12 @@ easier.
     <style name="Widget.DeviceDefault.Light.HorizontalScrollView" parent="Widget.Material.Light.HorizontalScrollView"/>
     <style name="Widget.DeviceDefault.Light.Spinner" parent="Widget.Material.Light.Spinner"/>
     <style name="Widget.DeviceDefault.Light.CompoundButton.Star" parent="Widget.Material.Light.CompoundButton.Star"/>
-    <style name="Widget.DeviceDefault.Light.TabWidget" parent="Widget.Material.Light.TabWidget"/>
+    <style name="Widget.DeviceDefault.Light.TabWidget" parent="Widget.DeviceDefault.TabWidget"/>
     <style name="Widget.DeviceDefault.Light.WebTextView" parent="Widget.Material.Light.WebTextView"/>
     <style name="Widget.DeviceDefault.Light.WebView" parent="Widget.Material.Light.WebView"/>
-    <style name="Widget.DeviceDefault.Light.DropDownItem" parent="Widget.Material.Light.DropDownItem"/>
-    <style name="Widget.DeviceDefault.Light.DropDownItem.Spinner" parent="Widget.Material.Light.DropDownItem.Spinner"/>
-    <style name="Widget.DeviceDefault.Light.TextView.SpinnerItem" parent="Widget.Material.Light.TextView.SpinnerItem"/>
+    <style name="Widget.DeviceDefault.Light.DropDownItem" parent="Widget.DeviceDefault.DropDownItem"/>
+    <style name="Widget.DeviceDefault.Light.DropDownItem.Spinner" parent="Widget.DeviceDefault.DropDownItem.Spinner"/>
+    <style name="Widget.DeviceDefault.Light.TextView.SpinnerItem" parent="Widget.DeviceDefault.TextView.SpinnerItem"/>
     <style name="Widget.DeviceDefault.Light.ListPopupWindow" parent="Widget.Material.Light.ListPopupWindow"/>
     <style name="Widget.DeviceDefault.Light.PopupMenu" parent="Widget.Material.Light.PopupMenu"/>
     <style name="Widget.DeviceDefault.Light.Tab" parent="Widget.Material.Light.Tab"/>
@@ -202,12 +214,10 @@ easier.
     <style name="Widget.DeviceDefault.Light.ActionMode" parent="Widget.Material.Light.ActionMode"/>
     <style name="Widget.DeviceDefault.Light.ActionButton.CloseMode" parent="Widget.Material.Light.ActionButton.CloseMode"/>
     <style name="Widget.DeviceDefault.Light.ActionBar" parent="Widget.Material.Light.ActionBar"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabView" parent="Widget.Material.Light.ActionBar.TabView"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabText" parent="Widget.Material.Light.ActionBar.TabText"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.TabBar" parent="Widget.Material.Light.ActionBar.TabBar"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.Material.Light.ActionBar.Solid">
-        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
-    </style>
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabView" parent="Widget.DeviceDefault.ActionBar.TabView" />
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabText" parent="Widget.DeviceDefault.ActionBar.TabText" />
+    <style name="Widget.DeviceDefault.Light.ActionBar.TabBar" parent="Widget.DeviceDefault.ActionBar.TabBar" />
+    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.DeviceDefault.ActionBar.Solid" />
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" parent="Widget.Holo.Light.ActionBar.Solid.Inverse"/>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
@@ -306,6 +316,9 @@ easier.
     </style>
     <style name="TextAppearance.DeviceDefault.Widget.EditText" parent="TextAppearance.Material.Widget.EditText">
         <item name="fontFamily">@string/config_bodyFontFamily</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Widget.Switch" parent="TextAppearance.Material.Widget.Switch">
+        <item name="fontFamily">@string/config_bodyFontFamilyMedium</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Widget.Button.Borderless.Colored" parent="TextAppearance.DeviceDefault.Widget.Button">
         <item name="textColor">@color/btn_colored_borderless_text_material</item>

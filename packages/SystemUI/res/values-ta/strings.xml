@@ -507,7 +507,7 @@
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nஉங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
-    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent இதை லாக் செய்யவில்லை"</string>
+    <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent இதைத் திறந்தே வைத்துள்ளது"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"நீங்கள் கைமுறையாகத் திறக்கும் வரை, சாதனம் பூட்டப்பட்டிருக்கும்"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"விரைவாக அறிவிப்புகளைப் பெறுதல்"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"திறக்கும் முன் அவற்றைப் பார்க்கவும்"</string>
@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"திரை பொருத்தப்பட்டது"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, முந்தையது மற்றும் மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முந்தையது மற்றும் முகப்புப் பொத்தான்களைத் தொட்டுப் பிடிக்கவும்."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முகப்புப் பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"இந்தத் திரையின் பின்னை அகற்ற, முந்தையது மற்றும் மேலோட்டப் பார்வைப் பொத்தான்களைத் தொட்டுப் பிடிக்கவும்"</string>
@@ -640,21 +642,20 @@
     <skip />
     <!-- no translation found for notification_alert_title (3966526305405016221) -->
     <skip />
-    <!-- no translation found for notification_channel_summary_low (8816251796432620434) -->
+    <!-- no translation found for notification_channel_summary_low (1065819618107531284) -->
     <skip />
-    <!-- no translation found for notification_channel_summary_low_status (838359173060008373) -->
+    <!-- no translation found for notification_channel_summary_low_status (2702170424808743755) -->
     <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (1568361562011497978) -->
+    <!-- no translation found for notification_channel_summary_low_lock (7966605244472624458) -->
     <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (966512668777695595) -->
+    <!-- no translation found for notification_channel_summary_low_status_lock (7012562768950012739) -->
     <skip />
-    <!-- no translation found for notification_channel_summary_default (619096010741301745) -->
+    <!-- no translation found for notification_channel_summary_default (3847289783382316019) -->
     <skip />
     <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
     <skip />
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ப்ராக்ஸியான அறிவிப்பு"</string>
     <string name="appops_camera" msgid="8100147441602585776">"இந்த ஆப்ஸானது கேமராவை உபயோகிக்கிறது."</string>
     <string name="appops_microphone" msgid="741508267659494555">"இந்த ஆப்ஸானது, மைக்ரோஃபோனை உபயோகிக்கிறது."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"இந்த ஆப்ஸானது, உங்கள் திரையில் பிற ஆப்ஸின் இடைமுகத்தின் மேல் தோன்றுகிறது."</string>
@@ -919,6 +920,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸைத் திறக்கும்"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> குமிழ்களுக்கான அமைப்புகள்"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸிலிருந்து குமிழ்களை அனுமதிக்கவா?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"நிராகரி"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"அனுமதி"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"பிறகு கேள்"</string>

@@ -1108,6 +1108,7 @@ final class AccessibilityController {
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
                 // TODO(b/112273690): Support multiple displays
+                // TODO(b/129098348): Support embedded displays
                 if (mService.getDefaultDisplayContentLocked().mCurrentFocus == null) {
                     return;
                 }
@@ -1400,7 +1401,28 @@ final class AccessibilityController {
                 if (w.isVisibleLw()) {
                     outWindows.put(mTempLayer++, w);
                 }
-            }, false /* traverseTopToBottom */ );
+            }, false /* traverseTopToBottom */);
+            mService.mRoot.forAllWindows(w -> {
+                final WindowState win = findRootDisplayParentWindow(w);
+                if (win != null && win.getDisplayContent().isDefaultDisplay && w.isVisibleLw()) {
+                    // TODO(b/129098348): insert windows on child displays into outWindows based on
+                    // root-display-parent window.
+                    outWindows.put(mTempLayer++, w);
+                }
+            }, false /* traverseTopToBottom */);
+        }
+
+        private WindowState findRootDisplayParentWindow(WindowState win) {
+            WindowState displayParentWindow = win.getDisplayContent().getParentWindow();
+            if (displayParentWindow == null) {
+                return null;
+            }
+            WindowState candidate = displayParentWindow;
+            while (candidate != null) {
+                displayParentWindow = candidate;
+                candidate = displayParentWindow.getDisplayContent().getParentWindow();
+            }
+            return displayParentWindow;
         }
 
         private class MyHandler extends Handler {

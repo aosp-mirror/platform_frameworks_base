@@ -535,6 +535,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран замацаваны"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, краніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Галоўны экран\"."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, краніце і ўтрымлівайце кнопку \"Агляд\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Будзе паказвацца, пакуль не адмацуеце. Каб адмацаваць, націсніце і ўтрымлівайце кнопку \"Галоўны экран\"."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Каб адмацаваць гэты экран, націсніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\""</string>
@@ -646,15 +648,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Працягваць паказваць апавяшчэнні гэтай праграмы?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Ціхі рэжым"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Прыярытэтныя"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Заўсёды без гуку. Паказваецца на апушчанай шторцы."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Заўсёды без гуку. Паказваецца на апушчанай шторцы і на панэлі стану."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Заўсёды без гуку. Паказваецца на апушчанай шторцы і на экране блакіроўкі."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Заўсёды без гуку. Паказваецца на апушчанай шторцы, панэлі стану і на экране блакіроўкі."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Паказваецца з гукам на апушчанай шторцы, панэлі стану і на экране блакіроўкі."</string>
-    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Гэтыя апавяшчэнні можна змяніць."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Дапамагае не адцягваць увагу, паказваючы апавяшчэнні толькі на апушчанай шторцы. Заўсёды без гуку."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Паказвае ўнізе апавяшчэнні з высокім прыярытэтам. Заўсёды без гуку."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Паказвае ўнізе апавяшчэнні з высокім прыярытэтам. Заўсёды без гуку."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Паказвае ўнізе апавяшчэнні з высокім прыярытэтам. Заўсёды без гуку."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Прываблівае ўвагу гукам і значком на панэлі стану. Паказвае на экране блакіроўкі."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"Гэтыя апавяшчэнні нельга змяніць."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Тут канфігурыраваць гэту групу апавяшчэнняў забаронена"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Праксіраванае апавяшчэнне"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Гэта праграма выкарыстоўвае камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Гэта праграма выкарыстоўвае мікрафон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Гэта праграма паказваецца на экране паверх іншых праграм."</string>
@@ -923,6 +924,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Адкрыць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Налады дыялогаў у праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Дазволіць дыялогі з праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Адмовіць"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Дазволіць"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Спытаць пазней"</string>

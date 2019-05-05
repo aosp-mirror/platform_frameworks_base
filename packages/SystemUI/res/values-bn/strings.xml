@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্রিন পিন করা হয়েছে"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"ফিরে যান\" এবং \"হোম\" বোতামদুটি ট্যাপ করে ধরে রাখুন।"</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"হোম\" বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"এই স্ক্রিনটি আনপিন করতে \"ফিরে যান\" এবং \"এক নজরে\" বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই অ্যাপের বিজ্ঞপ্তি পরেও দেখে যেতে চান?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"সাইলেন্ট মোডে"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"অগ্রাধিকার দেওয়া হয়েছে"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"সবসময় নীরব। পুল-ডাউন শেডে দেখানো হয়।"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"সবসময় নীরব। পুল-ডাউন শেড ও স্ট্যাটাস বারে দেখানো হয়।"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"সবসময় নীরব। পুল-ডাউন শেড ও লক স্ক্রিনে দেখানো হয়।"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"সবসময় নীরব। পুল-ডাউন শেড, স্ট্যাটাস বার ও লক স্ক্রিনে দেখানো হয়।"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"শব্দ করে এবং পুল-ডাউন শেড, স্ট্যাটাস বার ও লক স্ক্রিনে দেখানো হয়।"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"আপনি যাতে বিরক্ত না হন, তার জন্য শুধুমাত্র পুল-ডাউন শেডে এই বিজ্ঞপ্তি দেখায়। সবসময় সাইলেন্ট।"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"অগ্রাধিকারযুক্ত বিজ্ঞপ্তির নিচে দেখানো হয়। সবসময় সাইলেন্ট।"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"অগ্রাধিকারযুক্ত বিজ্ঞপ্তির নিচে দেখানো হয়। সবসময় সাইলেন্ট।"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"অগ্রাধিকারযুক্ত বিজ্ঞপ্তির নিচে দেখানো হয়। সবসময় সাইলেন্ট।"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"সাউন্ড ও স্ট্যাটাস বার আইকনের সাহায্যে দৃষ্টি আকর্ষণ করে। এটি লক স্ক্রিনে দেখা যায়।"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"প্রক্সি করা বিজ্ঞপ্তি"</string>
     <string name="appops_camera" msgid="8100147441602585776">"এই অ্যাপটি ক্যামেরা ব্যবহার করছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই অ্যাপটি মাইক্রোফোন ব্যবহার করছে।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"এই অ্যাপটি স্ক্রিনে অন্যান্য অ্যাপের উপরে দেখানো হচ্ছে।"</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> খুলুন"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপের বাবল চালু করবেন?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"খারিজ করুন"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"অনুমতি দিন"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"আমাকে পরে জিজ্ঞাসা করুন"</string>

@@ -1257,6 +1257,8 @@
 
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
+    <bool name="config_use_strict_phone_number_comparation_for_russian">true</bool>
+
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
     <integer name="config_criticalBatteryWarningLevel">5</integer>
@@ -3268,6 +3270,10 @@
     <!-- Controls whether the navigation bar lets through taps. -->
     <bool name="config_navBarTapThrough">false</bool>
 
+    <!-- Controls whether the side edge gestures can always trigger the transient nav bar to
+         show. -->
+    <bool name="config_navBarAlwaysShowOnSideEdgeGesture">false</bool>
+
     <!-- Controls the size of the back gesture inset. -->
     <dimen name="config_backGestureInset">0dp</dimen>
 
@@ -4057,4 +4063,38 @@
 
     <!-- Which binder services to include in incident reports containing restricted images. -->
     <string-array name="config_restrictedImagesServices" translatable="false"/>
+
+    <!-- Messages that should not be shown to the user during face auth enrollment. This should be
+         used to hide messages that may be too chatty or messages that the user can't do much about.
+         Entries are defined in android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_enroll_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_enroll_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Messages that should not be shown to the user during face authentication, on keyguard.
+         This includes both lockscreen and bouncer. This should be used to hide messages that may be
+         too chatty or messages that the user can't do much about. Entries are defined in
+         android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_keyguard_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_keyguard_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- Messages that should not be shown to the user during face authentication, on
+     BiometricPrompt. This should be used to hide messages that may be too chatty or messages that
+     the user can't do much about. Entries are defined in
+     android.hardware.biometrics.face@1.0 types.hal -->
+    <integer-array name="config_face_acquire_biometricprompt_ignorelist" translatable="false" >
+    </integer-array>
+    <!-- Same as the above, but are defined by vendorCodes -->
+    <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
+    </integer-array>
+
+    <!-- The component name for the default profile supervisor, which can be set as a profile owner
+    even after user setup is complete. The defined component should be used for supervision purposes
+    only. The component must be part of a system app. -->
+    <string name="config_defaultSupervisionProfileOwnerComponent" translatable="false"></string>
 </resources>

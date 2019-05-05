@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -99,7 +101,7 @@ public class NotificationListenerTest extends SysuiTestCase {
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
         TestableLooper.get(this).processAllMessages();
-        verify(mEntryManager).removeNotification(mSbn.getKey(), mRanking);
+        verify(mEntryManager).removeNotification(eq(mSbn.getKey()), eq(mRanking), anyInt());
     }
 
     @Test

@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skjárinn er festur"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Þetta heldur þessu opnu þangað til þú losar það. Haltu fingri á „Til baka“ og „Yfirlit“ til að losa."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Þetta heldur þessu opnu þangað til það er losað. Haltu inni bakkhnappinum og heimahnappinum til að losa."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Þetta heldur þessu opnu þangað til þú losar það. Haltu fingri á „Yfirlit“ til að losa."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Þetta heldur þessu opnu þangað til það er losað. Haltu heimahnappinum inni til að losa."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Til að losa þessa skjámynd skaltu halda inni bakkhnappinum og yfirlitshnappinum"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Sýna áfram tilkynningar frá þessu forriti?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Lágstemmdar"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Í forgangi"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Alltaf án hljóðs. Birtist á fellisvæði."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Alltaf án hljóðs. Birtist í fellisvæði og stöðustiku."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Alltaf án hljóðs. Birtist í fellisvæði og lásskjá."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Alltaf án hljóðs. Birtist á fellisvæði, stöðustiku og lásskjá."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Gefur frá sér hljóð og birtist í fellisvæði, á stöðustiku og lásskjá."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Auðveldar þér að einbeita þér með tilkynningum sem birtast aðeins á fellisvæði. Alltaf án hljóðs."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Birtir tilkynningar með lítinn forgang. Alltaf án hljóðs."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Birtir tilkynningar með lítinn forgang. Alltaf án hljóðs."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Birtir tilkynningar með lítinn forgang. Alltaf án hljóðs."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Fangar athygli þína með hljóði og stöðustikutákni. Sést á lásskjánum."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ekki er hægt að breyta þessum tilkynningum."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ekki er hægt að stilla þessar tilkynningar hér"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Staðgengilstilkynning"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Þetta forrit er að nota myndavélina."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Þetta forrit er að nota hljóðnemann."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Þetta forrit er að birta efni yfir öðrum forritum á skjánum þínum."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Opna <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Stillingar fyrir blöðrur frá <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Leyfa blöðrur frá <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Hafna"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Leyfa"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Spyrja mig síðar"</string>

@@ -37,6 +37,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewStructure;
+import android.view.WindowManager;
 import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
@@ -343,10 +344,9 @@ public final class ContentCaptureManager {
     /** @hide */
     @UiThread
     public void onActivityCreated(@NonNull IBinder applicationToken,
-            @NonNull ComponentName activityComponent, int flags) {
+            @NonNull ComponentName activityComponent) {
         if (mOptions.lite) return;
         synchronized (mLock) {
-            mFlags |= flags;
             getMainContentCaptureSession().start(applicationToken, activityComponent, mFlags);
         }
     }
@@ -495,6 +495,32 @@ public final class ContentCaptureManager {
         }
         if (mainSession != null) {
             mainSession.setDisabled(!enabled);
+        }
+    }
+
+    /**
+     * Called by apps to update flag secure when window attributes change.
+     *
+     * @hide
+     */
+    public void updateWindowAttributes(@NonNull WindowManager.LayoutParams params) {
+        if (sDebug) {
+            Log.d(TAG, "updateWindowAttributes(): window flags=" + params.flags);
+        }
+        final boolean flagSecureEnabled =
+                (params.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0;
+
+        MainContentCaptureSession mainSession;
+        synchronized (mLock) {
+            if (flagSecureEnabled) {
+                mFlags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
+            } else {
+                mFlags &= ~ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
+            }
+            mainSession = mMainSession;
+        }
+        if (mainSession != null) {
+            mainSession.setDisabled(flagSecureEnabled);
         }
     }
 

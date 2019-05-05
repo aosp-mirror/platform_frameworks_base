@@ -21,13 +21,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.UiAutomation;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.LocaleList;
-import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -568,61 +566,5 @@ public abstract class OverlayBaseTest {
         final int resId = R.integer.matrix_111111;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
-    }
-
-    /**
-     * Executes the shell command and reads all the output to ensure the command ran and didn't
-     * get stuck buffering on output.
-     */
-    protected static String executeShellCommand(UiAutomation automation, String command)
-            throws Exception {
-        final ParcelFileDescriptor pfd = automation.executeShellCommand(command);
-        try (InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(in, StandardCharsets.UTF_8));
-            StringBuilder str = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                str.append(line);
-            }
-            return str.toString();
-        }
-    }
-
-    /**
-     * Enables overlay packages and waits for a configuration change event before
-     * returning, to guarantee that Resources are up-to-date.
-     * @param packages the list of package names to enable.
-     */
-    protected static void enableOverlayPackages(String... packages) throws Exception {
-        enableOverlayPackages(true, packages);
-    }
-
-    /**
-     * Disables overlay packages and waits for a configuration change event before
-     * returning, to guarantee that Resources are up-to-date.
-     * @param packages the list of package names to disable.
-     */
-    protected static void disableOverlayPackages(String... packages) throws Exception {
-        enableOverlayPackages(false, packages);
-    }
-
-    /**
-     * Enables/disables overlay packages and waits for a configuration change event before
-     * returning, to guarantee that Resources are up-to-date.
-     * @param enable enables the overlays when true, disables when false.
-     * @param packages the list of package names to enable/disable.
-     */
-    private static void enableOverlayPackages(boolean enable, String[] packages)
-            throws Exception {
-        final UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation()
-                .getUiAutomation();
-        for (final String pkg : packages) {
-            executeShellCommand(uiAutomation,
-                    "cmd overlay " + (enable ? "enable " : "disable ") + pkg);
-        }
-
-        // Wait for the overlay change to propagate.
-        Thread.sleep(1000);
     }
 }

@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्‍क्रीन पिन कर दी गई है"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम बटन को दबाकर रखें."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"इस स्क्रीन को अनपिन करने के लिए, खास जानकारी और वापस जाएं वाले बटन को दबाकर रखें"</string>
@@ -611,7 +613,7 @@
     <string name="show_silently" msgid="6841966539811264192">"सूचना बिना आवाज़ के दिखाएं"</string>
     <string name="block" msgid="2734508760962682611">"सभी सूचनाएं रोकें"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"मौन ना करें"</string>
-    <string name="do_not_silence_block" msgid="4070647971382232311">"मौन या अवरुद्ध ना करें"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"मौन या ब्लॉक ना करें"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"पावर सूचना नियंत्रण"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
@@ -638,15 +640,19 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"बिना आवाज़ के"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ज़रूरी"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची में दिखाएं."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची और स्टेटस बार पर दिखाएं."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची और लॉक स्क्रीन पर दिखाएं."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"हमेशा आवाज़ और वाइब्रेशन के बिना दिखाएं. नीचे खींचने वाली सूची, स्टेटस बार और लॉक स्क्रीन पर दिखाएं."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"सूचना आने पर आवाज़ हाे और नीचे खींचने वाली सूची, स्टेटस बार और लॉक स्क्रीन पर भी दिखाई दे."</string>
+    <!-- no translation found for notification_channel_summary_low (1065819618107531284) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status (2702170424808743755) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_lock (7966605244472624458) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_low_status_lock (7012562768950012739) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (3847289783382316019) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"प्रॉक्सी सूचना"</string>
     <string name="appops_camera" msgid="8100147441602585776">"यह ऐप्लिकेशन कैमरे का इस्तेमाल कर रहा है."</string>
     <string name="appops_microphone" msgid="741508267659494555">"यह ऐप्लिकेशन माइक्रोफ़ोन का इस्तेमाल कर रहा है."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है."</string>
@@ -911,6 +917,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> खोलें"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल की सेटिंग"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> से बबल की अनुमति दें?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"अनुमति न दें"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"अनुमति दें"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"मुझसे बाद में पूछें"</string>

@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"ସ୍କ୍ରିନକୁ ପିନ୍‌ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ଓଭରଭ୍ୟୁ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ଏହି ଆପ୍‌ରୁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ଧିରେ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ପ୍ରାଥମିକତା ଭିତ୍ତିକ"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍‌ରେ ପ୍ରଦର୍ଶିତ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍ ଏବଂ ସ୍ଥିତି ବାର୍‌ରେ ପ୍ରଦର୍ଶନ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍ ଏବଂ ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ପ୍ରଦର୍ଶିତ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍, ସ୍ଥିତି ବାର୍ ଏବଂ ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ପ୍ରଦର୍ଶନ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"ଶବ୍ଦ କରେ ଏବଂ ପୁଲ୍-ଡାଉନ୍ ସେଡ୍ ସ୍ଥିତି ବାର ଏବଂ ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ପ୍ରଦର୍ଶିତ କରିଥାଏ।"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"କେବଳ ପୁଲ୍-ଡାଉନ୍ ସେଡ୍‌ରେ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଉପରେ ଫୋକସ୍ ରହିବା ପାଇଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିଥାଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ପ୍ରାଥମିକତା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ତଳେ ଡିସ୍‌ପ୍ଲେ ହୁଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ପ୍ରାଥମିକତା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ତଳେ ଡିସ୍‌ପ୍ଲେ ହୁଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ପ୍ରାଥମିକତା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ତଳେ ଡିସ୍‌ପ୍ଲେ ହୁଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ସାଉଣ୍ଡ ଏବଂ ଏକ ଷ୍ଟାଟସ୍ ବାର୍ ଆଇକନ୍ ମାଧ୍ୟମରେ ଆପଣଙ୍କର ଧ୍ୟାନ ଆକର୍ଷିତ କରିଥାଏ। ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯାଇଥାଏ।"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ବିଜ୍ଞପ୍ତି ପ୍ରକ୍ସୀ ହୋଇଛି"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ଏହି ଆପ୍ କ୍ୟାମେରା ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ଏହି ଆପ୍, ମାଇକ୍ରୋଫୋନ୍‍ ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ଏହି ଆପ୍, ଆପଣଙ୍କର ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍ ଉପରେ ପ୍ରଦର୍ଶିତ ହେଉଛି।"</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବବଲ୍‌ଗୁଡ଼ିକ ପାଇଁ ସେଟିଂସ୍"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବବ୍‌ଲ୍‌ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"ମୋତେ ପରେ ପଚାରନ୍ତୁ"</string>

@@ -171,7 +171,12 @@ public class ActivityStartController {
     void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason, int displayId) {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        options.setLaunchActivityType(ACTIVITY_TYPE_HOME);
+        if (!ActivityRecord.isResolverActivity(aInfo.name)) {
+            // The resolver activity shouldn't be put in home stack because when the foreground is
+            // standard type activity, the resolver activity should be put on the top of current
+            // foreground instead of bring home stack to front.
+            options.setLaunchActivityType(ACTIVITY_TYPE_HOME);
+        }
         options.setLaunchDisplayId(displayId);
         mLastHomeActivityStartResult = obtainStarter(intent, "startHomeActivity: " + reason)
                 .setOutActivity(tmpOutRecord)

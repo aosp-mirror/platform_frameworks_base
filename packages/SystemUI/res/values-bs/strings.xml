@@ -370,7 +370,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do svitanja"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Uključuje se u <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema po mraku"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tamna tema"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je onemogućen"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je omogućen"</string>
@@ -530,6 +530,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je prikačen"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Nazad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Da otkačite ekran, dodirnite i držite dugme Nazad i Početna."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Pregled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Da okačite ekran, dodirnite ili držite dugme Početna."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Dodirnite i držite dugmad Nazad i Pregled da otkačite ekran"</string>
@@ -643,15 +645,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Nastaviti prikazivanje obavještenja iz ove aplikacije?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Diskretno"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritetno"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Uvijek nečujno. Prikazuje se na padajućoj traci."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Uvijek nečujno. Prikazuje se na padajućoj traci i statusnoj traci."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Uvijek nečujno. Prikazuje se na padajućoj traci i zaključanom ekranu."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Uvijek nečujno. Prikazuje se na padajućoj traci, statusnoj traci i zaključanom ekranu."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Prikazuje se na padajućoj traci, statusnoj traci i zaključanom ekranu uz zvučno obavještenje."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Pomaže vam da se fokusirate prikazujući obavještenja samo na padajućoj traci. Uvijek nečujno."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Prikazuje se ispod prioritetnih obavještenja. Uvijek nečujno."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Prikazuje se ispod prioritetnih obavještenja. Uvijek nečujno."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Prikazuje se ispod prioritetnih obavještenja. Uvijek nečujno."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Privlači vašu pažnju pomoću zvuka i ikone na statusnoj traci. Prikazuje se na zaključanom ekranu."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ta obavještenja se ne mogu izmijeniti."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ovdje nije moguće konfigurirati ovu grupu obavještenja"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Obavještenje preko proksi servera"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ova aplikacija koristi kameru."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ova aplikacija koristi mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ova aplikacija prekriva druge aplikacije na ekranu."</string>
@@ -887,7 +888,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije koje rade u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite za detalje o potrošnji baterije i prijenosa podataka"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Isključiti prijenos podataka na mobilnoj mreži?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nećete imati pristup podacima ili internetu preko mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo preko WiFi mreže."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nećete imati pristup podacima ili internetu putem mobilnog operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem WiFi mreže."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"vaš operater"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -918,6 +919,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Otvori aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Postavke za mjehuriće aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Dozvoliti mjehuriće iz aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Odbij"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Dozvoli"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Pitaj me kasnije"</string>

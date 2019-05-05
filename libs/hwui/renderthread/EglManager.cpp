@@ -235,8 +235,6 @@ bool EglManager::hasEglContext() {
 }
 
 void EglManager::loadConfigs() {
-    ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
-
     // Note: The default pixel format is RGBA_8888, when other formats are
     // available, we should check the target pixel format and configure the
     // attributes list properly.
@@ -246,7 +244,6 @@ void EglManager::loadConfigs() {
             // Try again without dirty regions enabled
             ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
             mSwapBehavior = SwapBehavior::Discard;
-            ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
             mEglConfig = load8BitsConfig(mEglDisplay, mSwapBehavior);
         } else {
             // Failed to get a valid config

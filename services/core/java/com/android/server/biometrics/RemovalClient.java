@@ -33,11 +33,11 @@ public abstract class RemovalClient extends ClientMonitor {
     private final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(Context context, Metrics metrics,
+    public RemovalClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int biometricId, int groupId, int userId,
             boolean restricted, String owner, BiometricUtils utils) {
-        super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
+        super(context, constants, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
@@ -60,7 +60,7 @@ public abstract class RemovalClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(getLogTag(), "startRemove with id = " + mBiometricId + " failed, result=" +
                         result);
-                mMetricsLogger.histogram(mMetrics.tagRemoveStartError(), result);
+                mMetricsLogger.histogram(mConstants.tagRemoveStartError(), result);
                 onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
                 return result;

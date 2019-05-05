@@ -313,6 +313,7 @@
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
+  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_russian" />
   <java-symbol type="bool" name="config_single_volume" />
   <java-symbol type="bool" name="config_voice_capable" />
   <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
@@ -1406,6 +1407,9 @@
   <java-symbol type="drawable" name="ic_wifi_signal_2" />
   <java-symbol type="drawable" name="ic_wifi_signal_3" />
   <java-symbol type="drawable" name="ic_wifi_signal_4" />
+  <java-symbol type="drawable" name="ic_signal_wifi_transient_animation" />
+  <java-symbol type="drawable" name="ic_hotspot_transient_animation" />
+  <java-symbol type="drawable" name="ic_bluetooth_transient_animation" />
   <java-symbol type="drawable" name="stat_notify_rssi_in_range" />
   <java-symbol type="drawable" name="stat_sys_gps_on" />
   <java-symbol type="drawable" name="stat_sys_tether_wifi" />
@@ -2570,6 +2574,13 @@
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
   <java-symbol type="string" name="face_authenticated_confirmation_required" />
 
+  <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
+  <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />
+  <java-symbol type="array" name="config_face_acquire_keyguard_ignorelist" />
+  <java-symbol type="array" name="config_face_acquire_vendor_keyguard_ignorelist" />
+  <java-symbol type="array" name="config_face_acquire_biometricprompt_ignorelist" />
+  <java-symbol type="array" name="config_face_acquire_vendor_biometricprompt_ignorelist" />
+
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />
 
@@ -2858,6 +2869,7 @@
   <java-symbol type="integer" name="config_navBarInteractionMode" />
   <java-symbol type="bool" name="config_navBarCanMove" />
   <java-symbol type="bool" name="config_navBarTapThrough" />
+  <java-symbol type="bool" name="config_navBarAlwaysShowOnSideEdgeGesture" />
   <java-symbol type="bool" name="config_navBarNeedsScrim" />
   <java-symbol type="dimen" name="config_backGestureInset" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
@@ -3774,4 +3786,6 @@
   <java-symbol type="dimen" name="chooser_direct_share_label_placeholder_max_width" />
   <java-symbol type="layout" name="chooser_az_label_row" />
   <java-symbol type="string" name="chooser_all_apps_button_label" />
+
+  <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
 </resources>

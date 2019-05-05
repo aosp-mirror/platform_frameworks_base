@@ -16,6 +16,7 @@
 package android.view.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,10 +35,10 @@ public final class AutofillId implements Parcelable {
     private static final int FLAG_HAS_SESSION = 0x4;
 
     private final int mViewId;
-    private final int mFlags;
+    private int mFlags;
     private final int mVirtualIntId;
     private final long mVirtualLongId;
-    private final int mSessionId;
+    private int mSessionId;
 
     /** @hide */
     @TestApi
@@ -69,6 +70,12 @@ public final class AutofillId implements Parcelable {
         mVirtualIntId = ((flags & FLAG_IS_VIRTUAL_INT) != 0) ? (int) virtualChildId : View.NO_ID;
         mVirtualLongId = ((flags & FLAG_IS_VIRTUAL_LONG) != 0) ? virtualChildId : View.NO_ID;
         mSessionId = sessionId;
+    }
+
+    /** @hide */
+    public static AutofillId withoutSession(@NonNull AutofillId id) {
+        final int flags = id.mFlags & ~FLAG_HAS_SESSION;
+        return new AutofillId(flags, id.mViewId, id.mVirtualLongId, NO_SESSION);
     }
 
     /** @hide */
@@ -135,13 +142,26 @@ public final class AutofillId implements Parcelable {
         return !isVirtualInt() && !isVirtualLong();
     }
 
-    private boolean hasSession() {
+    /** @hide */
+    public boolean hasSession() {
         return (mFlags & FLAG_HAS_SESSION) != 0;
     }
 
     /** @hide */
     public int getSessionId() {
         return mSessionId;
+    }
+
+    /** @hide */
+    public void setSessionId(int sessionId) {
+        mFlags |= FLAG_HAS_SESSION;
+        mSessionId = sessionId;
+    }
+
+    /** @hide */
+    public void resetSessionId() {
+        mFlags &= ~FLAG_HAS_SESSION;
+        mSessionId = NO_SESSION;
     }
 
     /////////////////////////////////
@@ -169,6 +189,17 @@ public final class AutofillId implements Parcelable {
         if (mVirtualIntId != other.mVirtualIntId) return false;
         if (mVirtualLongId != other.mVirtualLongId) return false;
         if (mSessionId != other.mSessionId) return false;
+        return true;
+    }
+
+    /** @hide */
+    @TestApi
+    public boolean equalsIgnoreSession(@Nullable AutofillId other) {
+        if (this == other) return true;
+        if (other == null) return false;
+        if (mViewId != other.mViewId) return false;
+        if (mVirtualIntId != other.mVirtualIntId) return false;
+        if (mVirtualLongId != other.mVirtualLongId) return false;
         return true;
     }
 

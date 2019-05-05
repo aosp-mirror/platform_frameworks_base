@@ -80,6 +80,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.ScreenRecordHelper;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.view.RotationPolicy;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
@@ -413,6 +414,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                                 },
                                 mKeyguardManager.isDeviceLocked())
                         : null;
+
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
@@ -1497,6 +1499,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private boolean mKeyguardShowing;
         private boolean mShowing;
         private float mScrimAlpha;
+        private ResetOrientationData mResetOrientationData;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin) {
@@ -1530,27 +1533,50 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private boolean shouldUsePanel() {
-            if (!isPanelEnabled(mContext) || mPanelController == null) {
-                return false;
-            }
-            if (mPanelController.getPanelContent() == null) {
-                return false;
-            }
-            return true;
+            return isPanelEnabled(mContext)
+                    && mPanelController != null
+                    && mPanelController.getPanelContent() != null;
         }
 
         private void initializePanel() {
-            FrameLayout panelContainer = new FrameLayout(mContext);
-            FrameLayout.LayoutParams panelParams =
-                    new FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.WRAP_CONTENT);
-            panelContainer.addView(mPanelController.getPanelContent(), panelParams);
-            addContentView(
-                    panelContainer,
-                    new ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
+            int rotation = RotationUtils.getRotation(mContext);
+            boolean rotationLocked = RotationPolicy.isRotationLocked(mContext);
+            if (rotation != RotationUtils.ROTATION_NONE) {
+                if (rotationLocked) {
+                    if (mResetOrientationData == null) {
+                        mResetOrientationData = new ResetOrientationData();
+                        mResetOrientationData.locked = true;
+                        mResetOrientationData.rotation = rotation;
+                    }
+
+                    // Unlock rotation, so user can choose to rotate to portrait to see the panel.
+                    RotationPolicy.setRotationLockAtAngle(
+                            mContext, false, RotationUtils.ROTATION_NONE);
+                }
+            } else {
+                if (!rotationLocked) {
+                    if (mResetOrientationData == null) {
+                        mResetOrientationData = new ResetOrientationData();
+                        mResetOrientationData.locked = false;
+                    }
+
+                    // Lock to portrait, so the user doesn't accidentally hide the panel.
+                    RotationPolicy.setRotationLockAtAngle(
+                            mContext, true, RotationUtils.ROTATION_NONE);
+                }
+
+                FrameLayout panelContainer = new FrameLayout(mContext);
+                FrameLayout.LayoutParams panelParams =
+                        new FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT);
+                panelContainer.addView(mPanelController.getPanelContent(), panelParams);
+                addContentView(
+                        panelContainer,
+                        new ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT));
+            }
         }
 
         private void initializeLayout() {
@@ -1682,16 +1708,27 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         mBackgroundDrawable.setAlpha(alpha);
                     })
                     .start();
-            if (mPanelController != null) {
-                mPanelController.onDismissed();
-            }
+            dismissPanel();
+            resetOrientation();
         }
 
         void dismissImmediately() {
             super.dismiss();
             mShowing = false;
+            dismissPanel();
+            resetOrientation();
+        }
+
+        private void dismissPanel() {
             if (mPanelController != null) {
                 mPanelController.onDismissed();
+            }
+        }
+
+        private void resetOrientation() {
+            if (mResetOrientationData != null) {
+                RotationPolicy.setRotationLockAtAngle(mContext, mResetOrientationData.locked,
+                        mResetOrientationData.rotation);
             }
         }
 
@@ -1723,6 +1760,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             if (mShowing) {
                 refreshDialog();
             }
+        }
+
+        private static class ResetOrientationData {
+            public boolean locked;
+            public int rotation;
         }
     }
 

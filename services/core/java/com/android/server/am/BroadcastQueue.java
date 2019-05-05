@@ -437,6 +437,19 @@ public final class BroadcastQueue {
         return next;
     }
 
+    private void postActivityStartTokenRemoval(ProcessRecord app, BroadcastRecord r) {
+        // the receiver had run for less than allowed bg activity start timeout,
+        // so allow the process to still start activities from bg for some more time
+        String msgToken = (app.toShortString() + r.toString()).intern();
+        // first, if there exists a past scheduled request to remove this token, drop
+        // that request - we don't want the token to be swept from under our feet...
+        mHandler.removeCallbacksAndMessages(msgToken);
+        // ...then schedule the removal of the token after the extended timeout
+        mHandler.postAtTime(() -> {
+            app.removeAllowBackgroundActivityStartsToken(r);
+        }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
+    }
+
     public boolean finishReceiverLocked(BroadcastRecord r, int resultCode,
             String resultData, Bundle resultExtras, boolean resultAbort, boolean waitForServices) {
         final int state = r.state;
@@ -453,17 +466,8 @@ public final class BroadcastQueue {
                 // just remove the token for this process now and we're done
                 r.curApp.removeAllowBackgroundActivityStartsToken(r);
             } else {
-                // the receiver had run for less than allowed bg activity start timeout,
-                // so allow the process to still start activities from bg for some more time
-                String msgToken = (r.curApp.toShortString() + r.toString()).intern();
-                // first, if there exists a past scheduled request to remove this token, drop
-                // that request - we don't want the token to be swept from under our feet...
-                mHandler.removeCallbacksAndMessages(msgToken);
-                // ...then schedule the removal of the token after the extended timeout
-                final ProcessRecord app = r.curApp;
-                mHandler.postAtTime(() -> {
-                    app.removeAllowBackgroundActivityStartsToken(r);
-                }, msgToken, (r.receiverTime + mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT));
+                // It gets more time; post the removal to happen at the appropriate moment
+                postActivityStartTokenRemoval(r.curApp, r);
             }
         }
         // If we're abandoning this broadcast before any receivers were actually spun up,
@@ -810,19 +814,29 @@ public final class BroadcastQueue {
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
                         r.resultExtras, r.ordered, r.initialSticky, r.userId);
+                // parallel broadcasts are fire-and-forget, not bookended by a call to
+                // finishReceiverLocked(), so we manage their activity-start token here
+                if (r.allowBackgroundActivityStarts && !r.ordered) {
+                    postActivityStartTokenRemoval(filter.receiverList.app, r);
+                }
             }
             if (ordered) {
                 r.state = BroadcastRecord.CALL_DONE_RECEIVE;
             }
         } catch (RemoteException e) {
             Slog.w(TAG, "Failure sending broadcast " + r.intent, e);
+            // Clean up ProcessRecord state related to this broadcast attempt
+            if (filter.receiverList.app != null) {
+                filter.receiverList.app.removeAllowBackgroundActivityStartsToken(r);
+                if (ordered) {
+                    filter.receiverList.app.curReceivers.remove(r);
+                }
+            }
+            // And BroadcastRecord state related to ordered delivery, if appropriate
             if (ordered) {
                 r.receiver = null;
                 r.curFilter = null;
                 filter.receiverList.curBroadcast = null;
-                if (filter.receiverList.app != null) {
-                    filter.receiverList.app.curReceivers.remove(r);
-                }
             }
         }
     }
@@ -1283,6 +1297,8 @@ public final class BroadcastQueue {
             } else {
                 if (filter.receiverList != null) {
                     maybeAddAllowBackgroundActivityStartsToken(filter.receiverList.app, r);
+                    // r is guaranteed ordered at this point, so we know finishReceiverLocked()
+                    // will get a callback and handle the activity start token lifecycle.
                 }
                 if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
                     scheduleTempWhitelistLocked(filter.owningUid,

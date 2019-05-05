@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skerm is vasgespeld"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Terug en Oorsig om dit te ontspeld."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Terug en Tuis om dit te ontspeld."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Oorsig om dit te ontspeld."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Dit hou dit in sig totdat jy dit ontspeld. Raak en hou Tuis om dit te ontspeld."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Raak en hou die Terug- en Oorsig-knoppie om hierdie skerm te ontspeld"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Hou aan om kennisgewings van hierdie program af te wys?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Lig"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Geprioritiseerd"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Altyd stil. Wys op aftrekskerm."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Altyd stil. Wys op aftrekskerm en statusbalk."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Altyd stil. Wys op aftrekskerm en op sluitskerm."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Altyd stil. Wys op aftrekskerm, statusbalk en op sluitskerm."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Maak geluid en wys op aftrekskerm, statusbalk en op sluitskerm."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Help jou om te fokus met kennisgewings wat net op die aftrekskerm is. Altyd stil."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Wys prioriteitkennisgewings hieronder. Altyd stil."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Wys prioriteitkennisgewings hieronder. Altyd stil."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Wys prioriteitkennisgewings hieronder. Altyd stil."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Trek jou aandag met klank en \'n statusbalk-ikoon. Wys op sluitskerm."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Hierdie kennisgewings kan nie gewysig word nie."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Hierdie groep kennisgewings kan nie hier opgestel word nie"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Instaanbediener-kennisgewing"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Hierdie program gebruik tans die kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Hierdie program gebruik tans die mikrofoon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Hierdie program wys tans bo-oor ander programme op jou skerm."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Maak <xliff:g id="APP_NAME">%1$s</xliff:g> oop"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Instellings vir <xliff:g id="APP_NAME">%1$s</xliff:g>-borrels"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Laat borrels vanaf <xliff:g id="APP_NAME">%1$s</xliff:g> toe?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Weier"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Laat toe"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Vra my later"</string>

@@ -304,7 +304,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود عکس بگیرد و ویدیو ضبط کند؟"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"گزارش‌های تماس"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"خواندن و نوشتن گزارش تماس تلفنی"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه می‌دهید به گزارش تماس‌های تلفنی شما دسترسی داشته باشد؟"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود به گزارش تماس‌های تلفنی شما دسترسی داشته باشد؟"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"تلفن"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"برقراری و مدیریت تماس‌های تلفنی"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود تماس‌های تلفنی برقرار کند و آن‌ها را مدیریت کند؟"</string>
@@ -571,8 +571,10 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"بسیار شبیه قبلی است، لطفاً قیافه دیگری بگیرید."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"لطفاً مستقیم به صفحه نگاه کنید."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"لطفاً مستقیم به صفحه نگاه کنید."</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
     <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"لطفاً سرتان را به‌صورت عمود نگه دارید."</string>
     <string name="face_acquired_obscured" msgid="5747521031647744553">"هرگونه مانعی را بین سرتان و تلفن بردارید."</string>
     <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"لطفاً دوربین را تمیز کنید."</string>
@@ -2027,4 +2029,5 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> فایل</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"اشتراک‌گذاری مستقیم دردسترس نیست"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"فهرست برنامه‌ها"</string>
 </resources>

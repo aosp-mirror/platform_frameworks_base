@@ -148,7 +148,8 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
-import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.classifier.FalsingManagerFactory;
+import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -436,7 +437,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void onUserSetupChanged() {
             final boolean userSetup = mDeviceProvisionedController.isUserSetup(
                     mDeviceProvisionedController.getCurrentUser());
-            // STOPSHIP(kozynski, b/129405675) Remove log
             Log.d(TAG, "mUserSetupObserver - DeviceProvisionedListener called for user "
                     + mDeviceProvisionedController.getCurrentUser());
             if (MULTIUSER_DEBUG) {
@@ -713,7 +713,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 result.mFullscreenStackSysUiVisibility, result.mDockedStackSysUiVisibility,
                 0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds,
                 result.mNavbarColorManagedByIme);
-        topAppWindowChanged(mDisplayId, result.mMenuVisible);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
                 result.mImeBackDisposition, result.mShowImeSwitcher);
@@ -727,11 +726,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (DEBUG) {
             Log.d(TAG, String.format(
-                    "init: icons=%d disabled=0x%08x lights=0x%08x menu=0x%08x imeButton=0x%08x",
+                    "init: icons=%d disabled=0x%08x lights=0x%08x imeButton=0x%08x",
                     numIcons,
                     result.mDisabledFlags1,
                     result.mSystemUiVisibility,
-                    result.mMenuVisible ? 1 : 0,
                     result.mImeWindowVis));
         }
 
@@ -763,7 +761,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         putComponent(DozeHost.class, mDozeServiceHost);
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
-        mFalsingManager = FalsingManager.getInstance(mContext);
+        mFalsingManager = FalsingManagerFactory.getInstance(mContext);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
@@ -2235,31 +2233,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
 
-    public void setLightsOn(boolean on) {
-        Log.v(TAG, "setLightsOn(" + on + ")");
-        if (on) {
-            setSystemUiVisibility(mDisplayId, 0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
-                    mLastFullscreenStackBounds, mLastDockedStackBounds,
-                    false /* navbarColorManagedByIme */);
-        } else {
-            setSystemUiVisibility(mDisplayId, View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
-                    View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
-                    mLastDockedStackBounds, false /* navbarColorManagedByIme */);
-        }
-    }
-
-    @Override
-    public void topAppWindowChanged(int displayId, boolean showMenu) {
-        if (mDisplayId != displayId) return;
-        if (SPEW) {
-            Log.d(TAG, "display#" + displayId + ": "
-                    + (showMenu ? "showing" : "hiding") + " the MENU button");
-        }
-
-        // See above re: lights-out policy for legacy apps.
-        if (showMenu) setLightsOn(true);
-    }
-
     public static String viewInfo(View v) {
         return "[(" + v.getLeft() + "," + v.getTop() + ")(" + v.getRight() + "," + v.getBottom()
                 + ") " + v.getWidth() + "x" + v.getHeight() + "]";
@@ -2381,7 +2354,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
-        FalsingManager.getInstance(mContext).dump(pw);
+        FalsingManagerFactory.getInstance(mContext).dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");

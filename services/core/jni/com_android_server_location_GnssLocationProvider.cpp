@@ -45,6 +45,13 @@
 #include <string.h>
 #include <utils/SystemClock.h>
 
+static jclass class_gnssMeasurementsEvent;
+static jclass class_gnssMeasurement;
+static jclass class_location;
+static jclass class_gnssNavigationMessage;
+static jclass class_gnssClock;
+static jclass class_gnssConfiguration_halInterfaceVersion;
+
 static jobject mCallbacksObj = nullptr;
 
 static jmethodID method_reportLocation;
@@ -55,7 +62,7 @@ static jmethodID method_reportNmea;
 static jmethodID method_setTopHalCapabilities;
 static jmethodID method_setGnssYearOfHardware;
 static jmethodID method_setGnssHardwareModelName;
-static jmethodID method_xtraDownloadRequest;
+static jmethodID method_psdsDownloadRequest;
 static jmethodID method_reportNiNotification;
 static jmethodID method_requestLocation;
 static jmethodID method_requestRefLocation;
@@ -95,6 +102,12 @@ static jmethodID method_correctionPlaneAltDeg;
 static jmethodID method_correctionPlaneAzimDeg;
 static jmethodID method_reportNfwNotification;
 static jmethodID method_isInEmergencySession;
+static jmethodID method_gnssMeasurementsEventCtor;
+static jmethodID method_locationCtor;
+static jmethodID method_gnssNavigationMessageCtor;
+static jmethodID method_gnssClockCtor;
+static jmethodID method_gnssMeasurementCtor;
+static jmethodID method_halInterfaceVersionCtor;
 
 /*
  * Save a pointer to JavaVm to attach/detach threads executing
@@ -255,11 +268,11 @@ void JavaMethodHelper<T>::callJavaMethod(
 
 class JavaObject {
  public:
-    JavaObject(JNIEnv* env, const char* class_name);
-    JavaObject(JNIEnv* env, const char* class_name, const char * sz_arg_1);
-    JavaObject(JNIEnv* env, const char* class_name, jobject object);
+    JavaObject(JNIEnv* env, jclass clazz, jmethodID defaultCtor);
+    JavaObject(JNIEnv* env, jclass clazz, jmethodID stringCtor, const char * sz_arg_1);
+    JavaObject(JNIEnv* env, jclass clazz, jobject object);
 
-    virtual ~JavaObject();
+    virtual ~JavaObject() = default;
 
     template<class T>
     void callSetter(const char* method_name, T value);
@@ -273,25 +286,20 @@ class JavaObject {
     jobject object_;
 };
 
-JavaObject::JavaObject(JNIEnv* env, const char* class_name) : env_(env) {
-    clazz_ = env_->FindClass(class_name);
-    jmethodID ctor = env->GetMethodID(clazz_, "<init>", "()V");
-    object_ = env_->NewObject(clazz_, ctor);
+JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID defaultCtor) : env_(env),
+        clazz_(clazz) {
+    object_ = env_->NewObject(clazz_, defaultCtor);
 }
 
-JavaObject::JavaObject(JNIEnv* env, const char* class_name, const char * sz_arg_1) : env_(env) {
-    clazz_ = env_->FindClass(class_name);
-    jmethodID ctor = env->GetMethodID(clazz_, "<init>", "(Ljava/lang/String;)V");
-    object_ = env_->NewObject(clazz_, ctor, env->NewStringUTF(sz_arg_1));
+
+JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID stringCtor, const char * sz_arg_1)
+        : env_(env), clazz_(clazz) {
+    object_ = env_->NewObject(clazz_, stringCtor, env->NewStringUTF(sz_arg_1));
 }
 
-JavaObject::JavaObject(JNIEnv* env, const char* class_name, jobject object)
-    : env_(env), object_(object) {
-    clazz_ = env_->FindClass(class_name);
-}
 
-JavaObject::~JavaObject() {
-    env_->DeleteLocalRef(clazz_);
+JavaObject::JavaObject(JNIEnv* env, jclass clazz, jobject object)
+    : env_(env), clazz_(clazz), object_(object) {
 }
 
 template<class T>
@@ -358,11 +366,8 @@ static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
 }
 
 static jobject createHalInterfaceVersionJavaObject(JNIEnv* env, jint major, jint minor) {
-    jclass versionClass =
-            env->FindClass("com/android/server/location/GnssConfiguration$HalInterfaceVersion");
-    jmethodID versionCtor = env->GetMethodID(versionClass, "<init>", "(II)V");
-    jobject version = env->NewObject(versionClass, versionCtor, major, minor);
-    env->DeleteLocalRef(versionClass);
+    jobject version = env->NewObject(class_gnssConfiguration_halInterfaceVersion,
+            method_halInterfaceVersionCtor, major, minor);
     return version;
 }
 
@@ -452,7 +457,7 @@ static JNIEnv* getJniEnv() {
 
 static jobject translateGnssLocation(JNIEnv* env,
                                      const GnssLocation_V1_0& location) {
-    JavaObject object(env, "android/location/Location", "gps");
+    JavaObject object(env, class_location, method_locationCtor, "gps");
 
     uint16_t flags = static_cast<uint32_t>(location.gnssLocationFlags);
     if (flags & GnssLocationFlags::HAS_LAT_LONG) {
@@ -488,8 +493,7 @@ static jobject translateGnssLocation(JNIEnv* env,
 
 static jobject translateGnssLocation(JNIEnv* env,
                                      const GnssLocation_V2_0& location) {
-    JavaObject object(env, "android/location/Location",
-                      translateGnssLocation(env, location.v1_0));
+    JavaObject object(env, class_location, translateGnssLocation(env, location.v1_0));
 
     const uint16_t flags = static_cast<uint16_t>(location.elapsedRealtime.flags);
 
@@ -798,7 +802,7 @@ class GnssXtraCallback : public IGnssXtraCallback {
  */
 Return<void> GnssXtraCallback::downloadRequestCb() {
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_xtraDownloadRequest);
+    env->CallVoidMethod(mCallbacksObj, method_psdsDownloadRequest);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
 }
@@ -946,7 +950,7 @@ Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
       return Void();
     }
 
-    JavaObject object(env, "android/location/GnssNavigationMessage");
+    JavaObject object(env, class_gnssNavigationMessage, method_gnssNavigationMessageCtor);
     SET(Type, static_cast<int32_t>(message.type));
     SET(Svid, static_cast<int32_t>(message.svid));
     SET(MessageId, static_cast<int32_t>(message.messageId));
@@ -1013,7 +1017,7 @@ template<class T>
 void GnssMeasurementCallback::translateAndSetGnssData(const T& data) {
     JNIEnv* env = getJniEnv();
 
-    JavaObject gnssClockJavaObject(env, "android/location/GnssClock");
+    JavaObject gnssClockJavaObject(env, class_gnssClock, method_gnssClockCtor);
     translateGnssClock(gnssClockJavaObject, data);
     jobject clock = gnssClockJavaObject.get();
 
@@ -1175,41 +1179,30 @@ jobjectArray GnssMeasurementCallback::translateAllGnssMeasurements(JNIEnv* env,
         return nullptr;
     }
 
-    jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
     jobjectArray gnssMeasurementArray = env->NewObjectArray(
             count,
-            gnssMeasurementClass,
+            class_gnssMeasurement,
             nullptr /* initialElement */);
 
     for (uint16_t i = 0; i < count; ++i) {
-        JavaObject object(env, "android/location/GnssMeasurement");
+        JavaObject object(env, class_gnssMeasurement, method_gnssMeasurementCtor);
         translateSingleGnssMeasurement(&(measurements[i]), object);
         env->SetObjectArrayElement(gnssMeasurementArray, i, object.get());
     }
 
-    env->DeleteLocalRef(gnssMeasurementClass);
     return gnssMeasurementArray;
 }
 
 void GnssMeasurementCallback::setMeasurementData(JNIEnv* env, jobject clock,
                              jobjectArray measurementArray) {
-    jclass gnssMeasurementsEventClass =
-            env->FindClass("android/location/GnssMeasurementsEvent");
-    jmethodID gnssMeasurementsEventCtor =
-            env->GetMethodID(
-                    gnssMeasurementsEventClass,
-                    "<init>",
-                    "(Landroid/location/GnssClock;[Landroid/location/GnssMeasurement;)V");
-
-    jobject gnssMeasurementsEvent = env->NewObject(gnssMeasurementsEventClass,
-                                                   gnssMeasurementsEventCtor,
+    jobject gnssMeasurementsEvent = env->NewObject(class_gnssMeasurementsEvent,
+                                                   method_gnssMeasurementsEventCtor,
                                                    clock,
                                                    measurementArray);
 
     env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData,
                       gnssMeasurementsEvent);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    env->DeleteLocalRef(gnssMeasurementsEventClass);
     env->DeleteLocalRef(gnssMeasurementsEvent);
 }
 
@@ -1464,8 +1457,7 @@ template<class T>
 Return<void> GnssBatchingCallbackUtil::gnssLocationBatchCbImpl(const hidl_vec<T>& locations) {
     JNIEnv* env = getJniEnv();
 
-    jobjectArray jLocations = env->NewObjectArray(locations.size(),
-            env->FindClass("android/location/Location"), nullptr);
+    jobjectArray jLocations = env->NewObjectArray(locations.size(), class_location, nullptr);
 
     for (uint16_t i = 0; i < locations.size(); ++i) {
         jobject jLocation = translateGnssLocation(env, locations[i]);
@@ -1533,7 +1525,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
     method_setGnssHardwareModelName = env->GetMethodID(clazz, "setGnssHardwareModelName",
             "(Ljava/lang/String;)V");
-    method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
+    method_psdsDownloadRequest = env->GetMethodID(clazz, "psdsDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
             "(IIIIILjava/lang/String;Ljava/lang/String;II)V");
     method_requestLocation = env->GetMethodID(clazz, "requestLocation", "(ZZ)V");
@@ -1616,6 +1608,36 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_correctionPlaneLngDeg = env->GetMethodID(refPlaneClass, "getLongitudeDegrees", "()D");
     method_correctionPlaneAltDeg = env->GetMethodID(refPlaneClass, "getAltitudeMeters", "()D");
     method_correctionPlaneAzimDeg = env->GetMethodID(refPlaneClass, "getAzimuthDegrees", "()D");
+
+    jclass gnssMeasurementsEventClass = env->FindClass("android/location/GnssMeasurementsEvent");
+    class_gnssMeasurementsEvent= (jclass) env->NewGlobalRef(gnssMeasurementsEventClass);
+    method_gnssMeasurementsEventCtor = env->GetMethodID(
+                    class_gnssMeasurementsEvent,
+                    "<init>",
+                    "(Landroid/location/GnssClock;[Landroid/location/GnssMeasurement;)V");
+
+    jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
+    class_gnssMeasurement = (jclass) env->NewGlobalRef(gnssMeasurementClass);
+    method_gnssMeasurementCtor = env->GetMethodID(class_gnssMeasurement, "<init>", "()V");
+
+    jclass locationClass = env->FindClass("android/location/Location");
+    class_location = (jclass) env->NewGlobalRef(locationClass);
+    method_locationCtor = env->GetMethodID(class_location, "<init>", "(Ljava/lang/String;)V");
+
+    jclass gnssNavigationMessageClass = env->FindClass("android/location/GnssNavigationMessage");
+    class_gnssNavigationMessage = (jclass) env->NewGlobalRef(gnssNavigationMessageClass);
+    method_gnssNavigationMessageCtor = env->GetMethodID(class_gnssNavigationMessage, "<init>", "()V");
+
+    jclass gnssClockClass = env->FindClass("android/location/GnssClock");
+    class_gnssClock = (jclass) env->NewGlobalRef(gnssClockClass);
+    method_gnssClockCtor = env->GetMethodID(class_gnssClock, "<init>", "()V");
+
+    jclass gnssConfiguration_halInterfaceVersionClass =
+            env->FindClass("com/android/server/location/GnssConfiguration$HalInterfaceVersion");
+    class_gnssConfiguration_halInterfaceVersion =
+            (jclass) env->NewGlobalRef(gnssConfiguration_halInterfaceVersionClass);
+    method_halInterfaceVersionCtor =
+            env->GetMethodID(class_gnssConfiguration_halInterfaceVersion, "<init>", "(II)V");
 
     /*
      * Save a pointer to JVM.
@@ -2168,12 +2190,12 @@ static void android_location_GnssLocationProvider_inject_location(JNIEnv* /* env
     }
 }
 
-static jboolean android_location_GnssLocationProvider_supports_xtra(
+static jboolean android_location_GnssLocationProvider_supports_psds(
         JNIEnv* /* env */, jobject /* obj */) {
     return (gnssXtraIface != nullptr) ? JNI_TRUE : JNI_FALSE;
 }
 
-static void android_location_GnssLocationProvider_inject_xtra_data(JNIEnv* env, jobject /* obj */,
+static void android_location_GnssLocationProvider_inject_psds_data(JNIEnv* env, jobject /* obj */,
         jbyteArray data, jint length) {
     if (gnssXtraIface == nullptr) {
         ALOGE("XTRA Interface not supported");
@@ -3025,10 +3047,10 @@ static const JNINativeMethod sMethods[] = {
             android_location_GnssLocationProvider_inject_best_location)},
     {"native_inject_location", "(DDF)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_inject_location)},
-    {"native_supports_xtra", "()Z", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_supports_xtra)},
-    {"native_inject_xtra_data", "([BI)V", reinterpret_cast<void *>(
-            android_location_GnssLocationProvider_inject_xtra_data)},
+    {"native_supports_psds", "()Z", reinterpret_cast<void *>(
+            android_location_GnssLocationProvider_supports_psds)},
+    {"native_inject_psds_data", "([BI)V", reinterpret_cast<void *>(
+            android_location_GnssLocationProvider_inject_psds_data)},
     {"native_agps_set_id", "(ILjava/lang/String;)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_agps_set_id)},
     {"native_agps_set_ref_location_cellid", "(IIIII)V", reinterpret_cast<void *>(

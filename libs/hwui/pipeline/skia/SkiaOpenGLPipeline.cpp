@@ -166,8 +166,6 @@ static void setBufferCount(ANativeWindow* window, uint32_t extraBuffers) {
     auto min_undequeued_buffers = static_cast<uint32_t>(query_value);
 
     int bufferCount = min_undequeued_buffers + 2 + extraBuffers;
-    ALOGD("Setting buffer count to %d, min_undequeued %u, extraBuffers %u",
-            bufferCount, min_undequeued_buffers, extraBuffers);
     native_window_set_buffer_count(window, bufferCount);
 }
 

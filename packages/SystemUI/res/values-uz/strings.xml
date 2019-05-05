@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmalarni birga bosib turing."</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmlarni birga bosib turing."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Bu ekrandan chiqish uchun Orqaga va Menyu tugmalarini bosib turing"</string>
@@ -638,15 +640,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Tovushsiz"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Muhim"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Doimo ovozsiz qolsin. Bildirishnomalar panelida chiqadi."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Doimo ovozsiz qolsin. Bildirishnomalar va holat panelida chiqadi"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Doimo ovozsiz qolsin. Bildirishnomalar paneli va ekran qulfida chiqadi"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Doimo ovozsiz qolsin. Bildirishnomalar paneli, holat panelida va ekran qulfida chiqadi"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Ovoz chiqarib, bildirishnomalar paneli, holat paneli va ekran qulfida chiqadi."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Sizni chalgʻitmaslik uchun bildirishnomalar faqat maxsus panelda chiqadi. Doim tovushsiz."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Muhimligi past xabarlar chiqsin. Doim tovushsiz."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Muhimligi past xabarlar chiqsin. Doim tovushsiz."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Muhimligi past xabarlar chiqsin. Doim tovushsiz."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Kelgan bildirishnomalarni maxsus tovush va holat paneliga chiqadigan nishoncha orqali bilish mumkin. Bildirishnomalar ekran qulfida ham chiqadi."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Ishonchli bildirishnoma"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Bu ilova kameradan foydalanmoqda."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Bu ilova mikrofondan foydalanmoqda."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Bu ilova ekranda boshqa ilovalar ustidan ochilgan."</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Ochish: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> pufakchalari uchun sozlamalar"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> pufakchalariga ruxsat berilsinmi?"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"Rad etish"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Ruxsat"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Keyinroq soʻralsin"</string>

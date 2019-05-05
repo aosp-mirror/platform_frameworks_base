@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.intThat;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.WindowTestUtils.TestAppWindowToken;
@@ -65,6 +66,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsCreated() {
         mToken.mNeedsAnimationBoundsLayer = true;
 
@@ -86,6 +88,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void clipAfterAnim_boundsLayerIsDestroyed() {
         mToken.mNeedsAnimationBoundsLayer = true;
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
@@ -116,6 +119,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131005232)
     public void clipNoneAnim_boundsLayerIsNotCreated() {
         mToken.mNeedsAnimationBoundsLayer = false;
 

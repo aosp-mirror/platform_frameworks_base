@@ -79,7 +79,6 @@ import android.view.Gravity;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
-import com.android.server.wm.TaskRecord.TaskRecordFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -330,21 +329,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
                 anyBoolean(), anyBoolean(), any(), any(), any());
 
-        // instrument the stack and task used.
-        final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final TaskRecord task = new TaskBuilder(mSupervisor)
-                .setCreateStack(false)
-                .build();
-
-        // use factory that only returns spy task.
-        final TaskRecordFactory factory = mock(TaskRecordFactory.class);
-        TaskRecord.setTaskRecordFactory(factory);
-
-        // return task when created.
-        doReturn(task).when(factory).create(any(), anyInt(), any(), any(), any(), any());
+        // Use factory that only returns spy task.
+        mockTaskRecordFactory();
 
         if (mockGetLaunchStack) {
+            // Instrument the stack and task used.
+            final ActivityStack stack = mRootActivityContainer.getDefaultDisplay().createStack(
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
             // Direct starter to use spy stack.
             doReturn(stack).when(mRootActivityContainer)
                     .getLaunchStack(any(), any(), any(), anyBoolean());
@@ -704,6 +696,36 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertEquals(ActivityStarter.getExternalResult(
                 shouldHaveAborted ? START_ABORTED : START_SUCCESS), result);
         verify(options, times(shouldHaveAborted ? 1 : 0)).abort();
+    }
+
+    /**
+     * This test ensures that {@link ActivityStarter#setTargetStackAndMoveToFrontIfNeeded} will
+     * move the existing task to front if the current focused stack doesn't have running task.
+     */
+    @Test
+    public void testBringTaskToFrontWhenFocusedStackIsFinising() {
+        // Put 2 tasks in the same stack (simulate the behavior of home stack).
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setCreateTask(true).build();
+        new ActivityBuilder(mService)
+                .setStack(activity.getActivityStack())
+                .setCreateTask(true).build();
+
+        // Create a top finishing activity.
+        final ActivityRecord finishingTopActivity = new ActivityBuilder(mService)
+                .setCreateTask(true).build();
+        finishingTopActivity.getActivityStack().moveToFront("finishingTopActivity");
+
+        assertEquals(finishingTopActivity, mRootActivityContainer.topRunningActivity());
+        finishingTopActivity.finishing = true;
+
+        // Launch the bottom task of the target stack.
+        prepareStarter(FLAG_ACTIVITY_NEW_TASK, false /* mockGetLaunchStack */)
+                .setReason("testBringTaskToFrontWhenTopStackIsFinising")
+                .setIntent(activity.intent)
+                .execute();
+        // The hierarchies of the activity should move to front.
+        assertEquals(activity, mRootActivityContainer.topRunningActivity());
     }
 
     /**

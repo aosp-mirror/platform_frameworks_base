@@ -527,6 +527,8 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"သင်က ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ။"</string>
+    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"သင်ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် Overview ကိုထိပြီး ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'ပင်မ\' ခလုတ်ကို တို့၍ဖိထားပါ။"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ဤမျက်နှာပြင်ကို ပင်ဖြုတ်ရန်အတွက် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်တို့ကို တို့၍ဖိထားပါ"</string>
@@ -636,17 +638,16 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ဆက်လက် သတိပေးရန်"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"အကြောင်းကြားချက်များ ပိတ်ရန်"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ဤအက်ပ်ထံမှ အကြောင်းကြားချက်များကို ဆက်ပြလိုပါသလား။"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"ညင်သာသည်"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"မသိမသာ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ဦးစားပေး"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"အမြဲ အသံတိတ်ပါ။ ဆွဲချသည့်အရိပ်တွင် ပြသပါ။"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"အမြဲ အသံတိတ်ပါ။ ဆွဲချသည့်အရိပ်နှင့် အခြေအနေပြနေရာတွင် ပြသပါ။"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"အမြဲ အသံတိတ်ပါ။ ဆွဲချသည့်အရိပ်နှင့် လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပြသပါ။"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"အမြဲ အသံတိတ်ပါ။ ဆွဲချသည့်အရိပ်၊ အခြေအနေပြနေရာနှင့် လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပြသပါ။"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"အသံပြုပြီး ဆွဲချသည့်အရိပ်၊ အခြေအနေပြနေရာနှင့် လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပြသပါ။"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"အပေါ်မှဆွဲချသည့် နေရာတွင်သာ အကြောင်းကြားချက်များကို အာရုံစိုက်ရန် အထောက်ကူပြုပေးသည်။ အမြဲ အသံတိတ်ရန်။"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ဦးစားပေးအကြောင်းကြားချက်များ၏ အောက်တွင်ဖော်ပြသည်။ အမြဲ အသံတိတ်ရန်။"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ဦးစားပေးအကြောင်းကြားချက်များ၏ အောက်တွင်ဖော်ပြသည်။ အမြဲ အသံတိတ်ရန်။"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ဦးစားပေးအကြောင်းကြားချက်များ၏ အောက်တွင်ဖော်ပြသည်။ အမြဲ အသံတိတ်ရန်။"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"အသံအပါအဝင် အ‌ခြေနေပြနေရာ သင်္ကေတဖြင့် သင်သတိထားမိအောင် ပြုလုပ်သည်။ လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပြရန်။"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ဤအကြောင်းကြားချက်များကို ပြုပြင်၍ မရပါ။"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ဤအကြောင်းကြားချက်အုပ်စုကို ဤနေရာတွင် စီစဉ်သတ်မှတ်၍ မရပါ"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ပရောက်စီထည့်ထားသော အကြောင်းကြားချက်"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုနေသည်။"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုနေသည်။"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ဤအက်ပ်က ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
@@ -911,6 +912,8 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကိုဖွင့်ရန်"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပူဖောင်းကွက်များအတွက် ဆက်တင်များ"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> မှ ပူဖောင်းကွက်များကို ခွင့်ပြုလိုပါသလား။"</string>
+    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
+    <skip />
     <string name="no_bubbles" msgid="337101288173078247">"ငြင်းပယ်ရန်"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ခွင့်ပြုရန်"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"နောက်မှ မေးရန်"</string>

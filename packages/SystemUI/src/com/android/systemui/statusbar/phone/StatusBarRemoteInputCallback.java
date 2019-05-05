@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.View;
@@ -65,6 +66,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
     private final Context mContext;
     private final ActivityIntentHelper mActivityIntentHelper;
+    private final NotificationGroupManager mGroupManager;
     private View mPendingWorkRemoteInputView;
     private View mPendingRemoteInputView;
     private final ShadeController mShadeController = Dependency.get(ShadeController.class);
@@ -72,11 +74,12 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final CommandQueue mCommandQueue;
     private int mDisabled2;
     protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
+    private Handler mMainHandler = new Handler();
 
     /**
      */
     @Inject
-    public StatusBarRemoteInputCallback(Context context) {
+    public StatusBarRemoteInputCallback(Context context, NotificationGroupManager groupManager) {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
@@ -85,15 +88,15 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mCommandQueue = getComponent(context, CommandQueue.class);
         mCommandQueue.addCallback(this);
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
+        mGroupManager = groupManager;
     }
 
     @Override
     public void onStateChanged(int state) {
         if (state == StatusBarState.SHADE && mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
-                if (mPendingRemoteInputView != null
-                        && mPendingRemoteInputView.isAttachedToWindow()) {
-                    mPendingRemoteInputView.post(mPendingRemoteInputView::callOnClick);
+                if (mPendingRemoteInputView != null) {
+                    mMainHandler.post(mPendingRemoteInputView::callOnClick);
                 }
                 mPendingRemoteInputView = null;
             }
@@ -159,6 +162,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (mKeyguardMonitor.isShowing()) {
             onLockedRemoteInput(row, clickedView);
         } else {
+            if (row.isChildInGroup() && !row.areChildrenExpanded()) {
+                // The group isn't expanded, let's make sure it's visible!
+                mGroupManager.toggleGroupExpansion(row.getStatusBarNotification());
+            }
             row.setUserExpanded(true);
             row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);
         }

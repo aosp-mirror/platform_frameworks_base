@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint.Style;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextClock;
@@ -96,10 +95,7 @@ public class AnalogClockController implements ClockPlugin {
 
         mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClock = mView.findViewById(R.id.lock_screen_clock);
-        final int textSize = mResources.getDimensionPixelSize(R.dimen.widget_title_font_size);
-        mLockClock.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
     }
-
 
     @Override
     public void onDestroyView() {

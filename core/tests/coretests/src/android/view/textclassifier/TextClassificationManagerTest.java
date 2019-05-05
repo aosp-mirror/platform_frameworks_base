@@ -77,7 +77,7 @@ public class TextClassificationManagerTest {
 
         TextClassifier fallback = TextClassifier.NO_OP;
         TextClassifier classifier = new TextClassifierImpl(
-                fakeContext, TextClassificationConstants.loadFromString(null), fallback);
+                fakeContext, new TextClassificationConstants(() -> null), fallback);
 
         String text = "Contact me at +12122537077";
         String classifiedText = "+12122537077";

@@ -60,9 +60,11 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A helper class for {@link android.provider.DocumentsProvider} to perform file operations on local
@@ -613,28 +615,28 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return projection == null ? mDefaultProjection : projection;
     }
 
-    private void startObserving(File file, Uri notifyUri) {
+    private void startObserving(File file, Uri notifyUri, DirectoryCursor cursor) {
         synchronized (mObservers) {
             DirectoryObserver observer = mObservers.get(file);
             if (observer == null) {
-                observer = new DirectoryObserver(
-                        file, getContext().getContentResolver(), notifyUri);
+                observer =
+                        new DirectoryObserver(file, getContext().getContentResolver(), notifyUri);
                 observer.startWatching();
                 mObservers.put(file, observer);
             }
-            observer.mRefCount++;
+            observer.mCursors.add(cursor);
 
             if (LOG_INOTIFY) Log.d(TAG, "after start: " + observer);
         }
     }
 
-    private void stopObserving(File file) {
+    private void stopObserving(File file, DirectoryCursor cursor) {
         synchronized (mObservers) {
             DirectoryObserver observer = mObservers.get(file);
             if (observer == null) return;
 
-            observer.mRefCount--;
-            if (observer.mRefCount == 0) {
+            observer.mCursors.remove(cursor);
+            if (observer.mCursors.size() == 0) {
                 mObservers.remove(file);
                 observer.stopWatching();
             }
@@ -650,27 +652,31 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         private final File mFile;
         private final ContentResolver mResolver;
         private final Uri mNotifyUri;
+        private final CopyOnWriteArrayList<DirectoryCursor> mCursors;
 
-        private int mRefCount = 0;
-
-        public DirectoryObserver(File file, ContentResolver resolver, Uri notifyUri) {
+        DirectoryObserver(File file, ContentResolver resolver, Uri notifyUri) {
             super(file.getAbsolutePath(), NOTIFY_EVENTS);
             mFile = file;
             mResolver = resolver;
             mNotifyUri = notifyUri;
+            mCursors = new CopyOnWriteArrayList<>();
         }
 
         @Override
         public void onEvent(int event, String path) {
             if ((event & NOTIFY_EVENTS) != 0) {
                 if (LOG_INOTIFY) Log.d(TAG, "onEvent() " + event + " at " + path);
+                for (DirectoryCursor cursor : mCursors) {
+                    cursor.notifyChanged();
+                }
                 mResolver.notifyChange(mNotifyUri, null, false);
             }
         }
 
         @Override
         public String toString() {
-            return "DirectoryObserver{file=" + mFile.getAbsolutePath() + ", ref=" + mRefCount + "}";
+            String filePath = mFile.getAbsolutePath();
+            return "DirectoryObserver{file=" + filePath + ", ref=" + mCursors.size() + "}";
         }
     }
 
@@ -681,16 +687,22 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             super(columnNames);
 
             final Uri notifyUri = buildNotificationUri(docId);
-            setNotificationUri(getContext().getContentResolver(), notifyUri);
+            boolean registerSelfObserver = false; // Our FileObserver sees all relevant changes.
+            setNotificationUris(getContext().getContentResolver(), Arrays.asList(notifyUri),
+                    getContext().getContentResolver().getUserId(), registerSelfObserver);
 
             mFile = file;
-            startObserving(mFile, notifyUri);
+            startObserving(mFile, notifyUri, this);
+        }
+
+        public void notifyChanged() {
+            onChange(false);
         }
 
         @Override
         public void close() {
             super.close();
-            stopObserving(mFile);
+            stopObserving(mFile, this);
         }
     }
 }

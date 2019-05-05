@@ -23,7 +23,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/chooser_view_spacing"
     android:background="?android:attr/colorBackgroundFloating">
 
   <RelativeLayout
@@ -60,7 +59,7 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:clickable="true"
-        android:background="?android:attr/selectableItemBackgroundBorderless">
+        style="?attr/borderlessButtonStyle">
 
       <ImageView
           android:layout_width="24dp"
@@ -91,6 +90,7 @@
       android:orientation="horizontal"
       android:layout_marginLeft="@dimen/chooser_edge_margin_normal"
       android:layout_marginRight="@dimen/chooser_edge_margin_normal"
+      android:layout_marginBottom="@dimen/chooser_view_spacing"
       android:minHeight="80dp"
       android:background="@drawable/chooser_content_preview_rounded"
       android:id="@+id/content_preview_title_layout">
