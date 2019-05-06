@@ -48,7 +48,7 @@ public class RcsGroupThreadParticipantJoinedEventTest {
                 .createFromParcel(parcel);
 
         RcsGroupThreadParticipantJoinedEvent participantJoinedEvent =
-                participantJoinedEventDescriptor.createRcsEvent();
+                participantJoinedEventDescriptor.createRcsEvent(null);
 
         assertThat(participantJoinedEvent.getJoinedParticipant().getId()).isEqualTo(2);
         assertThat(participantJoinedEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);
