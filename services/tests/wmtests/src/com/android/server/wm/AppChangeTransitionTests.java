@@ -158,4 +158,22 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         waitUntilHandlersIdle();
         mToken.removeImmediately();
     }
+
+    @Test
+    public void testCancelPendingChangeOnHide() {
+        // setup currently defaults to no snapshot.
+        setUpOnDisplay(mDisplayContent);
+
+        mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertEquals(1, mDisplayContent.mChangingApps.size());
+        assertTrue(mToken.isInChangeTransition());
+
+        // Changing visibility should cancel the change transition and become closing
+        mToken.setVisibility(false, false);
+        assertEquals(0, mDisplayContent.mChangingApps.size());
+        assertFalse(mToken.isInChangeTransition());
+
+        waitUntilHandlersIdle();
+        mToken.removeImmediately();
+    }
 }
