@@ -272,6 +272,7 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
@@ -5736,6 +5737,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 owningUid, exported);
     }
 
+    @Override
+    public int checkPermissionWithDenialHintForwarding(String permission, int pid, int uid,
+            List<String> permissionDenialHints) {
+        List<String> prev = PermissionManager.resetPermissionDenialHints(permissionDenialHints);
+        try {
+            return checkPermission(permission, pid, uid);
+        } finally {
+            PermissionManager.resetPermissionDenialHints(prev);
+        }
+    }
+
     /**
      * As the only public entry point for permissions checking, this method
      * can enforce the semantic that requesting a check on a null global
@@ -5748,6 +5760,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public int checkPermission(String permission, int pid, int uid) {
         if (permission == null) {
+            PermissionManager.addPermissionDenialHint("Permission is null");
             return PackageManager.PERMISSION_DENIED;
         }
         return checkComponentPermission(permission, pid, uid, -1, true);

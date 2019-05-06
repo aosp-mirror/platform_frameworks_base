@@ -108,6 +108,7 @@ interface IPackageManager {
     @UnsupportedAppUsage
     int checkPermission(String permName, String pkgName, int userId);
 
+    int checkUidPermissionWithDenialHintForwarding(String permName, int uid, inout List<String> permissionDenialHints);
     int checkUidPermission(String permName, int uid);
 
     @UnsupportedAppUsage

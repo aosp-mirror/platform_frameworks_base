@@ -64,6 +64,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.permission.PermissionManager;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
@@ -3738,6 +3739,7 @@ public class ActivityManager {
         }
         // Isolated processes don't get any permissions.
         if (UserHandle.isIsolated(uid)) {
+            PermissionManager.addPermissionDenialHint("uid " + uid + " is isolated");
             return PackageManager.PERMISSION_DENIED;
         }
         // If there is a uid that owns whatever is being accessed, it has
@@ -3753,24 +3755,26 @@ public class ActivityManager {
             Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid,
                     here);
             */
+            PermissionManager.addPermissionDenialHint(
+                    "Target is not exported. owningUid=" + owningUid);
             return PackageManager.PERMISSION_DENIED;
         }
         if (permission == null) {
             return PackageManager.PERMISSION_GRANTED;
         }
-        try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return checkUidPermission(permission, uid);
     }
 
     /** @hide */
     public static int checkUidPermission(String permission, int uid) {
         try {
-            return AppGlobals.getPackageManager()
-                    .checkUidPermission(permission, uid);
+            List<String> hints = PermissionManager.getPermissionDenialHints();
+            if (hints == null) {
+                return AppGlobals.getPackageManager().checkUidPermission(permission, uid);
+            } else {
+                return AppGlobals.getPackageManager()
+                        .checkUidPermissionWithDenialHintForwarding(permission, uid, hints);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
