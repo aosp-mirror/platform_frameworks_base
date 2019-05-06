@@ -636,9 +636,11 @@ final class OverlayManagerServiceImpl {
         return true;
     }
 
-    void onDump(@NonNull final PrintWriter pw) {
-        mSettings.dump(pw);
-        pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
+    void dump(@NonNull final PrintWriter pw, @NonNull DumpState dumpState) {
+        mSettings.dump(pw, dumpState);
+        if (dumpState.getPackageName() == null) {
+            pw.println("Default overlays: " + TextUtils.join(";", mDefaultOverlays));
+        }
     }
 
     @NonNull String[] getDefaultOverlayPackages() {
