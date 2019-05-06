@@ -220,7 +220,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Unregister for stack order changes
             mDefaultDisplay.unregisterStackOrderChangedListener(this);
 
-            if (mWindowManager.getRecentsAnimationController() == null) return;
+            final RecentsAnimationController controller =
+                    mWindowManager.getRecentsAnimationController();
+            if (controller == null) return;
 
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
@@ -292,6 +294,16 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                             }
                         }
                     } else {
+                        // If there is no recents screenshot animation, we can update the visibility
+                        // of target stack immediately because it is visually invisible and the
+                        // launch-behind state is restored. That also prevents the next transition
+                        // type being disturbed if the visibility is updated after setting the next
+                        // transition (the target activity will be one of closing apps).
+                        if (!controller.shouldCancelWithDeferredScreenshot()
+                                && !targetStack.isFocusedStackOnDisplay()) {
+                            targetStack.ensureActivitiesVisibleLocked(null /* starting */,
+                                    0 /* starting */, false /* preserveWindows */);
+                        }
                         // Keep target stack in place, nothing changes, so ignore the transition
                         // logic below
                         return;
