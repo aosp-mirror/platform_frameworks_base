@@ -549,8 +549,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 configsByKey.put(AccessPoint.getKey(config), config);
             }
         }
-        ArrayMap<String, List<ScanResult>> scanResultsByApKey =
-                updateScanResultCache(newScanResults);
 
         WifiConfiguration connectionConfig = null;
         if (mLastInfo != null) {
@@ -560,6 +558,9 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         // Rather than dropping and reacquiring the lock multiple times in this method, we lock
         // once for efficiency of lock acquisition time and readability
         synchronized (mLock) {
+            ArrayMap<String, List<ScanResult>> scanResultsByApKey =
+                    updateScanResultCache(newScanResults);
+
             // Swap the current access points into a cached list for maintaining AP listeners
             List<AccessPoint> cachedAccessPoints;
             cachedAccessPoints = new ArrayList<>(mInternalAccessPoints);
