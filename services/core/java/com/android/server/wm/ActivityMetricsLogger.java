@@ -326,7 +326,7 @@ class ActivityMetricsLogger {
                                       intent));
         }
 
-        if (!isAnyTransitionActive()) {
+        if (mCurrentTransitionStartTime == INVALID_START_TIME) {
 
             mCurrentTransitionStartTime = SystemClock.uptimeMillis();
             mLastTransitionStartTime = mCurrentTransitionStartTime;
