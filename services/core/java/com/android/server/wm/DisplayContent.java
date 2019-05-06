@@ -4941,9 +4941,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean supportsSystemDecorations() {
         return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                || mWmService.mForceDesktopModeOnExternalDisplays)
+                || (mWmService.mForceDesktopModeOnExternalDisplays && !isUntrustedVirtualDisplay()))
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId;
+    }
+
+    /**
+     * @return {@code true} if the display is non-system created virtual display.
+     */
+    boolean isUntrustedVirtualDisplay() {
+        return mDisplay.getType() == Display.TYPE_VIRTUAL
+                && mDisplay.getOwnerUid() != Process.SYSTEM_UID;
     }
 
     /**
