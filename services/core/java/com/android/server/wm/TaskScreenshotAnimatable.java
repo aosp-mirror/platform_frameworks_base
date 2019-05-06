@@ -91,9 +91,11 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     }
 
     @Override
-    public void onAnimationLeashDestroyed(SurfaceControl.Transaction t) {
-        t.remove(mSurfaceControl);
-        mSurfaceControl = null;
+    public void onAnimationLeashLost(SurfaceControl.Transaction t) {
+        if (mSurfaceControl != null) {
+            t.remove(mSurfaceControl);
+            mSurfaceControl = null;
+        }
     }
 
     @Override
@@ -113,7 +115,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
 
     @Override
     public SurfaceControl getParentSurfaceControl() {
-        return mTask.mSurfaceAnimator.mLeash;
+        return mTask.mSurfaceControl;
     }
 
     @Override
