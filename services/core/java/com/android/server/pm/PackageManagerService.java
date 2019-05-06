@@ -13703,30 +13703,44 @@ public class PackageManagerService extends IPackageManager.Stub
         return unactionedPackages.toArray(new String[0]);
     }
 
-    @Override
-    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
-            PersistableBundle appExtras, PersistableBundle launcherExtras,
-            SuspendDialogInfo dialogInfo, String callingPackage, int userId) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
-                "setPackagesSuspendedAsUser");
+    private void enforceCanSetPackagesSuspendedAsUser(String callingPackage, int callingUid,
+            int userId, String callingMethod) {
+        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID) {
+            return;
+        }
 
-        final int callingUid = Binder.getCallingUid();
+        final String ownerPackage = mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(userId);
+        if (ownerPackage != null) {
+            final int ownerUid = getPackageUid(ownerPackage, 0, userId);
+            if (ownerUid == callingUid) {
+                return;
+            }
+            throw new UnsupportedOperationException("Cannot suspend/unsuspend packages. User "
+                    + userId + " has an active DO or PO");
+        }
+
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
+                callingMethod);
+
         final int packageUid = getPackageUid(callingPackage, 0, userId);
-        final boolean allowedCallingUid = callingUid == Process.ROOT_UID
-                || callingUid == Process.SYSTEM_UID;
         final boolean allowedPackageUid = packageUid == callingUid;
         final boolean allowedShell = callingUid == SHELL_UID
                 && UserHandle.isSameApp(packageUid, callingUid);
 
-        if (!allowedCallingUid && !allowedShell && !allowedPackageUid) {
+        if (!allowedShell && !allowedPackageUid) {
             throw new SecurityException("Calling package " + callingPackage + " in user "
                     + userId + " does not belong to calling uid " + callingUid);
         }
-        if (!PLATFORM_PACKAGE_NAME.equals(callingPackage)
-                && mProtectedPackages.getDeviceOwnerOrProfileOwnerPackage(userId) != null) {
-            throw new UnsupportedOperationException("Cannot suspend/unsuspend packages. User "
-                    + userId + " has an active DO or PO");
-        }
+    }
+
+    @Override
+    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
+            PersistableBundle appExtras, PersistableBundle launcherExtras,
+            SuspendDialogInfo dialogInfo, String callingPackage, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        enforceCanSetPackagesSuspendedAsUser(callingPackage, callingUid, userId,
+                "setPackagesSuspendedAsUser");
+
         if (ArrayUtils.isEmpty(packageNames)) {
             return packageNames;
         }
