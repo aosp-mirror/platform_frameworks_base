@@ -622,6 +622,7 @@ public class SettingsBackupTest {
                  Settings.Secure.COMPLETED_CATEGORY_PREFIX,
                  Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
                  Settings.Secure.CONTENT_CAPTURE_ENABLED,
+                 Settings.Secure.DEBUG_PACKAGE_PERMISSION_CHECK,
                  Settings.Secure.DEFAULT_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
