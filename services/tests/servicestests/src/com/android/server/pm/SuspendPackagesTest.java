@@ -509,25 +509,17 @@ public class SuspendPackagesTest {
     }
 
     @Test
-    public void testCannotSuspendWhenProfileOwner() throws IOException {
+    public void testCanSuspendWhenProfileOwner() throws IOException {
         assumeTrue(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN));
         assertTrue("Profile-owner could not be set", setProfileOwner());
-        try {
-            suspendTestPackage(null, null, null);
-            fail("Suspend succeeded. Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException uex) {
-        }
+        suspendTestPackage(null, null, null);
     }
 
     @Test
-    public void testCannotSuspendWhenDeviceOwner() throws IOException {
+    public void testCanSuspendWhenDeviceOwner() throws IOException {
         assumeTrue(mPackageManager.hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN));
         assertTrue("Device-owner could not be set", setDeviceOwner());
-        try {
-            suspendTestPackage(null, null, null);
-            fail("Suspend succeeded. Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException uex) {
-        }
+        suspendTestPackage(null, null, null);
     }
 
     @Test
