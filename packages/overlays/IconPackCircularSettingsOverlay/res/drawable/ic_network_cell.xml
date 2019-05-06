@@ -22,17 +22,14 @@
     android:width="24dp" >
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M20,4.75C20,4.34,19.66,4,19.25,4S18.5,4.34,18.5,4.75V22H20V4.75z" />
+        android:pathData="M20,22H18.5V4.75A0.76 0.76 ,0,0,1,19.25,4h0a0.76 0.76 ,0,0,1,0.75 0.75 Z" />
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M15.75,8C15.34,8,15,8.34,15,8.75V22h1.5V8.75C16.5,8.34,16.16,8,15.75,8z" />
+        android:pathData="M15.33,22h-1.5V9.75A0.76 0.76 ,0,0,1,14.58,9h0a0.75 0.75 ,0,0,1,0.75 0.75 Z" />
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M12.25,12c-0.41,0-0.75,0.34-0.75,0.75V22H13v-9.25C13,12.34,12.66,12,12.25,12z" />
+        android:pathData="M10.67,22H9.17V14.75A0.75 0.75 ,0,0,1,9.92,14h0a0.76 0.76 ,0,0,1,0.75 0.75 Z" />
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M8.75,15C8.34,15,8,15.34,8,15.75V22h1.5v-6.25C9.5,15.34,9.16,15,8.75,15z" />
-    <path
-        android:fillColor="@android:color/white"
-        android:pathData="M5.25,19c-0.41,0-0.75,0.34-0.75,0.75V22H6v-2.25C6,19.34,5.66,19,5.25,19z" />
+        android:pathData="M6,22H4.5V19.75A0.76 0.76 ,0,0,1,5.25,19h0a0.76 0.76 ,0,0,1,0.75 0.75 Z" />
 </vector>

@@ -285,6 +285,7 @@
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
         <item name="backgroundProtectedStyle">@style/BackgroundProtectedStyle</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
@@ -311,7 +312,7 @@
         <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
-    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
+    <style name="qs_theme" parent="@style/Theme.SystemUI">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>

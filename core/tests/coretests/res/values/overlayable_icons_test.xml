@@ -27,9 +27,9 @@
     <item>@*android:drawable/ic_bt_laptop</item>
     <item>@*android:drawable/ic_bt_network_pan</item>
     <item>@*android:drawable/ic_bt_pointing_hid</item>
+    <item>@*android:drawable/ic_corp_badge</item>
     <item>@*android:drawable/ic_expand_more</item>
     <item>@*android:drawable/ic_file_copy</item>
-    <item>@*android:drawable/ic_info_outline_24</item>
     <item>@*android:drawable/ic_lock</item>
     <item>@*android:drawable/ic_lock_bugreport</item>
     <item>@*android:drawable/ic_lock_open</item>
@@ -39,6 +39,7 @@
     <item>@*android:drawable/ic_phone</item>
     <item>@*android:drawable/ic_qs_airplane</item>
     <item>@*android:drawable/ic_qs_auto_rotate</item>
+    <item>@*android:drawable/ic_qs_battery_saver</item>
     <item>@*android:drawable/ic_qs_bluetooth</item>
     <item>@*android:drawable/ic_qs_dnd</item>
     <item>@*android:drawable/ic_qs_flashlight</item>
@@ -46,6 +47,17 @@
     <item>@*android:drawable/ic_restart</item>
     <item>@*android:drawable/ic_screenshot</item>
     <item>@*android:drawable/ic_settings_bluetooth</item>
+    <item>@*android:drawable/ic_signal_cellular_0_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_0_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_1_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_1_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_2_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_2_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_3_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_3_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_4_4_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_4_5_bar</item>
+    <item>@*android:drawable/ic_signal_cellular_5_5_bar</item>
     <item>@*android:drawable/ic_signal_location</item>
     <item>@*android:drawable/ic_wifi_signal_0</item>
     <item>@*android:drawable/ic_wifi_signal_1</item>
@@ -53,6 +65,7 @@
     <item>@*android:drawable/ic_wifi_signal_3</item>
     <item>@*android:drawable/ic_wifi_signal_4</item>
     <item>@*android:drawable/perm_group_activity_recognition</item>
+    <item>@*android:drawable/perm_group_calendar</item>
     <item>@*android:drawable/perm_group_call_log</item>
     <item>@*android:drawable/perm_group_camera</item>
     <item>@*android:drawable/perm_group_contacts</item>
