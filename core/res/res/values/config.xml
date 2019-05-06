@@ -3699,7 +3699,7 @@
     <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>
 
     <!-- URI for in call notification sound -->
-    <string translatable="false" name="config_inCallNotificationSound">/system/media/audio/ui/InCallNotification.ogg</string>
+    <string translatable="false" name="config_inCallNotificationSound">/product/media/audio/ui/InCallNotification.ogg</string>
 
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
     <integer translatable="false" name="config_autoGroupAtCount">4</integer>
