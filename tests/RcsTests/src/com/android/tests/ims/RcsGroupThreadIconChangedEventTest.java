@@ -50,9 +50,7 @@ public class RcsGroupThreadIconChangedEventTest {
                 RcsGroupThreadIconChangedEventDescriptor.CREATOR.createFromParcel(parcel);
 
         RcsGroupThreadIconChangedEvent iconChangedEvent =
-                iconChangedEventDescriptor.createRcsEvent();
-
-
+                iconChangedEventDescriptor.createRcsEvent(null);
 
         assertThat(iconChangedEvent.getNewIcon()).isEqualTo(newIconUri);
         assertThat(iconChangedEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);
