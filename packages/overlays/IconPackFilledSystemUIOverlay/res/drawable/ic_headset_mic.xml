@@ -19,7 +19,6 @@
     android:viewportHeight="24"
     android:viewportWidth="24"
     android:width="17dp" >
-    <path android:pathData="M0,0h24v24H0V0z" />
     <path
         android:fillColor="@android:color/white"
         android:pathData="M11.4,1.02C6.62,1.33,3,5.52,3,10.31L3,17c0,1.66,1.34,3,3,3h2c0.55,0,1-0.45,1-1v-6c0-0.55-0.45-1-1-1H5l0-1.71 C5,6.45,7.96,3.11,11.79,3C15.76,2.89,19,6.06,19,10v2h-3c-0.55,0-1,0.45-1,1v6c0,0.55,0.45,1,1,1h3v1h-6c-0.55,0-1,0.45-1,1v0 c0,0.55,0.45,1,1,1h5c1.66,0,3-1.34,3-3V10C21,4.83,16.64,0.68,11.4,1.02z" />
