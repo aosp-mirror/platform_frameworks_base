@@ -8810,8 +8810,8 @@ public class Notification implements Parcelable
              * and the notification is no longer relevant.</p>
              */
             @NonNull
-            public BubbleMetadata.Builder setSuppressNotification(boolean shouldSupressNotif) {
-                setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSupressNotif);
+            public BubbleMetadata.Builder setSuppressNotification(boolean shouldSuppressNotif) {
+                setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSuppressNotif);
                 return this;
             }
 
