@@ -6828,9 +6828,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            int lastWindowingMode = displayContent.getWindowingMode();
             mDisplayWindowSettings.setWindowingModeLocked(displayContent, mode);
 
             reconfigureDisplayLocked(displayContent);
+
+            if (lastWindowingMode != displayContent.getWindowingMode()) {
+                // reconfigure won't detect this change in isolation because the windowing mode is
+                // already set on the display, so fire off a new config now.
+                mH.removeMessages(H.SEND_NEW_CONFIGURATION);
+
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    // direct call since lock is shared.
+                    sendNewConfiguration(displayId);
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+                // Now that all configurations are updated, execute pending transitions
+                displayContent.executeAppTransition();
+            }
         }
     }
 
