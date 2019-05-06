@@ -13,7 +13,4 @@ Copyright (C) 2017 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="2.5dp"
-    android:insetRight="2.5dp"
-    android:drawable="@drawable/ic_cast_connected" />
+<com.android.systemui.statusbar.CastDrawable />
