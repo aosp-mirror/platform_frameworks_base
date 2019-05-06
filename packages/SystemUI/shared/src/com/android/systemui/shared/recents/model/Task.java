@@ -16,6 +16,8 @@
 
 package com.android.systemui.shared.recents.model;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.content.ComponentName;
@@ -62,6 +64,12 @@ public class Task {
         @ViewDebug.ExportedProperty(category="recents")
         public long lastActiveTime;
 
+        /**
+         * The id of the task was running from which display.
+         */
+        @ViewDebug.ExportedProperty(category = "recents")
+        public final int displayId;
+
         // The source component name which started this task
         public final ComponentName sourceComponent;
 
@@ -79,6 +87,7 @@ public class Task {
             this.sourceComponent = sourceComponent;
             this.userId = t.userId;
             this.lastActiveTime = t.lastActiveTime;
+            this.displayId = t.displayId;
             updateHashCode();
         }
 
@@ -90,6 +99,19 @@ public class Task {
             this.sourceComponent = sourceComponent;
             this.userId = userId;
             this.lastActiveTime = lastActiveTime;
+            this.displayId = DEFAULT_DISPLAY;
+            updateHashCode();
+        }
+
+        public TaskKey(int id, int windowingMode, Intent intent,
+                ComponentName sourceComponent, int userId, long lastActiveTime, int displayId) {
+            this.id = id;
+            this.windowingMode = windowingMode;
+            this.baseIntent = intent;
+            this.sourceComponent = sourceComponent;
+            this.userId = userId;
+            this.lastActiveTime = lastActiveTime;
+            this.displayId = displayId;
             updateHashCode();
         }
 
