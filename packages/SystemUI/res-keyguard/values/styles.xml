@@ -66,16 +66,16 @@
         <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
         <item name="android:ellipsize">none</item>
     </style>
-    <style name="widget_big_bold">
+    <style name="widget_title_bold">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">@dimen/widget_big_font_size</item>
-        <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
+        <item name="android:textSize">@dimen/widget_title_font_size</item>
+        <item name="android:paddingBottom">@dimen/widget_vertical_padding_clock</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:ellipsize">none</item>
     </style>
     <style name="widget_small_bold">
         <item name="android:textStyle">bold</item>
-        <item name="android:textSize">@dimen/widget_title_font_size</item>
+        <item name="android:textSize">@dimen/widget_small_font_size</item>
         <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:ellipsize">none</item>
