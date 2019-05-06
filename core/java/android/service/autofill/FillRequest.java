@@ -71,14 +71,6 @@ public final class FillRequest implements Parcelable {
      */
     public static final int FLAG_COMPATIBILITY_MODE_REQUEST = 0x2;
 
-    // Private flags below start from the highest-significative bit (0x80000000)
-    /**
-     * Request was only triggered for augmented autofill.
-     *
-     * @hide
-     */
-    public static final int FLAG_AUGMENTED_AUTOFILL_REQUEST = 0x80000000;
-
     /** @hide */
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
