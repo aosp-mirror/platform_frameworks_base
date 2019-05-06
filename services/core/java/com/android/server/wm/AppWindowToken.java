@@ -509,6 +509,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final DisplayContent displayContent = getDisplayContent();
         displayContent.mOpeningApps.remove(this);
         displayContent.mClosingApps.remove(this);
+        if (isInChangeTransition()) {
+            clearChangeLeash(getPendingTransaction(), true /* cancel */);
+        }
+        displayContent.mChangingApps.remove(this);
         waitingToShow = false;
         hiddenRequested = !visible;
         mDeferHidingClient = deferHidingClient;
@@ -1310,7 +1314,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void onDisplayChanged(DisplayContent dc) {
         DisplayContent prevDc = mDisplayContent;
         super.onDisplayChanged(dc);
-        if (prevDc == null) {
+        if (prevDc == null || prevDc == mDisplayContent) {
             return;
         }
         if (prevDc.mChangingApps.contains(this)) {
@@ -1333,7 +1337,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
 
-        if (prevDc != mDisplayContent && mLetterbox != null) {
+        if (mLetterbox != null) {
             mLetterbox.onMovedToDisplay(mDisplayContent.getDisplayId());
         }
     }
