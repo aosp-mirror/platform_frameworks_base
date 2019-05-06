@@ -27,5 +27,6 @@ message LocaleProto {
     optional string language = 1;
     optional string country = 2;
     optional string variant = 3;
+    optional string script = 4;
 }
 

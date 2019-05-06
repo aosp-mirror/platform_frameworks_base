@@ -55,6 +55,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
@@ -70,6 +71,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
 
@@ -86,6 +88,8 @@ import java.util.Locale;
 public final class Configuration implements Parcelable, Comparable<Configuration> {
     /** @hide */
     public static final Configuration EMPTY = new Configuration();
+
+    private static final String TAG = "Configuration";
 
     /**
      * Current user preference for the scaling factor for fonts, relative
@@ -1186,6 +1190,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         String language = "";
                         String country = "";
                         String variant = "";
+                        String script = "";
                         try {
                             while (protoInputStream.nextField()
                                     != ProtoInputStream.NO_MORE_FIELDS) {
@@ -1200,6 +1205,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                                     case (int) LocaleProto.VARIANT:
                                         variant = protoInputStream.readString(LocaleProto.VARIANT);
                                         break;
+                                    case (int) LocaleProto.SCRIPT:
+                                        script = protoInputStream.readString(LocaleProto.SCRIPT);
+                                        break;
                                 }
                             }
                         } catch (WireTypeMismatchException wtme) {
@@ -1207,7 +1215,19 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                             throw wtme;
                         } finally {
                             protoInputStream.end(localeToken);
-                            list.add(new Locale(language, country, variant));
+                            try {
+                                final Locale locale = new Locale.Builder()
+                                                        .setLanguage(language)
+                                                        .setRegion(country)
+                                                        .setVariant(variant)
+                                                        .setScript(script)
+                                                        .build();
+                                list.add(locale);
+                            } catch (IllformedLocaleException e) {
+                                Slog.e(TAG, "readFromProto error building locale with: "
+                                        + "language-" + language + ";country-" + country
+                                        + ";variant-" + variant + ";script-" + script);
+                            }
                         }
                         break;
                     case (int) SCREEN_LAYOUT:
