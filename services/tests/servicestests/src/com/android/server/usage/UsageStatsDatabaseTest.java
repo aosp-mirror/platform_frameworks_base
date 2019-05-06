@@ -223,6 +223,22 @@ public class UsageStatsDatabaseTest {
         config9.densityDpi = 19;
         mIntervalStats.getOrCreateConfigurationStats(config9);
 
+        Configuration config10 = new Configuration();
+        final Locale locale10 = new Locale.Builder()
+                                    .setLocale(new Locale("zh", "CN"))
+                                    .setScript("Hans")
+                                    .build();
+        config10.setLocale(locale10);
+        mIntervalStats.getOrCreateConfigurationStats(config10);
+
+        Configuration config11 = new Configuration();
+        final Locale locale11 = new Locale.Builder()
+                                    .setLocale(new Locale("zh", "CN"))
+                                    .setScript("Hant")
+                                    .build();
+        config11.setLocale(locale11);
+        mIntervalStats.getOrCreateConfigurationStats(config11);
+
         mIntervalStats.activeConfiguration = config9;
     }
 
