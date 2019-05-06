@@ -1205,11 +1205,11 @@ public final class SystemServer {
                 traceBeginAndSlog("StartPersistentDataBlock");
                 mSystemServiceManager.startService(PersistentDataBlockService.class);
                 traceEnd();
-
-                traceBeginAndSlog("StartTestHarnessMode");
-                mSystemServiceManager.startService(TestHarnessModeService.class);
-                traceEnd();
             }
+
+            traceBeginAndSlog("StartTestHarnessMode");
+            mSystemServiceManager.startService(TestHarnessModeService.class);
+            traceEnd();
 
             if (hasPdb || OemLockService.isHalPresent()) {
                 // Implementation depends on pdb or the OemLock HAL
