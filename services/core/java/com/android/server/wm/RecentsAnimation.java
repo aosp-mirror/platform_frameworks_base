@@ -352,6 +352,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
         final RecentsAnimationController controller =
                 mWindowManager.getRecentsAnimationController();
+        if (controller == null) {
+            return;
+        }
+
         final DisplayContent dc =
                 mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         dc.mBoundsAnimationController.setAnimationType(

@@ -195,7 +195,7 @@ class AppWindowThumbnail implements Animatable {
     }
 
     @Override
-    public void onAnimationLeashDestroyed(Transaction t) {
+    public void onAnimationLeashLost(Transaction t) {
 
         // TODO: Once attached to app token, we don't need to hide it immediately if thumbnail
         // became visible.
