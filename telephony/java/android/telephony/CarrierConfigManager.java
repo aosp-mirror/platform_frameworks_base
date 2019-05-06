@@ -3156,8 +3156,7 @@ public class CarrierConfigManager {
      * May throw an {@link IllegalArgumentException} if {@code overrideValues} contains invalid
      * values for the specified config keys.
      *
-     * NOTE: This API is meant for testing purposes only and may only be accessed from the shell UID
-     * during instrumentation testing.
+     * NOTE: This API is meant for testing purposes only.
      *
      * @param subscriptionId The subscription ID for which the override should be done.
      * @param overrideValues Key-value pairs of the values that are to be overridden. If set to
