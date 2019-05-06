@@ -45,6 +45,7 @@ message WindowManagerServiceDumpProto {
     optional bool display_frozen = 6;
     optional int32 rotation = 7;
     optional int32 last_orientation = 8;
+    optional int32 focused_display_id = 9;
 }
 
 /* represents RootWindowContainer object */
