@@ -601,28 +601,36 @@ public class GraphicsEnvironment {
             return false;
         }
 
-        final String anglePkgName = getAnglePackageName(pm);
-        if (anglePkgName.isEmpty()) {
-            Log.e(TAG, "Failed to find ANGLE package.");
-            return false;
-        }
+        ApplicationInfo angleInfo = null;
 
-        final ApplicationInfo angleInfo;
-        String angleDebugPackage = getAngleDebugPackage(context, bundle);
-        if (!angleDebugPackage.isEmpty()) {
-            Log.i(TAG, "ANGLE debug package enabled: " + angleDebugPackage);
+        // If the developer has specified a debug package over ADB, attempt to find it
+        String anglePkgName = getAngleDebugPackage(context, bundle);
+        if (!anglePkgName.isEmpty()) {
+            Log.i(TAG, "ANGLE debug package enabled: " + anglePkgName);
             try {
                 // Note the debug package does not have to be pre-installed
-                angleInfo = pm.getApplicationInfo(angleDebugPackage, 0);
+                angleInfo = pm.getApplicationInfo(anglePkgName, 0);
             } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "ANGLE debug package '" + angleDebugPackage + "' not installed");
+                Log.w(TAG, "ANGLE debug package '" + anglePkgName + "' not installed");
                 return false;
             }
-        } else {
-            try {
-                angleInfo = pm.getApplicationInfo(anglePkgName, PackageManager.MATCH_SYSTEM_ONLY);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
+        }
+
+        // Otherwise, check to see if ANGLE is properly installed
+        if (angleInfo == null) {
+            anglePkgName = getAnglePackageName(pm);
+            if (!anglePkgName.isEmpty()) {
+                Log.i(TAG, "ANGLE package enabled: " + anglePkgName);
+                try {
+                    // Production ANGLE libraries must be pre-installed as a system app
+                    angleInfo = pm.getApplicationInfo(anglePkgName,
+                            PackageManager.MATCH_SYSTEM_ONLY);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.w(TAG, "ANGLE package '" + anglePkgName + "' not installed");
+                    return false;
+                }
+            } else {
+                Log.e(TAG, "Failed to find ANGLE package.");
                 return false;
             }
         }
@@ -683,7 +691,7 @@ public class GraphicsEnvironment {
     private boolean setupAndUseAngle(Context context, String packageName) {
         // Need to make sure we are evaluating ANGLE usage for the correct circumstances
         if (!setupAngle(context, null, context.getPackageManager(), packageName)) {
-            Log.v(TAG, "Package '" + packageName + "' should use not ANGLE");
+            Log.v(TAG, "Package '" + packageName + "' should not use ANGLE");
             return false;
         }
 
