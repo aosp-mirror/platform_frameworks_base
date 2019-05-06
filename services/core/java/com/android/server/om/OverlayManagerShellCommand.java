@@ -77,13 +77,17 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("Overlay manager (overlay) commands:");
         out.println("  help");
         out.println("    Print this help text.");
-        out.println("  dump [--verbose] [--user USER_ID] [PACKAGE [PACKAGE [...]]]");
+        out.println("  dump [--verbose] [--user USER_ID] [[FIELD] PACKAGE]");
         out.println("    Print debugging information about the overlay manager.");
-        out.println("  list [--user USER_ID] [PACKAGE [PACKAGE [...]]]");
+        out.println("    With optional parameter PACKAGE, limit output to the specified");
+        out.println("    package. With optional parameter FIELD, limit output to");
+        out.println("    the value of that SettingsItem field. Field names are");
+        out.println("    case insensitive and out.println the m prefix can be omitted,");
+        out.println("    so the following are equivalent: mState, mstate, State, state.");
+        out.println("  list [--user USER_ID] [PACKAGE]");
         out.println("    Print information about target and overlay packages.");
         out.println("    Overlay packages are printed in priority order. With optional");
-        out.println("    parameters PACKAGEs, limit output to the specified packages");
-        out.println("    but include more information about each package.");
+        out.println("    parameter PACKAGE, limit output to the specified package.");
         out.println("  enable [--user USER_ID] PACKAGE");
         out.println("    Enable overlay package PACKAGE.");
         out.println("  disable [--user USER_ID] PACKAGE");
@@ -116,14 +120,20 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return 1;
             }
         }
+        final String packageName = getNextArg();
 
         final Map<String, List<OverlayInfo>> allOverlays = mInterface.getAllOverlays(userId);
         for (final String targetPackageName : allOverlays.keySet()) {
-            out.println(targetPackageName);
+            if (targetPackageName.equals(packageName)) {
+                out.println(targetPackageName);
+            }
             List<OverlayInfo> overlaysForTarget = allOverlays.get(targetPackageName);
             final int n = overlaysForTarget.size();
             for (int i = 0; i < n; i++) {
                 final OverlayInfo oi = overlaysForTarget.get(i);
+                if (!targetPackageName.equals(packageName) && !oi.packageName.equals(packageName)) {
+                    continue;
+                }
                 String status;
                 switch (oi.state) {
                     case OverlayInfo.STATE_ENABLED_STATIC:
@@ -139,7 +149,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
                 }
                 out.println(String.format("%s %s", status, oi.packageName));
             }
-            out.println();
+            if (targetPackageName.equals(packageName)) {
+                out.println();
+            }
         }
         return 0;
     }
