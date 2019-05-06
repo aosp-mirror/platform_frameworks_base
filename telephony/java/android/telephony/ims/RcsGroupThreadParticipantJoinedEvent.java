@@ -30,13 +30,14 @@ public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEv
      * Creates a new {@link RcsGroupThreadParticipantJoinedEvent}. This event is not persisted into
      * storage until {@link RcsMessageStore#persistRcsEvent(RcsEvent)} is called.
      *
-     * @param timestamp The timestamp of when this event happened, in milliseconds passed after
-     *                  midnight, January 1st, 1970 UTC
-     * @param rcsGroupThread The {@link RcsGroupThread} that this event happened on
+     * @param timestamp              The timestamp of when this event happened, in milliseconds
+     *                               passed after
+     *                               midnight, January 1st, 1970 UTC
+     * @param rcsGroupThread         The {@link RcsGroupThread} that this event happened on
      * @param originatingParticipant The {@link RcsParticipant} that added or invited the new
      *                               {@link RcsParticipant} into the {@link RcsGroupThread}
-     * @param joinedParticipant The new {@link RcsParticipant} that joined the
-     *                          {@link RcsGroupThread}
+     * @param joinedParticipant      The new {@link RcsParticipant} that joined the
+     *                               {@link RcsGroupThread}
      * @see RcsMessageStore#persistRcsEvent(RcsEvent)
      */
     public RcsGroupThreadParticipantJoinedEvent(long timestamp,
@@ -61,8 +62,9 @@ public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEv
     @Override
     void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
         rcsControllerCall.call(
-                iRcs -> iRcs.createGroupThreadParticipantJoinedEvent(getTimestamp(),
+                (iRcs, callingPackage) -> iRcs.createGroupThreadParticipantJoinedEvent(
+                        getTimestamp(),
                         getRcsGroupThread().getThreadId(), getOriginatingParticipant().getId(),
-                        getJoinedParticipant().getId()));
+                        getJoinedParticipant().getId(), callingPackage));
     }
 }
