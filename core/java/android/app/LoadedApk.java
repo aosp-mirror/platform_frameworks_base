@@ -1511,7 +1511,7 @@ public final class LoadedApk {
             private Intent mCurIntent;
             private final boolean mOrdered;
             private boolean mDispatched;
-            private Throwable mPreviousRunStacktrace; // To investigate b/37809561. STOPSHIP remove.
+            private boolean mRunCalled;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                     boolean ordered, boolean sticky, int sendingUser) {
@@ -1539,13 +1539,12 @@ public final class LoadedApk {
                     final Intent intent = mCurIntent;
                     if (intent == null) {
                         Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched
-                                + ": run() previously called at "
-                                + Log.getStackTraceString(mPreviousRunStacktrace));
+                                + (mRunCalled ? ", run() has already been called" : ""));
                     }
 
                     mCurIntent = null;
                     mDispatched = true;
-                    mPreviousRunStacktrace = new Throwable("Previous stacktrace");
+                    mRunCalled = true;
                     if (receiver == null || intent == null || mForgotten) {
                         if (mRegistered && ordered) {
                             if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
