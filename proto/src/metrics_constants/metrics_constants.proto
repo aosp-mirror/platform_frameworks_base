@@ -263,6 +263,14 @@ message MetricsEvent {
     PREVIOUSLY_VISIBLE = 2;
   }
 
+  // Types for ACTION_SHORTCUTS_CHANGED
+  enum ShortcutsChangesInfo {
+    SHORTCUTS_CHANGED_UNKNOWN = 0;
+    SHORTCUTS_CHANGED_USER_ID = 1;
+    SHORTCUTS_CHANGED_PACKAGE_COUNT = 2;
+    SHORTCUTS_CHANGED_SHORTCUT_COUNT = 3;
+  }
+
   // Explanations for notification importance, derived from
   // NotificationRecord.mImportanceExplanation.
   enum NotificationImportanceExplanation {
@@ -7221,6 +7229,19 @@ message MetricsEvent {
     //    For OPEN, the subtype is the innovation type for the assistant.
     // OS: Q
     ASSISTANT = 1716;
+
+    // ACTION: Published shortcuts in ShortcutManager changed
+    //   TYPE: All the SHORTCUTS_CHANGED_* values in ShortcutsChangesInfo
+    // OS: Q
+    ACTION_SHORTCUTS_CHANGED = 1717;
+
+    // ACTION: Direct share targets loaded via ShortcutManager
+    // OS: Q
+    ACTION_DIRECT_SHARE_TARGETS_LOADED_SHORTCUT_MANAGER = 1718;
+
+    // ACTION: Direct share targets loaded via ChooserService
+    // OS: Q
+    ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE = 1719;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
