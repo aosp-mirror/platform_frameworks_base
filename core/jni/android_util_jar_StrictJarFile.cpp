@@ -146,7 +146,7 @@ jobject StrictJarFile_nativeFindEntry(JNIEnv* env, jobject, jlong nativeHandle,
 
   ZipEntry data;
   const int32_t error = FindEntry(reinterpret_cast<ZipArchiveHandle>(nativeHandle),
-                                  ZipString(entryNameChars.c_str()), &data);
+                                  entryNameChars.c_str(), &data);
   if (error) {
     return NULL;
   }
