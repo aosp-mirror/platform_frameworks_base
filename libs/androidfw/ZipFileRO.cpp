@@ -98,7 +98,7 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 
     data->name = ZipString(entryName);
 
-    const int32_t error = FindEntry(mHandle, data->name, &(data->entry));
+    const int32_t error = FindEntry(mHandle, entryName, &(data->entry));
     if (error) {
         delete data;
         return NULL;

@@ -125,9 +125,8 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(unmanaged_handle, path, last_mod_time));
 
   // Find the resource table.
-  ::ZipString entry_name(kResourcesArsc.c_str());
   ::ZipEntry entry;
-  result = ::FindEntry(loaded_apk->zip_handle_.get(), entry_name, &entry);
+  result = ::FindEntry(loaded_apk->zip_handle_.get(), kResourcesArsc, &entry);
   if (result != 0) {
     // There is no resources.arsc, so create an empty LoadedArsc and return.
     loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
@@ -165,9 +164,8 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMode mode) const {
   CHECK(zip_handle_ != nullptr);
 
-  ::ZipString name(path.c_str());
   ::ZipEntry entry;
-  int32_t result = ::FindEntry(zip_handle_.get(), name, &entry);
+  int32_t result = ::FindEntry(zip_handle_.get(), path, &entry);
   if (result != 0) {
     return {};
   }
