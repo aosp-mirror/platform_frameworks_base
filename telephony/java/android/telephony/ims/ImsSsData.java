@@ -457,7 +457,7 @@ public final class ImsSsData implements Parcelable {
     }
 
     public boolean isTypeInterrogation() {
-        return (getServiceType() == SS_INTERROGATION);
+        return (getRequestType() == SS_INTERROGATION);
     }
 
     /**
