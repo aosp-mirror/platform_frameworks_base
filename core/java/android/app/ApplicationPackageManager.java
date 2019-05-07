@@ -90,6 +90,7 @@ import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.IconDrawableFactory;
 import android.util.LauncherIcons;
 import android.util.Log;
@@ -117,7 +118,14 @@ import java.util.Set;
 /** @hide */
 public class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
-    private final static boolean DEBUG_ICONS = false;
+    private static final boolean DEBUG_ICONS = false;
+    /**
+     * Note: Changing this won't do anything on it's own - you should also change the filtering in
+     * {@link #shouldTraceGrant}
+     *
+     * @hide
+     */
+    public static final boolean DEBUG_TRACE_GRANTS = false;
 
     private static final int DEFAULT_EPHEMERAL_COOKIE_MAX_SIZE_BYTES = 16384; // 16KB
 
@@ -680,6 +688,11 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void grantRuntimePermission(String packageName, String permissionName,
             UserHandle user) {
+        if (DEBUG_TRACE_GRANTS
+                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+            Log.i(TAG, "App " + mContext.getPackageName() + " is granting "
+                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+        }
         try {
             mPM.grantRuntimePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
@@ -687,9 +700,20 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /** @hide */
+    public static boolean shouldTraceGrant(String packageName, String permissionName, int userId) {
+        // To be modified when debugging
+        return false;
+    }
+
     @Override
     public void revokeRuntimePermission(String packageName, String permissionName,
             UserHandle user) {
+        if (DEBUG_TRACE_GRANTS
+                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+            Log.i(TAG, "App " + mContext.getPackageName() + " is revoking "
+                    + permissionName + " for user " + user.getIdentifier(), new RuntimeException());
+        }
         try {
             mPM.revokeRuntimePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
@@ -709,6 +733,15 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void updatePermissionFlags(String permissionName, String packageName,
             int flagMask, int flagValues, UserHandle user) {
+        if (DEBUG_TRACE_GRANTS
+                && shouldTraceGrant(packageName, permissionName, user.getIdentifier())) {
+            Log.i(TAG, "App " + mContext.getPackageName() + " is updating flags for "
+                    + permissionName + " for user " + user.getIdentifier() + ": "
+                    + DebugUtils.flagsToString(PackageManager.class, "FLAG_PERMISSION_", flagMask)
+                    + " := " + DebugUtils.flagsToString(
+                            PackageManager.class, "FLAG_PERMISSION_", flagValues),
+                    new RuntimeException());
+        }
         try {
             mPM.updatePermissionFlags(permissionName, packageName, flagMask,
                     flagValues,

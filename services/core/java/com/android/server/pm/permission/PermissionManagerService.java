@@ -49,6 +49,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ApplicationPackageManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PermissionWhitelistFlags;
@@ -76,6 +77,7 @@ import android.permission.PermissionManagerInternal.OnRuntimePermissionStateChan
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -1999,6 +2001,13 @@ public class PermissionManagerService {
 
     private void grantRuntimePermission(String permName, String packageName, boolean overridePolicy,
             int callingUid, final int userId, PermissionCallback callback) {
+        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+            Log.i(TAG, "System is granting "
+                    + permName + " for user " + userId + " on behalf of uid " + callingUid
+                    + " " + mPackageManagerInt.getNameForUid(callingUid),
+                    new RuntimeException());
+        }
         if (!mUserManagerInt.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -2133,6 +2142,14 @@ public class PermissionManagerService {
 
     private void revokeRuntimePermission(String permName, String packageName,
             boolean overridePolicy, int userId, PermissionCallback callback) {
+        int callingUid = Binder.getCallingUid();
+        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+            Log.i(TAG, "System is revoking "
+                            + permName + " for user " + userId + " on behalf of uid " + callingUid
+                            + " " + mPackageManagerInt.getNameForUid(callingUid),
+                    new RuntimeException());
+        }
         if (!mUserManagerInt.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -2142,7 +2159,7 @@ public class PermissionManagerService {
                 android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
                 "revokeRuntimePermission");
 
-        enforceCrossUserPermission(Binder.getCallingUid(), userId,
+        enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
                 true,  // checkShell
                 false, // requirePermissionWhenSameUser
@@ -2152,7 +2169,7 @@ public class PermissionManagerService {
         if (pkg == null || pkg.mExtras == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        if (mPackageManagerInt.filterAppAccess(pkg, Binder.getCallingUid(), userId)) {
+        if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
         final BasePermission bp = mSettings.getPermissionLocked(permName);
@@ -2759,6 +2776,20 @@ public class PermissionManagerService {
     private void updatePermissionFlags(String permName, String packageName, int flagMask,
             int flagValues, int callingUid, int userId, boolean overridePolicy,
             PermissionCallback callback) {
+        if (ApplicationPackageManager.DEBUG_TRACE_GRANTS
+                && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
+            Log.i(TAG, "System is updating flags for "
+                            + permName + " for user " + userId  + " "
+                            + DebugUtils.flagsToString(
+                                    PackageManager.class, "FLAG_PERMISSION_", flagMask)
+                            + " := "
+                            + DebugUtils.flagsToString(
+                                    PackageManager.class, "FLAG_PERMISSION_", flagValues)
+                            + " on behalf of uid " + callingUid
+                            + " " + mPackageManagerInt.getNameForUid(callingUid),
+                    new RuntimeException());
+        }
+
         if (!mUserManagerInt.exists(userId)) {
             return;
         }
