@@ -62,7 +62,7 @@ class Dimmer {
         }
 
         @Override
-        public void onAnimationLeashDestroyed(SurfaceControl.Transaction t) {
+        public void onAnimationLeashLost(SurfaceControl.Transaction t) {
         }
 
         @Override

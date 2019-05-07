@@ -45,6 +45,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -391,11 +392,34 @@ public class BubbleStackView extends FrameLayout {
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
+
+        // Custom actions.
+        AccessibilityAction moveTopLeft = new AccessibilityAction(R.id.action_move_top_left,
+                getContext().getResources()
+                        .getString(R.string.bubble_accessibility_action_move_top_left));
+        info.addAction(moveTopLeft);
+
+        AccessibilityAction moveTopRight = new AccessibilityAction(R.id.action_move_top_right,
+                getContext().getResources()
+                        .getString(R.string.bubble_accessibility_action_move_top_right));
+        info.addAction(moveTopRight);
+
+        AccessibilityAction moveBottomLeft = new AccessibilityAction(R.id.action_move_bottom_left,
+                getContext().getResources()
+                        .getString(R.string.bubble_accessibility_action_move_bottom_left));
+        info.addAction(moveBottomLeft);
+
+        AccessibilityAction moveBottomRight = new AccessibilityAction(R.id.action_move_bottom_right,
+                getContext().getResources()
+                        .getString(R.string.bubble_accessibility_action_move_bottom_right));
+        info.addAction(moveBottomRight);
+
+        // Default actions.
+        info.addAction(AccessibilityAction.ACTION_DISMISS);
         if (mIsExpanded) {
-            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+            info.addAction(AccessibilityAction.ACTION_COLLAPSE);
         } else {
-            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+            info.addAction(AccessibilityAction.ACTION_EXPAND);
         }
     }
 
@@ -404,16 +428,30 @@ public class BubbleStackView extends FrameLayout {
         if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_DISMISS:
-                mBubbleData.dismissAll(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
-                return true;
-            case AccessibilityNodeInfo.ACTION_COLLAPSE:
-                mBubbleData.setExpanded(false);
-                return true;
-            case AccessibilityNodeInfo.ACTION_EXPAND:
-                mBubbleData.setExpanded(true);
-                return true;
+        final RectF stackBounds = mStackAnimationController.getAllowableStackPositionRegion();
+
+        // R constants are not final so we cannot use switch-case here.
+        if (action == AccessibilityNodeInfo.ACTION_DISMISS) {
+            mBubbleData.dismissAll(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
+            return true;
+        } else if (action == AccessibilityNodeInfo.ACTION_COLLAPSE) {
+            mBubbleData.setExpanded(false);
+            return true;
+        } else if (action == AccessibilityNodeInfo.ACTION_EXPAND) {
+            mBubbleData.setExpanded(true);
+            return true;
+        } else if (action == R.id.action_move_top_left) {
+            mStackAnimationController.springStack(stackBounds.left, stackBounds.top);
+            return true;
+        } else if (action == R.id.action_move_top_right) {
+            mStackAnimationController.springStack(stackBounds.right, stackBounds.top);
+            return true;
+        } else if (action == R.id.action_move_bottom_left) {
+            mStackAnimationController.springStack(stackBounds.left, stackBounds.bottom);
+            return true;
+        } else if (action == R.id.action_move_bottom_right) {
+            mStackAnimationController.springStack(stackBounds.right, stackBounds.bottom);
+            return true;
         }
         return false;
     }

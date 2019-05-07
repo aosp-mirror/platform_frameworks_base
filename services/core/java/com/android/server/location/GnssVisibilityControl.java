@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -135,6 +136,7 @@ class GnssVisibilityControl {
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addDataScheme("package");
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
@@ -148,6 +150,7 @@ class GnssVisibilityControl {
                     case Intent.ACTION_PACKAGE_ADDED:
                     case Intent.ACTION_PACKAGE_REMOVED:
                     case Intent.ACTION_PACKAGE_REPLACED:
+                    case Intent.ACTION_PACKAGE_CHANGED:
                         String pkgName = intent.getData().getEncodedSchemeSpecificPart();
                         handleProxyAppPackageUpdate(pkgName, action);
                         break;
@@ -162,10 +165,12 @@ class GnssVisibilityControl {
             return; // ignore, pkgName is not one of the proxy apps in our list.
         }
 
-        Log.i(TAG, "Proxy app " + pkgName + " package changed: " + action);
-        final boolean updatedLocationPermission = hasLocationPermission(pkgName);
+        if (DEBUG) Log.d(TAG, "Proxy app " + pkgName + " package changed: " + action);
+        final boolean updatedLocationPermission = shouldEnableLocationPermissionInGnssHal(pkgName);
         if (locationPermission != updatedLocationPermission) {
             // Permission changed. So, update the GNSS HAL with the updated list.
+            Log.i(TAG, "Proxy app " + pkgName + " location permission changed."
+                    + " IsLocationPermissionEnabled: " + updatedLocationPermission);
             mProxyAppToLocationPermissions.put(pkgName, updatedLocationPermission);
             updateNfwLocationAccessProxyAppsInGnssHal();
         }
@@ -192,8 +197,9 @@ class GnssVisibilityControl {
             mProxyAppToLocationPermissions.clear();
         }
 
-        for (String proxApp : nfwLocationAccessProxyApps) {
-            mProxyAppToLocationPermissions.put(proxApp, hasLocationPermission(proxApp));
+        for (String proxyAppPkgName : nfwLocationAccessProxyApps) {
+            mProxyAppToLocationPermissions.put(proxyAppPkgName,
+                    shouldEnableLocationPermissionInGnssHal(proxyAppPkgName));
         }
 
         updateNfwLocationAccessProxyAppsInGnssHal();
@@ -308,35 +314,40 @@ class GnssVisibilityControl {
         }
 
         for (Map.Entry<String, Boolean> entry : mProxyAppToLocationPermissions.entrySet()) {
-            // Cannot cache uid since the application could be uninstalled and reinstalled.
-            final String proxyApp = entry.getKey();
-            final Integer nfwProxyAppUid = getApplicationUid(proxyApp);
-            if (nfwProxyAppUid == null || nfwProxyAppUid != uid) {
+            final String proxyAppPkgName = entry.getKey();
+            final ApplicationInfo proxyAppInfo = getProxyAppInfo(proxyAppPkgName);
+            if (proxyAppInfo == null || proxyAppInfo.uid != uid) {
                 continue;
             }
 
-            final boolean isLocationPermissionEnabled = hasLocationPermission(proxyApp);
+            final boolean isLocationPermissionEnabled = shouldEnableLocationPermissionInGnssHal(
+                    proxyAppPkgName);
             if (isLocationPermissionEnabled != entry.getValue()) {
-                Log.i(TAG, "Location permission setting is changed to "
-                        + (isLocationPermissionEnabled ? "enabled" : "disabled")
-                        + " for non-framework location access proxy app "
-                        + proxyApp);
+                Log.i(TAG, "Proxy app " + proxyAppPkgName + " location permission changed."
+                        + " IsLocationPermissionEnabled: " + isLocationPermissionEnabled);
                 entry.setValue(isLocationPermissionEnabled);
                 updateNfwLocationAccessProxyAppsInGnssHal();
-                return;
             }
+            return;
         }
     }
 
-    private Integer getApplicationUid(String pkgName) {
+    private ApplicationInfo getProxyAppInfo(String proxyAppPkgName) {
         try {
-            return mPackageManager.getApplicationInfo(pkgName, 0).uid;
+            return mPackageManager.getApplicationInfo(proxyAppPkgName, 0);
         } catch (PackageManager.NameNotFoundException e) {
-            if (DEBUG) {
-                Log.d(TAG, "Non-framework location access proxy app " + pkgName + " is not found.");
-            }
+            if (DEBUG) Log.d(TAG, "Proxy app " + proxyAppPkgName + " is not found.");
             return null;
         }
+    }
+
+    private boolean shouldEnableLocationPermissionInGnssHal(String proxyAppPkgName) {
+        return isProxyAppInstalled(proxyAppPkgName) && hasLocationPermission(proxyAppPkgName);
+    }
+
+    private boolean isProxyAppInstalled(String pkgName) {
+        ApplicationInfo proxyAppInfo = getProxyAppInfo(pkgName);
+        return (proxyAppInfo != null) && proxyAppInfo.enabled;
     }
 
     private boolean hasLocationPermission(String pkgName) {
@@ -393,9 +404,9 @@ class GnssVisibilityControl {
             return;
         }
 
-        final String proxyAppPackageName = nfwNotification.mProxyAppPackageName;
+        final String proxyAppPkgName = nfwNotification.mProxyAppPackageName;
         final Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
-                proxyAppPackageName);
+                proxyAppPkgName);
         final boolean isLocationRequestAccepted = nfwNotification.isRequestAccepted();
         final boolean isPermissionMismatched =
                 (isLocationPermissionEnabled == null) ? isLocationRequestAccepted
@@ -425,7 +436,7 @@ class GnssVisibilityControl {
         }
 
         if (isLocationPermissionEnabled == null) {
-            Log.w(TAG, "Could not find proxy app with name: " + proxyAppPackageName + " in the "
+            Log.w(TAG, "Could not find proxy app with name: " + proxyAppPkgName + " in the "
                     + "value specified for config parameter: "
                     + GnssConfiguration.CONFIG_NFW_PROXY_APPS + ". AppOps service not notified "
                     + "for non-framework location access notification: " + nfwNotification);
@@ -433,18 +444,19 @@ class GnssVisibilityControl {
         }
 
         // Display location icon attributed to this proxy app.
-        final Integer clsAppUid = getApplicationUid(proxyAppPackageName);
-        if (clsAppUid == null) {
-            Log.e(TAG, "Proxy app " + proxyAppPackageName + " is not found. AppOps service not "
+        final ApplicationInfo proxyAppInfo = getProxyAppInfo(proxyAppPkgName);
+        if (proxyAppInfo == null) {
+            Log.e(TAG, "Proxy app " + proxyAppPkgName + " is not found. AppOps service not "
                     + "notified for non-framework location access notification: "
                     + nfwNotification);
             return;
         }
-        mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, clsAppUid, proxyAppPackageName);
+
+        mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, proxyAppInfo.uid, proxyAppPkgName);
 
         // Log proxy app permission mismatch between framework and GNSS HAL.
         if (isPermissionMismatched) {
-            Log.w(TAG, "Permission mismatch. Framework proxy app " + proxyAppPackageName
+            Log.w(TAG, "Permission mismatch. Framework proxy app " + proxyAppPkgName
                     + " location permission is set to " + isLocationPermissionEnabled
                     + " but GNSS non-framework location access response type is "
                     + nfwNotification.getResponseTypeAsString() + " for notification: "

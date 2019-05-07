@@ -2818,6 +2818,59 @@ public class CarrierConfigManager {
         }
     }
 
+    /**
+     * Wi-Fi configs used in Carrier Wi-Fi application.
+     * TODO(b/132059890): Expose it in a future release as systemapi.
+     *
+     * @hide
+     */
+    public static final class Wifi {
+        /** Prefix of all Wifi.KEY_* constants. */
+        public static final String KEY_PREFIX = "wifi.";
+
+        /**
+         * Whenever any information under wifi namespace is changed, the version should be
+         * incremented by 1 so that the device is able to figure out the latest profiles based on
+         * the version.
+         */
+        public static final String KEY_CARRIER_PROFILES_VERSION_INT =
+                KEY_PREFIX + "carrier_profiles_version_int";
+
+        /**
+         * It contains the package name of connection manager that the carrier owns.
+         *
+         * <P>Once it is installed, the profiles installed by Carrier Wi-Fi Application
+         * will be deleted.
+         * Once it is uninstalled, Carrier Wi-Fi Application will re-install the latest profiles.
+         */
+        public static final String KEY_CARRIER_CONNECTION_MANAGER_PACKAGE_STRING =
+                KEY_PREFIX + "carrier_connection_manager_package_string";
+        /**
+         * It is to have the list of wifi networks profiles which contain the information about
+         * the wifi-networks to which carrier wants the device to connect.
+         */
+        public static final String KEY_NETWORK_PROFILES_STRING_ARRAY =
+                KEY_PREFIX + "network_profiles_string_array";
+
+        /**
+         * It is to have the list of Passpoint profiles which contain the information about
+         * the Passpoint networks to which carrier wants the device to connect.
+         */
+        public static final String KEY_PASSPOINT_PROFILES_STRING_ARRAY =
+                KEY_PREFIX + "passpoint_profiles_string_array";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putInt(KEY_CARRIER_PROFILES_VERSION_INT, -1);
+            defaults.putString(KEY_CARRIER_CONNECTION_MANAGER_PACKAGE_STRING, null);
+            defaults.putStringArray(KEY_NETWORK_PROFILES_STRING_ARRAY, null);
+            defaults.putStringArray(KEY_PASSPOINT_PROFILES_STRING_ARRAY, null);
+            return defaults;
+        }
+
+        private Wifi() {}
+    }
+
    /**
     * An int array containing CDMA enhanced roaming indicator values for Home (non-roaming) network.
     * The default values come from 3GPP2 C.R1001 table 8.1-1.
@@ -3306,6 +3359,7 @@ public class CarrierConfigManager {
         /* Default value is 10 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
         sDefaults.putAll(Gps.getDefaults());
+        sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {
                         1 /* Roaming Indicator Off */

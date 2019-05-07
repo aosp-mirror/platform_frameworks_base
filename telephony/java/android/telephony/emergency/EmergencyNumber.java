@@ -558,6 +558,24 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         } else if (this.getDisplayPriorityScore()
                 < emergencyNumber.getDisplayPriorityScore()) {
             return 1;
+        } else if (this.getNumber().compareTo(emergencyNumber.getNumber()) != 0) {
+            return this.getNumber().compareTo(emergencyNumber.getNumber());
+        } else if (this.getCountryIso().compareTo(emergencyNumber.getCountryIso()) != 0) {
+            return this.getCountryIso().compareTo(emergencyNumber.getCountryIso());
+        } else if (this.getMnc().compareTo(emergencyNumber.getMnc()) != 0) {
+            return this.getMnc().compareTo(emergencyNumber.getMnc());
+        } else if (this.getEmergencyServiceCategoryBitmask()
+                != emergencyNumber.getEmergencyServiceCategoryBitmask()) {
+            return this.getEmergencyServiceCategoryBitmask()
+                    > emergencyNumber.getEmergencyServiceCategoryBitmask() ? -1 : 1;
+        } else if (this.getEmergencyUrns().toString().compareTo(
+                emergencyNumber.getEmergencyUrns().toString()) != 0) {
+            return this.getEmergencyUrns().toString().compareTo(
+                    emergencyNumber.getEmergencyUrns().toString());
+        } else if (this.getEmergencyCallRouting()
+                != emergencyNumber.getEmergencyCallRouting()) {
+            return this.getEmergencyCallRouting()
+                    > emergencyNumber.getEmergencyCallRouting() ? -1 : 1;
         } else {
             return 0;
         }
@@ -579,13 +597,9 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         if (emergencyNumberList == null) {
             return;
         }
-        Set<EmergencyNumber> mergedEmergencyNumber = new HashSet<>();
+        Set<Integer> duplicatedEmergencyNumberPosition = new HashSet<>();
         for (int i = 0; i < emergencyNumberList.size(); i++) {
-            // Skip the check because it was merged.
-            if (mergedEmergencyNumber.contains(emergencyNumberList.get(i))) {
-                continue;
-            }
-            for (int j = i + 1; j < emergencyNumberList.size(); j++) {
+            for (int j = 0; j < i; j++) {
                 if (areSameEmergencyNumbers(
                         emergencyNumberList.get(i), emergencyNumberList.get(j))) {
                     Rlog.e(LOG_TAG, "Found unexpected duplicate numbers: "
@@ -594,14 +608,15 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
                     emergencyNumberList.set(i, mergeSameEmergencyNumbers(
                             emergencyNumberList.get(i), emergencyNumberList.get(j)));
                     // Mark the emergency number has been merged
-                    mergedEmergencyNumber.add(emergencyNumberList.get(j));
+                    duplicatedEmergencyNumberPosition.add(j);
                 }
             }
         }
-        // Remove the marked emergency number in the orignal list
-        for (int i = 0; i < emergencyNumberList.size(); i++) {
-            if (mergedEmergencyNumber.contains(emergencyNumberList.get(i))) {
-                emergencyNumberList.remove(i--);
+
+        // Remove the marked emergency number in the original list
+        for (int i = emergencyNumberList.size() - 1; i >= 0; i--) {
+            if (duplicatedEmergencyNumberPosition.contains(i)) {
+                emergencyNumberList.remove(i);
             }
         }
         Collections.sort(emergencyNumberList);

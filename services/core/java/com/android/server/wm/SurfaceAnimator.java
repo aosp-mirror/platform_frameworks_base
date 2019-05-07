@@ -50,7 +50,8 @@ class SurfaceAnimator {
 
     @VisibleForTesting
     SurfaceControl mLeash;
-    private final Animatable mAnimatable;
+    @VisibleForTesting
+    final Animatable mAnimatable;
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
     @VisibleForTesting
     final Runnable mAnimationFinishedCallback;
@@ -282,13 +283,15 @@ class SurfaceAnimator {
 
         boolean scheduleAnim = false;
 
-        // If the surface was destroyed, we don't care to reparent it back.
-        final boolean destroy = mLeash != null && surface != null && parent != null;
-        if (destroy) {
-            if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent");
+        // If the surface was destroyed or the leash is invalid, we don't care to reparent it back.
+        // Note that we also set this variable to true even if the parent isn't valid anymore, in
+        // order to ensure onAnimationLeashLost still gets called in this case.
+        final boolean reparent = mLeash != null && surface != null;
+        if (reparent) {
+            if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent: " + parent);
             // We shouldn't really need these isValid checks but we do
             // b/130364451
-            if (surface.isValid() && parent.isValid()) {
+            if (surface.isValid() && parent != null && parent.isValid()) {
                 t.reparent(surface, parent);
                 scheduleAnim = true;
             }
@@ -301,9 +304,10 @@ class SurfaceAnimator {
         mLeash = null;
         mAnimation = null;
 
-        // Make sure to inform the animatable after the leash was destroyed.
-        if (destroy) {
-            mAnimatable.onAnimationLeashDestroyed(t);
+        if (reparent) {
+            // Make sure to inform the animatable after the surface was reparented (or reparent
+            // wasn't possible, but we still need to invoke the callback)
+            mAnimatable.onAnimationLeashLost(t);
             scheduleAnim = true;
         }
 
@@ -394,12 +398,12 @@ class SurfaceAnimator {
         void onAnimationLeashCreated(Transaction t, SurfaceControl leash);
 
         /**
-         * Called when the leash is being destroyed, and the surface was reparented back to the
-         * original parent.
+         * Called when the leash is being destroyed, or when the leash is being transferred to
+         * another SurfaceAnimator.
          *
          * @param t The transaction to use to apply any necessary changes.
          */
-        void onAnimationLeashDestroyed(Transaction t);
+        void onAnimationLeashLost(Transaction t);
 
         /**
          * @return A new surface to be used for the animation leash, inserted at the correct
