@@ -855,21 +855,6 @@ public final class DefaultPermissionGrantPolicy {
         grantPermissionsToSystemPackage(useOpenWifiPackage, userId, ALWAYS_LOCATION_PERMISSIONS);
     }
 
-    public void grantDefaultPermissionsToDefaultSmsApp(String packageName, int userId) {
-        Log.i(TAG, "Granting permissions to default sms app for user:" + userId);
-        grantIgnoringSystemPackage(packageName, userId,
-                PHONE_PERMISSIONS, CONTACTS_PERMISSIONS, SMS_PERMISSIONS, STORAGE_PERMISSIONS,
-                MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS);
-    }
-
-    public void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId) {
-        mServiceInternal.onDefaultDialerAppChanged(packageName, userId);
-        Log.i(TAG, "Granting permissions to default dialer app for user:" + userId);
-        grantIgnoringSystemPackage(packageName, userId,
-                PHONE_PERMISSIONS, CONTACTS_PERMISSIONS, SMS_PERMISSIONS,
-                MICROPHONE_PERMISSIONS, CAMERA_PERMISSIONS);
-    }
-
     public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default Use Open WiFi app for user:" + userId);
         grantIgnoringSystemPackage(packageName, userId, ALWAYS_LOCATION_PERMISSIONS);
