@@ -175,11 +175,33 @@ public class StackAnimationController extends
 
     /** Whether the stack is on the left side of the screen. */
     public boolean isStackOnLeftSide() {
-        if (mLayout != null) {
-            return mStackPosition.x - mIndividualBubbleSize / 2 < mLayout.getWidth() / 2;
-        } else {
+        if (mLayout == null) {
             return false;
         }
+        float stackCenter = mStackPosition.x + mIndividualBubbleSize / 2;
+        float screenCenter = mLayout.getWidth() / 2;
+        return stackCenter < screenCenter;
+    }
+
+    /**
+     * Fling stack to given corner, within allowable screen bounds.
+     * Note that we need new SpringForce instances per animation despite identical configs because
+     * SpringAnimation uses SpringForce's internal (changing) velocity while the animation runs.
+     */
+    public void springStack(float destinationX, float destinationY) {
+        springFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_X,
+                    new SpringForce()
+                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
+                        .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
+                    0 /* startXVelocity */,
+                    destinationX);
+
+        springFirstBubbleWithStackFollowing(DynamicAnimation.TRANSLATION_Y,
+                    new SpringForce()
+                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
+                        .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
+                    0 /* startYVelocity */,
+                    destinationY);
     }
 
     /**
@@ -352,6 +374,7 @@ public class StackAnimationController extends
         float destinationY = Float.MIN_VALUE;
 
         if (imeVisible) {
+            // Stack is lower than it should be and overlaps the now-visible IME.
             if (mStackPosition.y > maxBubbleY && mPreImeY == Float.MIN_VALUE) {
                 mPreImeY = mStackPosition.y;
                 destinationY = maxBubbleY;
