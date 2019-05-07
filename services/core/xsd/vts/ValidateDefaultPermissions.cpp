@@ -16,13 +16,48 @@
 
 #include "utility/ValidateXml.h"
 
-TEST(CheckConfig, mediaDefaultPermissions) {
+#include <dirent.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <string>
+
+#include <android-base/strings.h>
+
+static std::vector<std::string> get_files_in_dirs(const char* dir_path) {
+    std::vector<std::string> files;
+    std::unique_ptr<DIR, decltype(&closedir)> d(opendir(dir_path), closedir);
+
+    if (d == nullptr) {
+        return files;
+    }
+
+    struct dirent* de;
+    while ((de = readdir(d.get()))) {
+        if (de->d_type != DT_REG) {
+            continue;
+        }
+        if (android::base::EndsWith(de->d_name, ".xml")) {
+            files.push_back(de->d_name);
+        }
+    }
+    return files;
+}
+
+TEST(CheckConfig, defaultPermissions) {
     RecordProperty("description",
                    "Verify that the default-permissions file "
                    "is valid according to the schema");
 
-    const char* location = "/vendor/etc/default-permissions";
+    std::vector<const char*> locations = {"/vendor/etc/default-permissions",
+                                          "/odm/etc/default-permissions"};
 
-    EXPECT_ONE_VALID_XML_MULTIPLE_LOCATIONS("default-permissions.xml", {location},
-                                            "/data/local/tmp/default-permissions.xsd");
+    for (const char* dir_path : locations) {
+        std::vector<std::string> files = get_files_in_dirs(dir_path);
+        for (auto& file_name : files) {
+            EXPECT_ONE_VALID_XML_MULTIPLE_LOCATIONS(file_name.c_str(), {dir_path},
+                                                    "/data/local/tmp/default-permissions.xsd");
+        }
+    }
 }
