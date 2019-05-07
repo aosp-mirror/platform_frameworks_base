@@ -3977,18 +3977,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             mLockTaskNotify = new LockTaskNotify(mService.mContext);
                         }
                         mLockTaskNotify.show(false);
-                        try {
-                            boolean shouldLockKeyguard = Settings.Secure.getInt(
-                                    mService.mContext.getContentResolver(),
-                                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
-                            if (mLockTaskModeState == LOCK_TASK_MODE_PINNED && shouldLockKeyguard) {
-                                mWindowManager.lockNow(null);
-                                mWindowManager.dismissKeyguard();
-                                new LockPatternUtils(mService.mContext)
-                                        .requireCredentialEntry(UserHandle.USER_ALL);
-                            }
-                        } catch (SettingNotFoundException e) {
-                            // No setting, don't lock.
+                        if (mLockTaskModeState == LOCK_TASK_MODE_PINNED && shouldLockKeyguard()) {
+                            mWindowManager.lockNow(null);
+                            mWindowManager.dismissKeyguard();
+                            new LockPatternUtils(mService.mContext)
+                                    .requireCredentialEntry(UserHandle.USER_ALL);
                         }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
@@ -4022,6 +4015,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 } break;
 
             }
+        }
+    }
+
+    private boolean shouldLockKeyguard() {
+        // This functionality should be kept consistent with
+        // com.android.settings.security.ScreenPinningSettings (see b/127605586)
+        try {
+            return Settings.Secure.getInt(
+                    mService.mContext.getContentResolver(),
+                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
+        } catch (Settings.SettingNotFoundException e) {
+            // Log to SafetyNet for b/127605586
+            android.util.EventLog.writeEvent(0x534e4554, "127605586", -1, "");
+            LockPatternUtils lockPatternUtils = new LockPatternUtils(mService.mContext);
+            return lockPatternUtils.isSecure(mCurrentUser);
         }
     }
 
