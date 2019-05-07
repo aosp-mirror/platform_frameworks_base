@@ -5966,6 +5966,15 @@ message GpuStatsGlobalInfo {
 
     // Total count of the Vulkan driver fails to be loaded.
     optional int64 vk_loading_failure_count = 8;
+
+    // Api version of the system Vulkan driver.
+    optional int32 vulkan_version = 9;
+
+    // Api version of the system CPU Vulkan driver.
+    optional int32 cpu_vulkan_version = 10;
+
+    // Api version of the system GLES driver.
+    optional int32 gles_version = 11;
 }
 
 /**
