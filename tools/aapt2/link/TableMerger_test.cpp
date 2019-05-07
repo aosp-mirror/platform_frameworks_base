@@ -408,54 +408,6 @@ TEST_F(TableMergerTest, FailToOverrideConflictingAttributeFormatsWithOverlay) {
   ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
-TEST_F(TableMergerTest, FailToOverrideConflictingFlagsAndEnumsWithOverlay) {
-  std::unique_ptr<ResourceTable> base =
-      test::ResourceTableBuilder()
-          .SetPackageId("", 0x7f)
-          .AddValue("attr/foo", test::AttributeBuilder()
-              .SetTypeMask(android::ResTable_map::TYPE_FLAGS)
-              .Build())
-          .Build();
-
-  std::unique_ptr<ResourceTable> overlay =
-      test::ResourceTableBuilder()
-          .SetPackageId("", 0x7f)
-          .AddValue("attr/foo", test::AttributeBuilder()
-              .SetTypeMask(android::ResTable_map::TYPE_FLAGS)
-              .SetWeak(false)
-              .Build())
-          .Build();
-
-  ResourceTable final_table;
-  TableMergerOptions options;
-  options.auto_add_overlay = false;
-  TableMerger merger(context_.get(), &final_table, options);
-
-  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
-  ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
-
-  base = test::ResourceTableBuilder()
-      .SetPackageId("", 0x7f)
-      .AddValue("attr/foo", test::AttributeBuilder()
-          .SetTypeMask(android::ResTable_map::TYPE_ENUM)
-          .Build())
-        .Build();
-
-  overlay = test::ResourceTableBuilder()
-      .SetPackageId("", 0x7f)
-      .AddValue("attr/foo", test::AttributeBuilder()
-          .SetTypeMask(android::ResTable_map::TYPE_ENUM)
-          .SetWeak(false)
-          .Build())
-      .Build();
-
-  ResourceTable final_table2;
-  TableMerger merger2(context_.get(), &final_table2, options);
-
-  ASSERT_TRUE(merger2.Merge({}, base.get(), false /*overlay*/));
-  ASSERT_FALSE(merger2.Merge({}, overlay.get(), true /*overlay*/));
-}
-
 TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder().SetPackageId("", 0x7f).Build();

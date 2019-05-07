@@ -284,8 +284,58 @@ TEST(ResourcesValuesTest, AttributeIsCompatible) {
 
   EXPECT_FALSE(attr_three.IsCompatibleWith(attr_one));
   EXPECT_FALSE(attr_three.IsCompatibleWith(attr_two));
-  EXPECT_FALSE(attr_three.IsCompatibleWith(attr_three));
+  EXPECT_TRUE(attr_three.IsCompatibleWith(attr_three));
   EXPECT_FALSE(attr_three.IsCompatibleWith(attr_four));
+
+  EXPECT_FALSE(attr_four.IsCompatibleWith(attr_one));
+  EXPECT_FALSE(attr_four.IsCompatibleWith(attr_two));
+  EXPECT_FALSE(attr_four.IsCompatibleWith(attr_three));
+  EXPECT_TRUE(attr_four.IsCompatibleWith(attr_four));
+}
+
+TEST(ResourcesValuesTest, AttributeEnumIsCompatible) {
+  Attribute attr_one(TYPE_ENUM);
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bar")), 0x07u});
+
+  Attribute attr_two(TYPE_ENUM);
+  attr_two.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr_two.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bar")), 0x07u});
+  EXPECT_TRUE(attr_one.IsCompatibleWith(attr_two));
+}
+
+TEST(ResourcesValuesTest, DifferentAttributeEnumDifferentNameIsNotCompatible) {
+  Attribute attr_one(TYPE_ENUM);
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bar")), 0x07u});
+
+  Attribute attr_two(TYPE_ENUM);
+  attr_two.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/baz")), 0x07u});
+  EXPECT_FALSE(attr_one.IsCompatibleWith(attr_two));
+}
+
+TEST(ResourcesValuesTest, DifferentAttributeEnumDifferentValueIsNotCompatible) {
+  Attribute attr_one(TYPE_ENUM);
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr_one.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bar")), 0x07u});
+
+  Attribute attr_two(TYPE_ENUM);
+  attr_two.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr_two.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bar")), 0x09u});
+  EXPECT_FALSE(attr_one.IsCompatibleWith(attr_two));
 }
 
 } // namespace aapt
