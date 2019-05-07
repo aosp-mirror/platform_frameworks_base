@@ -95,6 +95,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -412,6 +413,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @GuardedBy("mLock")
     private Exception mLastWtfStacktrace;
+
+    @GuardedBy("mLock")
+    private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     static class InvalidFileFormatException extends Exception {
         public InvalidFileFormatException(String message, Throwable cause) {
@@ -981,6 +985,8 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
             file.failWrite(os);
         }
+
+        getUserShortcutsLocked(userId).logSharingShortcutStats(mMetricsLogger);
     }
 
     @GuardedBy("mLock")
