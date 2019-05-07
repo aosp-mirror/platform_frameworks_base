@@ -32,6 +32,8 @@ import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManagerGlobal;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
@@ -213,8 +215,17 @@ public class NavigationBarController implements Callbacks {
     }
 
     /** @return {@link NavigationBarView} on the default display. */
-    public NavigationBarView getDefaultNavigationBarView() {
-        NavigationBarFragment navBar = mNavigationBars.get(DEFAULT_DISPLAY);
+    public @Nullable NavigationBarView getDefaultNavigationBarView() {
+        return getNavigationBarView(DEFAULT_DISPLAY);
+    }
+
+    /**
+     * @param displayId the ID of display which Navigation bar is on
+     * @return {@link NavigationBarView} on the display with {@code displayId}.
+     *         {@code null} if no navigation bar on that display.
+     */
+    public @Nullable NavigationBarView getNavigationBarView(int displayId) {
+        NavigationBarFragment navBar = mNavigationBars.get(displayId);
         return (navBar == null) ? null : (NavigationBarView) navBar.getView();
     }
 
