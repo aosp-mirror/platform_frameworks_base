@@ -206,7 +206,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
         long actions = mMediaController.getPlaybackState().getActions();
         Log.d(TAG, "Playback state actions are " + actions);
-        return (actions == 0 || (actions & PlaybackState.ACTION_SEEK_TO) != 0);
+        return ((actions & PlaybackState.ACTION_SEEK_TO) != 0);
     }
 
     protected final Runnable mUpdatePlaybackUi = new Runnable() {
