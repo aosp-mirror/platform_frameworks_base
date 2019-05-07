@@ -51,6 +51,7 @@ import android.view.Surface;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 
 import org.junit.After;
@@ -586,6 +587,23 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
                 getStoredDisplayAttributeValue("shouldShowSystemDecors"));
         assertEquals("Attribute value must be stored", "true",
                 getStoredDisplayAttributeValue("shouldShowIme"));
+    }
+
+    @Test
+    public void testShouldShowImeWithinForceDesktopMode() {
+        try {
+            // Presume display enabled force desktop mode from developer options.
+            final DisplayContent dc = createMockSimulatedDisplay();
+            mWm.setForceDesktopModeOnExternalDisplays(true);
+            final WindowManagerInternal wmInternal = LocalServices.getService(
+                    WindowManagerInternal.class);
+            // Make sure WindowManagerInter#shouldShowIme as true is due to
+            // mForceDesktopModeOnExternalDisplays as true.
+            assertFalse(mWm.mDisplayWindowSettings.shouldShowImeLocked(dc));
+            assertTrue(wmInternal.shouldShowIme(dc.getDisplayId()));
+        } finally {
+            mWm.setForceDesktopModeOnExternalDisplays(false);
+        }
     }
 
     /**
