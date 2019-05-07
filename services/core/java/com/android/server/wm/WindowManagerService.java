@@ -137,6 +137,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -2604,9 +2605,11 @@ public class WindowManagerService extends IWindowManager.Stub
         final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
         if (wtoken != null) {
             final WindowState win = wtoken.findMainWindow();
-            if (win != null) {
-                win.mWinAnimator.setOpaqueLocked(isOpaque);
+            if (win == null) {
+                return;
             }
+            isOpaque = isOpaque & !PixelFormat.formatHasAlpha(win.getAttrs().format);
+            win.mWinAnimator.setOpaqueLocked(isOpaque);
         }
     }
 
