@@ -71,6 +71,8 @@ public class GraphicsEnvironment {
             "android.app.action.ANGLE_FOR_ANDROID_TOAST_MESSAGE";
     private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
     private static final String GAME_DRIVER_WHITELIST_ALL = "*";
+    private static final int VULKAN_1_0 = 0x00400000;
+    private static final int VULKAN_1_1 = 0x00401000;
 
     // GAME_DRIVER_ALL_APPS
     // 0: Default (Invalid values fallback to default as well)
@@ -99,7 +101,8 @@ public class GraphicsEnvironment {
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "chooseDriver");
         if (!chooseDriver(context, coreSettings, pm, packageName)) {
             setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME, SYSTEM_DRIVER_VERSION_CODE,
-                    SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName);
+                    SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName,
+                    getVulkanVersion(pm));
         }
         Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
     }
@@ -198,6 +201,20 @@ public class GraphicsEnvironment {
         }
 
         return true;
+    }
+
+    private static int getVulkanVersion(PackageManager pm) {
+        // PackageManager doesn't have an API to retrieve the version of a specific feature, and we
+        // need to avoid retrieving all system features here and looping through them.
+        if (pm.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION, VULKAN_1_1)) {
+            return VULKAN_1_1;
+        }
+
+        if (pm.hasSystemFeature(PackageManager.FEATURE_VULKAN_HARDWARE_VERSION, VULKAN_1_0)) {
+            return VULKAN_1_0;
+        }
+
+        return 0;
     }
 
     /**
@@ -791,7 +808,7 @@ public class GraphicsEnvironment {
         // driver_build_time in the meta-data is in "L<Unix epoch timestamp>" format. e.g. L123456.
         // Long.parseLong will throw if the meta-data "driver_build_time" is not set properly.
         setGpuStats(driverPackageName, driverPackageInfo.versionName, driverAppInfo.longVersionCode,
-                Long.parseLong(driverBuildTime.substring(1)), packageName);
+                Long.parseLong(driverBuildTime.substring(1)), packageName, 0);
 
         return true;
     }
@@ -815,7 +832,7 @@ public class GraphicsEnvironment {
     private static native void setDebugLayersGLES(String layers);
     private static native void setDriverPathAndSphalLibraries(String path, String sphalLibraries);
     private static native void setGpuStats(String driverPackageName, String driverVersionName,
-            long driverVersionCode, long driverBuildTime, String appPackageName);
+            long driverVersionCode, long driverBuildTime, String appPackageName, int vulkanVersion);
     private static native void setAngleInfo(String path, String appPackage, String devOptIn,
             FileDescriptor rulesFd, long rulesOffset, long rulesLength);
     private static native boolean getShouldUseAngle(String packageName);
