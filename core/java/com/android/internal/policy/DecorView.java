@@ -1958,8 +1958,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean isFullscreen = config.windowConfiguration.getWindowingMode()
                 == WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         return isFullscreen && (0 != ((getWindowSystemUiVisibility() | getSystemUiVisibility())
-                & (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_LOW_PROFILE)));
+                & View.SYSTEM_UI_FLAG_FULLSCREEN));
     }
 
     private void updateDecorCaptionStatus(Configuration config) {
