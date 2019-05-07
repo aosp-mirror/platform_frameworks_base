@@ -2185,24 +2185,38 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "hidden_api_access_statslog_sampling_rate";
 
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
-            int logSampleRate = properties.getInt(HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, 0x0);
-            if (logSampleRate < 0 || logSampleRate > 0x10000) {
-                logSampleRate = -1;
-            }
-            if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
+            int logSampleRate = properties.getInt(HIDDEN_API_ACCESS_LOG_SAMPLING_RATE,
+                    mLogSampleRate);
+            int statslogSampleRate = properties.getInt(HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE,
+                    mStatslogSampleRate);
+            setSampleRates(logSampleRate, statslogSampleRate);
+        }
+
+        private void setSampleRates(int logSampleRate, int statslogSampleRate) {
+            if (logSampleRate >= 0 && logSampleRate <= 0x10000
+                    && logSampleRate != mLogSampleRate) {
                 mLogSampleRate = logSampleRate;
                 ZYGOTE_PROCESS.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
 
-            int statslogSampleRate =
-                    properties.getInt(HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE, 0);
-            if (statslogSampleRate < 0 || statslogSampleRate > 0x10000) {
-                statslogSampleRate = -1;
-            }
-            if (statslogSampleRate != -1 && statslogSampleRate != mStatslogSampleRate) {
+            if (statslogSampleRate >= 0 && statslogSampleRate <= 0x10000
+                    && statslogSampleRate != mStatslogSampleRate) {
                 mStatslogSampleRate = statslogSampleRate;
                 ZYGOTE_PROCESS.setHiddenApiAccessStatslogSampleRate(mStatslogSampleRate);
             }
+
+        }
+
+        /**
+         * Set initial sampling rates from DeviceConfig. This is required after each restart,
+         * if they never get updated.
+         */
+        private void initializeSampleRates() {
+            int logSampleRate = DeviceConfig.getInt(DeviceConfig.NAMESPACE_APP_COMPAT,
+                    HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, 0);
+            int statslogSampleRate = DeviceConfig.getInt(DeviceConfig.NAMESPACE_APP_COMPAT,
+                    HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE, 0);
+            setSampleRates(logSampleRate, statslogSampleRate);
         }
 
         public HiddenApiSettings(Handler handler, Context context) {
@@ -2219,6 +2233,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY),
                     false,
                     this);
+            initializeSampleRates();
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_COMPAT,
                     mContext.getMainExecutor(), this);
             update();

@@ -33,8 +33,12 @@ class StatsdHiddenApiUsageLogger implements HiddenApiUsageLogger {
     private int mHiddenApiAccessStatslogSampleRate = 0;
 
     static void setHiddenApiAccessLogSampleRates(int sampleRate, int newSampleRate) {
-        sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
-        sInstance.mHiddenApiAccessStatslogSampleRate = newSampleRate;
+        if (sampleRate != -1) {
+            sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
+        }
+        if (newSampleRate != -1) {
+            sInstance.mHiddenApiAccessStatslogSampleRate = newSampleRate;
+        }
     }
 
     static StatsdHiddenApiUsageLogger getInstance() {
