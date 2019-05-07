@@ -1059,11 +1059,19 @@ public class DisplayRotation {
                 preferredRotation = lastRotation;
             }
         } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
-                && orientation != ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
-            // Apply rotation lock.  Does not apply to NOSENSOR.
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT) {
+            // Apply rotation lock. Does not apply to NOSENSOR or specific rotations.
             // The idea is that the user rotation expresses a weak preference for the direction
             // of gravity and as NOSENSOR is never affected by gravity, then neither should
             // NOSENSOR be affected by rotation lock (although it will be affected by docks).
+            // Also avoid setting user rotation when app has preference over one particular rotation
+            // to avoid leaving the rotation to the reverse of it which has the compatible
+            // orientation, but isn't what app wants, when the user rotation is the reverse of the
+            // preferred rotation.
             preferredRotation = mUserRotation;
         } else {
             // No overriding preference.
