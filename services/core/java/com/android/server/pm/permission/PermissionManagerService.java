@@ -333,22 +333,15 @@ public class PermissionManagerService {
                 mPackageManagerInt.getInstantAppPackageName(uid) != null;
         final int userId = UserHandle.getUserId(uid);
         if (!mUserManagerInt.exists(userId)) {
-            PermissionManager.addPermissionDenialHint("User does not exist. userId=" + userId);
             return PackageManager.PERMISSION_DENIED;
         }
 
         if (pkg != null) {
             if (pkg.mSharedUserId != null) {
                 if (isCallerInstantApp) {
-                    PermissionManager.addPermissionDenialHint(
-                            "Caller is instant app. Pkg is shared. callingUid=" + callingUid
-                                    + " pkg=" + pkg.packageName);
                     return PackageManager.PERMISSION_DENIED;
                 }
             } else if (mPackageManagerInt.filterAppAccess(pkg, callingUid, callingUserId)) {
-                PermissionManager.addPermissionDenialHint(
-                        "Access is filtered. pkg=" + pkg + " callingUid=" + callingUid
-                                + " callingUserId=" + callingUserId);
                 return PackageManager.PERMISSION_DENIED;
             }
             final PermissionsState permissionsState =
@@ -358,8 +351,6 @@ public class PermissionManagerService {
                     if (mSettings.isPermissionInstant(permName)) {
                         return PackageManager.PERMISSION_GRANTED;
                     }
-                    PermissionManager.addPermissionDenialHint(
-                            "Caller instant app, but perm is not instant");
                 } else {
                     return PackageManager.PERMISSION_GRANTED;
                 }
@@ -367,7 +358,6 @@ public class PermissionManagerService {
             if (isImpliedPermissionGranted(permissionsState, permName, userId)) {
                 return PackageManager.PERMISSION_GRANTED;
             }
-            PermissionManager.addPermissionDenialHint("Does not have permission " + permName);
         } else {
             ArraySet<String> perms = mSystemPermissions.get(uid);
             if (perms != null) {
@@ -379,8 +369,6 @@ public class PermissionManagerService {
                     return PackageManager.PERMISSION_GRANTED;
                 }
             }
-            PermissionManager.addPermissionDenialHint(
-                    "System permissions do not contain " + permName);
         }
         return PackageManager.PERMISSION_DENIED;
     }
