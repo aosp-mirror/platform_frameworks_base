@@ -90,7 +90,10 @@ easier.
         <item name="subtitleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle</item>
     </style>
     <style name="Widget.DeviceDefault.ActionButton.CloseMode" parent="Widget.Material.ActionButton.CloseMode"/>
-    <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Material.ActionBar"/>
+    <style name="Widget.DeviceDefault.ActionBar" parent="Widget.Material.ActionBar">
+        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle</item>
+    </style>
     <style name="Widget.DeviceDefault.Button.Borderless" parent="Widget.Material.Button.Borderless"/>
     <!-- Colored borderless ink button -->
     <style name="Widget.DeviceDefault.Button.Borderless.Colored">
@@ -105,10 +108,15 @@ easier.
     <style name="Widget.DeviceDefault.CalendarView" parent="Widget.Material.CalendarView"/>
     <style name="Widget.DeviceDefault.DatePicker" parent="Widget.Material.DatePicker"/>
     <style name="Widget.DeviceDefault.ActionBar.TabView" parent="Widget.Material.ActionBar.TabView"/>
-    <style name="Widget.DeviceDefault.ActionBar.TabText" parent="Widget.Material.ActionBar.TabText"/>
+    <style name="Widget.DeviceDefault.ActionBar.TabText" parent="Widget.Material.ActionBar.TabText">
+        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle</item>
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Widget.TabWidget</item>
+    </style>
     <style name="Widget.DeviceDefault.ActionBar.TabBar" parent="Widget.Material.ActionBar.TabBar"/>
     <style name="Widget.DeviceDefault.ActionBar.Solid" parent="Widget.Material.ActionBar.Solid">
         <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle</item>
         <item name="background">?attr/colorPrimaryDark</item>
         <item name="backgroundStacked">?attr/colorPrimaryDark</item>
         <item name="backgroundSplit">?attr/colorPrimaryDark</item>
@@ -159,7 +167,6 @@ easier.
         <item name="titleTextAppearance">@style/TextAppearance.DeviceDefault.Widget.Toolbar.Title</item>
         <item name="subtitleTextAppearance">@style/TextAppearance.DeviceDefault.Widget.Toolbar.Subtitle</item>
     </style>
-
     <style name="Widget.DeviceDefault.Light" parent="Widget.Material.Light"/>
     <style name="Widget.DeviceDefault.Light.Button" parent="Widget.Material.Light.Button"/>
     <style name="Widget.DeviceDefault.Light.Button.Small" parent="Widget.Material.Light.Button.Small"/>
@@ -211,13 +218,16 @@ easier.
     <style name="Widget.DeviceDefault.Light.Button.Borderless.Small" parent="Widget.Material.Light.Button.Borderless.Small"/>
     <style name="Widget.DeviceDefault.Light.ActionButton" parent="Widget.Material.Light.ActionButton"/>
     <style name="Widget.DeviceDefault.Light.ActionButton.Overflow" parent="Widget.Material.Light.ActionButton.Overflow"/>
-    <style name="Widget.DeviceDefault.Light.ActionMode" parent="Widget.Material.Light.ActionMode"/>
+    <style name="Widget.DeviceDefault.Light.ActionMode" parent="Widget.DeviceDefault.ActionMode"/>
     <style name="Widget.DeviceDefault.Light.ActionButton.CloseMode" parent="Widget.Material.Light.ActionButton.CloseMode"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar" parent="Widget.Material.Light.ActionBar"/>
+    <style name="Widget.DeviceDefault.Light.ActionBar" parent="Widget.DeviceDefault.ActionBar"/>
     <style name="Widget.DeviceDefault.Light.ActionBar.TabView" parent="Widget.DeviceDefault.ActionBar.TabView" />
     <style name="Widget.DeviceDefault.Light.ActionBar.TabText" parent="Widget.DeviceDefault.ActionBar.TabText" />
     <style name="Widget.DeviceDefault.Light.ActionBar.TabBar" parent="Widget.DeviceDefault.ActionBar.TabBar" />
-    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.DeviceDefault.ActionBar.Solid" />
+    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.Material.Light.ActionBar.Solid">
+        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle</item>
+    </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" parent="Widget.Holo.Light.ActionBar.Solid.Inverse"/>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
