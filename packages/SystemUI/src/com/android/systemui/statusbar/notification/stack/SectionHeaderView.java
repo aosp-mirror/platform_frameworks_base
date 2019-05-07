@@ -60,6 +60,12 @@ public class SectionHeaderView extends ActivatableNotificationView {
         updateBackgroundColors();
         mLabelView.setTextColor(
                 getContext().getColor(R.color.notification_section_header_label_color));
+        mClearAllButton.setImageResource(
+                R.drawable.status_bar_notification_section_header_clear_btn);
+    }
+
+    void setAreThereDismissableGentleNotifs(boolean areThereDismissableGentleNotifs) {
+        mClearAllButton.setVisibility(areThereDismissableGentleNotifs ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -78,5 +84,10 @@ public class SectionHeaderView extends ActivatableNotificationView {
      */
     void setOnHeaderClickListener(View.OnClickListener listener) {
         mContents.setOnClickListener(listener);
+    }
+
+    /** Fired when the user clicks on the "X" button on the far right of the header. */
+    void setOnClearAllClickListener(View.OnClickListener listener) {
+        mClearAllButton.setOnClickListener(listener);
     }
 }
