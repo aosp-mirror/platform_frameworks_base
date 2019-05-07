@@ -21366,6 +21366,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return null;
             }
+            // InstallerPackageName for Apex is not stored in PackageManager
+            if (ps == null && mApexManager.isApexPackage(packageName)) {
+                return null;
+            }
             return mSettings.getInstallerPackageNameLPr(packageName);
         }
     }
