@@ -18,6 +18,11 @@ package com.android.server.display.color;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import androidx.test.InstrumentationRegistry;
+
+import java.lang.System;
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,6 +33,8 @@ public class DisplayWhiteBalanceTintControllerTest {
     @Before
     public void setUp() {
         mDisplayWhiteBalanceTintController = new DisplayWhiteBalanceTintController();
+        mDisplayWhiteBalanceTintController.setUp(InstrumentationRegistry.getContext(), true);
+        mDisplayWhiteBalanceTintController.setActivated(true);
     }
 
     @Test
@@ -59,4 +66,31 @@ public class DisplayWhiteBalanceTintControllerTest {
                 .isEqualTo(colorTemperature);
     }
 
+    @Test
+    public void displayWhiteBalance_setMatrixValidDwbCalculation() {
+        float[] currentMatrix = mDisplayWhiteBalanceTintController.getMatrix();
+        float[] oldMatrix = Arrays.copyOf(currentMatrix, currentMatrix.length);
+
+        mDisplayWhiteBalanceTintController
+                .setMatrix(mDisplayWhiteBalanceTintController.mCurrentColorTemperature + 1);
+        assertWithMessage("DWB matrix did not change when setting a new temperature")
+                .that(Arrays.equals(oldMatrix, currentMatrix))
+                .isFalse();
+    }
+
+    @Test
+    public void displayWhiteBalance_setMatrixInvalidDwbCalculation() {
+        Arrays.fill(mDisplayWhiteBalanceTintController.mDisplayNominalWhiteXYZ, 0);
+        mDisplayWhiteBalanceTintController
+            .setMatrix(mDisplayWhiteBalanceTintController.mCurrentColorTemperature + 1);
+        assertWithMessage("DWB matrix not set to identity after an invalid DWB calculation")
+                .that(Arrays.equals(mDisplayWhiteBalanceTintController.getMatrix(),
+                    new float[] {
+                        1, 0, 0, 0,
+                        0, 1, 0, 0,
+                        0, 0, 1, 0,
+                        0, 0, 0, 1
+                    })
+                ).isTrue();
+    }
 }

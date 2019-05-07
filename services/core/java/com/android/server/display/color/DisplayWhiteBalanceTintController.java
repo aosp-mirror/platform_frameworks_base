@@ -32,6 +32,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.System;
 
 final class DisplayWhiteBalanceTintController extends TintController {
 
@@ -39,6 +40,7 @@ final class DisplayWhiteBalanceTintController extends TintController {
     private static final int NUM_VALUES_PER_PRIMARY = 3;
     // Four colors: red, green, blue, and white
     private static final int NUM_DISPLAY_PRIMARIES_VALS = 4 * NUM_VALUES_PER_PRIMARY;
+    private static final int COLORSPACE_MATRIX_LENGTH = 9;
 
     private final Object mLock = new Object();
     @VisibleForTesting
@@ -46,14 +48,16 @@ final class DisplayWhiteBalanceTintController extends TintController {
     @VisibleForTesting
     int mTemperatureMax;
     private int mTemperatureDefault;
-    private float[] mDisplayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
+    @VisibleForTesting
+    float[] mDisplayNominalWhiteXYZ = new float[NUM_VALUES_PER_PRIMARY];
     @VisibleForTesting
     ColorSpace.Rgb mDisplayColorSpaceRGB;
     private float[] mChromaticAdaptationMatrix;
     @VisibleForTesting
     int mCurrentColorTemperature;
     private float[] mCurrentColorTemperatureXYZ;
-    private boolean mSetUp = false;
+    @VisibleForTesting
+    boolean mSetUp = false;
     private float[] mMatrixDisplayWhiteBalance = new float[16];
     private Boolean mIsAvailable;
 
@@ -71,6 +75,16 @@ final class DisplayWhiteBalanceTintController extends TintController {
                 Slog.e(ColorDisplayService.TAG, "Failed to get display color space from resources");
                 return;
             }
+        }
+
+        // Make sure display color space is valid
+        if (!isColorMatrixValid(displayColorSpaceRGB.getTransform())) {
+            Slog.e(ColorDisplayService.TAG, "Invalid display color space RGB-to-XYZ transform");
+            return;
+        }
+        if (!isColorMatrixValid(displayColorSpaceRGB.getInverseTransform())) {
+            Slog.e(ColorDisplayService.TAG, "Invalid display color space XYZ-to-RGB transform");
+            return;
         }
 
         final String[] nominalWhiteValues = res.getStringArray(
@@ -157,11 +171,16 @@ final class DisplayWhiteBalanceTintController extends TintController {
             final float adaptedMaxG = result[1] + result[4] + result[7];
             final float adaptedMaxB = result[2] + result[5] + result[8];
             final float denum = Math.max(Math.max(adaptedMaxR, adaptedMaxG), adaptedMaxB);
-            for (int i = 0; i < result.length; i++) {
-                result[i] /= denum;
-            }
 
             Matrix.setIdentityM(mMatrixDisplayWhiteBalance, 0);
+            for (int i = 0; i < result.length; i++) {
+                result[i] /= denum;
+                if (!isColorMatrixCoeffValid(result[i])) {
+                    Slog.e(ColorDisplayService.TAG, "Invalid DWB color matrix");
+                    return;
+                }
+            }
+
             java.lang.System.arraycopy(result, 0, mMatrixDisplayWhiteBalance, 0, 3);
             java.lang.System.arraycopy(result, 3, mMatrixDisplayWhiteBalance, 4, 3);
             java.lang.System.arraycopy(result, 6, mMatrixDisplayWhiteBalance, 8, 3);
@@ -277,4 +296,27 @@ final class DisplayWhiteBalanceTintController extends TintController {
 
         return makeRgbColorSpaceFromXYZ(displayRedGreenBlueXYZ, displayWhiteXYZ);
     }
+
+    private boolean isColorMatrixCoeffValid(float coeff) {
+        if (Float.isNaN(coeff) || Float.isInfinite(coeff)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isColorMatrixValid(float[] matrix) {
+        if (matrix == null || matrix.length != COLORSPACE_MATRIX_LENGTH) {
+            return false;
+        }
+
+        for (int i = 0; i < matrix.length; i++) {
+            if (!isColorMatrixCoeffValid(matrix[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
