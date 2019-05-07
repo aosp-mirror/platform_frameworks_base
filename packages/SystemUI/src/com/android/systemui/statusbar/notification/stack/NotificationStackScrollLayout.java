@@ -87,6 +87,7 @@ import com.android.systemui.SwipeHelper;
 import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
@@ -498,6 +499,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private final NotificationGutsManager
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
+    private final NotificationSectionsManager mSectionsManager;
     /**
      * If the {@link NotificationShelf} should be visible when dark.
      */
@@ -511,7 +513,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
             NotificationRoundnessManager notificationRoundnessManager,
             AmbientPulseManager ambientPulseManager,
-            DynamicPrivacyController dynamicPrivacyController) {
+            DynamicPrivacyController dynamicPrivacyController,
+            ActivityStarter activityStarter) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -522,7 +525,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         mAmbientPulseManager = ambientPulseManager;
-        mAmbientState = new AmbientState(context);
+        mSectionsManager =
+                new NotificationSectionsManager(
+                        this,
+                        activityStarter,
+                        NotificationUtils.useNewInterruptionModel(context));
+        mSectionsManager.inflateViews(context);
+        mAmbientState = new AmbientState(context, mSectionsManager);
         mRoundnessManager = notificationRoundnessManager;
         mBgColor = context.getColor(R.color.notification_shade_background_color);
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
@@ -629,6 +638,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         inflateFooterView();
         inflateEmptyShadeView();
         updateFooter();
+        mSectionsManager.inflateViews(mContext);
     }
 
     @Override
@@ -739,6 +749,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mBgColor = mContext.getColor(R.color.notification_shade_background_color);
         updateBackgroundDimming();
         mShelf.onUiModeChanged();
+        mSectionsManager.onUiModeChanged();
     }
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
@@ -2580,41 +2591,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return null;
     }
 
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    @Nullable
-    private ActivatableNotificationView getLastHighPriorityChild() {
-        ActivatableNotificationView lastChildBeforeGap = null;
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isHighPriority()) {
-                    break;
-                } else {
-                    lastChildBeforeGap = row;
-                }
-            }
-        }
-        return lastChildBeforeGap;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    @Nullable
-    private ActivatableNotificationView getFirstLowPriorityChild() {
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (!row.getEntry().isHighPriority()) {
-                    return row;
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * Fling the scroll view
      *
@@ -3180,7 +3156,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         ActivatableNotificationView lastChild = getLastChildWithBackground();
-        boolean sectionViewsChanged = updateFirstAndLastViewsInSectionsByPriority(
+        boolean sectionViewsChanged = mSectionsManager.updateFirstAndLastViewsInSections(
                 mSections[0], mSections[1], firstChild, lastChild);
 
         if (mAnimationsEnabled && mIsExpanded) {
@@ -3196,44 +3172,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mRoundnessManager.updateRoundedChildren(mSections);
         mAnimateBottomOnLayout = false;
         invalidate();
-    }
-
-    /** @return {@code true} if the last view in the top section changed (so we need to animate). */
-    private boolean updateFirstAndLastViewsInSectionsByPriority(
-            final NotificationSection highPrioritySection,
-            final NotificationSection lowPrioritySection,
-            ActivatableNotificationView firstChild,
-            ActivatableNotificationView lastChild) {
-        if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            ActivatableNotificationView previousLastHighPriorityChild =
-                    highPrioritySection.getLastVisibleChild();
-            ActivatableNotificationView previousFirstLowPriorityChild =
-                    lowPrioritySection.getFirstVisibleChild();
-            ActivatableNotificationView lastHighPriorityChild = getLastHighPriorityChild();
-            ActivatableNotificationView firstLowPriorityChild = getFirstLowPriorityChild();
-            if (lastHighPriorityChild != null && firstLowPriorityChild != null) {
-                highPrioritySection.setFirstVisibleChild(firstChild);
-                highPrioritySection.setLastVisibleChild(lastHighPriorityChild);
-                lowPrioritySection.setFirstVisibleChild(firstLowPriorityChild);
-                lowPrioritySection.setLastVisibleChild(lastChild);
-            } else if (lastHighPriorityChild != null) {
-                highPrioritySection.setFirstVisibleChild(firstChild);
-                highPrioritySection.setLastVisibleChild(lastChild);
-                lowPrioritySection.setFirstVisibleChild(null);
-                lowPrioritySection.setLastVisibleChild(null);
-            } else {
-                highPrioritySection.setFirstVisibleChild(null);
-                highPrioritySection.setLastVisibleChild(null);
-                lowPrioritySection.setFirstVisibleChild(firstChild);
-                lowPrioritySection.setLastVisibleChild(lastChild);
-            }
-            return lastHighPriorityChild != previousLastHighPriorityChild
-                    || firstLowPriorityChild != previousFirstLowPriorityChild;
-        } else {
-            highPrioritySection.setFirstVisibleChild(firstChild);
-            highPrioritySection.setLastVisibleChild(lastChild);
-            return false;
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -4595,11 +4533,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         return mAmbientState.isDimmed();
     }
 
-    @VisibleForTesting
-    int getSectionBoundaryIndex(int boundaryNum) {
-        return mAmbientState.getSectionBoundaryIndex(boundaryNum);
-    }
-
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void setDimAmount(float dimAmount) {
         mDimAmount = dimAmount;
@@ -5540,7 +5473,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void clearAllNotifications() {
+    private void clearAllNotifications() {
         // animate-swipe all dismissable notifications, then animate the shade closed
         int numChildren = getChildCount();
 
@@ -5813,27 +5746,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     /** Updates the indices of the boundaries between sections. */
     @ShadeViewRefactor(RefactorComponent.INPUT)
     public void updateSectionBoundaries() {
-        int gapIndex = -1;
-        if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            int currentIndex = 0;
-            final int n = getChildCount();
-            for (int i = 0; i < n; i++) {
-                View view = getChildAt(i);
-                if (view.getVisibility() == View.GONE
-                        || !(view instanceof ExpandableNotificationRow)) {
-                    continue;
-                }
-                ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                if (!row.getEntry().isHighPriority()) {
-                    if (currentIndex > 0) {
-                        gapIndex = currentIndex;
-                    }
-                    break;
-                }
-                currentIndex++;
-            }
-        }
-        mAmbientState.setSectionBoundaryIndex(0, gapIndex);
+        mSectionsManager.updateSectionBoundaries();
     }
 
     private void updateContinuousBackgroundDrawing() {
