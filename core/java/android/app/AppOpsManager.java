@@ -3119,6 +3119,15 @@ public class AppOpsManager {
             return mHistoricalUidOps.get(uid);
         }
 
+        /** @hide */
+        public void clearHistory(int uid, @NonNull String packageName) {
+            HistoricalUidOps historicalUidOps = getOrCreateHistoricalUidOps(uid);
+            historicalUidOps.clearHistory(packageName);
+            if (historicalUidOps.isEmpty()) {
+                mHistoricalUidOps.remove(uid);
+            }
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -3394,6 +3403,12 @@ public class AppOpsManager {
                 return null;
             }
             return mHistoricalPackageOps.get(packageName);
+        }
+
+        private void clearHistory(@NonNull String packageName) {
+            if (mHistoricalPackageOps != null) {
+                mHistoricalPackageOps.remove(packageName);
+            }
         }
 
         @Override

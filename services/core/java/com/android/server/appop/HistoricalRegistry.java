@@ -472,6 +472,25 @@ final class HistoricalRegistry {
                 DEFAULT_COMPRESSION_STEP);
     }
 
+    void clearHistory(int uid, String packageName) {
+        synchronized (mOnDiskLock) {
+            synchronized (mInMemoryLock) {
+                if (mMode != AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
+                    return;
+                }
+
+                for (int index = 0; index < mPendingWrites.size(); index++) {
+                    mPendingWrites.get(index).clearHistory(uid, packageName);
+                }
+
+                getUpdatedPendingHistoricalOpsMLocked(System.currentTimeMillis())
+                        .clearHistory(uid, packageName);
+
+                mPersistence.clearHistoryDLocked(uid, packageName);
+            }
+        }
+    }
+
     void clearHistory() {
         synchronized (mOnDiskLock) {
             clearHistoryOnDiskLocked();
@@ -626,6 +645,22 @@ final class HistoricalRegistry {
         private File generateFile(@NonNull File baseDir, int depth) {
             final long globalBeginMillis = computeGlobalIntervalBeginMillis(depth);
             return new File(baseDir, Long.toString(globalBeginMillis) + HISTORY_FILE_SUFFIX);
+        }
+
+        void clearHistoryDLocked(int uid, String packageName) {
+            List<HistoricalOps> historicalOps = readHistoryDLocked();
+
+            if (historicalOps == null) {
+                return;
+            }
+
+            for (int index = 0; index < historicalOps.size(); index++) {
+                historicalOps.get(index).clearHistory(uid, packageName);
+            }
+
+            clearHistoryDLocked();
+
+            persistHistoricalOpsDLocked(historicalOps);
         }
 
         void clearHistoryDLocked() {
