@@ -33,7 +33,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -50,7 +49,6 @@ import android.util.Log;
 
 import com.android.internal.database.SortCursor;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -59,7 +57,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * RingtoneManager provides access to ringtones, notification, and other types
@@ -927,11 +924,7 @@ public class RingtoneManager {
         }
 
         // Tell MediaScanner about the new file. Wait for it to assign a {@link Uri}.
-        try (NewRingtoneScanner scanner =  new NewRingtoneScanner(outFile)) {
-            return scanner.take();
-        } catch (InterruptedException e) {
-            throw new IOException("Audio file failed to scan as a ringtone", e);
-        }
+        return MediaStore.scanFile(mContext, outFile);
     }
 
     private static final String getExternalDirectoryForType(final int type) {
@@ -1106,53 +1099,6 @@ public class RingtoneManager {
      */
     public static boolean hasHapticChannels(@NonNull Uri ringtoneUri) {
         return AudioManager.hasHapticChannels(ringtoneUri);
-    }
-
-    /**
-     * Creates a {@link android.media.MediaScannerConnection} to scan a ringtone file and add its
-     * information to the internal database.
-     *
-     * It uses a {@link java.util.concurrent.LinkedBlockingQueue} so that the caller can block until
-     * the scan is completed.
-     */
-    private class NewRingtoneScanner implements Closeable, MediaScannerConnectionClient {
-        private MediaScannerConnection mMediaScannerConnection;
-        private File mFile;
-        private LinkedBlockingQueue<Uri> mQueue = new LinkedBlockingQueue<>(1);
-
-        public NewRingtoneScanner(File file) {
-            mFile = file;
-            mMediaScannerConnection = new MediaScannerConnection(mContext, this);
-            mMediaScannerConnection.connect();
-        }
-
-        @Override
-        public void close() {
-            mMediaScannerConnection.disconnect();
-        }
-
-        @Override
-        public void onMediaScannerConnected() {
-            mMediaScannerConnection.scanFile(mFile.getAbsolutePath(), null);
-        }
-
-        @Override
-        public void onScanCompleted(String path, Uri uri) {
-            if (uri == null) {
-                // There was some issue with scanning. Delete the copied file so it is not oprhaned.
-                mFile.delete();
-                return;
-            }
-            try {
-                mQueue.put(uri);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Unable to put new ringtone Uri in queue", e);
-            }
-        }
-
-        public Uri take() throws InterruptedException {
-            return mQueue.take();
-        }
     }
 
     /**
