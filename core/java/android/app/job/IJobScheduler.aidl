@@ -19,6 +19,7 @@ package android.app.job;
 import android.app.job.JobInfo;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
+import android.content.pm.ParceledListSlice;
 
  /**
   * IPC interface that supports the app-facing {@link #JobScheduler} api.
@@ -30,8 +31,8 @@ interface IJobScheduler {
     int scheduleAsPackage(in JobInfo job, String packageName, int userId, String tag);
     void cancel(int jobId);
     void cancelAll();
-    List<JobInfo> getAllPendingJobs();
+    ParceledListSlice getAllPendingJobs();
     JobInfo getPendingJob(int jobId);
     List<JobInfo> getStartedJobs();
-    List<JobSnapshot> getAllJobSnapshots();
+    ParceledListSlice getAllJobSnapshots();
 }

@@ -49,6 +49,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -2764,12 +2765,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public List<JobInfo> getAllPendingJobs() throws RemoteException {
+        public ParceledListSlice<JobInfo> getAllPendingJobs() throws RemoteException {
             final int uid = Binder.getCallingUid();
 
             long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.getPendingJobs(uid);
+                return new ParceledListSlice<>(JobSchedulerService.this.getPendingJobs(uid));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2905,7 +2906,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          * <p class="note">This is a slow operation, so it should be called sparingly.
          */
         @Override
-        public List<JobSnapshot> getAllJobSnapshots() {
+        public ParceledListSlice<JobSnapshot> getAllJobSnapshots() {
             final int uid = Binder.getCallingUid();
             if (uid != Process.SYSTEM_UID) {
                 throw new SecurityException(
@@ -2916,7 +2917,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobs.forEachJob((job) -> snapshots.add(
                         new JobSnapshot(job.getJob(), job.getSatisfiedConstraintFlags(),
                                 isReadyToBeExecutedLocked(job))));
-                return snapshots;
+                return new ParceledListSlice<>(snapshots);
             }
         }
     };
