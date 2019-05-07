@@ -19,22 +19,15 @@ package android.permission;
 import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.RemoteException;
-import android.provider.Settings;
-import android.util.Log;
 
 import com.android.internal.annotations.Immutable;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 
 import java.util.ArrayList;
@@ -49,8 +42,6 @@ import java.util.Objects;
 @SystemApi
 @SystemService(Context.PERMISSION_SERVICE)
 public final class PermissionManager {
-    private static final String LOG_TAG = PermissionManager.class.getSimpleName();
-
     /**
      * {@link android.content.pm.PackageParser} needs access without having a {@link Context}.
      *
@@ -62,119 +53,6 @@ public final class PermissionManager {
     private final @NonNull Context mContext;
 
     private final IPackageManager mPackageManager;
-
-    /** Permission denials added via {@link addPermissionDenial} */
-    private static final ThreadLocal<List<String>> sPermissionDenialHints = new ThreadLocal<>();
-
-    /**
-     * Report a hint that might explain why a permission check returned
-     * {@link PackageManager#PERMISSION_DENIED}.
-     *
-     * <p>Hints are only collected if enabled via {@link collectPermissionDenialHints} or
-     * when a non-null value was passed to {@link resetPermissionDenialHints}
-     *
-     * @param hint A description of the reason
-     *
-     * @hide
-     */
-    public static void addPermissionDenialHint(@NonNull String hint) {
-        List<String> hints = sPermissionDenialHints.get();
-        if (hints == null) {
-            return;
-        }
-
-        hints.add(hint);
-    }
-
-    /**
-     * @return hints added via {@link #addPermissionDenialHint(String)} on this thread before.
-     *
-     * @hide
-     */
-    public static @Nullable List<String> getPermissionDenialHints() {
-        if (Build.IS_USER) {
-            return null;
-        }
-
-        return sPermissionDenialHints.get();
-    }
-
-    /**
-     * Reset the permission denial hints for this thread.
-     *
-     * @param initial The initial values. If not null, enabled collection on this thread.
-     *
-     * @return the previously collected hints
-     *
-     * @hide
-     */
-    public static @Nullable List<String> resetPermissionDenialHints(
-            @Nullable List<String> initial) {
-        List<String> prev = getPermissionDenialHints();
-        if (initial == null) {
-            sPermissionDenialHints.remove();
-        } else {
-            sPermissionDenialHints.set(initial);
-        }
-        return prev;
-    }
-
-    /**
-     * Enable permission denial hint collection if package is in
-     * {@link Settings.Secure.DEBUG_PACKAGE_PERMISSION_CHECK}
-     *
-     * @param context A context to use
-     * @param uid The uid the permission check is for.
-     *
-     * @return the previously collected hints
-     *
-     * @hide
-     */
-    public static @Nullable List<String> collectPermissionDenialHints(@NonNull Context context,
-            int uid) {
-        List<String> prev = getPermissionDenialHints();
-
-        if (Build.IS_USER) {
-            return prev;
-        }
-
-        ContentResolver cr = context.getContentResolver();
-        if (cr == null) {
-            return prev;
-        }
-
-        String debugSetting;
-        try {
-            debugSetting = Settings.Secure.getString(cr,
-                    Settings.Secure.DEBUG_PACKAGE_PERMISSION_CHECK);
-        } catch (IllegalStateException e) {
-            Log.e(LOG_TAG, "Cannot access settings", e);
-            return prev;
-        }
-        if (debugSetting == null) {
-            return prev;
-        }
-        String[] debugPkgs = debugSetting.split(",");
-
-        PackageManager pm = context.getPackageManager();
-        if (pm == null) {
-            return prev;
-        }
-
-        String[] packages = pm.getPackagesForUid(uid);
-        if (packages == null) {
-            return prev;
-        }
-
-        for (String pkg : packages) {
-            if (ArrayUtils.contains(debugPkgs, pkg)) {
-                sPermissionDenialHints.set(new ArrayList<>(0));
-                break;
-            }
-        }
-
-        return prev;
-    }
 
     /**
      * Creates a new instance.

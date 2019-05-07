@@ -194,7 +194,6 @@ interface IActivityManager {
     int getProcessLimit();
     @UnsupportedAppUsage
     int checkPermission(in String permission, int pid, int uid);
-    int checkPermissionWithDenialHintForwarding(in String permission, int pid, int uid, inout List<String> permissionDenialHints);
     int checkUriPermission(in Uri uri, int pid, int uid, int mode, int userId,
             in IBinder callerToken);
     void grantUriPermission(in IApplicationThread caller, in String targetPkg, in Uri uri,
