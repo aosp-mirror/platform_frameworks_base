@@ -79,7 +79,7 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Налады ідэнтыфікатару АВН па змаўчанні: не абмяжавана. Наступны выклік: не абмежавана"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Служба не прадастаўляецца."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Вы не можаце змяніць налады ідэнтыфікатара абанента, якi тэлефануе."</string>
-    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Мабільны інтэрнэт недаступны"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Мабільная перадача даных недаступная"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Экстранныя выклікі недаступныя"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма сэрвісу галасавых выклікаў"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Галасавыя або экстранныя выклікі недаступныя"</string>
@@ -416,7 +416,7 @@
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлефоне, каб праграма магла іх выкарыстоўваць."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змяняць налады аудыё"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дазваляе прыкладанням змяняць глабальныя налады гуку, такія як моц і тое, што дынамік выкарыстоўваецца для выхаду."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"запісваць аўдыё"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"запіс аўдыя"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Гэта праграма можа у любы час запісваць аўдыя, выкарыстоўваючы мікрафон."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"адпраўляць каманды на SIM-карту"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Дазваляе праграме адпраўляць каманды SIM-карце. Гэта вельмі небяспечна."</string>
@@ -1052,21 +1052,21 @@
     <string name="deleteText" msgid="6979668428458199034">"Выдалiць"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метад уводу"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
-    <string name="email" msgid="4560673117055050403">"Электронная пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Напісаць ліст"</string>
     <string name="email_desc" msgid="3638665569546416795">"Напісаць электронны ліст на выбраны адрас"</string>
     <string name="dial" msgid="1253998302767701559">"Выклікаць"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Звязацца з абанентам"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="map" msgid="5441053548030107189">"Адкрыць карту"</string>
     <string name="map_desc" msgid="1836995341943772348">"Паказаць выбраны адрас на карце"</string>
     <string name="browse" msgid="1245903488306147205">"Адкрыць"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Адкрыць URL у браўзеры"</string>
-    <string name="sms" msgid="4560537514610063430">"Паведамленне"</string>
+    <string name="sms" msgid="4560537514610063430">"Напісаць SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Адправіць паведамленне на выбраны нумар"</string>
     <string name="add_contact" msgid="7867066569670597203">"Дадаць"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Дадаць у кантакты"</string>
     <string name="view_calendar" msgid="979609872939597838">"Прагледзець"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Паказаць выбраны час у календары"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Графік"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Запланаваць"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Запланаваць падзею ў выбраны час"</string>
     <string name="view_flight" msgid="7691640491425680214">"Сачыць"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Адсочваць рэйс"</string>

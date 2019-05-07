@@ -425,7 +425,7 @@ public final class Slice implements Parcelable {
         /**
          * Add a sub-slice to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Builder addSubSlice(@NonNull Slice slice, @Nullable @SliceSubtype String subType) {
             Preconditions.checkNotNull(slice);
@@ -437,7 +437,7 @@ public final class Slice implements Parcelable {
         /**
          * Add an action to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Slice.Builder addAction(@NonNull PendingIntent action, @NonNull Slice s,
                 @Nullable @SliceSubtype String subType) {
@@ -453,7 +453,7 @@ public final class Slice implements Parcelable {
         /**
          * Add text to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Builder addText(CharSequence text, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
@@ -464,7 +464,7 @@ public final class Slice implements Parcelable {
         /**
          * Add an image to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Builder addIcon(Icon icon, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
@@ -476,7 +476,7 @@ public final class Slice implements Parcelable {
         /**
          * Add remote input to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Slice.Builder addRemoteInput(RemoteInput remoteInput,
                 @Nullable @SliceSubtype String subType,
@@ -490,7 +490,7 @@ public final class Slice implements Parcelable {
         /**
          * Add an integer to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Builder addInt(int value, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
@@ -511,7 +511,7 @@ public final class Slice implements Parcelable {
         /**
          * Add a long to the slice being constructed
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Slice.Builder addLong(long value, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {
@@ -525,7 +525,7 @@ public final class Slice implements Parcelable {
          * <p>Expected to be used for support library extension, should not be used for general
          * development
          * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
+         * @see SliceItem#getSubType()
          */
         public Slice.Builder addBundle(Bundle bundle, @Nullable @SliceSubtype String subType,
                 @SliceHint List<String> hints) {

@@ -186,7 +186,7 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Descartar <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Cerrar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Se ha eliminado <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Se han ignorado todas las aplicaciones recientes."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Abre la información de la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"El teléfono se está calentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Se limitan algunas funciones mientras el teléfono se enfría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"El teléfono intentará enfriarse. Puedes seguir utilizándolo, pero es posible que funcione con mayor lentitud.\n\nUna vez que se haya enfriado, funcionará con normalidad."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desconecta el cargador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"No se puede cargar el dispositivo. Desconecta el adaptador de corriente con cuidado, ya que el cable puede estar caliente."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ver pasos de mantenimiento"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Acceso directo a la izquierda"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Acceso directo a la derecha"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Desbloquear también con el acceso directo a la izquierda"</string>

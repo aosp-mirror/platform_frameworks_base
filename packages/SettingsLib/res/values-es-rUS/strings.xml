@@ -144,7 +144,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Salida de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Velocidad de voz"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocidad en la que se habla el texto"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Sonido"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tono"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Afecta el tono de la voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Idioma"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Usar el idioma del sistema"</string>
@@ -373,9 +373,9 @@
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Tiempo restante: aproximadamente <xliff:g id="TIME_REMAINING">%1$s</xliff:g> en función de tu uso"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Tiempo restante: aproximadamente <xliff:g id="TIME_REMAINING">%1$s</xliff:g> en función de tu uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Tiempo restante: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Duración aproximada hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> según el uso"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -410,7 +410,7 @@
     <item msgid="1286113608943010849">"100%"</item>
   </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"Hace <xliff:g id="ID_1">%1$s</xliff:g>"</string>
-    <string name="remaining_length_format" msgid="7886337596669190587">"Falta <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Tiempo restante: <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Pequeño"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predeterminado"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Grande"</string>

@@ -808,6 +808,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon se segreva"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Nekatere funkcije bodo med ohlajanjem omejene."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon se bo samodejno poskusil ohladiti. Še naprej ga lahko uporabljate, vendar bo morda deloval počasneje.\n\nKo se telefon ohladi, bo zopet deloval kot običajno."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Odklopite polnilnik"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Pri polnjenju te naprave je prišlo do težave. Previdno odklopite napajalnik, ker se je kabel morda segrel."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Oglejte si navodila za ukrepanje"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Leva bližnjica"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Desna bližnjica"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Levo bližnjico uporabi tudi za odklepanje"</string>

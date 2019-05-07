@@ -808,6 +808,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonas kaista"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Kai kurios funkcijos gali neveikti, kol telefonas vėsta"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonas automatiškai bandys atvėsti. Telefoną vis tiek galėsite naudoti, tačiau jis gali veikti lėčiau.\n\nKai telefonas atvės, jis veiks įprastai."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Atjunkite kroviklį"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Įkraunant įrenginį iškilo problema. Atjunkite maitinimo adapterį. Būkite atsargūs, nes kabelis gali būti įkaitęs."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Žr. priežiūros veiksmus"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Spartusis klavišas kairėje"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Spartusis klavišas dešinėje"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Spartusis klavišas kairėje taip pat atrakina"</string>

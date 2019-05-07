@@ -295,7 +295,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"直向"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"橫向"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"輸入法"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"位置資訊"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"定位"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置資訊已關閉"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"媒體裝置"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"手機溫度正在上升"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限制"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。您仍可以使用手機，但手機的運作速度可能較慢。\n\n手機降溫後便會恢復正常。"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"拔下充電器"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"為此裝置充電時發生問題。請拔除電源適配器並注意安全，因為連接線可能會發熱。"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"查看保養步驟"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"向左捷徑"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"向右捷徑"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"向左捷徑亦能將裝置解鎖"</string>

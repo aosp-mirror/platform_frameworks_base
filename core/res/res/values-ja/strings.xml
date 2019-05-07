@@ -1026,9 +1026,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"連絡先に追加します"</string>
     <string name="view_calendar" msgid="979609872939597838">"表示"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"カレンダーで選択した日時を表示します"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"スケジュール"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"予定を作成"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"選択した日時に予定を設定します"</string>
-    <string name="view_flight" msgid="7691640491425680214">"トラック"</string>
+    <string name="view_flight" msgid="7691640491425680214">"フライト"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"選択したフライトをチェックします"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"一部のシステム機能が動作しない可能性があります"</string>

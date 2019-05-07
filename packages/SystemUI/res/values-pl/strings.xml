@@ -808,6 +808,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon się nagrzewa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Podczas obniżania temperatury telefonu niektóre funkcje są ograniczone"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon automatycznie podejmie próbę obniżenia temperatury. Możesz go wciąż używać, ale telefon może działać wolniej.\n\nGdy temperatura się obniży, telefon będzie działał normalnie."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Odłącz ładowarkę"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Podczas ładowania tego urządzenia wystąpił błąd. Odłącz zasilacz, zwracając uwagę na kabel, który może być gorący."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Zobacz instrukcję postępowania"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Lewy skrót"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Prawy skrót"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Lewy skrót również odblokowuje"</string>

@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"O smartphone está esquentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Alguns recursos ficam limitados enquanto o smartphone é resfriado"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Seu smartphone tentará se resfriar automaticamente. Você ainda poderá usá-lo, mas talvez ele fique mais lento.\n\nQuando o smartphone estiver resfriado, ele voltará ao normal."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desconecte o carregador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Ocorreu um problema com o carregamento deste dispositivo. Desconecte o adaptador de energia com cuidado, porque o cabo pode estar quente."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ver etapas de cuidado"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Atalho à esquerda"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Atalho à direita"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"O atalho à esquerda também desbloqueia"</string>

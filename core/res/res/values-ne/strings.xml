@@ -1012,21 +1012,21 @@
     <string name="deleteText" msgid="6979668428458199034">"मेट्नुहोस्"</string>
     <string name="inputMethod" msgid="1653630062304567879">"निवेश विधि"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"पाठ कार्यहरू"</string>
-    <string name="email" msgid="4560673117055050403">"इमेल"</string>
+    <string name="email" msgid="4560673117055050403">"इमेल गर्नुहोस्"</string>
     <string name="email_desc" msgid="3638665569546416795">"चयन गरिएको ठेगानामा इमेल पठाउनुहोस्"</string>
-    <string name="dial" msgid="1253998302767701559">"कल"</string>
+    <string name="dial" msgid="1253998302767701559">"कल गर्नुहोस्"</string>
     <string name="dial_desc" msgid="6573723404985517250">"चयन गरिएको फोन नम्बरमा कल गर्नुहोस्"</string>
-    <string name="map" msgid="5441053548030107189">"नक्सा"</string>
+    <string name="map" msgid="5441053548030107189">"नक्सा अनुप्रयोग खोल्नुहोस्"</string>
     <string name="map_desc" msgid="1836995341943772348">"चयन गरिएको ठेगाना पत्ता लगाउनुहोस्"</string>
     <string name="browse" msgid="1245903488306147205">"खोल्नुहोस्"</string>
     <string name="browse_desc" msgid="8220976549618935044">"चयन गरिएको URL खोल्नुहोस्"</string>
-    <string name="sms" msgid="4560537514610063430">"सन्देश"</string>
+    <string name="sms" msgid="4560537514610063430">"सन्देश पठाउनुहोस्"</string>
     <string name="sms_desc" msgid="7526588350969638809">"चयन गरिएको फोन नम्बरमा सन्देश पठाउनुहोस्‌"</string>
     <string name="add_contact" msgid="7867066569670597203">"थप्नुहोस्"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"सम्पर्क सूचीमा थप्नुहोस्"</string>
     <string name="view_calendar" msgid="979609872939597838">"हेर्नुहोस्"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"पात्रोमा चयन गरिएको समय हेर्नुहोस्"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"समयतालिका"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"समयतालिका बनाउनुहोस्"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"चयन गरिएको समयका लागि कार्यक्रमको समयतालिका बनाउनुहोस्‌"</string>
     <string name="view_flight" msgid="7691640491425680214">"ट्र्याक गर्नुहोस्"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"चयन गरिएको उडान ट्रयाक गर्नुहोस्"</string>
@@ -1668,7 +1668,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"प्रिन्ट सेवा सक्षम गरिएको छैन"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> सेवा स्थापित भयो"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"सक्षम पार्न ट्याप गर्नुहोस्"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"प्रशासकको PIN प्रविष्ट गर्नुहोस्"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"प्रशासकको PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान PIN"</string>
@@ -1829,7 +1829,7 @@
     <string name="time_picker_hour_label" msgid="2979075098868106450">"घन्टा"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"मिनेट"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"समय सेट गर्नुहोस्"</string>
-    <string name="time_picker_input_error" msgid="7574999942502513765">"मान्य समय प्रविष्ट गर्नुहोस्"</string>
+    <string name="time_picker_input_error" msgid="7574999942502513765">"मान्य समय प्रविष्टि गर्नुहोस्"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"समय टाइप गर्नुहोस्‌"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"समय इनपुट गर्न पाठ इनपुट मोडमा स्विच गर्नुहोस्।"</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"समय इनपुट गर्न घडी मोडमा स्विच गर्नुहोस्।"</string>

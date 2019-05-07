@@ -70,14 +70,11 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         public void onSimStateChanged(int subId, int slotId, State simState) {
             if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
             switch(simState) {
-                // If the SIM is removed, then we must remove the keyguard. It will be put up
-                // again when the PUK locked SIM is re-entered.
-                case ABSENT:
-                // intentional fall-through
                 // If the SIM is unlocked via a key sequence through the emergency dialer, it will
                 // move into the READY state and the PUK lock keyguard should be removed.
                 case READY: {
-                    KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked(mSubId);
+                    mRemainingAttempts = -1;
+                    mShowDefaultMessage = true;
                     // mCallback can be null if onSimStateChanged callback is called when keyguard
                     // isn't active.
                     if (mCallback != null) {

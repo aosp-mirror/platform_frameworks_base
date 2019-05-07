@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ఫోన్ వేడెక్కుతోంది"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ఫోన్‌ను చల్లబరిచే క్రమంలో కొన్ని లక్షణాలు పరిమితం చేయబడ్డాయి"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"మీ ఫోన్ స్వయంచాలకంగా చల్లబడటానికి ప్రయత్నిస్తుంది. మీరు ఇప్పటికీ మీ ఫోన్‌ను ఉపయోగించవచ్చు, కానీ దాని పనితీరు నెమ్మదిగా ఉండవచ్చు.\n\nమీ ఫోన్ చల్లబడిన తర్వాత, అది సాధారణ రీతిలో పని చేస్తుంది."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ప్లగ్ నుండి ఛార్జర్‌ తీసివేయండి"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"ఛార్జ్‌ అవుతున్నప్పుడు పరికరం నుంచి సాధారణ వేడి కంటే ఎక్కువ వెలువడుతుంది. ఛార్జర్‌ని ప్లగ్ నుండి తీసివేసి, ఛార్జర్ వైర్ ఏమైనా వేడి ఎక్కిందేమో చూసుకుని తగిన జాగ్రత్తలు తీసుకోండి."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ఎడమవైపు షార్ట్‌కట్"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"కుడివైపు షార్ట్‌కట్"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ఎడమవైపు షార్ట్‌కట్ కూడా అన్‌లాక్ చేస్తుంది"</string>

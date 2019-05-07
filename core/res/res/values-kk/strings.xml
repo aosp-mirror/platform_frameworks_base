@@ -1012,23 +1012,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Жою"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Енгізу әдісі"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Мәтін әрекеттері"</string>
-    <string name="email" msgid="4560673117055050403">"Электрондық пошта"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Таңдалған электрондық пошта мекенжайына хабар жіберу"</string>
+    <string name="email" msgid="4560673117055050403">"Эл. поштаны ашу"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Таңдалған мекенжайға хабар жіберу"</string>
     <string name="dial" msgid="1253998302767701559">"Қоңырау шалу"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Таңдалған телефон нөміріне қоңырау шалу"</string>
-    <string name="map" msgid="5441053548030107189">"Map"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайдың орналасқан жерін анықтау"</string>
+    <string name="map" msgid="5441053548030107189">"Картаны ашу"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Таңдалған мекенжайды табу"</string>
     <string name="browse" msgid="1245903488306147205">"Ашу"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Таңдалған URL мекенжайын ашу"</string>
-    <string name="sms" msgid="4560537514610063430">"Хабар"</string>
+    <string name="sms" msgid="4560537514610063430">"Хабар жазу"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Таңдалған телефон нөміріне хабар жіберу"</string>
     <string name="add_contact" msgid="7867066569670597203">"Енгізу"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Контактілер тізіміне енгізу"</string>
     <string name="view_calendar" msgid="979609872939597838">"Көру"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Күнтізбеде таңдалған уақытты көру"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Кесте"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Таңдалған уақытқа іс-шараны жоспарлау"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Бақылау"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Таңдалған уақытты күнтізбеден көру"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Жоспарлау"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Таңдалған уақытқа іс-шара жоспарлау"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Қадағалау"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Таңдалған ұшу рейсін қадағалау"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>

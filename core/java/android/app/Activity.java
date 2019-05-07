@@ -2154,7 +2154,7 @@ public class Activity extends ContextThemeWrapper
      * picture-in-picture.
      *
      * @return true if the system successfully put this activity into picture-in-picture mode or was
-     * already in picture-in-picture mode (@see {@link #isInPictureInPictureMode()). If the device
+     * already in picture-in-picture mode (see {@link #isInPictureInPictureMode()}). If the device
      * does not support picture-in-picture, return false.
      */
     public boolean enterPictureInPictureMode(@NonNull PictureInPictureParams params) {

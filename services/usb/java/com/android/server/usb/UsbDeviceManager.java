@@ -152,6 +152,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
     private static final int MSG_SET_FUNCTIONS_TIMEOUT = 15;
     private static final int MSG_GET_CURRENT_USB_FUNCTIONS = 16;
     private static final int MSG_FUNCTION_SWITCH_TIMEOUT = 17;
+    private static final int MSG_GADGET_HAL_REGISTERED = 18;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -1732,9 +1733,15 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         protected static final String CTL_STOP = "ctl.stop";
 
         /**
-         * Adb natvie daemon
+         * Adb native daemon.
          */
         protected static final String ADBD = "adbd";
+
+        /**
+         * Gadget HAL fully qualified instance name for registering for ServiceNotification.
+         */
+        protected static final String GADGET_HAL_FQ_NAME =
+                "android.hardware.usb.gadget@1.0::IUsbGadget";
 
         protected boolean mCurrentUsbFunctionsRequested;
 
@@ -1746,8 +1753,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                 ServiceNotification serviceNotification = new ServiceNotification();
 
                 boolean ret = IServiceManager.getService()
-                        .registerForNotifications("android.hardware.usb.gadget@1.0::IUsbGadget",
-                                "", serviceNotification);
+                        .registerForNotifications(GADGET_HAL_FQ_NAME, "", serviceNotification);
                 if (!ret) {
                     Slog.e(TAG, "Failed to register usb gadget service start notification");
                     return;
@@ -1758,8 +1764,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                     mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
                             USB_GADGET_HAL_DEATH_COOKIE);
                     mCurrentFunctions = UsbManager.FUNCTION_NONE;
-                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                     mCurrentUsbFunctionsRequested = true;
+                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
                 }
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
@@ -1789,20 +1795,12 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
             @Override
             public void onRegistration(String fqName, String name, boolean preexisting) {
                 Slog.i(TAG, "Usb gadget hal service started " + fqName + " " + name);
-                synchronized (mGadgetProxyLock) {
-                    try {
-                        mGadgetProxy = IUsbGadget.getService();
-                        mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
-                                USB_GADGET_HAL_DEATH_COOKIE);
-                        if (!mCurrentFunctionsApplied && !mCurrentUsbFunctionsRequested) {
-                            setEnabledFunctions(mCurrentFunctions, false);
-                        }
-                    } catch (NoSuchElementException e) {
-                        Slog.e(TAG, "Usb gadget hal not found", e);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Usb Gadget hal not responding", e);
-                    }
+                if (!fqName.equals(GADGET_HAL_FQ_NAME)) {
+                    Slog.e(TAG, "fqName does not match");
+                    return;
                 }
+
+                sendMessage(MSG_GADGET_HAL_REGISTERED, preexisting);
             }
         }
 
@@ -1838,6 +1836,23 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                      */
                     if (msg.arg1 != 1) {
                         setEnabledFunctions(UsbManager.FUNCTION_NONE, !mAdbEnabled);
+                    }
+                    break;
+                case MSG_GADGET_HAL_REGISTERED:
+                    boolean preexisting = msg.arg1 == 1;
+                    synchronized (mGadgetProxyLock) {
+                        try {
+                            mGadgetProxy = IUsbGadget.getService();
+                            mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
+                                    USB_GADGET_HAL_DEATH_COOKIE);
+                            if (!mCurrentFunctionsApplied && !preexisting) {
+                                setEnabledFunctions(mCurrentFunctions, false);
+                            }
+                        } catch (NoSuchElementException e) {
+                            Slog.e(TAG, "Usb gadget hal not found", e);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Usb Gadget hal not responding", e);
+                        }
                     }
                     break;
                 default:

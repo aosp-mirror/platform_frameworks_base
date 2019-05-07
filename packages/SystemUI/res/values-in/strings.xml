@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Ponsel menjadi hangat"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Beberapa fitur dibatasi saat ponsel mendingin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ponsel akan otomatis mencoba mendingin. Anda tetap dapat menggunakan ponsel, tetapi mungkin berjalan lebih lambat.\n\nSetelah dingin, ponsel akan berjalan seperti biasa."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Cabut pengisi daya"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Ada masalah saat mengisi daya perangkat ini. Cabut adaptor daya dan berhati-hatilah karena kabelnya mungkin panas."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Lihat langkah-langkah perawatan"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Pintasan kiri"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Pintasan kanan"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Pintasan kiri juga membuka kunci"</string>

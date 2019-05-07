@@ -257,6 +257,15 @@ public final class SmsManager {
      */
     public static final String MMS_CONFIG_SUPPORT_HTTP_CHARSET_HEADER =
             CarrierConfigManager.KEY_MMS_SUPPORT_HTTP_CHARSET_HEADER_BOOL;
+
+    /**
+     * When roaming, some operator's MCC would change. It results in MMSService's verification
+     * failure. This config could use correct country.
+     * @hide
+     */
+    public static final String MMS_CONFIG_SIM_COUNTRY_ISO_OVERRIDE =
+            CarrierConfigManager.KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING;
+
     /**
      * If true, add "Connection: close" header to MMS HTTP requests so the connection
      * is immediately closed (disabling keep-alive). (Boolean type)
@@ -2065,6 +2074,8 @@ public final class SmsManager {
         filtered.putString(MMS_CONFIG_EMAIL_GATEWAY_NUMBER,
                 config.getString(MMS_CONFIG_EMAIL_GATEWAY_NUMBER));
         filtered.putString(MMS_CONFIG_NAI_SUFFIX, config.getString(MMS_CONFIG_NAI_SUFFIX));
+        filtered.putString(MMS_CONFIG_SIM_COUNTRY_ISO_OVERRIDE,
+                config.getString(MMS_CONFIG_SIM_COUNTRY_ISO_OVERRIDE));
         filtered.putBoolean(MMS_CONFIG_SHOW_CELL_BROADCAST_APP_LINKS,
                 config.getBoolean(MMS_CONFIG_SHOW_CELL_BROADCAST_APP_LINKS));
         filtered.putBoolean(MMS_CONFIG_SUPPORT_HTTP_CHARSET_HEADER,

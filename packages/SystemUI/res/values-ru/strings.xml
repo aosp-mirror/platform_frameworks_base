@@ -808,6 +808,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон нагревается"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Пока телефон не остынет, некоторые функции могут быть недоступны."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш телефон остынет автоматически.\n\nОбратите внимание, что до тех пор он может работать медленнее, чем обычно."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Отключите зарядное устройство"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Во время зарядки возникла проблема. Отключите адаптер питания. Будьте осторожны, кабель может быть горячим."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Подробнее о действиях при перегреве…"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ярлык слева"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Ярлык справа"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ярлык слева также разблокирует экран"</string>

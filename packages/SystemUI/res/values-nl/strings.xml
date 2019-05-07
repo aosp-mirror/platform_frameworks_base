@@ -601,7 +601,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Uit"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Meldingen"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Deze meldingen worden niet meer weergegeven"</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Meldingen worden niet meer weergegeven"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Deze meldingen worden geminimaliseerd"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Meestal sluit je deze meldingen. \nWil je ze blijven weergeven?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Deze meldingen blijven weergeven?"</string>
@@ -640,7 +640,7 @@
       <item quantity="other">%d minuten</item>
       <item quantity="one">%d minuut</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Batterijgebruik"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vermindert de prestaties en achtergrondgegevens"</string>
@@ -779,7 +779,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Scherm vergrendelen"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Vergrendelingsscherm"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"De telefoon wordt warm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Bepaalde functies zijn beperkt terwijl de telefoon afkoelt"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Je telefoon probeert automatisch af te koelen. Je kunt je telefoon nog steeds gebruiken, maar deze kan langzamer werken.\n\nZodra de telefoon is afgekoeld, werkt deze weer normaal."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Oplader loskoppelen"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Er is een probleem met het opladen van dit apparaat. Koppel de voedingsadapter los. Wees voorzichtig omdat de kabel warm kan zijn."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Onderhoudsstappen bekijken"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Snelkoppeling links"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Snelkoppeling rechts"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Snelkoppeling links ontgrendelt ook"</string>

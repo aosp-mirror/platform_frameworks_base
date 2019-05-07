@@ -32,8 +32,8 @@
     <string name="backup_enc_password_required" msgid="7889652203371654149">"যিহেতু আপোনাৰ ডিভাইচটো এনক্ৰিপ্ট কৰা হৈছে, আপুনি আপোনাৰ বেকআপ এনক্ৰিপ্ট কৰাৰ প্ৰয়োজন। অনুগ্ৰহ কৰি তলত এটা পাছৱৰ্ড দিয়ক:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"যদি পুনঃস্থাপন কৰিবলগীয়া ডেটা এনক্ৰিপ্ট কৰা আছে, তেন্তে তলত পাছৱৰ্ড দিয়ক:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"বেকআপ লোৱা কাৰ্য আৰম্ভ কৰি আছে..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"বেকআপ লোৱা সম্পূৰ্ণ হ\'ল"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"বেকআপ লোৱা সম্পূৰ্ণ হ’ল"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"পুনঃস্থাপন কাৰ্য আৰম্ভ কৰি আছে..."</string>
-    <string name="toast_restore_ended" msgid="1764041639199696132">"পুনঃস্থাপন কাৰ্য সমাপ্ত হ\'ল"</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"পুনঃস্থাপন কাৰ্য সমাপ্ত হ’ল"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"কাৰ্যটোৰ সময়সীমা উকলি গ\'ল"</string>
 </resources>

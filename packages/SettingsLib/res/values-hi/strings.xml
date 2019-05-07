@@ -42,7 +42,7 @@
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"कनेक्ट हो गया है, लेकिन इंटरनेट नहीं है"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"इंटरनेट कनेक्शन नहीं है"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"साइन इन करना ज़रूरी है"</string>
-    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"एक्सेस प्वाइंट फ़िलहाल भरा हुआ है"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"एक्सेस पॉइंट फ़िलहाल भरा हुआ है"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s के ज़रिए कनेक्ट"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s के ज़रिए उपलब्ध"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"अत्‍यधिक धीमी"</string>
@@ -99,8 +99,8 @@
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"फ़ाइल स्‍थानांतरण के लिए उपयोग करें"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"इनपुट के लिए उपयोग करें"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"सुनने में मददगार डिवाइस के लिए इस्तेमाल करें"</string>
-    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"युग्‍म बनाएं"</string>
-    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"दूसरे डिवाइस से जोड़ें"</string>
+    <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"जोड़ें"</string>
+    <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"जोड़ें"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"रद्द करें"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"कनेक्ट होने पर, पेयरिंग से आपके संपर्कों और कॉल इतिहास तक पहुंचा जा सकता है."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> के साथ युग्‍मित नहीं हो सका."</string>
@@ -188,7 +188,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"यह उपयोगकर्ता, डेवलपर के लिए सेटिंग और टूल का इस्तेमाल नहीं कर सकता"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"टेदरिंग सेटिंग इस उपयोगकर्ता के लिए उपलब्ध नहीं हैं"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"एक्सेस प्वाइंट नाम सेटिंग इस उपयोगकर्ता के लिए मौजूद नहीं हैं"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"एक्सेस पॉइंट के नाम की सेटिंग इस उपयोगकर्ता के लिए मौजूद नहीं हैं"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB डीबग करना"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"डीबग मोड जब USB कनेक्‍ट किया गया हो"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB डीबग करने की मंज़ूरी रद्द करें"</string>
@@ -420,7 +420,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"सहायता और फ़ीडबैक"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"मेन्यू"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"डेमो मोड में फ़ैक्टरी रीसेट के लिए पासवर्ड डालें"</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"आगे"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"आगे बढ़ें"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"पासवर्ड आवश्यक"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"टाइप करने की सक्रीय पद्धतियां"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम की भाषाओं का उपयोग करें"</string>

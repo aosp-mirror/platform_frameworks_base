@@ -144,7 +144,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Spraakuitvoer"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Spreeksnelheid"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Snelheid waarmee de tekst wordt gesproken"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Hoogte"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Toonhoogte"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Is van invloed op de toon van de synthetisch gegenereerde spraak"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Taal"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Systeemtaal gebruiken"</string>
@@ -154,7 +154,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Een korte demonstratie van spraaksynthese afspelen"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Spraakgegevens installeren"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"De spraakgegevens voor spraaksynthese installeren"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Deze engine voor spraaksynthese kan mogelijk alle tekst verzamelen die wordt gesproken, waaronder persoonlijke gegevens zoals wachtwoorden en creditcardnummers. Deze engine is afkomstig van de <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>-engine. Het gebruik van deze engine voor spraaksynthese inschakelen?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Deze engine voor spraaksynthese kan mogelijk alle tekst verzamelen die wordt gesproken, waaronder persoonsgegevens zoals wachtwoorden en creditcardnummers. Deze engine is afkomstig van de <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>-engine. Het gebruik van deze engine voor spraaksynthese inschakelen?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Deze taal heeft een werkende netwerkverbinding nodig voor tekst-naar-spraak-uitvoer."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Dit is een voorbeeld van spraaksynthese"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Status van standaardtaal"</string>
@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Een willekeurig MAC-adres bij het maken van verbinding met wifi-netwerken"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Betaald"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Met datalimiet"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Gratis"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-buffergrootten"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Kies Logger-grootten per logbuffer"</string>
@@ -425,7 +425,7 @@
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Actieve invoermethoden"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Systeemtalen gebruiken"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Instellingen openen voor <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> mislukt"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"Deze invoermethode verzamelt mogelijk alle tekst die je typt, inclusief persoonlijke gegevens zoals wachtwoorden en creditcardnummers. De methode is afkomstig uit de app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Deze invoermethode inschakelen?"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Deze invoermethode verzamelt mogelijk alle tekst die je typt, inclusief persoonsgegevens zoals wachtwoorden en creditcardnummers. De methode is afkomstig uit de app <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Deze invoermethode inschakelen?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Opmerking: Wanneer je telefoon opnieuw is opgestart, kan deze app pas worden gestart nadat je je telefoon hebt ontgrendeld"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS-registratiestatus"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Geregistreerd"</string>

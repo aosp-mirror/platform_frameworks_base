@@ -869,6 +869,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             ExpandableNotificationRow child = mChildren.get(childIdx);
             child.setChildrenExpanded(childrenExpanded, false);
         }
+        updateHeaderTouchability();
     }
 
     public void setContainingNotification(ExpandableNotificationRow parent) {
@@ -1208,6 +1209,13 @@ public class NotificationChildrenContainer extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             child.setUserLocked(userLocked && !showingAsLowPriority());
+        }
+        updateHeaderTouchability();
+    }
+
+    private void updateHeaderTouchability() {
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setAcceptAllTouches(mChildrenExpanded || mUserLocked);
         }
     }
 

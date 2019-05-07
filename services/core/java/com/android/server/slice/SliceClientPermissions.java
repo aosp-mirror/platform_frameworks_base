@@ -282,9 +282,12 @@ public class SliceClientPermissions implements DirtyTracker, Persistable {
         public synchronized void writeTo(XmlSerializer out) throws IOException {
             final int N = mPaths.size();
             for (int i = 0; i < N; i++) {
-                out.startTag(NAMESPACE, TAG_PATH);
-                out.text(encodeSegments(mPaths.valueAt(i)));
-                out.endTag(NAMESPACE, TAG_PATH);
+                final String[] segments = mPaths.valueAt(i);
+                if (segments != null) {
+                    out.startTag(NAMESPACE, TAG_PATH);
+                    out.text(encodeSegments(segments));
+                    out.endTag(NAMESPACE, TAG_PATH);
+                }
             }
         }
 

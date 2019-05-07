@@ -57,7 +57,7 @@
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na ma-access ang <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> upang pamahalaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> upang pamahalaan ang <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Wala sa mga na-install na app ang gumagana sa USB accessory na ito. Matuto nang higit pa tungkol sa accessory na ito sa <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Wala sa mga na-install na app ang gumagana sa USB accessory na ito. Matuto pa tungkol sa accessory na ito sa <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB accessory"</string>
     <string name="label_view" msgid="6304565553218192990">"Tingnan"</string>
     <string name="always_use_device" msgid="4015357883336738417">"Palaging buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> kapag nakakonekta ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Umiinit ang telepono"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Limitado ang ilang feature habang nagku-cool down ang telepono"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Hugutin ang charger"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"May isyu sa pag-charge ng device na ito. Hugutin ang power adapter at mag-ingat dahil maaaring mainit ang cable."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Kaliwang shortcut"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Kanang shortcut"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ina-unlock din ng kaliwang shortcut ang"</string>
