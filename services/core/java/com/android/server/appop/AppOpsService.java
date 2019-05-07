@@ -1723,35 +1723,18 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
-     * @see #checkOperationUnchecked(int, int, String, boolean, boolean)
-     */
-    private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
-            boolean raw) {
-        return checkOperationUnchecked(code, uid, packageName, raw, true);
-    }
-
-    /**
      * Get the mode of an app-op.
      *
      * @param code The code of the op
      * @param uid The uid of the package the op belongs to
      * @param packageName The package the op belongs to
      * @param raw If the raw state of eval-ed state should be checked.
-     * @param verify If the code should check the package belongs to the uid
      *
      * @return The mode of the op
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
-                boolean raw, boolean verify) {
-        boolean isPrivileged;
-        try {
-            isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
-        } catch (Exception e) {
-            if (verify) {
-                throw e;
-            }
-            return AppOpsManager.MODE_IGNORED;
-        }
+                boolean raw) {
+        boolean isPrivileged = verifyAndGetIsPrivileged(uid, packageName);
 
         synchronized (this) {
             if (isOpRestrictedLocked(uid, code, packageName, isPrivileged)) {
@@ -4589,16 +4572,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             synchronized (AppOpsService.this) {
                 mProfileOwners = owners;
             }
-        }
-
-        @Override
-        public void setUidMode(int code, int uid, int mode) {
-            AppOpsService.this.setUidMode(code, uid, mode);
-        }
-
-        @Override
-        public @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName) {
-            return AppOpsService.this.checkOperationUnchecked(code, uid, packageName, true, false);
         }
     }
 }
