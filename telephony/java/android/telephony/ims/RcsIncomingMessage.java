@@ -26,8 +26,8 @@ public class RcsIncomingMessage extends RcsMessage {
     /**
      * @hide
      */
-    RcsIncomingMessage(int id) {
-        super(id);
+    RcsIncomingMessage(RcsControllerCall rcsControllerCall, int id) {
+        super(rcsControllerCall, id);
     }
 
     /**
@@ -39,8 +39,9 @@ public class RcsIncomingMessage extends RcsMessage {
      */
     @WorkerThread
     public void setArrivalTimestamp(long arrivalTimestamp) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setMessageArrivalTimestamp(mId, true, arrivalTimestamp));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setMessageArrivalTimestamp(mId, true,
+                        arrivalTimestamp, callingPackage));
     }
 
     /**
@@ -50,7 +51,9 @@ public class RcsIncomingMessage extends RcsMessage {
      */
     @WorkerThread
     public long getArrivalTimestamp() throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessageArrivalTimestamp(mId, true));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getMessageArrivalTimestamp(mId, true,
+                        callingPackage));
     }
 
     /**
@@ -62,8 +65,9 @@ public class RcsIncomingMessage extends RcsMessage {
      */
     @WorkerThread
     public void setSeenTimestamp(long notifiedTimestamp) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setMessageSeenTimestamp(mId, true, notifiedTimestamp));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setMessageSeenTimestamp(mId, true, notifiedTimestamp,
+                        callingPackage));
     }
 
     /**
@@ -73,7 +77,8 @@ public class RcsIncomingMessage extends RcsMessage {
      */
     @WorkerThread
     public long getSeenTimestamp() throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessageSeenTimestamp(mId, true));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getMessageSeenTimestamp(mId, true, callingPackage));
     }
 
     /**
@@ -83,7 +88,9 @@ public class RcsIncomingMessage extends RcsMessage {
     @WorkerThread
     public RcsParticipant getSenderParticipant() throws RcsMessageStoreException {
         return new RcsParticipant(
-                RcsControllerCall.call(iRcs -> iRcs.getSenderParticipant(mId)));
+                mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getSenderParticipant(mId, callingPackage)));
     }
 
     /**

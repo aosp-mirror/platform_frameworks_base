@@ -37,6 +37,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -163,7 +164,9 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         // Assume IRecentsAnimationController#cleanupScreenshot called to finish screenshot
         // animation.
+        spyOn(mController.mRecentScreenshotAnimator.mAnimatable);
         mController.mRecentScreenshotAnimator.cancelAnimation();
+        verify(mController.mRecentScreenshotAnimator.mAnimatable).onAnimationLeashLost(any());
         verify(mAnimationCallbacks).onAnimationFinished(REORDER_KEEP_IN_PLACE, true, false);
     }
 

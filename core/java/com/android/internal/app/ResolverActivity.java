@@ -2061,11 +2061,16 @@ public class ResolverActivity extends Activity {
     }
 
     static class ViewHolder {
+        public View itemView;
+        public Drawable defaultItemViewBackground;
+
         public TextView text;
         public TextView text2;
         public ImageView icon;
 
         public ViewHolder(View view) {
+            itemView = view;
+            defaultItemViewBackground = view.getBackground();
             text = (TextView) view.findViewById(com.android.internal.R.id.text1);
             text2 = (TextView) view.findViewById(com.android.internal.R.id.text2);
             icon = (ImageView) view.findViewById(R.id.icon);

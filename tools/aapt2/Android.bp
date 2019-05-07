@@ -41,6 +41,7 @@ cc_defaults {
         windows: {
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
+            ldflags: ["-static"],
         },
         darwin: {
             cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],

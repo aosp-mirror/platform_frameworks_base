@@ -23,6 +23,8 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"네트워크를 검색할 수 없습니다."</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"없음"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"저장됨"</string>
+    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
+    <skip />
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 설정 실패"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"저품질 네트워크로 인해 연결되지 않음"</string>

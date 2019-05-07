@@ -60,6 +60,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private final ActivityDisplay mDefaultDisplay;
     private final int mCallingPid;
 
+    /**
+     * The activity which has been launched behind. We need to remember the activity because the
+     * target stack may have other activities, then we are able to restore the launch-behind state
+     * for the exact activity.
+     */
+    private ActivityRecord mLaunchedTargetActivity;
     private int mTargetActivityType;
 
     // The stack to restore the target stack behind when the animation is finished
@@ -175,6 +181,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Mark the target activity as launch-behind to bump its visibility for the
             // duration of the gesture that is driven by the recents component
             targetActivity.mLaunchTaskBehind = true;
+            mLaunchedTargetActivity = targetActivity;
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started. Cancel any existing recents animation running synchronously (do not hold the
@@ -213,7 +220,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // Unregister for stack order changes
             mDefaultDisplay.unregisterStackOrderChangedListener(this);
 
-            if (mWindowManager.getRecentsAnimationController() == null) return;
+            final RecentsAnimationController controller =
+                    mWindowManager.getRecentsAnimationController();
+            if (controller == null) return;
 
             // Just to be sure end the launch hint in case the target activity was never launched.
             // However, if we're keeping the activity and making it visible, we can leave it on.
@@ -233,8 +242,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
                     final ActivityStack targetStack = mDefaultDisplay.getStack(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
+                    // Prefer to use the original target activity instead of top activity because
+                    // we may have moved another task to top (starting 3p launcher).
                     final ActivityRecord targetActivity = targetStack != null
-                            ? targetStack.getTopActivity()
+                            ? targetStack.isInStackLocked(mLaunchedTargetActivity)
                             : null;
                     if (DEBUG) Slog.d(TAG, "onAnimationFinished(): targetStack=" + targetStack
                             + " targetActivity=" + targetActivity
@@ -283,6 +294,16 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                             }
                         }
                     } else {
+                        // If there is no recents screenshot animation, we can update the visibility
+                        // of target stack immediately because it is visually invisible and the
+                        // launch-behind state is restored. That also prevents the next transition
+                        // type being disturbed if the visibility is updated after setting the next
+                        // transition (the target activity will be one of closing apps).
+                        if (!controller.shouldCancelWithDeferredScreenshot()
+                                && !targetStack.isFocusedStackOnDisplay()) {
+                            targetStack.ensureActivitiesVisibleLocked(null /* starting */,
+                                    0 /* starting */, false /* preserveWindows */);
+                        }
                         // Keep target stack in place, nothing changes, so ignore the transition
                         // logic below
                         return;
@@ -331,6 +352,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
         final RecentsAnimationController controller =
                 mWindowManager.getRecentsAnimationController();
+        if (controller == null) {
+            return;
+        }
+
         final DisplayContent dc =
                 mService.mRootActivityContainer.getDefaultDisplay().mDisplayContent;
         dc.mBoundsAnimationController.setAnimationType(

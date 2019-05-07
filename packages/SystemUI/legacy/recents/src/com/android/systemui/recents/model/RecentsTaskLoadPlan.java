@@ -113,7 +113,7 @@ public class RecentsTaskLoadPlan {
                     : t.realActivity;
             final int windowingMode = t.configuration.windowConfiguration.getWindowingMode();
             TaskKey taskKey = new TaskKey(t.persistentId, windowingMode, t.baseIntent,
-                    sourceComponent, t.userId, t.lastActiveTime);
+                    sourceComponent, t.userId, t.lastActiveTime, t.displayId);
 
             boolean isFreeformTask = windowingMode == WINDOWING_MODE_FREEFORM;
             boolean isStackTask = !isFreeformTask;

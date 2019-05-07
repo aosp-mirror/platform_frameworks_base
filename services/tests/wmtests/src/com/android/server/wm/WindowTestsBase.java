@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.View.VISIBLE;
@@ -444,5 +445,14 @@ class WindowTestsBase {
         synchronized (mWm.mGlobalLock) {
             return new WindowTestUtils.TestWindowState(mWm, mMockSession, mIWindow, attrs, token);
         }
+    }
+
+    /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
+    DisplayContent createMockSimulatedDisplay() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.type = Display.TYPE_VIRTUAL;
+        displayInfo.ownerUid = SYSTEM_UID;
+        return createNewDisplay(displayInfo);
     }
 }

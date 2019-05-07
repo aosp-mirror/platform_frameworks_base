@@ -1598,7 +1598,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) Log.d(TAG, "reportGnssServiceDied");
         mHandler.post(() -> {
             class_init_native();
-            native_init_once();
+            setupNativeGnssService();
             if (isEnabled()) {
                 synchronized (mLock) {
                     mEnabled = false;
@@ -2052,20 +2052,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
          * this handler.
          */
         private void handleInitialize() {
-            native_init_once();
-
-            /*
-             * A cycle of native_init() and native_cleanup() is needed so that callbacks are
-             * registered after bootup even when location is disabled.
-             * This will allow Emergency SUPL to work even when location is disabled before device
-             * restart.
-             */
-            boolean isInitialized = native_init();
-            if (!isInitialized) {
-                Log.w(TAG, "Native initialization failed at bootup");
-            } else {
-                native_cleanup();
-            }
+            setupNativeGnssService();
 
             if (native_is_gnss_visibility_control_supported()) {
                 mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper);
@@ -2225,6 +2212,23 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         s.append("  native internal state: ").append(native_get_internal_state());
         s.append("\n");
         pw.append(s);
+    }
+
+    private void setupNativeGnssService() {
+        native_init_once();
+
+        /*
+         * A cycle of native_init() and native_cleanup() is needed so that callbacks are
+         * registered after bootup even when location is disabled.
+         * This will allow Emergency SUPL to work even when location is disabled before device
+         * restart.
+         */
+        boolean isInitialized = native_init();
+        if (!isInitialized) {
+            Log.w(TAG, "Native initialization failed.");
+        } else {
+            native_cleanup();
+        }
     }
 
     // preallocated to avoid memory allocation in reportNmea()

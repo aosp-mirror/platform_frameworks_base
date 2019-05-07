@@ -23,6 +23,8 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Kan ikke søke etter nettverk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Lagret"</string>
+    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
+    <skip />
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Slått av"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurasjonsfeil"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ikke tilkoblet på grunn av nettverk av lav kvalitet"</string>
