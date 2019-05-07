@@ -3237,7 +3237,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 178;
+            private static final int SETTINGS_VERSION = 179;
 
             private final int mUserId;
 
@@ -4354,6 +4354,37 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 178;
+                }
+
+                if (currentVersion == 178) {
+                    // Version 178: Set the default value for Secure Settings:
+                    // SKIP_GESTURE & SILENCE_GESTURE
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    final Setting skipGesture = secureSettings.getSettingLocked(
+                            Secure.SKIP_GESTURE);
+
+                    if (skipGesture.isNull()) {
+                        final boolean defSkipGesture = getContext().getResources().getBoolean(
+                                R.bool.def_skip_gesture);
+                        secureSettings.insertSettingLocked(
+                                Secure.SKIP_GESTURE, defSkipGesture ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    final Setting silenceGesture = secureSettings.getSettingLocked(
+                            Secure.SILENCE_GESTURE);
+
+                    if (silenceGesture.isNull()) {
+                        final boolean defSilenceGesture = getContext().getResources().getBoolean(
+                                R.bool.def_silence_gesture);
+                        secureSettings.insertSettingLocked(
+                                Secure.SILENCE_GESTURE, defSilenceGesture ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 179;
                 }
 
 
