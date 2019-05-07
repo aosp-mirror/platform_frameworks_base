@@ -35,7 +35,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -164,7 +163,6 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -6830,9 +6828,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            int lastWindowingMode = displayContent.getWindowingMode();
             mDisplayWindowSettings.setWindowingModeLocked(displayContent, mode);
 
             reconfigureDisplayLocked(displayContent);
+
+            if (lastWindowingMode != displayContent.getWindowingMode()) {
+                // reconfigure won't detect this change in isolation because the windowing mode is
+                // already set on the display, so fire off a new config now.
+                mH.removeMessages(H.SEND_NEW_CONFIGURATION);
+
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    // direct call since lock is shared.
+                    sendNewConfiguration(displayId);
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+                // Now that all configurations are updated, execute pending transitions
+                displayContent.executeAppTransition();
+            }
         }
     }
 
@@ -6925,19 +6940,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: " + displayId);
                 return false;
             }
-            final Display display = displayContent.getDisplay();
-            if (isUntrustedVirtualDisplay(display)) {
+            if (displayContent.isUntrustedVirtualDisplay()) {
                 return false;
             }
             return displayContent.supportsSystemDecorations();
         }
-    }
-
-    /**
-     * @return {@code true} if the display is non-system created virtual display.
-     */
-    private static boolean isUntrustedVirtualDisplay(Display display) {
-        return display.getType() == TYPE_VIRTUAL && display.getOwnerUid() != Process.SYSTEM_UID;
     }
 
     @Override
@@ -6973,8 +6980,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + displayId);
                 return false;
             }
-            final Display display = displayContent.getDisplay();
-            if (isUntrustedVirtualDisplay(display)) {
+            if (displayContent.isUntrustedVirtualDisplay()) {
                 return false;
             }
             return mDisplayWindowSettings.shouldShowImeLocked(displayContent)
@@ -7426,8 +7432,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean shouldShowIme(int displayId) {
             synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
+                return WindowManagerService.this.shouldShowIme(displayId);
             }
         }
     }

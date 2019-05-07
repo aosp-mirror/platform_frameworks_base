@@ -749,15 +749,77 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @Override
-        protected void dump(@NonNull final FileDescriptor fd, @NonNull final PrintWriter pw,
-                @NonNull final String[] argv) {
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            final DumpState dumpState = new DumpState();
+            dumpState.setUserId(UserHandle.getUserId(Binder.getCallingUid()));
+
+            int opti = 0;
+            while (opti < args.length) {
+                final String opt = args[opti];
+                if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                    break;
+                }
+                opti++;
+
+                if ("-h".equals(opt)) {
+                    pw.println("dump [-h] [--verbose] [--user USER_ID] [[FIELD] PACKAGE]");
+                    pw.println("  Print debugging information about the overlay manager.");
+                    pw.println("  With optional parameter PACKAGE, limit output to the specified");
+                    pw.println("  package. With optional parameter FIELD, limit output to");
+                    pw.println("  the value of that SettingsItem field. Field names are");
+                    pw.println("  case insensitive and out.println the m prefix can be omitted,");
+                    pw.println("  so the following are equivalent: mState, mstate, State, state.");
+                    return;
+                } else if ("--user".equals(opt)) {
+                    opti++;
+                    if (opti >= args.length) {
+                        pw.println("Error: user missing argument");
+                        return;
+                    }
+                    try {
+                        dumpState.setUserId(Integer.parseInt(args[opti]));
+                    } catch (NumberFormatException e) {
+                        pw.println("Error: user argument is not a number: " + args[opti]);
+                        return;
+                    }
+                } else if ("--verbose".equals(opt)) {
+                    dumpState.setVerbose(true);
+                } else {
+                    pw.println("Unknown argument: " + opt + "; use -h for help");
+                }
+            }
+            if (opti < args.length) {
+                final String arg = args[opti];
+                opti++;
+                switch (arg) {
+                    case "packagename":
+                    case "userid":
+                    case "targetpackagename":
+                    case "targetoverlayablename":
+                    case "basecodepath":
+                    case "state":
+                    case "isenabled":
+                    case "isstatic":
+                    case "priority":
+                    case "category":
+                        dumpState.setField(arg);
+                        break;
+                    default:
+                        dumpState.setPackageName(arg);
+                        break;
+                }
+            }
+            if (dumpState.getPackageName() == null && opti < args.length) {
+                dumpState.setPackageName(args[opti]);
+                opti++;
+            }
+
             enforceDumpPermission("dump");
-
-            final boolean verbose = argv.length > 0 && "--verbose".equals(argv[0]);
-
             synchronized (mLock) {
-                mImpl.onDump(pw);
-                mPackageManager.dump(pw, verbose);
+                mImpl.dump(pw, dumpState);
+                if (dumpState.getPackageName() == null) {
+                    mPackageManager.dump(pw, dumpState);
+                }
             }
         }
 
@@ -1046,10 +1108,10 @@ public final class OverlayManagerService extends SystemService {
         private static final String TAB1 = "    ";
         private static final String TAB2 = TAB1 + TAB1;
 
-        public void dump(@NonNull final PrintWriter pw, final boolean verbose) {
+        public void dump(@NonNull final PrintWriter pw, @NonNull DumpState dumpState) {
             pw.println("PackageInfo cache");
 
-            if (!verbose) {
+            if (!dumpState.isVerbose()) {
                 int count = 0;
                 final int n = mCache.size();
                 for (int i = 0; i < n; i++) {

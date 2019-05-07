@@ -25,6 +25,7 @@ import android.annotation.WorkerThread;
  * @hide
  */
 public class RcsOutgoingMessageDelivery {
+    private final RcsControllerCall mRcsControllerCall;
     // The participant that this delivery is intended for
     private final int mRecipientId;
     // The message this delivery is associated with
@@ -35,7 +36,9 @@ public class RcsOutgoingMessageDelivery {
      *
      * @hide
      */
-    RcsOutgoingMessageDelivery(int recipientId, int messageId) {
+    RcsOutgoingMessageDelivery(
+            RcsControllerCall rcsControllerCall, int recipientId, int messageId) {
+        mRcsControllerCall = rcsControllerCall;
         mRecipientId = recipientId;
         mRcsOutgoingMessageId = messageId;
     }
@@ -49,8 +52,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public void setDeliveredTimestamp(long deliveredTimestamp) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(iRcs -> iRcs.setOutgoingDeliveryDeliveredTimestamp(
-                mRcsOutgoingMessageId, mRecipientId, deliveredTimestamp));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setOutgoingDeliveryDeliveredTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, deliveredTimestamp, callingPackage));
     }
 
     /**
@@ -61,8 +65,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public long getDeliveredTimestamp() throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getOutgoingDeliveryDeliveredTimestamp(
-                mRcsOutgoingMessageId, mRecipientId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getOutgoingDeliveryDeliveredTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, callingPackage));
     }
 
     /**
@@ -74,8 +79,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public void setSeenTimestamp(long seenTimestamp) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(iRcs -> iRcs.setOutgoingDeliverySeenTimestamp(
-                mRcsOutgoingMessageId, mRecipientId, seenTimestamp));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setOutgoingDeliverySeenTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, seenTimestamp, callingPackage));
     }
 
     /**
@@ -86,8 +92,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public long getSeenTimestamp() throws RcsMessageStoreException {
-        return RcsControllerCall.call(
-                iRcs -> iRcs.getOutgoingDeliverySeenTimestamp(mRcsOutgoingMessageId, mRecipientId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getOutgoingDeliverySeenTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, callingPackage));
     }
 
     /**
@@ -99,8 +106,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public void setStatus(@RcsMessage.RcsMessageStatus int status) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(iRcs -> iRcs.setOutgoingDeliveryStatus(
-                mRcsOutgoingMessageId, mRecipientId, status));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setOutgoingDeliveryStatus(
+                        mRcsOutgoingMessageId, mRecipientId, status, callingPackage));
     }
 
     /**
@@ -109,8 +117,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public @RcsMessage.RcsMessageStatus int getStatus() throws RcsMessageStoreException {
-        return RcsControllerCall.call(
-                iRcs -> iRcs.getOutgoingDeliveryStatus(mRcsOutgoingMessageId, mRecipientId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getOutgoingDeliveryStatus(mRcsOutgoingMessageId,
+                        mRecipientId, callingPackage));
     }
 
     /**
@@ -118,7 +127,7 @@ public class RcsOutgoingMessageDelivery {
      */
     @NonNull
     public RcsParticipant getRecipient() {
-        return new RcsParticipant(mRecipientId);
+        return new RcsParticipant(mRcsControllerCall, mRecipientId);
     }
 
     /**
@@ -126,6 +135,6 @@ public class RcsOutgoingMessageDelivery {
      */
     @NonNull
     public RcsOutgoingMessage getMessage() {
-        return new RcsOutgoingMessage(mRcsOutgoingMessageId);
+        return new RcsOutgoingMessage(mRcsControllerCall, mRcsOutgoingMessageId);
     }
 }

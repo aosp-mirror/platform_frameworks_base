@@ -157,6 +157,7 @@ public final class LocaleList implements Parcelable {
             protoOutputStream.write(LocaleProto.LANGUAGE, locale.getLanguage());
             protoOutputStream.write(LocaleProto.COUNTRY, locale.getCountry());
             protoOutputStream.write(LocaleProto.VARIANT, locale.getVariant());
+            protoOutputStream.write(LocaleProto.SCRIPT, locale.getScript());
             protoOutputStream.end(token);
         }
     }

@@ -766,7 +766,7 @@ class WindowStateAnimator {
             return false;
         }
 
-        if (w.inPinnedWindowingMode()) {
+        if (w.getWindowConfiguration().tasksAreFloating()) {
             return false;
         }
 

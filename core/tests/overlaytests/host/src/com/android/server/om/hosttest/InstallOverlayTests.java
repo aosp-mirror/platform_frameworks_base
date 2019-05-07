@@ -177,6 +177,23 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
                 .contains(APP_OVERLAY_PACKAGE_NAME));
     }
 
+    @Test
+    public void testAdbShellOMSInterface() throws Exception {
+        installPackage("OverlayHostTests_AppOverlayV1.apk");
+        assertTrue(shell("cmd overlay list " + DEVICE_TEST_PKG).contains(DEVICE_TEST_PKG));
+        assertTrue(shell("cmd overlay list " + DEVICE_TEST_PKG).contains(APP_OVERLAY_PACKAGE_NAME));
+        assertEquals("[ ] " + APP_OVERLAY_PACKAGE_NAME,
+                shell("cmd overlay list " + APP_OVERLAY_PACKAGE_NAME).trim());
+        assertEquals("STATE_DISABLED",
+                shell("cmd overlay dump state " + APP_OVERLAY_PACKAGE_NAME).trim());
+
+        setOverlayEnabled(APP_OVERLAY_PACKAGE_NAME, true);
+        assertEquals("[x] " + APP_OVERLAY_PACKAGE_NAME,
+                shell("cmd overlay list " + APP_OVERLAY_PACKAGE_NAME).trim());
+        assertEquals("STATE_ENABLED",
+                shell("cmd overlay dump state " + APP_OVERLAY_PACKAGE_NAME).trim());
+    }
+
     private void delay() {
         try {
             Thread.sleep(1000);
@@ -195,20 +212,24 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     }
 
     private void installConvertExistingInstantPackageToFull(String pkg) throws Exception {
-        getDevice().executeShellCommand("cmd package install-existing --wait --full " + pkg);
+        shell("cmd package install-existing --wait --full " + pkg);
     }
 
     private void setPackageEnabled(String pkg, boolean enabled) throws Exception {
-        getDevice().executeShellCommand("cmd package " + (enabled ? "enable " : "disable ") + pkg);
+        shell("cmd package " + (enabled ? "enable " : "disable ") + pkg);
         delay();
     }
 
     private void setOverlayEnabled(String pkg, boolean enabled) throws Exception {
-        getDevice().executeShellCommand("cmd overlay " + (enabled ? "enable " : "disable ") + pkg);
+        shell("cmd overlay " + (enabled ? "enable " : "disable ") + pkg);
         delay();
     }
 
     private boolean overlayManagerContainsPackage(String pkg) throws Exception {
-        return getDevice().executeShellCommand("cmd overlay list").contains(pkg);
+        return shell("cmd overlay list").contains(pkg);
+    }
+
+    private String shell(final String cmd) throws Exception {
+        return getDevice().executeShellCommand(cmd);
     }
 }

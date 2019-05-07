@@ -33,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 public abstract class RcsThread {
     /**
      * The rcs_participant_thread_id that represents this thread in the database
+     *
      * @hide
      */
     protected int mThreadId;
@@ -40,8 +41,14 @@ public abstract class RcsThread {
     /**
      * @hide
      */
-    protected RcsThread(int threadId) {
+    protected final RcsControllerCall mRcsControllerCall;
+
+    /**
+     * @hide
+     */
+    protected RcsThread(RcsControllerCall rcsControllerCall, int threadId) {
         mThreadId = threadId;
+        mRcsControllerCall = rcsControllerCall;
     }
 
     /**
@@ -51,7 +58,8 @@ public abstract class RcsThread {
     @WorkerThread
     @NonNull
     public RcsMessageSnippet getSnippet() throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessageSnippet(mThreadId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getMessageSnippet(mThreadId, callingPackage));
     }
 
     /**
@@ -64,8 +72,10 @@ public abstract class RcsThread {
     public RcsIncomingMessage addIncomingMessage(
             @NonNull RcsIncomingMessageCreationParams rcsIncomingMessageCreationParams)
             throws RcsMessageStoreException {
-        return new RcsIncomingMessage(RcsControllerCall.call(iRcs -> iRcs.addIncomingMessage(
-                mThreadId, rcsIncomingMessageCreationParams)));
+        int messageId = mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.addIncomingMessage(mThreadId,
+                        rcsIncomingMessageCreationParams, callingPackage));
+        return new RcsIncomingMessage(mRcsControllerCall, messageId);
     }
 
     /**
@@ -78,10 +88,10 @@ public abstract class RcsThread {
     public RcsOutgoingMessage addOutgoingMessage(
             @NonNull RcsOutgoingMessageCreationParams rcsOutgoingMessageCreationParams)
             throws RcsMessageStoreException {
-        int messageId = RcsControllerCall.call(iRcs -> iRcs.addOutgoingMessage(
-                mThreadId, rcsOutgoingMessageCreationParams));
+        int messageId = mRcsControllerCall.call((iRcs, callingPackage) -> iRcs.addOutgoingMessage(
+                mThreadId, rcsOutgoingMessageCreationParams, callingPackage));
 
-        return new RcsOutgoingMessage(messageId);
+        return new RcsOutgoingMessage(mRcsControllerCall, messageId);
     }
 
     /**
@@ -92,9 +102,10 @@ public abstract class RcsThread {
      */
     @WorkerThread
     public void deleteMessage(@NonNull RcsMessage rcsMessage) throws RcsMessageStoreException {
-        RcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.deleteMessage(rcsMessage.getId(), rcsMessage.isIncoming(), mThreadId,
-                        isGroup()));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.deleteMessage(rcsMessage.getId(),
+                        rcsMessage.isIncoming(), mThreadId,
+                        isGroup(), callingPackage));
     }
 
     /**
@@ -108,9 +119,11 @@ public abstract class RcsThread {
     @WorkerThread
     @NonNull
     public RcsMessageQueryResult getMessages() throws RcsMessageStoreException {
-        RcsMessageQueryParams queryParameters =
+        RcsMessageQueryParams queryParams =
                 new RcsMessageQueryParams.Builder().setThread(this).build();
-        return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
+        return new RcsMessageQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getMessages(queryParams, callingPackage)));
     }
 
     /**
