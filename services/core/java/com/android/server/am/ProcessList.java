@@ -1445,10 +1445,11 @@ public final class ProcessList {
         long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != ActivityManagerService.MY_PID) {
             checkSlow(startTime, "startProcess: removing from pids map");
-            mService.mPidsSelfLocked.remove(app.pid);
+            mService.mPidsSelfLocked.remove(app);
             mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             checkSlow(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
+            app.startSeq = 0;
         }
 
         if (DEBUG_PROCESSES && mService.mProcessesOnHold.contains(app)) Slog.v(
@@ -1656,6 +1657,14 @@ public final class ProcessList {
         app.killedByAm = false;
         app.removed = false;
         app.killed = false;
+        if (app.startSeq != 0) {
+            Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
+                    + " with non-zero startSeq:" + app.startSeq);
+        }
+        if (app.pid != 0) {
+            Slog.wtf(TAG, "startProcessLocked processName:" + app.processName
+                    + " with non-zero pid:" + app.pid);
+        }
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingRecord, seInfo, startTime);
         if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
@@ -2079,12 +2088,15 @@ public final class ProcessList {
         // If there is already an app occupying that pid that hasn't been cleaned up
         if (oldApp != null && !app.isolated) {
             // Clean up anything relating to this pid first
-            Slog.w(TAG, "Reusing pid " + pid
-                    + " while app is still mapped to it");
+            Slog.wtf(TAG, "handleProcessStartedLocked process:" + app.processName
+                    + " startSeq:" + app.startSeq
+                    + " pid:" + pid
+                    + " belongs to another existing app:" + oldApp.processName
+                    + " startSeq:" + oldApp.startSeq);
             mService.cleanUpApplicationRecordLocked(oldApp, false, false, -1,
                     true /*replacingPid*/);
         }
-        mService.mPidsSelfLocked.put(pid, app);
+        mService.mPidsSelfLocked.put(app);
         synchronized (mService.mPidsSelfLocked) {
             if (!procAttached) {
                 Message msg = mService.mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
@@ -2257,7 +2269,7 @@ public final class ProcessList {
                 .pendingStart)) {
             int pid = app.pid;
             if (pid > 0) {
-                mService.mPidsSelfLocked.remove(pid);
+                mService.mPidsSelfLocked.remove(app);
                 mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                 if (app.isolated) {
