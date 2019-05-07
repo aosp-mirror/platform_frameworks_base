@@ -161,4 +161,12 @@ oneway interface ITaskStackListener {
      * @see com.android.server.wm.AppWindowToken#inSizeCompatMode
      */
     void onSizeCompatModeActivityChanged(int displayId, in IBinder activityToken);
+
+    /**
+     * Reports that an Activity received a back key press when there were no additional activities
+     * on the back stack.
+     *
+     * @param taskInfo info about the task which received the back press
+     */
+    void onBackPressedOnTaskRoot(in ActivityManager.RunningTaskInfo taskInfo);
 }

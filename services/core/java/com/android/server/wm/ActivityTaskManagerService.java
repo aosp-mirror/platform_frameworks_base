@@ -141,6 +141,7 @@ import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.INotificationManager;
+import android.app.IRequestFinishCallback;
 import android.app.ITaskStackListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -2284,6 +2285,32 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 getTopDisplayFocusedStack().unhandledBackLocked();
             } finally {
                 Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressedOnTaskRoot(IBinder token, IRequestFinishCallback callback) {
+        synchronized (mGlobalLock) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            ActivityStack stack = r.getActivityStack();
+            if (stack != null && stack.isSingleTaskInstance()) {
+                // Single-task stacks are used for activities which are presented in floating
+                // windows above full screen activities. Instead of directly finishing the
+                // task, a task change listener is used to notify SystemUI so the action can be
+                // handled specially.
+                final TaskRecord task = r.getTaskRecord();
+                mTaskChangeNotificationController
+                        .notifyBackPressedOnTaskRoot(task.getTaskInfo());
+            } else {
+                try {
+                    callback.requestFinish();
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to invoke request finish callback", e);
+                }
             }
         }
     }

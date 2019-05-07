@@ -53,6 +53,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG = 18;
     private static final int NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED_MSG = 19;
     private static final int NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG = 20;
+    private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -90,6 +91,10 @@ class TaskChangeNotificationController {
 
     private final TaskStackConsumer mNotifyTaskDescriptionChanged = (l, m) -> {
         l.onTaskDescriptionChanged((RunningTaskInfo) m.obj);
+    };
+
+    private final TaskStackConsumer mNotifyBackPressedOnTaskRoot = (l, m) -> {
+        l.onBackPressedOnTaskRoot((RunningTaskInfo) m.obj);
     };
 
     private final TaskStackConsumer mNotifyActivityRequestedOrientationChanged = (l, m) -> {
@@ -224,6 +229,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG:
                     forAllRemoteListeners(mOnSizeCompatModeActivityChanged, msg);
+                    break;
+                case NOTIFY_BACK_PRESSED_ON_TASK_ROOT:
+                    forAllRemoteListeners(mNotifyBackPressedOnTaskRoot, msg);
                     break;
             }
         }
@@ -456,6 +464,17 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_SIZE_COMPAT_MODE_ACTIVITY_CHANGED_MSG,
                 displayId, 0 /* unused */, activityToken);
         forAllLocalListeners(mOnSizeCompatModeActivityChanged, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify listeners that an activity received a back press when there are no other activities
+     * in the back stack.
+     */
+    void notifyBackPressedOnTaskRoot(TaskInfo taskInfo) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_BACK_PRESSED_ON_TASK_ROOT,
+                taskInfo);
+        forAllLocalListeners(mNotifyBackPressedOnTaskRoot, msg);
         msg.sendToTarget();
     }
 }
