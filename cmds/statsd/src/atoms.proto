@@ -41,7 +41,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
-import "frameworks/base/core/proto/android/stats/connectivity/resolv_stats.proto";
+import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
@@ -5109,35 +5109,35 @@ message AppCompacted {
  * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
  * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
  *
- * The top-level message represents the entire lookup operation, which may result one or more
- * queries to the recursive DNS resolvers. Those are individually logged in DnsQueryEvent to
- * enable computing error rates and network latency and timeouts broken up by query type,
- * transport, network interface, etc.
+ * The NetworkDnsEventReported message represents the entire lookup operation, which may
+ * result one or more queries to the recursive DNS resolvers. Those are individually logged
+ * in DnsQueryEvents to enable computing error rates and network latency and timeouts
+ * broken up by query type, transport, network interface, etc.
  */
 message NetworkDnsEventReported {
+    optional android.stats.dnsresolver.EventType event_type = 1;
 
-    optional android.stats.connectivity.EventType event_type = 1;
-
-    optional android.stats.connectivity.ReturnCode return_code = 2;
+    optional android.stats.dnsresolver.ReturnCode return_code = 2;
 
     // The latency in microseconds of the entire DNS lookup operation.
     optional int32 latency_micros = 3;
 
-    optional android.stats.connectivity.DnsQueryEventRe dns_query_event_re = 4 [(log_mode) = MODE_BYTES];
+    // Only valid for event_type = EVENT_GETADDRINFO.
+    optional int32 hints_ai_flags = 4;
 
-    // ResNSend flags defined in android/multinetwork.h
-    optional int32 flags = 5;
+    // Flags passed to android_res_nsend() defined in multinetwork.h
+    // Only valid for event_type = EVENT_RESNSEND.
+    optional int32 res_nsend_flags = 5;
 
-    optional android.net.NetworkCapabilitiesProto.Transport network_type = 6;
+    optional android.stats.dnsresolver.Transport network_type = 6;
 
     // The DNS over TLS mode on a specific netId.
-    optional android.stats.connectivity.PrivateDnsModes private_dns_modes = 7;
+    optional android.stats.dnsresolver.PrivateDnsModes private_dns_modes = 7;
 
     // Additional pass-through fields opaque to statsd.
     // The DNS resolver Mainline module can add new fields here without requiring an OS update.
-    optional android.stats.connectivity.DnsCallEvent dns_call_event = 8 [(log_mode) = MODE_BYTES];
+    optional android.stats.dnsresolver.DnsQueryEvents dns_query_events = 8 [(log_mode) = MODE_BYTES];
 }
-
 
 /**
  * Logs when a data stall event occurs.
