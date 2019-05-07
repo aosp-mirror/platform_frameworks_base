@@ -719,6 +719,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mBubbleData.setExpanded(false);
             }
         }
+
+        @Override
+        public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
+            if (mStackView != null && taskInfo.displayId == getExpandedDisplayId(mContext)) {
+                mBubbleData.setExpanded(false);
+            }
+        }
     }
 
     private static boolean shouldAutoBubbleMessages(Context context) {
