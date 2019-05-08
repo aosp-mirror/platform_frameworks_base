@@ -92,6 +92,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected final int mTextColor;
 
     private Bundle mBundle;
+    private Bundle mRestoredState;
 
     private int mState;
     private boolean mAnimatingAway;
@@ -286,7 +287,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
-        if (requiresConfirmation()) {
+        if (requiresConfirmation() && mRestoredState == null) {
             mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(false);
         }
@@ -443,6 +444,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         if (newState == STATE_PENDING_CONFIRMATION) {
             mHandler.removeMessages(MSG_CLEAR_MESSAGE);
             mErrorText.setVisibility(View.INVISIBLE);
+            mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(true);
         } else if (newState == STATE_AUTHENTICATED) {
             mPositiveButton.setVisibility(View.GONE);
@@ -465,6 +467,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     public void restoreState(Bundle bundle) {
+        mRestoredState = bundle;
         mTryAgainButton.setVisibility(bundle.getInt(KEY_TRY_AGAIN_VISIBILITY));
         mPositiveButton.setVisibility(bundle.getInt(KEY_CONFIRM_VISIBILITY));
     }
