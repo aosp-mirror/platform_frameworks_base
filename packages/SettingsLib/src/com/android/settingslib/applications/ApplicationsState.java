@@ -707,7 +707,9 @@ public class ApplicationsState {
 
     private long getTotalInternalSize(PackageStats ps) {
         if (ps != null) {
-            return ps.codeSize + ps.dataSize;
+            // We subtract the cache size because the system can clear it automatically and
+            // |dataSize| is a superset of |cacheSize|.
+            return ps.codeSize + ps.dataSize - ps.cacheSize;
         }
         return SIZE_INVALID;
     }
@@ -715,7 +717,7 @@ public class ApplicationsState {
     private long getTotalExternalSize(PackageStats ps) {
         if (ps != null) {
             // We also include the cache size here because for non-emulated
-            // we don't automtically clean cache files.
+            // we don't automatically clean cache files.
             return ps.externalCodeSize + ps.externalDataSize
                     + ps.externalCacheSize
                     + ps.externalMediaSize + ps.externalObbSize;
