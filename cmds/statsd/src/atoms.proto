@@ -5975,6 +5975,12 @@ message GpuStatsGlobalInfo {
 
     // Api version of the system GLES driver.
     optional int32 gles_version = 11;
+
+    // Total count of the angle driver gets loaded.
+    optional int64 angle_loading_count = 12;
+
+    // Total count of the angle driver fails to be loaded.
+    optional int64 angle_loading_failure_count = 13;
 }
 
 /**
@@ -6006,6 +6012,10 @@ message GpuStatsAppInfo {
 
     // Vulkan driver loading time info.
     optional GpuDriverLoadingTime vk_driver_loading_time = 4
+            [(android.os.statsd.log_mode) = MODE_BYTES];
+
+    // Angle driver loading time info.
+    optional GpuDriverLoadingTime angle_driver_loading_time = 5
             [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
