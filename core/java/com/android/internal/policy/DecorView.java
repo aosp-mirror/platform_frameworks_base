@@ -630,7 +630,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 drawingBounds.bottom -= framePadding.bottom - frameOffsets.bottom;
             }
 
-            Drawable bg = getBackground();
+            // Need to call super here as we pretend to be having the original background.
+            Drawable bg = super.getBackground();
             if (bg != null) {
                 bg.setBounds(drawingBounds);
             }
@@ -975,6 +976,18 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
     }
 
+    @Override
+    public void setBackgroundDrawable(Drawable background) {
+
+        // TODO: This should route through setWindowBackground, but late in the release to make this
+        // change.
+        if (mOriginalBackgroundDrawable != background) {
+            mOriginalBackgroundDrawable = background;
+            updateBackgroundDrawable();
+            drawableChanged();
+        }
+    }
+
     public void setWindowFrame(Drawable drawable) {
         if (getForeground() != drawable) {
             setForeground(drawable);
@@ -1218,9 +1231,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return;
         }
         if (mOriginalBackgroundDrawable == null || mBackgroundInsets.equals(Insets.NONE)) {
-            setBackground(mOriginalBackgroundDrawable);
+
+            // Call super since we are intercepting setBackground on this class.
+            super.setBackgroundDrawable(mOriginalBackgroundDrawable);
         } else {
-            setBackground(new InsetDrawable(mOriginalBackgroundDrawable,
+
+            // Call super since we are intercepting setBackground on this class.
+            super.setBackgroundDrawable(new InsetDrawable(mOriginalBackgroundDrawable,
                     mBackgroundInsets.left, mBackgroundInsets.top,
                     mBackgroundInsets.right, mBackgroundInsets.bottom) {
 
@@ -1236,6 +1253,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
         mLastBackgroundInsets = mBackgroundInsets;
         mLastOriginalBackgroundDrawable = mOriginalBackgroundDrawable;
+    }
+
+    @Override
+    public Drawable getBackground() {
+        return mOriginalBackgroundDrawable;
     }
 
     private int calculateStatusBarColor() {
