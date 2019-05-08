@@ -295,6 +295,12 @@ class ScreenRotationAnimation {
                     } catch (RuntimeException e) {
                         Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
                     }
+                    // If the screenshot contains secure layers, we have to make sure the
+                    // screenshot surface we display it in also has FLAG_SECURE so that
+                    // the user can not screenshot secure layers via the screenshot surface.
+                    if (gb.doesContainSecureLayers()) {
+                        t.setSecure(mSurfaceControl, true);
+                    }
                     t.setLayer(mSurfaceControl, SCREEN_FREEZE_LAYER_SCREENSHOT);
                     t.setAlpha(mSurfaceControl, 0);
                     t.show(mSurfaceControl);
