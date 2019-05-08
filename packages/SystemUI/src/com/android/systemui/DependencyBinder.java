@@ -18,8 +18,10 @@ package com.android.systemui;
 
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.appops.AppOpsControllerImpl;
+import com.android.systemui.classifier.FalsingManagerProxy;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.PowerNotificationWarnings;
@@ -234,4 +236,9 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract QSHost provideQsHost(QSTileHost controllerImpl);
+
+    /**
+     */
+    @Binds
+    public abstract FalsingManager provideFalsingmanager(FalsingManagerProxy falsingManagerImpl);
 }
