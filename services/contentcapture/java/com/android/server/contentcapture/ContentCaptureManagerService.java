@@ -61,8 +61,8 @@ import android.util.SparseBooleanArray;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureHelper;
 import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.IContentCaptureManager;
-import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractRemoteService;
@@ -586,14 +586,14 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void removeUserData(@NonNull UserDataRemovalRequest request) {
+        public void removeData(@NonNull DataRemovalRequest request) {
             Preconditions.checkNotNull(request);
             assertCalledByPackageOwner(request.getPackageName());
 
             final int userId = UserHandle.getCallingUserId();
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
-                service.removeUserDataLocked(request);
+                service.removeDataLocked(request);
             }
         }
 

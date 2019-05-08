@@ -46,7 +46,7 @@ public class ContentCaptureManagerTest {
     }
 
     @Test
-    public void testRemoveUserData_invalid() {
-        assertThrows(NullPointerException.class, () -> mManager.removeUserData(null));
+    public void testRemoveData_invalid() {
+        assertThrows(NullPointerException.class, () -> mManager.removeData(null));
     }
 }

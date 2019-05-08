@@ -21,7 +21,7 @@ import android.os.IBinder;
 import android.service.contentcapture.ActivityEvent;
 import android.service.contentcapture.SnapshotData;
 import android.view.contentcapture.ContentCaptureContext;
-import android.view.contentcapture.UserDataRemovalRequest;
+import android.view.contentcapture.DataRemovalRequest;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -39,6 +39,6 @@ oneway interface IContentCaptureService {
                           in IResultReceiver clientReceiver, int initialState);
     void onSessionFinished(int sessionId);
     void onActivitySnapshot(int sessionId, in SnapshotData snapshotData);
-    void onUserDataRemovalRequest(in UserDataRemovalRequest request);
+    void onDataRemovalRequest(in DataRemovalRequest request);
     void onActivityEvent(in ActivityEvent event);
 }
