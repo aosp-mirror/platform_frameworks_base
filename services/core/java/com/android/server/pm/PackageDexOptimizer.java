@@ -506,15 +506,27 @@ public class PackageDexOptimizer {
      */
     private String getRealCompilerFilter(ApplicationInfo info, String targetCompilerFilter,
             boolean isUsedByOtherApps) {
-        int flags = info.flags;
-        boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         // When an app or priv app is configured to run out of box, only verify it.
         if (info.isEmbeddedDexUsed()
                 || (info.isPrivilegedApp()
                     && DexManager.isPackageSelectedToRunOob(info.packageName))) {
             return "verify";
         }
-        if (vmSafeMode) {
+
+        // We force vmSafeMode on debuggable apps as well:
+        //  - the runtime ignores their compiled code
+        //  - they generally have lots of methods that could make the compiler used run
+        //    out of memory (b/130828957)
+        // Note that forcing the compiler filter here applies to all compilations (even if they
+        // are done via adb shell commands). That's ok because right now the runtime will ignore
+        // the compiled code anyway. The alternative would have been to update either
+        // PackageDexOptimizer#canOptimizePackage or PackageManagerService#getOptimizablePackages
+        // but that would have the downside of possibly producing a big odex files which would
+        // be ignored anyway.
+        boolean vmSafeModeOrDebuggable = ((info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0)
+                || ((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+
+        if (vmSafeModeOrDebuggable) {
             return getSafeModeCompilerFilter(targetCompilerFilter);
         }
 
