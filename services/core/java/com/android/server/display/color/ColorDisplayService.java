@@ -473,6 +473,20 @@ public final class ColorDisplayService extends SystemService {
         onDisplayColorModeChanged(getColorModeInternal());
     }
 
+    private boolean isAccessiblityDaltonizerEnabled() {
+        return Secure.getIntForUser(getContext().getContentResolver(),
+            Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, mCurrentUser) != 0;
+    }
+
+    private boolean isAccessiblityInversionEnabled() {
+        return Secure.getIntForUser(getContext().getContentResolver(),
+            Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUser) != 0;
+    }
+
+    private boolean isAccessibilityEnabled() {
+        return isAccessiblityDaltonizerEnabled() || isAccessiblityInversionEnabled();
+    }
+
     /**
      * Apply the accessibility daltonizer transform based on the settings value.
      */
@@ -480,11 +494,10 @@ public final class ColorDisplayService extends SystemService {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
-        final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
-                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, 0, mCurrentUser) != 0;
-        final int daltonizerMode = enabled ? Secure.getIntForUser(getContext().getContentResolver(),
-                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
-                AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY, mCurrentUser)
+        final int daltonizerMode = isAccessiblityDaltonizerEnabled()
+                ? Secure.getIntForUser(getContext().getContentResolver(),
+                    Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+                    AccessibilityManager.DALTONIZER_CORRECT_DEUTERANOMALY, mCurrentUser)
                 : AccessibilityManager.DALTONIZER_DISABLED;
 
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
@@ -506,11 +519,9 @@ public final class ColorDisplayService extends SystemService {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
-        final boolean enabled = Secure.getIntForUser(getContext().getContentResolver(),
-                Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUser) != 0;
         final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_INVERT_COLOR,
-                enabled ? MATRIX_INVERT_COLOR : null);
+                isAccessiblityInversionEnabled() ? MATRIX_INVERT_COLOR : null);
     }
 
     /**
@@ -598,6 +609,7 @@ public final class ColorDisplayService extends SystemService {
         boolean oldActivated = mDisplayWhiteBalanceTintController.isActivated();
         mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled()
                 && !mNightDisplayTintController.isActivated()
+                && !isAccessibilityEnabled()
                 && DisplayTransformManager.needsLinearColorMatrix());
         boolean activated = mDisplayWhiteBalanceTintController.isActivated();
 
@@ -761,10 +773,7 @@ public final class ColorDisplayService extends SystemService {
 
     private @ColorMode int getColorModeInternal() {
         final ContentResolver cr = getContext().getContentResolver();
-        if (Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
-                0, mCurrentUser) == 1
-                || Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
-                0, mCurrentUser) == 1) {
+        if (isAccessibilityEnabled()) {
             // There are restrictions on the available color modes combined with a11y transforms.
             if (isColorModeAvailable(COLOR_MODE_SATURATED)) {
                 return COLOR_MODE_SATURATED;
