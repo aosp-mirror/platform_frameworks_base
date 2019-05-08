@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
@@ -42,6 +44,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
 
     private SectionHeaderView mGentleHeader;
     private boolean mGentleHeaderVisible = false;
+    @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
 
     NotificationSectionsManager(
             NotificationStackScrollLayout parent,
@@ -70,10 +73,16 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
         mGentleHeader = (SectionHeaderView) LayoutInflater.from(context).inflate(
                 R.layout.status_bar_notification_section_header, mParent, false);
         mGentleHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
+        mGentleHeader.setOnClearAllClickListener(this::onClearGentleNotifsClick);
 
         if (oldPos != -1) {
             mParent.addView(mGentleHeader, oldPos);
         }
+    }
+
+    /** Listener for when the "clear all" buttton is clciked on the gentle notification header. */
+    void setOnClearGentleNotifsClickListener(View.OnClickListener listener) {
+        mOnClearGentleNotifsClickListener = listener;
     }
 
     /** Must be called whenever the UI mode changes (i.e. when we enter night mode). */
@@ -111,6 +120,9 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
         }
 
         adjustGentleHeaderVisibilityAndPosition(firstGentleNotifIndex);
+
+        mGentleHeader.setAreThereDismissableGentleNotifs(
+                mParent.hasActiveClearableNotifications(ROWS_GENTLE));
     }
 
     private void adjustGentleHeaderVisibilityAndPosition(int firstGentleNotifIndex) {
@@ -224,5 +236,11 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
                 true,
                 true,
                 Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    }
+
+    private void onClearGentleNotifsClick(View v) {
+        if (mOnClearGentleNotifsClickListener != null) {
+            mOnClearGentleNotifsClickListener.onClick(v);
+        }
     }
 }
