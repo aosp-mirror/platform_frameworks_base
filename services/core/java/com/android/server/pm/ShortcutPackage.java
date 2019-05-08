@@ -680,20 +680,23 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
         for (int i = 0; i < shortcuts.size(); i++) {
-            final ShortcutInfo si = shortcuts.get(i);
+            final Set<String> categories = shortcuts.get(i).getCategories();
+            if (categories == null || categories.isEmpty()) {
+                continue;
+            }
             for (int j = 0; j < matchedTargets.size(); j++) {
                 // Shortcut must have all of share target categories
                 boolean hasAllCategories = true;
                 final ShareTargetInfo target = matchedTargets.get(j);
                 for (int q = 0; q < target.mCategories.length; q++) {
-                    if (!si.getCategories().contains(target.mCategories[q])) {
+                    if (!categories.contains(target.mCategories[q])) {
                         hasAllCategories = false;
                         break;
                     }
                 }
                 if (hasAllCategories) {
-                    result.add(new ShortcutManager.ShareShortcutInfo(si, new ComponentName(
-                            getPackageName(), target.mTargetClass)));
+                    result.add(new ShortcutManager.ShareShortcutInfo(shortcuts.get(i),
+                            new ComponentName(getPackageName(), target.mTargetClass)));
                     break;
                 }
             }
@@ -703,6 +706,45 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     public boolean hasShareTargets() {
         return !mShareTargets.isEmpty();
+    }
+
+    /**
+     * Returns the number of shortcuts that can be used as a share target in the ShareSheet. Such
+     * shortcuts must have a matching category with at least one of the defined ShareTargets from
+     * the app's Xml resource.
+     */
+    int getSharingShortcutCount() {
+        if (mShortcuts.isEmpty() || mShareTargets.isEmpty()) {
+            return 0;
+        }
+
+        // Get the list of all dynamic shortcuts in this package
+        final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
+        findAll(shortcuts, ShortcutInfo::isDynamicVisible, ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+
+        int sharingShortcutCount = 0;
+        for (int i = 0; i < shortcuts.size(); i++) {
+            final Set<String> categories = shortcuts.get(i).getCategories();
+            if (categories == null || categories.isEmpty()) {
+                continue;
+            }
+            for (int j = 0; j < mShareTargets.size(); j++) {
+                // A SharingShortcut must have all of share target categories
+                boolean hasAllCategories = true;
+                final ShareTargetInfo target = mShareTargets.get(j);
+                for (int q = 0; q < target.mCategories.length; q++) {
+                    if (!categories.contains(target.mCategories[q])) {
+                        hasAllCategories = false;
+                        break;
+                    }
+                }
+                if (hasAllCategories) {
+                    sharingShortcutCount++;
+                    break;
+                }
+            }
+        }
+        return sharingShortcutCount;
     }
 
     /**

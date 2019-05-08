@@ -3787,6 +3787,8 @@
   <java-symbol type="dimen" name="chooser_direct_share_label_placeholder_max_width" />
   <java-symbol type="layout" name="chooser_az_label_row" />
   <java-symbol type="string" name="chooser_all_apps_button_label" />
-
+  <java-symbol type="anim" name="resolver_launch_anim" />
+  <java-symbol type="style" name="Animation.DeviceDefault.Activity.Resolver" />
+  
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
 </resources>

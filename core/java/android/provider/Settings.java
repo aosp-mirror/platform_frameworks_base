@@ -5786,16 +5786,6 @@ public final class Settings {
         public static final String ANDROID_ID = "android_id";
 
         /**
-         * Comma separated list packages to enable collection of permission denial hints for.
-         *
-         * @hide
-         *
-         * @see android.permission.PermissionManager#collectPermissionDenialHints(Context, int)
-         */
-        public static final String DEBUG_PACKAGE_PERMISSION_CHECK =
-                "debug_package_permission_check";
-
-        /**
          * @deprecated Use {@link android.provider.Settings.Global#BLUETOOTH_ON} instead
          */
         @Deprecated

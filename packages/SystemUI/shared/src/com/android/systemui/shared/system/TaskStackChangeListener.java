@@ -76,6 +76,8 @@ public abstract class TaskStackChangeListener {
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
     public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) { }
 
+    public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) { }
+
     /**
      * Checks that the current user matches the process. Since
      * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of

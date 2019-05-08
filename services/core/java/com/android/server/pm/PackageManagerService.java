@@ -240,7 +240,6 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
-import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings.Global;
@@ -4330,19 +4329,13 @@ public class PackageManagerService extends IPackageManager.Stub
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
         // if we're in an isolated process, get the real calling UID
         if (Process.isIsolated(callingUid)) {
-            int newCallingUid = mIsolatedOwners.get(callingUid);
-            PermissionManager.addPermissionDenialHint(
-                    "callingUid=" + callingUid + " is changed to " + newCallingUid
-                            + " as process is isolated");
-            callingUid = newCallingUid;
+            callingUid = mIsolatedOwners.get(callingUid);
         }
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         final boolean callerIsInstantApp = instantAppPkgName != null;
         if (ps == null) {
             if (callerIsInstantApp) {
                 // pretend the application exists, but, needs to be filtered
-                PermissionManager.addPermissionDenialHint(
-                        "No package setting but caller is instant app");
                 return true;
             }
             return false;
@@ -4354,7 +4347,6 @@ public class PackageManagerService extends IPackageManager.Stub
         if (callerIsInstantApp) {
             // both caller and target are both instant, but, different applications, filter
             if (ps.getInstantApp(userId)) {
-                PermissionManager.addPermissionDenialHint("Apps are different instant apps");
                 return true;
             }
             // request for a specific component; if it hasn't been explicitly exposed through
@@ -4366,23 +4358,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         && isCallerSameApp(instrumentation.info.targetPackage, callingUid)) {
                     return false;
                 }
-                if (!isComponentVisibleToInstantApp(component, componentType)) {
-                    PermissionManager.addPermissionDenialHint(
-                            "Component is not visible to instant app: "
-                                    + component.flattenToShortString());
-                    return true;
-                } else {
-                    return false;
-                }
+                return !isComponentVisibleToInstantApp(component, componentType);
             }
             // request for application; if no components have been explicitly exposed, filter
-            if (!ps.pkg.visibleToInstantApps) {
-                PermissionManager.addPermissionDenialHint(
-                        "Package is not visible to instant app: " + ps.pkg.packageName);
-                return true;
-            } else {
-                return false;
-            }
+            return !ps.pkg.visibleToInstantApps;
         }
         if (ps.getInstantApp(userId)) {
             // caller can see all components of all instant applications, don't filter
@@ -4391,19 +4370,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             // request for a specific instant application component, filter
             if (component != null) {
-                PermissionManager.addPermissionDenialHint(
-                        "Component is not null: " + component.flattenToShortString());
                 return true;
             }
             // request for an instant application; if the caller hasn't been granted access, filter
-            if (!mInstantAppRegistry.isInstantAccessGranted(
-                    userId, UserHandle.getAppId(callingUid), ps.appId)) {
-                PermissionManager.addPermissionDenialHint(
-                        "Instant access is not granted: " + ps.appId);
-                return true;
-            } else {
-                return false;
-            }
+            return !mInstantAppRegistry.isInstantAccessGranted(
+                    userId, UserHandle.getAppId(callingUid), ps.appId);
         }
         return false;
     }
@@ -5645,17 +5616,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private int checkPermissionImpl(String permName, String pkgName, int userId) {
         return mPermissionManager.checkPermission(permName, pkgName, getCallingUid(), userId);
-    }
-
-    @Override
-    public int checkUidPermissionWithDenialHintForwarding(String permName, int uid,
-            List<String> permissionDenialHints) {
-        List<String> prev = PermissionManager.resetPermissionDenialHints(permissionDenialHints);
-        try {
-            return checkUidPermission(permName, uid);
-        } finally {
-            PermissionManager.resetPermissionDenialHints(prev);
-        }
     }
 
     @Override

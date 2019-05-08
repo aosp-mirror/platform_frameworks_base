@@ -8428,6 +8428,7 @@ public final class ViewRootImpl implements ViewParent,
 
     void changeCanvasOpacity(boolean opaque) {
         Log.d(mTag, "changeCanvasOpacity: opaque=" + opaque);
+        opaque = opaque & ((mView.mPrivateFlags & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0);
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.setOpaque(opaque);
         }

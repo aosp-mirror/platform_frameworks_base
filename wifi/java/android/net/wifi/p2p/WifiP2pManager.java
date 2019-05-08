@@ -93,7 +93,9 @@ import java.util.Map;
  * {@link WifiP2pInfo} contains the address of the group owner
  * {@link WifiP2pInfo#groupOwnerAddress} and a flag {@link WifiP2pInfo#isGroupOwner} to indicate
  * if the current device is a p2p group owner. A p2p client can thus communicate with
- * the p2p group owner through a socket connection.
+ * the p2p group owner through a socket connection. If the current device is the p2p group owner,
+ * {@link WifiP2pInfo#groupOwnerAddress} is anonymized unless the caller holds the
+ * {@code android.Manifest.permission#LOCAL_MAC_ADDRESS} permission.
  *
  * <p> With peer discovery using {@link  #discoverPeers}, an application discovers the neighboring
  * peers, but has no good way to figure out which peer to establish a connection with. For example,
@@ -299,6 +301,11 @@ public class WifiP2pManager {
      * {@link #requestDeviceInfo(Channel, DeviceInfoListener)} when p2p is enabled.
      * To get information notifications on P2P getting enabled refers
      * {@link #WIFI_P2P_STATE_ENABLED}.
+     *
+     * <p> The {@link #EXTRA_WIFI_P2P_DEVICE} extra contains an anonymized version of the device's
+     * MAC address. Callers holding the {@code android.Manifest.permission#LOCAL_MAC_ADDRESS}
+     * permission can use {@link #requestDeviceInfo} to obtain the actual MAC address of this
+     * device.
      *
      * All of these permissions are required to receive this broadcast:
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
@@ -1880,6 +1887,10 @@ public class WifiP2pManager {
      *
      * <p> This {@link android.net.wifi.p2p.WifiP2pDevice} is returned using the
      * {@link DeviceInfoListener} listener.
+     *
+     * <p> {@link android.net.wifi.p2p.WifiP2pDevice#deviceAddress} is only available if the caller
+     * holds the {@code android.Manifest.permission#LOCAL_MAC_ADDRESS} permission, and holds the
+     * anonymized MAC address (02:00:00:00:00:00) otherwise.
      *
      * <p> This information is also included in the {@link #WIFI_P2P_THIS_DEVICE_CHANGED_ACTION}
      * broadcast event with extra {@link #EXTRA_WIFI_P2P_DEVICE}.
