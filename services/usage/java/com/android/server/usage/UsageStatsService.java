@@ -774,6 +774,62 @@ public class UsageStatsService extends SystemService implements
                             mAppTimeLimit.dump(remainingArgs, pw);
                         }
                         return;
+                    } else if ("file".equals(arg)) {
+                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                        if (i + 1 >= args.length) {
+                            // dump everything for all users
+                            final int numUsers = mUserState.size();
+                            for (int user = 0; user < numUsers; user++) {
+                                ipw.println("user=" + mUserState.keyAt(user));
+                                ipw.increaseIndent();
+                                mUserState.valueAt(user).dumpFile(ipw, null);
+                                ipw.decreaseIndent();
+                            }
+                        } else {
+                            final int user;
+                            try {
+                                user = Integer.valueOf(args[i + 1]);
+                            } catch (NumberFormatException nfe) {
+                                ipw.println("invalid user specified.");
+                                return;
+                            }
+                            if (mUserState.indexOfKey(user) < 0) {
+                                ipw.println("the specified user does not exist.");
+                                return;
+                            }
+                            final String[] remainingArgs = Arrays.copyOfRange(
+                                    args, i + 2, args.length);
+                            // dump everything for the specified user
+                            mUserState.get(user).dumpFile(ipw, remainingArgs);
+                        }
+                        return;
+                    } else if ("database-info".equals(arg)) {
+                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                        if (i + 1 >= args.length) {
+                            // dump info for all users
+                            final int numUsers = mUserState.size();
+                            for (int user = 0; user < numUsers; user++) {
+                                ipw.println("user=" + mUserState.keyAt(user));
+                                ipw.increaseIndent();
+                                mUserState.valueAt(user).dumpDatabaseInfo(ipw);
+                                ipw.decreaseIndent();
+                            }
+                        } else {
+                            final int user;
+                            try {
+                                user = Integer.valueOf(args[i + 1]);
+                            } catch (NumberFormatException nfe) {
+                                ipw.println("invalid user specified.");
+                                return;
+                            }
+                            if (mUserState.indexOfKey(user) < 0) {
+                                ipw.println("the specified user does not exist.");
+                                return;
+                            }
+                            // dump info only for the specified user
+                            mUserState.get(user).dumpDatabaseInfo(ipw);
+                        }
+                        return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
                         pkg = arg;
