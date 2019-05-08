@@ -3433,7 +3433,7 @@
 
     <!-- Flag indicating whether the assist disclosure can be disabled using
          ASSIST_DISCLOSURE_ENABLED. -->
-    <bool name="config_allowDisablingAssistDisclosure">false</bool>
+    <bool name="config_allowDisablingAssistDisclosure">true</bool>
 
     <!-- True if the device supports system navigation keys. -->
     <bool name="config_supportSystemNavigationKeys">false</bool>
