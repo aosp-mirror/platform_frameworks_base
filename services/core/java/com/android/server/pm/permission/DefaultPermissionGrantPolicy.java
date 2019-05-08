@@ -518,7 +518,7 @@ public final class DefaultPermissionGrantPolicy {
         // Media provider
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultProviderAuthorityPackage(MediaStore.AUTHORITY, userId), userId,
-                STORAGE_PERMISSIONS, PHONE_PERMISSIONS);
+                STORAGE_PERMISSIONS);
 
         // Downloads provider
         grantSystemFixedPermissionsToSystemPackage(
