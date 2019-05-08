@@ -296,22 +296,22 @@ public class BubbleControllerTest extends SysuiTestCase {
         BubbleStackView stackView = mBubbleController.getStackView();
         mBubbleController.expandStack();
         assertTrue(mBubbleController.isStackExpanded());
-        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().key);
 
-        // First added is the one that is expanded
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubbleView().getEntry());
-        assertFalse(mRow.getEntry().showInShadeWhenBubble());
-
-        // Switch which bubble is expanded
-        mBubbleController.selectBubble(mRow2.getEntry().key);
-        stackView.setExpandedBubble(mRow2.getEntry());
+        // Last added is the one that is expanded
         assertEquals(mRow2.getEntry(), stackView.getExpandedBubbleView().getEntry());
         assertFalse(mRow2.getEntry().showInShadeWhenBubble());
 
+        // Switch which bubble is expanded
+        mBubbleController.selectBubble(mRow.getEntry().key);
+        stackView.setExpandedBubble(mRow.getEntry());
+        assertEquals(mRow.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        assertFalse(mRow.getEntry().showInShadeWhenBubble());
+
         // collapse for previous bubble
-        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().key);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().key);
         // expand for selected bubble
-        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().key);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);
 
         // Collapse
         mBubbleController.collapseStack();
@@ -352,27 +352,27 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.expandStack();
 
         assertTrue(mBubbleController.isStackExpanded());
-        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().key);
 
-        // First added is the one that is expanded
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubbleView().getEntry());
-        assertFalse(mRow.getEntry().showInShadeWhenBubble());
+        // Last added is the one that is expanded
+        assertEquals(mRow2.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        assertFalse(mRow2.getEntry().showInShadeWhenBubble());
 
         // Dismiss currently expanded
         mBubbleController.removeBubble(stackView.getExpandedBubbleView().getKey(),
                 BubbleController.DISMISS_USER_GESTURE);
-        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().key);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().key);
 
-        // Make sure next bubble is selected
-        assertEquals(mRow2.getEntry(), stackView.getExpandedBubbleView().getEntry());
-        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().key);
+        // Make sure first bubble is selected
+        assertEquals(mRow.getEntry(), stackView.getExpandedBubbleView().getEntry());
+        verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);
 
         // Dismiss that one
         mBubbleController.removeBubble(stackView.getExpandedBubbleView().getKey(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
-        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().key);
+        verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().key);
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
         assertFalse(mBubbleController.hasBubbles());
     }
