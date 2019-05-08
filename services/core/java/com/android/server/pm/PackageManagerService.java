@@ -11731,7 +11731,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     "Code and resource paths haven't been set correctly");
         }
 
-        if (mApexManager.isApexPackage(pkg.packageName)) {
+        // Check that there is an APEX package with the same name only during install/first boot
+        // after OTA.
+        final boolean isUserInstall = (scanFlags & SCAN_BOOTING) == 0;
+        final boolean isFirstBootOrUpgrade = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
+        if ((isUserInstall || isFirstBootOrUpgrade)
+                && mApexManager.isApexPackage(pkg.packageName)) {
             throw new PackageManagerException(INSTALL_FAILED_DUPLICATE_PACKAGE,
                     pkg.packageName + " is an APEX package and can't be installed as an APK.");
         }
