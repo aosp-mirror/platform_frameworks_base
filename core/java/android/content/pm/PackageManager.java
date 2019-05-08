@@ -2719,6 +2719,16 @@ public abstract class PackageManager {
             = "android.content.pm.CLEAN_EXTERNAL_STORAGE";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite kernel support for multinetworking-capable IPsec tunnels.
+     *
+     * <p>This feature implies that the device supports XFRM Interfaces (CONFIG_XFRM_INTERFACE), or
+     * VTIs with kernel patches allowing updates of output/set mark via UPDSA.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
+
+    /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.
      *
