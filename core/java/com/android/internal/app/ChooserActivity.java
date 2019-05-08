@@ -779,7 +779,7 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
         } catch (SecurityException | NullPointerException e) {
-            Log.w(TAG, "Error loading file preview", e);
+            logContentPreviewWarning(uri);
         }
 
         if (TextUtils.isEmpty(fileName)) {
@@ -791,6 +791,14 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         return new FileInfo(fileName, hasThumbnail);
+    }
+
+    private void logContentPreviewWarning(Uri uri) {
+        // The ContentResolver already logs the exception. Log something more informative.
+        Log.w(TAG, "Could not load (" + uri.toString() + ") thumbnail/name for preview. If "
+                + "desired, consider using Intent#createChooser to launch the ChooserActivity, "
+                + "and set your Intent's clipData and flags in accordance with that method's "
+                + "documentation");
     }
 
     private ViewGroup displayFileContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
@@ -1664,7 +1672,7 @@ public class ChooserActivity extends ResolverActivity {
         try {
             return ImageUtils.loadThumbnail(getContentResolver(), uri, size);
         } catch (IOException | NullPointerException | SecurityException ex) {
-            Log.w(TAG, "Error loading preview thumbnail for uri: " + uri.toString(), ex);
+            logContentPreviewWarning(uri);
         }
         return null;
     }
