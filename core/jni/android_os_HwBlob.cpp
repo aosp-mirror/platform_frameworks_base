@@ -85,7 +85,7 @@ JHwBlob::JHwBlob(JNIEnv *env, jobject thiz, size_t size)
       mOwnsBuffer(true),
       mHandle(0) {
     if (size > 0) {
-        mBuffer = malloc(size);
+        mBuffer = calloc(size, 1);
     }
 }
 
