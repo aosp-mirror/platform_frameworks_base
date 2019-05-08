@@ -32,7 +32,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_INSTAL
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
 import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
-import static android.content.pm.PackageManager.RESTRICTED_PERMISSIONS_ENABLED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
@@ -1058,8 +1057,8 @@ public class PermissionManagerService {
 
                                 boolean wasChanged = false;
 
-                                boolean restrictionExempt = !RESTRICTED_PERMISSIONS_ENABLED
-                                        || (origPermissions.getPermissionFlags(bp.name, userId)
+                                boolean restrictionExempt =
+                                        (origPermissions.getPermissionFlags(bp.name, userId)
                                                 & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
                                 boolean restrictionApplied = (origPermissions.getPermissionFlags(
                                         bp.name, userId) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
@@ -1177,8 +1176,8 @@ public class PermissionManagerService {
                             for (int userId : currentUserIds) {
                                 boolean wasChanged = false;
 
-                                boolean restrictionExempt = !RESTRICTED_PERMISSIONS_ENABLED
-                                        || (origPermissions.getPermissionFlags(bp.name, userId)
+                                boolean restrictionExempt =
+                                        (origPermissions.getPermissionFlags(bp.name, userId)
                                                 & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
                                 boolean restrictionApplied = (origPermissions.getPermissionFlags(
                                         bp.name, userId) & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
@@ -2054,7 +2053,7 @@ public class PermissionManagerService {
             return;
         }
 
-        if (RESTRICTED_PERMISSIONS_ENABLED && bp.isHardOrSoftRestricted()
+        if (bp.isHardOrSoftRestricted()
                 && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
             Log.e(TAG, "Cannot grant restricted non-exempt permission "
                     + permName + " for package " + packageName);
