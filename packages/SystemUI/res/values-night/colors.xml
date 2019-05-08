@@ -68,4 +68,10 @@
 
     <!-- The color of the text in the Global Actions menu -->
     <color name="global_actions_alert_text">@color/GM2_red_300</color>
+
+    <!-- Biometric dialog colors -->
+    <color name="biometric_dialog_gray">#ff888888</color>
+    <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
+    <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
+
 </resources>
