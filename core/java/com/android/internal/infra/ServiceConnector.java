@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -70,7 +71,7 @@ public interface ServiceConnector<I extends IInterface> {
      *
      * @return whether a job was successfully scheduled
      */
-    boolean fireAndForget(@NonNull VoidJob<I> job);
+    boolean run(@NonNull VoidJob<I> job);
 
     /**
      * Schedules to run a given job when service is connected.
@@ -167,7 +168,7 @@ public interface ServiceConnector<I extends IInterface> {
          * @return the result of this operation to be propagated to the original caller.
          *         If you do not need to provide a result you can implement {@link VoidJob} instead
          */
-        R run(@NonNull II service) throws RemoteException;
+        R run(@NonNull II service) throws Exception;
 
     }
 
@@ -180,10 +181,10 @@ public interface ServiceConnector<I extends IInterface> {
     interface VoidJob<II> extends Job<II, Void> {
 
         /** @see Job#run */
-        void runNoResult(II service) throws RemoteException;
+        void runNoResult(II service) throws Exception;
 
         @Override
-        default Void run(II service) throws RemoteException {
+        default Void run(II service) throws Exception {
             runNoResult(service);
             return null;
         }
@@ -213,6 +214,7 @@ public interface ServiceConnector<I extends IInterface> {
         static final String LOG_TAG = "ServiceConnector.Impl";
 
         private static final long DEFAULT_DISCONNECT_TIMEOUT_MS = 15_000;
+        private static final long DEFAULT_REQUEST_TIMEOUT_MS = 30_000;
 
         private final @NonNull Queue<Job<I, ?>> mQueue = this;
         private final @NonNull List<CompletionAwareJob<I, ?>> mUnfinishedJobs = new ArrayList<>();
@@ -275,6 +277,19 @@ public interface ServiceConnector<I extends IInterface> {
         }
 
         /**
+         * Gets the amount of time to wait for a request to complete, before finishing it with a
+         * {@link java.util.concurrent.TimeoutException}
+         *
+         * <p>
+         * This includes time spent connecting to the service, if any.
+         *
+         * @return amount of time in ms
+         */
+        protected long getRequestTimeoutMs() {
+            return DEFAULT_REQUEST_TIMEOUT_MS;
+        }
+
+        /**
          * {@link Context#bindServiceAsUser Binds} to the service.
          *
          * <p>
@@ -320,7 +335,7 @@ public interface ServiceConnector<I extends IInterface> {
         protected void onServiceConnectionStatusChanged(@NonNull I service, boolean isConnected) {}
 
         @Override
-        public boolean fireAndForget(@NonNull VoidJob<I> job) {
+        public boolean run(@NonNull VoidJob<I> job) {
             if (DEBUG) {
                 Log.d(LOG_TAG, "Wrapping fireAndForget job to take advantage of its mDebugName");
                 return !post(job).isCompletedExceptionally();
@@ -653,6 +668,11 @@ public interface ServiceConnector<I extends IInterface> {
             boolean mAsync = false;
             private String mDebugName;
             {
+                long requestTimeout = getRequestTimeoutMs();
+                if (requestTimeout > 0) {
+                    orTimeout(requestTimeout, TimeUnit.MILLISECONDS);
+                }
+
                 if (DEBUG) {
                     mDebugName = Arrays.stream(Thread.currentThread().getStackTrace())
                             .skip(2)
@@ -665,7 +685,7 @@ public interface ServiceConnector<I extends IInterface> {
             }
 
             @Override
-            public R run(@NonNull II service) throws RemoteException {
+            public R run(@NonNull II service) throws Exception {
                 return mDelegate.run(service);
             }
 
@@ -688,13 +708,18 @@ public interface ServiceConnector<I extends IInterface> {
 
             @Override
             public void accept(@Nullable R res, @Nullable Throwable err) {
-                if (mUnfinishedJobs.remove(this)) {
-                    maybeScheduleUnbindTimeout();
-                }
                 if (err != null) {
                     completeExceptionally(err);
                 } else {
                     complete(res);
+                }
+            }
+
+            @Override
+            protected void onCompleted(R res, Throwable err) {
+                super.onCompleted(res, err);
+                if (mUnfinishedJobs.remove(this)) {
+                    maybeScheduleUnbindTimeout();
                 }
             }
         }

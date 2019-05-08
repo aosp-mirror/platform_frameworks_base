@@ -20,6 +20,7 @@ import android.os.RemoteException;
 import android.util.ExceptionUtils;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -33,6 +34,27 @@ public class FunctionalUtils {
      * {@link Consumer} by propagating any checked exceptions as {@link RuntimeException}
      */
     public static <T> Consumer<T> uncheckExceptions(ThrowingConsumer<T> action) {
+        return action;
+    }
+
+    /**
+     * @see #uncheckExceptions(ThrowingConsumer)
+     */
+    public static <I, O> Function<I, O> uncheckExceptions(ThrowingFunction<I, O> action) {
+        return action;
+    }
+
+    /**
+     * @see #uncheckExceptions(ThrowingConsumer)
+     */
+    public static Runnable uncheckExceptions(ThrowingRunnable action) {
+        return action;
+    }
+
+    /**
+     * @see #uncheckExceptions(ThrowingConsumer)
+     */
+    public static <T> Supplier<T> uncheckExceptions(ThrowingSupplier<T> action) {
         return action;
     }
 
@@ -85,10 +107,19 @@ public class FunctionalUtils {
      * to be handled within it
      */
     @FunctionalInterface
-    public interface ThrowingSupplier<T> {
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingSupplier<T> extends Supplier<T> {
         T getOrThrow() throws Exception;
-    }
 
+        @Override
+        default T get() {
+            try {
+                return getOrThrow();
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
+            }
+        }
+    }
     /**
      * A {@link Consumer} that allows throwing checked exceptions from its single abstract method.
      *
@@ -126,6 +157,31 @@ public class FunctionalUtils {
                 acceptOrThrow(t);
             } catch (RemoteException ex) {
                 // ignore
+            }
+        }
+    }
+
+    /**
+     * A {@link Function} that allows throwing checked exceptions from its single abstract method.
+     *
+     * Can be used together with {@link #uncheckExceptions} to effectively turn a lambda expression
+     * that throws a checked exception into a regular {@link Function}
+     *
+     * @param <T> see {@link Function}
+     * @param <R> see {@link Function}
+     */
+    @FunctionalInterface
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingFunction<T, R> extends Function<T, R> {
+        /** @see ThrowingFunction */
+        R applyOrThrow(T t) throws Exception;
+
+        @Override
+        default R apply(T t) {
+            try {
+                return applyOrThrow(t);
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
             }
         }
     }

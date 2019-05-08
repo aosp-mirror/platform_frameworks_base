@@ -224,7 +224,7 @@ final class RemoteAugmentedAutofillService
      * Called by {@link Session} when it's time to destroy all augmented autofill requests.
      */
     public void onDestroyAutofillWindowsRequest() {
-        fireAndForget((s) -> s.onDestroyAllFillWindowsRequest());
+        run((s) -> s.onDestroyAllFillWindowsRequest());
     }
 
     public interface RemoteAugmentedAutofillServiceCallbacks

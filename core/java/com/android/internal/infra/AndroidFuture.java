@@ -16,6 +16,9 @@
 
 package com.android.internal.infra;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
@@ -30,10 +33,13 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A customized {@link CompletableFuture} with focus on reducing the number of allocations involved
@@ -42,9 +48,12 @@ import java.util.function.Function;
  * In particular this involves allocations optimizations in:
  * <ul>
  *     <li>{@link #thenCompose(Function)}</li>
+ *     <li>{@link #thenApply(Function)}</li>
+ *     <li>{@link #thenCombine(CompletionStage, BiFunction)}</li>
  *     <li>{@link #orTimeout(long, TimeUnit)}</li>
  *     <li>{@link #whenComplete(BiConsumer)}</li>
  * </ul>
+ * As well as their *Async versions.
  *
  * @param <T> see {@link CompletableFuture}
  */
@@ -52,8 +61,11 @@ public class AndroidFuture<T> extends CompletableFuture<T> {
 
     private static final String LOG_TAG = AndroidFuture.class.getSimpleName();
 
-    @GuardedBy("this")
+    private final @NonNull Object mLock = new Object();
+    @GuardedBy("mLock")
     private @Nullable BiConsumer<? super T, ? super Throwable> mListener;
+    @GuardedBy("mLock")
+    private @Nullable Executor mListenerExecutor = DIRECT_EXECUTOR;
     private @NonNull Handler mTimeoutHandler = Handler.getMain();
 
     @Override
@@ -74,27 +86,44 @@ public class AndroidFuture<T> extends CompletableFuture<T> {
         return super.completeExceptionally(ex);
     }
 
-    private void onCompleted(@Nullable T res, @Nullable Throwable err) {
+    @CallSuper
+    protected void onCompleted(@Nullable T res, @Nullable Throwable err) {
         cancelTimeout();
 
         BiConsumer<? super T, ? super Throwable> listener;
-        synchronized (this) {
+        synchronized (mLock) {
             listener = mListener;
             mListener = null;
         }
 
         if (listener != null) {
-            callListener(listener, res, err);
+            callListenerAsync(listener, res, err);
         }
     }
 
     @Override
-    public AndroidFuture<T> whenComplete(
-            @NonNull BiConsumer<? super T, ? super Throwable> action) {
+    public AndroidFuture<T> whenComplete(@NonNull BiConsumer<? super T, ? super Throwable> action) {
+        return whenCompleteAsync(action, DIRECT_EXECUTOR);
+    }
+
+    @Override
+    public AndroidFuture<T> whenCompleteAsync(
+            @NonNull BiConsumer<? super T, ? super Throwable> action,
+            @NonNull Executor executor) {
         Preconditions.checkNotNull(action);
-        synchronized (this) {
+        Preconditions.checkNotNull(executor);
+        synchronized (mLock) {
             if (!isDone()) {
                 BiConsumer<? super T, ? super Throwable> oldListener = mListener;
+
+                if (oldListener != null && executor != mListenerExecutor) {
+                    // 2 listeners with different executors
+                    // Too complex - give up on saving allocations and delegate to superclass
+                    super.whenCompleteAsync(action, executor);
+                    return this;
+                }
+
+                mListenerExecutor = executor;
                 mListener = oldListener == null
                         ? action
                         : (res, err) -> {
@@ -115,8 +144,19 @@ public class AndroidFuture<T> extends CompletableFuture<T> {
         } catch (Throwable e) {
             err = e;
         }
-        callListener(action, res, err);
+        callListenerAsync(action, res, err);
         return this;
+    }
+
+    private void callListenerAsync(BiConsumer<? super T, ? super Throwable> listener,
+            @Nullable T res, @Nullable Throwable err) {
+        if (mListenerExecutor == DIRECT_EXECUTOR) {
+            callListener(listener, res, err);
+        } else {
+            mListenerExecutor.execute(PooledLambda
+                    .obtainRunnable(AndroidFuture::callListener, listener, res, err)
+                    .recycleOnUse());
+        }
     }
 
     /**
@@ -137,8 +177,7 @@ public class AndroidFuture<T> extends CompletableFuture<T> {
                 } else {
                     // listener exception-case threw
                     // give up on listener but preserve the original exception when throwing up
-                    ExceptionUtils.getRootCause(t).initCause(err);
-                    throw t;
+                    throw ExceptionUtils.appendCause(t, err);
                 }
             }
         } catch (Throwable t2) {
@@ -163,8 +202,14 @@ public class AndroidFuture<T> extends CompletableFuture<T> {
         }
     }
 
-    protected void cancelTimeout() {
+    /**
+     * Cancel all timeouts previously set with {@link #orTimeout}, if any.
+     *
+     * @return {@code this} for chaining
+     */
+    public AndroidFuture<T> cancelTimeout() {
         mTimeoutHandler.removeCallbacksAndMessages(this);
+        return this;
     }
 
     /**
@@ -179,47 +224,192 @@ public class AndroidFuture<T> extends CompletableFuture<T> {
     @Override
     public <U> AndroidFuture<U> thenCompose(
             @NonNull Function<? super T, ? extends CompletionStage<U>> fn) {
-        return (AndroidFuture<U>) new ThenCompose<>(this, fn);
+        return thenComposeAsync(fn, DIRECT_EXECUTOR);
     }
 
-    private static class ThenCompose<T, U> extends AndroidFuture<Object>
-            implements BiConsumer<Object, Throwable> {
-        private final AndroidFuture<T> mSource;
-        private Function<? super T, ? extends CompletionStage<U>> mFn;
+    @Override
+    public <U> AndroidFuture<U> thenComposeAsync(
+            @NonNull Function<? super T, ? extends CompletionStage<U>> fn,
+            @NonNull Executor executor) {
+        return new ThenComposeAsync<>(this, fn, executor);
+    }
 
-        ThenCompose(@NonNull AndroidFuture<T> source,
-                @NonNull Function<? super T, ? extends CompletionStage<U>> fn) {
-            mSource = source;
+    private static class ThenComposeAsync<T, U> extends AndroidFuture<U>
+            implements BiConsumer<Object, Throwable>, Runnable {
+        private volatile T mSourceResult = null;
+        private final Executor mExecutor;
+        private volatile Function<? super T, ? extends CompletionStage<U>> mFn;
+
+        ThenComposeAsync(@NonNull AndroidFuture<T> source,
+                @NonNull Function<? super T, ? extends CompletionStage<U>> fn,
+                @NonNull Executor executor) {
             mFn = Preconditions.checkNotNull(fn);
+            mExecutor = Preconditions.checkNotNull(executor);
+
             // subscribe to first job completion
             source.whenComplete(this);
         }
 
         @Override
         public void accept(Object res, Throwable err) {
-            Function<? super T, ? extends CompletionStage<U>> fn;
-            synchronized (this) {
-                fn = mFn;
-                mFn = null;
-            }
-            if (fn != null) {
+            if (err != null) {
+                // first or second job failed
+                completeExceptionally(err);
+            } else if (mFn != null) {
                 // first job completed
-                CompletionStage<U> secondJob;
-                try {
-                    secondJob = Preconditions.checkNotNull(fn.apply((T) res));
-                } catch (Throwable t) {
-                    completeExceptionally(t);
-                    return;
-                }
-                // subscribe to second job completion
-                secondJob.whenComplete(this);
+                mSourceResult = (T) res;
+                // subscribe to second job completion asynchronously
+                mExecutor.execute(this);
             } else {
                 // second job completed
-                if (err != null) {
-                    completeExceptionally(err);
-                } else {
-                    complete(res);
+                complete((U) res);
+            }
+        }
+
+        @Override
+        public void run() {
+            CompletionStage<U> secondJob;
+            try {
+                secondJob = Preconditions.checkNotNull(mFn.apply(mSourceResult));
+            } catch (Throwable t) {
+                completeExceptionally(t);
+                return;
+            } finally {
+                // Marks first job complete
+                mFn = null;
+            }
+            // subscribe to second job completion
+            secondJob.whenComplete(this);
+        }
+    }
+
+    @Override
+    public <U> AndroidFuture<U> thenApply(@NonNull Function<? super T, ? extends U> fn) {
+        return thenApplyAsync(fn, DIRECT_EXECUTOR);
+    }
+
+    @Override
+    public <U> AndroidFuture<U> thenApplyAsync(@NonNull Function<? super T, ? extends U> fn,
+            @NonNull Executor executor) {
+        return new ThenApplyAsync<>(this, fn, executor);
+    }
+
+    private static class ThenApplyAsync<T, U> extends AndroidFuture<U>
+            implements BiConsumer<T, Throwable>, Runnable {
+        private volatile T mSourceResult = null;
+        private final Executor mExecutor;
+        private final Function<? super T, ? extends U> mFn;
+
+        ThenApplyAsync(@NonNull AndroidFuture<T> source,
+                @NonNull Function<? super T, ? extends U> fn,
+                @NonNull Executor executor) {
+            mExecutor = Preconditions.checkNotNull(executor);
+            mFn = Preconditions.checkNotNull(fn);
+
+            // subscribe to job completion
+            source.whenComplete(this);
+        }
+
+        @Override
+        public void accept(T res, Throwable err) {
+            if (err != null) {
+                completeExceptionally(err);
+            } else {
+                mSourceResult = res;
+                mExecutor.execute(this);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                complete(mFn.apply(mSourceResult));
+            } catch (Throwable t) {
+                completeExceptionally(t);
+            }
+        }
+    }
+
+    @Override
+    public <U, V> AndroidFuture<V> thenCombine(
+            @NonNull CompletionStage<? extends U> other,
+            @NonNull BiFunction<? super T, ? super U, ? extends V> combineResults) {
+        return new ThenCombine<T, U, V>(this, other, combineResults);
+    }
+
+    /** @see CompletionStage#thenCombine */
+    public AndroidFuture<T> thenCombine(@NonNull CompletionStage<Void> other) {
+        return thenCombine(other, (res, aVoid) -> res);
+    }
+
+    private static class ThenCombine<T, U, V> extends AndroidFuture<V>
+            implements BiConsumer<Object, Throwable> {
+        private volatile @Nullable T mResultT = null;
+        private volatile @NonNull CompletionStage<? extends U> mSourceU;
+        private final @NonNull BiFunction<? super T, ? super U, ? extends V> mCombineResults;
+
+        ThenCombine(CompletableFuture<T> sourceT,
+                CompletionStage<? extends U> sourceU,
+                BiFunction<? super T, ? super U, ? extends V> combineResults) {
+            mSourceU = Preconditions.checkNotNull(sourceU);
+            mCombineResults = Preconditions.checkNotNull(combineResults);
+
+            sourceT.whenComplete(this);
+        }
+
+        @Override
+        public void accept(Object res, Throwable err) {
+            if (err != null) {
+                completeExceptionally(err);
+                return;
+            }
+
+            if (mSourceU != null) {
+                // T done
+                mResultT = (T) res;
+                mSourceU.whenComplete(this);
+            } else {
+                // U done
+                try {
+                    complete(mCombineResults.apply(mResultT, (U) res));
+                } catch (Throwable t) {
+                    completeExceptionally(t);
                 }
+            }
+        }
+    }
+
+    /**
+     * Similar to {@link CompletableFuture#supplyAsync} but
+     * runs the given action directly.
+     *
+     * The resulting future is immediately completed.
+     */
+    public static <T> AndroidFuture<T> supply(Supplier<T> supplier) {
+        return supplyAsync(supplier, DIRECT_EXECUTOR);
+    }
+
+    /**
+     * @see CompletableFuture#supplyAsync(Supplier, Executor)
+     */
+    public static <T> AndroidFuture<T> supplyAsync(Supplier<T> supplier, Executor executor) {
+        return new SupplyAsync<>(supplier, executor);
+    }
+
+    private static class SupplyAsync<T> extends AndroidFuture<T> implements Runnable {
+        private final @NonNull Supplier<T> mSupplier;
+
+        SupplyAsync(Supplier<T> supplier, Executor executor) {
+            mSupplier = supplier;
+            executor.execute(this);
+        }
+
+        @Override
+        public void run() {
+            try {
+                complete(mSupplier.get());
+            } catch (Throwable t) {
+                completeExceptionally(t);
             }
         }
     }
