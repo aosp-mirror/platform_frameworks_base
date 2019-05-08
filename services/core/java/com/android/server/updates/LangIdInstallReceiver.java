@@ -25,4 +25,9 @@ public class LangIdInstallReceiver extends ConfigUpdateInstallReceiver {
             "metadata/lang_id",
             "version");
     }
+
+    @Override
+    protected boolean verifyVersion(int current, int alternative) {
+        return true;
+    }
 }
