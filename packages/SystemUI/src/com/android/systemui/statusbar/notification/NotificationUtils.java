@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
 import android.provider.Settings;
@@ -33,6 +34,9 @@ import com.android.systemui.R;
 public class NotificationUtils {
     private static final int[] sLocationBase = new int[2];
     private static final int[] sLocationOffset = new int[2];
+
+    @Nullable private static Boolean sUseNewInterruptionModel = null;
+
     public static boolean isGrayscale(ImageView v, ContrastColorUtil colorUtil) {
         Object isGrayscale = v.getTag(R.id.icon_is_grayscale);
         if (isGrayscale != null) {
@@ -72,9 +76,15 @@ public class NotificationUtils {
         return (int) (dimensionPixelSize * factor);
     }
 
-    /** Returns the value of the new interruption model setting. */
+    /**
+     * Returns the value of the new interruption model setting. This result is cached and cannot
+     * change except through reboots/process restarts.
+     */
     public static boolean useNewInterruptionModel(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1) != 0;
+        if (sUseNewInterruptionModel == null) {
+            sUseNewInterruptionModel = Settings.Secure.getInt(context.getContentResolver(),
+                    NOTIFICATION_NEW_INTERRUPTION_MODEL, 1) != 0;
+        }
+        return sUseNewInterruptionModel;
     }
 }
