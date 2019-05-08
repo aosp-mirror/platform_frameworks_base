@@ -3455,10 +3455,25 @@ public final class Settings {
          */
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
-        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(
-                        ColorDisplayManager.COLOR_MODE_NATURAL,
-                        ColorDisplayManager.COLOR_MODE_AUTOMATIC);
+        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR = new Validator() {
+            @Override
+            public boolean validate(@Nullable String value) {
+                // Assume the actual validation that this device can properly handle this kind of
+                // color mode further down in ColorDisplayManager / ColorDisplayService.
+                try {
+                    final int setting = Integer.parseInt(value);
+                    final boolean isInFrameworkRange =
+                            setting >= ColorDisplayManager.COLOR_MODE_NATURAL
+                                    && setting <= ColorDisplayManager.COLOR_MODE_AUTOMATIC;
+                    final boolean isInVendorRange =
+                            setting >= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MIN
+                                    && setting <= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MAX;
+                    return isInFrameworkRange || isInVendorRange;
+                } catch (NumberFormatException | NullPointerException e) {
+                    return false;
+                }
+            }
+        };
 
         /**
          * The user selected peak refresh rate in frames per second.
