@@ -90,7 +90,7 @@ JHwBlob::JHwBlob(JNIEnv *env, jobject thiz, size_t size)
     mObject = env->NewWeakGlobalRef(thiz);
 
     if (size > 0) {
-        mBuffer = malloc(size);
+        mBuffer = calloc(size, 1);
     }
 }
 
