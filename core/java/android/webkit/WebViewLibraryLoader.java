@@ -181,9 +181,9 @@ public class WebViewLibraryLoader {
         boolean is64Bit = VMRuntime.getRuntime().is64Bit();
         // On 64-bit address space is really cheap and we can reserve 1GB which is plenty.
         // On 32-bit it's fairly scarce and we should keep it to a realistic number that
-        // permits some future growth but doesn't hog space: we use 100MB which is more than 2x
-        // the current requirement.
-        long addressSpaceToReserve = is64Bit ? 1 * 1024 * 1024 * 1024 : 100 * 1024 * 1024;
+        // permits some future growth but doesn't hog space: we use 130MB which is roughly
+        // what was calculated on older OS versions in practice.
+        long addressSpaceToReserve = is64Bit ? 1 * 1024 * 1024 * 1024 : 130 * 1024 * 1024;
         sAddressSpaceReserved = nativeReserveAddressSpace(addressSpaceToReserve);
 
         if (sAddressSpaceReserved) {
