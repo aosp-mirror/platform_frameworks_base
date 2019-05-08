@@ -342,7 +342,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 Integer newDefaultSubIdObj = new Integer(intent.getIntExtra(
                         PhoneConstants.SUBSCRIPTION_KEY,
                         SubscriptionManager.getDefaultSubscriptionId()));
-                int newDefaultPhoneId = intent.getIntExtra(PhoneConstants.SLOT_KEY,
+                int newDefaultPhoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY,
                     SubscriptionManager.getPhoneId(mDefaultSubId));
                 if (DBG) {
                     log("onReceive:current mDefaultSubId=" + mDefaultSubId
@@ -1935,8 +1935,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
             pw.println("mCallQuality=" + mCallQuality);
             pw.println("mCallAttributes=" + mCallAttributes);
-            pw.println("mDefaultPhoneId" + mDefaultPhoneId);
-            pw.println("mDefaultSubId" + mDefaultSubId);
+            pw.println("mDefaultPhoneId=" + mDefaultPhoneId);
+            pw.println("mDefaultSubId=" + mDefaultSubId);
 
             pw.decreaseIndent();
 
