@@ -160,7 +160,7 @@ static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
 static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
         jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
-        int rotation) {
+        int rotation, bool captureSecureLayers) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken == NULL) {
         return NULL;
@@ -173,7 +173,7 @@ static jobject nativeScreenshotToBuffer(JNIEnv* env, jclass clazz,
     sp<GraphicBuffer> buffer;
     status_t res = ScreenshotClient::capture(displayToken,
             sourceCrop, width, height, minLayer, maxLayer, useIdentityTransform,
-            rotation, &buffer);
+            rotation, captureSecureLayers, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -1026,7 +1026,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
     {"nativeScreenshotToBuffer",
-     "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/GraphicBuffer;",
+     "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZIZ)Landroid/graphics/GraphicBuffer;",
      (void*)nativeScreenshotToBuffer },
     {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/graphics/Rect;F)Landroid/graphics/GraphicBuffer;",
             (void*)nativeCaptureLayers },
