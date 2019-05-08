@@ -1177,8 +1177,8 @@ final class AutofillManagerServiceImpl
      * @return whether caller UID is the augmented autofill service for the user
      */
     @GuardedBy("mLock")
-    boolean setAugmentedAutofillWhitelistLocked(List<String> packages,
-            List<ComponentName> activities, int callingUid) {
+    boolean setAugmentedAutofillWhitelistLocked(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities, int callingUid) {
 
         if (!isCalledByAugmentedAutofillServiceLocked("setAugmentedAutofillWhitelistLocked",
                 callingUid)) {
@@ -1189,8 +1189,25 @@ final class AutofillManagerServiceImpl
                     + activities + ")");
         }
         whitelistForAugmentedAutofillPackages(packages, activities);
+        final String serviceName;
+        if (mRemoteAugmentedAutofillServiceInfo != null) {
+            serviceName = mRemoteAugmentedAutofillServiceInfo.getComponentName()
+                    .flattenToShortString();
+        } else {
+            Slog.e(TAG, "setAugmentedAutofillWhitelistLocked(): no service");
+            serviceName = "N/A";
+        }
 
-        // TODO(b/122858578): log metrics
+        final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_AUGMENTED_WHITELIST_REQUEST)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, serviceName);
+        if (packages != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_PACKAGES, packages.size());
+        }
+        if (activities != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_ACTIVITIES, activities.size());
+        }
+        mMetricsLogger.write(log);
+
         return true;
     }
 
@@ -1233,7 +1250,6 @@ final class AutofillManagerServiceImpl
     }
 
     /**
-     *
      * @throws IllegalArgumentException if packages or components are empty.
      */
     private void whitelistForAugmentedAutofillPackages(@Nullable List<String> packages,

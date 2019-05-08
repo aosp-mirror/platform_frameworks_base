@@ -570,7 +570,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void requestNewFillResponseLocked(@NonNull ViewState viewState, int newState,
             int flags) {
         if (mForAugmentedAutofillOnly) {
-            // TODO(b/122858578): log metrics
             if (sVerbose) {
                 Slog.v(TAG, "requestNewFillResponse(): triggering augmented autofill instead "
                         + "(mForAugmentedAutofillOnly=" + mForAugmentedAutofillOnly
@@ -3252,6 +3251,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (totalAugmentedRequests > 0) {
             log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_AUGMENTED_REQUESTS,
                     totalAugmentedRequests);
+        }
+        if (mForAugmentedAutofillOnly) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_AUGMENTED_ONLY, 1);
         }
         mMetricsLogger.write(log);
 
