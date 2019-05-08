@@ -153,7 +153,7 @@ public abstract class BiometricDialogView extends LinearLayout {
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
 
         TypedArray array = getContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorError, android.R.attr.textColorSecondary});
+                new int[]{R.color.biometric_dialog_error, R.color.biometric_dialog_gray});
         mErrorColor = array.getColor(0, 0);
         mTextColor = array.getColor(1, 0);
         array.recycle();
