@@ -56,38 +56,41 @@ interface ITelephonyRegistry {
     void notifyDataConnection(int state, boolean isDataConnectivityPossible,
             String apn, String apnType, in LinkProperties linkProperties,
             in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
-    void notifyDataConnectionForSubscriber(int subId, int state, boolean isDataConnectivityPossible,
+    void notifyDataConnectionForSubscriber(int phoneId, int subId, int state,
+            boolean isDataConnectivityPossible,
             String apn, String apnType, in LinkProperties linkProperties,
             in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
     @UnsupportedAppUsage
     void notifyDataConnectionFailed(String apnType);
-    void notifyDataConnectionFailedForSubscriber(int subId, String apnType);
+    void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType);
     void notifyCellLocation(in Bundle cellLocation);
     void notifyCellLocationForSubscriber(in int subId, in Bundle cellLocation);
-    void notifyOtaspChanged(in int otaspMode);
+    void notifyOtaspChanged(in int subId, in int otaspMode);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
     void notifyPhysicalChannelConfiguration(in List<PhysicalChannelConfig> configs);
     void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
             in List<PhysicalChannelConfig> configs);
-    void notifyPreciseCallState(int ringingCallState, int foregroundCallState,
-            int backgroundCallState, int phoneId);
-    void notifyDisconnectCause(int disconnectCause, int preciseDisconnectCause);
-    void notifyPreciseDataConnectionFailed(String apnType, String apn,
+    void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
+            int foregroundCallState, int backgroundCallState);
+    void notifyDisconnectCause(int phoneId, int subId, int disconnectCause,
+            int preciseDisconnectCause);
+    void notifyPreciseDataConnectionFailed(int phoneId, int subId, String apnType, String apn,
             int failCause);
     void notifyCellInfoForSubscriber(in int subId, in List<CellInfo> cellInfo);
     void notifySrvccStateChanged(in int subId, in int lteState);
     void notifySimActivationStateChangedForPhoneId(in int phoneId, in int subId,
             int activationState, int activationType);
-    void notifyOemHookRawEventForSubscriber(in int subId, in byte[] rawData);
+    void notifyOemHookRawEventForSubscriber(in int phoneId, in int subId, in byte[] rawData);
     void notifySubscriptionInfoChanged();
     void notifyOpportunisticSubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
     void notifyActiveDataSubIdChanged(int activeDataSubId);
-    void notifyRadioPowerStateChanged(in int state);
-    void notifyEmergencyNumberList();
-    void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int callNetworkType);
+    void notifyRadioPowerStateChanged(in int phoneId, in int subId, in int state);
+    void notifyEmergencyNumberList(in int phoneId, in int subId);
+    void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
+            int callNetworkType);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
 }
