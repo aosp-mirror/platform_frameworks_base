@@ -43,6 +43,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.appop.AppOpsService;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,6 +55,7 @@ import java.util.List;
  * or for which we can write more detailed unit tests than CTS tests (because the internal APIs are
  * more finegrained data than the public ones).
  */
+@Ignore
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class AppOpsServiceTest {
