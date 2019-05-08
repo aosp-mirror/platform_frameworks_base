@@ -17,7 +17,6 @@
 package android.provider;
 
 import static android.provider.DeviceConfig.OnPropertiesChangedListener;
-import static android.provider.DeviceConfig.OnPropertyChangedListener;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -392,31 +391,6 @@ public class DeviceConfigTest {
         } finally {
             DeviceConfig.removeOnPropertiesChangedListener(changeListener);
         }
-    }
-
-    @Test
-    public void testOnPropertyChangedListener() throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-
-        OnPropertyChangedListener changeListener = (namespace, name, value) -> {
-            assertThat(namespace).isEqualTo(sNamespace);
-            assertThat(name).isEqualTo(sKey);
-            assertThat(value).isEqualTo(sValue);
-            countDownLatch.countDown();
-        };
-
-        try {
-            DeviceConfig.addOnPropertyChangedListener(sNamespace,
-                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
-            DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
-            assertThat(countDownLatch.await(
-                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-        } catch (InterruptedException e) {
-            Assert.fail(e.getMessage());
-        } finally {
-            DeviceConfig.removeOnPropertyChangedListener(changeListener);
-        }
-
     }
 
     private static boolean deleteViaContentProvider(String namespace, String key) {
