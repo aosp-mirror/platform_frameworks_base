@@ -2241,6 +2241,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    /** Returns whether the top activity is in fullscreen mode. */
+    public boolean inFullscreenMode() {
+        return 0
+                != (mSystemUiVisibility
+                        & (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION));
+    }
+
+    /** Returns whether the top activity is in immersive mode. */
+    public boolean inImmersiveMode() {
+        return 0
+                != (mSystemUiVisibility
+                        & (View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY));
+    }
+
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
