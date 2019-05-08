@@ -18,7 +18,6 @@ package com.android.systemui.biometrics;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -151,12 +150,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
         mAnimationTranslationOffset = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
-
-        TypedArray array = getContext().obtainStyledAttributes(
-                new int[]{R.color.biometric_dialog_error, R.color.biometric_dialog_gray});
-        mErrorColor = array.getColor(0, 0);
-        mTextColor = array.getColor(1, 0);
-        array.recycle();
+        mErrorColor = getResources().getColor(R.color.biometric_dialog_error);
+        mTextColor = getResources().getColor(R.color.biometric_dialog_gray);
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
@@ -225,7 +220,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         mTryAgainButton.setOnClickListener((View v) -> {
             updateState(STATE_AUTHENTICATING);
             showTryAgainButton(false /* show */);
-            handleClearMessage();
             mCallback.onTryAgainPressed();
         });
 
