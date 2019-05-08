@@ -709,7 +709,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (shouldDisableNavbarGestures()) {
             return false;
         }
-        mNavigationBarView.onNavigationButtonLongPress(v);
         mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         Bundle args  = new Bundle();
         args.putInt(
@@ -749,12 +748,10 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private boolean onLongPressBackHome(View v) {
-        mNavigationBarView.onNavigationButtonLongPress(v);
         return onLongPressNavigationButtons(v, R.id.back, R.id.home);
     }
 
     private boolean onLongPressBackRecents(View v) {
-        mNavigationBarView.onNavigationButtonLongPress(v);
         return onLongPressNavigationButtons(v, R.id.back, R.id.recent_apps);
     }
 
