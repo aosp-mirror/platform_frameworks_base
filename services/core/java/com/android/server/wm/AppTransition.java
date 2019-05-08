@@ -1902,6 +1902,8 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter) {
+        if (DEBUG_APP_TRANSITIONS) Slog.i(TAG, "Override pending remote transitionSet="
+                + isTransitionSet() + " adapter=" + remoteAnimationAdapter);
         if (isTransitionSet()) {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;

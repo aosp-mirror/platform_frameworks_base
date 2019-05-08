@@ -3379,7 +3379,7 @@ class ActivityStack extends ConfigurationContainer {
 
                     canMoveOptions = false;
                     if (noOptions && topOptions == null) {
-                        topOptions = p.takeOptionsLocked();
+                        topOptions = p.takeOptionsLocked(false /* fromClient */);
                         if (topOptions != null) {
                             noOptions = false;
                         }
@@ -3418,7 +3418,7 @@ class ActivityStack extends ConfigurationContainer {
                     }
                     canMoveOptions = false;
                     if (noOptions && topOptions == null) {
-                        topOptions = p.takeOptionsLocked();
+                        topOptions = p.takeOptionsLocked(false /* fromClient */);
                         if (topOptions != null) {
                             noOptions = false;
                         }

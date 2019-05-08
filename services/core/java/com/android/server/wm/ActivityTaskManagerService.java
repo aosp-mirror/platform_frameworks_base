@@ -2931,7 +2931,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r != null) {
-                    final ActivityOptions activityOptions = r.takeOptionsLocked();
+                    final ActivityOptions activityOptions = r.takeOptionsLocked(
+                            true /* fromClient */);
                     return activityOptions == null ? null : activityOptions.toBundle();
                 }
                 return null;
