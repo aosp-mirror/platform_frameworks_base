@@ -4919,19 +4919,17 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void onSetVolumeIndexOnDevice(@NonNull DeviceVolumeUpdate update) {
-        synchronized (VolumeStreamState.class) {
-            final VolumeStreamState streamState = mStreamStates[update.mStreamType];
-            if (update.hasVolumeIndex()) {
-                final int index = update.getVolumeIndex();
-                streamState.setIndex(index, update.mDevice, update.mCaller);
-                sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller + " dev:0x"
-                        + Integer.toHexString(update.mDevice) + " volIdx:" + index));
-            } else {
-                sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller
-                        + " update vol on dev:0x" + Integer.toHexString(update.mDevice)));
-            }
-            setDeviceVolume(streamState, update.mDevice);
+        final VolumeStreamState streamState = mStreamStates[update.mStreamType];
+        if (update.hasVolumeIndex()) {
+            final int index = update.getVolumeIndex();
+            streamState.setIndex(index, update.mDevice, update.mCaller);
+            sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller + " dev:0x"
+                    + Integer.toHexString(update.mDevice) + " volIdx:" + index));
+        } else {
+            sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller
+                    + " update vol on dev:0x" + Integer.toHexString(update.mDevice)));
         }
+        setDeviceVolume(streamState, update.mDevice);
     }
 
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
