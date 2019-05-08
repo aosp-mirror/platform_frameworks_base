@@ -1078,7 +1078,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 + mRequestedWidth + ", mRequestedheight="
                 + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
                 + "): frame=" + mWindowFrames.mFrame.toShortString()
-                + " " + mWindowFrames.getInsetsInfo());
+                + " " + mWindowFrames.getInsetsInfo()
+                + " " + mAttrs.getTitle());
     }
 
     // TODO: Look into whether this override is still necessary.

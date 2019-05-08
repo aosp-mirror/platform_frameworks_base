@@ -1667,8 +1667,7 @@ easier.
 
     <!-- Theme used for the intent picker activity. -->
     <style name="Theme.DeviceDefault.ResolverCommon" parent="Theme.DeviceDefault.DayNight">
-        <item name="windowEnterTransition">@empty</item>
-        <item name="windowExitTransition">@empty</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Activity.Resolver</item>
         <item name="windowIsTranslucent">true</item>
         <item name="windowNoTitle">true</item>
         <item name="windowBackground">@color/transparent</item>
@@ -1680,6 +1679,14 @@ easier.
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
         <item name="navigationBarColor">?attr/colorBackgroundFloating</item>
         <item name="navigationBarDividerColor">@color/chooser_row_divider</item>
+    </style>
+
+    <style name="Animation.DeviceDefault.Activity.Resolver" parent="Animation.DeviceDefault.Activity">
+        <item name="activityOpenEnterAnimation">@anim/resolver_launch_anim</item>
+        <item name="taskOpenEnterAnimation">@anim/resolver_launch_anim</item>
+        <!-- Handle close for profile switching -->
+        <item name="activityOpenExitAnimation">@anim/resolver_close_anim</item>
+        <item name="taskOpenExitAnimation">@anim/resolver_close_anim</item>
     </style>
 
     <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">

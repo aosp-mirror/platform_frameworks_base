@@ -7243,6 +7243,13 @@ message MetricsEvent {
     // OS: Q
     ACTION_DIRECT_SHARE_TARGETS_LOADED_CHOOSER_SERVICE = 1719;
 
+    // ---- Skipping ahead to avoid conflicts between master and release branches.
+
+    // OPEN: Settings > System > Gestures > Global Actions Panel
+    // CATEGORY: SETTINGS
+    // OS: Q
+    GLOBAL_ACTIONS_PANEL_SETTINGS = 1800;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

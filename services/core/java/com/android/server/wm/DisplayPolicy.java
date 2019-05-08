@@ -70,6 +70,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
@@ -2007,7 +2008,8 @@ public class DisplayPolicy {
                         pf.set(displayFrames.mOverscan);
                     } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
-                            || type == TYPE_VOLUME_OVERLAY)) {
+                            || type == TYPE_VOLUME_OVERLAY
+                            || type == TYPE_KEYGUARD_DIALOG)) {
                         // Asking for layout as if the nav bar is hidden, lets the application
                         // extend into the unrestricted overscan screen area. We only do this for
                         // application windows and certain system windows to ensure no window that

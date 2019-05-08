@@ -168,4 +168,9 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken)
             throws RemoteException {
     }
+
+    @Override
+    public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo)
+            throws RemoteException {
+    }
 }

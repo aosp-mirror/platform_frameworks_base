@@ -21,6 +21,7 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
@@ -32,6 +33,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -150,6 +152,25 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
             mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
             mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+            assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+            assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+            assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+            assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+            assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
+        }
+    }
+
+    @Test
+    public void layoutWindowLw_keyguardDialog_hideNav() {
+        synchronized (mWm.mGlobalLock) {
+            mWindow.mAttrs.type = TYPE_KEYGUARD_DIALOG;
+            mWindow.mAttrs.flags |= FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+            mWindow.mAttrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            addWindow(mWindow);
+
+            mDisplayPolicy.beginLayoutLw(mFrames, 0 /* uiMode */);
+            mDisplayPolicy.layoutWindowLw(mWindow, null /* attached */, mFrames);
 
             assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
             assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
