@@ -3259,6 +3259,9 @@ class ActivityStack extends ConfigurationContainer {
                 // tell WindowManager that r is visible even though it is at the back of the stack.
                 r.setVisibility(true);
                 ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                // Go ahead to execute app transition for this activity since the app transition
+                // will not be triggered through the resume channel.
+                getDisplay().mDisplayContent.executeAppTransition();
             } else if (SHOW_APP_STARTING_PREVIEW && doShow) {
                 // Figure out if we are transitioning from another activity that is
                 // "has the same starting icon" as the next one.  This allows the
