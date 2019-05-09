@@ -78,6 +78,8 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.DisplayContentProto.ABOVE_APP_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.BELOW_APP_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.CHANGING_APPS;
+import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
@@ -85,14 +87,12 @@ import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
-import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
-import static com.android.server.wm.DisplayContentProto.CHANGING_APPS;
-import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -2945,9 +2945,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(mScheduleToastTimeout, false /* traverseTopToBottom */);
     }
 
-    WindowState findFocusedWindowIfNeeded() {
-        return (mWmService.mPerDisplayFocusEnabled
-                || mWmService.mRoot.mTopFocusedAppByProcess.isEmpty()) ? findFocusedWindow() : null;
+    /**
+     * Looking for the focused window on this display if the top focused display hasn't been
+     * found yet (topFocusedDisplayId is INVALID_DISPLAY) or per-display focused was allowed.
+     *
+     * @param topFocusedDisplayId Id of the top focused display.
+     * @return The focused window or null if there isn't any or no need to seek.
+     */
+    WindowState findFocusedWindowIfNeeded(int topFocusedDisplayId) {
+        return (mWmService.mPerDisplayFocusEnabled || topFocusedDisplayId == INVALID_DISPLAY)
+                ? findFocusedWindow() : null;
     }
 
     WindowState findFocusedWindow() {
@@ -2971,10 +2978,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *             {@link WindowManagerService#UPDATE_FOCUS_WILL_PLACE_SURFACES},
      *             {@link WindowManagerService#UPDATE_FOCUS_REMOVING_FOCUS}
      * @param updateInputWindows Whether to sync the window information to the input module.
+     * @param topFocusedDisplayId Display id of current top focused display.
      * @return {@code true} if the focused window has changed.
      */
-    boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
-        WindowState newFocus = findFocusedWindowIfNeeded();
+    boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows,
+            int topFocusedDisplayId) {
+        WindowState newFocus = findFocusedWindowIfNeeded(topFocusedDisplayId);
         if (mCurrentFocus == newFocus) {
             return false;
         }
@@ -2994,7 +3003,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (imWindowChanged) {
             mWmService.mWindowsChanged = true;
             setLayoutNeeded();
-            newFocus = findFocusedWindowIfNeeded();
+            newFocus = findFocusedWindowIfNeeded(topFocusedDisplayId);
         }
         if (mCurrentFocus != newFocus) {
             mWmService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
