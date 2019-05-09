@@ -35,7 +35,9 @@ import com.android.server.usb.descriptors.UsbDescriptorParser;
 import libcore.io.IoUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * UsbAlsaManager manages USB audio and MIDI devices.
@@ -60,6 +62,50 @@ public final class UsbAlsaManager {
     // ALSA device when we are notified that its associated USB device has been removed.
     private final ArrayList<UsbAlsaDevice> mAlsaDevices = new ArrayList<UsbAlsaDevice>();
     private UsbAlsaDevice mSelectedDevice;
+
+    //
+    // Device Blacklist
+    //
+    // This exists due to problems with Sony game controllers which present as an audio device
+    // even if no headset is connected and have no way to set the volume on the unit.
+    // Handle this by simply declining to use them as an audio device.
+    private static final int USB_VENDORID_SONY = 0x054C;
+    private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT1 = 0x05C4;
+    private static final int USB_PRODUCTID_PS4CONTROLLER_ZCT2 = 0x09CC;
+
+    private static final int USB_BLACKLIST_OUTPUT = 0x0001;
+    private static final int USB_BLACKLIST_INPUT  = 0x0002;
+
+    private static class BlackListEntry {
+        final int mVendorId;
+        final int mProductId;
+        final int mFlags;
+
+        BlackListEntry(int vendorId, int productId, int flags) {
+            mVendorId = vendorId;
+            mProductId = productId;
+            mFlags = flags;
+        }
+    }
+
+    static final List<BlackListEntry> sDeviceBlacklist = Arrays.asList(
+            new BlackListEntry(USB_VENDORID_SONY,
+                    USB_PRODUCTID_PS4CONTROLLER_ZCT1,
+                    USB_BLACKLIST_OUTPUT),
+            new BlackListEntry(USB_VENDORID_SONY,
+                    USB_PRODUCTID_PS4CONTROLLER_ZCT2,
+                    USB_BLACKLIST_OUTPUT));
+
+    private static boolean isDeviceBlacklisted(int vendorId, int productId, int flags) {
+        for (BlackListEntry entry : sDeviceBlacklist) {
+            if (entry.mVendorId == vendorId && entry.mProductId == productId) {
+                // see if the type flag is set
+                return (entry.mFlags & flags) != 0;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * List of connected MIDI devices
@@ -179,8 +225,12 @@ public final class UsbAlsaManager {
         }
 
         // Add it to the devices list
-        boolean hasInput = parser.hasInput();
-        boolean hasOutput = parser.hasOutput();
+        boolean hasInput = parser.hasInput()
+                && !isDeviceBlacklisted(usbDevice.getVendorId(), usbDevice.getProductId(),
+                        USB_BLACKLIST_INPUT);
+        boolean hasOutput = parser.hasOutput()
+                && !isDeviceBlacklisted(usbDevice.getVendorId(), usbDevice.getProductId(),
+                        USB_BLACKLIST_OUTPUT);
         if (DEBUG) {
             Slog.d(TAG, "hasInput: " + hasInput + " hasOutput:" + hasOutput);
         }
