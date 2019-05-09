@@ -3393,6 +3393,9 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         WindowManagerGlobal.initialize();
 
+        // Hint the GraphicsEnvironment that an activity is launching on the process.
+        GraphicsEnvironment.hintActivityLaunch();
+
         final Activity a = performLaunchActivity(r, customIntent);
 
         if (a != null) {
