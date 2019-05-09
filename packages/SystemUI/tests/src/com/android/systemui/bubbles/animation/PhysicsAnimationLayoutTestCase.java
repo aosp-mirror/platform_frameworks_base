@@ -195,9 +195,11 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
 
             @Override
             protected void animateValueForChild(DynamicAnimation.ViewProperty property, View view,
-                    float value, float startVel, long startDelay, Runnable[] afterCallbacks) {
+                    float value, float startVel, long startDelay, float stiffness,
+                    float dampingRatio, Runnable[] afterCallbacks) {
                 mMainThreadHandler.post(() -> super.animateValueForChild(
-                        property, view, value, startVel, startDelay, afterCallbacks));
+                        property, view, value, startVel, startDelay, stiffness, dampingRatio,
+                        afterCallbacks));
             }
         }
 
