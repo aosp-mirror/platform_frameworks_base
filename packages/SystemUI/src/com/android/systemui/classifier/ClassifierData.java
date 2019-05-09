@@ -44,7 +44,7 @@ public class ClassifierData {
         // sampling rate, this creates potentialy false positives.
         if (event.getActionMasked() == MotionEvent.ACTION_MOVE
                 && mCurrentStrokes.size() != 0
-                && event.getEventTimeNano() - mCurrentStrokes.get(0).getLastEventTimeNano()
+                && event.getEventTimeNano() - mCurrentStrokes.valueAt(0).getLastEventTimeNano()
                         < MINIMUM_DT_NANOS - MINIMUM_DT_SMEAR_NANOS) {
             return false;
         }
