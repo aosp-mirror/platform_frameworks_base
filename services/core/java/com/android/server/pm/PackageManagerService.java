@@ -1009,6 +1009,9 @@ public class PackageManagerService extends IPackageManager.Stub
     private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
 
     @GuardedBy("mPackages")
+    private PackageManagerInternal.DefaultDialerProvider mDefaultDialerProvider;
+
+    @GuardedBy("mPackages")
     private PackageManagerInternal.DefaultHomeProvider mDefaultHomeProvider;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
@@ -13982,10 +13985,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return resolveInfo == null ? null : resolveInfo.activityInfo.packageName;
     }
 
-    private String getDefaultDialerPackageName(int userId) {
+    @Nullable
+    private String getDefaultDialerPackageName(@UserIdInt int userId) {
+        PackageManagerInternal.DefaultDialerProvider provider;
         synchronized (mPackages) {
-            return mSettings.getDefaultDialerPackageNameLPw(userId);
+            provider = mDefaultDialerProvider;
         }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultDialerProvider is null");
+            return null;
+        }
+        return provider.getDefaultDialer(userId);
     }
 
     @Override
@@ -24216,13 +24226,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void onDefaultDialerAppChanged(String packageName, int userId) {
-            synchronized (mPackages) {
-                mSettings.setDefaultDialerPackageNameLPw(packageName, userId);
-            }
-        }
-
-        @Override
         public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
             mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
                     packageName, userId);
@@ -24764,6 +24767,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
             synchronized (mPackages) {
                 mDefaultBrowserProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider) {
+            synchronized (mPackages) {
+                mDefaultDialerProvider = provider;
             }
         }
 
