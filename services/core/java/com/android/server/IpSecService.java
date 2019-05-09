@@ -1369,7 +1369,7 @@ public class IpSecService extends IIpSecService.Stub {
     public synchronized IpSecTunnelInterfaceResponse createTunnelInterface(
             String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder,
             String callingPackage) {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         checkNotNull(binder, "Null Binder passed to createTunnelInterface");
         checkNotNull(underlyingNetwork, "No underlying network was specified");
         checkInetAddress(localAddr);
@@ -1455,7 +1455,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void addAddressToTunnelInterface(
             int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1484,7 +1484,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void removeAddressFromTunnelInterface(
             int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1513,7 +1513,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void deleteTunnelInterface(
             int resourceId, String callingPackage) throws RemoteException {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         releaseResource(userRecord.mTunnelInterfaceRecords, resourceId);
     }
@@ -1642,7 +1642,12 @@ public class IpSecService extends IIpSecService.Stub {
 
     private static final String TUNNEL_OP = AppOpsManager.OPSTR_MANAGE_IPSEC_TUNNELS;
 
-    private void enforceTunnelPermissions(String callingPackage) {
+    private void enforceTunnelFeatureAndPermissions(String callingPackage) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_IPSEC_TUNNELS)) {
+            throw new UnsupportedOperationException(
+                    "IPsec Tunnel Mode requires PackageManager.FEATURE_IPSEC_TUNNELS");
+        }
+
         checkNotNull(callingPackage, "Null calling package cannot create IpSec tunnels");
         switch (getAppOpsManager().noteOp(TUNNEL_OP, Binder.getCallingUid(), callingPackage)) {
             case AppOpsManager.MODE_DEFAULT:
@@ -1714,7 +1719,7 @@ public class IpSecService extends IIpSecService.Stub {
             IpSecConfig c, IBinder binder, String callingPackage) throws RemoteException {
         checkNotNull(c);
         if (c.getMode() == IpSecTransform.MODE_TUNNEL) {
-            enforceTunnelPermissions(callingPackage);
+            enforceTunnelFeatureAndPermissions(callingPackage);
         }
         checkIpSecConfig(c);
         checkNotNull(binder, "Null Binder passed to createTransform");
@@ -1822,7 +1827,7 @@ public class IpSecService extends IIpSecService.Stub {
     public synchronized void applyTunnelModeTransform(
             int tunnelResourceId, int direction,
             int transformResourceId, String callingPackage) throws RemoteException {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         checkDirection(direction);
 
         int callingUid = Binder.getCallingUid();
