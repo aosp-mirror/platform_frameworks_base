@@ -1283,11 +1283,13 @@ public class PermissionManagerService {
                         permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
                                 MASK_PERMISSION_FLAGS_ALL, 0);
                         changedInstallPermission = true;
-                        Slog.i(TAG, "Un-granting permission " + perm
-                                + " from package " + pkg.packageName
-                                + " (protectionLevel=" + bp.getProtectionLevel()
-                                + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
-                                + ")");
+                        if (DEBUG_PERMISSIONS) {
+                            Slog.i(TAG, "Un-granting permission " + perm
+                                    + " from package " + pkg.packageName
+                                    + " (protectionLevel=" + bp.getProtectionLevel()
+                                    + " flags=0x" + Integer.toHexString(pkg.applicationInfo.flags)
+                                    + ")");
+                        }
                     } else if (bp.isAppOp()) {
                         // Don't print warning for app op permissions, since it is fine for them
                         // not to be granted, there is a UI for the user to decide.
