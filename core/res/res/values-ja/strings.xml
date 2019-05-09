@@ -227,7 +227,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"緊急通報"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"バグレポート"</string>
     <string name="global_action_logout" msgid="935179188218826050">"セッションを終了"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"スクリーンショット"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"画面の保存"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"バグレポート"</string>
     <string name="bugreport_message" msgid="398447048750350456">"現在のデバイスの状態に関する情報が収集され、その内容がメールで送信されます。バグレポートが開始してから送信可能な状態となるまでには多少の時間がかかりますのでご了承ください。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"対話型レポート"</string>
@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"顔を登録し直してください。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"顔を認識できなくなりました。もう一度お試しください。"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"似すぎています。ポーズを変えてください。"</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"顔の向きを少し戻してください。"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"顔の向きを少し戻してください。"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"頭を左右に傾けず、まっすぐにしてください。"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"顔とスマートフォンの間に何も置かないでください。"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"カメラの汚れを拭き取ってください。"</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"顔を確認できません。ハードウェアを利用できません。"</string>

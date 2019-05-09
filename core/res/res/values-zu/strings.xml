@@ -304,7 +304,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthatha izithombe iphinde irekhode ividiyo?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Amarekhodi wamakholi"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"funda futhi ubhale irekhodi lamakholi efoni"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukufinyelela irekhodi lakho lamakholi wefoni?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukufinyelela kurekhodi lakho lamakholi wefoni?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Ifoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"yenza uphinde uphathe amakholi wefoni"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi yenze iphinde iphathe amakholi efoni?"</string>
@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Sicela uphinde ubhalise ubuso bakho."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ayisakwazi ukubona ubuso. Zama futhi."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Kufana kakhulu, sicela ushintshe ukuma kwakho."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Jikisa ikhanda lakho kancane."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Jikisa ikhanda lakho kancane."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Sicela uqondise ikhanda lakho ngokumile."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Susa isikhala esiphakathi kwekhanda lakho nefoni."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Sicela uhlanze ikhamera."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ayikwazi ukuqinisekisa ubuso. Izingxenyekazi zekhompyutha azitholakali."</string>

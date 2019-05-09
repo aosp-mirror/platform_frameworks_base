@@ -87,7 +87,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Тандалган тармакты өзгөртүп көрүңүз. Өзгөртүү үчүн таптаңыз."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Шашылыш чалуу жеткиликсиз"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Wi-Fi аркылуу шашылыш чалуулар иштетилген жок"</string>
-    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Эскертүүлөр"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Шашылыш билдирүүлөр"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Чалууну башка номерге багыттоо"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Шашылыш кайра чалуу режими"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Мобилдик Интернеттин абалы"</string>
@@ -262,7 +262,7 @@
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Жеткиликтүү тармактар"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN абалы"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Түзмөктү администрациялоо"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Эскертүүлөр"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Шашылыш билдирүүлөр"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Чекене соода дүкөнү үчүн демо режим"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB аркылуу туташуу"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Колдонмо иштеп жатат"</string>
@@ -295,19 +295,19 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна түзмөгүңүздөгү сүрөттөрдү жана башка мультимедиа файлдарын пайдаланууга уруксат бересизби?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"аудио жаздыруу"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна аудио файлдарды жаздырууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна аудио файлдарды жазганга уруксат бересизби?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Кыймыл-аракет"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"кыймыл-аракетиңизге мүмкүнчүлүк алат"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна кыймыл-аракетиңизге мүмкүнчүлүк бересизби?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"сүрөт жана видео тартууга"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна сүрөттөрдү тартып, видеолорду жаздырууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна сүрөттөр менен видеолорду тартканга уруксат бересизби?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Чалуулар тизмелери"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"телефондогу чалуулар тизмесин окуу жана жазуу"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефондогу чалуулар тизмесин пайдаланууга уруксат берилсинби?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефон чалууга жана чалууларды башкарууга уруксат берилсинби?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефон чалууга жана чалууларды башкарууга уруксат бересизби?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Дене сенсорлору"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"организмдин абалына көз салган сенсордун дайындарына мүмкүнчүлүк алуу"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна организмдин абалына көз салган сенсордун көрсөткүчтөрүн көрүүгө уруксат бересизби?"</string>
@@ -548,7 +548,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>-манжа"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Манжа изинин сөлөкөтү"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Манжа изинин сүрөтчөсү"</string>
     <string name="permlab_manageFace" msgid="2137540986007309781">"жүздүн аныктыгын текшерүүчү аппараттык камсыздоону башкаруу"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Колдонмого пайдалануу үчүн жүздүн үлгүлөрүн кошуу жана жок кылуу мүмкүндүгүн берет."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"жүздүн аныктыгын текшерүүчү аппараттык камсыздоону колдонуу"</string>
@@ -575,9 +575,12 @@
     <skip />
     <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Башыңызды түз кармаңыз."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Башыңыз менен телефондун ортосу бош болушу керек."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Камераны тазалаңыз."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Жүз ырасталбай жатат. Аппараттык камсыздоо жеткиликсиз."</string>
@@ -1599,7 +1602,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Зымсыз дисплей"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Тышкы экранга чыгаруу"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Түзмөккө туташуу"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Сырткы экранга чыгаруу"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Тышкы экранга чыгаруу"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Түзмөктөр изделүүдө..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Жөндөөлөр"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Ажыратуу"</string>

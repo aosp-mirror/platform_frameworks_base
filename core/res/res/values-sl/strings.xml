@@ -231,7 +231,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Klic v sili"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Poročilo o napakah"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Končaj sejo"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek zaslona"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Poročilo o napakah"</string>
     <string name="bugreport_message" msgid="398447048750350456">"S tem bodo zbrani podatki o trenutnem stanju naprave, ki bodo poslani v e-poštnem sporočilu. Izvedba poročila o napakah in priprava trajata nekaj časa, zato bodite potrpežljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivno poročilo"</string>
@@ -577,13 +577,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova prijavite svoj obraz."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Obraza ni več mogoče prepoznati. Poskusite znova."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Preveč podobno, spremenite položaj."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Glejte malce bolj naravnost."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Malce manj nagnite glavo."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Zravnajte glavo."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Povečajte razmik med glavo in telefonom."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Očistite fotoaparat."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Obraza ni mogoče preveriti. Str. opr. ni na voljo."</string>
