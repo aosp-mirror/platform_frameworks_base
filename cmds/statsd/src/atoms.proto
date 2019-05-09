@@ -745,6 +745,22 @@ message ScheduledJobStateChanged {
     // This is only applicable when the state is FINISHED.
     // The default value is STOP_REASON_UNKNOWN.
     optional android.app.job.StopReasonEnum stop_reason = 4;
+
+    // The standby bucket of the app that scheduled the job. These match the framework constants
+    // defined in JobSchedulerService.java with the addition of UNKNOWN using -1, as ACTIVE is
+    // already assigned 0.
+    enum Bucket {
+        UNKNOWN = -1;
+        ACTIVE = 0;
+        WORKING_SET = 1;
+        FREQUENT = 2;
+        RARE = 3;
+        NEVER = 4;
+    }
+    optional Bucket standby_bucket = 5 [default = UNKNOWN];
+
+    // The job id (as assigned by the app).
+    optional int32 job_id = 6;
 }
 
 /**
