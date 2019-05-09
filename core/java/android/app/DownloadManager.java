@@ -539,8 +539,9 @@ public class DownloadManager {
          *
          * <p> For applications targeting {@link android.os.Build.VERSION_CODES#Q} or above,
          * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE}
-         * permission is not needed and the {@code dirType} must
-         * be {@link Environment#DIRECTORY_DOWNLOADS}.
+         * permission is not needed and the {@code dirType} must be one of the known public
+         * directories like {@link Environment#DIRECTORY_DOWNLOADS},
+         * {@link Environment#DIRECTORY_PICTURES}, {@link Environment#DIRECTORY_MOVIES}, etc.
          *
          * @param dirType the directory type to pass to {@link Environment#getExternalStoragePublicDirectory(String)}
          * @param subPath the path within the external directory, including the
@@ -594,11 +595,8 @@ public class DownloadManager {
          * should be called before {@link DownloadManager#enqueue(Request)} is called.
          *
          * @deprecated Starting in Q, this value is ignored. Files downloaded to
-         * public Downloads directory (as returned by
-         * {@link Environment#getExternalStoragePublicDirectory(String)} with
-         * {@link Environment#DIRECTORY_DOWNLOADS}) will be scanned by MediaScanner
-         * and files downloaded to directories owned by applications
-         * (e.g. {@link Context#getExternalFilesDir(String)}) will not be scanned.
+         * directories owned by applications (e.g. {@link Context#getExternalFilesDir(String)})
+         * will not be scanned by MediaScanner and the rest will be scanned.
          */
         @Deprecated
         public void allowScanningByMediaScanner() {
@@ -783,11 +781,11 @@ public class DownloadManager {
          * @param isVisible whether to display this download in the Downloads UI
          * @return this object
          *
-         * @deprecated Starting in Q, this value is ignored. Files downloaded to
+         * @deprecated Starting in Q, this value is ignored. Only files downloaded to
          * public Downloads directory (as returned by
          * {@link Environment#getExternalStoragePublicDirectory(String)} with
          * {@link Environment#DIRECTORY_DOWNLOADS}) will be visible in system's Downloads UI
-         * and files downloaded to directories owned by applications
+         * and the rest will not be visible.
          * (e.g. {@link Context#getExternalFilesDir(String)}) will not be visible.
          */
         @Deprecated
