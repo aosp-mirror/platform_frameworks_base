@@ -6514,6 +6514,13 @@ public final class Settings {
                 "global_actions_panel_available";
 
         /**
+         * Enables debug mode for the Global Actions Panel.
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_PANEL_DEBUG_ENABLED =
+                "global_actions_panel_debug_enabled";
+
+        /**
          * Whether the hush gesture has ever been used
          * @hide
          */

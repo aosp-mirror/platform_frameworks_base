@@ -1769,12 +1769,19 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /**
+     * Determines whether or not debug mode has been activated for the Global Actions Panel.
+     */
+    private static boolean isPanelDebugModeEnabled(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.GLOBAL_ACTIONS_PANEL_DEBUG_ENABLED, 0) == 1;
+    }
+
+    /**
      * Determines whether or not the Global Actions menu should be forced to
      * use the newer grid-style layout.
      */
     private static boolean isForceGridEnabled(Context context) {
-        return FeatureFlagUtils.isEnabled(context,
-                FeatureFlagUtils.FORCE_GLOBAL_ACTIONS_GRID_ENABLED);
+        return isPanelDebugModeEnabled(context);
     }
 
     /**
