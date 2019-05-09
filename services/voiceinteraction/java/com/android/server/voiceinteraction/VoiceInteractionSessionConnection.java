@@ -253,7 +253,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
 
         if (data == null) {
             try {
-                mSession.handleAssist(-1, null, null, null, null, -1, 0);
+                mSession.handleAssist(-1, null, null, null, null, 0, 0);
             } catch (RemoteException e) {
                 // Ignore
             }
