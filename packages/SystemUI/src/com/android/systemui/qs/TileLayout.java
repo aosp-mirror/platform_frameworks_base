@@ -126,7 +126,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 (mRows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
         if (height < 0) height = 0;
 
-        setMeasuredDimension(width + getPaddingStart() + getPaddingEnd(), height);
+        setMeasuredDimension(width, height);
     }
 
     /**
