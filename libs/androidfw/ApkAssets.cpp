@@ -211,9 +211,8 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
     root_path_full += '/';
   }
 
-  ::ZipString prefix(root_path_full.c_str());
   void* cookie;
-  if (::StartIteration(zip_handle_.get(), &cookie, &prefix, nullptr) != 0) {
+  if (::StartIteration(zip_handle_.get(), &cookie, root_path_full, "") != 0) {
     return false;
   }
 
