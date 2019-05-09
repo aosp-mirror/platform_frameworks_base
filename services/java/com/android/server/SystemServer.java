@@ -115,7 +115,6 @@ import com.android.server.om.OverlayManagerService;
 import com.android.server.os.BugreportManagerService;
 import com.android.server.os.DeviceIdentifiersPolicyService;
 import com.android.server.os.SchedulingPolicyService;
-import com.android.server.pm.ApexManager;
 import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.CrossProfileAppsService;
 import com.android.server.pm.DynamicCodeLoggingService;
@@ -626,12 +625,6 @@ public final class SystemServer {
         traceBeginAndSlog("StartWatchdog");
         final Watchdog watchdog = Watchdog.getInstance();
         watchdog.start();
-        traceEnd();
-
-        // Start ApexManager as early as we can to give it enough time to call apexd and populate
-        // cache of known apex packages. Note that calling apexd will happen asynchronously.
-        traceBeginAndSlog("StartApexManager");
-        mSystemServiceManager.startService(ApexManager.class);
         traceEnd();
 
         Slog.i(TAG, "Reading configuration...");
