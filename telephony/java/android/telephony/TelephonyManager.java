@@ -3836,10 +3836,12 @@ public class TelephonyManager {
     }
 
     /**
-     * Return the set of subscriber IDs that should be considered as "merged
-     * together" for data usage purposes. This is commonly {@code null} to
-     * indicate no merging is required. Any returned subscribers are sorted in a
-     * deterministic order.
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. This is commonly {@code null} to indicate no merging is required. Any returned
+     * subscribers are sorted in a deterministic order.
+     * <p>
+     * The returned set of subscriber IDs will include the subscriber ID corresponding to this
+     * TelephonyManager's subId.
      *
      * @hide
      */
@@ -3848,7 +3850,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getMergedSubscriberIds(getOpPackageName());
+                return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
