@@ -223,11 +223,11 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"TV ਚੋਣਾਂ"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ਫ਼ੋਨ ਚੋਣਾਂ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ਸਕ੍ਰੀਨ ਲਾਕ"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"ਪਾਵਰ ਬੰਦ"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"ਸੰਕਟਕਾਲ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="global_action_logout" msgid="935179188218826050">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"ਬੱਗ ਰਿਪੋਰਟ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਦਰਜ ਕਰੋ।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ਹੁਣ ਚਿਹਰਾ ਪਛਾਣਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ਬਹੁਤ ਮਿਲਦਾ-ਜੁਲਦਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਅੰਦਾਜ਼ ਬਦਲੋ।"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"ਕਿਰਪਾ ਕਰਕੇ ਸਿੱਧਾ ਸਕ੍ਰੀਨ ਵੱਲ ਦੇਖੋ।"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"ਕਿਰਪਾ ਕਰਕੇ ਸਿੱਧਾ ਸਕ੍ਰੀਨ ਵੱਲ ਦੇਖੋ।"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਸਿਰ ਨੂੰ ਸਿੱਧਾ ਖੜ੍ਹਵਾਂ ਰੱਖੋ।"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"ਤੁਹਾਡੇ ਸਿਰ ਅਤੇ ਫ਼ੋਨ ਵਿਚਾਲੇ ਕੁਝ ਨਾ ਹੋਵੇ।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"ਕਿਰਪਾ ਕਰਕੇ ਕੈਮਰਾ ਸਾਫ਼ ਕਰੋ।"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ਆਪਣਾ ਸਿਰ ਥੋੜਾ ਜਿਹਾ ਝੁਕਾਓ।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ਆਪਣਾ ਸਿਰ ਥੋੜਾ ਜਿਹਾ ਝੁਕਾਓ।"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
@@ -1322,7 +1325,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"ਹੋ ਗਿਆ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ਕਾਰਡ ਜੋੜਿਆ ਗਿਆ"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਲਈ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"ਰੀਸਟਾਰਟ ਕਰੋ"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"ਮੋਬਾਈਲ ਸੇਵਾ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ਆਪਣੇ ਨਵੇਂ ਸਿਮ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਲਈ ਕੈਰੀਅਰ ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"ਆਪਣੇ ਨਵੇਂ ਸਿਮ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਲਈ <xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
@@ -1596,8 +1599,8 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"ਪ੍ਰਸਾਰਿਤ ਕਰੋ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ਡੀਵਾਈਸ ਨਾਲ ਸਕ੍ਰੀਨ ਜੋੜੋ"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ਡਿਵਾਈਸਾਂ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ਡੀਵਾਈਸ ਨਾਲ ਸਕ੍ਰੀਨ ਕਾਸਟ ਕਰੋ"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ਡੀਵਾਈਸਾਂ ਦੀ ਖੋਜ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
@@ -2028,4 +2031,5 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ਫ਼ਾਈਲਾਂ</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"ਸਿੱਧਾ ਸਾਂਝਾ ਕਰਨ ਦੀ ਸੁਵਿਧਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ਐਪ ਸੂਚੀ"</string>
 </resources>

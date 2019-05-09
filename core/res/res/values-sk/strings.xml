@@ -78,7 +78,7 @@
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Obmedzené"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Bez obmedzenia"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Služba nie je poskytovaná."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Nemôžete meniť nastavenia identifikácie volajúceho."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Nemôžete meniť nastavenie identifikácie volajúcich."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Žiadna mobilná dátová služba"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Tiesňové volania nie sú k dispozícii"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Žiadne hlasové hovory"</string>
@@ -308,9 +308,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snímať fotky a zaznamenávať video?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Denníky hovorov"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čítanie a zapisovanie do denníka hovorov telefónu"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k denníku hovorov telefónu?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zoznam hovorov"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čítať a zapisovať do zoznamu hovorov"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k zoznamu hovorov?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovanie a správu hovorov"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uskutočňovať a spravovať telefonické hovory?"</string>
@@ -406,7 +406,7 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"zapisovať do denníka hovorov"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Umožňuje aplikácii upravovať denník hovorov vo vašom tablete vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Umožňuje aplikácii upravovať denník hovorov vo vašom televízore vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikácii upravovať denník hovorov vo vašom telefóne vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho denníka hovorov."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Umožňuje aplikácii upravovať zoznam hovorov vo vašom telefóne vrátane údajov o prichádzajúcich a odchádzajúcich hovoroch. Škodlivé aplikácie to môžu zneužiť na vymazanie alebo úpravu vášho zoznamu hovorov."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"prístup k telesným senzorom (ako sú snímače tepu)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Umožňuje aplikácii získať prístup k údajom senzorov monitorujúcich vašu fyzickú kondíciu (napríklad pulz)."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Čítanie udalostí kalendára a podrobností"</string>
@@ -577,11 +577,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova zaregistrujte svoju tvár."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Tvár už nie je možné rozpoznať. Skúste to znova."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Príliš rovnaké, zmeňte postoj."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Pozrite sa priamejšie na obrazovku."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Pozrite sa priamejšie na obrazovku."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Zvisle vyrovnajte hlavu."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Odstráňte prekážky medzi vašou hlavou a telefónom."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Vyčistite fotoaparát."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Otočte hlavu o niečo menej."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Otočte hlavu o niečo menej."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Tvár sa nedá overiť. Hardvér nie je k dispozícii."</string>
@@ -2099,4 +2102,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> súbor</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Priame zdieľanie nie je k dispozícii"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Zoznam aplikácií"</string>
 </resources>

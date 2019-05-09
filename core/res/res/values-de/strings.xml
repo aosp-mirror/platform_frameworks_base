@@ -99,7 +99,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer hat TTY-Modus \"HCO\" angefordert."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer hat TTY-Modus \"VC\" angefordert."</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Peer hat TTY-Modus \"Aus\" angefordert."</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Stimme"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Sprache"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Daten"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -554,8 +554,8 @@
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"Gesichtserkennungshardware verwenden"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Ermöglicht der App, für die Authentifizierung Gesichtserkennungshardware zu verwenden"</string>
     <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Gesichtserkennung"</string>
-    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Gesicht neu scannen"</string>
-    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Für bessere Erkennung Gesicht neu scannen"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Gesicht neu scannen lassen"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Für bessere Erkennung Gesicht neu scannen lassen"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Zu hell. Schwächere Beleuchtung ausprobieren."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Zu dunkel. Probier eine hellere Beleuchtung aus."</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Gesicht wird nicht mehr erkannt. Erneut versuchen."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Zu ähnlich. Bitte dreh deinen Kopf etwas."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Bitte sieh direkt auf das Display."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Bitte sieh direkt auf das Display."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Bitte halte deinen Kopf gerade."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Halte den Platz zwischen Kopf und Smartphone frei."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Bitte reinige die Kamera."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Dreh den Kopf etwas weniger zur Seite."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Neig den Kopf etwas weniger stark."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -2027,4 +2030,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> und <xliff:g id="COUNT_1">%d</xliff:g> Datei</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Direct Share nicht verfügbar"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Liste der Apps"</string>
 </resources>

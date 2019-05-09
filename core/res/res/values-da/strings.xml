@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrer dit ansigt igen."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ansigtet kan ikke længere genkendes. Prøv igen."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Det minder for meget om et andet. Skift stilling."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Kig mere direkte på skærmen."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Kig mere direkte på skærmen."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Hold hovedet helt lodret."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Sørg for, at der ikke er noget foran dit ansigt."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Rengør kameraet."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Sørg for, at hovedet ikke er drejet for meget."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Sørg for, at hovedet ikke er bøjet for meget."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
@@ -1595,7 +1598,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skærm"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Cast"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Opret forbindelse til enheden"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skærm til enhed"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast skærm til enhed"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søger efter enheder…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Indstillinger"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Afbryd forbindelsen"</string>
@@ -1649,9 +1652,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Du har forsøgt at låse tabletten op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Tabletten nulstilles til fabriksindstillingerne."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Du har forsøgt at låse tv\'et forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Fjernsynet nulstilles nu til fabriksindstillingerne."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles til fabriksindstillingerne."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%2$d</xliff:g> mislykket forsøg bliver du bedt om at låse op for dit tv ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en mailkonto\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%2$d</xliff:g> mislykket forsøg bliver du bedt om at låse op for dit tv ved hjælp af en mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget høj musik over længere tid."</string>
@@ -2027,4 +2030,5 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Det er ikke muligt at dele direkte"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Liste over apps"</string>
 </resources>

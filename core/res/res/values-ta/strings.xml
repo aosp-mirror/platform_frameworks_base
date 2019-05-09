@@ -466,9 +466,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"டிவியின் நேர மண்டலத்தை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"மொபைலின் நேர மண்டலத்தை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"சாதனத்தில் கணக்குகளைக் கண்டறிதல்"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"டேப்லெட் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற ஆப்ஸை அனுமதிக்கிறது. நீங்கள் நிறுவிய பயன்பாடுகள் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"டேப்லெட் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற ஆப்ஸை அனுமதிக்கிறது. நீங்கள் நிறுவிய ஆப்ஸ் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"டிவி அறிந்த கணக்குகளின் பட்டியலைப் பெற, ஆப்ஸை அனுமதிக்கிறது. இதில் நிறுவிய பயன்பாடுகளினால் உருவாக்கப்பட்ட எல்லா கணக்குகளும் அடங்கலாம்."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"மொபைல் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற ஆப்ஸை அனுமதிக்கிறது. நீங்கள் நிறுவிய பயன்பாடுகள் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"மொபைல் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற ஆப்ஸை அனுமதிக்கிறது. நீங்கள் நிறுவிய ஆப்ஸ் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"நெட்வொர்க் இணைப்புகளைக் காட்டு"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"தற்போது இருக்கும் நெட்வொர்க்குகள் எவை மற்றும் இணைக்கப்பட்டுள்ளவை எவை போன்ற நெட்வொர்க் இணைப்புகள் குறித்த தகவலைப் பார்க்கப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"முழுமையான நெட்வொர்க் அணுகலைக் கொண்டிருக்கும்"</string>
@@ -553,12 +553,9 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"உபயோகிப்பதற்காக முக டெம்ப்ளேட்டுகளை சேர்க்கும்/நீக்கும் முறைகளை இயக்க, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"முக அங்கீகாரத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"அடையாளம் காண்பதற்கு, முக அங்கீகார வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கிறது"</string>
-    <!-- no translation found for face_recalibrate_notification_name (3976629945250435054) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_title (4087620069451499365) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_content (5530308842361499835) -->
-    <skip />
+    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"முக அங்கீகாரம்"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"அடையாளத்தை மேம்படுத்த முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"முகம் தெளிவாகப் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"அதிக ஒளிர்வு. மிதமான ஒளியில் முயலவும்."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"இருட்டாக உள்ளது. பிரகாசமான ஒளியில் முயலவும்."</string>
@@ -574,11 +571,16 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"உங்கள் முகத்தை மீண்டும் பதிவுசெய்யுங்கள்."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"முகத்தைக் கண்டறிய இயலவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"மீண்டும் அதே போஸ் தருகிறீர்கள், வேறு முயலுங்கள்."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"திரையில் முழுமுகம் தெரியுமாறு நேராகப் பார்க்கவும்."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"திரையில் முழுமுகம் தெரியுமாறு நேராகப் பார்க்கவும்."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"உங்கள் தலையை நேராக வைக்கவும்."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"முகத்திற்கும் மொபைலுக்குமான இடைவெளியை குறைக்கவும்."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"கேமராவைத் துடைக்கவும்"</string>
+    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <skip />
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
@@ -1909,7 +1911,7 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"பணிக் கணக்கை திறக்க, தட்டுக"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> உடன் இணைக்கப்பட்டது"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
-    <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
+    <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"டெமோவைத் தொடங்குகிறது…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"சாதனத்தை மீட்டமைக்கிறது…"</string>
@@ -2031,4 +2033,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ஃபைல்</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"நேரடிப் பகிர்வு இல்லை"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ஆப்ஸ் பட்டியல்"</string>
 </resources>

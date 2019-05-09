@@ -227,7 +227,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"緊急"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"錯誤報告"</string>
     <string name="global_action_logout" msgid="935179188218826050">"結束工作階段"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"擷取螢幕畫面"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"螢幕截圖"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"錯誤報告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"這會收集您目前裝置狀態的相關資訊，並以電郵傳送給您。從開始建立錯誤報告到準備傳送需要一段時間，請耐心等候。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互動報告"</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"請重新註冊臉孔。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"無法再識別臉孔。請再試一次。"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"臉孔位置太相近，請改變您的姿勢。"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"請以更直視的角度看著螢幕。"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"請以更直視的角度看著螢幕。"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"請保持頭部垂直。"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"請移除頭部與手機之間的障礙物。"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"請清潔相機。"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"減少頭部左右轉動幅度。"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"減少頭部上下轉動幅度。"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"無法驗證臉孔，硬件無法使用。"</string>
@@ -1595,7 +1598,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"無線螢幕分享"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"投放"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"連接裝置"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"在裝置上放送螢幕"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"螢幕投放到裝置"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
@@ -2027,4 +2030,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> 個檔案</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"無法直接分享"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"應用程式清單"</string>
 </resources>

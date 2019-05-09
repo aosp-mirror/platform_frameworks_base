@@ -68,7 +68,7 @@
     <string name="CwMmi" msgid="9129678056795016867">"انتظار المكالمة"</string>
     <string name="BaMmi" msgid="455193067926770581">"حظر الاتصال"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"تغيير كلمة المرور"</string>
-    <string name="PinMmi" msgid="3113117780361190304">"‏تغيير رمز PIN"</string>
+    <string name="PinMmi" msgid="3113117780361190304">"تغيير رقم التعريف الشخصي"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"رقم الاتصال موجود"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"رقم الاتصال محظور"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"اتصال ثلاثي"</string>
@@ -583,11 +583,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"لم يعُد يمكن التعرّف على الوجه. حاول مرة أخرى."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"الوجه مشابه جدًا، يُرجى تغيير وضعيتك."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"يُرجى النظر إلى الشاشة مباشرة أكثر."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"يُرجى النظر إلى الشاشة مباشرة أكثر."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"يُرجى تثبيت الرأس في وضع عمودي."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"يُرجى إخلاء المنطقة بين رأسك والهاتف."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"يُرجى تنظيف الكاميرا."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"اخفض وجهك قليلاً."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"اخفض وجهك قليلاً."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
@@ -2171,4 +2174,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> وملف (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"لا تتوفّر إمكانية المشاركة المباشرة."</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"قائمة التطبيقات"</string>
 </resources>
