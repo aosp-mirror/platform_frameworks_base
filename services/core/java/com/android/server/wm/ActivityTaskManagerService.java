@@ -1375,6 +1375,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setMayWait(userId)
                     .setIgnoreTargetSecurity(ignoreTargetSecurity)
                     .setFilterCallingUid(isResolver ? 0 /* system */ : targetUid)
+                    // The target may well be in the background, which would normally prevent it
+                    // from starting an activity. Here we definitely want the start to succeed.
+                    .setAllowBackgroundActivityStart(true)
                     .execute();
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
