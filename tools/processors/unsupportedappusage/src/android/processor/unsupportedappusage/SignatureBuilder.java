@@ -20,12 +20,13 @@ import static javax.lang.model.element.ElementKind.PACKAGE;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.WARNING;
 
-import android.annotation.UnsupportedAppUsage;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.sun.tools.javac.code.Type;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,6 +70,7 @@ public class SignatureBuilder {
         public SignatureBuilderException(String message) {
             super(message);
         }
+
         public void report(Element offendingElement) {
             mMessager.printMessage(ERROR, getMessage(), offendingElement);
         }
@@ -153,7 +155,7 @@ public class SignatureBuilder {
     /**
      * Get the signature for an executable, either a method or a constructor.
      *
-     * @param name "<init>" for  constructor, else the method name
+     * @param name   "<init>" for  constructor, else the method name
      * @param method The executable element in question.
      */
     private String getExecutableSignature(CharSequence name, ExecutableElement method)
@@ -191,8 +193,13 @@ public class SignatureBuilder {
         return sig.toString();
     }
 
-    public String buildSignature(Element element) {
-        UnsupportedAppUsage uba = element.getAnnotation(UnsupportedAppUsage.class);
+    /**
+     * Creates the signature for an annotated element.
+     *
+     * @param annotationType type of annotation being processed.
+     * @param element        element for which we want to create a signature.
+     */
+    public String buildSignature(Class<? extends Annotation> annotationType, Element element) {
         try {
             String signature;
             switch (element.getKind()) {
@@ -208,18 +215,35 @@ public class SignatureBuilder {
                 default:
                     return null;
             }
-            // if we have an expected signature on the annotation, warn if it doesn't match.
-            if (!Strings.isNullOrEmpty(uba.expectedSignature())) {
-                if (!signature.equals(uba.expectedSignature())) {
-                    mMessager.printMessage(
-                            WARNING,
-                            String.format("Expected signature doesn't match generated signature.\n"
-                                            + " Expected:  %s\n Generated: %s",
-                                    uba.expectedSignature(), signature),
-                            element);
-                }
+            // Obtain annotation objects
+            Annotation annotation = element.getAnnotation(annotationType);
+            if (annotation == null) {
+                throw new IllegalStateException(
+                        "Element doesn't have any UnsupportedAppUsage annotation");
             }
-            return signature;
+            try {
+                Method expectedSignatureMethod = annotationType.getMethod("expectedSignature");
+                // If we have an expected signature on the annotation, warn if it doesn't match.
+                String expectedSignature = expectedSignatureMethod.invoke(annotation).toString();
+                if (!Strings.isNullOrEmpty(expectedSignature)) {
+                    if (!signature.equals(expectedSignature)) {
+                        mMessager.printMessage(
+                                WARNING,
+                                String.format(
+                                        "Expected signature doesn't match generated signature.\n"
+                                                + " Expected:  %s\n Generated: %s",
+                                        expectedSignature, signature),
+                                element);
+                    }
+                }
+                return signature;
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(
+                        "Annotation type does not have expectedSignature parameter", e);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException(
+                        "Could not get expectedSignature parameter for annotation", e);
+            }
         } catch (SignatureBuilderException problem) {
             problem.report(element);
             return null;
