@@ -279,8 +279,8 @@ public class NetworkMonitor extends StateMachine {
 
     private final Context mContext;
     private final INetworkMonitorCallbacks mCallback;
+    private final Network mCleartextDnsNetwork;
     private final Network mNetwork;
-    private final Network mNonPrivateDnsBypassNetwork;
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
     private final ConnectivityManager mCm;
@@ -370,8 +370,8 @@ public class NetworkMonitor extends StateMachine {
         mCallback = cb;
         mDependencies = deps;
         mDetectionStatsUtils = detectionStatsUtils;
-        mNonPrivateDnsBypassNetwork = network;
-        mNetwork = deps.getPrivateDnsBypassNetwork(network);
+        mNetwork = network;
+        mCleartextDnsNetwork = deps.getPrivateDnsBypassNetwork(network);
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mCm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -496,7 +496,7 @@ public class NetworkMonitor extends StateMachine {
 
     @Override
     protected void log(String s) {
-        if (DBG) Log.d(TAG + "/" + mNetwork.toString(), s);
+        if (DBG) Log.d(TAG + "/" + mCleartextDnsNetwork.toString(), s);
     }
 
     private void validationLog(int probeType, Object url, String msg) {
@@ -769,7 +769,7 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
                     final Bundle appExtras = new Bundle();
                     // OneAddressPerFamilyNetwork is not parcelable across processes.
-                    final Network network = new Network(mNetwork);
+                    final Network network = new Network(mCleartextDnsNetwork);
                     appExtras.putParcelable(ConnectivityManager.EXTRA_NETWORK, network);
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
                     appExtras.putString(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
@@ -881,7 +881,7 @@ public class NetworkMonitor extends StateMachine {
         CustomIntentReceiver(String action, int token, int what) {
             mToken = token;
             mWhat = what;
-            mAction = action + "_" + mNetwork.getNetworkHandle() + "_" + token;
+            mAction = action + "_" + mCleartextDnsNetwork.getNetworkHandle() + "_" + token;
             mContext.registerReceiver(this, new IntentFilter(mAction));
         }
         public PendingIntent getPendingIntent() {
@@ -994,7 +994,8 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
-                final InetAddress[] ips = mNetwork.getAllByName(mPrivateDnsProviderHostname);
+                final InetAddress[] ips = mCleartextDnsNetwork.getAllByName(
+                        mPrivateDnsProviderHostname);
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
                 validationLog("Strict mode hostname resolved: " + mPrivateDnsConfig);
             } catch (UnknownHostException uhe) {
@@ -1033,7 +1034,7 @@ public class NetworkMonitor extends StateMachine {
                     + oneTimeHostnameSuffix;
             final Stopwatch watch = new Stopwatch().start();
             try {
-                final InetAddress[] ips = mNonPrivateDnsBypassNetwork.getAllByName(host);
+                final InetAddress[] ips = mNetwork.getAllByName(host);
                 final long time = watch.stop();
                 final String strIps = Arrays.toString(ips);
                 final boolean success = (ips != null && ips.length > 0);
@@ -1506,7 +1507,7 @@ public class NetworkMonitor extends StateMachine {
 
         final int oldTag = TrafficStats.getAndSetThreadStatsTag(
                 TrafficStatsConstants.TAG_SYSTEM_PROBE);
-        mDependencies.getDnsResolver().query(mNetwork, host, DnsResolver.FLAG_EMPTY,
+        mDependencies.getDnsResolver().query(mCleartextDnsNetwork, host, DnsResolver.FLAG_EMPTY,
                 r -> r.run() /* executor */, null /* cancellationSignal */, callback);
         TrafficStats.setThreadStatsTag(oldTag);
 
@@ -1565,7 +1566,7 @@ public class NetworkMonitor extends StateMachine {
         final int oldTag = TrafficStats.getAndSetThreadStatsTag(
                 TrafficStatsConstants.TAG_SYSTEM_PROBE);
         try {
-            urlConnection = (HttpURLConnection) mNetwork.openConnection(url);
+            urlConnection = (HttpURLConnection) mCleartextDnsNetwork.openConnection(url);
             urlConnection.setInstanceFollowRedirects(probeType == ValidationProbeEvent.PROBE_PAC);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
@@ -1814,7 +1815,7 @@ public class NetworkMonitor extends StateMachine {
 
     private void logNetworkEvent(int evtype) {
         int[] transports = mNetworkCapabilities.getTransportTypes();
-        mMetricsLog.log(mNetwork, transports, new NetworkEvent(evtype));
+        mMetricsLog.log(mCleartextDnsNetwork, transports, new NetworkEvent(evtype));
     }
 
     private int networkEventType(ValidationStage s, EvaluationResult r) {
@@ -1836,7 +1837,7 @@ public class NetworkMonitor extends StateMachine {
     private void maybeLogEvaluationResult(int evtype) {
         if (mEvaluationTimer.isRunning()) {
             int[] transports = mNetworkCapabilities.getTransportTypes();
-            mMetricsLog.log(mNetwork, transports,
+            mMetricsLog.log(mCleartextDnsNetwork, transports,
                     new NetworkEvent(evtype, mEvaluationTimer.stop()));
             mEvaluationTimer.reset();
         }
@@ -1850,7 +1851,7 @@ public class NetworkMonitor extends StateMachine {
                 .setReturnCode(probeResult)
                 .setDurationMs(durationMs)
                 .build();
-        mMetricsLog.log(mNetwork, transports, ev);
+        mMetricsLog.log(mCleartextDnsNetwork, transports, ev);
     }
 
     @VisibleForTesting
