@@ -257,7 +257,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         when(mAccessibilityController.isAccessibilityEnabled()).thenReturn(true);
         clickCaptor.getValue().onClick(mLockIcon);
-        verify(mShadeController).showBouncer(eq(false));
+        verify(mShadeController).animateCollapsePanels(anyInt(), eq(true));
 
         longClickCaptor.getValue().onLongClick(mLockIcon);
         verify(mLockPatternUtils).requireCredentialEntry(anyInt());
