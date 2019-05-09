@@ -294,7 +294,7 @@
     <string name="quick_settings_dnd_label" msgid="7112342227663678739">"Niet storen"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Alleen prioriteit"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alleen wekkers"</string>
-    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Totale stilte"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Helemaal stil"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> apparaten)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth uit"</string>
@@ -397,8 +397,8 @@
     <string name="phone_hint" msgid="4872890986869209950">"Vegen voor telefoon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Vegen vanaf pictogram voor spraakassistent"</string>
     <string name="camera_hint" msgid="7939688436797157483">"Vegen voor camera"</string>
-    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Totale stilte. Hiermee worden schermlezers ook op stil gezet."</string>
-    <string name="interruption_level_none" msgid="6000083681244492992">"Totale stilte"</string>
+    <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Helemaal stil. Hiermee worden schermlezers ook op stil gezet."</string>
+    <string name="interruption_level_none" msgid="6000083681244492992">"Helemaal stil"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Alleen prioriteit"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Alleen wekkers"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Totale\nstilte"</string>
@@ -448,6 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Niet opnieuw weergeven"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alles wissen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Beheren"</string>
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Vriendelijke meldingen"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Alle vriendelijke meldingen wissen"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Meldingen onderbroken door \'Niet storen\'"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Nu starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Geen meldingen"</string>
@@ -527,8 +529,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Scherm is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Veeg omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Tik op Terug en Overzicht en houd deze knoppen vast om dit scherm los te maken"</string>
@@ -881,7 +882,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps uitgevoerd op achtergrond"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tik voor batterij- en datagebruik"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Mobiele data uitschakelen?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Je hebt geen toegang tot gegevens of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen beschikbaar via wifi."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Je hebt geen toegang tot data of internet via <xliff:g id="CARRIER">%s</xliff:g>. Internet is alleen beschikbaar via wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"je provider"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> toestaan om segmenten van <xliff:g id="APP_2">%2$s</xliff:g> weer te geven?"</string>
@@ -912,8 +913,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> openen"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Instellingen voor <xliff:g id="APP_NAME">%1$s</xliff:g>-ballonnen"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Ballonnen van <xliff:g id="APP_NAME">%1$s</xliff:g> toestaan?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Beheren"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Weigeren"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Toestaan"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Later vragen"</string>

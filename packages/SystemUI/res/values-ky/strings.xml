@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Экинчи көрсөтүлбөсүн"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Бардыгын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Башкаруу"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\"Тынчымды алба\" режиминде билдирмелер тындырылды"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Азыр баштоо"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Билдирме жок"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран кадалган"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Артка\" жана \"Карап чыгуу\" баскычтарын басып, кармап туруңуз."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Артка\" жана \"Башкы бет\" баскычтарын басып, кармап туруңуз."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн өйдө сүрүп, коё бербей басып туруңуз."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Карап чыгуу\" баскычын басып, кармап туруңуз."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ал бошотулмайынча көрүнө берет. Бошотуу үчүн, \"Башкы бет\" баскычын басып, кармап туруңуз."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Бул экранды бошотуу үчүн \"Артка\" жана \"Сереп салуу\" баскычтарын басып, кармап туруңуз"</string>
@@ -622,7 +625,7 @@
     <string name="notification_channel_disabled" msgid="344536703863700565">"Мындан ары бул эскертмелер сизге көрсөтүлбөйт"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Бул эскертмелер кичирейтилет"</string>
     <string name="notification_channel_silenced" msgid="2877199534497961942">"Бул билдирмелер үнсүз көрсөтүлөт"</string>
-    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Бул билдирмелер үн менен эскертилет"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Бул билдирмелер тууралуу кабарлап турабыз"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Адатта мындай эскертмелерди өткөрүп жибересиз. \nАлар көрсөтүлө берсинби?"</string>
     <string name="inline_done_button" msgid="492513001558716452">"Бүттү"</string>
     <string name="inline_ok_button" msgid="975600017662930615">"Колдонуу"</string>
@@ -764,8 +767,8 @@
     <string name="accessibility_key" msgid="5701989859305675896">"Ыңгайлаштырылган чабыттоо баскычы"</string>
     <string name="left_keycode" msgid="2010948862498918135">"Сол жактагы баскыч коду"</string>
     <string name="right_keycode" msgid="708447961000848163">"Оң жактагы баскыч коду"</string>
-    <string name="left_icon" msgid="3096287125959387541">"Сол жактагы сүрөтчө"</string>
-    <string name="right_icon" msgid="3952104823293824311">"Оң жактагы сүрөтчө"</string>
+    <string name="left_icon" msgid="3096287125959387541">"¨Солго¨ сүрөтчөсү"</string>
+    <string name="right_icon" msgid="3952104823293824311">"¨Оңго¨ сүрөтчөсү"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Керектүү элементтерди сүйрөп келиңиз"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Элементтердин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
@@ -775,12 +778,12 @@
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Сааттар, мүнөттөр жана секунддар"</item>
     <item msgid="1427801730816895300">"Сааттар жана мүнөттөр (демейки шартта)"</item>
-    <item msgid="3830170141562534721">"Бул сөлөкөт көрсөтүлбөсүн"</item>
+    <item msgid="3830170141562534721">"Бул сүрөтчө көрсөтүлбөсүн"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="3160236755818672034">"Ар дайым пайызы көрсөтүлсүн"</item>
     <item msgid="2139628951880142927">"Кубаттоо учурунда пайызы көрсөтүлсүн (демейки)"</item>
-    <item msgid="3327323682209964956">"Бул сөлөкөт көрсөтүлбөсүн"</item>
+    <item msgid="3327323682209964956">"Бул сүрөтчө көрсөтүлбөсүн"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="1325884786608312358">"Анча маанилүү эмес билдирменин сүрөтчөлөрүн көрсөтүү"</string>
     <string name="other" msgid="4060683095962566764">"Башка"</string>
@@ -854,7 +857,7 @@
     <string name="tuner_right" msgid="6222734772467850156">"Оңго"</string>
     <string name="tuner_menu" msgid="191640047241552081">"Меню"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Эскертүүлөр"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Шашылыш билдирүүлөр"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"Батарея"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоттор"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Жалпы билдирүүлөр"</string>
@@ -880,8 +883,8 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Алмаштыруу"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Фондо иштеп жаткан колдонмолор"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батареянын кубаты жана трафиктин көлөмү жөнүндө билүү үчүн таптап коюңуз"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Мобилдик Интернет өчүрүлсүнбү?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> байланыш оператору аркылуу дайындарга же Интернетке кирүү мүмкүнчүлүгүңүз болбойт. Интернетке Wi-Fi аркылуу гана кирүү мүмкүн."</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Мобилдик Интернетти өчүрөсүзбү?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> байланыш оператору аркылуу дайындарга же Интернетке кирүү мүмкүнчүлүгүңүз болбойт. Интернетке Wi-Fi аркылуу гана кире аласыз."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"байланыш операторуңуз"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Жөндөөлөр жообуңузду ырастай албай жатат."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосуна <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөтүүгө уруксат берилсинби?"</string>
@@ -911,9 +914,8 @@
     <string name="restart_button_description" msgid="2035077840254950187">"Бул колдонмону өчүрүп күйгүзүп, толук экранга өтүү үчүн таптап коюңуз."</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун ачуу"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> көбүктөрүнүн жөндөөлөрү"</string>
-    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун көбүктөрүнө уруксат берилсинби?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун калкып чыкма билдирмелерине уруксат бересизби?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Башкаруу"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Жок"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Уруксат берүү"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Кийинчерээк суралсын"</string>

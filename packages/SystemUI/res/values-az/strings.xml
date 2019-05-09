@@ -448,6 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Daha göstərmə"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hamısını silin"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"İdarə edin"</string>
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Daha az əhəmiyyətli bildirişlər"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Az əhəmiyyətli bildirişlərin hamısını silin"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Bildirişlər \"Narahat Etməyin\" rejimi tərəfindən dayandırıldı"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"İndi başlayın"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Heç bir bildiriş yoxdur"</string>
@@ -527,8 +529,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekrana sancaq taxıldı"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və Əsas səhifə düymələrinə basıb saxlayın."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Bu, onu çıxarana qədər görünəcək. Çıxarmaq üçün yuxarı sürüşdürün &amp; basıb saxlayın."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri düyməsinə basıb saxlayın."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Əsas səhifə düyməsinə basıb saxlayın."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Bu ekrandan sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın"</string>
@@ -912,8 +913,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> tətbiqini açın"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> qabarcıqları üçün ayarlar"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> qabarcıqlarına icazə verilsin?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"İdarə edin"</string>
     <string name="no_bubbles" msgid="337101288173078247">"İmtina edin"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"İcazə verin"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Sonra soruşun"</string>

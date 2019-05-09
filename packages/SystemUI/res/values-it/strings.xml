@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Non mostrare più"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Cancella tutto"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gestisci"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notifiche messe in pausa in base alla modalità Non disturbare"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Avvia adesso"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Nessuna notifica"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"La schermata è fissata"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Indietro e Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Indietro e Home."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Mantiene la visualizzazione fino allo sblocco. Scorri verso l\'alto e tieni premuto per sbloccare."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"La schermata rimane visibile finché non viene sganciata. Per sganciarla, tieni premuto Panoramica."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"La schermata rimane visibile finché non viene disattivato il blocco su schermo. Per disattivarlo, tocca e tieni premuto Home."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Per disattivare il blocco su schermo, tocca e tieni premuti i pulsanti Indietro e Panoramica"</string>
@@ -615,7 +618,7 @@
     <string name="do_not_silence" msgid="6878060322594892441">"Non silenziare"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Non silenziare e non bloccare"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Controlli di gestione delle notifiche"</string>
-    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Attiva"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"On"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Off"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifiche"</string>
@@ -632,7 +635,7 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blocca"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continua a mostrare"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Riduci a icona"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Modalità senza avvisi"</string>
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Silenziose"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Continua con notifiche silenziose"</string>
     <string name="inline_silent_button_alert" msgid="2449191160203602471">"Modalità invasiva"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continua ad avvisare"</string>
@@ -640,11 +643,11 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuare a ricevere notifiche da questa app?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Senza avvisi"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Con priorità"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Ti consente di concentrarti grazie alla visualizzazione delle notifiche soltanto nell\'area a discesa. Sempre silenziose."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Puoi concentrarti perché le notifiche sono visualizzate solo nell\'area a discesa. Sempre silenziose."</string>
     <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Vengono mostrate le notifiche con priorità bassa. Sempre silenziose."</string>
     <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Vengono mostrate le notifiche con priorità bassa. Sempre silenziose."</string>
     <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Vengono mostrate le notifiche con priorità bassa. Sempre silenziose."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Viene attirata la tua attenzione con un suono e un\'icona nella barra di stato. La notifica viene mostrata nella schermata di blocco."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Attirano la tua attenzione con un suono e un\'icona nella barra di stato. Le notifiche sono mostrate nella schermata di blocco."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Impossibile modificare queste notifiche."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Qui non è possibile configurare questo gruppo di notifiche"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notifica inviata al proxy"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Apri <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Impostazioni per fumetti <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Consentire fumetti da <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Gestisci"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Rifiuta"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Consenti"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Ricordamelo più tardi"</string>
