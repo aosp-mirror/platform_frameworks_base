@@ -18,7 +18,6 @@ package com.android.systemui.biometrics;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -93,6 +92,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected final int mTextColor;
 
     private Bundle mBundle;
+    private Bundle mRestoredState;
 
     private int mState;
     private boolean mAnimatingAway;
@@ -151,12 +151,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
         mAnimationTranslationOffset = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
-
-        TypedArray array = getContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorError, android.R.attr.textColorSecondary});
-        mErrorColor = array.getColor(0, 0);
-        mTextColor = array.getColor(1, 0);
-        array.recycle();
+        mErrorColor = getResources().getColor(R.color.biometric_dialog_error);
+        mTextColor = getResources().getColor(R.color.biometric_dialog_gray);
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
@@ -225,7 +221,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         mTryAgainButton.setOnClickListener((View v) -> {
             updateState(STATE_AUTHENTICATING);
             showTryAgainButton(false /* show */);
-            handleClearMessage();
             mCallback.onTryAgainPressed();
         });
 
@@ -292,7 +287,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
-        if (requiresConfirmation()) {
+        if (requiresConfirmation() && mRestoredState == null) {
             mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(false);
         }
@@ -449,6 +444,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         if (newState == STATE_PENDING_CONFIRMATION) {
             mHandler.removeMessages(MSG_CLEAR_MESSAGE);
             mErrorText.setVisibility(View.INVISIBLE);
+            mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(true);
         } else if (newState == STATE_AUTHENTICATED) {
             mPositiveButton.setVisibility(View.GONE);
@@ -471,6 +467,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     }
 
     public void restoreState(Bundle bundle) {
+        mRestoredState = bundle;
         mTryAgainButton.setVisibility(bundle.getInt(KEY_TRY_AGAIN_VISIBILITY));
         mPositiveButton.setVisibility(bundle.getInt(KEY_CONFIRM_VISIBILITY));
     }

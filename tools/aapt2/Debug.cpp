@@ -178,19 +178,17 @@ class ValueBodyPrinter : public ConstValueVisitor {
   void Visit(const Array* array) override {
     const size_t count = array->elements.size();
     printer_->Print("[");
-    if (count > 0) {
-      for (size_t i = 0u; i < count; i++) {
-        if (i != 0u && i % 4u == 0u) {
-          printer_->Println();
-          printer_->Print(" ");
-        }
-        PrintItem(*array->elements[i]);
-        if (i != count - 1) {
-          printer_->Print(", ");
-        }
+    for (size_t i = 0u; i < count; i++) {
+      if (i != 0u && i % 4u == 0u) {
+        printer_->Println();
+        printer_->Print(" ");
       }
-      printer_->Println("]");
+      PrintItem(*array->elements[i]);
+      if (i != count - 1) {
+        printer_->Print(", ");
+      }
     }
+    printer_->Println("]");
   }
 
   void Visit(const Plural* plural) override {

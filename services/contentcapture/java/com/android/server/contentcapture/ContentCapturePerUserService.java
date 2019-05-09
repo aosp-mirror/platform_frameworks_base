@@ -54,8 +54,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.contentcapture.ContentCaptureCondition;
-import android.view.contentcapture.UserDataRemovalRequest;
+import android.view.contentcapture.DataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -342,12 +343,12 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
-    public void removeUserDataLocked(@NonNull UserDataRemovalRequest request) {
+    public void removeDataLocked(@NonNull DataRemovalRequest request) {
         if (!isEnabledLocked()) {
             return;
         }
         assertCallerLocked(request.getPackageName());
-        mRemoteService.onUserDataRemovalRequest(request);
+        mRemoteService.onDataRemovalRequest(request);
     }
 
     @GuardedBy("mLock")
@@ -552,6 +553,39 @@ final class ContentCapturePerUserService
                         + " for user " + mUserId);
             }
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
+
+            // Must disable session that are not the whitelist anymore...
+            final int numSessions = mSessions.size();
+            if (numSessions <= 0) return;
+
+            // ...but without holding the lock on mGlobalContentCaptureOptions
+            final SparseBooleanArray blacklistedSessions = new SparseBooleanArray(numSessions);
+
+            for (int i = 0; i < numSessions; i++) {
+                final ContentCaptureServerSession session = mSessions.valueAt(i);
+                final boolean whitelisted = mMaster.mGlobalContentCaptureOptions
+                        .isWhitelisted(mUserId, session.appComponentName);
+                if (!whitelisted) {
+                    final int sessionId = mSessions.keyAt(i);
+                    if (mMaster.debug) {
+                        Slog.d(TAG, "marking session " + sessionId + " (" + session.appComponentName
+                                + ") for un-whitelisting");
+                    }
+                    blacklistedSessions.append(sessionId, true);
+                }
+            }
+            final int numBlacklisted = blacklistedSessions.size();
+
+            if (numBlacklisted <= 0) return;
+
+            synchronized (mLock) {
+                for (int i = 0; i < numBlacklisted; i++) {
+                    final int sessionId = blacklistedSessions.keyAt(i);
+                    if (mMaster.debug) Slog.d(TAG, "un-whitelisting " + sessionId);
+                    final ContentCaptureServerSession session = mSessions.get(sessionId);
+                    session.setContentCaptureEnabledLocked(false);
+                }
+            }
         }
 
         @Override

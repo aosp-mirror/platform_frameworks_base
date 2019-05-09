@@ -7284,6 +7284,13 @@ message MetricsEvent {
     // type of response could not be determined
     AUTOFILL_AUGMENTED_RESPONSE = 1724;
 
+    // ---- Skipping ahead to avoid conflicts between master and release branches.
+
+    // OPEN: Settings > System > Gestures > Global Actions Panel
+    // CATEGORY: SETTINGS
+    // OS: Q
+    GLOBAL_ACTIONS_PANEL_SETTINGS = 1800;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

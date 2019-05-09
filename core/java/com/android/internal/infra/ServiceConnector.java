@@ -343,15 +343,17 @@ public interface ServiceConnector<I extends IInterface> {
 
         @Override
         public <R> AndroidFuture<R> postAsync(@NonNull Job<I, CompletableFuture<R>> job) {
-            CompletionAwareJob task = postForResult(job);
+            CompletionAwareJob<I, R> task = new CompletionAwareJob<>();
+            task.mDelegate = (Job) job;
             task.mAsync = true;
+            enqueue(task);
             return task;
         }
 
         @Override
         public synchronized AndroidFuture<I> connect() {
             if (mServiceConnectionFutureCache == null) {
-                mServiceConnectionFutureCache = new CompletionAwareJob<I, I>();
+                mServiceConnectionFutureCache = new CompletionAwareJob<>();
                 mServiceConnectionFutureCache.mDelegate = s -> s;
                 I service = mService;
                 if (service != null) {
@@ -366,7 +368,8 @@ public interface ServiceConnector<I extends IInterface> {
         private void enqueue(@NonNull CompletionAwareJob<I, ?> task) {
             if (!enqueue((Job<I, ?>) task)) {
                 task.completeExceptionally(new IllegalStateException(
-                        "Failed to post a job to main handler. Likely main looper is exiting"));
+                        "Failed to post a job to handler. Likely "
+                                + getJobHandler().getLooper() + " is exiting"));
             }
         }
 

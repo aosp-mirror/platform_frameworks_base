@@ -16,12 +16,18 @@
 
 package com.android.systemui.bubbles;
 
+import static com.android.systemui.bubbles.BubbleController.DISMISS_AGED;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +53,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -108,6 +116,628 @@ public class BubbleDataTest extends SysuiTestCase {
         // Used by BubbleData to set lastAccessedTime
         when(mTimeSource.currentTimeMillis()).thenReturn(1000L);
         mBubbleData.setTimeSource(mTimeSource);
+
+        // Assert baseline starting state
+        assertThat(mBubbleData.hasBubbles()).isFalse();
+        assertThat(mBubbleData.isExpanded()).isFalse();
+        assertThat(mBubbleData.getSelectedBubble()).isNull();
+    }
+
+    @Test
+    public void testAddBubble() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+
+        // Verify
+        verify(mListener).onBubbleAdded(eq(mBubbleA1));
+        verify(mListener).onSelectionChanged(eq(mBubbleA1));
+        verify(mListener).apply();
+    }
+
+    @Test
+    public void testRemoveBubble() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryA3, 3000);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+
+        // Verify
+        verify(mListener).onBubbleRemoved(eq(mBubbleA1), eq(BubbleController.DISMISS_USER_GESTURE));
+        verify(mListener).apply();
+    }
+
+    // COLLAPSED / ADD
+
+    /**
+     * Verifies that the number of bubbles is not allowed to exceed the maximum. The limit is
+     * enforced by expiring the bubble which was least recently updated (lowest timestamp).
+     */
+    @Test
+    public void test_collapsed_addBubble_atMaxBubbles_expiresOldest() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryA3, 3000);
+        sendUpdatedEntryAtTime(mEntryB1, 4000);
+        sendUpdatedEntryAtTime(mEntryB2, 5000);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryC1, 6000);
+        verify(mListener).onBubbleRemoved(eq(mBubbleA1), eq(DISMISS_AGED));
+    }
+
+    /**
+     * Verifies that new bubbles insert to the left when collapsed, carrying along grouped bubbles.
+     * <p>
+     * Placement within the list is based on lastUpdate (post time of the notification), descending
+     * order (with most recent first).
+     *
+     * @see #test_expanded_addBubble_sortAndGrouping_newGroup()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_collapsed_addBubble_sortAndGrouping() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        verify(mListener, never()).onOrderChanged(anyList());
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleA1)));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB2, mBubbleB1, mBubbleA1)));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryA2, 4000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1)));
+    }
+
+    /**
+     * Verifies that new bubbles insert to the left when collapsed, carrying along grouped bubbles.
+     * Additionally, any bubble which is ongoing is considered "newer" than any non-ongoing bubble.
+     * <p>
+     * Because of the ongoing bubble, the new bubble cannot be placed in the first position. This
+     * causes the 'B' group to remain last, despite having a new button added.
+     *
+     * @see #test_expanded_addBubble_sortAndGrouping_newGroup()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_collapsed_addBubble_sortAndGrouping_withOngoing() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        setOngoing(mEntryA1, true);
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        verify(mListener, never()).onOrderChanged(anyList());
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        verify(mListener, never()).onOrderChanged(eq(listOf(mBubbleA1, mBubbleB1)));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleB2, mBubbleB1)));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryA2, 4000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleA2, mBubbleB2, mBubbleB1)));
+    }
+
+    /**
+     * Verifies that new bubbles become the selected bubble when they appear when the stack is in
+     * the collapsed state.
+     *
+     * @see #test_collapsed_updateBubble_selectionChanges()
+     * @see #test_collapsed_updateBubble_noSelectionChanges_withOngoing()
+     */
+    @Test
+    public void test_collapsed_addBubble_selectionChanges() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        verify(mListener).onSelectionChanged(eq(mBubbleA1));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        verify(mListener).onSelectionChanged(eq(mBubbleB1));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        verify(mListener).onSelectionChanged(eq(mBubbleB2));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryA2, 4000);
+        verify(mListener).onSelectionChanged(eq(mBubbleA2));
+    }
+    /**
+     * Verifies that while collapsed, the selection will not change if the selected bubble is
+     * ongoing. It remains the top bubble and as such remains selected.
+     *
+     * @see #test_collapsed_addBubble_selectionChanges()
+     */
+    @Test
+    public void test_collapsed_addBubble_noSelectionChanges_withOngoing() {
+        // Setup
+        setOngoing(mEntryA1, true);
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000);
+        verify(mListener, never()).onSelectionChanged(any(Bubble.class));
+        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1); // selection unchanged
+    }
+
+    // COLLAPSED / REMOVE
+
+    /**
+     * Verifies that groups may reorder when bubbles are removed, while the stack is in the
+     * collapsed state.
+     */
+    @Test
+    public void test_collapsed_removeBubble_sortAndGrouping() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB2, mBubbleB1, mBubbleA1)));
+    }
+
+
+    /**
+     * Verifies that onOrderChanged is not called when a bubble is removed if the removal does not
+     * cause other bubbles to change position.
+     */
+    @Test
+    public void test_collapsed_removeOldestBubble_doesNotCallOnOrderChanged() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
+        verify(mListener, never()).onOrderChanged(anyList());
+    }
+
+    /**
+     * Verifies that bubble ordering reverts to normal when an ongoing bubble is removed. A group
+     * which has a newer bubble may move to the front after the ongoing bubble is removed.
+     */
+    @Test
+    public void test_collapsed_removeBubble_sortAndGrouping_withOngoing() {
+        // Setup
+        setOngoing(mEntryA1, true);
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryB1, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000); // [A1*, A2, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB2, mBubbleB1, mBubbleA2)));
+    }
+
+    /**
+     * Verifies that when the selected bubble is removed with the stack in the collapsed state,
+     * the selection moves to the next most-recently updated bubble.
+     */
+    @Test
+    public void test_collapsed_removeBubble_selectionChanges() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_NOTIF_CANCEL);
+        verify(mListener).onSelectionChanged(eq(mBubbleB2));
+    }
+
+    // COLLAPSED / UPDATE
+
+    /**
+     * Verifies that bubble and group ordering may change with updates while the stack is in the
+     * collapsed state.
+     */
+    @Test
+    public void test_collapsed_updateBubble_orderAndGrouping() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryB1, 5000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1)));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryA1, 6000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleA2, mBubbleB1, mBubbleB2)));
+    }
+
+    /**
+     * Verifies that selection tracks the most recently updated bubble while in the collapsed state.
+     */
+    @Test
+    public void test_collapsed_updateBubble_selectionChanges() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, A1, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryB1, 5000);
+        verify(mListener).onSelectionChanged(eq(mBubbleB1));
+
+        reset(mListener);
+        sendUpdatedEntryAtTime(mEntryA1, 6000);
+        verify(mListener).onSelectionChanged(eq(mBubbleA1));
+    }
+
+    /**
+     * Verifies that selection does not change in response to updates when collapsed, if the
+     * selected bubble is ongoing.
+     */
+    @Test
+    public void test_collapsed_updateBubble_noSelectionChanges_withOngoing() {
+        // Setup
+        setOngoing(mEntryA1, true);
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A1*, A2, B2, B1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryB2, 5000); // [A1*, A2, B2, B1]
+        verify(mListener, never()).onSelectionChanged(any(Bubble.class));
+    }
+
+    /**
+     * Verifies that a request to expand the stack has no effect if there are no bubbles.
+     */
+    @Test
+    public void test_collapsed_expansion_whenEmpty_doesNothing() {
+        assertThat(mBubbleData.hasBubbles()).isFalse();
+        changeExpandedStateAtTime(true, 2000L);
+
+        verify(mListener, never()).onExpandedChanged(anyBoolean());
+        verify(mListener, never()).apply();
+    }
+
+    @Test
+    public void test_collapsed_removeLastBubble_clearsSelectedBubble() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+
+        // Verify the selection was cleared.
+        verify(mListener).onSelectionChanged(isNull());
+    }
+
+    // EXPANDED / ADD
+
+    /**
+     * Verifies that bubbles added as part of a new group insert before existing groups while
+     * expanded.
+     * <p>
+     * Placement within the list is based on lastUpdate (post time of the notification), descending
+     * order (with most recent first).
+     *
+     * @see #test_collapsed_addBubble_sortAndGrouping()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_expanded_addBubble_sortAndGrouping_newGroup() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryB1, 3000); // [B1, A2, A1]
+        changeExpandedStateAtTime(true, 4000L);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryC1, 4000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleC1, mBubbleB1, mBubbleA2, mBubbleA1)));
+    }
+
+    /**
+     * Verifies that bubbles added as part of a new group insert before existing groups while
+     * expanded, but not before any groups with ongoing bubbles.
+     *
+     * @see #test_collapsed_addBubble_sortAndGrouping_withOngoing()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_expanded_addBubble_sortAndGrouping_newGroup_withOngoing() {
+        // Setup
+        setOngoing(mEntryA1, true);
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryB1, 3000); // [A1*, A2, B1]
+        changeExpandedStateAtTime(true, 4000L);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryC1, 4000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleA2, mBubbleC1, mBubbleB1)));
+    }
+
+    /**
+     * Verifies that bubbles added as part of an existing group insert to the beginning of that
+     * group. The order of groups within the list must not change while in the expanded state.
+     *
+     * @see #test_collapsed_addBubble_sortAndGrouping()
+     * @see #test_expanded_addBubble_sortAndGrouping_newGroup()
+     */
+    @Test
+    public void test_expanded_addBubble_sortAndGrouping_existingGroup() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryB1, 3000); // [B1, A2, A1]
+        changeExpandedStateAtTime(true, 4000L);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryA3, 4000);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleA3, mBubbleA2, mBubbleA1)));
+    }
+
+    // EXPANDED / UPDATE
+
+    /**
+     * Verifies that updates to bubbles while expanded do not result in any change to sorting
+     * or grouping of bubbles or sorting of groups.
+     *
+     * @see #test_collapsed_addBubble_sortAndGrouping()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_expanded_updateBubble_sortAndGrouping_noChanges() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryB1, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000); // [B2, B1, A2, A1]
+        changeExpandedStateAtTime(true, 5000L);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryA1, 4000);
+        verify(mListener, never()).onOrderChanged(anyList());
+    }
+
+    /**
+     * Verifies that updates to bubbles while expanded do not result in any change to selection.
+     *
+     * @see #test_collapsed_addBubble_selectionChanges()
+     * @see #test_collapsed_updateBubble_noSelectionChanges_withOngoing()
+     */
+    @Test
+    public void test_expanded_updateBubble_noSelectionChanges() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryA2, 2000);
+        sendUpdatedEntryAtTime(mEntryB1, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000); // [B2, B1, A2, A1]
+        changeExpandedStateAtTime(true, 5000L);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryA1, 6000);
+        sendUpdatedEntryAtTime(mEntryA2, 7000);
+        sendUpdatedEntryAtTime(mEntryB1, 8000);
+        verify(mListener, never()).onSelectionChanged(any(Bubble.class));
+    }
+
+    // EXPANDED / REMOVE
+
+    /**
+     * Verifies that removing a bubble while expanded does not result in reordering of groups
+     * or any of the remaining bubbles.
+     *
+     * @see #test_collapsed_addBubble_sortAndGrouping()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_expanded_removeBubble_sortAndGrouping() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000); // [B2, B1, A2, A1]
+        changeExpandedStateAtTime(true, 5000L);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleA2, mBubbleA1)));
+    }
+
+    /**
+     * Verifies that removing the selected bubble while expanded causes another bubble to become
+     * selected. The replacement selection is the bubble which appears at the same index as the
+     * previous one, or the previous index if this was the last position.
+     *
+     * @see #test_collapsed_addBubble_sortAndGrouping()
+     * @see #test_expanded_addBubble_sortAndGrouping_existingGroup()
+     */
+    @Test
+    public void test_expanded_removeBubble_selectionChanges_whenSelectedRemoved() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000);
+        changeExpandedStateAtTime(true, 5000L);
+        mBubbleData.setSelectedBubble(mBubbleA2);  // [B2, B1, ^A2, A1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
+        verify(mListener).onSelectionChanged(mBubbleA1);
+
+        reset(mListener);
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        verify(mListener).onSelectionChanged(mBubbleB1);
+    }
+
+    @Test
+    public void test_expandAndCollapse_callsOnExpandedChanged() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        changeExpandedStateAtTime(true, 3000L);
+        verify(mListener).onExpandedChanged(eq(true));
+
+        reset(mListener);
+        changeExpandedStateAtTime(false, 4000L);
+        verify(mListener).onExpandedChanged(eq(false));
+    }
+
+    /**
+     * Verifies that transitions between the collapsed and expanded state maintain sorting and
+     * grouping rules.
+     * <p>
+     * While collapsing, sorting is applied since no sorting happens while expanded. The resulting
+     * state is the new expanded ordering. This state is saved and restored if possible when next
+     * expanded.
+     * <p>
+     * When the stack transitions to the collapsed state, the selected bubble is brought to the top.
+     * Bubbles within the same group should move up with it.
+     * <p>
+     * When the stack transitions back to the expanded state, the previous ordering is restored, as
+     * long as no changes have been made (adds, removes or updates) while in the collapsed state.
+     */
+    @Test
+    public void test_expansionChanges() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000);
+        changeExpandedStateAtTime(true, 5000L); // [B2=4000, B1=2000, A2=3000, A1=1000]
+        sendUpdatedEntryAtTime(mEntryB1, 6000); // [B2=4000, B1=6000*, A2=3000, A1=1000]
+        setCurrentTime(7000);
+        mBubbleData.setSelectedBubble(mBubbleA2);
+        mBubbleData.setListener(mListener);
+        assertThat(mBubbleData.getBubbles()).isEqualTo(
+                listOf(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
+
+        // Test
+
+        // At this point, B1 has been updated but sorting has not been changed because the
+        // stack is expanded. When next collapsed, sorting will be applied and saved, just prior
+        // to moving the selected bubble to the top (first).
+        //
+        // In this case, the expected re-expand state will be: [B1, B2, A2*, A1]
+        //
+        // That state is restored as long as no changes occur (add/remove/update) while in
+        // the collapsed state.
+        //
+        // collapse -> selected bubble (A2) moves first.
+        changeExpandedStateAtTime(false, 8000L);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2)));
+
+        // expand -> "original" order/grouping restored
+        reset(mListener);
+        changeExpandedStateAtTime(true, 10000L);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1)));
+    }
+
+    /**
+     * When a change occurs while collapsed (any update, add, remove), the previous expanded
+     * order and grouping becomes invalidated, and the order and grouping when next expanded will
+     * remain the same as collapsed.
+     */
+    @Test
+    public void test_expansionChanges_withUpdatesWhileCollapsed() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryA2, 3000);
+        sendUpdatedEntryAtTime(mEntryB2, 4000);
+        changeExpandedStateAtTime(true, 5000L); // [B2=4000, B1=2000, A2=3000, A1=1000]
+        sendUpdatedEntryAtTime(mEntryB1, 6000); // [B2=4000, B1=*6000, A2=3000, A1=1000]
+        setCurrentTime(7000);
+        mBubbleData.setSelectedBubble(mBubbleA2); // [B2, B1, ^A2, A1]
+        mBubbleData.setListener(mListener);
+
+        // Test
+
+        // At this point, B1 has been updated but sorting has not been changed because the
+        // stack is expanded. When next collapsed, sorting will be applied and saved, just prior
+        // to moving the selected bubble to the top (first).
+        //
+        // In this case, the expected re-expand state will be: [B1, B2, A2*, A1]
+        //
+        // That state is restored as long as no changes occur (add/remove/update) while in
+        // the collapsed state.
+        //
+        // collapse -> selected bubble (A2) moves first.
+        changeExpandedStateAtTime(false, 8000L);
+        verify(mListener).onOrderChanged(eq(listOf(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2)));
+
+        // An update occurs, which causes sorting, and this invalidates the previously saved order.
+        sendUpdatedEntryAtTime(mEntryA2, 9000);
+
+        // No order changes when expanding because the new sorted order remains.
+        reset(mListener);
+        changeExpandedStateAtTime(true, 10000L);
+        verify(mListener, never()).onOrderChanged(anyList());
+    }
+
+    @Test
+    public void test_expanded_removeLastBubble_collapsesStack() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        changeExpandedStateAtTime(true, 2000);
+        mBubbleData.setListener(mListener);
+
+        // Test
+        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
+        verify(mListener).onExpandedChanged(eq(false));
     }
 
     private NotificationEntry createBubbleEntry(int userId, String notifKey, String packageName) {
@@ -155,553 +785,22 @@ public class BubbleDataTest extends SysuiTestCase {
         return new NotificationEntry(sbn);
     }
 
+    private void setCurrentTime(long time) {
+        when(mTimeSource.currentTimeMillis()).thenReturn(time);
+    }
+
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
         setPostTime(entry, postTime);
         mBubbleData.notificationEntryUpdated(entry);
     }
 
     private void changeExpandedStateAtTime(boolean shouldBeExpanded, long time) {
-        when(mTimeSource.currentTimeMillis()).thenReturn(time);
+        setCurrentTime(time);
         mBubbleData.setExpanded(shouldBeExpanded);
     }
 
-    @Test
-    public void testAddBubble() {
-        // Setup
-        mBubbleData.setListener(mListener);
-
-        // Test
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-
-        // Verify
-        verify(mListener).onBubbleAdded(eq(mBubbleA1));
-        verify(mListener).onSelectionChanged(eq(mBubbleA1));
-        verify(mListener).apply();
-    }
-
-    @Test
-    public void testRemoveBubble() {
-        // Setup
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-        mBubbleData.notificationEntryUpdated(mEntryA2);
-        mBubbleData.notificationEntryUpdated(mEntryA3);
-        mBubbleData.setListener(mListener);
-
-        // Test
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
-
-        // Verify
-        verify(mListener).onBubbleRemoved(eq(mBubbleA1), eq(BubbleController.DISMISS_USER_GESTURE));
-        verify(mListener).onSelectionChanged(eq(mBubbleA2));
-        verify(mListener).apply();
-    }
-
-    @Test
-    public void test_collapsed_addBubble_atMaxBubbles_expiresLeastActive() {
-        // Given
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryA3, 3000);
-        sendUpdatedEntryAtTime(mEntryB1, 4000);
-        sendUpdatedEntryAtTime(mEntryB2, 5000);
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-
-        // When
-        sendUpdatedEntryAtTime(mEntryC1, 6000);
-
-        // Then
-        // A2 is removed. A1 is oldest but is the selected bubble.
-        assertThat(mBubbleData.getBubbles()).doesNotContain(mBubbleA2);
-    }
-
-    @Test
-    public void test_collapsed_expand_whenEmpty_doesNothing() {
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        changeExpandedStateAtTime(true, 2000L);
-
-        verify(mListener, never()).onExpandedChanged(anyBoolean());
-        verify(mListener, never()).apply();
-    }
-
-    // New bubble while stack is collapsed
-    @Test
-    public void test_collapsed_addBubble() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        // When
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        // Then
-        // New bubbles move to front when collapsed, bringing bubbles from the same app along
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-    }
-
-    // New bubble while collapsed with ongoing bubble present
-    @Test
-    public void test_collapsed_addBubble_withOngoing() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        // When
-        setOngoing(mEntryA1, true);
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-        setPostTime(mEntryB1, 2000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-        setPostTime(mEntryB2, 3000);
-        mBubbleData.notificationEntryUpdated(mEntryB2);
-        setPostTime(mEntryA2, 4000);
-        mBubbleData.notificationEntryUpdated(mEntryA2);
-
-        // Then
-        // New bubbles move to front, but stay behind any ongoing bubbles.
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA1, mBubbleA2, mBubbleB2, mBubbleB1));
-    }
-
-    // Remove the selected bubble (middle bubble), while the stack is collapsed.
-    @Test
-    public void test_collapsed_removeBubble_selected() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-
-        setPostTime(mEntryB1, 2000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        setPostTime(mEntryB2, 3000);
-        mBubbleData.notificationEntryUpdated(mEntryB2);
-
-        setPostTime(mEntryA2, 4000);
-        mBubbleData.notificationEntryUpdated(mEntryA2);
-
-        mBubbleData.setSelectedBubble(mBubbleB2);
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
-
-        // Then
-        // (Selection remains in the same position)
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleB1);
-    }
-
-    // Remove the selected bubble (last bubble), while the stack is collapsed.
-    @Test
-    public void test_collapsed_removeSelectedBubble_inLastPosition() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        mBubbleData.setSelectedBubble(mBubbleB1);
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
-
-        // Then
-        // (Selection is forced to move to previous)
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleB2);
-    }
-
-    @Test
-    public void test_collapsed_addBubble_ongoing() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        // When
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-
-        setPostTime(mEntryB1, 2000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        setPostTime(mEntryB2, 3000);
-        setOngoing(mEntryB2, true);
-        mBubbleData.notificationEntryUpdated(mEntryB2);
-
-        setPostTime(mEntryA2, 4000);
-        mBubbleData.notificationEntryUpdated(mEntryA2);
-
-        // Then
-        // New bubbles move to front, but stay behind any ongoing bubbles.
-        // Does not break grouping. (A2 is inserted after B1, even though it's newer).
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
-    }
-
-    @Test
-    public void test_collapsed_removeBubble() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        // When
-        mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
-
-        // Then
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB1));
-    }
-
-    @Test
-    public void test_collapsed_updateBubble() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        sendUpdatedEntryAtTime(mEntryB2, 5000);
-
-        // Then
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
-    }
-
-    @Test
-    public void test_collapsed_updateBubble_withOngoing() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-
-        setPostTime(mEntryB1, 2000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        setPostTime(mEntryB2, 3000);
-        mBubbleData.notificationEntryUpdated(mEntryB2);
-
-        setOngoing(mEntryA2, true);
-        setPostTime(mEntryA2, 4000);
-        mBubbleData.notificationEntryUpdated(mEntryA2);
-
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        setPostTime(mEntryB1, 5000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        // Then
-        // A2 remains in first position, due to being ongoing. B1 moves before B2, Group A
-        // remains before group B.
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2));
-    }
-
-    @Test
-    public void test_collapse_afterUpdateWhileExpanded() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-
-        changeExpandedStateAtTime(true, 5000L);
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        sendUpdatedEntryAtTime(mEntryB1, 6000);
-
-        // (No reordering while expanded)
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        changeExpandedStateAtTime(false, 7000L);
-
-        // Then
-        // A1 moves to front on collapse, since it is the selected bubble (and most recently
-        // accessed).
-        // A2 moves next to A1 to maintain grouping.
-        // B1 moves in front of B2, since it received an update while expanded
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA1, mBubbleA2, mBubbleB1, mBubbleB2));
-    }
-
-    @Test
-    public void test_collapse_afterUpdateWhileExpanded_withOngoing() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-
-        setOngoing(mEntryB2, true);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-
-        changeExpandedStateAtTime(true, 5000L);
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
-
-        sendUpdatedEntryAtTime(mEntryA1, 6000);
-
-        // No reordering if expanded
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
-
-        // When
-        changeExpandedStateAtTime(false, 7000L);
-
-        // Then
-        // B2 remains in first position because it is ongoing.
-        // B1 remains grouped with B2
-        // A1 moves in front of A2, since it is more recently updated (and is selected).
-        // B1 moves in front of B2, since it has more recent activity.
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA1, mBubbleA2));
-    }
-
-    @Test
-    public void test_collapsed_removeLastBubble_clearsSelectedBubble() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryB1, 2000);
-        sendUpdatedEntryAtTime(mEntryB2, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
-        mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
-        mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
-        mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
-
-        assertThat(mBubbleData.getSelectedBubble()).isNull();
-    }
-
-    @Test
-    public void test_expanded_addBubble_atMaxBubbles_expiresLeastActive() {
-        // Given
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-
-        changeExpandedStateAtTime(true, 2000L);
-        assertThat(mBubbleData.getSelectedBubble().getLastActivity()).isEqualTo(2000);
-
-        sendUpdatedEntryAtTime(mEntryA2, 3000);
-        sendUpdatedEntryAtTime(mEntryA3, 4000);
-        sendUpdatedEntryAtTime(mEntryB1, 5000);
-        sendUpdatedEntryAtTime(mEntryB2, 6000);
-        sendUpdatedEntryAtTime(mEntryB3, 7000);
-
-
-        // Then
-        // A1 would be removed, but it is selected and expanded, so it should not go away.
-        // Instead, fall through to removing A2 (the next oldest).
-        assertThat(mBubbleData.getBubbles()).doesNotContain(mEntryA2);
-    }
-
-    @Test
-    public void test_expanded_removeLastBubble_collapsesStack() {
-        // Given
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-
-        setPostTime(mEntryB1, 2000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        setPostTime(mEntryB2, 3000);
-        mBubbleData.notificationEntryUpdated(mEntryC1);
-
-        mBubbleData.setExpanded(true);
-
-        mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
-        mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
-        mBubbleData.notificationEntryRemoved(mEntryC1, BubbleController.DISMISS_USER_GESTURE);
-
-        assertThat(mBubbleData.isExpanded()).isFalse();
-        assertThat(mBubbleData.getSelectedBubble()).isNull();
-    }
-
-    // Bubbles do not reorder while expanded
-    @Test
-    public void test_expanded_selection_collapseToTop() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryB1, 3000);
-
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB1, mBubbleA2, mBubbleA1));
-
-        changeExpandedStateAtTime(true, 4000L);
-
-        // regrouping only happens when collapsed (after new or update) or expanded->collapsed
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB1, mBubbleA2, mBubbleA1));
-
-        changeExpandedStateAtTime(false, 6000L);
-
-        // A1 is still selected and it's lastAccessed time has been updated
-        // on collapse, sorting is applied, keeping the selected bubble at the front
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA1, mBubbleA2, mBubbleB1));
-    }
-
-    // New bubble from new app while stack is expanded
-    @Test
-    public void test_expanded_addBubble_newApp() {
-        // Given
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryA3, 3000);
-        sendUpdatedEntryAtTime(mEntryB1, 4000);
-        sendUpdatedEntryAtTime(mEntryB2, 5000);
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-
-        changeExpandedStateAtTime(true, 6000L);
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1);
-        assertThat(mBubbleData.getSelectedBubble().getLastActivity()).isEqualTo(6000L);
-
-        // regrouping only happens when collapsed (after new or update) or expanded->collapsed
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA3, mBubbleA2, mBubbleA1));
-
-        // When
-        sendUpdatedEntryAtTime(mEntryC1, 7000);
-
-        // Then
-        // A2 is expired. A1 was oldest, but lastActivityTime is reset when expanded, since A1 is
-        // selected.
-        // C1 is added at the end since bubbles are expanded.
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA3, mBubbleA1, mBubbleC1));
-    }
-
-    // New bubble from existing app while stack is expanded
-    @Test
-    public void test_expanded_addBubble_existingApp() {
-        // Given
-        sendUpdatedEntryAtTime(mEntryB1, 1000);
-        sendUpdatedEntryAtTime(mEntryB2, 2000);
-        sendUpdatedEntryAtTime(mEntryA1, 3000);
-        sendUpdatedEntryAtTime(mEntryA2, 4000);
-        sendUpdatedEntryAtTime(mEntryA3, 5000);
-
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleB1);
-
-        changeExpandedStateAtTime(true, 6000L);
-
-        // B1 is first (newest, since it's just been expanded and is selected)
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleB1);
-        assertThat(mBubbleData.getSelectedBubble().getLastActivity()).isEqualTo(6000L);
-
-        // regrouping only happens when collapsed (after new or update) or while collapsing
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA3, mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        sendUpdatedEntryAtTime(mEntryB3, 7000);
-
-        // Then
-        // (B2 is expired, B1 was oldest, but it's lastActivityTime is updated at the point when
-        // the stack was expanded, since it is the selected bubble.
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA3, mBubbleA2, mBubbleA1, mBubbleB3, mBubbleB1));
-    }
-
-    // Updated bubble from existing app while stack is expanded
-    @Test
-    public void test_expanded_updateBubble_existingApp() {
-        sendUpdatedEntryAtTime(mEntryA1, 1000);
-        sendUpdatedEntryAtTime(mEntryA2, 2000);
-        sendUpdatedEntryAtTime(mEntryB1, 3000);
-        sendUpdatedEntryAtTime(mEntryB2, 4000);
-
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
-        mBubbleData.setExpanded(true);
-
-        sendUpdatedEntryAtTime(mEntryA1, 5000);
-
-        // Does not reorder while expanded (for an update).
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
-    }
-
-    @Test
-    public void test_expanded_updateBubble() {
-        // Given
-        assertThat(mBubbleData.hasBubbles()).isFalse();
-        assertThat(mBubbleData.isExpanded()).isFalse();
-
-        setPostTime(mEntryA1, 1000);
-        mBubbleData.notificationEntryUpdated(mEntryA1);
-
-        setPostTime(mEntryB1, 2000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        setPostTime(mEntryB2, 3000);
-        mBubbleData.notificationEntryUpdated(mEntryB2);
-
-        setPostTime(mEntryA2, 4000);
-        mBubbleData.notificationEntryUpdated(mEntryA2);
-
-        mBubbleData.setExpanded(true);
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
-
-        // When
-        setPostTime(mEntryB1, 5000);
-        mBubbleData.notificationEntryUpdated(mEntryB1);
-
-        // Then
-        // B1 remains in the same place due to being expanded
-        assertThat(mBubbleData.getBubbles()).isEqualTo(
-                ImmutableList.of(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1));
+    /** Syntactic sugar to keep assertions more readable */
+    private static <T> List<T> listOf(T... a) {
+        return ImmutableList.copyOf(a);
     }
 }

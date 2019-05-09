@@ -82,14 +82,8 @@ public:
      * was written (i.e. after filtering).
      *
      * The buffer is assumed to have already been filtered to bufferLevel.
-     *
-     * This function can be called when persisting data to disk or when sending
-     * data to client. In the former case, we need to encrypt the data when that
-     * section requires encryption. In the latter case, we shouldn't send the
-     * unencrypted data to client.
      */
-    status_t writeData(const FdBuffer& buffer, uint8_t bufferLevel, size_t* maxSize,
-                       bool encryptIfNeeded);
+    status_t writeData(const FdBuffer& buffer, uint8_t bufferLevel, size_t* maxSize);
 
 private:
     int mSectionId;
