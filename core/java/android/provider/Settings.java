@@ -8273,6 +8273,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether or not the face unlock education screen has been shown to the user.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_EDUCATION_INFO_DISPLAYED =
+                "face_unlock_education_info_displayed";
+
+        private static final Validator FACE_UNLOCK_EDUCATION_INFO_DISPLAYED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Whether or not debugging is enabled.
          * @hide
          */
@@ -9079,6 +9089,8 @@ public final class Settings {
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
+            VALIDATORS.put(FACE_UNLOCK_EDUCATION_INFO_DISPLAYED,
+                    FACE_UNLOCK_EDUCATION_INFO_DISPLAYED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_ENABLED, ASSIST_GESTURE_ENABLED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
                     ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR);
