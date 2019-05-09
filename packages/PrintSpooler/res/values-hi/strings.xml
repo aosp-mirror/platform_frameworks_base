@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"पीडीएफ़ में सेव करें"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"प्रिंट विकल्पों को विस्तृत किया गया"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"प्रिंट विकल्पों को संक्षिप्त किया गया"</string>
-    <string name="search" msgid="5421724265322228497">"खोजें"</string>
+    <string name="search" msgid="5421724265322228497">"सर्च करें"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सभी प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोड़ें"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"सर्च बॉक्स दिखाई दे रहा है"</string>
@@ -84,7 +84,7 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिंटर गड़बड़ी <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटर अवरोधित <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancel" msgid="4373674107267141885">"रद्द करें"</string>
-    <string name="restart" msgid="2472034227037808749">"फिर से आरंभ करें"</string>
+    <string name="restart" msgid="2472034227037808749">"पुन: आरंभ करें"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटर के लिए कोई कनेक्शन नहीं"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> का उपयोग करें?"</string>
@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"लैंडस्केप"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"फ़ाइल पर नहीं लिखा जा सका"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. फिर से प्रयास करें."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. पुन: प्रयास करें."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"फिर से प्रयास करें"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"यह प्रिंटर इस समय उपलब्ध नहीं है."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"झलक नहीं दिखाई जा सकती"</string>

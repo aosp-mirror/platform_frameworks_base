@@ -35,7 +35,7 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"പ്രിവ്യൂ കാണിക്കുന്നതിന് PDF വ്യൂവർ ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"പ്രിന്റുചെയ്യൽ അപ്ലിക്കേഷൻ ക്രാഷായി"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"പ്രിന്റ് ജോലി സൃഷ്‌ടിക്കുന്നു"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF-ആയി സംരക്ഷിക്കൂ"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF ആയി സംരക്ഷിക്കുക"</string>
     <string name="all_printers" msgid="5018829726861876202">"എല്ലാ പ്രിന്ററുകളും..."</string>
     <string name="print_dialog" msgid="32628687461331979">"പ്രിന്റ് സംഭാഷണം"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>

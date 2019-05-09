@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"कनेक्शन अनुरोध"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> वीपीएन कनेक्‍शन सेट अप करना चाहता है, जिससे वह नेटवर्क ट्रैफ़िक पर नज़र रख पाएगा. इसकी मंज़ूरी तभी दें जब आपको इस पर भरोसा हो. वीपीएन चालू होने पर &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; आपकी स्क्रीन के सबसे ऊपर दिखाई देता है."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> VPN कनेक्‍शन सेट अप करना चाहता है, जिससे वह नेटवर्क ट्रैफ़िक पर नज़र रख पाएगा. इसकी मंज़ूरी तभी दें जब आपको आप इस पर भरोसा हो. VPN चालू होने पर आपकी स्क्रीन के सबसे ऊपर &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; दिखाई देता है."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN कनेक्‍ट है"</string>
     <string name="session" msgid="6470628549473641030">"सत्र:"</string>
     <string name="duration" msgid="3584782459928719435">"अवधि:"</string>

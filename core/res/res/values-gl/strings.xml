@@ -78,9 +78,9 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Servizo non ofrecido."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Non podes cambiar a configuración do identificador de chamada."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Non hai servizo de datos para móbiles"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"As chamadas de emerxencia non están dispoñibles"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"As chamadas de urxencia non están dispoñibles"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Non hai servizo de chamadas de voz"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Non hai servizo de voz nin chamadas de emerxencia"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Non hai servizo de voz nin chamadas de urxencia"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"O teu operador desactivou este servizo temporalmente"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"O teu operador desactivou este servizo temporalmente para a SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Non se puido conectar coa rede de telefonía móbil"</string>
@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Non se poden realizar chamadas de emerxencia por wifi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de chamadas"</string>
-    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de chamadas de emerxencia"</string>
+    <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de chamadas de urxencia"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Estado dos datos móbiles"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensaxes SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensaxes de correo de voz"</string>
@@ -136,13 +136,9 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wifi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Chamadas por wifi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi de <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling" msgid="4990486735013125329">"Chamadas por wifi"</string>
-    <string name="wfcSpnFormat_wifi" msgid="1892673884655959773">"Wifi"</string>
-    <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"Chamadas por wifi"</string>
-    <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Chama por wifi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Chama pola rede de telefonía móbil"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wifi preferida"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Datos móbiles preferidos"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Só por wifi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: non desviada"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -224,7 +220,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcións de teléfono"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueo de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Emerxencias"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Urxencias"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de erros"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Finalizar a sesión"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -339,7 +335,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensaxes de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite á aplicación recibir e procesar mensaxes MMS. Isto significa que a aplicación pode supervisar ou eliminar mensaxes enviadas ao teu dispositivo sen mostrarchas."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensaxes de difusión móbil"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil envíanse nalgunhas localizacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de emerxencia."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil envíanse nalgunhas localizacións para avisar de situacións de urxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de urxencia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds subscritos"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Permite á aplicación obter detalles acerca dos feeds sincronizados actualmente."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"enviar e consultar mensaxes de SMS"</string>
@@ -427,15 +423,13 @@
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar a vibración"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite á aplicación controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"chamar directamente aos números de teléfono"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite á aplicación chamar a números de teléfono sen a túa intervención. Esta acción pode implicar chamadas ou custos inesperados. Ten en conta que isto non permite á aplicación chamar a números de emerxencia. É posible que aplicacións maliciosas che custen diñeiro debido á realización de chamadas sen a túa confirmación."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Permite á aplicación chamar a números de teléfono sen a túa intervención. Esta acción pode implicar chamadas ou custos inesperados. Ten en conta que isto non permite á aplicación chamar a números de urxencia. É posible que aplicacións maliciosas che custen diñeiro debido á realización de chamadas sen a túa confirmación."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"acceso ao servizo de chamadas de IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Permite que a aplicación use o servizo de IMS para facer chamadas sen a túa intervención."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ler o estado e a identidade do teléfono"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permite á aplicación acceder ás funcións de teléfono do dispositivo. Con este permiso a aplicación pode determinar o número de teléfono e os ID do dispositivo, se unha chamada está activa e o número remoto conectado mediante unha chamada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"dirixir as chamadas a través do sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permite á aplicación dirixir as súas chamadas a través do sistema para mellorar a túa experiencia durante as chamadas."</string>
-    <string name="permlab_callCompanionApp" msgid="3599252979411970473">"consultar e controlar as chamadas a través do sistema."</string>
-    <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"Permite que a aplicación consulte e controle as chamadas en curso do dispositivo. Pode acceder a información como os números e os estados das chamadas."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"continuar unha chamada iniciada noutra aplicación"</string>
     <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permite que a aplicación continúe unha chamada que se iniciou noutra aplicación."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ler números de teléfono"</string>
@@ -454,10 +448,10 @@
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permite á aplicación definir o fondo de pantalla do sistema."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"definir o tamaño do fondo de pantalla"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Permite á aplicación definir a optimización do tamaño do fondo de pantalla do sistema."</string>
-    <string name="permlab_setTimeZone" msgid="2945079801013077340">"establecer o fuso horario"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Permite á aplicación cambiar o fuso horario da tableta."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Permite que a aplicación cambie o fuso horario da televisión."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Permite á aplicación cambiar o fuso horario do teléfono."</string>
+    <string name="permlab_setTimeZone" msgid="2945079801013077340">"establecer a zona horaria"</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Permite á aplicación cambiar a zona horaria da tableta."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Permite que a aplicación cambie a zona horaria da televisión."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Permite á aplicación cambiar a zona horaria do teléfono."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"encontrar contas no dispositivo"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Permite á aplicación obter a lista de contas coñecidas pola tableta. É posible que aquí se inclúan contas creadas por aplicacións que teñas instaladas."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Permite que a aplicación obteña a lista de contas recoñecidas pola televisión. Pode incluír as contas creadas polas aplicacións que instalaches."</string>
@@ -597,11 +591,11 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar o bloqueo da pantalla"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia o bloqueo da pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear a pantalla"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla como e cando se bloquea a pantalla."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar como e cando se bloquea a pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos os datos"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borra os datos da tableta sen previo aviso mediante a realización dun restablecemento dos datos de fábrica."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borrar os datos da tableta sen previo aviso mediante a realización dun restablecemento dos datos de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Borra os datos da televisión sen previo aviso a través do restablecemento dos valores de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borra os datos do teléfono sen previo aviso mediante a realización dun restablecemento dos datos de fábrica."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borrar os datos do teléfono sen previo aviso mediante a realización dun restablecemento dos datos de fábrica."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Borrar os datos do usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Borra os datos deste usuario nesta tableta sen previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Borra os datos deste usuario nesta televisión sen previo aviso."</string>
@@ -739,13 +733,13 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Escribe o PIN para desbloquear"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Para desbloquear, preme Menú e, a continuación, 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de emerxencia"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Número de urxencia"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Sen servizo"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Pantalla bloqueada"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Preme Menú para desbloquear ou realizar unha chamada de emerxencia."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Preme Menú para desbloquear ou realizar unha chamada de urxencia."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Preme Menú para desbloquear."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Crea o padrón de desbloqueo"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Emerxencias"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Urxencia"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Volver á chamada"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Correcto!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Téntao de novo"</string>
@@ -767,7 +761,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Deter"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Rebobinar"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Avance rápido"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Só chamadas de emerxencia"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Só chamadas de urxencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Bloqueada pola rede"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"A tarxeta SIM está bloqueada con código PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulta a guía do usuario ou ponte en contacto co servizo de asistencia ao cliente."</string>
@@ -779,8 +773,8 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Debuxaches o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear a tableta cos datos de inicio de sesión de Google.\n\n Téntao de novo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Debuxaches o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear a televisión cos datos de inicio de sesión de Google.\n\n Téntao de novo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Debuxaches o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono cos datos de inicio de sesión de Google.\n\n Téntao de novo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tentaches desbloquear a tableta <xliff:g id="NUMBER_0">%1$d</xliff:g> veces sen conseguilo. Se se realizan <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos máis sen logralo, restablecerase a configuración de fábrica predeterminada e perderanse todos os datos do usuario."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Tentaches desbloquear a televisión <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, restableceranse os valores de fábrica do aparello e perderanse todos os datos do usuario."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tentaches desbloquear a tableta <xliff:g id="NUMBER_0">%1$d</xliff:g> veces sen conseguilo. Se se realizan <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos máis sen logralo, restablecerase a configuración de fábrica predeterminada e perderanse todos os datos de usuario."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Tentaches desbloquear a televisión <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, restableceranse os valores de fábrica do aparello e perderanse todos os datos de usuario."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Tentaches desbloquear o teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces sen conseguilo. Se se realizan <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos máis sen logralo, restablecerase a configuración de fábrica predeterminada e perderanse todos os datos do usuario."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tentaches desbloquear a tableta <xliff:g id="NUMBER">%d</xliff:g> veces sen conseguilo. Restablecerase a configuración de fábrica predeterminada."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Tentaches desbloquear a televisión <xliff:g id="NUMBER">%d</xliff:g> veces de forma incorrecta. Agora restableceranse os valores de fábrica do aparello."</string>
@@ -1030,7 +1024,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Localiza o enderezo seleccionado"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abre o URL seleccionado"</string>
-    <string name="sms" msgid="4560537514610063430">"Enviar SMS"</string>
+    <string name="sms" msgid="4560537514610063430">"Mensaxe"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Envía unha mensaxe ao número de teléfono seleccionado"</string>
     <string name="add_contact" msgid="7867066569670597203">"Engadir"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Engade o elemento aos contactos"</string>
@@ -1133,9 +1127,9 @@
     <string name="new_app_action" msgid="6694851182870774403">"Abrir a aplicación <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"A aplicación <xliff:g id="OLD_APP">%1$s</xliff:g> pecharase sen gardar o contido"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> superou o límite de memoria"</string>
-    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Recompilouse un baleirado da zona de memoria dinámica. Toca para compartilo."</string>
-    <string name="dump_heap_title" msgid="5864292264307651673">"Queres compartir o baleirado da zona de memoria dinámica?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"O proceso <xliff:g id="PROC">%1$s</xliff:g> superou o seu límite de memoria de proceso de <xliff:g id="SIZE">%2$s</xliff:g>. Tes dispoñible un baleirado da zona de memoria dinámica para compartir co seu programador. Debes ter coidado, pois este baleirado da zona de memoria dinámica pode conter información persoal á que ten acceso a aplicación."</string>
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Recompilouse un baleirado de montóns. Toca para compartilo."</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Queres compartir o baleirado de montóns?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"O proceso <xliff:g id="PROC">%1$s</xliff:g> superou o seu límite de memoria de proceso de <xliff:g id="SIZE">%2$s</xliff:g>. Tes dispoñible un baleirado de montóns para compartir co seu programador. Debes ter coidado, pois este baleirado de montóns pode conter información persoal á que ten acceso a aplicación."</string>
     <string name="sendText" msgid="5209874571959469142">"Seleccionar unha acción para o texto"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Volume do timbre"</string>
     <string name="volume_music" msgid="5421651157138628171">"Volume dos elementos multimedia"</string>
@@ -1183,11 +1177,8 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inicia sesión na rede"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> non ten acceso a Internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"A wifi non ten acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca para ver opcións."</string>
-    <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Estableceuse conexión"</string>
-    <string name="network_partial_connectivity" msgid="7774883385494762741">"A conectividade de <xliff:g id="NETWORK_SSID">%1$s</xliff:g> é limitada"</string>
-    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Toca para conectarte de todas formas"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios na configuración da zona wifi"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Modificouse a banda da zona wifi."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo non admite a opción de conectarse só a bandas de 5 GHz, pero usaraas se están dispoñibles."</string>
@@ -1557,7 +1548,7 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Introduciches o contrasinal incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tentaches desbloquear a tableta <xliff:g id="NUMBER_0">%1$d</xliff:g> veces sen conseguilo. Se se realizan <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos máis sen logralo, restablecerase á configuración de fábrica predeterminada e perderanse todos os datos do usuario."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Tentaches desbloquear a televisión <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, restableceranse os valores de fábrica do aparello e perderanse todos os datos do usuario."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Tentaches desbloquear a televisión <xliff:g id="NUMBER_0">%1$d</xliff:g> veces de forma incorrecta. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, restableceranse os valores de fábrica do aparello e perderanse todos os datos de usuario."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Tentaches desbloquear o teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces sen conseguilo. Se se realizan <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos máis sen logralo, restablecerase a configuración de fábrica predeterminada e perderanse todos os datos do usuario."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tentouse desbloquear a tableta <xliff:g id="NUMBER">%d</xliff:g> veces sen conseguilo. Agora, restablecerase á configuración de fábrica predeterminada."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Tentaches desbloquear a televisión <xliff:g id="NUMBER">%d</xliff:g> veces de forma incorrecta. Agora restableceranse os valores de fábrica do aparello."</string>
@@ -1704,7 +1695,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para soltar fixación"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar un PIN antes de soltar a pantalla"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar un padrón de desbloqueo antes de soltar a pantalla"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar un contrasinal antes de soltar a pantalla"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado polo teu administrador"</string>
@@ -1838,7 +1829,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"minuto"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Definir hora"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Introduce unha hora válida"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Introduce a hora"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Escribe a hora"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Cambia ao modo de introdución de texto para introducir a hora."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Cambiar ao modo de reloxo para introducir a hora."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opcións de autocompletar"</string>
@@ -1863,7 +1854,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantén a calma e busca refuxio cerca."</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Abandona de inmediato rexións costeiras e situadas na beira de ríos para dirixirte a un lugar máis seguro, como un terreo elevado."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Mantén a calma e busca refuxio cerca."</string>
-    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Proba de mensaxes de emerxencia"</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Proba de mensaxes de urxencia"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Responder"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Non se permite a tarxeta SIM para as accións de voz"</string>

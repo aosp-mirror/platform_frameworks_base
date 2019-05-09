@@ -4,14 +4,14 @@
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
     <string name="android_system_label" msgid="2797790869522345065">"मोबाइल वाहक"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"मोबाइल डेटा संपला आहे"</string>
-    <string name="no_data_notification_id" msgid="668400731803969521">"तुमचा मोबाइल डेटा निष्क्रिय केला गेला"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"आपला मोबाइल डेटा निष्क्रिय केला गेला"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s वेबसाइटला भेट देण्‍यासाठी टॅप करा"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"कृपया आपल्या %s सेवा प्रदात्याशी संपर्क साधा"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"मोबाइल डेटा कनेक्‍शन नाही"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"%sने डेटा किंवा रोमिंग प्‍लॅन जोडा"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"मोबाइल डेटा स्थिती"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"मोबाइल नेटवर्कमध्ये साइन इन करा"</string>
-    <string name="ssl_error_warning" msgid="3127935140338254180">"तुम्ही ज्या नेटवर्कमध्‍ये सामील होण्याचा प्रयत्न करत आहात त्यात सुरक्षितता समस्या आहेत."</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"आपण ज्या नेटवर्कमध्‍ये सामील होण्याचा प्रयत्न करत आहात त्यात सुरक्षितता समस्या आहेत."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"उदाहरणार्थ, लॉग इन पृष्‍ठ दर्शवलेल्या संस्थेच्या मालकीचे नसू शकते."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"तरीही ब्राउझरद्वारे सुरू ठेवा"</string>
 </resources>

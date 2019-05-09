@@ -1657,6 +1657,13 @@ droidstubs {
     },
 }
 
+filegroup {
+    name: "framework-annotation-nonnull-srcs",
+    srcs: [
+        "core/java/android/annotation/NonNull.java",
+    ],
+}
+
 // Creates an index of AIDL methods; used for adding UnsupportedAppUsage
 // annotations to private apis
 aidl_mapping {

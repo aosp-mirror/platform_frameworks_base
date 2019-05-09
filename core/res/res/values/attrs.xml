@@ -5959,7 +5959,7 @@
         <attr name="insetBottom" format="fraction|dimension" />
     </declare-styleable>
 
-    <!-- Drawable used to draw animated images (gif) -->
+    <!-- Drawable used to draw animated images (gif). -->
     <declare-styleable name="AnimatedImageDrawable">
         <!-- Identifier of the image file. This attribute is mandatory.
              It must be an image file with multiple frames, e.g. gif or webp -->
@@ -8837,8 +8837,8 @@
         <attr name="name" />
     </declare-styleable>
 
-    <!-- Attributes that are read when parsing a <font> tag, which is a child of
-         <font-family>. This represents an actual font file and its attributes. -->
+    <!-- Attributes that are read when parsing a &lt;font&gt; tag, which is a child of
+         &lt;font-family&gt;. This represents an actual font file and its attributes. -->
     <declare-styleable name="FontFamilyFont">
         <!-- The style of the given font file. This will be used when the font is being loaded into
          the font stack and will override any style information in the font's header tables. If
@@ -8869,7 +8869,7 @@
         <attr name="fontVariationSettings" format="string" />
     </declare-styleable>
 
-    <!-- Attributes that are read when parsing a <fontfamily> tag. -->
+    <!-- Attributes that are read when parsing a &lt;fontfamily&gt; tag. -->
     <declare-styleable name="FontFamily">
         <!-- The authority of the Font Provider to be used for the request. -->
         <attr name="fontProviderAuthority" format="string" />
