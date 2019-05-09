@@ -357,8 +357,10 @@ public class GpsNetInitiatedHandler {
         }
     }
 
-    // Sets the NI notification.
-    private synchronized void setNiNotification(GpsNiNotification notif) {
+    /**
+     * Posts a notification in the status bar using the contents in {@code notif} object.
+     */
+    public synchronized void setNiNotification(GpsNiNotification notif) {
         NotificationManager notificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
@@ -539,14 +541,14 @@ public class GpsNetInitiatedHandler {
      */
     static private String decodeString(String original, boolean isHex, int coding)
     {
+        if (coding == GPS_ENC_NONE) {
+            return original;
+        }
+
         String decoded = original;
         byte[] input = stringToByteArray(original, isHex);
 
         switch (coding) {
-        case GPS_ENC_NONE:
-            decoded = original;
-            break;
-
         case GPS_ENC_SUPL_GSM_DEFAULT:
             decoded = decodeGSMPackedString(input);
             break;
