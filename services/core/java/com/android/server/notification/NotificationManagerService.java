@@ -121,8 +121,6 @@ import android.app.backup.BackupManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.content.BroadcastReceiver;
@@ -183,7 +181,6 @@ import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationStats;
-import android.service.notification.NotifyingApp;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -260,8 +257,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -2467,7 +2462,8 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
-            checkCallerIsSystemOrSameApp(pkg);
+            enforceSystemOrSystemUIOrSamePackage(pkg,
+                    "Caller not system or systemui or same package");
             if (UserHandle.getCallingUserId() != UserHandle.getUserId(uid)) {
                 getContext().enforceCallingPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
@@ -2793,7 +2789,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("getNotificationChannelGroupsForPackage");
             return mPreferencesHelper.getNotificationChannelGroups(
                     pkg, uid, includeDeleted, true, false);
         }
