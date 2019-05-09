@@ -380,6 +380,14 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(window1.isFocused());
         assertEquals(perDisplayFocusEnabled && targetSdk >= Q, window2.isFocused());
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
+
+        // Make sure top focused display not changed if there is a focused app.
+        window1.mAppToken.hiddenRequested = true;
+        window1.getDisplayContent().setFocusedApp(window1.mAppToken);
+        updateFocusedWindow();
+        assertTrue(!window1.isFocused());
+        assertEquals(window1.getDisplayId(),
+                mWm.mRoot.getTopFocusedDisplayContent().getDisplayId());
     }
 
     /**
