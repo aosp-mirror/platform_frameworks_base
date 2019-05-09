@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.INetd;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
@@ -57,6 +58,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
@@ -119,6 +121,11 @@ public class IpSecServiceParameterizedTest {
         }
 
         @Override
+        public PackageManager getPackageManager() {
+            return mMockPkgMgr;
+        }
+
+        @Override
         public void enforceCallingOrSelfPermission(String permission, String message) {
             if (permission == android.Manifest.permission.MANAGE_IPSEC_TUNNELS) {
                 return;
@@ -128,6 +135,7 @@ public class IpSecServiceParameterizedTest {
     };
 
     INetd mMockNetd;
+    PackageManager mMockPkgMgr;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
     Network fakeNetwork = new Network(0xAB);
@@ -152,11 +160,16 @@ public class IpSecServiceParameterizedTest {
     @Before
     public void setUp() throws Exception {
         mMockNetd = mock(INetd.class);
+        mMockPkgMgr = mock(PackageManager.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
         mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
 
         // Injecting mock netd
         when(mMockIpSecSrvConfig.getNetdInstance()).thenReturn(mMockNetd);
+
+        // PackageManager should always return true (feature flag tests in IpSecServiceTest)
+        when(mMockPkgMgr.hasSystemFeature(anyString())).thenReturn(true);
+
         // A package granted the AppOp for MANAGE_IPSEC_TUNNELS will be MODE_ALLOWED.
         when(mMockAppOps.noteOp(anyInt(), anyInt(), eq("blessedPackage")))
             .thenReturn(AppOpsManager.MODE_ALLOWED);
@@ -707,6 +720,20 @@ public class IpSecServiceParameterizedTest {
                     createAndValidateTunnel(mSourceAddr, mDestinationAddr, "badPackage");
             fail("Expected a SecurityException for badPackage.");
         } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testFeatureFlagVerification() throws Exception {
+        when(mMockPkgMgr.hasSystemFeature(eq(PackageManager.FEATURE_IPSEC_TUNNELS)))
+                .thenReturn(false);
+
+        try {
+            String addr = Inet4Address.getLoopbackAddress().getHostAddress();
+            mIpSecService.createTunnelInterface(
+                    addr, addr, new Network(0), new Binder(), "blessedPackage");
+            fail("Expected UnsupportedOperationException for disabled feature");
+        } catch (UnsupportedOperationException expected) {
         }
     }
 }
