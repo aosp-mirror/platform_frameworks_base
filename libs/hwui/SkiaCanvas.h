@@ -69,6 +69,7 @@ public:
     virtual int save(SaveFlags::Flags flags) override;
     virtual void restore() override;
     virtual void restoreToCount(int saveCount) override;
+    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
                           SaveFlags::Flags flags) override;
