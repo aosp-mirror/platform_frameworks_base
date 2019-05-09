@@ -367,7 +367,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Al atardecer"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Hasta el amanecer"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Hora: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hasta: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hasta las <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema oscuro"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La conexión NFC está inhabilitada"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gestionar"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificaciones pausadas por el modo No molestar"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Iniciar ahora"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"No hay notificaciones"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Pantalla fijada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsados los botones Atrás y Aplicaciones recientes."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsados los botones Atrás e Inicio."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Se mantiene visible hasta que dejas de fijarla. Para ello, desliza el dedo hacia arriba y mantén pulsado."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Aplicaciones recientes."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Inicio."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Mantén pulsado el botón Atrás y el de aplicaciones recientes para dejar de fijar esta pantalla"</string>
@@ -767,7 +770,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Icono a la izquierda"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icono a la derecha"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Pulsa y arrastra para añadir funciones"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mantén pulsado un icono y arrástralo para reorganizarlo"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mantén pulsado un icono y arrástralo para reubicarlo"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra aquí para quitar una función"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necesitas al menos 6 iconos"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
@@ -881,7 +884,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicaciones que se están ejecutando en segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toca para ver información detallada sobre el uso de datos y de la batería"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"¿Quieres desactivar los datos móviles?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"No tienes conexión a Internet ni de datos móviles a través de <xliff:g id="CARRIER">%s</xliff:g>. Solo puedes conectarte a Internet mediante una red Wi‑Fi."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"No tendrás conexión a Internet ni de datos móviles a través de <xliff:g id="CARRIER">%s</xliff:g>. Solo podrás conectarte a Internet mediante una red Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"tu operador"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Una aplicación impide ver una solicitud de permiso, por lo que Ajustes no puede verificar tu respuesta."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"¿Quieres permitir que <xliff:g id="APP_0">%1$s</xliff:g> muestre fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Ajustes de las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"¿Quieres permitir las burbujas de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Gestionar"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Denegar"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Preguntarme más tarde"</string>

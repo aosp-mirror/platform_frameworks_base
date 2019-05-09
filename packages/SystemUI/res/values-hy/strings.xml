@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Այլևս ցույց չտալ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Մաքրել բոլորը"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Կառավարել"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Ծանուցումները չեն ցուցադրվի «Չանհանգստացնել» ռեժիմում"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Սկսել հիմա"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ծանուցումներ չկան"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Էկրանն ամրացված է"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Հետ և Համատեսք կոճակները:"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք Հետ և գլխավոր էկրանի կոճակները:"</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար մատը սահեցրեք վեր և պահեք։"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Համատեսք կոճակը:"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Էկրանը կցուցադրվի այնքան ժամանակ, մինչև որ չապամրացնեք այն: Ապամրացնելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Էկրանն ապամրացնելու համար հպեք և պահեք Հետ և Համատեսք կոճակները"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Բացել <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ի ամպիկների կարգավորումներ"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Թույլատրե՞լ ամպիկներ <xliff:g id="APP_NAME">%1$s</xliff:g>-ից։"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Կառավարել"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Մերժել"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Թույլատրել"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Հարցնել ավելի ուշ"</string>

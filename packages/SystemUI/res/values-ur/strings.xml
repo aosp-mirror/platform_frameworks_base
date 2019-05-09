@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوبارہ نہ دکھائیں"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"سبھی کو صاف کریں"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"نظم کریں"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'ڈسٹرب نہ کریں\' کے ذریعے اطلاعات کو موقوف کیا گیا"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ابھی شروع کریں"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"کوئی اطلاعات نہیں ہیں"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے اور مجموعی جائزہ بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"پیچھے\" اور \"ہوم\" بٹنز کو ٹچ کریں اور دبائے رکھیں۔"</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کے لیے سوائپ کریں اور پکڑ کر رکھیں۔"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے مجموعی جائزہ بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"یہ اس کو اس وقت تک مد نظر رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے \"ہوم\" بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"اس اسکرین سے پن ہٹانے کیلئے، \"پیچھے\" اور \"مجموعی جائزہ\" بٹنز کو ٹچ کریں اور دبائے رکھیں"</string>
@@ -639,17 +642,12 @@
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"اطلاعات کو آف کریں"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"اس ایپ کی طرف سے اطلاعات دکھانا جاری رکھیں؟"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"لطیف"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"ترجیح دی گئی"</string>
-    <!-- no translation found for notification_channel_summary_low (1065819618107531284) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (2702170424808743755) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (7966605244472624458) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (7012562768950012739) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (3847289783382316019) -->
-    <skip />
+    <string name="notification_alert_title" msgid="3966526305405016221">"ترجیحی"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"صرف نیچے کی طرف کھینچیں شیڈ میں اطلاعات کے ساتھ فوکس کرنے میں آپ کی مدد کرتا ہے۔ ہمیشہ خاموش۔"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"کم ترجیحی اطلاعات ڈسپلے کرتا ہے۔ ہمیشہ خاموش۔"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"کم ترجیحی اطلاعات ڈسپلے کرتا ہے۔ ہمیشہ خاموش۔"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"کم ترجیحی اطلاعات ڈسپلے کرتا ہے۔ ہمیشہ خاموش۔"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"آواز اور اسٹیٹس بار کے آئیکن کے ساتھ آپ کی توجہ حاصل کرتا ہے۔ مقفل اسکرین پر دکھاتا ہے۔"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"پراکسی اطلاع"</string>
@@ -917,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> کھولیں"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> بلبلوں کے لیے ترتیبات"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> کی جانب سے بلبلوں کو اجازت دیں؟"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"نظم کریں"</string>
     <string name="no_bubbles" msgid="337101288173078247">"مسترد کریں"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"اجازت دیں"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"مجھ سے بعد میں پوچھیں"</string>

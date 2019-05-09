@@ -178,7 +178,7 @@
     <string name="data_connection_roaming" msgid="6037232010953697354">"Itinerància"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"No hi ha cap targeta SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"No hi ha cap SIM."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dades mòbils"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dades mòbils activades"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"S\'han desactivat les dades mòbils"</string>
@@ -187,7 +187,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartició de xarxa per Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN activada"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap SIM."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"S\'està canviant la xarxa de l\'operador de telefonia mòbil"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Obre els detalls de la bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> per cent de bateria."</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gestió"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificacions pausades pel mode No molestis"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Comença ara"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Cap notificació"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"La pantalla està fixada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, toca i mantén premudes els botons Enrere i Aplicacions recents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, mantén premuts els botons Enrere i Inici."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Llisca cap amunt i mantén premut per deixar de fixar-lo."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, toca i mantén premut el botó Aplicacions recents."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, mantén premut el botó d\'inici."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Per deixar de fixar aquesta pantalla, mantén premuts els botons Enrere i Aplicacions recents"</string>
@@ -639,12 +642,12 @@
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Desactiva les notificacions"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Discreta"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Prioritària"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"T\'ajuda a centrar-te en les notificacions que es mostren a l\'àrea de notificacions. Sempre silenciosa."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Es mostra a sota de les notificacions prioritàries. Sempre silenciosa."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Es mostra a sota de les notificacions prioritàries. Sempre silenciosa."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Es mostra a sota de les notificacions prioritàries. Sempre silenciosa."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Emet un so i mostra una icona a la barra d\'estat. Es mostra a la pantalla de bloqueig."</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"Prioritàries"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"T\'ajuda a concentrar-te perquè les notificacions només es mostren a l\'àrea desplegable. Sempre en silenci."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Es mostra a sota de les notificacions prioritàries. Sempre en silenci."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Es mostra a sota de les notificacions prioritàries. Sempre en silenci."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Es mostra a sota de les notificacions prioritàries. Sempre en silenci."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Atrau la teva atenció amb un so i una icona a la barra d\'estat. Es mostra a la pantalla de bloqueig."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Aquestes notificacions no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquest grup de notificacions no es pot configurar aquí"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notificació mitjançant aplicació intermediària"</string>
@@ -881,7 +884,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicacions que s\'estan executant en segon pla"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toca per obtenir informació sobre l\'ús de dades i de bateria"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Vols desactivar les dades mòbils?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"No tindràs accés a dades ni a Internet amb <xliff:g id="CARRIER">%s</xliff:g>. Només podràs accedir a Internet per Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"No tindràs accés a dades ni a Internet mitjançant <xliff:g id="CARRIER">%s</xliff:g>. Internet només estarà disponible per Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"el teu operador de telefonia mòbil"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Com que hi ha una aplicació que oculta una sol·licitud de permís, no es pot verificar la teva resposta des de la configuració."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Vols permetre que <xliff:g id="APP_0">%1$s</xliff:g> mostri porcions de l\'aplicació <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Obre <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Configuració de les bombolles: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Vols permetre les bombolles de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Gestiona"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Denega"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permet"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Pregunta-m\'ho més tard"</string>

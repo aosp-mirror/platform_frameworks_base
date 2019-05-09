@@ -208,10 +208,10 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Обавештење је одбачено."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Прозор са обавештењима."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Брза подешавања."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Закључани екран."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Закључан екран."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Подешавања"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Преглед."</string>
-    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Закључани екран за посао"</string>
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"Закључан екран за посао"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Затвори"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi је искључен."</string>
@@ -451,6 +451,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Не приказуј поново"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Управљајте"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Обавештења су паузирана режимом Не узнемиравај"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Започни одмах"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Нема обавештења"</string>
@@ -530,8 +534,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екран је закачен"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"На овај начин се стално приказује док га не откачите. Превуците нагоре и задржите да бисте га откачили."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Почетна да бисте га откачили."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Да бисте откачили овај екран, додирните и задржите дугмад Назад и Преглед"</string>
@@ -823,7 +826,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Отвори подешавања за <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Измени редослед подешавања."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. страна од <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Закључани екран"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Закључан екран"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Прошири"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Умањи"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Затвори"</string>
@@ -917,8 +920,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Отворите <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Подешавања за <xliff:g id="APP_NAME">%1$s</xliff:g> облачиће"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Желите ли да омогућите облачиће из апликације <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Управљајте"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Одбиј"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Дозволи"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Питај ме касније"</string>

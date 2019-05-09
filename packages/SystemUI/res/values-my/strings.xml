@@ -448,6 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"နောက်ထပ် မပြပါနှင့်"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"အားလုံး ဖယ်ရှားရန်"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"စီမံရန်"</string>
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"မသိမသာ အကြောင်းကြားချက်များ"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"မသိမသာ အကြောင်းကြားချက်အားလုံး ရှင်းပါ"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"အကြောင်းကြားချက်များကို \'မနှောင့်ယှက်ရ\' က ခေတ္တရပ်ထားသည်"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"အကြောင်းကြားချက်များ မရှိ"</string>
@@ -527,8 +529,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"သင်က ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ။"</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် အပေါ်သို့ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"သင်ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် Overview ကိုထိပြီး ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'ပင်မ\' ခလုတ်ကို တို့၍ဖိထားပါ။"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ဤမျက်နှာပြင်ကို ပင်ဖြုတ်ရန်အတွက် \'နောက်သို့\' နှင့် \'အနှစ်ချုပ်\' ခလုတ်တို့ကို တို့၍ဖိထားပါ"</string>
@@ -881,7 +882,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"နောက်ခံတွင် ပွင့်နေသော အက်ပ်များ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ဘက်ထရီနှင့် ဒေတာအသုံးပြုမှု အသေးစိတ်ကို ကြည့်ရန် တို့ပါ"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"မိုဘိုင်းဒေတာ ပိတ်လိုပါသလား။"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> မှ ဒေတာ သို့မဟုတ် အင်တာနက်ကို သုံးစွဲ၍ မရနိုင်ပါ။ Wi-Fi အသုံးပြု၍သာ အင်တာနက် သုံးစွဲနိုင်ပါသည်။"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> မှတစ်ဆင့် ဒေတာ သို့မဟုတ် အင်တာနက်ကို သုံးစွဲ၍ မရနိုင်ပါ။ Wi-Fi အသုံးပြု၍သာ အင်တာနက် သုံးစွဲနိုင်ပါသည်။"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"သင်၏ ဝန်ဆောင်မှုပေးသူ"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"အပလီကေးရှင်းတစ်ခုက ခွင့်ပြုချက်တောင်းခံမှုကို ပိတ်ထားသောကြောင့် ဆက်တင်များသည် သင်၏ လုပ်ဆောင်ကို တုံ့ပြန်နိုင်ခြင်းမရှိပါ။"</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> အား <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များ ပြသခွင့်ပြုပါသလား။"</string>
@@ -912,8 +913,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကိုဖွင့်ရန်"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> ပူဖောင်းကွက်များအတွက် ဆက်တင်များ"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> မှ ပူဖောင်းကွက်များကို ခွင့်ပြုလိုပါသလား။"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"စီမံရန်"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ငြင်းပယ်ရန်"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ခွင့်ပြုရန်"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"နောက်မှ မေးရန်"</string>

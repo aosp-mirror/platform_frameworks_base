@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Omogoči USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek zaslona"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Shranjev. posnetka zaslona ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Shranjevanje posnetka zaslona ..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Posnetek zaslona je shranjen"</string>
@@ -454,6 +454,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tega ne prikaži več"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Izbriši vse"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Upravljanje"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Prikazovanje obvestil je začasno zaustavljeno z načinom »ne moti«"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Začni zdaj"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ni obvestil"</string>
@@ -533,8 +537,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Zaslon je pripet"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in pregled."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, hkrati pridržite gumba za nazaj in za začetni zaslon."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, povlecite navzgor in pridržite."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za pregled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"S tem ostane zaslon viden, dokler ga ne odpnete. Če ga želite odpeti, pridržite gumb za začetni zaslon."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Če želite odpeti ta zaslon, hkrati pridržite gumba za nazaj in za pregled."</string>
@@ -638,13 +641,13 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blokiraj"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Prikazuj še naprej"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimiraj"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Brez zvočnega opozorila"</string>
+    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Diskretno"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Še naprej prikazuj brez zvoka"</string>
     <string name="inline_silent_button_alert" msgid="2449191160203602471">"Z zvočnim opozorilom"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Še naprej opozarjaj"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Izklopi obvestila"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite, da so obvestila te aplikacije še naprej prikazana?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Brez zvočnega opozorila"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"Diskretno"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prednostno"</string>
     <string name="notification_channel_summary_low" msgid="1065819618107531284">"Nemoteč prikaz samo na poteznem zaslonu z obvestili. Vedno tiho."</string>
     <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Prikaz pod prednostnimi obvestili. Vedno tiho."</string>
@@ -891,7 +894,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacije, ki se izvajajo v ozadju"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dotaknite se za prikaz podrobnosti porabe akumulatorja in prenosa podatkov"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Želite izklopiti prenos podatkov v mobilnih omrežjih?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Dostopa do podatkov ali interneta ne boste imeli prek <xliff:g id="CARRIER">%s</xliff:g>. Internet bo na voljo samo prek povezave Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Prek operaterja <xliff:g id="CARRIER">%s</xliff:g> ne boste imeli dostopa do podatkovne povezave ali interneta. Internet bo na voljo samo prek povezave Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"svojega operaterja"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Ker aplikacija zakriva zahtevo za dovoljenje, z nastavitvami ni mogoče preveriti vašega odziva."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Želite dovoliti, da aplikacija <xliff:g id="APP_0">%1$s</xliff:g> prikaže izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -922,8 +925,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Odpri aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Nastavitve za oblačke aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Želite dovoliti oblačke iz aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Upravljanje"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Zavrni"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Dovoli"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Vprašaj me pozneje"</string>

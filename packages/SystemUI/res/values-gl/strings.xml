@@ -82,7 +82,7 @@
     <string name="screenrecord_mic_label" msgid="4522870600914810019">"Gravar voz en off"</string>
     <string name="screenrecord_taps_label" msgid="1776467076607964790">"Mostrar toques"</string>
     <string name="screenrecord_stop_label" msgid="2544887572381260038">"Deter"</string>
-    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Poñer en pausa"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pór en pausa"</string>
     <string name="screenrecord_resume_label" msgid="3605818317015993314">"Retomar"</string>
     <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Cancelar"</string>
     <string name="screenrecord_share_label" msgid="4197867360204019389">"Compartir"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Non mostrar outra vez"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Xestionar"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"O modo Non molestar puxo en pausa as notificacións"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Non hai notificacións"</string>
@@ -525,18 +529,17 @@
     <string name="volume_odi_captions_hint_disable" msgid="8980842810619956593">"desactiva"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Cambia ao dispositivo de saída"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A pantalla está fixada"</string>
-    <string name="screen_pinning_description" msgid="8909878447196419623">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Atrás e Visión xeral."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Atrás e Inicio."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
-    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Visión xeral."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"A pantalla manterase visible ata que a soltes. Para facelo, mantén premido Inicio."</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"Para soltar a pantalla, mantén premidos os botóns Volver e Visión xeral"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para soltar a pantalla, mantén premidos os botóns Atrás e Inicio"</string>
+    <string name="screen_pinning_description" msgid="8909878447196419623">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Atrás e Visión xeral."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Atrás e Inicio."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"A pantalla manterase visible ata que deixes de fixala. Para facelo, pasa o dedo cara arriba e manteno premido."</string>
+    <string name="screen_pinning_description_accessible" msgid="426190689254018656">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Visión xeral."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Inicio."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Para deixar de fixar a pantalla, mantén premidos os botóns Volver e Visión xeral"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para deixar de fixar a pantalla, mantén premidos os botóns Atrás e Inicio"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"De acordo"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Non, grazas"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Fixouse a pantalla"</string>
-    <string name="screen_pinning_exit" msgid="5187339744262325372">"Soltouse a pantalla"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Deixouse de fixar a pantalla"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Queres ocultar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Volverá aparecer a próxima vez que se active na configuración."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
@@ -640,7 +643,7 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Queres seguir mostrando as notificacións desta aplicación?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Discretas"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritarias"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Permíteche centrarte con notificacións só na lista despregable. Sempre en silencio."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Permíteche centrarte con notificacións só no panel despregable. Sempre en silencio."</string>
     <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
     <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
     <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abre a aplicación <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Configuración das burbullas de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Queres permitir que se mostren as burbullas de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Xestionar"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Denegar"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Preguntarme máis tarde"</string>
