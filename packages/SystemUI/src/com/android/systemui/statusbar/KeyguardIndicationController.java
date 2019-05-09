@@ -198,7 +198,7 @@ public class KeyguardIndicationController implements StateListener,
         if (!mAccessibilityController.isAccessibilityEnabled()) {
             return;
         }
-        mShadeController.showBouncer(false /* scrimmed */);
+        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
     }
 
     /**
