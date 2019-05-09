@@ -64,6 +64,8 @@ interface IAudioService {
 
     oneway void recorderEvent(in int riid, in int event);
 
+    oneway void releaseRecorder(in int riid);
+
     // Java-only methods below.
 
     oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,

@@ -3774,7 +3774,7 @@ public class AudioManager {
     /** @hide */
     public static final int RECORD_CONFIG_EVENT_UPDATE = 2;
     /** @hide */
-    public static final int RECORD_CONFIG_EVENT_DEATH = 3;
+    public static final int RECORD_CONFIG_EVENT_RELEASE = 3;
     /**
      * keep in sync with frameworks/native/include/audiomanager/AudioManager.h
      */
