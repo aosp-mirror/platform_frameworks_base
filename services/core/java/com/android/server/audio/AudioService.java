@@ -7071,6 +7071,13 @@ public class AudioService extends IAudioService.Stub
         mRecordMonitor.recorderEvent(riid, event);
     }
 
+    /**
+     * Stop tracking the recorder
+     */
+    public void releaseRecorder(int riid) {
+        mRecordMonitor.releaseRecorder(riid);
+    }
+
     public void disableRingtoneSync(final int userId) {
         final int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId != userId) {
