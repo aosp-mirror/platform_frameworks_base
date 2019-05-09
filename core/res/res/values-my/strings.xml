@@ -302,7 +302,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ကင်မရာ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ဓာတ်ပုံ ရိုက်ပြီးနောက် ဗွီဒီယို မှတ်တမ်းတင်ရန်"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဓာတ်ပုံနှင့် ဗီဒီယိုရိုက်ကူးခွင့် ပေးလိုပါသလား။"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ခေါ်ဆိုထားသော မှတ်တမ်းများ"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ခေါ်ဆိုမှတ်တမ်း"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ဖုန်းခေါ်ဆိုထားသော မှတ်တမ်း ဖတ်ပြီး ရေးရန်"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ခေါ်ဆိုထားသော မှတ်တမ်းများကို သုံးခွင့်ပေးလိုပါသလား။"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ဖုန်း"</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"မျက်နှာ မမှတ်သားနိုင်တော့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ဆင်တူနေသည်၊ အမူအရာ ပြောင်းပါ။"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"ဖန်သားပြင်ကို တည့်တည့်ကြည့်ပါ။"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"ဖန်သားပြင်ကို တည့်တည့်ကြည့်ပါ။"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ခေါင်းမတ်မတ်ထားပါ။"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"သင့်မျက်နှာနှင့် ဖုန်းအကြား ဘာမှကွယ်မထားပါနှင့်။"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"ကင်မရာကို သန့်ရှင်းရေးလုပ်ပါ။"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
@@ -2028,4 +2031,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ဖိုင်</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"တိုက်ရိုက်မျှဝေ၍ မရပါ"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"အက်ပ်စာရင်း"</string>
 </resources>

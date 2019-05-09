@@ -577,11 +577,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Zaznamenejte obličej znovu."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Obličej už nelze rozpoznat. Zkuste to znovu."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Příliš podobné, změňte výraz."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Dívejte se přímo na obrazovku."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Dívejte se přímo na obrazovku."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Narovnejte hlavu."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Mezi vaší hlavou a telefonem nesmí nic překážet."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Očistěte fotoaparát."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Natočte hlavu o něco méně."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Natočte hlavu o něco méně."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Obličej nelze ověřit. Hardware není dostupný."</string>
@@ -985,7 +988,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Poslední měsíc"</string>
     <string name="older" msgid="5211975022815554840">"Starší"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"dne <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"v <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"roku <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"den"</string>
@@ -2099,4 +2102,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> soubor</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Přímé sdílení není k dispozici"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Seznam aplikací"</string>
 </resources>

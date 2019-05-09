@@ -278,7 +278,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedere ai contatti"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai tuoi contatti?"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizzazione"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizz."</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"L\'app avrà accesso alla posizione soltanto quando la usi"</string>
@@ -302,8 +302,8 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di scattare foto e registrare video?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registri chiamate"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"leggere e scrivere il registro chiamate del telefono"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Log chiamate"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"leggere e modificare il registro chiamate del telefono"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai registri chiamate del tuo telefono?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"eseguire e gestire le telefonate"</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Non è più possibile riconoscere il volto. Riprova."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Troppo simile; cambia posa."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Guarda più direttamente verso lo schermo."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Guarda più direttamente verso lo schermo."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Raddrizza la testa in verticale."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Libera lo spazio tra la tua testa e il telefono."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Pulisci la fotocamera."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Gira un po\' meno la testa."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Gira un po\' meno la testa."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. verificare volto. Hardware non disponibile."</string>
@@ -2027,4 +2030,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> file</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Condivisione diretta non attiva"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Elenco di app"</string>
 </resources>

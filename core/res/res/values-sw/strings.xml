@@ -304,7 +304,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; kupiga picha na kurekodi video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Rekodi ya nambari za simu"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"kusoma na kuandika rekodi ya nambari za simu"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie rekodi zako za nambari za simu?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie rekodi zako za nambari za simu?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige na kudhibiti simu?"</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Tafadhali sajili uso wako tena."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Haiwezi tena kutambua uso. Jaribu tena."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Inafanana sana, tafadhali badilisha mkao wako."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Tafadhali angalia skrini moja kwa moja."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Tafadhali angalia skrini moja kwa moja."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Tafadhali simamisha kichwa chako wima."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Safisha nafasi iliyo kati ya kichwa chako na simu."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Tafadhali safisha kamera."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Geuza kichwa chako kidogo."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Geuza kichwa chako kidogo."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imeshindwa kuthibitisha uso. Maunzi hayapatikani."</string>
@@ -2027,4 +2030,5 @@
       <item quantity="one">Faili <xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g></item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Huwezi kushiriki moja kwa moja"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Orodha ya programu"</string>
 </resources>

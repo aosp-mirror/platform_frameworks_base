@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"โปรดลงทะเบียนใบหน้าอีกครั้ง"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"จำใบหน้าไม่ได้แล้ว ลองอีกครั้ง"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ใกล้เคียงเกินไป โปรดเปลี่ยนท่าโพส"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"โปรดมองตรงไปที่หน้าจอ"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"โปรดมองตรงไปที่หน้าจอ"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"โปรดตั้งศีรษะให้ตรง"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"ดูว่าไม่มีสิ่งใดขวางระหว่างใบหน้าและโทรศัพท์"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"โปรดทำความสะอาดกล้อง"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"จัดตำแหน่งศีรษะให้ตรง"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"จัดตำแหน่งศีรษะให้ตรง"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ยืนยันใบหน้าไม่ได้ ฮาร์ดแวร์ไม่พร้อมใช้งาน"</string>
@@ -1595,7 +1598,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"การแสดงผลแบบไร้สาย"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"แคสต์"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"เชื่อมต่อกับอุปกรณ์"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ส่งหน้าจอไปยังอุปกรณ์"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"แคสต์หน้าจอไปยังอุปกรณ์"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"กำลังค้นหาอุปกรณ์…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"การตั้งค่า"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ยกเลิกการเชื่อมต่อ"</string>
@@ -2027,4 +2030,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> และอีก <xliff:g id="COUNT_1">%d</xliff:g> ไฟล์</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"การแชร์โดยตรงไม่พร้อมใช้งาน"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"รายชื่อแอป"</string>
 </resources>
