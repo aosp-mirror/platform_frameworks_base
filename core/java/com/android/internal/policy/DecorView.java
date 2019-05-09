@@ -1230,6 +1230,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * are set.
      */
     private void updateBackgroundDrawable() {
+        // Background insets can be null if super constructor calls setBackgroundDrawable.
+        if (mBackgroundInsets == null) {
+            mBackgroundInsets = Insets.NONE;
+        }
         if (mBackgroundInsets.equals(mLastBackgroundInsets)
                 && mLastOriginalBackgroundDrawable == mOriginalBackgroundDrawable) {
             return;
@@ -1553,10 +1557,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return;
         }
 
-        setPadding(mFramePadding.left + mBackgroundPadding.left,
-                mFramePadding.top + mBackgroundPadding.top,
-                mFramePadding.right + mBackgroundPadding.right,
-                mFramePadding.bottom + mBackgroundPadding.bottom);
+        // Fields can be null if super constructor calls setBackgroundDrawable.
+        Rect framePadding = mFramePadding != null ? mFramePadding : new Rect();
+        Rect backgroundPadding = mBackgroundPadding != null ? mBackgroundPadding : new Rect();
+
+        setPadding(framePadding.left + backgroundPadding.left,
+                framePadding.top + backgroundPadding.top,
+                framePadding.right + backgroundPadding.right,
+                framePadding.bottom + backgroundPadding.bottom);
         requestLayout();
         invalidate();
 
@@ -1576,8 +1584,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (bg != null) {
                 if (fg == null) {
                     opacity = bg.getOpacity();
-                } else if (mFramePadding.left <= 0 && mFramePadding.top <= 0
-                        && mFramePadding.right <= 0 && mFramePadding.bottom <= 0) {
+                } else if (framePadding.left <= 0 && framePadding.top <= 0
+                        && framePadding.right <= 0 && framePadding.bottom <= 0) {
                     // If the frame padding is zero, then we can be opaque
                     // if either the frame -or- the background is opaque.
                     int fop = fg.getOpacity();
