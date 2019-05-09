@@ -157,7 +157,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
         return new AudioRecordingConfiguration( /*anonymized uid*/ -1,
                 in.mClientSessionId, in.mClientSource, in.mClientFormat,
                 in.mDeviceFormat, in.mPatchHandle, "" /*empty package name*/,
-                /*anonymized portId*/ -1, in.mClientSilenced, in.mDeviceSource, in.mClientEffects,
+                in.mClientPortId, in.mClientSilenced, in.mDeviceSource, in.mClientEffects,
                 in.mDeviceEffects);
     }
 
