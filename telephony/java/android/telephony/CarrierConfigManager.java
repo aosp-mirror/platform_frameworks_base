@@ -2964,6 +2964,15 @@ public class CarrierConfigManager {
     public static final String KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY =
             "gsm_rssi_thresholds_int_array";
 
+    /**
+     * Determines whether Wireless Priority Service call is supported over IMS.
+     *
+     * See Wireless Priority Service from https://www.fcc.gov/general/wireless-priority-service-wps
+     * @hide
+     */
+    public static final String KEY_SUPPORT_WPS_OVER_IMS_BOOL =
+            "support_wps_over_ims_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3381,6 +3390,7 @@ public class CarrierConfigManager {
                         -97, /* SIGNAL_STRENGTH_GOOD */
                         -89,  /* SIGNAL_STRENGTH_GREAT */
                 });
+        sDefaults.putBoolean(KEY_SUPPORT_WPS_OVER_IMS_BOOL, true);
     }
 
     /**
