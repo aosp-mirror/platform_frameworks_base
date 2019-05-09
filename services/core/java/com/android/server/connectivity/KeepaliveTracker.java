@@ -496,10 +496,11 @@ public class KeepaliveTracker {
         if (networkKeepalives != null) {
             for (KeepaliveInfo ki : networkKeepalives.values()) {
                 ki.stop(reason);
+                // Clean up keepalives since the network agent is disconnected and unable to pass
+                // back asynchronous result of stop().
+                cleanupStoppedKeepalive(nai, ki.mSlot);
             }
         }
-        // Clean up keepalives will be done as a result of calling ki.stop() after the slots are
-        // freed.
     }
 
     public void handleStopKeepalive(NetworkAgentInfo nai, int slot, int reason) {
