@@ -16,4 +16,4 @@
 
 package android.view.contentcapture;
 
-parcelable UserDataRemovalRequest;
+parcelable DataRemovalRequest;

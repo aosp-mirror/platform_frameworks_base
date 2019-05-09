@@ -29,7 +29,7 @@ import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
-import android.view.contentcapture.UserDataRemovalRequest;
+import android.view.contentcapture.DataRemovalRequest;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.os.IResultReceiver;
@@ -122,8 +122,8 @@ final class RemoteContentCaptureService
     /**
      * Called by {@link ContentCaptureServerSession} to request removal of user data.
      */
-    public void onUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
-        scheduleAsyncRequest((s) -> s.onUserDataRemovalRequest(request));
+    public void onDataRemovalRequest(@NonNull DataRemovalRequest request) {
+        scheduleAsyncRequest((s) -> s.onDataRemovalRequest(request));
     }
 
     /**

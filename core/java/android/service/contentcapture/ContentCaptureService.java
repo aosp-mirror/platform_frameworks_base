@@ -46,9 +46,9 @@ import android.view.contentcapture.ContentCaptureEvent;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
+import android.view.contentcapture.DataRemovalRequest;
 import android.view.contentcapture.IContentCaptureDirectManager;
 import android.view.contentcapture.MainContentCaptureSession;
-import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -155,17 +155,15 @@ public abstract class ContentCaptureService extends Service {
         }
 
         @Override
-        public void onUserDataRemovalRequest(UserDataRemovalRequest request) {
-            mHandler.sendMessage(
-                    obtainMessage(ContentCaptureService::handleOnUserDataRemovalRequest,
-                            ContentCaptureService.this, request));
+        public void onDataRemovalRequest(DataRemovalRequest request) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnDataRemovalRequest,
+                    ContentCaptureService.this, request));
         }
 
         @Override
         public void onActivityEvent(ActivityEvent event) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnActivityEvent,
                     ContentCaptureService.this, event));
-
         }
     };
 
@@ -305,12 +303,12 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     * Notifies the service that the app requested to remove data associated with the user.
+     * Notifies the service that the app requested to remove content capture data.
      *
-     * @param request the user data requested to be removed
+     * @param request the content capture data requested to be removed
      */
-    public void onUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
-        if (sVerbose) Log.v(TAG, "onUserDataRemovalRequest()");
+    public void onDataRemovalRequest(@NonNull DataRemovalRequest request) {
+        if (sVerbose) Log.v(TAG, "onDataRemovalRequest()");
     }
 
     /**
@@ -466,8 +464,8 @@ public abstract class ContentCaptureService extends Service {
         onDestroyContentCaptureSession(new ContentCaptureSessionId(sessionId));
     }
 
-    private void handleOnUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
-        onUserDataRemovalRequest(request);
+    private void handleOnDataRemovalRequest(@NonNull DataRemovalRequest request) {
+        onDataRemovalRequest(request);
     }
 
     private void handleOnActivityEvent(@NonNull ActivityEvent event) {

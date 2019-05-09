@@ -613,16 +613,16 @@ public final class ContentCaptureManager {
     }
 
     /**
-     * Called by the app to request the content capture service to remove user-data associated with
-     * some context.
+     * Called by the app to request the content capture service to remove content capture data
+     * associated with some context.
      *
      * @param request object specifying what user data should be removed.
      */
-    public void removeUserData(@NonNull UserDataRemovalRequest request) {
+    public void removeData(@NonNull DataRemovalRequest request) {
         Preconditions.checkNotNull(request);
 
         try {
-            mService.removeUserData(request);
+            mService.removeData(request);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

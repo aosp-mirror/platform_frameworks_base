@@ -19,7 +19,7 @@ package android.view.contentcapture;
 import android.content.ComponentName;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
-import android.view.contentcapture.UserDataRemovalRequest;
+import android.view.contentcapture.DataRemovalRequest;
 import android.os.IBinder;
 
 import com.android.internal.os.IResultReceiver;
@@ -59,9 +59,9 @@ oneway interface IContentCaptureManager {
     void getServiceComponentName(in IResultReceiver result);
 
     /**
-     * Requests the removal of user data for the calling user.
+     * Requests the removal of content catpure data for the calling user.
      */
-    void removeUserData(in UserDataRemovalRequest request);
+    void removeData(in DataRemovalRequest request);
 
     /**
      * Returns whether the content capture feature is enabled for the calling user.

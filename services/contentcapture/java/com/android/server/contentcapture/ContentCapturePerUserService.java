@@ -56,7 +56,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.contentcapture.ContentCaptureCondition;
-import android.view.contentcapture.UserDataRemovalRequest;
+import android.view.contentcapture.DataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -343,12 +343,12 @@ final class ContentCapturePerUserService
     }
 
     @GuardedBy("mLock")
-    public void removeUserDataLocked(@NonNull UserDataRemovalRequest request) {
+    public void removeDataLocked(@NonNull DataRemovalRequest request) {
         if (!isEnabledLocked()) {
             return;
         }
         assertCallerLocked(request.getPackageName());
-        mRemoteService.onUserDataRemovalRequest(request);
+        mRemoteService.onDataRemovalRequest(request);
     }
 
     @GuardedBy("mLock")

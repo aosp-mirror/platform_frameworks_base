@@ -31,10 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class used by apps to request the Content Capture service to remove user-data associated with
- * some context.
+ * Class used by apps to request the Content Capture service to remove data associated with
+ * {@link LocusId LocusIds}.
  */
-public final class UserDataRemovalRequest implements Parcelable {
+public final class DataRemovalRequest implements Parcelable {
 
     /**
      * When set, service should use the {@link LocusId#getId()} as prefix for the data to be
@@ -54,7 +54,7 @@ public final class UserDataRemovalRequest implements Parcelable {
     private final boolean mForEverything;
     private ArrayList<LocusIdRequest> mLocusIdRequests;
 
-    private UserDataRemovalRequest(@NonNull Builder builder) {
+    private DataRemovalRequest(@NonNull Builder builder) {
         mPackageName = ActivityThread.currentActivityThread().getApplication().getPackageName();
         mForEverything = builder.mForEverything;
         if (builder.mLocusIds != null) {
@@ -67,7 +67,7 @@ public final class UserDataRemovalRequest implements Parcelable {
         }
     }
 
-    private UserDataRemovalRequest(@NonNull Parcel parcel) {
+    private DataRemovalRequest(@NonNull Parcel parcel) {
         mPackageName = parcel.readString();
         mForEverything = parcel.readBoolean();
         if (!mForEverything) {
@@ -89,7 +89,7 @@ public final class UserDataRemovalRequest implements Parcelable {
     }
 
     /**
-     * Checks if app is requesting to remove all user data associated with its package.
+     * Checks if app is requesting to remove content capture data associated with its package.
      */
     public boolean isForEverything() {
         return mForEverything;
@@ -104,7 +104,7 @@ public final class UserDataRemovalRequest implements Parcelable {
     }
 
     /**
-     * Builder for {@link UserDataRemovalRequest} objects.
+     * Builder for {@link DataRemovalRequest} objects.
      */
     public static final class Builder {
 
@@ -115,7 +115,7 @@ public final class UserDataRemovalRequest implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Requests servive to remove all user data associated with the app's package.
+         * Requests servive to remove all content capture data associated with the app's package.
          *
          * @return this builder
          */
@@ -132,7 +132,7 @@ public final class UserDataRemovalRequest implements Parcelable {
          * Request service to remove data associated with a given {@link LocusId}.
          *
          * @param locusId the {@link LocusId} being requested to be removed.
-         * @param flags either {@link UserDataRemovalRequest#FLAG_IS_PREFIX} or {@code 0}
+         * @param flags either {@link DataRemovalRequest#FLAG_IS_PREFIX} or {@code 0}
          *
          * @return this builder
          */
@@ -154,17 +154,17 @@ public final class UserDataRemovalRequest implements Parcelable {
         }
 
         /**
-         * Builds the {@link UserDataRemovalRequest}.
+         * Builds the {@link DataRemovalRequest}.
          */
         @NonNull
-        public UserDataRemovalRequest build() {
+        public DataRemovalRequest build() {
             throwIfDestroyed();
 
             Preconditions.checkState(mForEverything || mLocusIds != null,
                     "must call either #forEverything() or add one #addLocusId()");
 
             mDestroyed = true;
-            return new UserDataRemovalRequest(this);
+            return new DataRemovalRequest(this);
         }
 
         private void throwIfDestroyed() {
@@ -192,19 +192,19 @@ public final class UserDataRemovalRequest implements Parcelable {
         }
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<UserDataRemovalRequest> CREATOR =
-            new Parcelable.Creator<UserDataRemovalRequest>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<DataRemovalRequest> CREATOR =
+            new Parcelable.Creator<DataRemovalRequest>() {
 
         @Override
         @NonNull
-        public UserDataRemovalRequest createFromParcel(Parcel parcel) {
-            return new UserDataRemovalRequest(parcel);
+        public DataRemovalRequest createFromParcel(Parcel parcel) {
+            return new DataRemovalRequest(parcel);
         }
 
         @Override
         @NonNull
-        public UserDataRemovalRequest[] newArray(int size) {
-            return new UserDataRemovalRequest[size];
+        public DataRemovalRequest[] newArray(int size) {
+            return new DataRemovalRequest[size];
         }
     };
 
@@ -231,7 +231,7 @@ public final class UserDataRemovalRequest implements Parcelable {
         /**
          * Gets the flags associates with request.
          *
-         * @return either {@link UserDataRemovalRequest#FLAG_IS_PREFIX} or {@code 0}.
+         * @return either {@link DataRemovalRequest#FLAG_IS_PREFIX} or {@code 0}.
          */
         @NonNull
         public @Flags int getFlags() {
