@@ -6182,6 +6182,9 @@ message GpuStatsAppInfo {
     // Angle driver loading time info.
     optional GpuDriverLoadingTime angle_driver_loading_time = 5
             [(android.os.statsd.log_mode) = MODE_BYTES];
+
+    // CPU Vulkan implementation is in use.
+    optional bool cpu_vulkan_in_use = 6;
 }
 
 /*
