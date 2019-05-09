@@ -3854,6 +3854,9 @@ public class ConnectivityServiceTest {
         networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
         testFactory.waitForRequests();
 
+        // unregister network callback - a no-op, but should not fail
+        mCm.unregisterNetworkCallback(networkCallback);
+
         testFactory.unregister();
         handlerThread.quit();
     }
