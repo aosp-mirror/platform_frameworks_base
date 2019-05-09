@@ -281,8 +281,9 @@ class ActivityStack extends ConfigurationContainer {
         if (display != null && inSplitScreenPrimaryWindowingMode()) {
             // If we created a docked stack we want to resize it so it resizes all other stacks
             // in the system.
-            getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
-            mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect2,
+            getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
+                    mTmpRect /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
+            mStackSupervisor.resizeDockedStackLocked(getRequestedOverrideBounds(), mTmpRect,
                     mTmpRect2, null, null, PRESERVE_WINDOWS);
         }
         mRootActivityContainer.updateUIDsPresentOnDisplay();
@@ -396,7 +397,6 @@ class ActivityStack extends ConfigurationContainer {
 
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
-    private final Rect mTmpRect3 = new Rect();
     private final ActivityOptions mTmpOptions = ActivityOptions.makeBasic();
 
     /** List for processing through a set of activities */
@@ -512,7 +512,6 @@ class ActivityStack extends ConfigurationContainer {
         mWindowManager = mService.mWindowManager;
         mStackId = stackId;
         mCurrentUser = mService.mAmInternal.getCurrentUserId();
-        mTmpRect2.setEmpty();
         // Set display id before setting activity and window type to make sure it won't affect
         // stacks on a wrong display.
         mDisplayId = display.mDisplayId;
@@ -572,90 +571,87 @@ class ActivityStack extends ConfigurationContainer {
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
         final boolean prevIsAlwaysOnTop = isAlwaysOnTop();
-        final ActivityDisplay display = getDisplay();
         final int prevRotation = getWindowConfiguration().getRotation();
         final int prevDensity = getConfiguration().densityDpi;
         final int prevScreenW = getConfiguration().screenWidthDp;
         final int prevScreenH = getConfiguration().screenHeightDp;
-
-        getBounds(mTmpRect); // previous bounds
+        final Rect newBounds = mTmpRect;
+        // Initialize the new bounds by previous bounds as the input and output for calculating
+        // override bounds in pinned (pip) or split-screen mode.
+        getBounds(newBounds);
 
         super.onConfigurationChanged(newParentConfig);
-        if (display == null) {
-            return;
-        }
-        if (getTaskStack() == null) {
+        final ActivityDisplay display = getDisplay();
+        if (display == null || getTaskStack() == null) {
             return;
         }
 
+        final boolean windowingModeChanged = prevWindowingMode != getWindowingMode();
+        final int overrideWindowingMode = getRequestedOverrideWindowingMode();
         // Update bounds if applicable
         boolean hasNewOverrideBounds = false;
         // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
+        if (overrideWindowingMode == WINDOWING_MODE_PINNED) {
             // Pinned calculation already includes rotation
-            mTmpRect2.set(mTmpRect);
-            hasNewOverrideBounds = getTaskStack().calculatePinnedBoundsForConfigChange(mTmpRect2);
-        } else {
+            hasNewOverrideBounds = getTaskStack().calculatePinnedBoundsForConfigChange(newBounds);
+        } else if (!matchParentBounds()) {
+            // If the parent (display) has rotated, rotate our bounds to best-fit where their
+            // bounds were on the pre-rotated display.
             final int newRotation = getWindowConfiguration().getRotation();
-            if (!matchParentBounds()) {
-                // If the parent (display) has rotated, rotate our bounds to best-fit where their
-                // bounds were on the pre-rotated display.
-                if (prevRotation != newRotation) {
-                    mTmpRect2.set(mTmpRect);
-                    getDisplay().mDisplayContent
-                            .rotateBounds(newParentConfig.windowConfiguration.getBounds(),
-                                    prevRotation, newRotation, mTmpRect2);
-                    hasNewOverrideBounds = true;
-                }
+            final boolean rotationChanged = prevRotation != newRotation;
+            if (rotationChanged) {
+                display.mDisplayContent.rotateBounds(
+                        newParentConfig.windowConfiguration.getBounds(), prevRotation, newRotation,
+                        newBounds);
+                hasNewOverrideBounds = true;
+            }
 
+            // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
+            if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    || overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                 // If entering split screen or if something about the available split area changes,
                 // recalculate the split windows to match the new configuration.
-                if (prevRotation != newRotation
+                if (rotationChanged || windowingModeChanged
                         || prevDensity != getConfiguration().densityDpi
-                        || prevWindowingMode != getWindowingMode()
                         || prevScreenW != getConfiguration().screenWidthDp
                         || prevScreenH != getConfiguration().screenHeightDp) {
-                    // Use override windowing mode to prevent extra bounds changes if inheriting
-                    // the mode.
-                    if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                            || getRequestedOverrideWindowingMode()
-                            == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-                        mTmpRect2.set(mTmpRect);
-                        getTaskStack()
-                                .calculateDockedBoundsForConfigChange(newParentConfig, mTmpRect2);
-                        hasNewOverrideBounds = true;
-                    }
+                    getTaskStack().calculateDockedBoundsForConfigChange(newParentConfig, newBounds);
+                    hasNewOverrideBounds = true;
                 }
             }
         }
-        if (getWindowingMode() != prevWindowingMode) {
+
+        if (windowingModeChanged) {
             // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-            if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
+            if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
+                        newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
                 // immediately resize so docked bounds are available in onSplitScreenModeActivated
                 setTaskDisplayedBounds(null);
-                setTaskBounds(mTmpRect2);
-                setBounds(mTmpRect2);
-            } else if (
-                    getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                setTaskBounds(newBounds);
+                setBounds(newBounds);
+                newBounds.set(newBounds);
+            } else if (overrideWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                 Rect dockedBounds = display.getSplitScreenPrimaryStack().getBounds();
                 final boolean isMinimizedDock =
-                        getDisplay().mDisplayContent.getDockedDividerController().isMinimizedDock();
+                        display.mDisplayContent.getDockedDividerController().isMinimizedDock();
                 if (isMinimizedDock) {
                     TaskRecord topTask = display.getSplitScreenPrimaryStack().topTask();
                     if (topTask != null) {
                         dockedBounds = topTask.getBounds();
                     }
                 }
-                getStackDockedModeBounds(dockedBounds, null, mTmpRect2, mTmpRect3);
+                getStackDockedModeBounds(dockedBounds, null /* currentTempTaskBounds */,
+                        newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
                 hasNewOverrideBounds = true;
             }
-        }
-        if (prevWindowingMode != getWindowingMode()) {
             display.onStackWindowingModeChanged(this);
         }
         if (hasNewOverrideBounds) {
-            mRootActivityContainer.resizeStack(this, mTmpRect2, null, null, PRESERVE_WINDOWS,
+            // Note the resizeStack may enter onConfigurationChanged recursively, so we make a copy
+            // of the temporary bounds (newBounds is mTmpRect) to avoid it being modified.
+            mRootActivityContainer.resizeStack(this, new Rect(newBounds), null /* tempTaskBounds */,
+                    null /* tempTaskInsetBounds */, PRESERVE_WINDOWS,
                     true /* allowResizeInDockedMode */, true /* deferResume */);
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
