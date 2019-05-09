@@ -15,6 +15,7 @@
 package com.android.systemui;
 
 import android.annotation.Nullable;
+import android.app.INotificationManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorPrivacyManager;
@@ -68,6 +69,7 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -298,6 +300,8 @@ public class Dependency extends SystemUI {
     @Inject Lazy<SensorPrivacyController> mSensorPrivacyController;
     @Inject Lazy<DumpController> mDumpController;
     @Inject Lazy<DockManager> mDockManager;
+    @Inject Lazy<ChannelEditorDialogController> mChannelEditorDialogController;
+    @Inject Lazy<INotificationManager> mINotificationManager;
 
     @Inject
     public Dependency() {
@@ -473,6 +477,8 @@ public class Dependency extends SystemUI {
         mProviders.put(SensorPrivacyController.class, mSensorPrivacyController::get);
         mProviders.put(DumpController.class, mDumpController::get);
         mProviders.put(DockManager.class, mDockManager::get);
+        mProviders.put(ChannelEditorDialogController.class, mChannelEditorDialogController::get);
+        mProviders.put(INotificationManager.class, mINotificationManager::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add
