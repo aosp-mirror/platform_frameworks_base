@@ -155,13 +155,6 @@ public class StorageManager {
     public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
 
     /** {@hide} */
-    public static final String PROP_FORCE_AUDIO = "persist.fw.force_audio";
-    /** {@hide} */
-    public static final String PROP_FORCE_VIDEO = "persist.fw.force_video";
-    /** {@hide} */
-    public static final String PROP_FORCE_IMAGES = "persist.fw.force_images";
-
-    /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
