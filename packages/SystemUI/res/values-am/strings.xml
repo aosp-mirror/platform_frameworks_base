@@ -271,8 +271,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"ለGPS በመፈለግ ላይ"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"በ GPS የተዘጋጀ ሥፍራ"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"የአካባቢ ጥያቄዎች ነቅተዋል"</string>
-    <!-- no translation found for accessibility_sensors_off_active (157126524598525432) -->
-    <skip />
+    <string name="accessibility_sensors_off_active" msgid="157126524598525432">"ዳሳሾች ጠፍተዋል ገቢር"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ሁሉንም ማሳወቂያዎች አጽዳ"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
@@ -449,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ዳግመኛ አታሳይ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ያቀናብሩ"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ማሳወቂያዎች በአትረብሽ ባሉበት ቆመዋል"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"አሁን ጀምር"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ምንም ማሳወቂያ የለም"</string>
@@ -528,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"ማያ ገጽ ተሰክቷል"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል ተመለስ እና አጠቃላይ ዕይታ የሚለውን ይጫኑ እና ይያዙ።"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል ተመለስ እና መነሻ የሚለውን ይንኩ እና ይያዙ።"</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"እስኪነቅሉት ድረስ ይህ በእይታ ውስጥ ያቆየዋል። ለመንቀል ወደ ላይ ጠረግ አድርገው ይያዙ።"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል አጠቃላይ ዕይታ ተጭነው ይያዙ።"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ይሄ እስኪነቅሉት ድረስ በእይታ ውስጥ ያስቀምጠዋል። ለመንቀል መነሻ የሚለውን ይንኩ እና ይያዙ።"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ይህን ማያ ገጽ ለመንቀል ተመለስ እና አጠቃላይ ዕይታ አዝራሮችን ይንኩ እና ይያዙ"</string>
@@ -639,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ከዚህ መተግበሪያ ማሳወቂያዎችን ማሳየት ይቀጥል?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ረጋ ያለ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ቅድሚያ የተሰጠው"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ሁልጊዜ ጸጥታ። በወደ ታች ተጎታች ጥላ ውስጥ ያሳያል።"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ሁልጊዜ ጸጥታ። በወደ ታች ተጎታች ዝርዝር ጥላ እና በሁነታ አሞሌው ውስጥ ያሳያል"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ሁልጊዜ ጸጥታ። በወደ ታች ተጎታች ዝርዝር ጥላ ውስጥ እና በማያ ገጽ መቆለፊያ ገጽ ላይ ያሳያል።"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ሁልጊዜ ጸጥታ። በወደ ታች ተጎታች ጥላ፣ በሁነታ አሞሌ እና በመቆለፊያ ማያ ገጽ ውስጥ ያሳያል።"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"በወደ ታች ተጎታች ዝርዝር ጥላ እና በማያ ገጽ መቆለፊያ ውስጥ ድምፅን እና ማሳያዎችን ፍጠር።"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"በወደታች ተጎችታች ጥላ ውስጥ ብቻ በማሳወቂያዎች ላይ እንዲያተኩሩ ያግዝዎታል። ሁልጊዜ ጸጥታ።"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ከዚህ በታች ቅድሚያ ተሰጪ ማሳወቂያዎችን ያሳያል። ሁልጊዜ ጸጥታ።"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ከዚህ በታች ቅድሚያ ተሰጪ ማሳወቂያዎችን ያሳያል። ሁልጊዜ ጸጥታ።"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ከዚህ በታች ቅድሚያ ተሰጪ ማሳወቂያዎችን ያሳያል። ሁልጊዜ ጸጥታ።"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ከድምፅ እና የሁኔታ አሞሌ አዶ ጋር የእርስዎን ትኩረት ይስባል። በማያ ገጽ ቁልፍ ላይ ያሳያል።"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"እነዚህ ማሳወቂያዎች ሊሻሻሉ አይችሉም።"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"የማሳወቂያዎች ይህ ቡድን እዚህ ላይ ሊዋቀር አይችልም"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ተኪ ማሳወቂያ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ይህ መተግበሪያ ካሜራውን እየተጠቀመ ነው።"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ይህ መተግበሪያ ማይክሮፎኑን እየተጠቀመ ነው።"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ይህ መተግበሪያ በማያ ገጽዎ ላይ ባሉ ሌሎች መተግበሪያዎች ላይ እያሳየ ነው።"</string>
@@ -912,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ክፈት"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"ቅንብሮች ለ <xliff:g id="APP_NAME">%1$s</xliff:g> አረፋዎች"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"ከ <xliff:g id="APP_NAME">%1$s</xliff:g> አረፋዎች ይፈቀዱ?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"ያቀናብሩ"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ከልክል"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ፍቀድ"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"በኋላ ጠይቀኝ"</string>

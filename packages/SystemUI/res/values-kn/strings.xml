@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ನಿರ್ವಹಿಸಿ"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಎನ್ನುವ ಮೂಲಕ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"ಪರದೆಯನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕಿಸಿ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಮೇಲೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ಸಾಮಾನ್ಯ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ಆದ್ಯತೆಗೊಳಿಸಿದ"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ. ಪುಲ್‌-ಡೌನ್ ಶೇಡ್‌ನಲ್ಲಿ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ. ಪುಲ್‌-ಡೌನ್ ಶೇಡ್ &amp; ಸ್ಥಿತಿ ಪಟ್ಟಿಯಲ್ಲಿ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತವೆ."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ. ಪುಲ್‌-ಡೌನ್ ಶೇಡ್ &amp; ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತವೆ."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ. ಪುಲ್‌-ಡೌನ್ ಶೇಡ್, ಸ್ಥಿತಿ ಪಟ್ಟಿ &amp; ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಆಗುತ್ತದೆ."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"ಧ್ವನಿ ಮಾಡುತ್ತದೆ ಮತ್ತು ಪುಲ್‌-ಡೌನ್ ಶೇಡ್, ಸ್ಥಿತಿ ಪಟ್ಟಿ &amp; ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಮಾಡುತ್ತದೆ."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ಪುಲ್-ಡೌನ್ ಶೇಡ್‌ನಲ್ಲಿರುವ ಅಧಿಸೂಚನೆಗಳ ಕಡೆಗೆ ಮಾತ್ರ ಗಮನಹರಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ. ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ಪ್ರಾಶಸ್ತ್ಯದ ಅಧಿಸೂಚನೆಗಳ ಕೆಳಗೆ ಪ್ರದರ್ಶಿತವಾಗುತ್ತದೆ. ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ಪ್ರಾಶಸ್ತ್ಯದ ಅಧಿಸೂಚನೆಗಳ ಕೆಳಗೆ ಪ್ರದರ್ಶಿತವಾಗುತ್ತದೆ. ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ಪ್ರಾಶಸ್ತ್ಯದ ಅಧಿಸೂಚನೆಗಳ ಕೆಳಗೆ ಪ್ರದರ್ಶಿತವಾಗುತ್ತದೆ. ಯಾವಾಗಲೂ ನಿಶ್ಯಬ್ದ."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ಧ್ವನಿ ಮತ್ತು ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಮೂಲಕ ನಿಮ್ಮ ಗಮನವನ್ನು ಸೆಳೆಯುತ್ತದೆ. ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ತೋರಿಸುತ್ತದೆ."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ಪ್ರಾಕ್ಸಿ ಮಾಡಿದ ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೇಲಿಂದ ಪ್ರದರ್ಶಿಸುತ್ತಿದೆ."</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಬಬಲ್‌ಗಳಿಗಾಗಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್‌ನ ಬಬಲ್‌ಗಳನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"ನಿರ್ವಹಿಸಿ"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ನಿರಾಕರಿಸಿ"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ಅನುಮತಿಸಿ"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"ನನ್ನನ್ನು ಆನಂತರ ಕೇಳಿ"</string>

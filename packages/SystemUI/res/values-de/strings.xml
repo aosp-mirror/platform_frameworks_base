@@ -452,6 +452,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht mehr anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Verwalten"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
@@ -531,6 +535,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Bildschirm ist fixiert"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Dazu wischst du nach oben und hältst den Bildschirm gedrückt"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Um die Fixierung für diesen Bildschirm aufzuheben, berühre und halte \"Zurück\" und \"Übersicht\""</string>
@@ -642,15 +647,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Benachrichtigungen dieser App weiterhin anzeigen?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Stumm"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Priorisiert"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste und der Statusleiste."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste und auf dem Sperrbildschirm."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Immer lautlos. Benachrichtigungen erscheinen in der Benachrichtigungsleiste, der Statusleiste und auf dem Sperrbildschirm."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Akustisches Signal ertönt. Benachrichtigungen erscheinen in der Benachrichtigungsleiste, der Statusleiste und auf dem Sperrbildschirm."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Benachrichtigungen erscheinen nur in der Benachrichtigungsleiste. So kannst du dich besser konzentrieren. Immer lautlos."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Erscheinen unter den wichtigen Benachrichtigungen. Immer lautlos."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Erscheinen unter den wichtigen Benachrichtigungen. Immer lautlos."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Erscheinen unter den wichtigen Benachrichtigungen. Immer lautlos."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Benachrichtigungen werden mit einem Ton und einem Statusleistensymbol angekündigt. Erscheinen auf dem Sperrbildschirm."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Weitergeleitete Benachrichtigung"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Diese App verwendet die Kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Diese App verwendet das Mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Diese App wird über anderen Apps auf dem Bildschirm angezeigt."</string>
@@ -915,6 +919,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> öffnen"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Einstellungen für <xliff:g id="APP_NAME">%1$s</xliff:g>-Bubbles"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>-Bubbles zulassen?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Verwalten"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Ablehnen"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Zulassen"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Später fragen"</string>

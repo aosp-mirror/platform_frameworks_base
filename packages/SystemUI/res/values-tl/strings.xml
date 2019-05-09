@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Huwag ipakitang muli"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"I-clear lahat"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Pamahalaan"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Mga notification na na-pause ng Huwag Istorbohin"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Magsimula ngayon"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Walang mga notification"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Naka-pin ang screen"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Bumalik at Home upang mag-unpin."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Mag-swipe pataas at i-hold para i-unpin."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Overview upang mag-unpin."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Pinapanatili nitong nakikita ito hanggang sa mag-unpin ka. Pindutin nang matagal ang Home upang mag-unpin."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Upang i-unpin ang screen na ito, pindutin nang matagal ang mga button na Bumalik at Overview"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Patuloy na ipakita ang mga notification mula sa app na ito?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Malumanay"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Priyoridad"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Palaging naka-silent. Ipinapakita sa pull-down na shade."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Palaging naka-silent. Ipinapakita sa pull-down na shade at status bar."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Palaging naka-silent. Ipinapakita sa pull-down na shade at lock screen."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Palaging naka-silent. Ipinapakita sa pull-down na shade, status bar, at lock screen."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Tumutunog at ipinapakita sa pull-down na shade, status bar, at lock screen."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Nakakatulong para hindi ka maabala dahil sa pull-down na shade lang lalabas ang mga notification. Palaging naka-silent."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Ipinapakita sa ibaba ng mga priyoridad na notification. Palaging naka-silent."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Ipinapakita sa ibaba ng mga priyoridad na notification. Palaging naka-silent."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Ipinapakita sa ibaba ng mga priyoridad na notification. Palaging naka-silent."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Kinukuha ang iyong atensyon gamit ang tunog at icon sa status bar. Ipinapakita sa lock screen."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Hindi puwedeng baguhin ang mga notification na ito."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Na-proxy na notification"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ginagamit ng app na ito ang camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ginagamit ng app na ito ang mikropono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ipinapakita ang app na ito sa ibabaw ng iba pang app sa iyong screen."</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Buksan ang <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Mga setting para sa mga bubble ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Payagan ang mga bubble mula sa <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Pamahalaan"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Tanggihan"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Payagan"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Tanungin ako sa ibang pagkakataon"</string>

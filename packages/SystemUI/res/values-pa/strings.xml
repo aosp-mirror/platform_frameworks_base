@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB ਚਾਲੂ ਕਰੋ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਜ਼ੂਮ ਕਰੋ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਸਟ੍ਰੈਚ ਕਰੋ"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ਹੁਣ ਚਾਲੂ ਕਰੋ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਅਤੇ ਫੜ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਬਟਨਾਂ ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ਸਰਲ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ਤਰਜੀਹੀ"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ਹਮੇਸ਼ਾਂ ਖਾਮੋਸ਼। ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ \'ਤੇ ਦਿਸਦੀ ਹੈ।"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ਹਮੇਸ਼ਾਂ ਖਾਮੋਸ਼। ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ \'ਤੇ ਦਿਸਦੀ ਹੈ।"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ਹਮੇਸ਼ਾਂ ਖਾਮੋਸ਼। ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਸਦੀ ਹੈ।"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ਹਮੇਸ਼ਾਂ ਖਾਮੋਸ਼। ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ, ਸਥਿਤੀ ਪੱਟੀ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਸਦੀ ਹੈ।"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"ਧੁਨੀ ਵਜਾਉਂਦੀ ਹੈ ਅਤੇ ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ, ਸਥਿਤੀ ਪੱਟੀ ਅਤੇ ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਸਦੀ ਹੈ।"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ਸਿਰਫ਼ ਹੇਠਾਂ ਖਿੱਚੀ ਜਾਣ ਵਾਲੀ ਸੂਚੀ ਵਿਚਲੀਆਂ ਸੂਚਨਾਵਾਂ ਨਾਲ ਧਿਆਨ ਦੇਣ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੀਆਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੀਆਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੀਆਂ ਸੂਚਨਾਵਾਂ ਦਿਖਾਓ। ਹਮੇਸ਼ਾਂ ਖਮੋਸ਼।"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ਧੁਨੀ ਅਤੇ ਸਥਿਤੀ ਪੱਟੀ ਪ੍ਰਤੀਕ ਨਾਲ ਤੁਹਾਡਾ ਧਿਆਨ ਖਿੱਚਦੀ ਹੈ। ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਦਿਖਾਓ।"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ਇੱਕ ਐਪ ਦੀ ਥਾਂ \'ਤੇ ਦੂਜੀ ਐਪ ਰਾਹੀਂ ਦਿੱਤੀ ਗਈ ਸੂਚਨਾ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ਇਹ ਐਪ ਕੈਮਰੇ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ਇਹ ਐਪ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ਇਹ ਐਪ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹੈ।"</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਖੋਲ੍ਹੋ"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਬੁਲਬੁਲਿਆਂ ਲਈ ਸੈਟਿੰਗਾਂ"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੋਂ ਬੁਲਬੁਲੇ ਆਉਣ ਦਿਓ?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ਮਨ੍ਹਾ ਕਰੋ"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ਕਰਨ ਦਿਓ"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"ਮੈਨੂੰ ਬਾਅਦ ਵਿੱਚ ਪੁੱਛੋ"</string>

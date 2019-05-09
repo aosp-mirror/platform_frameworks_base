@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ära kuva uuesti"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tühjenda kõik"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Haldamine"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Režiim Mitte segada peatas märguanded"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Alusta kohe"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Märguandeid pole"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekraan on kinnitatud"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Avakuva."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks pühkige üles ja hoidke sõrme ekraanil."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Ülevaade."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppu Avakuva."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Ekraanikuva vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Kas jätkata selle rakenduse märguannete kuvamist?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Leebe"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioriseeritud"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Alati vaikne. Kuvatakse allatõmmatavas menüüs."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Alati vaikne. Kuvatakse allatõmmatavas menüüs ja olekuribal."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Alati vaikne. Kuvatakse allatõmmatavas menüüs ja lukustuskuval."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Alati vaikne. Kuvatakse allatõmmatavas menüüs, olekuribal ja lukustuskuval."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Kostub heli, kuvatakse allatõmmatavas menüüs, olekuribal ja lukustuskuval."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Aitab teil allatõmmatavas menüüs ainult märguannetele keskenduda. Alati vaikne."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Kuvatakse prioriteetsete märguannete all. Alati vaikne."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Kuvatakse prioriteetsete märguannete all. Alati vaikne."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Kuvatakse prioriteetsete märguannete all. Alati vaikne."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Haarab teie tähelepanu heli ja olekuriba ikooni abil. Kuvatakse lukustuskuval."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Neid märguandeid ei saa muuta."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Seda märguannete rühma ei saa siin seadistada"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Puhvriga märguanne"</string>
     <string name="appops_camera" msgid="8100147441602585776">"See rakendus kasutab kaamerat."</string>
     <string name="appops_microphone" msgid="741508267659494555">"See rakendus kasutab mikrofoni."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"See rakendus kuvatakse teie ekraanil muude rakenduste peal."</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Ava <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> mullide seaded"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Kas soovite rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> mullid lubada?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Halda"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Keela"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Luba"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Küsi hiljem"</string>

@@ -118,7 +118,7 @@
     <string name="cancel" msgid="6442560571259935130">"ຍົກເລີກ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"ຢືນຢັນ"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ລອງໃໝ່"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Touch the fingerprint sensor"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ແຕະໃສ່ເຊັນເຊີລາຍນິ້ວມື"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ໄອຄອນລາຍນິ້ວມື"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ກຳລັງຊອກຫາທ່ານ…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"ໄອຄອນໃບໜ້າ"</string>
@@ -448,6 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ບໍ່​ຕ້ອງ​ສະ​ແດງ​ອີກ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ລຶບລ້າງທັງໝົດ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ຈັດການ"</string>
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"ການແຈ້ງເຕືອນສຸພາບ"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"ລຶບລ້າງການແຈ້ງເຕືອນແບບສຸພາບ"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ຢຸດການແຈ້ງເຕືອນໂດຍໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ເລີ່ມດຽວນີ້"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ບໍ່ມີການແຈ້ງເຕືອນ"</string>
@@ -527,6 +529,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"ນີ້ຈະເຮັດໃຫ້ມັນຢູ່ໃນມຸມມອງຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ປັດຂຶ້ນຄ້າງໄວ້ເພື່ອເຊົາປັກໝຸດ."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ເພື່ອຍົກເລີກການປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
@@ -638,15 +641,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ສະແດງການແຈ້ງເຕືອນຈາກແອັບນີ້ຕໍ່ໄປບໍ?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ສຸພາບ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ສຳຄັນ"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ປິດສຽງຕະຫຼອດ. ສະແດງໃນແຖບແບບເລື່ອນລົງ."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ປິດສຽງຕະຫຼອດ. ສະແດງໃນແຖບແບບເລື່ອນລົງ ແລະ ແຖບສະຖານະ."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ປິດສຽງຕະຫຼອດ. ສະແດງໃນແຖບແບບດຶງລົງ ແລະ ໃນໜ້າຈໍລັອກ."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ປິດສຽງຕະຫຼອດ. ສະແດງໃນແຖບແບບເລື່ອນລົງ, ແຖບສະຖານະ ແລະ ຢູ່ໜ້າຈໍລັອກ."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"ເປີດສຽງ ແລະ ສະແດງໃນແຖບແບບເລື່ອນລົງ, ແຖບສະຖານະ ແລະ ຢູ່ໜ້າຈໍລັອກ."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ຊ່ວຍທ່ານມີສະມາທິກກັບການແຈ້ງເຕືອນສະເພາະໃນແຖບເລື່ອນລົງເທົ່ານັ້ນ. ປິດສຽງຕະຫຼອດ."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ສະແດງການແຈ້ງເຕືອນທີ່ຄວາມສຳຄັນຕ່ຳລົງ. ປິດສຽງຕະຫຼອດ."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ສະແດງການແຈ້ງເຕືອນທີ່ຄວາມສຳຄັນຕ່ຳລົງ. ປິດສຽງຕະຫຼອດ."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ສະແດງການແຈ້ງເຕືອນທີ່ຄວາມສຳຄັນຕ່ຳລົງ. ປິດສຽງຕະຫຼອດ."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ດຶງຄວາມສົນໃຈຂອງທ່ານດ້ວຍສຽງ ແລະ ໄອຄອນແຖບສະຖານະ. ສະແດງຢູ່ໜ້າຈໍລັອກ."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ບໍ່ສາມາດແກ້ໄຂການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄດ້."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ບໍ່ສາມາດຕັ້ງຄ່າກຸ່ມການແຈ້ງເຕືອນນີ້ຢູ່ບ່ອນນີ້ໄດ້"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ການແຈ້ງເຕືອນແບບພຣັອກຊີ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ແອັບນີ້ກຳລັງໃຊ້ກ້ອງຢູ່."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ແອັບນີ້ກຳລັງໃຊ້ໄມໂຄຣໂຟນຢູ່."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ແອັບນີ້ກຳລັງສະແດງຜົນບັງແອັບອື່ນຢູ່ໜ້າຈໍຂອງທ່ານ."</string>
@@ -911,6 +913,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"ເປີດ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"ການຕັ້ງຄ່າສຳລັບ bubble <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"ອະນຸຍາດໃຫ້ມີ bubbles ຈາກ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"ຈັດການ"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ປະຕິເສດ"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ອະນຸຍາດ"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"ຖາມຂ້ອຍໃນພາຍຫຼັງ"</string>
