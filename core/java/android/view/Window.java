@@ -1090,6 +1090,7 @@ public abstract class Window {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void addPrivateFlags(int flags) {
         setPrivateFlags(flags, flags);
     }
