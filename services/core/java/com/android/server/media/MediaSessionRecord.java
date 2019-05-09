@@ -19,12 +19,12 @@ package com.android.server.media;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
-import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.ISession;
@@ -612,7 +612,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 ISessionControllerCallbackHolder holder = mControllerCallbackHolders.get(i);
                 try {
                     holder.mCallback.onQueueChanged(mQueue == null ? null :
-                            new MediaParceledListSlice<>(mQueue));
+                            new ParceledListSlice<>(mQueue));
                 } catch (DeadObjectException e) {
                     mControllerCallbackHolders.remove(i);
                     logCallbackException("Removing dead callback in pushQueueUpdate", holder, e);
@@ -904,7 +904,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setQueue(MediaParceledListSlice queue) throws RemoteException {
+        public void setQueue(ParceledListSlice queue) throws RemoteException {
             synchronized (mLock) {
                 mQueue = queue == null ? null : (List<QueueItem>) queue.getList();
             }
@@ -1469,9 +1469,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public MediaParceledListSlice getQueue() {
+        public ParceledListSlice getQueue() {
             synchronized (mLock) {
-                return mQueue == null ? null : new MediaParceledListSlice<>(mQueue);
+                return mQueue == null ? null : new ParceledListSlice<>(mQueue);
             }
         }
 

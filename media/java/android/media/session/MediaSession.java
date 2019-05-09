@@ -24,10 +24,10 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
-import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
@@ -473,7 +473,7 @@ public final class MediaSession {
      */
     public void setQueue(@Nullable List<QueueItem> queue) {
         try {
-            mBinder.setQueue(queue == null ? null : new MediaParceledListSlice(queue));
+            mBinder.setQueue(queue == null ? null : new ParceledListSlice(queue));
         } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
