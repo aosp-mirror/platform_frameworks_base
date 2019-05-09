@@ -38,6 +38,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.Button;
@@ -98,6 +99,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private LiveData<Slice> mLiveData;
     private int mDisplayId = INVALID_DISPLAY;
     private int mIconSize;
+    private int mIconSizeWithHeader;
     /**
      * Runnable called whenever the view contents change.
      */
@@ -106,6 +108,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private boolean mHasHeader;
     private final int mRowWithHeaderPadding;
     private final int mRowPadding;
+    private float mRowTextSize;
+    private float mRowWithHeaderTextSize;
 
     @Inject
     public KeyguardSliceView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -141,6 +145,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         mRow = findViewById(R.id.row);
         mTextColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
         mIconSize = (int) mContext.getResources().getDimension(R.dimen.widget_icon_size);
+        mIconSizeWithHeader = (int) mContext.getResources().getDimension(R.dimen.header_icon_size);
+        mRowTextSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.widget_label_font_size);
+        mRowWithHeaderTextSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.header_row_font_size);
         mTitle.setOnClickListener(this);
     }
 
@@ -244,16 +253,19 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             final SliceItem titleItem = rc.getTitleItem();
             button.setText(titleItem == null ? null : titleItem.getText());
             button.setContentDescription(rc.getContentDescription());
+            button.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    mHasHeader ? mRowWithHeaderTextSize : mRowTextSize);
 
             Drawable iconDrawable = null;
             SliceItem icon = SliceQuery.find(item.getSlice(),
                     android.app.slice.SliceItem.FORMAT_IMAGE);
             if (icon != null) {
+                final int iconSize = mHasHeader ? mIconSizeWithHeader : mIconSize;
                 iconDrawable = icon.getIcon().loadDrawable(mContext);
                 if (iconDrawable != null) {
                     final int width = (int) (iconDrawable.getIntrinsicWidth()
-                            / (float) iconDrawable.getIntrinsicHeight() * mIconSize);
-                    iconDrawable.setBounds(0, 0, Math.max(width, 1), mIconSize);
+                            / (float) iconDrawable.getIntrinsicHeight() * iconSize);
+                    iconDrawable.setBounds(0, 0, Math.max(width, 1), iconSize);
                 }
             }
             button.setCompoundDrawables(iconDrawable, null, null, null);
@@ -361,6 +373,11 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     @Override
     public void onDensityOrFontScaleChanged() {
         mIconSize = mContext.getResources().getDimensionPixelSize(R.dimen.widget_icon_size);
+        mIconSizeWithHeader = (int) mContext.getResources().getDimension(R.dimen.header_icon_size);
+        mRowTextSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.widget_label_font_size);
+        mRowWithHeaderTextSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.header_row_font_size);
     }
 
     public void refresh() {
