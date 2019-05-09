@@ -2398,6 +2398,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * it's a summary notification).
      */
     public int getNumUniqueChannels() {
+        return getUniqueChannels().size();
+    }
+
+    /**
+     * Returns the channels covered by the notification row (including its children if
+     * it's a summary notification).
+     */
+    public ArraySet<NotificationChannel> getUniqueChannels() {
         ArraySet<NotificationChannel> channels = new ArraySet<>();
 
         channels.add(mEntry.channel);
@@ -2417,7 +2425,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
             }
         }
-        return channels.size();
+
+        return channels;
     }
 
     public void updateChildrenHeaderAppearance() {

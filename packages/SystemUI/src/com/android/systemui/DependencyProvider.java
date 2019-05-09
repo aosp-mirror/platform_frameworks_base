@@ -22,6 +22,7 @@ import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
 import android.annotation.Nullable;
+import android.app.INotificationManager;
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.NightDisplayListener;
@@ -130,6 +131,14 @@ public class DependencyProvider {
     public IStatusBarService provideIStatusBarService() {
         return IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+    }
+
+    /** */
+    @Singleton
+    @Provides
+    public INotificationManager provideINotificationManager() {
+        return INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }
 
     @Singleton

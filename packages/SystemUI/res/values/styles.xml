@@ -450,6 +450,12 @@
         <item name="android:alpha">0.54</item>
     </style>
 
+    <style name="TextAppearance.NotificationInfo.Title">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
+        <item name="android:textColor">@color/notification_primary_text_color</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="TextAppearance.NotificationInfo.Button">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
         <item name="android:textSize">16sp</item>
