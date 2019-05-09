@@ -416,7 +416,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockView.setVisibility(hasHeader ? View.INVISIBLE : View.VISIBLE);
         mClockViewBold.setVisibility(hasHeader ? View.VISIBLE : View.INVISIBLE);
         int paddingBottom = mContext.getResources().getDimensionPixelSize(hasHeader
-                ? R.dimen.widget_vertical_padding_clock : R.dimen.header_subtitle_padding);
+                ? R.dimen.widget_vertical_padding_clock : R.dimen.title_clock_padding);
         mClockView.setPadding(mClockView.getPaddingLeft(), mClockView.getPaddingTop(),
                 mClockView.getPaddingRight(), paddingBottom);
         mClockViewBold.setPadding(mClockViewBold.getPaddingLeft(), mClockViewBold.getPaddingTop(),

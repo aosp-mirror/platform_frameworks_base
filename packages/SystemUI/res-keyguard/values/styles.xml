@@ -115,6 +115,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:lines">1</item>
         <item name="android:textSize">@dimen/widget_label_font_size</item>
+        <item name="android:letterSpacing">0.02</item>
     </style>
 
     <style name="TextAppearance.Keyguard.BottomArea">
