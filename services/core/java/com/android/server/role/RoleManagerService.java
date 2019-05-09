@@ -156,6 +156,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         packageManagerInternal.setDefaultBrowserProvider(new DefaultBrowserProvider());
+        packageManagerInternal.setDefaultDialerProvider(new DefaultDialerProvider());
         packageManagerInternal.setDefaultHomeProvider(new DefaultHomeProvider());
 
         registerUserRemovedReceiver();
@@ -769,6 +770,16 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 getOrCreateController(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
                         callback);
             }
+        }
+    }
+
+    private class DefaultDialerProvider implements PackageManagerInternal.DefaultDialerProvider {
+
+        @Nullable
+        @Override
+        public String getDefaultDialer(@UserIdInt int userId) {
+            return CollectionUtils.firstOrNull(getOrCreateUserState(userId).getRoleHolders(
+                    RoleManager.ROLE_DIALER));
         }
     }
 
