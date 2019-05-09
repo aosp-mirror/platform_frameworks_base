@@ -234,14 +234,13 @@ public final class Zygote {
     static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            String packageName, String[] packagesForUID, String sandboxId, int targetSdkVersion) {
+            int targetSdkVersion) {
         ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
-                fdsToIgnore, startChildZygote, instructionSet, appDataDir, packageName,
-                packagesForUID, sandboxId);
+                fdsToIgnore, startChildZygote, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Zygote.disableExecuteOnly(targetSdkVersion);
@@ -257,8 +256,7 @@ public final class Zygote {
     private static native int nativeForkAndSpecialize(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
-            String appDataDir, String packageName, String[] packagesForUID,
-            String sandboxId);
+            String appDataDir);
 
     /**
      * Specialize an unspecialized app process.  The current VM must have been started
@@ -283,11 +281,9 @@ public final class Zygote {
      */
     private static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
-            String[] packagesForUID, String sandboxId) {
+            boolean startChildZygote, String instructionSet, String appDataDir) {
         nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
-                                 niceName, startChildZygote, instructionSet, appDataDir,
-                                 packageName, packagesForUID, sandboxId);
+                                 niceName, startChildZygote, instructionSet, appDataDir);
 
         // Enable tracing as soon as possible for the child process.
         Trace.setTracingEnabled(true, runtimeFlags);
@@ -306,8 +302,7 @@ public final class Zygote {
 
     private static native void nativeSpecializeAppProcess(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
-            boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
-            String[] packagesForUID, String sandboxId);
+            boolean startChildZygote, String instructionSet, String appDataDir);
 
     /**
      * Called to do any initialization before starting an application.
@@ -610,8 +605,7 @@ public final class Zygote {
         specializeAppProcess(args.mUid, args.mGid, args.mGids,
                              args.mRuntimeFlags, rlimits, args.mMountExternal,
                              args.mSeInfo, args.mNiceName, args.mStartChildZygote,
-                             args.mInstructionSet, args.mAppDataDir, args.mPackageName,
-                             args.mPackagesForUid, args.mSandboxId);
+                             args.mInstructionSet, args.mAppDataDir);
 
         disableExecuteOnly(args.mTargetSdkVersion);
 
