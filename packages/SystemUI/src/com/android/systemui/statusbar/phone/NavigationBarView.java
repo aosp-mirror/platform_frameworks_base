@@ -628,6 +628,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // as they are used for exiting.
         final boolean pinningActive = ActivityManagerWrapper.getInstance().isScreenPinningActive();
         if (mOverviewProxyService.isEnabled()) {
+            // Force disable recents when not in legacy mode
+            disableRecent |= !QuickStepContract.isLegacyMode(mNavBarMode);
             if (pinningActive) {
                 disableBack = disableHome = false;
             }
