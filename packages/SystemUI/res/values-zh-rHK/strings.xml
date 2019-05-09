@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"啟用 USB"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"擷取螢幕畫面"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"螢幕截圖"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"螢幕擷取畫面已儲存"</string>
@@ -313,7 +313,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"直向"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"橫向"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"輸入法"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"定位"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"位置"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置資訊已關閉"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"媒體裝置"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -354,7 +354,7 @@
       <item quantity="one">%d 部裝置</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"閃光燈"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"電筒"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"流動數據"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"數據用量"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩餘資料"</string>
@@ -366,8 +366,8 @@
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜燈模式"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"在日落時開啟"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"在日出時關閉"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"在<xliff:g id="TIME">%s</xliff:g>開啟"</string>
-    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"在<xliff:g id="TIME">%s</xliff:g>關閉"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"深色主題背景"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「請勿騷擾」模式已將通知暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"畫面將會繼續顯示，直至您取消固定為止。按住 [返回] 按鈕和主按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"畫面將會繼續顯示，直至您取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定此畫面，請按住 [返回] 按鈕和 [概覽] 按鈕"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示此應用程式的通知嗎？"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"低重要性"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"優先"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"一律靜音。在下拉式通知欄中顯示。"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"一律靜音。在下拉式通知欄和狀態列中顯示。"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"一律靜音。在下拉式通知欄和上鎖畫面中顯示。"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"一律靜音。在下拉式通知欄、狀態列和上鎖畫面中顯示。"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"發出音效，並在下拉式通知欄、狀態列和上鎖畫面中顯示。"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"協助您只查看下拉式通知欄中的通知。一律靜音。"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"顯示不重要的通知。一律靜音。"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"顯示不重要的通知。一律靜音。"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"顯示不重要的通知。一律靜音。"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"透過聲音和狀態列圖示引起您的注意，並在上鎖畫面顯示。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"無法在此設定這組通知"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"代理通知"</string>
     <string name="appops_camera" msgid="8100147441602585776">"此應用程式目前使用相機。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"此應用程式目前使用麥克風。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"此應用程式目前透過其他應用程式在畫面上顯示內容。"</string>
@@ -880,7 +884,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"正在背景中執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"輕按即可查看電池和數據用量詳情"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"要關閉流動數據嗎？"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"您將無法透過 <xliff:g id="CARRIER">%s</xliff:g> 存取流動數據或互聯網。您必須連接 Wi-Fi 才能使用互聯網。"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"您將無法透過「<xliff:g id="CARRIER">%s</xliff:g>」存取流動數據或互聯網。必須連接 Wi-Fi 才能使用互聯網。"</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"您的流動網絡供應商"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"由於某個應用程式已阻擋權限要求畫面，因此「設定」應用程式無法驗證您的回應。"</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊嗎？"</string>
@@ -896,7 +900,7 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"省電模式將會在電量低於 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟。"</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"設定"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"知道了"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"傾印 SysUI 記憶體快照"</string>
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"轉儲 SysUI 堆"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"「<xliff:g id="APP">%1$s</xliff:g>」正在使用<xliff:g id="TYPES_LIST">%2$s</xliff:g>。"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"有多個應用程式正在使用<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">"、 "</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"開啟「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」小視窗設定"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"要允許開啟「<xliff:g id="APP_NAME">%1$s</xliff:g>」的小視窗嗎？"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"管理"</string>
     <string name="no_bubbles" msgid="337101288173078247">"拒絕"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"允許"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"稍後再詢問我"</string>

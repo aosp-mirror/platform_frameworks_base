@@ -275,8 +275,8 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सर्व सूचना साफ करा."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
-      <item quantity="one">आत आणखी <xliff:g id="NUMBER_1">%s</xliff:g> सूचना.</item>
       <item quantity="other">आत आणखी <xliff:g id="NUMBER_1">%s</xliff:g> सूचना.</item>
+      <item quantity="one">आत आणखी <xliff:g id="NUMBER_0">%s</xliff:g> सूचना.</item>
     </plurals>
     <string name="notification_summary_message_format" msgid="715071952312553396">"<xliff:g id="CONTACT_NAME">%1$s</xliff:g>: <xliff:g id="MESSAGE_CONTENT">%2$s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"सूचना सेटिंग्ज"</string>
@@ -338,7 +338,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"वाय-फाय कनेक्ट केलेले नाही"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"चमक"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वयंचलित"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंगांचा क्रम उलटा लावा"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"रंग उलटे लावा"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"रंग सुधारणा मोड"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"अधिक सेटिंग्ज"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"पूर्ण झाले"</string>
@@ -350,8 +350,8 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"सुरू करत आहे…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"डेटा सेव्हर सुरू आहे"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
-      <item quantity="one">%d डिव्हाइस</item>
       <item quantity="other">%d डिव्हाइस</item>
+      <item quantity="one">%d डिव्हाइस</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"सूचना"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"फ्लॅशलाइट"</string>
@@ -434,8 +434,8 @@
     <string name="user_add_user_message_short" msgid="2161624834066214559">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीने त्यांचे स्थान सेट करणे आवश्यक असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अॅप्स अपडेट करू शकतो."</string>
     <string name="user_limit_reached_title" msgid="7374910700117359177">"वापरकर्ता मर्यादा गाठली"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
-      <item quantity="one">तुम्ही <xliff:g id="COUNT">%d</xliff:g> वापरकर्त्यापर्यंत जोडू शकता.</item>
       <item quantity="other">तुम्ही <xliff:g id="COUNT">%d</xliff:g> वापरकर्त्यांपर्यंत जोडू शकता.</item>
+      <item quantity="one">फक्त एक वापरकर्ता तयार केला जाऊ शकतो.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"वापरकर्त्यास काढायचे?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"या वापरकर्त्याचे सर्व अॅप्स आणि डेटा काढून टाकला जाईल."</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"व्यवस्थापित करा"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"व्यत्यय आणून नकाद्वारे सूचना थांबवल्या"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"सूचना नाहीत"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"स्क्रीन पिन केलेली आहे"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"तुम्ही अनपिन करेर्यंत हे त्याला दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी मागे आणि होम वर स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"हे तुम्ही अनपिन करेपर्यंत दृश्यमान ठेवते. वरती स्‍वाइप करा आणि अनपिन करण्यासाठी धरून ठेवा."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"तुम्ही अनपिन करेर्यंत हे यास दृश्यामध्ये ठेवते. अनपिन करण्‍यासाठी विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"तुम्ही अनपिन करेपर्यंत हे त्यास दृश्यामध्ये ठेवते. अनपिन करण्यासाठी होमला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"हा स्क्रीन अनपिन करण्यासाठी, मागे आणि अवलोकन बटणांना स्पर्श करून धरून ठेवा"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"या अ‍ॅपकडील सूचना दाखवणे सुरू ठेवायचे?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"हळू आवाजातील"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"प्राधान्यकृत"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"नेहमी सायलंट. पूल-डाउन शेडमध्ये प्रदर्शित करते."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"नेहमी सायलंट. पूल-डाउन शेड आणि स्टेटस बारमध्ये प्रदर्शित करते."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"नेहमी सायलंट. पूल-डाउन शेडमध्ये आणि लॉक स्क्रीनवर प्रदर्शित करते."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"नेहमी सायलंट. पूल-डाउन शेडमध्ये, स्टेटस बारमध्ये आणि लॉक स्क्रीनवर प्रदर्शित करते."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"आवाज करते आणि पूल-डाउन शेडमध्ये, स्टेटस बारमध्ये आणि लॉक स्क्रीनवर प्रदर्शित करते."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"फक्त पुल डाउन शेडमध्ये सूचनांवर लक्ष केंद्रीत करण्यात मदत करते. नेहमी सायलंट."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"कमी प्राधान्य असलेल्या सूचना दाखवते. नेहमी सायलंट."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"कमी प्राधान्य असलेल्या सूचना दाखवते. नेहमी सायलंट."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"कमी प्राधान्य असलेल्या सूचना दाखवते. नेहमी सायलंट."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"आवाज आणि स्टेटस बार आयकनसह तुमचे लक्ष वेधून घेते. लॉक स्‍क्रीनवर दाखवते."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"प्रॉक्सी केलेल्या सूचना"</string>
     <string name="appops_camera" msgid="8100147441602585776">"हे अ‍ॅप कॅमेरा वापरत आहे."</string>
     <string name="appops_microphone" msgid="741508267659494555">"हे अ‍ॅप मायक्रोफोन वापरत आहे."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"हे अ‍ॅप स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे."</string>
@@ -670,12 +674,12 @@
     <string name="snooze_undo" msgid="6074877317002985129">"पूर्ववत करा"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> साठी स्नूझ करा"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
-      <item quantity="one"> %d तास</item>
       <item quantity="other"> %d तास</item>
+      <item quantity="one">%d तास</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
-      <item quantity="one"> %d मिनिट</item>
       <item quantity="other"> %d मिनिटे</item>
+      <item quantity="one">%d मिनिट</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"बॅटरी वापर"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज करताना बॅटरी बचतकर्ता उपलब्ध नाही"</string>
@@ -733,9 +737,9 @@
     <string name="accessibility_long_click_tile" msgid="6687350750091842525">"सेटिंग्ज उघडा"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफोन कनेक्ट केले"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हेडसेट कनेक्ट केला"</string>
-    <string name="data_saver" msgid="5037565123367048522">"डेटा बचतकर्ता"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा बचतकर्ता चालू आहे"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा बचतकर्ता बंद आहे"</string>
+    <string name="data_saver" msgid="5037565123367048522">"डेटा सेव्हर"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेव्हर चालू आहे"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा सेव्हर बंद आहे"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"चालू"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"बंद"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नॅव्हिगेशन बार"</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> उघडा"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबलसाठी सेटिंग्ज"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> वरील बबलना अनुमती द्यायची?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"व्यवस्थापित करा"</string>
     <string name="no_bubbles" msgid="337101288173078247">"नाकारा"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"अनुमती द्या"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"मला नंतर विचारा"</string>
