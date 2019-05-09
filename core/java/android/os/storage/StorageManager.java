@@ -291,9 +291,6 @@ public class StorageManager {
     public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
             IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
 
-    /** @hide Prefix used in sandboxIds for apps with sharedUserIds */
-    public static final String SHARED_SANDBOX_PREFIX = "shared-";
-
     private static volatile IStorageManager sStorageManager = null;
 
     private final Context mContext;
@@ -1618,15 +1615,7 @@ public class StorageManager {
      * @hide
      */
     public File translateAppToSystem(File file, int pid, int uid) {
-        // We can only translate absolute paths
-        if (!file.isAbsolute()) return file;
-
-        try {
-            return new File(mStorageManager.translateAppToSystem(file.getAbsolutePath(),
-                    pid, uid));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return file;
     }
 
     /**
@@ -1636,15 +1625,7 @@ public class StorageManager {
      * @hide
      */
     public File translateSystemToApp(File file, int pid, int uid) {
-        // We can only translate absolute paths
-        if (!file.isAbsolute()) return file;
-
-        try {
-            return new File(mStorageManager.translateSystemToApp(file.getAbsolutePath(),
-                    pid, uid));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return file;
     }
 
     /**
