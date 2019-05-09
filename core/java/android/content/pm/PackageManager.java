@@ -725,6 +725,7 @@ public abstract class PackageManager {
             INSTALL_APEX,
             INSTALL_ENABLE_ROLLBACK,
             INSTALL_ALLOW_DOWNGRADE,
+            INSTALL_STAGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -893,6 +894,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_ALLOW_DOWNGRADE = 0x00100000;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package
+     * is being installed as part of a staged install.
+     *
+     * @hide
+     */
+    public static final int INSTALL_STAGED = 0x00200000;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {

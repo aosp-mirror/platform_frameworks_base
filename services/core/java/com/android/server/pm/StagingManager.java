@@ -383,6 +383,7 @@ public class StagingManager {
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
         params.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+        params.installFlags |= PackageManager.INSTALL_STAGED;
         // TODO(b/129744602): use the userid from the original session.
         int apkSessionId = mPi.createSession(
                 params, originalSession.getInstallerPackageName(),
