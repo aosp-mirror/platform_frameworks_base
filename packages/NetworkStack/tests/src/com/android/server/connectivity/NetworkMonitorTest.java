@@ -133,8 +133,8 @@ public class NetworkMonitorTest {
     private @Mock Random mRandom;
     private @Mock NetworkMonitor.Dependencies mDependencies;
     private @Mock INetworkMonitorCallbacks mCallbacks;
-    private @Spy Network mNetwork = new Network(TEST_NETID);
-    private @Mock Network mNonPrivateDnsBypassNetwork;
+    private @Spy Network mCleartextDnsNetwork = new Network(TEST_NETID);
+    private @Mock Network mNetwork;
     private @Mock DataStallStatsUtils mDataStallStatsUtils;
     private @Mock WifiInfo mWifiInfo;
     private @Captor ArgumentCaptor<String> mNetworkTestedRedirectUrlCaptor;
@@ -191,7 +191,7 @@ public class NetworkMonitorTest {
 
         /** Returns the answer for a given name on the given mock network. */
         private synchronized List<InetAddress> getAnswer(Object mock, String hostname) {
-            if (mock == mNonPrivateDnsBypassNetwork && !mNonBypassPrivateDnsWorking) {
+            if (mock == mNetwork && !mNonBypassPrivateDnsWorking) {
                 return null;
             }
             if (mAnswers.containsKey(hostname)) {
@@ -226,17 +226,17 @@ public class NetworkMonitorTest {
 
         /** Starts mocking DNS queries. */
         private void startMocking() throws UnknownHostException {
-            // Queries on mNetwork (i.e., bypassing private DNS) using getAllByName.
+            // Queries on mCleartextDnsNetwork using getAllByName.
+            doAnswer(invocation -> {
+                return getAllByName(invocation.getMock(), invocation.getArgument(0));
+            }).when(mCleartextDnsNetwork).getAllByName(any());
+
+            // Queries on mNetwork using getAllByName.
             doAnswer(invocation -> {
                 return getAllByName(invocation.getMock(), invocation.getArgument(0));
             }).when(mNetwork).getAllByName(any());
 
-            // Queries on mNonBypassPrivateDnsNetwork using getAllByName.
-            doAnswer(invocation -> {
-                return getAllByName(invocation.getMock(), invocation.getArgument(0));
-            }).when(mNonPrivateDnsBypassNetwork).getAllByName(any());
-
-            // Queries on mNetwork (i.e., bypassing private DNS) using DnsResolver#query.
+            // Queries on mCleartextDnsNetwork using DnsResolver#query.
             doAnswer(invocation -> {
                 String hostname = (String) invocation.getArgument(1);
                 Executor executor = (Executor) invocation.getArgument(3);
@@ -259,7 +259,7 @@ public class NetworkMonitorTest {
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
-        when(mDependencies.getPrivateDnsBypassNetwork(any())).thenReturn(mNetwork);
+        when(mDependencies.getPrivateDnsBypassNetwork(any())).thenReturn(mCleartextDnsNetwork);
         when(mDependencies.getDnsResolver()).thenReturn(mDnsResolver);
         when(mDependencies.getRandom()).thenReturn(mRandom);
         when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_MODE), anyInt()))
@@ -271,7 +271,7 @@ public class NetworkMonitorTest {
         when(mDependencies.getSetting(any(), eq(Settings.Global.CAPTIVE_PORTAL_HTTPS_URL), any()))
                 .thenReturn(TEST_HTTPS_URL);
 
-        doReturn(mNetwork).when(mNonPrivateDnsBypassNetwork).getPrivateDnsBypassingCopy();
+        doReturn(mCleartextDnsNetwork).when(mNetwork).getPrivateDnsBypassingCopy();
 
         when(mContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(mCm);
         when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephony);
@@ -305,7 +305,7 @@ public class NetworkMonitorTest {
                     fail("URL not mocked: " + url.toString());
                     return null;
             }
-        }).when(mNetwork).openConnection(any());
+        }).when(mCleartextDnsNetwork).openConnection(any());
         when(mHttpConnection.getRequestProperties()).thenReturn(new ArrayMap<>());
         when(mHttpsConnection.getRequestProperties()).thenReturn(new ArrayMap<>());
 
@@ -355,7 +355,7 @@ public class NetworkMonitorTest {
         private final ConditionVariable mQuitCv = new ConditionVariable(false);
 
         WrappedNetworkMonitor() {
-            super(mContext, mCallbacks, mNonPrivateDnsBypassNetwork, mLogger, mValidationLogger,
+            super(mContext, mCallbacks, mNetwork, mLogger, mValidationLogger,
                     mDependencies, mDataStallStatsUtils);
         }
 
@@ -665,7 +665,7 @@ public class NetworkMonitorTest {
     @Test
     public void testNoInternetCapabilityValidated() throws Exception {
         runNetworkTest(NO_INTERNET_CAPABILITIES, NETWORK_TEST_RESULT_VALID);
-        verify(mNetwork, never()).openConnection(any());
+        verify(mCleartextDnsNetwork, never()).openConnection(any());
     }
 
     @Test
