@@ -778,6 +778,7 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mAutoBrightnessAdjustment=" + mAutoBrightnessAdjustment);
             pw.println("  mUserLux=" + mUserLux);
             pw.println("  mUserBrightness=" + mUserBrightness);
+            pw.println("  mDefaultConfig=" + mDefaultConfig);
         }
 
         private void computeSpline() {
