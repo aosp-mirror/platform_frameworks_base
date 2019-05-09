@@ -149,11 +149,8 @@ bool ZipFileRO::startIteration(void** cookie) {
 bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix)
 {
     _ZipEntryRO* ze = new _ZipEntryRO;
-    ZipString pe(prefix ? prefix : "");
-    ZipString se(suffix ? suffix : "");
     int32_t error = StartIteration(mHandle, &(ze->cookie),
-                                   prefix ? &pe : NULL,
-                                   suffix ? &se : NULL);
+                                   prefix ? prefix : "", suffix ? suffix : "");
     if (error) {
         ALOGW("Could not start iteration over %s: %s", mFileName != NULL ? mFileName : "<null>",
                 ErrorCodeString(error));
