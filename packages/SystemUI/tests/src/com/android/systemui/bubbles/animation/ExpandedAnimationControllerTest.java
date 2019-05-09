@@ -17,6 +17,8 @@
 package com.android.systemui.bubbles.animation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.verify;
 
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -69,14 +71,14 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testBubblesInCorrectExpandedPositions();
-        Mockito.verify(afterExpand).run();
+        verify(afterExpand).run();
 
         Runnable afterCollapse = Mockito.mock(Runnable.class);
         mExpandedController.collapseBackToStack(afterCollapse);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testStackedAtPosition(mExpansionPoint.x, mExpansionPoint.y, -1);
-        Mockito.verify(afterExpand).run();
+        verify(afterExpand).run();
     }
 
     @Test
@@ -138,6 +140,78 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
         assertEquals(-1, mLayout.indexOfChild(draggedBubble));
         testBubblesInCorrectExpandedPositions();
+    }
+
+    @Test
+    public void testMagnetToDismiss_dismiss() throws InterruptedException {
+        expand();
+
+        final View draggedOutView = mViews.get(0);
+        final Runnable after = Mockito.mock(Runnable.class);
+
+        mExpandedController.prepareForBubbleDrag(draggedOutView);
+        mExpandedController.dragBubbleOut(draggedOutView, 25, 25);
+
+        // Magnet to dismiss, verify the bubble is at the dismiss target and the callback was
+        // called.
+        mExpandedController.magnetBubbleToDismiss(
+                mViews.get(0), 100 /* velX */, 100 /* velY */, 1000 /* destY */, after);
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+        verify(after).run();
+        assertEquals(1000, mViews.get(0).getTranslationY(), .1f);
+
+        // Dismiss the now-magneted bubble, verify that the callback was called.
+        final Runnable afterDismiss = Mockito.mock(Runnable.class);
+        mExpandedController.dismissDraggedOutBubble(afterDismiss);
+        waitForPropertyAnimations(DynamicAnimation.ALPHA);
+        verify(after).run();
+
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+
+        assertEquals(mBubblePadding, mViews.get(1).getTranslationX(), 1f);
+    }
+
+    @Test
+    public void testMagnetToDismiss_demagnetizeThenDrag() throws InterruptedException {
+        expand();
+
+        final View draggedOutView = mViews.get(0);
+        final Runnable after = Mockito.mock(Runnable.class);
+
+        mExpandedController.prepareForBubbleDrag(draggedOutView);
+        mExpandedController.dragBubbleOut(draggedOutView, 25, 25);
+
+        // Magnet to dismiss, verify the bubble is at the dismiss target and the callback was
+        // called.
+        mExpandedController.magnetBubbleToDismiss(
+                draggedOutView, 100 /* velX */, 100 /* velY */, 1000 /* destY */, after);
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+        verify(after).run();
+        assertEquals(1000, mViews.get(0).getTranslationY(), .1f);
+
+        // Demagnetize the bubble towards (25, 25).
+        mExpandedController.demagnetizeBubbleTo(25 /* x */, 25 /* y */, 100, 100);
+
+        // Start dragging towards (20, 20).
+        mExpandedController.dragBubbleOut(draggedOutView, 20, 20);
+
+        // Since we just demagnetized, the bubble shouldn't be at (20, 20), it should be animating
+        // towards it.
+        assertNotEquals(20, draggedOutView.getTranslationX());
+        assertNotEquals(20, draggedOutView.getTranslationY());
+        waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
+
+        // Waiting for the animations should result in the bubble ending at (20, 20) since the
+        // animation end value was updated.
+        assertEquals(20, draggedOutView.getTranslationX(), 1f);
+        assertEquals(20, draggedOutView.getTranslationY(), 1f);
+
+        // Drag to (30, 30).
+        mExpandedController.dragBubbleOut(draggedOutView, 30, 30);
+
+        // It should go there instantly since the animations finished.
+        assertEquals(30, draggedOutView.getTranslationX(), 1f);
+        assertEquals(30, draggedOutView.getTranslationY(), 1f);
     }
 
     /** Expand the stack and wait for animations to finish. */
