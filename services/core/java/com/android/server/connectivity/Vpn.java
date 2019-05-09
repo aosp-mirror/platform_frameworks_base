@@ -1141,7 +1141,11 @@ public class Vpn {
             }
         } catch (RuntimeException e) {
             IoUtils.closeQuietly(tun);
-            agentDisconnect();
+            // If this is not seamless handover, disconnect partially-established network when error
+            // occurs.
+            if (oldNetworkAgent != mNetworkAgent) {
+                agentDisconnect();
+            }
             // restore old state
             mConfig = oldConfig;
             mConnection = oldConnection;
