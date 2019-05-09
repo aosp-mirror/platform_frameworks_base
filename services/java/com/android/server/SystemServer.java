@@ -1174,9 +1174,12 @@ public final class SystemServer {
         if (!mOnlyCore) {
             traceBeginAndSlog("UpdatePackagesIfNeeded");
             try {
+                Watchdog.getInstance().pauseWatchingCurrentThread("dexopt");
                 mPackageManagerService.updatePackagesIfNeeded();
             } catch (Throwable e) {
                 reportWtf("update packages", e);
+            } finally {
+                Watchdog.getInstance().resumeWatchingCurrentThread("dexopt");
             }
             traceEnd();
         }

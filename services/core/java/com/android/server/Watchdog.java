@@ -140,6 +140,7 @@ public class Watchdog extends Thread {
         private boolean mCompleted;
         private Monitor mCurrentMonitor;
         private long mStartTime;
+        private int mPauseCount;
 
         HandlerChecker(Handler handler, String name, long waitMaxMillis) {
             mHandler = handler;
@@ -160,17 +161,18 @@ public class Watchdog extends Thread {
                 mMonitors.addAll(mMonitorQueue);
                 mMonitorQueue.clear();
             }
-            if (mMonitors.size() == 0 && mHandler.getLooper().getQueue().isPolling()) {
+            if ((mMonitors.size() == 0 && mHandler.getLooper().getQueue().isPolling())
+                    || (mPauseCount > 0)) {
+                // Don't schedule until after resume OR
                 // If the target looper has recently been polling, then
                 // there is no reason to enqueue our checker on it since that
                 // is as good as it not being deadlocked.  This avoid having
-                // to do a context switch to check the thread.  Note that we
-                // only do this if mCheckReboot is false and we have no
-                // monitors, since those would need to be executed at this point.
+                // to do a context switch to check the thread. Note that we
+                // only do this if we have no monitors since those would need to
+                // be executed at this point.
                 mCompleted = true;
                 return;
             }
-
             if (!mCompleted) {
                 // we already have a check in flight, so no need
                 return;
@@ -234,6 +236,28 @@ public class Watchdog extends Thread {
             synchronized (Watchdog.this) {
                 mCompleted = true;
                 mCurrentMonitor = null;
+            }
+        }
+
+        /** Pause the HandlerChecker. */
+        public void pauseLocked(String reason) {
+            mPauseCount++;
+            // Mark as completed, because there's a chance we called this after the watchog
+            // thread loop called Object#wait after 'WAITED_HALF'. In that case we want to ensure
+            // the next call to #getCompletionStateLocked for this checker returns 'COMPLETED'
+            mCompleted = true;
+            Slog.i(TAG, "Pausing HandlerChecker: " + mName + " for reason: "
+                    + reason + ". Pause count: " + mPauseCount);
+        }
+
+        /** Resume the HandlerChecker from the last {@link #pauseLocked}. */
+        public void resumeLocked(String reason) {
+            if (mPauseCount > 0) {
+                mPauseCount--;
+                Slog.i(TAG, "Resuming HandlerChecker: " + mName + " for reason: "
+                        + reason + ". Pause count: " + mPauseCount);
+            } else {
+                Slog.wtf(TAG, "Already resumed HandlerChecker: " + mName);
             }
         }
     }
@@ -360,6 +384,51 @@ public class Watchdog extends Thread {
         synchronized (this) {
             final String name = thread.getLooper().getThread().getName();
             mHandlerCheckers.add(new HandlerChecker(thread, name, timeoutMillis));
+        }
+    }
+
+    /**
+     * Pauses Watchdog action for the currently running thread. Useful before executing long running
+     * operations that could falsely trigger the watchdog. Each call to this will require a matching
+     * call to {@link #resumeWatchingCurrentThread}.
+     *
+     * <p>If the current thread has not been added to the Watchdog, this call is a no-op.
+     *
+     * <p>If the Watchdog is already paused for the current thread, this call adds
+     * adds another pause and will require an additional {@link #resumeCurrentThread} to resume.
+     *
+     * <p>Note: Use with care, as any deadlocks on the current thread will be undetected until all
+     * pauses have been resumed.
+     */
+    public void pauseWatchingCurrentThread(String reason) {
+        synchronized (this) {
+            for (HandlerChecker hc : mHandlerCheckers) {
+                if (Thread.currentThread().equals(hc.getThread())) {
+                    hc.pauseLocked(reason);
+                }
+            }
+        }
+    }
+
+    /**
+     * Resumes the last pause from {@link #pauseWatchingCurrentThread} for the currently running
+     * thread.
+     *
+     * <p>If the current thread has not been added to the Watchdog, this call is a no-op.
+     *
+     * <p>If the Watchdog action for the current thread is already resumed, this call logs a wtf.
+     *
+     * <p>If all pauses have been resumed, the Watchdog action is finally resumed, otherwise,
+     * the Watchdog action for the current thread remains paused until resume is called at least
+     * as many times as the calls to pause.
+     */
+    public void resumeWatchingCurrentThread(String reason) {
+        synchronized (this) {
+            for (HandlerChecker hc : mHandlerCheckers) {
+                if (Thread.currentThread().equals(hc.getThread())) {
+                    hc.resumeLocked(reason);
+                }
+            }
         }
     }
 
