@@ -302,9 +302,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om foto\'s te maken en video op te nemen?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Gesprekkenlijsten"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"gesprekkenlijst lezen en schrijven"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je gesprekkenlijsten?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Gesprekslijsten"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"gesprekslijst lezen en schrijven"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je gesprekslijsten?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en gesprekken beheren"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om telefoongesprekken te starten en te beheren?"</string>
@@ -395,12 +395,12 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekkenlijst lezen"</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekslijst lezen"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Deze app kan je gespreksgeschiedenis lezen."</string>
-    <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekkenlijst schrijven"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app de gesprekkenlijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app de gesprekkenlijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app de gesprekkenlijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekslijst schrijven"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app de gesprekslijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app de gesprekslijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app de gesprekslijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"toegang tot lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die je lichamelijke conditie controleren, zoals je hartslag."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Agenda-afspraken en -gegevens lezen"</string>
@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registreer je gezicht opnieuw."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Herkent gezicht niet meer. Probeer het nog eens."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Lijkt te veel op elkaar. Verander je pose."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Draai je hoofd iets minder."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Draai je hoofd iets minder."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Houd je hoofd verticaal recht."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Zorg dat er niks tussen je hoofd en telefoon zit."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Maak de camera schoon."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Kan gezicht niet verifiëren. Hardware niet beschikbaar."</string>

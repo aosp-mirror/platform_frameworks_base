@@ -296,7 +296,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ta opp lyd"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ta opp lyd?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fysisk aktivitet"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fysisk aktivitet-"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"tilgang til den fysiske aktiviteten din"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til den fysiske aktiviteten din?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -342,7 +342,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"motta tekstmeldinger (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lar appen motta og behandle multimediemeldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din uten at du har sett dem."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lese kringkastede meldinger"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillater at appen kan lese kringkastede meldinger enheten din mottar. Kringkastede varsler leveres noen steder for å advare deg om nødsituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillater at appen kan lese kringkastede meldinger enheten din mottar. Kringkastede varsler leveres noen steder for å advare deg om nødssituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lese abonnement på nyhetskilder"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Lar appen hente inn detaljer om strømmer som er synkroniserte for øyeblikket."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"sende og lese SMS-meldinger"</string>
@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrer ansiktet ditt på nytt."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Kan ikke gjenkjenne ansiktet lenger. Prøv igjen."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"For likt – endre posituren din."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Vri hodet ditt litt mindre."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Vri hodet ditt litt mindre."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Rett hodet ditt vertikalt."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Tøm området mellom hodet ditt og telefonen."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Rengjør kameraet."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Kan ikke bekrefte ansikt. Utilgjengelig maskinvare."</string>

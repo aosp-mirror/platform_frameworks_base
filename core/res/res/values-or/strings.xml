@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ଆଉ ମୁହଁ ଚିହ୍ନଟ କରିହେଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ଅତ୍ୟନ୍ତ ସମପରି, ଦୟାକରି ଆପଣଙ୍କର ପୋଜ୍ ବଦଳାନ୍ତୁ।"</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ଦୟାକରି ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ସିଧା ରଖନ୍ତୁ।"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"ଆପଣଙ୍କର ମୁଣ୍ଡ ଏବଂ ଫୋନ୍ ମଧ୍ୟରେ ଥିବା ସ୍ଥାନ କମ୍ କରନ୍ତୁ।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"ଦୟାକରି କ୍ୟାମେରାକୁ ସଫା କରନ୍ତୁ।"</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
@@ -1220,7 +1221,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"ରିଙ୍ଗଟୋନ୍‍‍କୁ ନିରବ ଭାବେ ସେଟ୍ କରାଯାଇଛି"</string>
     <string name="volume_call" msgid="3941680041282788711">"ଇନ୍‍-କଲ୍‍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"ବ୍ଲୁଟୂଥ୍‍ ଇନ୍-କଲ୍ ଭଲ୍ୟୁମ୍‌"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"ଆଲାର୍ମର ଭଲ୍ୟୁମ୍‌"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"ଆଲାରାମ୍ ଭଲ୍ୟୁମ୍‌"</string>
     <string name="volume_notification" msgid="2422265656744276715">"ବିଜ୍ଞପ୍ତି ଭଲ୍ୟୁମ୍‍"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"ଭଲ୍ୟୁମ୍"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ବ୍ଲୁଟୂଥ୍‍‍ ଭଲ୍ୟୁମ୍‍"</string>
@@ -1597,7 +1598,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ୱେୟାର୍‍ଲେସ୍‍ ଡିସ୍‍ପ୍ଲେ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ଡିଭାଇସ୍‍ ସଂଯୋଗ କରନ୍ତୁ"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ଡିଭାଇସ୍‍ରେ ସ୍କ୍ରୀନ୍‍ କାଷ୍ଟ କରନ୍ତୁ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ଡିଭାଇସରେ ସ୍କ୍ରିନ୍‍ କାଷ୍ଟ କରନ୍ତୁ"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ଡିଭାଇସ୍‍ ଖୋଜାଯାଉଛି…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ସେଟିଙ୍ଗ"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ବିଛିନ୍ନ କରନ୍ତୁ"</string>
@@ -1816,7 +1817,7 @@
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
       <item quantity="other">%1$d ଘଣ୍ଟା ପାଇଁ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ)</item>
-      <item quantity="one">, 1 ଘଣ୍ଟା ପାଇଁ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ)</item>
+      <item quantity="one">1 ଘଣ୍ଟା ପାଇଁ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">%1$d ଘଣ୍ଟା ପାଇଁ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ପର୍ଯ୍ୟନ୍ତ)</item>
@@ -1832,7 +1833,7 @@
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
       <item quantity="other">%d ଘଣ୍ଟା ପାଇଁ</item>
-      <item quantity="one">, 1 ଘଣ୍ଟା ପାଇଁ</item>
+      <item quantity="one">1 ଘଣ୍ଟା ପାଇଁ</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">%d ଘଣ୍ଟା ପାଇଁ</item>
@@ -1886,7 +1887,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"ଏକ ଭାଷା ଯୋଡ଼ନ୍ତୁ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"ପରାମର୍ଶିତ"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"ପ୍ରସ୍ତାବିତ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>

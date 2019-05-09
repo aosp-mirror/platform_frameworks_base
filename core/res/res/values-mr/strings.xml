@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"चेहरा ओळखू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"एकाच प्रकारची पोझ देत आहात कृपया तुमची पोझ बदला."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"तुमचे डोके थोडे कमी फिरवा."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"तुमचे डोके थोडे कमी फिरवा."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"कृपया तुमची मान वर करा."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"तुमचे डोके आणि फोन यांमधली जागा मोकळी करा."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"कृपया कॅमेरा साफ करा."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
@@ -1121,7 +1122,7 @@
     <string name="no" msgid="5141531044935541497">"रद्द करा"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"लक्ष द्या"</string>
     <string name="loading" msgid="7933681260296021180">"लोड करत आहे..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
+    <string name="capital_on" msgid="1544682755514494298">"सुरू"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
     <string name="whichApplication" msgid="4533185947064773386">"याचा वापर करून क्रिया पूर्ण करा"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s वापरून क्रिया पूर्ण करा"</string>
@@ -1599,7 +1600,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"कास्‍ट करा"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"डिव्हाइसला कनेक्ट करा"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"डिव्‍हाइसवर स्क्रीन कास्‍ट करा"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"डिव्‍हाइसेस शोधत आहे…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"डिव्‍हाइस शोधत आहे…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"सेटिंग्ज"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"‍डिस्कनेक्ट करा"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"स्कॅन करत आहे..."</string>
@@ -1805,7 +1806,7 @@
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि इतर हाय-पॉवर वैशिष्ट्ये बंद किंवा मर्यादित करतो. "<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि इतर हाय-पॉवर वैशिष्ट्ये बंद किंवा मर्यादित करतो."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा  मिळवण्यास प्रतिबंध करतो. तुम्ही सध्या वापरत असलेला अ‍ॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, तुम्ही इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेव्हर चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> पर्यंत)</item>
