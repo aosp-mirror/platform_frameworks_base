@@ -108,6 +108,12 @@ public class GraphicsEnvironment {
     }
 
     /**
+     * Hint for GraphicsEnvironment that an activity is launching on the process.
+     * Then the app process is allowed to send stats to GpuStats module.
+     */
+    public static native void hintActivityLaunch();
+
+    /**
      * Allow to query whether an application will use Game Driver.
      */
     public static boolean shouldUseGameDriver(Context context, Bundle coreSettings,
