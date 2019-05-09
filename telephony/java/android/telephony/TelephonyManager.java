@@ -6869,7 +6869,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return the preferred network type.
+     * @return the preferred network type, defined in RILConstants.java.
      * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE))
@@ -9756,6 +9756,23 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionReportDefaultNetworkStatus", e);
+        }
+    }
+
+    /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    public void carrierActionResetAll(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionResetAll(subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
         }
     }
 

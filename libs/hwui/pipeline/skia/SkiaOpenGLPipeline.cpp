@@ -331,8 +331,7 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
     switch (info.colorType()) {
         case kRGBA_8888_SkColorType:
             isSupported = true;
-            // ARGB_4444 is upconverted to RGBA_8888
-            [[fallthrough]];
+        // ARGB_4444 is upconverted to RGBA_8888
         case kARGB_4444_SkColorType:
             pixelFormat = PIXEL_FORMAT_RGBA_8888;
             format = GL_RGBA;

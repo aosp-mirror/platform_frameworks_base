@@ -29,7 +29,6 @@ java_defaults {
         "libbpf",
         "libbpf_android",
         "libc++",
-        "libcgrouprc",
         "libcrypto",
         "libcutils",
         "libdexfile",

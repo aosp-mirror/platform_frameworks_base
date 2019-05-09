@@ -315,7 +315,8 @@ public class SlicePermissionManager implements DirtyTracker {
         return new AtomicFile(new File(mSliceDir, fileName));
     }
 
-    private void handlePersist() {
+    @VisibleForTesting
+    void handlePersist() {
         synchronized (this) {
             for (Persistable persistable : mDirty) {
                 AtomicFile file = getFile(persistable.getFileName());
@@ -335,13 +336,19 @@ public class SlicePermissionManager implements DirtyTracker {
 
                     out.flush();
                     file.finishWrite(stream);
-                } catch (IOException | XmlPullParserException e) {
+                } catch (IOException | XmlPullParserException | RuntimeException e) {
                     Slog.w(TAG, "Failed to save access file, restoring backup", e);
                     file.failWrite(stream);
                 }
             }
             mDirty.clear();
         }
+    }
+
+    // use addPersistableDirty(); this is just for tests
+    @VisibleForTesting
+    void addDirtyImmediate(Persistable obj) {
+        mDirty.add(obj);
     }
 
     private void handleRemove(PkgUser pkgUser) {

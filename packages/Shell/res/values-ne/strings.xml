@@ -25,9 +25,9 @@
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"उक्त बग सम्बन्धी रिपोर्ट चाँडै नै यस फोनमा देखा पर्नेछ"</string>
     <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"तपाईंको बग रिपोर्ट आदान प्रदान गर्न चयन गर्नुहोस्"</string>
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"तपाईंको बग रिपोर्टलाई साझेदारी गर्न ट्याप गर्नुहोस्"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"तपाईंको बग रिपोर्ट स्क्रिनसट बिना आदान प्रदान गर्नाका लागि चयन गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुने प्रतीक्षा गर्नुहोस्"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नाका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नाका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"तपाईंको बग रिपोर्ट स्क्रिनसट बिना आदान प्रदान गर्नका लागि चयन गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुने प्रतीक्षा गर्नुहोस्"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"तपाईँको बग रिपोर्टलाई स्क्रिनसट बिना साझेदारी गर्नका लागि ट्याप गर्नुहोस् वा स्क्रिनसट लिने प्रक्रिया पूरा हुन प्रतीक्षा गर्नुहोस्"</string>
     <string name="bugreport_confirm" msgid="5917407234515812495">"बग रिपोर्टहरूमा प्रणालीका विभिन्न लग फाइलहरूको डेटा हुन्छ जसमा तपाईँले संवेदनशील मानेको डेटा समावेश हुन सक्छ (जस्तै अनुप्रयोगको प्रयोग र स्थान सम्बन्धी डेटा)। तपाईँले विश्वास गर्ने व्यक्ति र अनुप्रयोगहरूसँग मात्र बग रिपोर्टहरूलाई साझेदारी गर्नुहोस्।"</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"फेरि नदेखाउनुहोस्"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रिपोर्टहरू"</string>
@@ -35,9 +35,9 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"बग रिपोर्ट सम्बन्धी विवरणहरूलाई जिप फाइलमा थप्न सकिएन"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"(नामविहीन)"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"विवरण"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रिसट"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"स्क्रिसट सफलतापूर्वक लिइयो।"</string>
-    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रिसट लिन सकिएन।"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रिनशट"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"स्क्रिनशट सफलतापूर्वक लिइयो।"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रिनशट लिन सकिएन।"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>का विवरणहरू"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फाइलको नाम"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"बगको शीर्षक"</string>

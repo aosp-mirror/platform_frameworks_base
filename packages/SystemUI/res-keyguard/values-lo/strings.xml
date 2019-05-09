@@ -28,15 +28,12 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"ແຕະເພື່ອພິມລະຫັດຜ່ານ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ພິມລະຫັດເພື່ອປົດລັອກ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ພິມລະຫັດ PIN ເພື່ອປົດລັອກ"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"ໃສ່ລະຫັດ PIN ຂອງທ່ານ"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"ໃສ່ຮູບແບບປົດລັອກຂອງທ່ານ"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"ໃສ່ລະຫັດຜ່ານຂອງທ່ານ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ບັດບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"ສາກເຕັມແລ້ວ."</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບດ່ວນ"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"ກຳລັງສາກໄຟ"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"ກຳລັງສາກດ່ວນ"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"ກຳລັງສາກຊ້າໆ"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"ເຊື່ອມຕໍ່ສາຍສາກຂອງທ່ານ."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"ກົດ \"ເມນູ\" ເພື່ອປົດລັອກ."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ເຄືອຂ່າຍຖືກລັອກ"</string>
@@ -51,7 +48,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ຊິມກາດຖືກລັອກດ້ວຍລະຫັດ PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ປົດລັອກ SIM card..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"ພື້ນທີ່ PIN"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"ລະຫັດຜ່ານອຸປະກອນ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ພື້ນທີ່ PIN ຂອງ SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ພື້ນທີ່ PUK ຂອງ SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"ໂມງປຸກຕໍ່ໄປຖືກຕັ້ງໄວ້ເວລາ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -141,9 +137,9 @@
       <item quantity="one">ອຸປະກອນບໍ່ໄດ້ຖືກປົດລັອກເປັນເວລາ <xliff:g id="NUMBER_0">%d</xliff:g> ຊົ່ວໂມງ. ຢືນຢັນລະຫັດຜ່ານ.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"ບໍ່ຮັບຮູ້"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
-      <item quantity="other">ລະຫັດ SIM PIN ບໍ່ຖືກຕ້ອງ. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ.</item>
-      <item quantity="one">ໃສ່ລະຫັດ SIM PIN. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ຈະຕ້ອງຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການເພື່ອປົດລັອກ.</item>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="other">ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ.</item>
+      <item quantity="one">ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນທ່ານ.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>

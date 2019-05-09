@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"Erro nos traballos de impresión"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"Non se puido crear o arquivo"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Algúns servizos de impresión están desactivados"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"Buscando impresoras"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Busca de impresoras"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"Non hai servizos de impresión activados"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Non se atopou ningunha impresora"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Non se poden engadir impresoras"</string>
