@@ -60,5 +60,10 @@
                 }
             ]
         }
+    ],
+    "imports": [
+        {
+            "path": "vendor/xts/gts-tests/tests/permission"
+        }
     ]
 }
