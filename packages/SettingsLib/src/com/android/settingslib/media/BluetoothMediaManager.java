@@ -198,6 +198,11 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     }
 
     @Override
+    public void onAudioModeChanged() {
+        dispatchDataChanged();
+    }
+
+    @Override
     public void onDeviceAdded(CachedBluetoothDevice cachedDevice) {
         if (isCachedDeviceConnected(cachedDevice)) {
             addMediaDevice(cachedDevice);
