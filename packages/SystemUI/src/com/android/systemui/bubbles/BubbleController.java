@@ -108,7 +108,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_ACCESSIBILITY_ACTION = 6;
     static final int DISMISS_NO_LONGER_BUBBLE = 7;
 
-    static final int MAX_BUBBLES = 5; // TODO: actually enforce this
+    public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
     // Enables some subset of notifs to automatically become bubbles
     private static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;

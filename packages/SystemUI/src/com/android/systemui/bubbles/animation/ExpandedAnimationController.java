@@ -64,6 +64,20 @@ public class ExpandedAnimationController
     /** Size of dismiss target at bottom of screen. */
     private float mPipDismissHeight;
 
+    /** Whether the dragged-out bubble is in the dismiss target. */
+    private boolean mIndividualBubbleWithinDismissTarget = false;
+
+    /**
+     * Whether the dragged out bubble is springing towards the touch point, rather than using the
+     * default behavior of moving directly to the touch point.
+     *
+     * This happens when the user's finger exits the dismiss area while the bubble is magnetized to
+     * the center. Since the touch point differs from the bubble location, we need to animate the
+     * bubble back to the touch point to avoid a jarring instant location change from the center of
+     * the target to the touch point just outside the target bounds.
+     */
+    private boolean mSpringingBubbleToTouch = false;
+
     public ExpandedAnimationController(Point displaySize) {
         mDisplaySize = displaySize;
     }
@@ -151,8 +165,23 @@ public class ExpandedAnimationController
      * bubble is dragged back into the row.
      */
     public void dragBubbleOut(View bubbleView, float x, float y) {
-        bubbleView.setTranslationX(x);
-        bubbleView.setTranslationY(y);
+        if (mSpringingBubbleToTouch) {
+            if (mLayout.arePropertiesAnimatingOnView(
+                    bubbleView, DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y)) {
+                animationForChild(mBubbleDraggingOut)
+                        .translationX(x)
+                        .translationY(y)
+                        .withStiffness(SpringForce.STIFFNESS_HIGH)
+                        .start();
+            } else {
+                mSpringingBubbleToTouch = false;
+            }
+        }
+
+        if (!mSpringingBubbleToTouch && !mIndividualBubbleWithinDismissTarget) {
+            bubbleView.setTranslationX(x);
+            bubbleView.setTranslationY(y);
+        }
 
         final boolean draggedOutEnough =
                 y > getExpandedY() + mBubbleSizePx || y < getExpandedY() - mBubbleSizePx;
@@ -162,6 +191,53 @@ public class ExpandedAnimationController
                     /* startIndex */ mLayout.indexOfChild(bubbleView) + 1);
             mBubbleDraggedOutEnough = draggedOutEnough;
         }
+    }
+
+    /** Plays a dismiss animation on the dragged out bubble. */
+    public void dismissDraggedOutBubble(Runnable after) {
+        mIndividualBubbleWithinDismissTarget = false;
+
+        // Fill the space from the soon to be dismissed bubble.
+        animateStackByBubbleWidthsStartingFrom(
+                /* numBubbleWidths */ -1,
+                /* startIndex */ mLayout.indexOfChild(mBubbleDraggingOut) + 1);
+
+        animationForChild(mBubbleDraggingOut)
+                .withStiffness(SpringForce.STIFFNESS_HIGH)
+                .scaleX(1.1f)
+                .scaleY(1.1f)
+                .alpha(0f, after)
+                .start();
+    }
+
+    /** Magnets the given bubble to the dismiss target. */
+    public void magnetBubbleToDismiss(
+            View bubbleView, float velX, float velY, float destY, Runnable after) {
+        mIndividualBubbleWithinDismissTarget = true;
+        mSpringingBubbleToTouch = false;
+        animationForChild(bubbleView)
+                .withStiffness(SpringForce.STIFFNESS_MEDIUM)
+                .withDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
+                .withPositionStartVelocities(velX, velY)
+                .translationX(mLayout.getWidth() / 2f - mBubbleSizePx / 2f)
+                .translationY(destY, after)
+                .start();
+    }
+
+    /**
+     * Springs the dragged-out bubble towards the given coordinates and sets flags to have touch
+     * events update the spring's final position until it's settled.
+     */
+    public void demagnetizeBubbleTo(float x, float y, float velX, float velY) {
+        mIndividualBubbleWithinDismissTarget = false;
+        mSpringingBubbleToTouch = true;
+
+        animationForChild(mBubbleDraggingOut)
+                .translationX(x)
+                .translationY(y)
+                .withPositionStartVelocities(velX, velY)
+                .withStiffness(SpringForce.STIFFNESS_HIGH)
+                .start();
     }
 
     /**
@@ -274,27 +350,20 @@ public class ExpandedAnimationController
 
     @Override
     void onChildRemoved(View child, int index, Runnable finishRemoval) {
-        // Bubble pops out to the top.
-        // TODO: Reverse this when bubbles are at the bottom.
-
         final PhysicsAnimationLayout.PhysicsPropertyAnimator animator = animationForChild(child);
-        animator.alpha(0f, finishRemoval /* endAction */);
 
         // If we're removing the dragged-out bubble, that means it got dismissed.
         if (child.equals(mBubbleDraggingOut)) {
-            animator.position(
-                            mLayout.getWidth() / 2f - mBubbleSizePx / 2f,
-                            mLayout.getHeight() + mBubbleSizePx)
-                    .withPositionStartVelocities(mBubbleDraggingOutVelX, mBubbleDraggingOutVelY)
-                    .scaleX(ANIMATE_SCALE_PERCENT)
-                    .scaleY(ANIMATE_SCALE_PERCENT);
-
             mBubbleDraggingOut = null;
+            finishRemoval.run();
         } else {
-            animator.translationY(getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR);
+            animator.alpha(0f, finishRemoval /* endAction */)
+                    .withStiffness(SpringForce.STIFFNESS_HIGH)
+                    .withDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
+                    .scaleX(1.1f)
+                    .scaleY(1.1f)
+                    .start();
         }
-
-        animator.start();
 
         // Animate all the other bubbles to their new positions sans this bubble.
         animateBubblesAfterIndexToCorrectX(index);
