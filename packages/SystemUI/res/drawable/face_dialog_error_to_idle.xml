@@ -29,7 +29,7 @@
                         android:pathData=" M30 6.2 C16.9,6.2 6.3,16.8 6.3,30 C6.3,43.2 16.9,53.8 30,53.8 C43.1,53.8 53.8,43.2 53.8,30 C53.8,16.8 43.1,6.2 30,6.2c "
                         android:strokeWidth="2.5"
                         android:strokeAlpha="1"
-                        android:strokeColor="?android:attr/colorError"
+                        android:strokeColor="@color/biometric_dialog_error"
                         android:trimPathStart="0"
                         android:trimPathEnd="1"
                         android:trimPathOffset="0" />
@@ -38,7 +38,7 @@
                         android:pathData=" M34.78 38.76 C33.83,38.75 31.54,38.75 30.01,38.75 C26.97,38.75 26.14,38.75 24.3,38.76 "
                         android:strokeWidth="2.5"
                         android:strokeAlpha="1"
-                        android:strokeColor="?android:attr/colorError"
+                        android:strokeColor="@color/biometric_dialog_error"
                         android:trimPathStart="0.34"
                         android:trimPathEnd="0.5700000000000001"
                         android:trimPathOffset="0" />
@@ -51,7 +51,7 @@
                         <path
                             android:name="_R_G_L_0_G_D_2_P_0"
                             android:fillAlpha="0"
-                            android:fillColor="@color/biometric_face_icon_gray"
+                            android:fillColor="@color/biometric_dialog_gray"
                             android:fillType="nonZero"
                             android:pathData=" M-2.1 0 C-2.1,1.2 -1.2,2.1 0,2.1 C1.1,2.1 2.1,1.2 2.1,0 C2.1,-1.2 1.2,-2.1 0,-2.1 C-1.2,-2.1 -2.1,-1.2 -2.1,0c " />
                     </group>
@@ -64,7 +64,7 @@
                         <path
                             android:name="_R_G_L_0_G_D_3_P_0"
                             android:fillAlpha="0"
-                            android:fillColor="@color/biometric_face_icon_gray"
+                            android:fillColor="@color/biometric_dialog_gray"
                             android:fillType="nonZero"
                             android:pathData=" M-2.1 0 C-2.1,1.2 -1.2,2.1 0,2.1 C1.2,2.1 2.1,1.2 2.1,0 C2.1,-1.2 1.2,-2.1 0,-2.1 C-1.2,-2.1 -2.1,-1.2 -2.1,0c " />
                     </group>
@@ -75,7 +75,7 @@
                         <path
                             android:name="_R_G_L_0_G_D_4_P_0"
                             android:fillAlpha="1"
-                            android:fillColor="?android:attr/colorError"
+                            android:fillColor="@color/biometric_dialog_error"
                             android:fillType="nonZero"
                             android:pathData=" M0.9 3.25 C0.9,3.25 -1.5,3.25 -1.5,3.25 C-1.5,3.25 -1.5,1.25 -1.5,1.25 C-1.5,1.25 -1.5,1.25 -1.5,1.25 C-1.5,1.25 -1.5,-11.71 -1.5,-11.71 C-1.5,-11.71 0.9,-11.71 0.9,-11.71 C0.9,-11.71 0.9,3.25 0.9,3.25c " />
                     </group>
@@ -91,8 +91,8 @@
                     android:duration="83"
                     android:propertyName="strokeColor"
                     android:startOffset="0"
-                    android:valueFrom="?android:attr/colorError"
-                    android:valueTo="?android:attr/colorError"
+                    android:valueFrom="@color/biometric_dialog_error"
+                    android:valueTo="@color/biometric_dialog_error"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
@@ -102,8 +102,8 @@
                     android:duration="17"
                     android:propertyName="strokeColor"
                     android:startOffset="83"
-                    android:valueFrom="?android:attr/colorError"
-                    android:valueTo="@color/biometric_face_icon_gray"
+                    android:valueFrom="@color/biometric_dialog_error"
+                    android:valueTo="@color/biometric_dialog_gray"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
@@ -119,8 +119,8 @@
                     android:duration="83"
                     android:propertyName="strokeColor"
                     android:startOffset="0"
-                    android:valueFrom="?android:attr/colorError"
-                    android:valueTo="?android:attr/colorError"
+                    android:valueFrom="@color/biometric_dialog_error"
+                    android:valueTo="@color/biometric_dialog_error"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
@@ -130,8 +130,8 @@
                     android:duration="17"
                     android:propertyName="strokeColor"
                     android:startOffset="83"
-                    android:valueFrom="?android:attr/colorError"
-                    android:valueTo="@color/biometric_face_icon_gray"
+                    android:valueFrom="@color/biometric_dialog_error"
+                    android:valueTo="@color/biometric_dialog_gray"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
@@ -427,8 +427,8 @@
                     android:duration="83"
                     android:propertyName="fillColor"
                     android:startOffset="0"
-                    android:valueFrom="?android:attr/colorError"
-                    android:valueTo="?android:attr/colorError"
+                    android:valueFrom="@color/biometric_dialog_error"
+                    android:valueTo="@color/biometric_dialog_error"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />
@@ -438,8 +438,8 @@
                     android:duration="17"
                     android:propertyName="fillColor"
                     android:startOffset="83"
-                    android:valueFrom="?android:attr/colorError"
-                    android:valueTo="@color/biometric_face_icon_gray"
+                    android:valueFrom="@color/biometric_dialog_error"
+                    android:valueTo="@color/biometric_dialog_gray"
                     android:valueType="colorType">
                     <aapt:attr name="android:interpolator">
                         <pathInterpolator android:pathData="M 0.0,0.0 c0.167,0.167 0.833,0.833 1.0,1.0" />

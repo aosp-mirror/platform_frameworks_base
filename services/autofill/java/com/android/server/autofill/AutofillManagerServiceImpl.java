@@ -20,8 +20,8 @@ import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
-import static android.view.autofill.AutofillManager.FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY;
 import static android.view.autofill.AutofillManager.NO_SESSION;
+import static android.view.autofill.AutofillManager.RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -283,7 +283,7 @@ final class AutofillManagerServiceImpl
      *
      * @return {@code long} whose right-most 32 bits represent the session id (which is always
      * non-negative), and the left-most contains extra flags (currently either {@code 0} or
-     * {@link AutofillManager#FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY}).
+     * {@link AutofillManager#RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY}).
      */
     @GuardedBy("mLock")
     long startSessionLocked(@NonNull IBinder activityToken, int taskId, int uid,
@@ -357,7 +357,8 @@ final class AutofillManagerServiceImpl
         if (forAugmentedAutofillOnly) {
             // Must embed the flag in the response, at the high-end side of the long.
             // (session is always positive, so we don't have to worry about the signal bit)
-            final long extraFlags = ((long) FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) << 32;
+            final long extraFlags =
+                    ((long) RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) << 32;
             final long result = extraFlags | newSession.id;
             return result;
         } else {
@@ -1051,6 +1052,14 @@ final class AutofillManagerServiceImpl
         }
     }
 
+    @GuardedBy("mLock")
+    void destroySessionsForAugmentedAutofillOnlyLocked() {
+        final int sessionCount = mSessions.size();
+        for (int i = sessionCount - 1; i >= 0; i--) {
+            mSessions.valueAt(i).forceRemoveSelfIfForAugmentedAutofillOnlyLocked();
+        }
+    }
+
     // TODO(b/64940307): remove this method if SaveUI is refactored to be attached on activities
     @GuardedBy("mLock")
     void destroyFinishedSessionsLocked() {
@@ -1070,9 +1079,18 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void listSessionsLocked(ArrayList<String> output) {
         final int numSessions = mSessions.size();
+        if (numSessions <= 0) return;
+
+        final String fmt = "%d:%s:%s";
         for (int i = 0; i < numSessions; i++) {
-            output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
-                    : null) + ":" + mSessions.keyAt(i));
+            final int id = mSessions.keyAt(i);
+            final String service = mInfo == null
+                    ? "no_svc"
+                    : mInfo.getServiceInfo().getComponentName().flattenToShortString();
+            final String augmentedService = mRemoteAugmentedAutofillServiceInfo == null
+                    ? "no_aug"
+                    : mRemoteAugmentedAutofillServiceInfo.getComponentName().flattenToShortString();
+            output.add(String.format(fmt, id, service, augmentedService));
         }
     }
 
@@ -1136,6 +1154,7 @@ final class AutofillManagerServiceImpl
                     Slog.v(TAG, "updateRemoteAugmentedAutofillService(): "
                             + "destroying old remote service");
                 }
+                destroySessionsForAugmentedAutofillOnlyLocked();
                 mRemoteAugmentedAutofillService.destroy();
                 mRemoteAugmentedAutofillService = null;
                 mRemoteAugmentedAutofillServiceInfo = null;
@@ -1177,8 +1196,8 @@ final class AutofillManagerServiceImpl
      * @return whether caller UID is the augmented autofill service for the user
      */
     @GuardedBy("mLock")
-    boolean setAugmentedAutofillWhitelistLocked(List<String> packages,
-            List<ComponentName> activities, int callingUid) {
+    boolean setAugmentedAutofillWhitelistLocked(@Nullable List<String> packages,
+            @Nullable List<ComponentName> activities, int callingUid) {
 
         if (!isCalledByAugmentedAutofillServiceLocked("setAugmentedAutofillWhitelistLocked",
                 callingUid)) {
@@ -1189,8 +1208,25 @@ final class AutofillManagerServiceImpl
                     + activities + ")");
         }
         whitelistForAugmentedAutofillPackages(packages, activities);
+        final String serviceName;
+        if (mRemoteAugmentedAutofillServiceInfo != null) {
+            serviceName = mRemoteAugmentedAutofillServiceInfo.getComponentName()
+                    .flattenToShortString();
+        } else {
+            Slog.e(TAG, "setAugmentedAutofillWhitelistLocked(): no service");
+            serviceName = "N/A";
+        }
 
-        // TODO(b/122858578): log metrics
+        final LogMaker log = new LogMaker(MetricsEvent.AUTOFILL_AUGMENTED_WHITELIST_REQUEST)
+                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, serviceName);
+        if (packages != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_PACKAGES, packages.size());
+        }
+        if (activities != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUMBER_ACTIVITIES, activities.size());
+        }
+        mMetricsLogger.write(log);
+
         return true;
     }
 
@@ -1233,7 +1269,6 @@ final class AutofillManagerServiceImpl
     }
 
     /**
-     *
      * @throws IllegalArgumentException if packages or components are empty.
      */
     private void whitelistForAugmentedAutofillPackages(@Nullable List<String> packages,
