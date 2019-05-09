@@ -1983,13 +1983,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      */
     static abstract class AbstractPart {
 
-        /**
-         * Enum which indicates which representation of a given part we have.
-         */
-        static class Representation {
-            static final int ENCODED = 1;
-            static final int DECODED = 2;
-        }
+        // Possible values of mCanonicalRepresentation.
+        static final int REPRESENTATION_ENCODED = 1;
+        static final int REPRESENTATION_DECODED = 2;
 
         volatile String encoded;
         volatile String decoded;
@@ -1997,11 +1993,11 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         AbstractPart(String encoded, String decoded) {
             if (encoded != NOT_CACHED) {
-                this.mCanonicalRepresentation = Representation.ENCODED;
+                this.mCanonicalRepresentation = REPRESENTATION_ENCODED;
                 this.encoded = encoded;
                 this.decoded = NOT_CACHED;
             } else if (decoded != NOT_CACHED) {
-                this.mCanonicalRepresentation = Representation.DECODED;
+                this.mCanonicalRepresentation = REPRESENTATION_DECODED;
                 this.encoded = NOT_CACHED;
                 this.decoded = decoded;
             } else {
@@ -2019,9 +2015,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
 
         final void writeTo(Parcel parcel) {
             final String canonicalValue;
-            if (mCanonicalRepresentation == Representation.ENCODED) {
+            if (mCanonicalRepresentation == REPRESENTATION_ENCODED) {
                 canonicalValue = encoded;
-            } else if (mCanonicalRepresentation == Representation.DECODED) {
+            } else if (mCanonicalRepresentation == REPRESENTATION_DECODED) {
                 canonicalValue = decoded;
             } else {
                 throw new IllegalArgumentException("Unknown representation: "
@@ -2066,9 +2062,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
             int representation = parcel.readInt();
             String value = parcel.readString();
             switch (representation) {
-                case Representation.ENCODED:
+                case REPRESENTATION_ENCODED:
                     return fromEncoded(value);
-                case Representation.DECODED:
+                case REPRESENTATION_DECODED:
                     return fromDecoded(value);
                 default:
                     throw new IllegalArgumentException("Unknown representation: "
@@ -2254,9 +2250,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         static PathPart readFrom(Parcel parcel) {
             int representation = parcel.readInt();
             switch (representation) {
-                case Representation.ENCODED:
+                case REPRESENTATION_ENCODED:
                     return fromEncoded(parcel.readString());
-                case Representation.DECODED:
+                case REPRESENTATION_DECODED:
                     return fromDecoded(parcel.readString());
                 default:
                     throw new IllegalArgumentException("Unknown representation: " + representation);
