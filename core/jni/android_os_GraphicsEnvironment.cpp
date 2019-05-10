@@ -85,6 +85,10 @@ void setDebugLayersGLES_native(JNIEnv* env, jobject clazz, jstring layers) {
     }
 }
 
+void hintActivityLaunch_native(JNIEnv* env, jobject clazz) {
+    android::GraphicsEnv::getInstance().hintActivityLaunch();
+}
+
 const JNINativeMethod g_methods[] = {
     { "getCanLoadSystemLibraries", "()I", reinterpret_cast<void*>(getCanLoadSystemLibraries_native) },
     { "setDriverPathAndSphalLibraries", "(Ljava/lang/String;Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPathAndSphalLibraries_native) },
@@ -94,6 +98,7 @@ const JNINativeMethod g_methods[] = {
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
     { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
     { "setDebugLayersGLES", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayersGLES_native) },
+    { "hintActivityLaunch", "()V", reinterpret_cast<void*>(hintActivityLaunch_native) },
 };
 
 const char* const kGraphicsEnvironmentName = "android/os/GraphicsEnvironment";
