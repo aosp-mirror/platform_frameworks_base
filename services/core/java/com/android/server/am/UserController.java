@@ -98,6 +98,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
+import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
@@ -319,7 +320,7 @@ class UserController implements Handler.Callback {
                 // Owner/System user and current user can't be stopped
                 continue;
             }
-            if (stopUsersLU(userId, false, null) == USER_OP_SUCCESS) {
+            if (stopUsersLU(userId, false, null, null) == USER_OP_SUCCESS) {
                 iterator.remove();
             }
         }
@@ -586,19 +587,18 @@ class UserController implements Handler.Callback {
     }
 
     int restartUser(final int userId, final boolean foreground) {
-        return stopUser(userId, /* force */ true, new IStopUserCallback.Stub() {
+        return stopUser(userId, /* force */ true, null, new KeyEvictedCallback() {
             @Override
-            public void userStopped(final int userId) {
+            public void keyEvicted(@UserIdInt int userId) {
                 // Post to the same handler that this callback is called from to ensure the user
                 // cleanup is complete before restarting.
-                mHandler.post(() -> startUser(userId, foreground));
+                mHandler.post(() -> UserController.this.startUser(userId, foreground));
             }
-            @Override
-            public void userStopAborted(final int userId) {}
         });
     }
 
-    int stopUser(final int userId, final boolean force, final IStopUserCallback callback) {
+    int stopUser(final int userId, final boolean force, final IStopUserCallback stopUserCallback,
+            KeyEvictedCallback keyEvictedCallback) {
         if (mInjector.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: switchUser() from pid="
@@ -613,7 +613,7 @@ class UserController implements Handler.Callback {
         }
         enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
         synchronized (mLock) {
-            return stopUsersLU(userId, force, callback);
+            return stopUsersLU(userId, force, stopUserCallback, keyEvictedCallback);
         }
     }
 
@@ -622,7 +622,8 @@ class UserController implements Handler.Callback {
      * {@link #getUsersToStopLU(int)} to determine the list of users that should be stopped.
      */
     @GuardedBy("mLock")
-    private int stopUsersLU(final int userId, boolean force, final IStopUserCallback callback) {
+    private int stopUsersLU(final int userId, boolean force,
+            final IStopUserCallback stopUserCallback, KeyEvictedCallback keyEvictedCallback) {
         if (userId == UserHandle.USER_SYSTEM) {
             return USER_OP_ERROR_IS_SYSTEM;
         }
@@ -640,7 +641,7 @@ class UserController implements Handler.Callback {
                 if (force) {
                     Slog.i(TAG,
                             "Force stop user " + userId + ". Related users will not be stopped");
-                    stopSingleUserLU(userId, callback);
+                    stopSingleUserLU(userId, stopUserCallback, keyEvictedCallback);
                     return USER_OP_SUCCESS;
                 }
                 return USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
@@ -648,22 +649,25 @@ class UserController implements Handler.Callback {
         }
         if (DEBUG_MU) Slog.i(TAG, "stopUsersLocked usersToStop=" + Arrays.toString(usersToStop));
         for (int userIdToStop : usersToStop) {
-            stopSingleUserLU(userIdToStop, userIdToStop == userId ? callback : null);
+            stopSingleUserLU(userIdToStop,
+                    userIdToStop == userId ? stopUserCallback : null,
+                    userIdToStop == userId ? keyEvictedCallback : null);
         }
         return USER_OP_SUCCESS;
     }
 
     @GuardedBy("mLock")
-    private void stopSingleUserLU(final int userId, final IStopUserCallback callback) {
+    private void stopSingleUserLU(final int userId, final IStopUserCallback stopUserCallback,
+            KeyEvictedCallback keyEvictedCallback) {
         if (DEBUG_MU) Slog.i(TAG, "stopSingleUserLocked userId=" + userId);
         final UserState uss = mStartedUsers.get(userId);
         if (uss == null) {
             // User is not started, nothing to do...  but we do need to
             // callback if requested.
-            if (callback != null) {
+            if (stopUserCallback != null) {
                 mHandler.post(() -> {
                     try {
-                        callback.userStopped(userId);
+                        stopUserCallback.userStopped(userId);
                     } catch (RemoteException e) {
                     }
                 });
@@ -671,8 +675,11 @@ class UserController implements Handler.Callback {
             return;
         }
 
-        if (callback != null) {
-            uss.mStopCallbacks.add(callback);
+        if (stopUserCallback != null) {
+            uss.mStopCallbacks.add(stopUserCallback);
+        }
+        if (keyEvictedCallback != null) {
+            uss.mKeyEvictedCallbacks.add(keyEvictedCallback);
         }
 
         if (uss.state != UserState.STATE_STOPPING
@@ -753,10 +760,12 @@ class UserController implements Handler.Callback {
         final int userId = uss.mHandle.getIdentifier();
         final boolean stopped;
         boolean lockUser = true;
-        ArrayList<IStopUserCallback> callbacks;
+        final ArrayList<IStopUserCallback> stopCallbacks;
+        final ArrayList<KeyEvictedCallback> keyEvictedCallbacks;
         int userIdToLock = userId;
         synchronized (mLock) {
-            callbacks = new ArrayList<>(uss.mStopCallbacks);
+            stopCallbacks = new ArrayList<>(uss.mStopCallbacks);
+            keyEvictedCallbacks = new ArrayList<>(uss.mKeyEvictedCallbacks);
             if (mStartedUsers.get(userId) != uss || uss.state != UserState.STATE_SHUTDOWN) {
                 stopped = false;
             } else {
@@ -779,11 +788,11 @@ class UserController implements Handler.Callback {
             forceStopUser(userId, "finish user");
         }
 
-        for (int i = 0; i < callbacks.size(); i++) {
+        for (final IStopUserCallback callback : stopCallbacks) {
             try {
-                if (stopped) callbacks.get(i).userStopped(userId);
-                else callbacks.get(i).userStopAborted(userId);
-            } catch (RemoteException e) {
+                if (stopped) callback.userStopped(userId);
+                else callback.userStopAborted(userId);
+            } catch (RemoteException ignored) {
             }
         }
 
@@ -813,6 +822,11 @@ class UserController implements Handler.Callback {
                     mInjector.getStorageManager().lockUserKey(userIdToLockF);
                 } catch (RemoteException re) {
                     throw re.rethrowAsRuntimeException();
+                }
+                if (userIdToLockF == userId) {
+                    for (final KeyEvictedCallback callback : keyEvictedCallbacks) {
+                        callback.keyEvicted(userId);
+                    }
                 }
             });
         }
@@ -912,7 +926,7 @@ class UserController implements Handler.Callback {
         if (userInfo.isGuest() || userInfo.isEphemeral()) {
             // This is a user to be stopped.
             synchronized (mLock) {
-                stopUsersLU(oldUserId, true, null);
+                stopUsersLU(oldUserId, true, null, null);
             }
         }
     }
@@ -1392,7 +1406,7 @@ class UserController implements Handler.Callback {
         synchronized (mLock) {
             if (DEBUG_MU) Slog.i(TAG, "stopBackgroundUsersIfEnforced stopping " + oldUserId
                     + " and related users");
-            stopUsersLU(oldUserId, false, null);
+            stopUsersLU(oldUserId, false, null, null);
         }
     }
 

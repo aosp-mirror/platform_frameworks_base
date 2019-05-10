@@ -17354,7 +17354,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, callback);
+        return mUserController.stopUser(userId, force, callback, null /* keyEvictedCallback */);
     }
 
     @Override
