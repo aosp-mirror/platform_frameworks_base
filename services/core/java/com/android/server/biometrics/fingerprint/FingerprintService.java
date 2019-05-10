@@ -67,8 +67,8 @@ import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
-import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.Constants;
+import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
@@ -150,6 +150,12 @@ public class FingerprintService extends BiometricServiceBase {
         @Override
         public boolean shouldFrameworkHandleLockout() {
             return true;
+        }
+
+        @Override
+        public boolean wasUserDetected() {
+            // TODO: Return a proper value for devices that use ERROR_TIMEOUT
+            return false;
         }
 
         @Override
