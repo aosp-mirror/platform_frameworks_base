@@ -981,6 +981,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
+        updateScreenPinningGestures();
     }
 
     public void disableAnimationsDuringHide(long delay) {
