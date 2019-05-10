@@ -637,6 +637,7 @@ public class SettingsBackupTest {
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
                  Settings.Secure.ENABLED_PRINT_SERVICES,
                  Settings.Secure.GLOBAL_ACTIONS_PANEL_AVAILABLE,
+                 Settings.Secure.GLOBAL_ACTIONS_PANEL_DEBUG_ENABLED,
                  Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
                  Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
                  Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY,
