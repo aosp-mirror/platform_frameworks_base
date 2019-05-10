@@ -28,6 +28,7 @@ import static android.app.usage.UsageStatsManager.INTERVAL_YEARLY;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.EventList;
 import android.app.usage.EventStats;
+import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
@@ -38,6 +39,7 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -665,6 +667,77 @@ class UserUsageStatsService {
         mDatabase.dump(pw, compact);
     }
 
+    void dumpDatabaseInfo(IndentingPrintWriter ipw) {
+        mDatabase.dump(ipw, false);
+    }
+
+    void dumpFile(IndentingPrintWriter ipw, String[] args) {
+        if (args == null || args.length == 0) {
+            // dump all files for every interval for specified user
+            final int numIntervals = mDatabase.mSortedStatFiles.length;
+            for (int interval = 0; interval < numIntervals; interval++) {
+                ipw.println("interval=" + intervalToString(interval));
+                ipw.increaseIndent();
+                dumpFileDetailsForInterval(ipw, interval);
+                ipw.decreaseIndent();
+            }
+        } else {
+            final int interval;
+            try {
+                final int intervalValue = stringToInterval(args[0]);
+                if (intervalValue == -1) {
+                    interval = Integer.valueOf(args[0]);
+                } else {
+                    interval = intervalValue;
+                }
+            } catch (NumberFormatException nfe) {
+                ipw.println("invalid interval specified.");
+                return;
+            }
+            if (interval < 0 || interval >= mDatabase.mSortedStatFiles.length) {
+                ipw.println("the specified interval does not exist.");
+                return;
+            }
+            if (args.length == 1) {
+                // dump all files in the specified interval
+                dumpFileDetailsForInterval(ipw, interval);
+            } else {
+                // dump details only for the specified filename
+                final long filename;
+                try {
+                    filename = Long.valueOf(args[1]);
+                } catch (NumberFormatException nfe) {
+                    ipw.println("invalid filename specified.");
+                    return;
+                }
+                final IntervalStats stats = mDatabase.readIntervalStatsForFile(interval, filename);
+                if (stats == null) {
+                    ipw.println("the specified filename does not exist.");
+                    return;
+                }
+                dumpFileDetails(ipw, stats, Long.valueOf(args[1]));
+            }
+        }
+    }
+
+    private void dumpFileDetailsForInterval(IndentingPrintWriter ipw, int interval) {
+        final TimeSparseArray<AtomicFile> files = mDatabase.mSortedStatFiles[interval];
+        final int numFiles = files.size();
+        for (int i = 0; i < numFiles; i++) {
+            final long filename = files.keyAt(i);
+            final IntervalStats stats = mDatabase.readIntervalStatsForFile(interval, filename);
+            dumpFileDetails(ipw, stats, filename);
+            ipw.println();
+        }
+    }
+
+    private void dumpFileDetails(IndentingPrintWriter ipw, IntervalStats stats, long filename) {
+        ipw.println("file=" + filename);
+        ipw.increaseIndent();
+        printIntervalStats(ipw, stats, false, false, null);
+        ipw.decreaseIndent();
+    }
+
     static String formatDateTime(long dateTime, boolean pretty) {
         if (pretty) {
             return "\"" + sDateFormat.format(dateTime)+ "\"";
@@ -905,6 +978,21 @@ class UserUsageStatsService {
                 return "yearly";
             default:
                 return "?";
+        }
+    }
+
+    private static int stringToInterval(String interval) {
+        switch (interval.toLowerCase()) {
+            case "daily":
+                return INTERVAL_DAILY;
+            case "weekly":
+                return INTERVAL_WEEKLY;
+            case "monthly":
+                return INTERVAL_MONTHLY;
+            case "yearly":
+                return INTERVAL_YEARLY;
+            default:
+                return -1;
         }
     }
 
