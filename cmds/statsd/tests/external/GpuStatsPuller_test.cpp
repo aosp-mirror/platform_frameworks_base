@@ -55,8 +55,9 @@ static const int64_t ANGLE_DRIVER_LOADING_TIME_1  = 1111;
 static const int32_t VULKAN_VERSION               = 1;
 static const int32_t CPU_VULKAN_VERSION           = 2;
 static const int32_t GLES_VERSION                 = 3;
+static const bool CPU_VULKAN_IN_USE               = true;
 static const size_t NUMBER_OF_VALUES_GLOBAL       = 13;
-static const size_t NUMBER_OF_VALUES_APP          = 5;
+static const size_t NUMBER_OF_VALUES_APP          = 6;
 // clang-format on
 
 class MockGpuStatsPuller : public GpuStatsPuller {
@@ -148,6 +149,7 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsAppInfo) {
     EXPECT_TRUE(event->write(int64VectorToProtoByteString(glDriverLoadingTime)));
     EXPECT_TRUE(event->write(int64VectorToProtoByteString(vkDriverLoadingTime)));
     EXPECT_TRUE(event->write(int64VectorToProtoByteString(angleDriverLoadingTime)));
+    EXPECT_TRUE(event->write(CPU_VULKAN_IN_USE));
     event->init();
     inData.emplace_back(event);
     MockGpuStatsPuller mockPuller(android::util::GPU_STATS_APP_INFO, &inData);
@@ -165,6 +167,7 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsAppInfo) {
               outData[0]->getValues()[3].mValue.str_value);
     EXPECT_EQ(int64VectorToProtoByteString(angleDriverLoadingTime),
               outData[0]->getValues()[4].mValue.str_value);
+    EXPECT_EQ(CPU_VULKAN_IN_USE, outData[0]->getValues()[5].mValue.int_value);
 }
 
 }  // namespace statsd
