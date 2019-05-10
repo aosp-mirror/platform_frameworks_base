@@ -29,6 +29,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -255,9 +256,12 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                             if (getDrawable() == animation && state == getState()
                                     && doesAnimationLoop(iconAnimRes)) {
                                 animation.start();
+                            } else {
+                                Trace.endAsyncSection("LockIcon#Animation", state);
                             }
                         }
                     });
+                    Trace.beginAsyncSection("LockIcon#Animation", state);
                     animation.start();
                 }
             }
