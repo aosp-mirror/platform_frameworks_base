@@ -1325,13 +1325,19 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
-    <!-- Indicates that it is okay for this activity to be resized to any dimension. Intended for a
+    <!-- Indicates that it is okay for this activity to be put in multi-window mode. Intended for a
          multi-window device where there can be multiple activities of various sizes on the screen
          at the same time.
 
          <p>The default value is <code>false</code> for applications with
          <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#N} and
          <code>true</code> otherwise.
+
+         <p>Setting this flag to <code>false</code> lets the system know that the app may not be
+         tested or optimized for multi-window environment. The system may still put such activity in
+         multi-window with compatibility mode applied. It also does not guarantee that there will be
+         no other apps in multi-window visible on screen (e.g. picture-in-picture) or on other
+         displays. Therefore, this flag cannot be used to assure an exclusive resource access.
 
          <p>NOTE: A task's root activity value is applied to all additional activities launched in
          the task. That is if the root activity of a task is resizeable then the system will treat
@@ -1363,8 +1369,7 @@
          Value needs to be greater or equal to 1.0, otherwise it is ignored.
          <p>
          NOTE: This attribute is ignored if the activity has
-         {@link android.R.attr#resizeableActivity} set to true, since that means your activity
-         supports any size. -->
+         {@link android.R.attr#resizeableActivity} set to true. -->
     <attr name="maxAspectRatio" format="float" />
 
     <!-- This value indicates the minimum aspect ratio the activity supports. If the app runs on a
@@ -1377,8 +1382,7 @@
          Value needs to be greater or equal to 1.0, otherwise it is ignored.
          <p>
          NOTE: This attribute is ignored if the activity has
-         {@link android.R.attr#resizeableActivity} set to true, since that means your activity
-         supports any size. -->
+         {@link android.R.attr#resizeableActivity} set to true. -->
     <attr name="minAspectRatio" format="float" />
 
     <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.
