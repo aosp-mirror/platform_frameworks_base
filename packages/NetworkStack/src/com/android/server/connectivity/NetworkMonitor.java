@@ -23,6 +23,7 @@ import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_PROBE_SPEC;
 import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.DnsResolver.FLAG_EMPTY;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
@@ -55,6 +56,8 @@ import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USER_AGENT;
 import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USE_HTTPS;
 import static android.net.util.NetworkStackUtils.NAMESPACE_CONNECTIVITY;
 import static android.net.util.NetworkStackUtils.isEmpty;
+
+import static com.android.networkstack.util.DnsUtils.TYPE_ADDRCONFIG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -113,6 +116,7 @@ import com.android.internal.util.TrafficStatsConstants;
 import com.android.networkstack.R;
 import com.android.networkstack.metrics.DataStallDetectionStats;
 import com.android.networkstack.metrics.DataStallStatsUtils;
+import com.android.networkstack.util.DnsUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -129,7 +133,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
@@ -1008,8 +1011,8 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
-                final InetAddress[] ips = mCleartextDnsNetwork.getAllByName(
-                        mPrivateDnsProviderHostname);
+                final InetAddress[] ips = DnsUtils.getAllByName(mDependencies.getDnsResolver(),
+                        mCleartextDnsNetwork, mPrivateDnsProviderHostname, getDnsProbeTimeout());
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
                 validationLog("Strict mode hostname resolved: " + mPrivateDnsConfig);
             } catch (UnknownHostException uhe) {
@@ -1503,39 +1506,8 @@ public class NetworkMonitor extends StateMachine {
     @VisibleForTesting
     protected InetAddress[] sendDnsProbeWithTimeout(String host, int timeoutMs)
                 throws UnknownHostException {
-        final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicReference<List<InetAddress>> resultRef = new AtomicReference<>();
-        final DnsResolver.Callback<List<InetAddress>> callback =
-                    new DnsResolver.Callback<List<InetAddress>>() {
-            public void onAnswer(List<InetAddress> answer, int rcode) {
-                if (rcode == 0) {
-                    resultRef.set(answer);
-                }
-                latch.countDown();
-            }
-            public void onError(@NonNull DnsResolver.DnsException e) {
-                validationLog("DNS error resolving " + host + ": " + e.getMessage());
-                latch.countDown();
-            }
-        };
-
-        final int oldTag = TrafficStats.getAndSetThreadStatsTag(
-                TrafficStatsConstants.TAG_SYSTEM_PROBE);
-        mDependencies.getDnsResolver().query(mCleartextDnsNetwork, host, DnsResolver.FLAG_EMPTY,
-                r -> r.run() /* executor */, null /* cancellationSignal */, callback);
-        TrafficStats.setThreadStatsTag(oldTag);
-
-        try {
-            latch.await(timeoutMs, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-        }
-
-        List<InetAddress> result = resultRef.get();
-        if (result == null || result.size() == 0) {
-            throw new UnknownHostException(host);
-        }
-
-        return result.toArray(new InetAddress[0]);
+        return DnsUtils.getAllByName(mDependencies.getDnsResolver(), mCleartextDnsNetwork, host,
+                TYPE_ADDRCONFIG, FLAG_EMPTY, timeoutMs);
     }
 
     /** Do a DNS resolution of the given server. */
