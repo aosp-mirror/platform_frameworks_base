@@ -16,12 +16,12 @@ Copyright (C) 2019 The Android Open Source Project
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:width="32dp"
         android:height="32dp"
-        android:viewportWidth="32"
-        android:viewportHeight="32">
+        android:viewportWidth="32.0"
+        android:viewportHeight="32.0">
     <path
-        android:fillColor="#000"
-        android:pathData="M16,20m-2.7,0a2.7,2.7 0,1 1,5.4 0a2.7,2.7 0,1 1,-5.4 0"/>
+        android:fillColor="#FF000000"
+        android:pathData="M16,20m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0"/>
     <path
-        android:fillColor="#000"
-        android:pathData="M24,10.7h-2V7.3c0,-3.3 -2.7,-6 -6,-6s-6,2.7 -6,6v3.3H8c-1.5,0 -2.7,1.2 -2.7,2.7v13.3c0,1.5 1.2,2.7 2.7,2.7h16c1.5,0 2.7,-1.2 2.7,-2.7V13.3C26.7,11.9 25.5,10.7 24,10.7zM12.7,7.3C12.7,5.5 14.2,4 16,4s3.3,1.5 3.3,3.3v3.3h-6.7V7.3zM24,26.7H8V13.3h2h12h2V26.7z"/>
+        android:fillColor="#FF000000"
+        android:pathData="M24,11h-2.3V7.3c0,-3.1 -2.5,-5.7 -5.7,-5.7c-3.1,0 -5.7,2.5 -5.7,5.7V11H8c-1.3,0 -2.3,1 -2.3,2.3v13.3c0,1.3 1,2.3 2.3,2.3h16c1.3,0 2.3,-1 2.3,-2.3V13.3C26.3,12 25.3,11 24,11zM12.3,7.3c0,-2 1.6,-3.7 3.7,-3.7c2,0 3.7,1.6 3.7,3.7V11h-7.3V7.3zM24.3,26.7c0,0.2 -0.1,0.3 -0.3,0.3H8c-0.2,0 -0.3,-0.1 -0.3,-0.3V13.3C7.7,13.1 7.8,13 8,13h16c0.2,0 0.3,0.1 0.3,0.3V26.7z"/>
 </vector>
