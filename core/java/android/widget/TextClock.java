@@ -190,7 +190,10 @@ public class TextClock extends TextView {
             long now = SystemClock.uptimeMillis();
             long next = now + (1000 - now % 1000);
 
-            getHandler().postAtTime(mTicker, next);
+            Handler handler = getHandler();
+            if (handler != null) {
+                handler.postAtTime(mTicker, next);
+            }
         }
     };
 
