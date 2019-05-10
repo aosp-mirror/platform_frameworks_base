@@ -3559,8 +3559,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         pw.println("    Limit output to data associated with the given package name.");
         pw.println("  --watchers");
         pw.println("    Only output the watcher sections.");
-        pw.println("  --history");
-        pw.println("    Output the historical data.");
     }
 
     private void dumpStatesLocked(@NonNull PrintWriter pw, @NonNull Op op,
@@ -3696,8 +3694,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 } else if ("--watchers".equals(arg)) {
                     dumpWatchers = true;
-                } else if ("--history".equals(arg)) {
-                    dumpHistory = true;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     return;
