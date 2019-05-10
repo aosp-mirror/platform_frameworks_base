@@ -9193,13 +9193,6 @@ HPLandroid/media/MediaMetadata$Builder;-><init>(Landroid/media/MediaMetadata;)V
 HSPLandroid/media/MediaMetadata$Builder;->build()Landroid/media/MediaMetadata;
 HPLandroid/media/MediaMetadata;->size()I
 HSPLandroid/media/MediaMetadata;->writeToParcel(Landroid/os/Parcel;I)V
-HSPLandroid/media/MediaParceledListSlice$2;-><init>()V
-HSPLandroid/media/MediaParceledListSlice$2;->createFromParcel(Landroid/os/Parcel;)Landroid/media/MediaParceledListSlice;
-HSPLandroid/media/MediaParceledListSlice$2;->createFromParcel(Landroid/os/Parcel;)Ljava/lang/Object;
-HSPLandroid/media/MediaParceledListSlice;-><init>(Landroid/os/Parcel;)V
-HPLandroid/media/MediaParceledListSlice;-><init>(Ljava/util/List;)V
-HSPLandroid/media/MediaParceledListSlice;->getList()Ljava/util/List;
-HSPLandroid/media/MediaParceledListSlice;->writeToParcel(Landroid/os/Parcel;I)V
 HSPLandroid/media/MediaPlayer$2$1;->getSubtitleLooper()Landroid/os/Looper;
 HSPLandroid/media/MediaPlayer$2$1;->setSubtitleWidget(Landroid/media/SubtitleTrack$RenderingWidget;)V
 HSPLandroid/media/MediaPlayer$2;->run()V
@@ -9446,7 +9439,7 @@ HPLandroid/media/session/ISessionController$Stub;->onTransact(ILandroid/os/Parce
 HPLandroid/media/session/ISessionControllerCallback$Stub$Proxy;->asBinder()Landroid/os/IBinder;
 HPLandroid/media/session/ISessionControllerCallback$Stub$Proxy;->onMetadataChanged(Landroid/media/MediaMetadata;)V
 HPLandroid/media/session/ISessionControllerCallback$Stub$Proxy;->onPlaybackStateChanged(Landroid/media/session/PlaybackState;)V
-HPLandroid/media/session/ISessionControllerCallback$Stub$Proxy;->onQueueChanged(Landroid/media/MediaParceledListSlice;)V
+HPLandroid/media/session/ISessionControllerCallback$Stub$Proxy;->onQueueChanged(Landroid/media/ParceledListSlice;)V
 HPLandroid/media/session/ISessionControllerCallback$Stub$Proxy;->onSessionDestroyed()V
 HSPLandroid/media/session/ISessionManager$Stub$Proxy;->getSessions(Landroid/content/ComponentName;I)Ljava/util/List;
 HSPLandroid/media/session/ISessionManager$Stub;-><init>()V
