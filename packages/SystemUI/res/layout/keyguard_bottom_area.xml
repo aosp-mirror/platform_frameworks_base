@@ -26,7 +26,6 @@
 
     <LinearLayout
         android:id="@+id/keyguard_indication_area"
-        android:forceHasOverlappingRendering="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
