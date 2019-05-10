@@ -27,7 +27,7 @@ import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
-import libcore.net.MimeUtils;
+import libcore.net.MimeMap;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public class MimeIconUtils {
 
         // If this MIME type has an extension, customize the label
         final CharSequence label;
-        final String ext = MimeUtils.guessExtensionFromMimeType(mimeType);
+        final String ext = MimeMap.getDefault().guessExtensionFromMimeType(mimeType);
         if (!TextUtils.isEmpty(ext) && extLabelId != -1) {
             label = res.getString(extLabelId, ext.toUpperCase(Locale.US));
         } else {
@@ -241,8 +241,9 @@ public class MimeIconUtils {
         // As one last-ditch effort, try "bouncing" the MIME type through its
         // default extension. This handles cases like "application/x-flac" to
         // ".flac" to "audio/flac".
-        final String bouncedMimeType = MimeUtils
-                .guessMimeTypeFromExtension(MimeUtils.guessExtensionFromMimeType(mimeType));
+        MimeMap mimeMap = MimeMap.getDefault();
+        final String bouncedMimeType = mimeMap
+                .guessMimeTypeFromExtension(mimeMap.guessExtensionFromMimeType(mimeType));
         if (bouncedMimeType != null && !Objects.equals(mimeType, bouncedMimeType)) {
             return buildTypeInfo(bouncedMimeType);
         }

@@ -31,7 +31,7 @@ import android.mtp.MtpConstants;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import libcore.net.MimeUtils;
+import libcore.net.MimeMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,11 +83,12 @@ public class MediaFileTest {
 
     @Test
     public void testPlayList() throws Exception {
-        assertTrue(isPlayListMimeType(MimeUtils.guessMimeTypeFromExtension("pls")));
-        assertTrue(isPlayListMimeType(MimeUtils.guessMimeTypeFromExtension("wpl")));
-        assertTrue(isPlayListMimeType(MimeUtils.guessMimeTypeFromExtension("m3u")));
-        assertTrue(isPlayListMimeType(MimeUtils.guessMimeTypeFromExtension("m3u8")));
-        assertTrue(isPlayListMimeType(MimeUtils.guessMimeTypeFromExtension("asf")));
+        MimeMap mimeMap = MimeMap.getDefault();
+        assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("pls")));
+        assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("wpl")));
+        assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("m3u")));
+        assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("m3u8")));
+        assertTrue(isPlayListMimeType(mimeMap.guessMimeTypeFromExtension("asf")));
     }
 
     @Test
