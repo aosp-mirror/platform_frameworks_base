@@ -113,7 +113,7 @@ public class StagingManager {
             return false;
         }
 
-        final PackageInfo packageInfo = mApexManager.getActivePackage(packageName);
+        final PackageInfo packageInfo = mApexManager.getPackageInfoForApexName(packageName);
 
         if (packageInfo == null) {
             // Only allow installing new apexes if on a debuggable build.
@@ -158,7 +158,8 @@ public class StagingManager {
             return false;
         }
         for (ApexInfo newPackage : apexInfoList.apexInfos) {
-            PackageInfo activePackage = mApexManager.getActivePackage(newPackage.packageName);
+            PackageInfo activePackage = mApexManager.getPackageInfoForApexName(
+                    newPackage.packageName);
             if (activePackage == null) {
                 continue;
             }

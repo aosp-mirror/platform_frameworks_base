@@ -34,6 +34,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.sysprop.ApexProperties;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -41,13 +42,8 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * ApexManager class handles communications with the apex service to perform operation and queries,
@@ -58,8 +54,25 @@ class ApexManager {
     private final IApexService mApexService;
     private final Context mContext;
     private final Object mLock = new Object();
+    /**
+     * A map from {@code APEX packageName} to the {@Link PackageInfo} generated from the {@code
+     * AndroidManifest.xml}
+     *
+     * <p>Note that key of this map is {@code packageName} field of the corresponding {@code
+     * AndroidManfiset.xml}.
+      */
     @GuardedBy("mLock")
-    private Map<String, PackageInfo> mActivePackagesCache;
+    private ArrayMap<String, PackageInfo> mActivePackagesCache;
+    /**
+     * A map from {@code apexName} to the {@Link PackageInfo} generated from the {@code
+     * AndroidManifest.xml}.
+     *
+     * <p>Note that key of this map is {@code apexName} field which corresponds to the {@code name}
+     * field of {@code apex_manifest.json}.
+     */
+    // TODO(b/132324953): remove.
+    @GuardedBy("mLock")
+    private ArrayMap<String, PackageInfo> mApexNameToPackageInfoCache;
 
     ApexManager(Context context) {
         try {
@@ -86,8 +99,9 @@ class ApexManager {
             if (mActivePackagesCache != null) {
                 return;
             }
+            mActivePackagesCache = new ArrayMap<>();
+            mApexNameToPackageInfoCache = new ArrayMap<>();
             try {
-                List<PackageInfo> list = new ArrayList<>();
                 final ApexInfo[] activePkgs = mApexService.getActivePackages();
                 for (ApexInfo ai : activePkgs) {
                     // If the device is using flattened APEX, don't report any APEX
@@ -96,15 +110,16 @@ class ApexManager {
                         break;
                     }
                     try {
-                        list.add(PackageParser.generatePackageInfoFromApex(
+                        final PackageInfo pkg = PackageParser.generatePackageInfoFromApex(
                                 new File(ai.packagePath), PackageManager.GET_META_DATA
-                                | PackageManager.GET_SIGNING_CERTIFICATES));
+                                | PackageManager.GET_SIGNING_CERTIFICATES);
+                        mActivePackagesCache.put(pkg.packageName, pkg);
+                        // TODO(b/132324953): remove.
+                        mApexNameToPackageInfoCache.put(ai.packageName, pkg);
                     } catch (PackageParserException pe) {
                         throw new IllegalStateException("Unable to parse: " + ai, pe);
                     }
                 }
-                mActivePackagesCache = list.stream().collect(
-                        Collectors.toMap(p -> p.packageName, Function.identity()));
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
                 throw new RuntimeException(re);
@@ -125,6 +140,18 @@ class ApexManager {
     @Nullable PackageInfo getActivePackage(String packageName) {
         populateActivePackagesCacheIfNeeded();
         return mActivePackagesCache.get(packageName);
+    }
+
+    /**
+     * Returns a {@link PackageInfo} for an APEX package keyed by it's {@code apexName}.
+     *
+     * @deprecated this API will soon be deleted, please don't depend on it.
+     */
+    // TODO(b/132324953): delete.
+    @Deprecated
+    @Nullable PackageInfo getPackageInfoForApexName(String apexName) {
+        populateActivePackagesCacheIfNeeded();
+        return mApexNameToPackageInfoCache.get(apexName);
     }
 
     /**
