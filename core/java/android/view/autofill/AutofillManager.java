@@ -3248,7 +3248,12 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm == null) return null;
 
-            final View view = afm.getClient().autofillClientFindViewByAutofillIdTraversal(id);
+            final AutofillClient client = afm.getClient();
+            if (client == null) {
+                Log.w(TAG, "getViewCoordinates(" + id + "): no autofill client");
+                return null;
+            }
+            final View view = client.autofillClientFindViewByAutofillIdTraversal(id);
             if (view == null) {
                 Log.w(TAG, "getViewCoordinates(" + id + "): could not find view");
                 return null;
