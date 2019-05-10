@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ネットワークをスキャンできません"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"なし"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"保存済み"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"未接続"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"無効"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP設定エラー"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ネットワークの品質が低いため、接続されていません"</string>
@@ -296,10 +297,10 @@
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"更新時にウィンドウの表示面全体を点滅させる"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"画面の更新を表示"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"描画時にウィンドウ内の表示を点滅させる"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"ハードウェア層情報を表示"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"ハードウェア層の更新を表示"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ハードウェア層が更新されると緑色に点滅する"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPUオーバードローをデバッグ"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"HWオーバーレイを無効"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HWオーバーレイを無効化"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"画面合成に常にGPUを使用する"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"色空間シミュレート"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGLトレースを有効化"</string>

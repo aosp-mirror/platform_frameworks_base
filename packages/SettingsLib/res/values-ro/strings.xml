@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nu se poate scana pentru rețele"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Niciuna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Salvată"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Deconectat"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Dezactivată"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Eroare de configurație IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nu există conexiune din cauza rețelei de calitate slabă"</string>
@@ -247,8 +248,8 @@
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Contorizată"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Necontorizată"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile tamponului jurnalului"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Dimensiuni jurnal / tampon jurnal"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile memoriei temporare a jurnalului"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Dimensiuni jurnal / mem. temp. jurnal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ștergeți stocarea permanentă a jurnalului?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Când nu mai monitorizăm folosind jurnalul permanent, trebuie să ștergem datele de jurnal aflate pe dispozitivul dvs."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Stocați date jurnal permanent pe dispozitiv"</string>
@@ -333,8 +334,8 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Permiteți redimensionarea tuturor activităților pentru modul cu ferestre multiple, indiferent de valorile manifestului."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Activați ferestrele cu formă liberă"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Activați compatibilitatea pentru ferestrele experimentale cu formă liberă."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Parolă copie rez. desktop"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"În prezent, backupurile complete pe desktop nu sunt protejate"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Parolă backup computer"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"În prezent, backupurile complete pe computer nu sunt protejate"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Atingeți ca să modificați sau să eliminați parola pentru backupurile complete pe desktop"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"A fost setată o parolă de rezervă nouă"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Parola nouă și confirmarea acesteia nu se potrivesc."</string>

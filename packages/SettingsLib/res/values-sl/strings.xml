@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ni mogoče iskati omrežij"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Brez"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Shranjeno"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Ni povezave"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogočeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Konfiguracija IP-ja ni uspela"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ni povezano zaradi slabe kakovosti omrežja"</string>
@@ -200,10 +201,10 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Nastavitve VPN niso na voljo za tega uporabnika"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Nastavitve za povezavo z internetom prek mobilne naprave niso na voljo za tega uporabnika"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Nastavitve imena dostopne točke niso na voljo za tega uporabnika"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Odpravljanje težav prek USB"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Odpravljanje težav prek USB-ja"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Način za odpravljanje težav, ko je vzpostavljena povezava USB"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Preklic dovoljenj za odpr. težav prek USB"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Bližnjica za por. o napakah"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Preklic dovoljenj za odpravljanje težav prek povezave USB"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Bližnjica za poročanje o napakah"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Prikaz gumba za ustvarjanje poročila o napakah v meniju za vklop/izklop"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Brez izklopa zaslona"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Med polnjenjem se zaslon ne bo nikoli izklopil"</string>
@@ -247,7 +248,7 @@
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povečaj raven zapis. dnev. za Wi-Fi; v izbir. Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Omejen prenos podatkov"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Z neomejenim prenosom podatkov"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Velikosti medpomn. zapisov. dnevnika"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Velikosti medpomnilnikov zapisovalnika dnevnika"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izberite velikost medpomnilnika dnevnika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite izbrisati trajno shranjevanje dnevniškega orodja?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Ko prenehamo spremljanje s trajnim dnevniškim orodjem, moramo podatke tega orodja, shranjene v napravi, izbrisati."</string>
@@ -265,7 +266,7 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Ali želite preklicati dostop do odpravljanja težav prek povezave USB iz vseh računalnikov, ki ste jih pooblastili?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Ali želite omogočiti nastavitve za razvijanje?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Te nastavitve so namenjene samo za razvijanje in lahko povzročijo prekinitev ali napačno delovanje naprave in aplikacij v njej."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Preveri aplikacije prek USB"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Preveri aplikacije prek USB-ja"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Preveri, ali so aplikacije, nameščene prek ADB/ADT, škodljive."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Prikazane bodo naprave Bluetooth brez imen (samo z naslovi MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogoči funkcijo absolutne glasnosti za Bluetooth, če pride do težav z glasnostjo z oddaljenimi napravami, kot je nesprejemljivo visoka glasnost ali pomanjkanje nadzora."</string>
@@ -289,7 +290,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"Strog način je omogočen"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Osveži zaslon pri dolgih postopkih v glavni niti"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Mesto kazalca"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Prekriv. zaslona prikazuje trenutni dotik"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Prekrivanje zaslona prikazuje trenutni dotik"</string>
     <string name="show_touches" msgid="2642976305235070316">"Prikaz dotikov"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Prikaz vizualnih povratnih informacij za dotike"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Pokaži posodob. površine"</string>
@@ -311,7 +312,7 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Vsili smer postavitve na zaslonu od desne proti levi za vse jezike"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Vsili 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"V aplikacijah OpenGL ES 2.0 omogoči 4x MSAA"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Odpr. težav s postopki nepravokotnega izrezovanja"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Odpravljanje težav s postopki nepravokotnega izrezovanja"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Upodob. profilov s HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Omog. sloje odpr. nap. GPE"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Apl. za odpr. nap. dovoli nal. sloj. odpr. nap. GPE"</string>
@@ -333,7 +334,7 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Poskrbi, da je ne glede na vrednosti v manifestu mogoče vsem aktivnostim spremeniti velikost za način z več okni."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Omogočanje oken svobodne oblike"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Omogočanje podpore za poskusna okna svobodne oblike"</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Geslo za varn. kop. nam."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Geslo za varn. kop. namizja"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Popolne varnostne kopije namizja trenutno niso zaščitene"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Dotaknite se, če želite spremeniti ali odstraniti geslo za popolno varnostno kopiranje namizja"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Novo geslo je nastavljeno"</string>

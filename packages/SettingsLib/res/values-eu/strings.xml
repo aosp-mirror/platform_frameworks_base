@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ezin dira sareak bilatu"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Bat ere ez"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gordeta"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Deskonektatuta"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Desgaituta"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Ezin izan da konfiguratu IP helbidea"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ez dago konektatuta sarearen kalitate eskasagatik"</string>
@@ -245,7 +246,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ezin izan da konektatu"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautagailuan."</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Sare mugatua"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sare ez-mugatua"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Erregistroen buffer-tamainak"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Hautatu erregistroen buffer-tamainak"</string>
@@ -313,8 +314,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Araztu angeluzuzenak ez diren klip-eragiketak"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Profilaren HWUI errendatzea"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Gaitu GPUaren arazte-geruzak"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Onartu GPUaren arazte-geruzak kargatzea arazte-aplikazioetarako"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Gaitu GPUaren arazketa-geruzak"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Eman GPUaren arazketa-geruzak kargatzeko baimena arazketa-aplikazioei"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Trantsizioen animazio-eskala"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatzailearen iraupena"</string>
@@ -427,7 +428,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Handiena"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Pertsonalizatua (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menua"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"Idatzi pasahitza jatorrizko ezarpenak demo moduan berrezartzeko"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Idatzi pasahitza jatorrizko datuak demo moduan berrezartzeko"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Hurrengoa"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Pasahitza behar da"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Idazketa-metodo aktiboak"</string>

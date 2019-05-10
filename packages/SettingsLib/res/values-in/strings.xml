@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Tidak dapat memindai jaringan"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Tidak ada"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Disimpan"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Terputus"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Nonaktif"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Kegagalan Konfigurasi IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Tidak tersambung karena jaringan berkualitas rendah"</string>
@@ -219,7 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Jaringan"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktifkan Pencatatan Log Panjang Wi-Fi"</string>
-    <string name="mobile_data_always_on" msgid="8774857027458200434">"Data seluler selalu aktif"</string>
+    <string name="mobile_data_always_on" msgid="8774857027458200434">"Kuota selalu aktif"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Akselerasi hardware tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Tampilkan perangkat Bluetooth tanpa nama"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Nonaktifkan volume absolut"</string>
@@ -258,7 +259,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Mengizinkan lokasi palsu"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Mengizinkan lokasi palsu"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Aktifkan inspeksi atribut tampilan"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Selalu aktifkan data seluler, meski Wi-Fi aktif (agar jaringan beralih dengan cepat)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Selalu aktifkan kuota, meski Wi-Fi aktif (agar jaringan beralih dengan cepat)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Gunakan akselerasi hardware tethering jika tersedia"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Izinkan melakukan debug USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Debugging USB dimaksudkan untuk tujuan pengembangan saja. Gunakan untuk menyalin data antara komputer dan perangkat Anda, memasang apl pada perangkat tanpa notifikasi, dan membaca data log."</string>

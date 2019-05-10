@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Не може да се сканира за мрежи"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Няма"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Запазено"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Няма връзка"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Деактивирани"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Неуспешно конфигуриране на IP адреса"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Не е установена връзка поради ниското качество на мрежата"</string>
