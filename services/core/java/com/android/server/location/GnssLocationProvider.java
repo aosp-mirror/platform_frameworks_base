@@ -579,6 +579,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mSuplEsEnabled = mGnssConfiguration.getSuplEs(0) == 1;
         if (mGnssVisibilityControl != null) {
             mGnssVisibilityControl.updateProxyApps(mGnssConfiguration.getProxyApps());
+            mGnssVisibilityControl.setEsNotify(mGnssConfiguration.getEsNotify(0));
         }
     }
 
