@@ -871,6 +871,8 @@
     <string name="quick_settings_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
     <!-- QuickSettings: Label for the toggle to activate Dark theme (A.K.A Dark Mode). [CHAR LIMIT=20] -->
     <string name="quick_settings_ui_mode_night_label">Dark Theme</string>
+    <!-- QuickSettings: Label for the Dark theme tile when enabled by battery saver. [CHAR LIMIT=40] -->
+    <string name="quick_settings_ui_mode_night_label_battery_saver">Dark Theme\nBattery saver</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
