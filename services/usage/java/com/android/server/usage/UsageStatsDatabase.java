@@ -1172,4 +1172,16 @@ public class UsageStatsDatabase {
             pw.decreaseIndent();
         }
     }
+
+    IntervalStats readIntervalStatsForFile(int interval, long fileName) {
+        synchronized (mLock) {
+            final IntervalStats stats = new IntervalStats();
+            try {
+                readLocked(mSortedStatFiles[interval].get(fileName, null), stats);
+                return stats;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    }
 }
