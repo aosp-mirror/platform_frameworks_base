@@ -29,6 +29,7 @@ import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+import static android.net.SocketKeepalive.ERROR_UNSUPPORTED;
 import static android.net.SocketKeepalive.MAX_INTERVAL_SEC;
 import static android.net.SocketKeepalive.MIN_INTERVAL_SEC;
 import static android.net.SocketKeepalive.NO_KEEPALIVE;
@@ -46,6 +47,7 @@ import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
 import android.net.util.IpUtils;
+import android.net.util.KeepaliveUtils;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -57,6 +59,7 @@ import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.R;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -65,6 +68,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -90,10 +94,29 @@ public class KeepaliveTracker {
     @NonNull
     private final Context mContext;
 
+    // Supported keepalive count for each transport type, can be configured through
+    // config_networkSupportedKeepaliveCount. For better error handling, use
+    // {@link getSupportedKeepalivesForNetworkCapabilities} instead of direct access.
+    @NonNull
+    private final int[] mSupportedKeepalives;
+
+    // Reserved privileged keepalive slots per transport. Caller's permission will be enforced if
+    // the number of remaining keepalive slots is less than or equal to the threshold.
+    private final int mReservedPrivilegedSlots;
+
+    // Allowed unprivileged keepalive slots per uid. Caller's permission will be enforced if
+    // the number of remaining keepalive slots is less than or equal to the threshold.
+    private final int mAllowedUnprivilegedSlotsForUid;
+
     public KeepaliveTracker(Context context, Handler handler) {
         mConnectivityServiceHandler = handler;
         mTcpController = new TcpKeepaliveController(handler);
         mContext = context;
+        mSupportedKeepalives = KeepaliveUtils.getSupportedKeepalives(mContext);
+        mReservedPrivilegedSlots = mContext.getResources().getInteger(
+                R.integer.config_reservedPrivilegedKeepaliveSlots);
+        mAllowedUnprivilegedSlotsForUid = mContext.getResources().getInteger(
+                R.integer.config_allowedUnprivilegedKeepalivePerUid);
     }
 
     /**
@@ -114,11 +137,6 @@ public class KeepaliveTracker {
 
         public static final int TYPE_NATT = 1;
         public static final int TYPE_TCP = 2;
-
-        // Max allowed unprivileged keepalive slots per network. Caller's permission will be
-        // enforced if number of existing keepalives reach this limit.
-        // TODO: consider making this limit configurable via resources.
-        private static final int MAX_UNPRIVILEGED_SLOTS = 3;
 
         // Keepalive slot. A small integer that identifies this keepalive among the ones handled
         // by this network.
@@ -247,24 +265,54 @@ public class KeepaliveTracker {
 
         private int checkPermission() {
             final HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(mNai);
-            int unprivilegedCount = 0;
             if (networkKeepalives == null) {
                 return ERROR_INVALID_NETWORK;
             }
-            for (KeepaliveInfo ki : networkKeepalives.values()) {
-                if (!ki.mPrivileged) {
-                    unprivilegedCount++;
-                }
-                if (unprivilegedCount >= MAX_UNPRIVILEGED_SLOTS) {
-                    return mPrivileged ? SUCCESS : ERROR_INSUFFICIENT_RESOURCES;
+
+            if (mPrivileged) return SUCCESS;
+
+            final int supported = KeepaliveUtils.getSupportedKeepalivesForNetworkCapabilities(
+                    mSupportedKeepalives, mNai.networkCapabilities);
+
+            int takenUnprivilegedSlots = 0;
+            for (final KeepaliveInfo ki : networkKeepalives.values()) {
+                if (!ki.mPrivileged) ++takenUnprivilegedSlots;
+            }
+            if (takenUnprivilegedSlots > supported - mReservedPrivilegedSlots) {
+                return ERROR_INSUFFICIENT_RESOURCES;
+            }
+
+            // Count unprivileged keepalives for the same uid across networks.
+            int unprivilegedCountSameUid = 0;
+            for (final HashMap<Integer, KeepaliveInfo> kaForNetwork : mKeepalives.values()) {
+                for (final KeepaliveInfo ki : kaForNetwork.values()) {
+                    if (ki.mUid == mUid) {
+                        unprivilegedCountSameUid++;
+                    }
                 }
             }
+            if (unprivilegedCountSameUid > mAllowedUnprivilegedSlotsForUid) {
+                return ERROR_INSUFFICIENT_RESOURCES;
+            }
+            return SUCCESS;
+        }
+
+        private int checkLimit() {
+            final HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(mNai);
+            if (networkKeepalives == null) {
+                return ERROR_INVALID_NETWORK;
+            }
+            final int supported = KeepaliveUtils.getSupportedKeepalivesForNetworkCapabilities(
+                    mSupportedKeepalives, mNai.networkCapabilities);
+            if (supported == 0) return ERROR_UNSUPPORTED;
+            if (networkKeepalives.size() > supported) return ERROR_INSUFFICIENT_RESOURCES;
             return SUCCESS;
         }
 
         private int isValid() {
             synchronized (mNai) {
                 int error = checkInterval();
+                if (error == SUCCESS) error = checkLimit();
                 if (error == SUCCESS) error = checkPermission();
                 if (error == SUCCESS) error = checkNetworkConnected();
                 if (error == SUCCESS) error = checkSourceAddress();
@@ -670,6 +718,9 @@ public class KeepaliveTracker {
     }
 
     public void dump(IndentingPrintWriter pw) {
+        pw.println("Supported Socket keepalives: " + Arrays.toString(mSupportedKeepalives));
+        pw.println("Reserved Privileged keepalives: " + mReservedPrivilegedSlots);
+        pw.println("Allowed Unprivileged keepalives per uid: " + mAllowedUnprivilegedSlotsForUid);
         pw.println("Socket keepalives:");
         pw.increaseIndent();
         for (NetworkAgentInfo nai : mKeepalives.keySet()) {
