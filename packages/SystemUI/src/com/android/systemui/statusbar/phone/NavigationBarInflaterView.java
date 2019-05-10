@@ -35,23 +35,15 @@ import android.widget.Space;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
-import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class NavigationBarInflaterView extends FrameLayout
-        implements Tunable, PluginListener<NavBarButtonProvider>,
-                NavigationModeController.ModeChangedListener {
+        implements NavigationModeController.ModeChangedListener {
 
     private static final String TAG = "NavBarInflater";
 
@@ -86,8 +78,6 @@ public class NavigationBarInflaterView extends FrameLayout
     private static final String WEIGHT_CENTERED_SUFFIX = "WC";
     private static final String ABSOLUTE_SUFFIX = "A";
     private static final String ABSOLUTE_VERTICAL_CENTERED_SUFFIX = "C";
-
-    private final List<NavBarButtonProvider> mPlugins = new ArrayList<>();
 
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
@@ -160,30 +150,9 @@ public class NavigationBarInflaterView extends FrameLayout
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Dependency.get(TunerService.class).addTunable(this, NAV_BAR_VIEWS, NAV_BAR_LEFT,
-                NAV_BAR_RIGHT);
-        Dependency.get(PluginManager.class).addPluginListener(this,
-                NavBarButtonProvider.class, true /* Allow multiple */);
-    }
-
-    @Override
     protected void onDetachedFromWindow() {
-        Dependency.get(TunerService.class).removeTunable(this);
-        Dependency.get(PluginManager.class).removePluginListener(this);
         Dependency.get(NavigationModeController.class).removeListener(this);
         super.onDetachedFromWindow();
-    }
-
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (NAV_BAR_VIEWS.equals(key)) {
-            setNavigationBarLayout(newValue);
-        } else if (NAV_BAR_LEFT.equals(key) || NAV_BAR_RIGHT.equals(key)) {
-            clearViews();
-            inflateLayout(mCurrentLayout);
-        }
     }
 
     public void setNavigationBarLayout(String layoutValue) {
@@ -404,16 +373,9 @@ public class NavigationBarInflaterView extends FrameLayout
         View v = null;
         String button = extractButton(buttonSpec);
         if (LEFT.equals(button)) {
-            String s = Dependency.get(TunerService.class).getValue(NAV_BAR_LEFT, NAVSPACE);
-            button = extractButton(s);
+            button = extractButton(NAVSPACE);
         } else if (RIGHT.equals(button)) {
-            String s = Dependency.get(TunerService.class).getValue(NAV_BAR_RIGHT, MENU_IME_ROTATE);
-            button = extractButton(s);
-        }
-        // Let plugins go first so they can override a standard view if they want.
-        for (NavBarButtonProvider provider : mPlugins) {
-            v = provider.createView(buttonSpec, parent);
-            if (v != null) return v;
+            button = extractButton(MENU_IME_ROTATE);
         }
         if (HOME.equals(button)) {
             v = inflater.inflate(R.layout.home, parent, false);
@@ -521,19 +483,5 @@ public class NavigationBarInflaterView extends FrameLayout
 
     private static float convertDpToPx(Context context, float dp) {
         return dp * context.getResources().getDisplayMetrics().density;
-    }
-
-    @Override
-    public void onPluginConnected(NavBarButtonProvider plugin, Context context) {
-        mPlugins.add(plugin);
-        clearViews();
-        inflateLayout(mCurrentLayout);
-    }
-
-    @Override
-    public void onPluginDisconnected(NavBarButtonProvider plugin) {
-        mPlugins.remove(plugin);
-        clearViews();
-        inflateLayout(mCurrentLayout);
     }
 }
