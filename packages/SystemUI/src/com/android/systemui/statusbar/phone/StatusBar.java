@@ -527,6 +527,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (mKeyguardMonitor.isKeyguardFadingAway()) {
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+                mStatusBarWindow.onKeyguardFadedAway();
             }
         }
 
@@ -3791,6 +3792,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void notifyBiometricAuthModeChanged() {
         updateDozing();
         updateScrimController();
+        mStatusBarWindow.onBiometricAuthModeChanged(mBiometricUnlockController.isWakeAndUnlock());
     }
 
     @VisibleForTesting
