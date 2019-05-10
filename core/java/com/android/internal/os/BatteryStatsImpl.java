@@ -12028,7 +12028,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // if the device is now charging, it means that this is either called
         // 1. directly when level >= 90
         // 2. or from within the runnable that we deferred
-        // For 1. if we have an existing callback, remove it, since we will immediatelly send a
+        // For 1. if we have an existing callback, remove it, since we will immediately send a
         // ACTION_CHARGING
         // For 2. we remove existing callback so we don't send multiple ACTION_CHARGING
         mHandler.removeCallbacks(mDeferSetCharging);
@@ -12369,7 +12369,6 @@ public class BatteryStatsImpl extends BatteryStats {
                     // If the battery level is at least 90%, always consider the device to be
                     // charging even if it happens to go down a level.
                     changed |= setChargingLocked(true);
-                    mLastChargeStepLevel = level;
                 } else if (!mCharging) {
                     if (mLastChargeStepLevel < level) {
                         // We have not reported that we are charging, but the level has gone up,
@@ -12395,17 +12394,16 @@ public class BatteryStatsImpl extends BatteryStats {
                         changed |= setChargingLocked(false);
                     }
                 }
-                mLastChargeStepLevel = level;
                 if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
                     mChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
                             modeBits, elapsedRealtime);
                     mDailyChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
                             modeBits, elapsedRealtime);
-                    mLastChargeStepLevel = level;
                     mMaxChargeStepLevel = level;
                     mInitStepMode = mCurStepMode;
                     mModStepMode = 0;
                 }
+                mLastChargeStepLevel = level;
             }
             if (changed) {
                 addHistoryRecordLocked(elapsedRealtime, uptime);
