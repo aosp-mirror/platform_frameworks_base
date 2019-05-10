@@ -327,6 +327,8 @@ public class KeepaliveTracker {
                 Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.name());
                 switch (mType) {
                     case TYPE_NATT:
+                        mNai.asyncChannel.sendMessage(
+                                CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */, mPacket);
                         mNai.asyncChannel
                                 .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
                         break;
@@ -337,9 +339,8 @@ public class KeepaliveTracker {
                             handleStopKeepalive(mNai, mSlot, ERROR_INVALID_SOCKET);
                             return;
                         }
-                        mNai.asyncChannel
-                                .sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */,
-                                        mPacket);
+                        mNai.asyncChannel.sendMessage(
+                                CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */, mPacket);
                         // TODO: check result from apf and notify of failure as needed.
                         mNai.asyncChannel
                                 .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
@@ -375,14 +376,17 @@ public class KeepaliveTracker {
                     return;
                 default:
                     mStartedState = STOPPING;
-                    if (mType == TYPE_NATT) {
-                        mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                    } else if (mType == TYPE_TCP) {
-                        mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                        mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER, mSlot);
-                        mTcpController.stopSocketMonitor(mSlot);
-                    } else {
-                        Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
+                    switch (mType) {
+                        case TYPE_TCP:
+                            mTcpController.stopSocketMonitor(mSlot);
+                            // fall through
+                        case TYPE_NATT:
+                            mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
+                            mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER,
+                                    mSlot);
+                            break;
+                        default:
+                            Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
                     }
             }
 
