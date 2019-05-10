@@ -634,26 +634,11 @@ public final class ActiveServices {
         }
 
         if (allowBackgroundActivityStarts) {
-            r.setHasStartedWhitelistingBgActivityStarts(true);
-            scheduleCleanUpHasStartedWhitelistingBgActivityStartsLocked(r);
+            r.whitelistBgActivityStartsOnServiceStart();
         }
 
         ComponentName cmp = startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
         return cmp;
-    }
-
-    private void scheduleCleanUpHasStartedWhitelistingBgActivityStartsLocked(ServiceRecord r) {
-        // if there's a request pending from the past, drop it before scheduling a new one
-        if (r.startedWhitelistingBgActivityStartsCleanUp == null) {
-            r.startedWhitelistingBgActivityStartsCleanUp = () -> {
-                synchronized(mAm) {
-                    r.setHasStartedWhitelistingBgActivityStarts(false);
-                }
-            };
-        }
-        mAm.mHandler.removeCallbacks(r.startedWhitelistingBgActivityStartsCleanUp);
-        mAm.mHandler.postDelayed(r.startedWhitelistingBgActivityStartsCleanUp,
-                mAm.mConstants.SERVICE_BG_ACTIVITY_START_TIMEOUT);
     }
 
     private boolean requestStartTargetPermissionsReviewIfNeededLocked(ServiceRecord r,
