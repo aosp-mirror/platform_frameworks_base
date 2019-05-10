@@ -483,6 +483,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             return;
         }
 
+        if (isUserKeyUnlocked(userId)) {
+            // If storage is not locked, the user will be automatically unlocked so there is
+            // no need to show the notification.
+            return;
+        }
+
         final UserHandle userHandle = user.getUserHandle();
         final boolean isSecure = isUserSecure(userId);
         if (isSecure && !mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
