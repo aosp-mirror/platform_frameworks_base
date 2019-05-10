@@ -70,6 +70,7 @@ class GnssConfiguration {
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
     public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
+    public static final String CONFIG_ES_NOTIFY_INT = "ES_NOTIFY_INT";
 
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
@@ -199,6 +200,14 @@ class GnssConfiguration {
     }
 
     /**
+     * Returns the value of config parameter ES_NOTIFY_INT or {@code defaulEsNotify} if no
+     * value is provided or if there is an error parsing the configured value.
+     */
+    int getEsNotify(int defaulEsNotify) {
+        return getIntConfig(CONFIG_ES_NOTIFY_INT, defaulEsNotify);
+    }
+
+    /**
      * Updates the GNSS HAL satellite blacklist.
      */
     void setSatelliteBlacklist(int[] constellations, int[] svids) {
@@ -320,10 +329,12 @@ class GnssConfiguration {
                         .substring(CarrierConfigManager.Gps.KEY_PREFIX.length())
                         .toUpperCase();
                 Object value = configs.get(configKey);
+                if (DEBUG) Log.d(TAG, "Gps config: " + key + " = " + value);
                 if (value instanceof String) {
-                    // All GPS properties are of String type; convert so.
-                    if (DEBUG) Log.d(TAG, "Gps config: " + key + " = " + value);
+                    // Most GPS properties are of String type; convert so.
                     mProperties.setProperty(key, (String) value);
+                } else if (value != null) {
+                    mProperties.setProperty(key, value.toString());
                 }
             }
         }
