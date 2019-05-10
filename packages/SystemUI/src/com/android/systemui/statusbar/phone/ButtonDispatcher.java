@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
 
-import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
 import java.util.ArrayList;
