@@ -716,24 +716,23 @@ public final class AudioAttributes implements Parcelable {
         }
 
         /**
-         * Specifies weather the audio may or may not be captured by other apps or the system.
+         * Specifies whether the audio may or may not be captured by other apps or the system.
          *
          * The default is {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
          *
          * There are multiple ways to set this policy:
-         *  - for each tracks independently, with this method
-         *  - application wide at runtime, with {@link AudioManager#setAllowedCapturePolicy(int)}
-         *  - application wide at build time, see {@code allowAudioPlaybackCapture} in the
-         *    application manifest.
+         * <ul>
+         * <li> for each track independently, with this method </li>
+         * <li> application-wide at runtime, with
+         *      {@link AudioManager#setAllowedCapturePolicy(int)} </li>
+         * <li> application-wide at build time, see {@code allowAudioPlaybackCapture} in the
+         *      application manifest. </li>
+         * </ul>
          * The most restrictive policy is always applied.
          *
-         * See {@link AudioPlaybackCaptureConfiguration} for more details on the restrictions
+         * See {@link AudioPlaybackCaptureConfiguration} for more details on
          * which audio signals can be captured.
          *
-         * @param capturePolicy one of
-         *     {@link #ALLOW_CAPTURE_BY_ALL},
-         *     {@link #ALLOW_CAPTURE_BY_SYSTEM},
-         *     {@link #ALLOW_CAPTURE_BY_NONE}.
          * @return the same Builder instance
          * @throws IllegalArgumentException if the argument is not a valid value.
          */
