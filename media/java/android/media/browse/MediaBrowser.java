@@ -23,8 +23,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ParceledListSlice;
 import android.media.MediaDescription;
-import android.media.MediaParceledListSlice;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.os.Binder;
@@ -653,7 +653,7 @@ public final class MediaBrowser {
     }
 
     private void onLoadChildren(final IMediaBrowserServiceCallbacks callback,
-            final String parentId, final MediaParceledListSlice list, final Bundle options) {
+            final String parentId, final ParceledListSlice list, final Bundle options) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -1107,12 +1107,12 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(String parentId, MediaParceledListSlice list) {
+        public void onLoadChildren(String parentId, ParceledListSlice list) {
             onLoadChildrenWithOptions(parentId, list, null);
         }
 
         @Override
-        public void onLoadChildrenWithOptions(String parentId, MediaParceledListSlice list,
+        public void onLoadChildrenWithOptions(String parentId, ParceledListSlice list,
                 final Bundle options) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
