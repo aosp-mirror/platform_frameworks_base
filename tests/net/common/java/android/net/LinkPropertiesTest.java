@@ -18,6 +18,7 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -46,28 +47,80 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LinkPropertiesTest {
-    private static InetAddress ADDRV4 = NetworkUtils.numericToInetAddress("75.208.6.1");
-    private static InetAddress ADDRV6 = NetworkUtils.numericToInetAddress(
+    private static final InetAddress ADDRV4 = InetAddresses.parseNumericAddress("75.208.6.1");
+    private static final InetAddress ADDRV6 = InetAddresses.parseNumericAddress(
             "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
-    private static InetAddress DNS1 = NetworkUtils.numericToInetAddress("75.208.7.1");
-    private static InetAddress DNS2 = NetworkUtils.numericToInetAddress("69.78.7.1");
-    private static InetAddress DNS6 = NetworkUtils.numericToInetAddress("2001:4860:4860::8888");
-    private static InetAddress PCSCFV6 =  NetworkUtils.numericToInetAddress(
+    private static final InetAddress DNS1 = InetAddresses.parseNumericAddress("75.208.7.1");
+    private static final InetAddress DNS2 = InetAddresses.parseNumericAddress("69.78.7.1");
+    private static final InetAddress DNS6 = InetAddresses.parseNumericAddress(
+            "2001:4860:4860::8888");
+    private static final InetAddress PRIVDNS1 = InetAddresses.parseNumericAddress("1.1.1.1");
+    private static final InetAddress PRIVDNS2 = InetAddresses.parseNumericAddress("1.0.0.1");
+    private static final InetAddress PRIVDNS6 = InetAddresses.parseNumericAddress(
+            "2606:4700:4700::1111");
+    private static final InetAddress PCSCFV4 = InetAddresses.parseNumericAddress("10.77.25.37");
+    private static final InetAddress PCSCFV6 = InetAddresses.parseNumericAddress(
             "2001:0db8:85a3:0000:0000:8a2e:0370:1");
-    private static InetAddress GATEWAY1 = NetworkUtils.numericToInetAddress("75.208.8.1");
-    private static InetAddress GATEWAY2 = NetworkUtils.numericToInetAddress("69.78.8.1");
-    private static InetAddress GATEWAY61 = NetworkUtils.numericToInetAddress("fe80::6:0000:613");
-    private static InetAddress GATEWAY62 = NetworkUtils.numericToInetAddress("fe80::6:2222");
-    private static String NAME = "qmi0";
-    private static int MTU = 1500;
-
-    private static LinkAddress LINKADDRV4 = new LinkAddress(ADDRV4, 32);
-    private static LinkAddress LINKADDRV6 = new LinkAddress(ADDRV6, 128);
-    private static LinkAddress LINKADDRV6LINKLOCAL = new LinkAddress("fe80::1/64");
+    private static final InetAddress GATEWAY1 = InetAddresses.parseNumericAddress("75.208.8.1");
+    private static final InetAddress GATEWAY2 = InetAddresses.parseNumericAddress("69.78.8.1");
+    private static final InetAddress GATEWAY61 = InetAddresses.parseNumericAddress(
+            "fe80::6:0000:613");
+    private static final InetAddress GATEWAY62 = InetAddresses.parseNumericAddress("fe80::6:2222");
+    private static final String NAME = "qmi0";
+    private static final String DOMAINS = "google.com";
+    private static final String PRIV_DNS_SERVER_NAME = "private.dns.com";
+    private static final String TCP_BUFFER_SIZES = "524288,1048576,2097152,262144,524288,1048576";
+    private static final int MTU = 1500;
+    private static final LinkAddress LINKADDRV4 = new LinkAddress(ADDRV4, 32);
+    private static final LinkAddress LINKADDRV6 = new LinkAddress(ADDRV6, 128);
+    private static final LinkAddress LINKADDRV6LINKLOCAL = new LinkAddress("fe80::1/64");
 
     // TODO: replace all calls to NetworkUtils.numericToInetAddress with calls to this method.
     private InetAddress Address(String addrString) {
-        return NetworkUtils.numericToInetAddress(addrString);
+        return InetAddresses.parseNumericAddress(addrString);
+    }
+
+    private void checkEmpty(final LinkProperties lp) {
+        assertEquals(0, lp.getAllInterfaceNames().size());
+        assertEquals(0, lp.getAllAddresses().size());
+        assertEquals(0, lp.getDnsServers().size());
+        assertEquals(0, lp.getValidatedPrivateDnsServers().size());
+        assertEquals(0, lp.getPcscfServers().size());
+        assertEquals(0, lp.getAllRoutes().size());
+        assertEquals(0, lp.getAllLinkAddresses().size());
+        assertEquals(0, lp.getStackedLinks().size());
+        assertEquals(0, lp.getMtu());
+        assertNull(lp.getPrivateDnsServerName());
+        assertNull(lp.getDomains());
+        assertNull(lp.getHttpProxy());
+        assertNull(lp.getTcpBufferSizes());
+        assertNull(lp.getNat64Prefix());
+        assertFalse(lp.isProvisioned());
+        assertFalse(lp.isIpv4Provisioned());
+        assertFalse(lp.isIpv6Provisioned());
+        assertFalse(lp.isPrivateDnsActive());
+    }
+
+    private LinkProperties makeTestObject() {
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(NAME);
+        lp.addLinkAddress(LINKADDRV4);
+        lp.addLinkAddress(LINKADDRV6);
+        lp.addDnsServer(DNS1);
+        lp.addDnsServer(DNS2);
+        lp.addValidatedPrivateDnsServer(PRIVDNS1);
+        lp.addValidatedPrivateDnsServer(PRIVDNS2);
+        lp.setUsePrivateDns(true);
+        lp.setPrivateDnsServerName(PRIV_DNS_SERVER_NAME);
+        lp.addPcscfServer(PCSCFV6);
+        lp.setDomains(DOMAINS);
+        lp.addRoute(new RouteInfo(GATEWAY1));
+        lp.addRoute(new RouteInfo(GATEWAY2));
+        lp.setHttpProxy(ProxyInfo.buildDirectProxy("test", 8888));
+        lp.setMtu(MTU);
+        lp.setTcpBufferSizes(TCP_BUFFER_SIZES);
+        lp.setNat64Prefix(new IpPrefix("2001:db8:0:64::/96"));
+        return lp;
     }
 
     public void assertLinkPropertiesEqual(LinkProperties source, LinkProperties target) {
@@ -170,8 +223,7 @@ public class LinkPropertiesTest {
         target.clear();
         target.setInterfaceName(NAME);
         // change link addresses
-        target.addLinkAddress(new LinkAddress(
-                NetworkUtils.numericToInetAddress("75.208.6.2"), 32));
+        target.addLinkAddress(new LinkAddress(Address("75.208.6.2"), 32));
         target.addLinkAddress(LINKADDRV6);
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
@@ -186,7 +238,7 @@ public class LinkPropertiesTest {
         target.addLinkAddress(LINKADDRV4);
         target.addLinkAddress(LINKADDRV6);
         // change dnses
-        target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
+        target.addDnsServer(Address("75.208.7.2"));
         target.addDnsServer(DNS2);
         target.addPcscfServer(PCSCFV6);
         target.addRoute(new RouteInfo(GATEWAY1));
@@ -198,11 +250,10 @@ public class LinkPropertiesTest {
         target.setInterfaceName(NAME);
         target.addLinkAddress(LINKADDRV4);
         target.addLinkAddress(LINKADDRV6);
-        target.addDnsServer(NetworkUtils.numericToInetAddress("75.208.7.2"));
+        target.addDnsServer(Address("75.208.7.2"));
         target.addDnsServer(DNS2);
         // change pcscf
-        target.addPcscfServer(NetworkUtils.numericToInetAddress(
-            "2001::1"));
+        target.addPcscfServer(Address("2001::1"));
         target.addRoute(new RouteInfo(GATEWAY1));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);
@@ -215,7 +266,7 @@ public class LinkPropertiesTest {
         target.addDnsServer(DNS1);
         target.addDnsServer(DNS2);
         // change gateway
-        target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress("75.208.8.2")));
+        target.addRoute(new RouteInfo(Address("75.208.8.2")));
         target.addRoute(new RouteInfo(GATEWAY2));
         target.setMtu(MTU);
         assertFalse(source.equals(target));
@@ -285,10 +336,15 @@ public class LinkPropertiesTest {
         }
     }
 
+    private void assertAllRoutesNotHaveInterface(String iface, LinkProperties lp) {
+        for (RouteInfo r : lp.getRoutes()) {
+            assertNotEquals(iface, r.getInterface());
+        }
+    }
+
     @Test
     public void testRouteInterfaces() {
-        LinkAddress prefix = new LinkAddress(
-            NetworkUtils.numericToInetAddress("2001:db8::"), 32);
+        LinkAddress prefix = new LinkAddress(Address("2001:db8::"), 32);
         InetAddress address = ADDRV6;
 
         // Add a route with no interface to a LinkProperties with no interface. No errors.
@@ -312,6 +368,8 @@ public class LinkPropertiesTest {
         // Change the interface name. All the routes should change their interface name too.
         lp.setInterfaceName("rmnet0");
         assertAllRoutesHaveInterface("rmnet0", lp);
+        assertAllRoutesNotHaveInterface(null, lp);
+        assertAllRoutesNotHaveInterface("wlan0", lp);
 
         // Now add a route with the wrong interface. This causes an exception too.
         try {
@@ -325,6 +383,7 @@ public class LinkPropertiesTest {
         lp.addRoute(r);
         assertEquals(2, lp.getRoutes().size());
         assertAllRoutesHaveInterface("wlan0", lp);
+        assertAllRoutesNotHaveInterface("rmnet0", lp);
 
         // Routes with null interfaces are converted to wlan0.
         r = RouteInfo.makeHostRoute(ADDRV6, null);
@@ -334,14 +393,23 @@ public class LinkPropertiesTest {
 
         // Check comparisons work.
         LinkProperties lp2 = new LinkProperties(lp);
-        assertAllRoutesHaveInterface("wlan0", lp);
+        assertAllRoutesHaveInterface("wlan0", lp2);
         assertEquals(0, lp.compareAllRoutes(lp2).added.size());
         assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
 
         lp2.setInterfaceName("p2p0");
         assertAllRoutesHaveInterface("p2p0", lp2);
+        assertAllRoutesNotHaveInterface("wlan0", lp2);
         assertEquals(3, lp.compareAllRoutes(lp2).added.size());
         assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
+
+        // Check remove works
+        lp.removeRoute(new RouteInfo(prefix, address, null));
+        assertEquals(3, lp.getRoutes().size());
+        lp.removeRoute(new RouteInfo(prefix, address, "wlan0"));
+        assertEquals(2, lp.getRoutes().size());
+        assertAllRoutesHaveInterface("wlan0", lp);
+        assertAllRoutesNotHaveInterface("p2p0", lp);
     }
 
     @Test
@@ -488,18 +556,26 @@ public class LinkPropertiesTest {
     }
 
     @Test
-    public void testSetLinkAddresses() {
-        LinkProperties lp = new LinkProperties();
+    public void testLinkAddresses() {
+        final LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(LINKADDRV4);
         lp.addLinkAddress(LINKADDRV6);
 
-        LinkProperties lp2 = new LinkProperties();
+        final LinkProperties lp2 = new LinkProperties();
         lp2.addLinkAddress(LINKADDRV6);
 
-        assertFalse(lp.equals(lp2));
+        final LinkProperties lp3 = new LinkProperties();
+        final List<LinkAddress> linkAddresses = Arrays.asList(LINKADDRV4);
+        lp3.setLinkAddresses(linkAddresses);
 
-        lp2.setLinkAddresses(lp.getLinkAddresses());
-        assertTrue(lp.equals(lp));
+        assertFalse(lp.equals(lp2));
+        assertFalse(lp2.equals(lp3));
+
+        lp.removeLinkAddress(LINKADDRV4);
+        assertTrue(lp.equals(lp2));
+
+        lp2.setLinkAddresses(lp3.getLinkAddresses());
+        assertTrue(lp2.equals(lp3));
     }
 
     @Test
@@ -675,9 +751,9 @@ public class LinkPropertiesTest {
         assertTrue(v4lp.isReachable(DNS2));
 
         final LinkProperties v6lp = new LinkProperties();
-        final InetAddress kLinkLocalDns = NetworkUtils.numericToInetAddress("fe80::6:1");
-        final InetAddress kLinkLocalDnsWithScope = NetworkUtils.numericToInetAddress("fe80::6:2%43");
-        final InetAddress kOnLinkDns = NetworkUtils.numericToInetAddress("2001:db8:85a3::53");
+        final InetAddress kLinkLocalDns = Address("fe80::6:1");
+        final InetAddress kLinkLocalDnsWithScope = Address("fe80::6:2%43");
+        final InetAddress kOnLinkDns = Address("2001:db8:85a3::53");
         assertFalse(v6lp.isReachable(kLinkLocalDns));
         assertFalse(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertFalse(v6lp.isReachable(kOnLinkDns));
@@ -686,8 +762,7 @@ public class LinkPropertiesTest {
         // Add a link-local route, making the link-local DNS servers reachable. Because
         // we assume the presence of an IPv6 link-local address, link-local DNS servers
         // are considered reachable, but only those with a non-zero scope identifier.
-        assertTrue(v6lp.addRoute(new RouteInfo(
-                new IpPrefix(NetworkUtils.numericToInetAddress("fe80::"), 64))));
+        assertTrue(v6lp.addRoute(new RouteInfo(new IpPrefix(Address("fe80::"), 64))));
         assertFalse(v6lp.isReachable(kLinkLocalDns));
         assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertFalse(v6lp.isReachable(kOnLinkDns));
@@ -703,8 +778,7 @@ public class LinkPropertiesTest {
         // Add a global route on link, but no global address yet. DNS servers reachable
         // via a route that doesn't require a gateway: give them the benefit of the
         // doubt and hope the link-local source address suffices for communication.
-        assertTrue(v6lp.addRoute(new RouteInfo(
-                new IpPrefix(NetworkUtils.numericToInetAddress("2001:db8:85a3::"), 64))));
+        assertTrue(v6lp.addRoute(new RouteInfo(new IpPrefix(Address("2001:db8:85a3::"), 64))));
         assertFalse(v6lp.isReachable(kLinkLocalDns));
         assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
         assertTrue(v6lp.isReachable(kOnLinkDns));
@@ -766,8 +840,8 @@ public class LinkPropertiesTest {
         LinkProperties rmnet1 = new LinkProperties();
         rmnet1.setInterfaceName("rmnet1");
         rmnet1.addLinkAddress(new LinkAddress("10.0.0.3/8"));
-        RouteInfo defaultRoute1 = new RouteInfo((IpPrefix) null,
-                NetworkUtils.numericToInetAddress("10.0.0.1"), rmnet1.getInterfaceName());
+        RouteInfo defaultRoute1 = new RouteInfo((IpPrefix) null, Address("10.0.0.1"),
+                rmnet1.getInterfaceName());
         RouteInfo directRoute1 = new RouteInfo(new IpPrefix("10.0.0.0/8"), null,
                 rmnet1.getInterfaceName());
         rmnet1.addRoute(defaultRoute1);
@@ -785,8 +859,8 @@ public class LinkPropertiesTest {
         rmnet2.setInterfaceName("rmnet2");
         rmnet2.addLinkAddress(new LinkAddress("fe80::cafe/64"));
         rmnet2.addLinkAddress(new LinkAddress("2001:db8::2/64"));
-        RouteInfo defaultRoute2 = new RouteInfo((IpPrefix) null,
-                NetworkUtils.numericToInetAddress("2001:db8::1"), rmnet2.getInterfaceName());
+        RouteInfo defaultRoute2 = new RouteInfo((IpPrefix) null, Address("2001:db8::1"),
+                rmnet2.getInterfaceName());
         RouteInfo directRoute2 = new RouteInfo(new IpPrefix("2001:db8::/64"), null,
                 rmnet2.getInterfaceName());
         RouteInfo linkLocalRoute2 = new RouteInfo(new IpPrefix("fe80::/64"), null,
@@ -875,5 +949,112 @@ public class LinkPropertiesTest {
     public void testParcelUninitialized() throws Exception {
         LinkProperties empty = new LinkProperties();
         TestUtils.assertParcelingIsLossless(empty);
+    }
+
+    @Test
+    public void testConstructor() {
+        LinkProperties lp = new LinkProperties();
+        checkEmpty(lp);
+        assertLinkPropertiesEqual(lp, new LinkProperties(lp));
+        assertLinkPropertiesEqual(lp, new LinkProperties());
+
+        lp = makeTestObject();
+        assertLinkPropertiesEqual(lp, new LinkProperties(lp));
+    }
+
+    @Test
+    public void testDnsServers() {
+        final LinkProperties lp = new LinkProperties();
+        final List<InetAddress> dnsServers = Arrays.asList(DNS1, DNS2);
+        lp.setDnsServers(dnsServers);
+        assertEquals(2, lp.getDnsServers().size());
+        assertEquals(DNS1, lp.getDnsServers().get(0));
+        assertEquals(DNS2, lp.getDnsServers().get(1));
+
+        lp.removeDnsServer(DNS1);
+        assertEquals(1, lp.getDnsServers().size());
+        assertEquals(DNS2, lp.getDnsServers().get(0));
+
+        lp.addDnsServer(DNS6);
+        assertEquals(2, lp.getDnsServers().size());
+        assertEquals(DNS2, lp.getDnsServers().get(0));
+        assertEquals(DNS6, lp.getDnsServers().get(1));
+    }
+
+    @Test
+    public void testValidatedPrivateDnsServers() {
+        final LinkProperties lp = new LinkProperties();
+        final List<InetAddress> privDnsServers = Arrays.asList(PRIVDNS1, PRIVDNS2);
+        lp.setValidatedPrivateDnsServers(privDnsServers);
+        assertEquals(2, lp.getValidatedPrivateDnsServers().size());
+        assertEquals(PRIVDNS1, lp.getValidatedPrivateDnsServers().get(0));
+        assertEquals(PRIVDNS2, lp.getValidatedPrivateDnsServers().get(1));
+
+        lp.removeValidatedPrivateDnsServer(PRIVDNS1);
+        assertEquals(1, lp.getValidatedPrivateDnsServers().size());
+        assertEquals(PRIVDNS2, lp.getValidatedPrivateDnsServers().get(0));
+
+        lp.addValidatedPrivateDnsServer(PRIVDNS6);
+        assertEquals(2, lp.getValidatedPrivateDnsServers().size());
+        assertEquals(PRIVDNS2, lp.getValidatedPrivateDnsServers().get(0));
+        assertEquals(PRIVDNS6, lp.getValidatedPrivateDnsServers().get(1));
+    }
+
+    @Test
+    public void testPcscfServers() {
+        final LinkProperties lp = new LinkProperties();
+        final List<InetAddress> pcscfServers = Arrays.asList(PCSCFV4);
+        lp.setPcscfServers(pcscfServers);
+        assertEquals(1, lp.getPcscfServers().size());
+        assertEquals(PCSCFV4, lp.getPcscfServers().get(0));
+
+        lp.removePcscfServer(PCSCFV4);
+        assertEquals(0, lp.getPcscfServers().size());
+
+        lp.addPcscfServer(PCSCFV6);
+        assertEquals(1, lp.getPcscfServers().size());
+        assertEquals(PCSCFV6, lp.getPcscfServers().get(0));
+    }
+
+    @Test
+    public void testTcpBufferSizes() {
+        final LinkProperties lp = makeTestObject();
+        assertEquals(TCP_BUFFER_SIZES, lp.getTcpBufferSizes());
+
+        lp.setTcpBufferSizes(null);
+        assertNull(lp.getTcpBufferSizes());
+    }
+
+    @Test
+    public void testHasIpv6DefaultRoute() {
+        final LinkProperties lp = makeTestObject();
+        assertFalse(lp.hasIPv6DefaultRoute());
+
+        lp.addRoute(new RouteInfo(GATEWAY61));
+        assertTrue(lp.hasIPv6DefaultRoute());
+    }
+
+    @Test
+    public void testHttpProxy() {
+        final LinkProperties lp = makeTestObject();
+        assertTrue(lp.getHttpProxy().equals(ProxyInfo.buildDirectProxy("test", 8888)));
+    }
+
+    @Test
+    public void testPrivateDnsServerName() {
+        final LinkProperties lp = makeTestObject();
+        assertEquals(PRIV_DNS_SERVER_NAME, lp.getPrivateDnsServerName());
+
+        lp.setPrivateDnsServerName(null);
+        assertNull(lp.getPrivateDnsServerName());
+    }
+
+    @Test
+    public void testUsePrivateDns() {
+        final LinkProperties lp = makeTestObject();
+        assertTrue(lp.isPrivateDnsActive());
+
+        lp.clear();
+        assertFalse(lp.isPrivateDnsActive());
     }
 }
