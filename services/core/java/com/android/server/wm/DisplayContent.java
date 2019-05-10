@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -373,6 +374,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see NonAppWindowContainers#getOrientation()
      */
     private int mLastKeyguardForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+    /**
+     * The maximum aspect ratio (longerSide/shorterSide) that is treated as close-to-square. The
+     * orientation requests from apps would be ignored if the display is close-to-square.
+     */
+    @VisibleForTesting
+    final float mCloseToSquareMaxAspectRatio;
+
+    /**
+     * If this is true, we would not rotate the display for apps. The rotation would be either the
+     * sensor rotation or the user rotation, controlled by
+     * {@link WindowManagerPolicy.UserRotationMode}.
+     */
+    private boolean mIgnoreRotationForApps;
 
     /**
      * Keep track of wallpaper visibility to notify changes.
@@ -909,6 +924,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplayPolicy = new DisplayPolicy(service, this);
         mDisplayRotation = new DisplayRotation(service, this);
+        mCloseToSquareMaxAspectRatio = service.mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_closeToSquareDisplayMaxAspectRatio);
         if (isDefaultDisplay) {
             // The policy may be invoked right after here, so it requires the necessary default
             // fields of this display content.
@@ -1539,6 +1556,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
+
+        // Not much of use to rotate the display for apps since it's close to square.
+        mIgnoreRotationForApps = isNonDecorDisplayCloseToSquare(Surface.ROTATION_0, width, height);
+    }
+
+    private boolean isNonDecorDisplayCloseToSquare(int rotation, int width, int height) {
+        final DisplayCutout displayCutout =
+                calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
+        final int uiMode = mWmService.mPolicy.getUiMode();
+        final int w = mDisplayPolicy.getNonDecorDisplayWidth(
+                width, height, rotation, uiMode, displayCutout);
+        final int h = mDisplayPolicy.getNonDecorDisplayHeight(
+                width, height, rotation, uiMode, displayCutout);
+        final float aspectRatio = Math.max(w, h) / (float) Math.min(w, h);
+        return aspectRatio <= mCloseToSquareMaxAspectRatio;
     }
 
     /**
@@ -2118,6 +2150,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     int getOrientation() {
         final WindowManagerPolicy policy = mWmService.mPolicy;
+
+        if (mIgnoreRotationForApps) {
+            return SCREEN_ORIENTATION_USER;
+        }
 
         if (mWmService.mDisplayFrozen) {
             if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {

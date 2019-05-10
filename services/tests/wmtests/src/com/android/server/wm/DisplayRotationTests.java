@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -394,19 +393,6 @@ public class DisplayRotationTests {
         verifyOrientationListenerRegistration(0);
     }
 
-    @Test
-    public void testNotEnablesSensor_ForceDefaultRotation_Squared() throws Exception {
-        mBuilder.build();
-        configureDisplayRotation(SCREEN_ORIENTATION_LOCKED, false, false);
-
-        when(mMockDisplayPolicy.isScreenOnEarly()).thenReturn(true);
-        when(mMockDisplayPolicy.isAwake()).thenReturn(true);
-        when(mMockDisplayPolicy.isKeyguardDrawComplete()).thenReturn(true);
-        when(mMockDisplayPolicy.isWindowManagerDrawComplete()).thenReturn(true);
-        mTarget.updateOrientationListener();
-        verifyOrientationListenerRegistration(0);
-    }
-
     private void enableOrientationSensor() {
         when(mMockDisplayPolicy.isScreenOnEarly()).thenReturn(true);
         when(mMockDisplayPolicy.isAwake()).thenReturn(true);
@@ -533,15 +519,6 @@ public class DisplayRotationTests {
     }
 
     @Test
-    public void testReturnsUserRotation_ForceDefaultRotation_Squared() throws Exception {
-        mBuilder.build();
-        configureDisplayRotation(SCREEN_ORIENTATION_LOCKED, false, false);
-
-        assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(SCREEN_ORIENTATION_PORTRAIT,
-                Surface.ROTATION_180));
-    }
-
-    @Test
     public void testReturnsLidOpenRotation_LidOpen() throws Exception {
         mBuilder.setLidOpenRotation(Surface.ROTATION_90).build();
         configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
@@ -643,14 +620,9 @@ public class DisplayRotationTests {
                 width = 1080;
                 height = 1920;
                 break;
-            case SCREEN_ORIENTATION_LOCKED:
-                // We use locked for squared display.
-                width = 1080;
-                height = 1080;
-                break;
             default:
-                throw new IllegalArgumentException("displayOrientation needs to be landscape, "
-                        + "portrait or locked, but we got "
+                throw new IllegalArgumentException("displayOrientation needs to be either landscape"
+                        + " or portrait, but we got "
                         + ActivityInfo.screenOrientationToString(displayOrientation));
         }
 
@@ -660,10 +632,6 @@ public class DisplayRotationTests {
                 .thenReturn(isCar);
         when(mockPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
                 .thenReturn(isTv);
-        when(mMockDisplayPolicy.getNonDecorDisplayWidth(anyInt(), anyInt(), anyInt(), anyInt(),
-                any())).thenReturn(width);
-        when(mMockDisplayPolicy.getNonDecorDisplayHeight(anyInt(), anyInt(), anyInt(), anyInt(),
-                any())).thenReturn(height);
 
         final int shortSizeDp = (isCar || isTv) ? 540 : 720;
         final int longSizeDp = 960;
@@ -831,9 +799,6 @@ public class DisplayRotationTests {
                     .thenReturn(convertRotationToDegrees(mDeskDockRotation));
             when(mMockRes.getInteger(com.android.internal.R.integer.config_undockedHdmiRotation))
                     .thenReturn(convertRotationToDegrees(mUndockedHdmiRotation));
-            when(mMockRes.getFloat(
-                    com.android.internal.R.dimen.config_closeToSquareDisplayMaxAspectRatio))
-                    .thenReturn(1.33f);
 
             mMockSensorManager = mock(SensorManager.class);
             when(mMockContext.getSystemService(Context.SENSOR_SERVICE))
