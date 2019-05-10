@@ -21822,6 +21822,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
             } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_SHARED_USERS);
+                if (opti < args.length && "noperm".equals(args[opti])) {
+                    dumpState.setOptionEnabled(DumpState.OPTION_SKIP_PERMISSIONS);
+                }
             } else if ("prov".equals(cmd) || "providers".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PROVIDERS);
             } else if ("m".equals(cmd) || "messages".equals(cmd)) {

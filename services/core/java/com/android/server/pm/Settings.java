@@ -4959,27 +4959,43 @@ public final class Settings {
                     pw.println("Shared users:");
                     printedSomething = true;
                 }
+
                 pw.print("  SharedUser [");
                 pw.print(su.name);
                 pw.print("] (");
                 pw.print(Integer.toHexString(System.identityHashCode(su)));
-                        pw.println("):");
+                pw.println("):");
 
                 String prefix = "    ";
                 pw.print(prefix); pw.print("userId="); pw.println(su.userId);
 
-                PermissionsState permissionsState = su.getPermissionsState();
+                pw.print(prefix); pw.println("Packages");
+                final int numPackages = su.packages.size();
+                for (int i = 0; i < numPackages; i++) {
+                    final PackageSetting ps = su.packages.valueAt(i);
+                    if (ps != null) {
+                        pw.print(prefix + "  "); pw.println(ps.toString());
+                    } else {
+                        pw.print(prefix + "  "); pw.println("NULL?!");
+                    }
+                }
+
+                if (dumpState.isOptionEnabled(DumpState.OPTION_SKIP_PERMISSIONS)) {
+                    continue;
+                }
+
+                final PermissionsState permissionsState = su.getPermissionsState();
                 dumpInstallPermissionsLPr(pw, prefix, permissionNames, permissionsState);
 
                 for (int userId : UserManagerService.getInstance().getUserIds()) {
                     final int[] gids = permissionsState.computeGids(userId);
-                    List<PermissionState> permissions = permissionsState
-                            .getRuntimePermissionStates(userId);
+                    final List<PermissionState> permissions =
+                            permissionsState.getRuntimePermissionStates(userId);
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
                         pw.print(prefix); pw.print("User "); pw.print(userId); pw.println(": ");
                         dumpGidsLPr(pw, prefix + "  ", gids);
-                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames, permissions,
-                                packageName != null);
+                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames,
+                                permissions, packageName != null);
                     }
                 }
             } else {
