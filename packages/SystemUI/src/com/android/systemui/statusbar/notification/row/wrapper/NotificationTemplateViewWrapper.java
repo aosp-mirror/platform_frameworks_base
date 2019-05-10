@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import static com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.DEFAULT_HEADER_VISIBLE_AMOUNT;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -49,6 +51,7 @@ import com.android.systemui.statusbar.notification.row.HybridNotificationView;
  */
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
+    private final int mTranslationForHeader;
     protected ImageView mPicture;
     private ProgressBar mProgressBar;
     private TextView mTitle;
@@ -63,6 +66,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private ArraySet<PendingIntent> mCancelledPendingIntents = new ArraySet<>();
     private UiOffloadThread mUiOffloadThread;
     private View mRemoteInputHistory;
+    private float mHeaderTranslation;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -131,6 +135,10 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                     }
 
                 }, TRANSFORMING_VIEW_TEXT);
+        mTranslationForHeader = ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin)
+                - ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_top);
     }
 
     private void resolveTemplateViews(StatusBarNotification notification) {
@@ -280,6 +288,9 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         // the transformation types and we need to have our values set by then.
         resolveTemplateViews(row.getStatusBarNotification());
         super.onContentUpdated(row);
+        if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
+            setHeaderVisibleAmount(row.getHeaderVisibleAmount());
+        }
     }
 
     @Override
@@ -331,6 +342,19 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight()
                     - getHeaderTranslation());
         }
+    }
+
+    @Override
+    public int getHeaderTranslation() {
+        return (int) mHeaderTranslation;
+    }
+
+    @Override
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
+        super.setHeaderVisibleAmount(headerVisibleAmount);
+        mNotificationHeader.setAlpha(headerVisibleAmount);
+        mHeaderTranslation = (1.0f - headerVisibleAmount) * mTranslationForHeader;
+        mView.setTranslationY(mHeaderTranslation);
     }
 
     @Override
