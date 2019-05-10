@@ -602,6 +602,7 @@ java_defaults {
         "telephony/java/com/android/ims/ImsConfigListener.aidl",
         "telephony/java/com/android/internal/telephony/IApnSourceService.aidl",
         "telephony/java/com/android/internal/telephony/ICarrierConfigLoader.aidl",
+        "telephony/java/com/android/internal/telephony/IIntegerConsumer.aidl",
         "telephony/java/com/android/internal/telephony/IMms.aidl",
         "telephony/java/com/android/internal/telephony/INumberVerificationCallback.aidl",
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
