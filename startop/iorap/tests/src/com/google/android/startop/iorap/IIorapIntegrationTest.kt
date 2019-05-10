@@ -105,6 +105,13 @@ class IIorapIntegrationTest {
     }
 
     @Test
+    fun testOnAppLaunchEvent() {
+        testAnyMethod { requestId : RequestId ->
+            // iorapService.onAppLaunchEvent(requestId, AppLaunchEvent.IntentStarted())
+        }
+    }
+
+    @Test
     fun testOnSystemServiceEvent() {
         testAnyMethod { requestId: RequestId ->
             iorapService.onSystemServiceEvent(requestId,

@@ -17,6 +17,19 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$DIR/lib/common"
 
+launch_application_usage() {
+    cat <<EOF
+Usage: $(basename $0) <package> <activity>
+
+  Positional Arguments:
+    <package>                   package of the app to test
+    <activity>                  activity to use
+
+  Named Arguments:
+    -h, --help                  usage information (this)
+EOF
+}
+
 launch_application() {
   local package="$1"
   local activity="$2"
@@ -43,5 +56,10 @@ launch_application() {
 
   echo "$total_time"
 }
+
+if [[ $# -lt 2 ]]; then
+  launch_application_usage
+  exit 1
+fi
 
 launch_application "$@"
