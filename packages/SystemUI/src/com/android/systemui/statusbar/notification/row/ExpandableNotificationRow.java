@@ -770,7 +770,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         if (mHeaderVisibleAmount != headerVisibleAmount) {
             mHeaderVisibleAmount = headerVisibleAmount;
-            mPrivateLayout.setHeaderVisibleAmount(headerVisibleAmount);
+            for (NotificationContentView l : mLayouts) {
+                l.setHeaderVisibleAmount(headerVisibleAmount);
+            }
             if (mChildrenContainer != null) {
                 mChildrenContainer.setHeaderVisibleAmount(headerVisibleAmount);
             }
