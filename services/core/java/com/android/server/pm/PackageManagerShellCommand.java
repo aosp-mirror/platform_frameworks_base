@@ -723,7 +723,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         pw.print(info.getLongVersionCode());
                     }
                 }
-                if (listInstaller && !isApex) {
+                if (listInstaller) {
                     pw.print("  installer=");
                     pw.print(mInterface.getInstallerPackageName(info.packageName));
                 }
