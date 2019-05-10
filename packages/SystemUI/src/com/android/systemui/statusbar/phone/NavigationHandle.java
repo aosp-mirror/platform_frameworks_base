@@ -29,7 +29,6 @@ import android.view.View;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 
 public class NavigationHandle extends View implements ButtonInterface {
     private float mDarkIntensity = -1;
