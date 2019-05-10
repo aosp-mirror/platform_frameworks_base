@@ -105,9 +105,8 @@ public class TestHarnessModeService extends SystemService {
      */
     private void setUpTestHarnessMode() {
         Slog.d(TAG, "Setting up test harness mode");
-        byte[] testHarnessModeData = getPersistentDataBlock().getTestHarnessModeData();
-        if (testHarnessModeData == null || testHarnessModeData.length == 0) {
-            // There's no data to apply, so leave it as-is.
+        byte[] testHarnessModeData = getTestHarnessModeData();
+        if (testHarnessModeData == null) {
             return;
         }
         // If there is data, we should set the device as provisioned, so that we skip the setup
@@ -125,9 +124,8 @@ public class TestHarnessModeService extends SystemService {
 
     private void completeTestHarnessModeSetup() {
         Slog.d(TAG, "Completing Test Harness Mode setup.");
-        byte[] testHarnessModeData = getPersistentDataBlock().getTestHarnessModeData();
-        if (testHarnessModeData == null || testHarnessModeData.length == 0) {
-            // There's no data to apply, so leave it as-is.
+        byte[] testHarnessModeData = getTestHarnessModeData();
+        if (testHarnessModeData == null) {
             return;
         }
         try {
@@ -143,6 +141,21 @@ public class TestHarnessModeService extends SystemService {
             // anyway.
             getPersistentDataBlock().clearTestHarnessModeData();
         }
+    }
+
+    private byte[] getTestHarnessModeData() {
+        PersistentDataBlockManagerInternal blockManager = getPersistentDataBlock();
+        if (blockManager == null) {
+            Slog.e(TAG, "Failed to start Test Harness Mode; no implementation of "
+                    + "PersistentDataBlockManagerInternal was bound!");
+            return null;
+        }
+        byte[] testHarnessModeData = blockManager.getTestHarnessModeData();
+        if (testHarnessModeData == null || testHarnessModeData.length == 0) {
+            // There's no data to apply, so leave it as-is.
+            return null;
+        }
+        return testHarnessModeData;
     }
 
     private void configureSettings() {
@@ -309,7 +322,14 @@ public class TestHarnessModeService extends SystemService {
                 byte[] adbTempKeysBytes = getBytesFromFile(adbTempKeys);
 
                 PersistentData persistentData = new PersistentData(adbKeysBytes, adbTempKeysBytes);
-                getPersistentDataBlock().setTestHarnessModeData(persistentData.toBytes());
+                PersistentDataBlockManagerInternal blockManager = getPersistentDataBlock();
+                if (blockManager == null) {
+                    Slog.e(TAG, "Failed to enable Test Harness Mode. No implementation of "
+                            + "PersistentDataBlockManagerInternal was bound.");
+                    getErrPrintWriter().println("Failed to enable Test Harness Mode");
+                    return 1;
+                }
+                blockManager.setTestHarnessModeData(persistentData.toBytes());
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to store ADB keys.", e);
                 getErrPrintWriter().println("Failed to enable Test Harness Mode");
