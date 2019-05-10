@@ -353,7 +353,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (!mHighTempWarning) {
             return;
         }
-        mHighTempWarning = false;
         dismissHighTemperatureWarningInternal();
     }
 
@@ -364,6 +363,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
      */
     private void dismissHighTemperatureWarningInternal() {
         mNoMan.cancelAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, UserHandle.ALL);
+        mHighTempWarning = false;
     }
 
     @Override
