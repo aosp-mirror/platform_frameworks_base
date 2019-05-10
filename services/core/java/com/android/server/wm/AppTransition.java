@@ -452,6 +452,13 @@ public class AppTransition implements Dump {
 
     void freeze() {
         final int transit = mNextAppTransition;
+        // The RemoteAnimationControl didn't register AppTransitionListener and
+        // only initialized the finish and timeout callback when goodToGo().
+        // So cancel the remote animation here to prevent the animation can't do
+        // finish after transition state cleared.
+        if (mRemoteAnimationController != null) {
+            mRemoteAnimationController.cancelAnimation("freeze");
+        }
         setAppTransition(TRANSIT_UNSET, 0 /* flags */);
         clear();
         setReady();
