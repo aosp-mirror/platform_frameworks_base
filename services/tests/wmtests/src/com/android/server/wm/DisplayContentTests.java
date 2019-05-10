@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -29,6 +30,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
@@ -533,6 +535,43 @@ public class DisplayContentTests extends WindowTestsBase {
         mWm.setKeyguardGoingAway(true);
         assertEquals("Keyguard that is going away must not influence device orientation",
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+    }
+
+    @Test
+    public void testOrientationForAspectRatio() {
+        final DisplayContent dc = createNewDisplay();
+
+        // When display content is created its configuration is not yet initialized, which could
+        // cause unnecessary configuration propagation, so initialize it here.
+        final Configuration config = new Configuration();
+        dc.computeScreenConfiguration(config);
+        dc.onRequestedOverrideConfigurationChanged(config);
+
+        // Create a window that requests a fixed orientation. It will define device orientation
+        // by default.
+        final WindowState window = createWindow(null /* parent */, TYPE_APPLICATION_OVERLAY, dc,
+                "window");
+        window.mHasSurface = true;
+        window.mAttrs.screenOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+
+        // --------------------------------
+        // Test non-close-to-square display
+        // --------------------------------
+        dc.mBaseDisplayWidth = 1000;
+        dc.mBaseDisplayHeight = (int) (dc.mBaseDisplayWidth * dc.mCloseToSquareMaxAspectRatio * 2f);
+        dc.configureDisplayPolicy();
+
+        assertEquals("Screen orientation must be defined by the window by default.",
+                window.mAttrs.screenOrientation, dc.getOrientation());
+
+        // ----------------------------
+        // Test close-to-square display
+        // ----------------------------
+        dc.mBaseDisplayHeight = dc.mBaseDisplayWidth;
+        dc.configureDisplayPolicy();
+
+        assertEquals("Screen orientation must be SCREEN_ORIENTATION_USER.",
+                SCREEN_ORIENTATION_USER, dc.getOrientation());
     }
 
     @Test

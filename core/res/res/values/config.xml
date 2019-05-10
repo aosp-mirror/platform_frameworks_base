@@ -3328,9 +3328,8 @@
     -->
     <integer name="config_dockedStackDividerSnapMode">0</integer>
 
-    <!-- The maximum aspect ratio (longerSide/shorterSide) that is treated as close-to-square. If
-         config_forceDefaultOrientation is set to true, the rotation on a close-to-square display
-         will be fixed. -->
+    <!-- The maximum aspect ratio (longerSide/shorterSide) that is treated as close-to-square. The
+         orientation requests from apps would be ignored if the display is close-to-square. -->
     <item name="config_closeToSquareDisplayMaxAspectRatio" format="float" type="dimen">1.333</item>
 
     <!-- List of comma separated package names for which we the system will not show crash, ANR,
