@@ -111,13 +111,12 @@ public class IpMemoryStoreTest {
 
     @Test
     public void testNetworkAttributes() throws Exception {
-        startIpMemoryStore(true);
+        startIpMemoryStore(true /* supplyService */);
         final String l2Key = "fakeKey";
 
         mStore.storeNetworkAttributes(l2Key, TEST_NETWORK_ATTRIBUTES,
-                status -> {
-                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
-                });
+                status -> assertTrue("Store not successful : " + status.resultCode,
+                        status.isSuccess()));
         verify(mMockService, times(1)).storeNetworkAttributes(eq(l2Key),
                 mNapCaptor.capture(), any());
         assertEquals(TEST_NETWORK_ATTRIBUTES, new NetworkAttributes(mNapCaptor.getValue()));
@@ -135,7 +134,7 @@ public class IpMemoryStoreTest {
 
     @Test
     public void testPrivateData() throws RemoteException {
-        startIpMemoryStore(true);
+        startIpMemoryStore(true /* supplyService */);
         final Blob b = new Blob();
         b.data = TEST_BLOB_DATA;
         final String l2Key = "fakeKey";
@@ -162,7 +161,7 @@ public class IpMemoryStoreTest {
     @Test
     public void testFindL2Key()
             throws UnknownHostException, RemoteException, Exception {
-        startIpMemoryStore(true);
+        startIpMemoryStore(true /* supplyService */);
         final String l2Key = "fakeKey";
 
         mStore.findL2Key(TEST_NETWORK_ATTRIBUTES,
@@ -177,7 +176,7 @@ public class IpMemoryStoreTest {
 
     @Test
     public void testIsSameNetwork() throws UnknownHostException, RemoteException {
-        startIpMemoryStore(true);
+        startIpMemoryStore(true /* supplyService */);
         final String l2Key1 = "fakeKey1";
         final String l2Key2 = "fakeKey2";
 
@@ -193,7 +192,7 @@ public class IpMemoryStoreTest {
 
     @Test
     public void testEnqueuedIpMsRequests() throws Exception {
-        startIpMemoryStore(false);
+        startIpMemoryStore(false /* supplyService */);
 
         final Blob b = new Blob();
         b.data = TEST_BLOB_DATA;
@@ -201,9 +200,8 @@ public class IpMemoryStoreTest {
 
         // enqueue multiple ipms requests
         mStore.storeNetworkAttributes(l2Key, TEST_NETWORK_ATTRIBUTES,
-                status -> {
-                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
-                });
+                status -> assertTrue("Store not successful : " + status.resultCode,
+                        status.isSuccess()));
         mStore.retrieveNetworkAttributes(l2Key,
                 (status, key, attr) -> {
                     assertTrue("Retrieve network attributes not successful : "
@@ -212,9 +210,8 @@ public class IpMemoryStoreTest {
                     assertEquals(TEST_NETWORK_ATTRIBUTES, attr);
                 });
         mStore.storeBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME, b,
-                status -> {
-                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
-                });
+                status -> assertTrue("Store not successful : " + status.resultCode,
+                        status.isSuccess()));
         mStore.retrieveBlob(l2Key, TEST_CLIENT_ID, TEST_OTHER_DATA_NAME,
                 (status, key, name, data) -> {
                     assertTrue("Retrieve blob status not successful : " + status.resultCode,
@@ -240,7 +237,7 @@ public class IpMemoryStoreTest {
 
     @Test
     public void testEnqueuedIpMsRequestsWithException() throws Exception {
-        startIpMemoryStore(true);
+        startIpMemoryStore(true /* supplyService */);
         doThrow(RemoteException.class).when(mMockService).retrieveNetworkAttributes(any(), any());
 
         final Blob b = new Blob();
@@ -249,9 +246,8 @@ public class IpMemoryStoreTest {
 
         // enqueue multiple ipms requests
         mStore.storeNetworkAttributes(l2Key, TEST_NETWORK_ATTRIBUTES,
-                status -> {
-                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
-                });
+                status -> assertTrue("Store not successful : " + status.resultCode,
+                        status.isSuccess()));
         mStore.retrieveNetworkAttributes(l2Key,
                 (status, key, attr) -> {
                     assertTrue("Retrieve network attributes not successful : "
@@ -260,9 +256,8 @@ public class IpMemoryStoreTest {
                     assertEquals(TEST_NETWORK_ATTRIBUTES, attr);
                 });
         mStore.storeBlob(l2Key, TEST_CLIENT_ID, TEST_DATA_NAME, b,
-                status -> {
-                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
-                });
+                status -> assertTrue("Store not successful : " + status.resultCode,
+                        status.isSuccess()));
         mStore.retrieveBlob(l2Key, TEST_CLIENT_ID, TEST_OTHER_DATA_NAME,
                 (status, key, name, data) -> {
                     assertTrue("Retrieve blob status not successful : " + status.resultCode,
@@ -286,7 +281,7 @@ public class IpMemoryStoreTest {
 
     @Test
     public void testEnqueuedIpMsRequestsCallbackFunctionWithException() throws Exception {
-        startIpMemoryStore(true);
+        startIpMemoryStore(true /* supplyService */);
 
         final Blob b = new Blob();
         b.data = TEST_BLOB_DATA;
@@ -294,9 +289,8 @@ public class IpMemoryStoreTest {
 
         // enqueue multiple ipms requests
         mStore.storeNetworkAttributes(l2Key, TEST_NETWORK_ATTRIBUTES,
-                status -> {
-                    assertTrue("Store not successful : " + status.resultCode, status.isSuccess());
-                });
+                status -> assertTrue("Store not successful : " + status.resultCode,
+                        status.isSuccess()));
         mStore.retrieveNetworkAttributes(l2Key,
                 (status, key, attr) -> {
                     throw new RuntimeException("retrieveNetworkAttributes test");
@@ -320,6 +314,7 @@ public class IpMemoryStoreTest {
 
         inOrder.verify(mMockService).storeNetworkAttributes(eq(l2Key), mNapCaptor.capture(),
                 any());
+        inOrder.verify(mMockService).retrieveNetworkAttributes(eq(l2Key), any());
         inOrder.verify(mMockService).storeBlob(eq(l2Key), eq(TEST_CLIENT_ID), eq(TEST_DATA_NAME),
                 eq(b), any());
         inOrder.verify(mMockService).retrieveBlob(eq(l2Key), eq(TEST_CLIENT_ID),
