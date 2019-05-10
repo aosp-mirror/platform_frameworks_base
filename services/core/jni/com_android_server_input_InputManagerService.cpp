@@ -724,19 +724,18 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
 
     JNIEnv* env = jniEnv();
 
-    jobject tokenObj = javaObjectForIBinder(env, token);
-    jstring reasonObj = env->NewStringUTF(reason.c_str());
+    ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
+    ScopedLocalRef<jstring> reasonObj(env, env->NewStringUTF(reason.c_str()));
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, tokenObj,
-                reasonObj);
+                gServiceClassInfo.notifyANR, tokenObj.get(),
+                reasonObj.get());
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
     } else {
         assert(newTimeout >= 0);
     }
 
-    env->DeleteLocalRef(reasonObj);
     return newTimeout;
 }
 
@@ -748,10 +747,10 @@ void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
 
     JNIEnv* env = jniEnv();
 
-    jobject tokenObj = javaObjectForIBinder(env, token);
-    if (tokenObj) {
+    ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
+    if (tokenObj.get()) {
         env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyInputChannelBroken,
-                tokenObj);
+                tokenObj.get());
         checkAndClearExceptionFromCallback(env, "notifyInputChannelBroken");
     }
 }
@@ -765,10 +764,10 @@ void NativeInputManager::notifyFocusChanged(const sp<IBinder>& oldToken,
 
     JNIEnv* env = jniEnv();
 
-    jobject oldTokenObj = javaObjectForIBinder(env, oldToken);
-    jobject newTokenObj = javaObjectForIBinder(env, newToken);
+    ScopedLocalRef<jobject> oldTokenObj(env, javaObjectForIBinder(env, oldToken));
+    ScopedLocalRef<jobject> newTokenObj(env, javaObjectForIBinder(env, newToken));
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyFocusChanged,
-            oldTokenObj, newTokenObj);
+            oldTokenObj.get(), newTokenObj.get());
     checkAndClearExceptionFromCallback(env, "notifyFocusChanged");
 }
 
@@ -1141,13 +1140,13 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
         JNIEnv* env = jniEnv();
 
         // Token may be null
-        jobject tokenObj = javaObjectForIBinder(env, token);
+        ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
 
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
             jlong delayMillis = env->CallLongMethod(mServiceObj,
                     gServiceClassInfo.interceptKeyBeforeDispatching,
-                    tokenObj, keyEventObj, policyFlags);
+                    tokenObj.get(), keyEventObj, policyFlags);
             bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
@@ -1175,12 +1174,12 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
         JNIEnv* env = jniEnv();
 
         // Note: tokenObj may be null.
-        jobject tokenObj = javaObjectForIBinder(env, token);
+        ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
         jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
         if (keyEventObj) {
             jobject fallbackKeyEventObj = env->CallObjectMethod(mServiceObj,
                     gServiceClassInfo.dispatchUnhandledKey,
-                    tokenObj, keyEventObj, policyFlags);
+                    tokenObj.get(), keyEventObj, policyFlags);
             if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
                 fallbackKeyEventObj = nullptr;
             }
@@ -1225,8 +1224,9 @@ void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedTok
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    jobject touchedTokenObj = javaObjectForIBinder(env, touchedToken);
-    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDownOutsideFocus, touchedTokenObj);
+    ScopedLocalRef<jobject> touchedTokenObj(env, javaObjectForIBinder(env, touchedToken));
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDownOutsideFocus,
+            touchedTokenObj.get());
     checkAndClearExceptionFromCallback(env, "onPointerDownOutsideFocus");
 }
 
