@@ -1051,7 +1051,17 @@ interface ITelephony {
      */
     String getLine1AlphaTagForDisplay(int subId, String callingPackage);
 
-    String[] getMergedSubscriberIds(String callingPackage);
+    /**
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. This is commonly {@code null} to indicate no merging is required. Any returned
+     * subscribers are sorted in a deterministic order.
+     * <p>
+     * The returned set of subscriber IDs will include the subscriber ID corresponding to this
+     * TelephonyManager's subId.
+     *
+     * @hide
+     */
+    String[] getMergedSubscriberIds(int subId, String callingPackage);
 
     /**
      * Override the operator branding for the current ICCID.
