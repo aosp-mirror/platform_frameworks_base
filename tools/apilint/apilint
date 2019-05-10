@@ -1,0 +1,147 @@
+#!/bin/bash
+
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the 'License');
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an 'AS IS' BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+if [ "$1" == "--help" -o "$1" == "-h" ]; then
+echo "Usage: apilint [FILTERS...]"
+echo "  Shows lint from currently open files (as diffed from HEAD), i.e. errors"
+echo "  you will receive if you upload this CL."
+echo
+echo "Usage: apilint --all [FILTERS...]"
+echo "  Shows all lint errors present in the current working directory, regardless"
+echo "  of when they were added."
+echo
+echo "Usage: apilint --level API_LEVEL [FILTERS...]"
+echo "  Shows lint as it stands in API_LEVEL"
+echo
+echo "Usage: apilint --shal SHA [FILTERS...]"
+echo "  Shows lint from locally commited git change SHA."
+echo
+echo "Usage: apilint --unreleased [FILTERS...]"
+echo "  Shows all lint errors in the current working directory directory added since"
+echo "  the last released SDK version."
+echo
+echo "FILTERS"
+echo "  List of class or package names by which to filter the results."
+echo
+exit
+fi
+
+if [ \( -z "$ANDROID_BUILD_TOP" \) \
+           -a \( ! -f frameworks/base/api/current.txt \) \
+           -a \( ! -f frameworks/base/api/system-current.txt \) \
+        ]; then
+    echo "apilint must be run either with ANDROID_BUILD_TOP set or from the" 1>&2
+    echo "root of the android source tree" 1>&2
+    exit 1
+fi
+
+if [ ${ANDROID_BUILD_TOP:0:1} != "/" ]; then
+    echo "ANDROID_BUILD_TOP must be an absolute path, not: $ANDROID_BUILD_TOP" 1>&2
+    exit 1
+fi
+
+if [ -z "$ANDROID_BUILD_TOP" ]; then
+    ANDROID_BUILD_TOP=$(pwd)
+fi
+
+FW_BASE=$ANDROID_BUILD_TOP/frameworks/base
+
+MODE=open
+
+OPTIONS=$(getopt -n apilint -o "" -l "all,sha:,unreleased" -- "$@")
+
+[ $? -eq 0 ] || { 
+    exit 1
+}
+
+eval set -- "$OPTIONS"
+while true; do
+    case "$1" in
+    --all)
+        MODE=all
+        ;;
+    --sha)
+        shift; # The arg is next in position args
+        MODE=sha
+        SHA=$1
+        ;;
+    --unreleased)
+        MODE=unreleased
+        ;;
+    --)
+        shift
+        break
+        ;;
+    esac
+    shift
+done
+FILTERS=
+for var in "$@"
+do
+    FILTERS="$FILTERS --filter $var"
+done
+
+if [ $MODE = "all" ]; then
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SDK" \
+            $FILTERS \
+            $ANDROID_BUILD_TOP/frameworks/base/api/current.txt
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SystemApi" \
+            $FILTERS \
+            --base-current $ANDROID_BUILD_TOP/frameworks/base/api/current.txt \
+            $ANDROID_BUILD_TOP/frameworks/base/api/system-current.txt
+elif [ $MODE = "open" ]; then
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SDK" \
+            $FILTERS \
+            $ANDROID_BUILD_TOP/frameworks/base/api/current.txt \
+            <(cd $FW_BASE ; git show HEAD:api/current.txt)
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SystemApi" \
+            $FILTERS \
+            --base-current $ANDROID_BUILD_TOP/frameworks/base/api/current.txt \
+            --base-previous <(cd $FW_BASE ; git show HEAD:api/current.txt) \
+            $ANDROID_BUILD_TOP/frameworks/base/api/system-current.txt \
+            <(cd $FW_BASE ; git show HEAD:api/system-current.txt)
+elif [ $MODE = "sha" ]; then
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SDK" \
+            $FILTERS \
+            <(cd $FW_BASE ; git show $SHA:api/current.txt) \
+            <(cd $FW_BASE ; git show $SHA^:api/current.txt)
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SystemApi" \
+            $FILTERS \
+            --base-current <(cd $FW_BASE ; git show $SHA:api/current.txt) \
+            --base-previous <(cd $FW_BASE ; git show $SHA^:api/current.txt) \
+            <(cd $FW_BASE ; git show $SHA:api/system-current.txt) \
+            <(cd $FW_BASE ; git show $SHA^:api/system-current.txt)
+elif [ $MODE = "unreleased" ]; then
+    LAST_SDK=$(ls $ANDROID_BUILD_TOP/prebuilts/sdk | grep "^[0-9][0-9]*$" | sort -n | tail -n 1)
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SDK" \
+            $FILTERS \
+            $ANDROID_BUILD_TOP/frameworks/base/api/current.txt \
+            $ANDROID_BUILD_TOP/prebuilts/sdk/$LAST_SDK/public/api/android.txt
+    python2.7 -B $ANDROID_BUILD_TOP/frameworks/base/tools/apilint/apilint.py \
+            --title "SystemApi" \
+            $FILTERS \
+            --base-current $ANDROID_BUILD_TOP/frameworks/base/api/current.txt \
+            --base-previous $ANDROID_BUILD_TOP/prebuilts/sdk/$LAST_SDK/public/api/android.txt \
+            $ANDROID_BUILD_TOP/frameworks/base/api/system-current.txt \
+            $ANDROID_BUILD_TOP/prebuilts/sdk/$LAST_SDK/system/api/android.txt
+fi
