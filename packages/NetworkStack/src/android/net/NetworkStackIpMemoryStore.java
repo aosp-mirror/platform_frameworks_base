@@ -19,6 +19,9 @@ package android.net;
 import android.annotation.NonNull;
 import android.content.Context;
 
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+
 /**
  * service used to communicate with the ip memory store service in network stack,
  * which is running in the same module.
@@ -35,8 +38,7 @@ public class NetworkStackIpMemoryStore extends IpMemoryStoreClient {
     }
 
     @Override
-    @NonNull
-    protected IIpMemoryStore getService() {
-        return mService;
+    protected void runWhenServiceReady(Consumer<IIpMemoryStore> cb) throws ExecutionException {
+        cb.accept(mService);
     }
 }
