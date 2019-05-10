@@ -27,10 +27,8 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.CursorWindow;
 import android.net.Uri;
 import android.os.BaseBundle;
@@ -64,22 +62,22 @@ import java.util.concurrent.Executor;
 
 /**
  * Manages SMS operations such as sending data, text, and pdu SMS messages.
- * Get this object by calling the static method {@link #getDefault()}.
+ * Get this object by calling the static method {@link #getDefault()}. To create an instance of
+ * {@link SmsManager} associated with a specific subscription ID, call
+ * {@link #getSmsManagerForSubscriptionId(int)}. This is typically used for devices that support
+ * multiple active subscriptions at once.
  *
  * <p>For information about how to behave as the default SMS app on Android 4.4 (API level 19)
  * and higher, see {@link android.provider.Telephony}.
+ *
+ * @see SubscriptionManager#getActiveSubscriptionInfoList()
  */
 public final class SmsManager {
     private static final String TAG = "SmsManager";
 
-    /**
-     * A psuedo-subId that represents the default subId at any given time. The actual subId it
-     * represents changes as the default subId is changed.
-     */
-    private static final int DEFAULT_SUBSCRIPTION_ID = -1002;
-
     /** Singleton object constructed during class initialization. */
-    private static final SmsManager sInstance = new SmsManager(DEFAULT_SUBSCRIPTION_ID);
+    private static final SmsManager sInstance = new SmsManager(
+            SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
     private static final Object sLockObject = new Object();
 
     /** @hide */
@@ -919,7 +917,7 @@ public final class SmsManager {
 
     /**
      * Get the SmsManager associated with the default subscription id. The instance will always be
-     * associated with the default subscription id, even if the default subscription id is changed.
+     * associated with the default subscription id, even if the default subscription id changes.
      *
      * @return the SmsManager associated with the default subscription id
      */
@@ -928,14 +926,18 @@ public final class SmsManager {
     }
 
     /**
-     * Get the the instance of the SmsManager associated with a particular subscription id
+     * Get the the instance of the SmsManager associated with a particular subscription ID.
      *
-     * @param subId an SMS subscription id, typically accessed using
-     *   {@link android.telephony.SubscriptionManager}
-     * @return the instance of the SmsManager associated with subId
+     * Constructing an {@link SmsManager} in this manner will never cause an SMS disambiguation
+     * dialog to appear, unlike {@link #getDefault()}.
+     *
+     * @param subId an SMS subscription ID, typically accessed using {@link SubscriptionManager}
+     * @return the instance of the SmsManager associated with subscription
+     *
+     * @see SubscriptionManager#getActiveSubscriptionInfoList()
+     * @see SubscriptionManager#getDefaultSmsSubscriptionId()
      */
     public static SmsManager getSmsManagerForSubscriptionId(int subId) {
-        // TODO(shri): Add javadoc link once SubscriptionManager is made public api
         synchronized(sLockObject) {
             SmsManager smsManager = sSubInstances.get(subId);
             if (smsManager == null) {
@@ -953,60 +955,21 @@ public final class SmsManager {
     /**
      * Get the associated subscription id. If the instance was returned by {@link #getDefault()},
      * then this method may return different values at different points in time (if the user
-     * changes the default subscription id). It will return < 0 if the default subscription id
-     * cannot be determined.
+     * changes the default subscription id).
      *
-     * Additionally, to support legacy applications that are not multi-SIM aware,
-     * if the following are true:
-     *     - We are using a multi-SIM device
-     *     - A default SMS SIM has not been selected
-     *     - At least one SIM subscription is available
-     * then ask the user to set the default SMS SIM.
+     * Note: This method used to display a disambiguation dialog to the user asking them to choose a
+     * default subscription to send SMS messages over if they haven't chosen yet. Starting in Q, we
+     * allow the user to choose "ask every time" as a valid option for multi-SIM devices, so no
+     * disambiguation dialog will be shown and we will return
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
      *
-     * @return associated subscription id
+     * @return associated subscription ID or {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if
+     * the default subscription id cannot be determined or the device supports multiple active
+     * subscriptions and and no default is set ("ask every time") by the user.
      */
     public int getSubscriptionId() {
-        final int subId = getSubIdOrDefault();
-        boolean isSmsSimPickActivityNeeded = false;
-        final Context context = ActivityThread.currentApplication().getApplicationContext();
-        try {
-            ISms iSms = getISmsService();
-            if (iSms != null) {
-                isSmsSimPickActivityNeeded = iSms.isSmsSimPickActivityNeeded(subId);
-            }
-        } catch (RemoteException ex) {
-            Log.e(TAG, "Exception in getSubscriptionId");
-        }
-
-        if (isSmsSimPickActivityNeeded) {
-            Log.d(TAG, "getSubscriptionId isSmsSimPickActivityNeeded is true");
-            // ask the user for a default SMS SIM.
-            Intent intent = new Intent();
-            intent.setClassName("com.android.settings",
-                    "com.android.settings.sim.SimDialogActivity");
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(DIALOG_TYPE_KEY, SMS_PICK);
-            try {
-                context.startActivity(intent);
-            } catch (ActivityNotFoundException anfe) {
-                // If Settings is not installed, only log the error as we do not want to break
-                // legacy applications.
-                Log.e(TAG, "Unable to launch Settings application.");
-            }
-        }
-
-        return subId;
-    }
-
-    /**
-     * @return the subscription ID associated with this {@link SmsManager} or the default set by the
-     * user if this instance was created using {@link SmsManager#getDefault}.
-     *
-     * If there is no default set by the user, this method returns
-     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
-     */
-    private int getSubIdOrDefault() {
-        return (mSubId == DEFAULT_SUBSCRIPTION_ID) ? getDefaultSmsSubscriptionId() : mSubId;
+        return (mSubId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)
+                ? getDefaultSmsSubscriptionId() : mSubId;
     }
 
     /**
@@ -1176,8 +1139,9 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
-                success = iSms.enableCellBroadcastForSubscriber(getSubIdOrDefault(),
+                // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
+                // the default phone internally.
+                success = iSms.enableCellBroadcastForSubscriber(getSubscriptionId(),
                         messageIdentifier, ranType);
             }
         } catch (RemoteException ex) {
@@ -1213,8 +1177,9 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
-                success = iSms.disableCellBroadcastForSubscriber(getSubIdOrDefault(),
+                // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
+                // the default phone internally.
+                success = iSms.disableCellBroadcastForSubscriber(getSubscriptionId(),
                         messageIdentifier, ranType);
             }
         } catch (RemoteException ex) {
@@ -1257,8 +1222,9 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
-                success = iSms.enableCellBroadcastRangeForSubscriber(getSubIdOrDefault(),
+                // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
+                // the default phone internally.
+                success = iSms.enableCellBroadcastRangeForSubscriber(getSubscriptionId(),
                         startMessageId, endMessageId, ranType);
             }
         } catch (RemoteException ex) {
@@ -1301,8 +1267,9 @@ public final class SmsManager {
         try {
             ISms iSms = getISmsService();
             if (iSms != null) {
-                // If getSubIdOrDefault() returns INVALID, we will use the default phone internally.
-                success = iSms.disableCellBroadcastRangeForSubscriber(getSubIdOrDefault(),
+                // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
+                // the default phone internally.
+                success = iSms.disableCellBroadcastRangeForSubscriber(getSubscriptionId(),
                         startMessageId, endMessageId, ranType);
             }
         } catch (RemoteException ex) {
@@ -1390,7 +1357,8 @@ public final class SmsManager {
     /**
      * Get default sms subscription id
      *
-     * @return the default SMS subscription id
+     * @return the default SMS subscription id or
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if no default is set.
      */
     public static int getDefaultSmsSubscriptionId() {
         ISms iSms = null;
