@@ -184,7 +184,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
                     getHandler().post(() -> {
                         boolean success = enableRollback(installFlags, newPackageCodePath,
-                                installedUsers, user);
+                                installedUsers, user, token);
                         int ret = PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED;
                         if (!success) {
                             ret = PackageManagerInternal.ENABLE_ROLLBACK_FAILED;
@@ -202,6 +202,27 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }, enableRollbackFilter, null, getHandler());
+
+        IntentFilter enableRollbackTimedOutFilter = new IntentFilter();
+        enableRollbackTimedOutFilter.addAction(Intent.ACTION_CANCEL_ENABLE_ROLLBACK);
+
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_CANCEL_ENABLE_ROLLBACK.equals(intent.getAction())) {
+                    int token = intent.getIntExtra(
+                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN, -1);
+                    synchronized (mLock) {
+                        for (NewRollback rollback : mNewRollbacks) {
+                            if (rollback.hasToken(token)) {
+                                rollback.isCancelled = true;
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }, enableRollbackTimedOutFilter, null, getHandler());
 
         registerTimeChangeReceiver();
     }
@@ -818,10 +839,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * @param newPackageCodePath path to the package about to be installed.
      * @param installedUsers the set of users for which a given package is installed.
      * @param user the user that owns the install session to enable rollback on.
+     * @param token the distinct rollback token sent by package manager.
      * @return true if enabling the rollback succeeds, false otherwise.
      */
     private boolean enableRollback(int installFlags, File newPackageCodePath,
-            int[] installedUsers, @UserIdInt int user) {
+            int[] installedUsers, @UserIdInt int user, int token) {
 
         // Find the session id associated with this install.
         // TODO: It would be nice if package manager or package installer told
@@ -914,6 +936,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 mNewRollbacks.add(newRollback);
             }
         }
+        newRollback.addToken(token);
 
         return enableRollbackForPackageSession(newRollback.data, packageSession,
                 installedUsers, /* snapshotUserData*/ true);
@@ -1016,7 +1039,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     public void restoreUserData(String packageName, int[] userIds, int appId, long ceDataInode,
             String seInfo, int token) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("restoureUserData may only be called by the system.");
+            throw new SecurityException("restoreUserData may only be called by the system.");
         }
 
         getHandler().post(() -> {
@@ -1272,6 +1295,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             deleteRollback(data);
             return null;
         }
+        if (newRollback.isCancelled) {
+            Log.e(TAG, "Rollback has been cancelled by PackageManager");
+            deleteRollback(data);
+            return null;
+        }
 
         // It's safe to access data.info outside a synchronized block because
         // this is running on the handler thread and all changes to the
@@ -1452,6 +1480,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         public final RollbackData data;
 
         /**
+         * This array holds all of the rollback tokens associated with package sessions included
+         * in this rollback. This is used to identify which rollback should be cancelled in case
+         * {@link PackageManager} sends an {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK} intent.
+         */
+        private final IntArray mTokens = new IntArray();
+
+        /**
          * Session ids for all packages in the install.
          * For multi-package sessions, this is the list of child session ids.
          * For normal sessions, this list is a single element with the normal
@@ -1459,9 +1494,30 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
          */
         public final int[] packageSessionIds;
 
+        /**
+         * Flag to determine whether the RollbackData has been cancelled.
+         *
+         * <p>RollbackData could be invalidated and cancelled if RollbackManager receives
+         * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK} from {@link PackageManager}.
+         *
+         * <p>The main underlying assumption here is that if enabling the rollback times out, then
+         * {@link PackageManager} will NOT send
+         * {@link PackageInstaller.SessionCallback#onFinished(int, boolean)} before it broadcasts
+         * {@link Intent#ACTION_CANCEL_ENABLE_ROLLBACK}.
+         */
+        public boolean isCancelled = false;
+
         NewRollback(RollbackData data, int[] packageSessionIds) {
             this.data = data;
             this.packageSessionIds = packageSessionIds;
+        }
+
+        public void addToken(int token) {
+            mTokens.add(token);
+        }
+
+        public boolean hasToken(int token) {
+            return mTokens.indexOf(token) != -1;
         }
     }
 
