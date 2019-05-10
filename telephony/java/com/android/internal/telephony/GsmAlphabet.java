@@ -1516,7 +1516,7 @@ public class GsmAlphabet {
             }
         }
 
-        sCharsToShiftTables = new SparseIntArray[numTables];
+        sCharsToShiftTables = new SparseIntArray[numShiftTables];
         for (int i = 0; i < numShiftTables; i++) {
             String shiftTable = sLanguageShiftTables[i];
 
