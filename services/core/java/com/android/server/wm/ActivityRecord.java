@@ -120,6 +120,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
@@ -1631,6 +1632,7 @@ final class ActivityRecord extends ConfigurationContainer {
 
     void updateOptionsLocked(ActivityOptions options) {
         if (options != null) {
+            if (DEBUG_TRANSITION) Slog.i(TAG, "Update options for " + this);
             if (pendingOptions != null) {
                 pendingOptions.abort();
             }
@@ -1641,6 +1643,7 @@ final class ActivityRecord extends ConfigurationContainer {
     void applyOptionsLocked() {
         if (pendingOptions != null
                 && pendingOptions.getAnimationType() != ANIM_SCENE_TRANSITION) {
+            if (DEBUG_TRANSITION) Slog.i(TAG, "Applying options for " + this);
             applyOptionsLocked(pendingOptions, intent);
             if (task == null) {
                 clearOptionsLocked(false /* withAbort */);
@@ -1762,9 +1765,19 @@ final class ActivityRecord extends ConfigurationContainer {
         pendingOptions = null;
     }
 
-    ActivityOptions takeOptionsLocked() {
+    ActivityOptions takeOptionsLocked(boolean fromClient) {
+        if (DEBUG_TRANSITION) Slog.i(TAG, "Taking options for " + this + " callers="
+                + Debug.getCallers(6));
         ActivityOptions opts = pendingOptions;
-        pendingOptions = null;
+
+        // If we are trying to take activity options from the client, do not null it out if it's a
+        // remote animation as the client doesn't need it ever. This is a workaround when client is
+        // faster to take the options than we are to resume the next activity.
+        // TODO (b/132432864): Fix the root cause of these transition preparing/applying options
+        // timing somehow
+        if (!fromClient || opts == null || opts.getRemoteAnimationAdapter() == null) {
+            pendingOptions = null;
+        }
         return opts;
     }
 
