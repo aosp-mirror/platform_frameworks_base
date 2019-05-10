@@ -60,6 +60,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.Watchdog;
 import com.android.server.pm.Installer;
 
 import java.io.File;
@@ -99,6 +100,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     // handler threads are running so that's fine.
     private long mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
 
+    private static final long HANDLER_THREAD_TIMEOUT_DURATION_MILLIS =
+            TimeUnit.MINUTES.toMillis(10);
+
     // Used for generating rollback IDs.
     private final Random mRandom = new SecureRandom();
 
@@ -137,6 +141,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mInstaller.onStart();
         mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
         mHandlerThread.start();
+
+        // Monitor the handler thread
+        Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
 
         mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
 
