@@ -37,7 +37,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -57,8 +60,8 @@ public final class AdbDebuggingManagerTest {
                     + "com.android.server.adb.AdbDebuggingManagerTestActivity";
 
     // The base64 encoding of the values 'test key 1' and 'test key 2'.
-    private static final String TEST_KEY_1 = "dGVzdCBrZXkgMQo=";
-    private static final String TEST_KEY_2 = "dGVzdCBrZXkgMgo=";
+    private static final String TEST_KEY_1 = "dGVzdCBrZXkgMQo= test@android.com";
+    private static final String TEST_KEY_2 = "dGVzdCBrZXkgMgo= test@android.com";
 
     // This response is received from the AdbDebuggingHandler when the key is allowed to connect
     private static final String RESPONSE_KEY_ALLOWED = "OK";
@@ -76,22 +79,26 @@ public final class AdbDebuggingManagerTest {
     private AdbDebuggingManager.AdbKeyStore mKeyStore;
     private BlockingQueue<TestResult> mBlockingQueue;
     private long mOriginalAllowedConnectionTime;
-    private File mKeyFile;
+    private File mAdbKeyXmlFile;
+    private File mAdbKeyFile;
 
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getContext();
-        mManager = new AdbDebuggingManager(mContext, ADB_CONFIRM_COMPONENT);
-        mKeyFile = new File(mContext.getFilesDir(), "test_adb_keys.xml");
-        if (mKeyFile.exists()) {
-            mKeyFile.delete();
+        mAdbKeyFile = new File(mContext.getFilesDir(), "adb_keys");
+        if (mAdbKeyFile.exists()) {
+            mAdbKeyFile.delete();
+        }
+        mManager = new AdbDebuggingManager(mContext, ADB_CONFIRM_COMPONENT, mAdbKeyFile);
+        mAdbKeyXmlFile = new File(mContext.getFilesDir(), "test_adb_keys.xml");
+        if (mAdbKeyXmlFile.exists()) {
+            mAdbKeyXmlFile.delete();
         }
         mThread = new AdbDebuggingThreadTest();
-        mKeyStore = mManager.new AdbKeyStore(mKeyFile);
+        mKeyStore = mManager.new AdbKeyStore(mAdbKeyXmlFile);
         mHandler = mManager.new AdbDebuggingHandler(FgThread.get().getLooper(), mThread, mKeyStore);
         mOriginalAllowedConnectionTime = mKeyStore.getAllowedConnectionTime();
         mBlockingQueue = new ArrayBlockingQueue<>(1);
-
     }
 
     @After
@@ -118,6 +125,13 @@ public final class AdbDebuggingManagerTest {
         // Verify if the user allows the key but does not select the option to 'always
         // allow' that the connection is allowed but the key is not stored.
         runAdbTest(TEST_KEY_1, true, false, false);
+
+        // Persist the keystore to ensure that the key is not written to the adb_keys file.
+        persistKeyStore();
+        assertFalse(
+                "A key for which the 'always allow' option is not selected must not be written "
+                        + "to the adb_keys file",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
     }
 
     @Test
@@ -146,25 +160,11 @@ public final class AdbDebuggingManagerTest {
 
         // Send the disconnect message for the currently connected key to trigger an update of the
         // last connection time.
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_DISCONNECT).sendToTarget();
-
-        // Use a latch to ensure the test does not exit untill the Runnable has been processed.
-        CountDownLatch latch = new CountDownLatch(1);
-
-        // Post a new Runnable to the handler to ensure it runs after the disconnect message is
-        // processed.
-        mHandler.post(() -> {
-            assertNotEquals(
-                    "The last connection time was not updated after the disconnect",
-                    lastConnectionTime,
-                    mKeyStore.getLastConnectionTime(TEST_KEY_1));
-            latch.countDown();
-        });
-        if (!latch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
-            fail("The Runnable to verify the last connection time was updated did not complete "
-                    + "within the timeout period");
-        }
+        disconnectKey(TEST_KEY_1);
+        assertNotEquals(
+                "The last connection time was not updated after the disconnect",
+                lastConnectionTime,
+                mKeyStore.getLastConnectionTime(TEST_KEY_1));
     }
 
     @Test
@@ -177,8 +177,7 @@ public final class AdbDebuggingManagerTest {
         runAdbTest(TEST_KEY_1, true, false, false);
 
         // Send the disconnect message for the currently connected key.
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_DISCONNECT).sendToTarget();
+        disconnectKey(TEST_KEY_1);
 
         // Verify that the disconnected key is not automatically allowed on a subsequent connection.
         runAdbTest(TEST_KEY_1, true, false, false);
@@ -192,12 +191,13 @@ public final class AdbDebuggingManagerTest {
         // Allow a connection from a new key with the 'Always allow' option selected.
         runAdbTest(TEST_KEY_1, true, true, false);
 
-        // Next attempt another connection with the same key and verify that the activity to prompt
-        // the user to accept the key is not launched.
-        runAdbTest(TEST_KEY_1, true, true, true);
+        // Send a persist keystore message to force the key to be written to the adb_keys file
+        persistKeyStore();
 
-        // Verify that a different key is not automatically allowed.
-        runAdbTest(TEST_KEY_2, false, false, false);
+        // Verify the key is in the adb_keys file to ensure subsequent connections are allowed by
+        // adbd.
+        assertTrue("The key was not in the adb_keys file after persisting the keystore",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
     }
 
     @Test
@@ -215,8 +215,11 @@ public final class AdbDebuggingManagerTest {
         // fail the new test but would be allowed with the original behavior.
         mKeyStore.setLastConnectionTime(TEST_KEY_1, 1);
 
-        // Run the test with the key and verify that the connection is automatically allowed.
-        runAdbTest(TEST_KEY_1, true, true, true);
+        // Verify that the key is in the adb_keys file to ensure subsequent connections are
+        // automatically allowed by adbd.
+        persistKeyStore();
+        assertTrue("The key was not in the adb_keys file after persisting the keystore",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
     }
 
     @Test
@@ -237,24 +240,11 @@ public final class AdbDebuggingManagerTest {
         Thread.sleep(10);
 
         // Send a message to the handler to update the last connection time for the active key
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_UPDATE_KEY_CONNECTION_TIME)
-                .sendToTarget();
-
-        // Post a Runnable to the handler to ensure it runs after the update key connection time
-        // message is processed.
-        CountDownLatch latch = new CountDownLatch(1);
-        mHandler.post(() -> {
-            assertNotEquals(
-                    "The last connection time of the key was not updated after the update key "
-                            + "connection time message",
-                    lastConnectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
-            latch.countDown();
-        });
-        if (!latch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
-            fail("The Runnable to verify the last connection time was updated did not complete "
-                    + "within the timeout period");
-        }
+        updateKeyStore();
+        assertNotEquals(
+                "The last connection time of the key was not updated after the update key "
+                        + "connection time message",
+                lastConnectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
     }
 
     @Test
@@ -266,16 +256,12 @@ public final class AdbDebuggingManagerTest {
         // Allow the key to connect with the 'Always allow' option selected
         runAdbTest(TEST_KEY_1, true, true, false);
 
-        // Send a message to the handler to persist the updated keystore.
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_PERSIST_KEY_STORE)
-                .sendToTarget();
-
-        // Post a Runnable to the handler to ensure the persist key store message has been processed
-        // using a new AdbKeyStore backed by the key file.
-        mHandler.post(() -> assertTrue(
+        // Send a message to the handler to persist the updated keystore and verify a new key store
+        // backed by the XML file contains the key.
+        persistKeyStore();
+        assertTrue(
                 "The key with the 'Always allow' option selected was not persisted in the keystore",
-                mManager.new AdbKeyStore(mKeyFile).isKeyAuthorized(TEST_KEY_1)));
+                mManager.new AdbKeyStore(mAdbKeyXmlFile).isKeyAuthorized(TEST_KEY_1));
 
         // Get the current last connection time to ensure it is updated in the persisted keystore.
         long lastConnectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
@@ -284,29 +270,18 @@ public final class AdbDebuggingManagerTest {
         Thread.sleep(10);
 
         // Send a message to the handler to update the last connection time for the active key.
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_UPDATE_KEY_CONNECTION_TIME)
-                .sendToTarget();
+        updateKeyStore();
 
-        // Persist the updated last connection time.
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_PERSIST_KEY_STORE)
-                .sendToTarget();
-
-        // Post a Runnable with a new key store backed by the key file to verify that the last
-        // connection time obtained above is different from the persisted updated value.
-        CountDownLatch latch = new CountDownLatch(1);
-        mHandler.post(() -> {
-            assertNotEquals(
-                    "The last connection time in the key file was not updated after the update "
-                            + "connection time message", lastConnectionTime,
-                    mManager.new AdbKeyStore(mKeyFile).getLastConnectionTime(TEST_KEY_1));
-            latch.countDown();
-        });
-        if (!latch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
-            fail("The Runnable to verify the last connection time was updated did not complete "
-                    + "within the timeout period");
-        }
+        // Persist the updated last connection time and verify a new key store backed by the XML
+        // file contains the updated connection time.
+        persistKeyStore();
+        assertNotEquals(
+                "The last connection time in the key file was not updated after the update "
+                        + "connection time message", lastConnectionTime,
+                mManager.new AdbKeyStore(mAdbKeyXmlFile).getLastConnectionTime(TEST_KEY_1));
+        // Verify that the key is in the adb_keys file
+        assertTrue("The key was not in the adb_keys file after persisting the keystore",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
     }
 
     @Test
@@ -318,28 +293,18 @@ public final class AdbDebuggingManagerTest {
         runAdbTest(TEST_KEY_1, true, true, false);
 
         // Send a message to the handler to clear the adb authorizations.
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_CLEAR).sendToTarget();
+        clearKeyStore();
 
         // Send a message to disconnect the currently connected key
-        mHandler.obtainMessage(
-                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_DISCONNECT).sendToTarget();
+        disconnectKey(TEST_KEY_1);
+        assertFalse(
+                "The currently connected 'always allow' key must not be authorized after an adb"
+                        + " clear message.",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
 
-        // Post a Runnable to ensure the disconnect has completed to verify the 'Always allow' key
-        // that was connected when the clear was sent requires authorization.
-        CountDownLatch latch = new CountDownLatch(1);
-        mHandler.post(() -> {
-            assertFalse(
-                    "The currently connected 'always allow' key should not be authorized after an"
-                            + " adb"
-                            + " clear message.",
-                    mKeyStore.isKeyAuthorized(TEST_KEY_1));
-            latch.countDown();
-        });
-        if (!latch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
-            fail("The Runnable to verify the key is not authorized did not complete within the "
-                    + "timeout period");
-        }
+        // The key should not be in the adb_keys file after clearing the authorizations.
+        assertFalse("The key must not be in the adb_keys file after clearing authorizations",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
     }
 
     @Test
@@ -357,8 +322,17 @@ public final class AdbDebuggingManagerTest {
         // Sleep for a small amount of time to exceed the allowed window.
         Thread.sleep(10);
 
-        // A new connection from this key should prompt the user again.
-        runAdbTest(TEST_KEY_1, true, true, false);
+        // The AdbKeyStore has a method to get the time of the next key expiration to ensure the
+        // scheduled job runs at the time of the next expiration or after 24 hours, whichever occurs
+        // first.
+        assertEquals("The time of the next key expiration must be 0.", 0,
+                mKeyStore.getNextExpirationTime());
+
+        // Persist the key store and verify that the key is no longer in the adb_keys file.
+        persistKeyStore();
+        assertFalse(
+                "The key must not be in the adb_keys file after the allowed time has elapsed.",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
     }
 
     @Test
@@ -381,7 +355,7 @@ public final class AdbDebuggingManagerTest {
         // Attempt to set the last connection time to 1970
         mKeyStore.setLastConnectionTime(TEST_KEY_1, 0);
         assertEquals(
-                "The last connection time in the adb key store should not be set to a value less "
+                "The last connection time in the adb key store must not be set to a value less "
                         + "than the previous connection time",
                 lastConnectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
 
@@ -389,9 +363,313 @@ public final class AdbDebuggingManagerTest {
         mKeyStore.setLastConnectionTime(TEST_KEY_1,
                 Math.max(0, lastConnectionTime - (mKeyStore.getAllowedConnectionTime() + 1)));
         assertEquals(
-                "The last connection time in the adb key store should not be set to a value less "
+                "The last connection time in the adb key store must not be set to a value less "
                         + "than the previous connection time",
                 lastConnectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
+    }
+
+    @Test
+    public void testAdbKeyRemovedByScheduledJob() throws Exception {
+        // When a key is automatically allowed it should be stored in the adb_keys file. A job is
+        // then scheduled daily to update the connection time of the currently connected key, and if
+        // no connected key exists the key store is updated to purge expired keys. This test
+        // verifies that after a key's expiration time has been reached that it is no longer
+        // in the key store nor the adb_keys file
+
+        // Set the allowed time to the default to ensure that any modification to this value do not
+        // impact this test.
+        setAllowedConnectionTime(Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
+
+        // Allow both test keys to connect with the 'always allow' option selected.
+        runAdbTest(TEST_KEY_1, true, true, false);
+        runAdbTest(TEST_KEY_2, true, true, false);
+        disconnectKey(TEST_KEY_1);
+        disconnectKey(TEST_KEY_2);
+
+        // Persist the key store and verify that both keys are in the key store and adb_keys file.
+        persistKeyStore();
+        assertTrue(
+                "Test key 1 must be in the adb_keys file after selecting the 'always allow' "
+                        + "option",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
+        assertTrue(
+                "Test key 1 must be in the adb key store after selecting the 'always allow' "
+                        + "option",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
+        assertTrue(
+                "Test key 2 must be in the adb_keys file after selecting the 'always allow' "
+                        + "option",
+                isKeyInFile(TEST_KEY_2, mAdbKeyFile));
+        assertTrue(
+                "Test key 2 must be in the adb key store after selecting the 'always allow' option",
+                mKeyStore.isKeyAuthorized(TEST_KEY_2));
+
+        // Set test key 1's last connection time to a small value and persist the keystore to ensure
+        // it is cleared out after the next key store update.
+        mKeyStore.setLastConnectionTime(TEST_KEY_1, 1, true);
+        updateKeyStore();
+        assertFalse(
+                "Test key 1 must no longer be in the adb_keys file after its timeout period is "
+                        + "reached",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
+        assertFalse(
+                "Test key 1 must no longer be in the adb key store after its timeout period is "
+                        + "reached",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
+        assertTrue(
+                "Test key 2 must still be in the adb_keys file after test key 1's timeout "
+                        + "period is reached",
+                isKeyInFile(TEST_KEY_2, mAdbKeyFile));
+        assertTrue(
+                "Test key 2 must still be in the adb key store after test key 1's timeout period "
+                        + "is reached",
+                mKeyStore.isKeyAuthorized(TEST_KEY_2));
+    }
+
+    @Test
+    public void testKeystoreExpirationTimes() throws Exception {
+        // When one or more keys are always allowed a daily job is scheduled to update the
+        // connection time of the connected key and to purge any expired keys. The keystore provides
+        // a method to obtain the expiration time of the next key to expire to ensure that a
+        // scheduled job can run at the time of the next expiration if it is before the daily job
+        // would run. This test verifies that this method returns the expected values depending on
+        // when the key should expire and also verifies that the method to schedule the next job to
+        // update the keystore is the expected value based on the time of the next expiration.
+
+        final long epsilon = 5000;
+
+        // Ensure the allowed time is set to the default.
+        setAllowedConnectionTime(Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
+
+        // If there are no keys in the keystore the expiration time should be -1.
+        assertEquals("The expiration time must be -1 when there are no keys in the keystore", -1,
+                mKeyStore.getNextExpirationTime());
+
+        // Allow the test key to connect with the 'always allow' option.
+        runAdbTest(TEST_KEY_1, true, true, false);
+
+        // Verify that the current expiration time is within a small value of the default time.
+        long expirationTime = mKeyStore.getNextExpirationTime();
+        if (Math.abs(expirationTime - Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME)
+                > epsilon) {
+            fail("The expiration time for a new key, " + expirationTime
+                    + ", is outside the expected value of "
+                    + Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
+        }
+        // The delay until the next job should be the lesser of the default expiration time and the
+        // AdbDebuggingHandler's job interval.
+        long expectedValue = Math.min(
+                AdbDebuggingManager.AdbDebuggingHandler.UPDATE_KEYSTORE_JOB_INTERVAL,
+                Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
+        long delay = mHandler.scheduleJobToUpdateAdbKeyStore();
+        if (Math.abs(delay - expectedValue) > epsilon) {
+            fail("The delay before the next scheduled job, " + delay
+                    + ", is outside the expected value of " + expectedValue);
+        }
+
+        // Set the current expiration time to a minute from expiration and verify this new value is
+        // returned.
+        final long newExpirationTime = 60000;
+        mKeyStore.setLastConnectionTime(TEST_KEY_1,
+                System.currentTimeMillis() - Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME
+                        + newExpirationTime, true);
+        expirationTime = mKeyStore.getNextExpirationTime();
+        if (Math.abs(expirationTime - newExpirationTime) > epsilon) {
+            fail("The expiration time for a key about to expire, " + expirationTime
+                    + ", is outside the expected value of " + newExpirationTime);
+        }
+        delay = mHandler.scheduleJobToUpdateAdbKeyStore();
+        if (Math.abs(delay - newExpirationTime) > epsilon) {
+            fail("The delay before the next scheduled job, " + delay
+                    + ", is outside the expected value of " + newExpirationTime);
+        }
+
+        // If a key is already expired the expiration time and delay before the next job runs should
+        // be 0.
+        mKeyStore.setLastConnectionTime(TEST_KEY_1, 1, true);
+        assertEquals("The expiration time for a key that is already expired must be 0", 0,
+                mKeyStore.getNextExpirationTime());
+        assertEquals(
+                "The delay before the next scheduled job for a key that is already expired must"
+                        + " be 0", 0, mHandler.scheduleJobToUpdateAdbKeyStore());
+
+        // If the previous behavior of never removing old keys is set then the expiration time
+        // should be -1 to indicate the job does not need to run.
+        setAllowedConnectionTime(0);
+        assertEquals("The expiration time must be -1 when the keys are set to never expire", -1,
+                mKeyStore.getNextExpirationTime());
+    }
+
+    @Test
+    public void testConnectionTimeUpdatedWithConnectedKeyMessage() throws Exception {
+        // When a system successfully passes the SIGNATURE challenge adbd sends a connected key
+        // message to the framework to notify of the newly connected key. This message should
+        // trigger the AdbDebuggingManager to update the last connection time for this key and mark
+        // it as the currently connected key so that its time can be updated during subsequent
+        // keystore update jobs as well as when the disconnected message is received.
+
+        // Allow the test key to connect with the 'always allow' option selected.
+        runAdbTest(TEST_KEY_1, true, true, false);
+
+        // Simulate disconnecting the key before a subsequent connection without user interaction.
+        disconnectKey(TEST_KEY_1);
+
+        // Get the last connection time for the key to verify that it is updated when the connected
+        // key message is sent.
+        long connectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
+        Thread.sleep(10);
+        mHandler.obtainMessage(AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_CONNECTED_KEY,
+                TEST_KEY_1).sendToTarget();
+        flushHandlerQueue();
+        assertNotEquals(
+                "The connection time for the key must be updated when the connected key message "
+                        + "is received",
+                connectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
+
+        // Verify that the scheduled job updates the connection time of the key.
+        connectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
+        Thread.sleep(10);
+        updateKeyStore();
+        assertNotEquals(
+                "The connection time for the key must be updated when the update keystore message"
+                        + " is sent",
+                connectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
+
+        // Verify that the connection time is updated when the key is disconnected.
+        connectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
+        Thread.sleep(10);
+        disconnectKey(TEST_KEY_1);
+        assertNotEquals(
+                "The connection time for the key must be updated when the disconnected message is"
+                        + " received",
+                connectionTime, mKeyStore.getLastConnectionTime(TEST_KEY_1));
+    }
+
+    @Test
+    public void testClearAuthorizations() throws Exception {
+        // When the user selects the 'Revoke USB debugging authorizations' all previously 'always
+        // allow' keys should be deleted.
+
+        // Set the allowed connection time to the default value to ensure tests do not fail due to
+        // a small value.
+        setAllowedConnectionTime(Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
+
+        // Allow the test key to connect with the 'always allow' option selected.
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+
+        // Verify that the key is authorized and in the adb_keys file
+        assertTrue(
+                "The test key must be in the keystore after the 'always allow' option is selected",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
+        assertTrue(
+                "The test key must be in the adb_keys file after the 'always allow option is "
+                        + "selected",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
+
+        // Send the message to clear the adb authorizations and verify that the keys are no longer
+        // authorized.
+        clearKeyStore();
+        assertFalse(
+                "The test key must not be in the keystore after clearing the authorizations",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
+        assertFalse(
+                "The test key must not be in the adb_keys file after clearing the authorizations",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
+    }
+
+    @Test
+    public void testClearKeystoreAfterDisablingAdb() throws Exception {
+        // When the user disables adb they should still be able to clear the authorized keys.
+
+        // Allow the test key to connect with the 'always allow' option selected and persist the
+        // keystore.
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+
+        // Disable adb and verify that the keystore can be cleared without throwing an exception.
+        disableAdb();
+        clearKeyStore();
+        assertFalse(
+                "The test key must not be in the adb_keys file after clearing the authorizations",
+                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
+    }
+
+    @Test
+    public void testUntrackedUserKeysAddedToKeystore() throws Exception {
+        // When a device is first updated to a build that tracks the connection time of adb keys
+        // the keys in the user key file will not have a connection time. To prevent immediately
+        // deleting keys that the user is actively using these untracked keys should be added to the
+        // keystore with the current system time; this gives the user time to reconnect
+        // automatically with an active key while inactive keys are deleted after the expiration
+        // time.
+
+        final long epsilon = 5000;
+        final String[] testKeys = {TEST_KEY_1, TEST_KEY_2};
+
+        // Add the test keys to the user key file.
+        FileOutputStream fo = new FileOutputStream(mAdbKeyFile);
+        for (String key : testKeys) {
+            fo.write(key.getBytes());
+            fo.write('\n');
+        }
+        fo.close();
+
+        // Set the expiration time to the default and use this value to verify the expiration time
+        // of the previously untracked keys.
+        setAllowedConnectionTime(Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
+
+        // The untracked keys should be added to the keystore as part of the constructor.
+        AdbDebuggingManager.AdbKeyStore adbKeyStore = mManager.new AdbKeyStore(mAdbKeyXmlFile);
+
+        // Verify that the connection time for each test key is within a small value of the current
+        // time.
+        long time = System.currentTimeMillis();
+        for (String key : testKeys) {
+            long connectionTime = adbKeyStore.getLastConnectionTime(key);
+            if (Math.abs(connectionTime - connectionTime) > epsilon) {
+                fail("The connection time for a previously untracked key, " + connectionTime
+                        + ", is beyond the current time of " + time);
+            }
+        }
+    }
+
+    @Test
+    public void testConnectionTimeUpdatedForMultipleConnectedKeys() throws Exception {
+        // Since ADB supports multiple simultaneous connections verify that the connection time of
+        // each key is updated by the scheduled job as long as it is connected.
+
+        // Allow both test keys to connect with the 'always allow' option selected.
+        runAdbTest(TEST_KEY_1, true, true, false);
+        runAdbTest(TEST_KEY_2, true, true, false);
+
+        // Sleep a small amount of time to ensure the connection time is updated by the scheduled
+        // job.
+        long connectionTime1 = mKeyStore.getLastConnectionTime(TEST_KEY_1);
+        long connectionTime2 = mKeyStore.getLastConnectionTime(TEST_KEY_2);
+        Thread.sleep(10);
+        updateKeyStore();
+        assertNotEquals(
+                "The connection time for test key 1 must be updated after the scheduled job runs",
+                connectionTime1, mKeyStore.getLastConnectionTime(TEST_KEY_1));
+        assertNotEquals(
+                "The connection time for test key 2 must be updated after the scheduled job runs",
+                connectionTime2, mKeyStore.getLastConnectionTime(TEST_KEY_2));
+
+        // Disconnect the second test key and verify that the last connection time of the first key
+        // is the only one updated.
+        disconnectKey(TEST_KEY_2);
+        connectionTime1 = mKeyStore.getLastConnectionTime(TEST_KEY_1);
+        connectionTime2 = mKeyStore.getLastConnectionTime(TEST_KEY_2);
+        Thread.sleep(10);
+        updateKeyStore();
+        assertNotEquals(
+                "The connection time for test key 1 must be updated after another key is "
+                        + "disconnected and the scheduled job runs",
+                connectionTime1, mKeyStore.getLastConnectionTime(TEST_KEY_1));
+        assertEquals(
+                "The connection time for test key 2 must not be updated after it is disconnected",
+                connectionTime2, mKeyStore.getLastConnectionTime(TEST_KEY_2));
     }
 
     /**
@@ -440,10 +718,78 @@ public final class AdbDebuggingManagerTest {
                 allowKey ? RESPONSE_KEY_ALLOWED : RESPONSE_KEY_DENIED, threadResult.mMessage);
         // if the key is not allowed or not always allowed verify it is not in the key store
         if (!allowKey || !alwaysAllow) {
-            assertFalse(
-                    "The key should not be allowed automatically on subsequent connection attempts",
+            assertFalse("The key must not be authorized in the key store",
                     mKeyStore.isKeyAuthorized(key));
+            assertFalse(
+                    "The key must not be stored in the adb_keys file",
+                    isKeyInFile(key, mAdbKeyFile));
         }
+        flushHandlerQueue();
+    }
+
+    private void persistKeyStore() throws Exception {
+        // Send a message to the handler to persist the key store.
+        mHandler.obtainMessage(
+                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_PERSIST_KEYSTORE)
+                    .sendToTarget();
+        flushHandlerQueue();
+    }
+
+    private void disconnectKey(String key) throws Exception {
+        // Send a message to the handler to disconnect the currently connected key.
+        mHandler.obtainMessage(AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_DISCONNECT,
+                key).sendToTarget();
+        flushHandlerQueue();
+    }
+
+    private void updateKeyStore() throws Exception {
+        // Send a message to the handler to run the update keystore job.
+        mHandler.obtainMessage(
+                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_UPDATE_KEYSTORE).sendToTarget();
+        flushHandlerQueue();
+    }
+
+    private void clearKeyStore() throws Exception {
+        // Send a message to the handler to clear all previously authorized keys.
+        mHandler.obtainMessage(
+                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_CLEAR).sendToTarget();
+        flushHandlerQueue();
+    }
+
+    private void disableAdb() throws Exception {
+        // Send a message to the handler to disable adb.
+        mHandler.obtainMessage(
+                AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_DISABLED).sendToTarget();
+        flushHandlerQueue();
+    }
+
+    private void flushHandlerQueue() throws Exception {
+        // Post a Runnable to ensure that all of the current messages in the queue are flushed.
+        CountDownLatch latch = new CountDownLatch(1);
+        mHandler.post(() -> {
+            latch.countDown();
+        });
+        if (!latch.await(TIMEOUT, TIMEOUT_TIME_UNIT)) {
+            fail("The Runnable to flush the handler's queue did not complete within the timeout "
+                    + "period");
+        }
+    }
+
+    private boolean isKeyInFile(String key, File keyFile) throws Exception {
+        if (key == null) {
+            return false;
+        }
+        if (keyFile.exists()) {
+            try (BufferedReader in = new BufferedReader(new FileReader(keyFile))) {
+                String currKey;
+                while ((currKey = in.readLine()) != null) {
+                    if (key.equals(currKey)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**

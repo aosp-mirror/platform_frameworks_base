@@ -27,9 +27,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.debug.AdbProtoEnums;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -48,6 +50,7 @@ import android.util.StatsLog;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
@@ -57,18 +60,24 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides communication to the Android Debug Bridge daemon to allow, deny, or clear public keysi
@@ -85,19 +94,22 @@ public class AdbDebuggingManager {
     // This file contains keys that will be allowed to connect without user interaction as long
     // as a subsequent connection occurs within the allowed duration.
     private static final String ADB_TEMP_KEYS_FILE = "adb_temp_keys.xml";
-    private static final int BUFFER_SIZE = 4096;
+    private static final int BUFFER_SIZE = 65536;
 
     private final Context mContext;
     private final Handler mHandler;
     private AdbDebuggingThread mThread;
     private boolean mAdbEnabled = false;
     private String mFingerprints;
-    private String mConnectedKey;
+    private final List<String> mConnectedKeys;
     private String mConfirmComponent;
+    private final File mTestUserKeyFile;
 
     public AdbDebuggingManager(Context context) {
         mHandler = new AdbDebuggingHandler(FgThread.get().getLooper());
         mContext = context;
+        mTestUserKeyFile = null;
+        mConnectedKeys = new ArrayList<>(1);
     }
 
     /**
@@ -105,10 +117,12 @@ public class AdbDebuggingManager {
      * an adb connection from the key.
      */
     @TestApi
-    protected AdbDebuggingManager(Context context, String confirmComponent) {
+    protected AdbDebuggingManager(Context context, String confirmComponent, File testUserKeyFile) {
         mHandler = new AdbDebuggingHandler(FgThread.get().getLooper());
         mContext = context;
         mConfirmComponent = confirmComponent;
+        mTestUserKeyFile = testUserKeyFile;
+        mConnectedKeys = new ArrayList<>();
     }
 
     class AdbDebuggingThread extends Thread {
@@ -153,12 +167,13 @@ public class AdbDebuggingManager {
                 mInputStream = null;
 
                 if (DEBUG) Slog.d(TAG, "Creating socket");
-                mSocket = new LocalSocket();
+                mSocket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
                 mSocket.connect(address);
 
                 mOutputStream = mSocket.getOutputStream();
                 mInputStream = mSocket.getInputStream();
             } catch (IOException ioe) {
+                Slog.e(TAG, "Caught an exception opening the socket: " + ioe);
                 closeSocketLocked();
                 throw ioe;
             }
@@ -172,6 +187,7 @@ public class AdbDebuggingManager {
                     // if less than 2 bytes are read the if statements below will throw an
                     // IndexOutOfBoundsException.
                     if (count < 2) {
+                        Slog.w(TAG, "Read failed with count " + count);
                         break;
                     }
 
@@ -183,9 +199,18 @@ public class AdbDebuggingManager {
                         msg.obj = key;
                         mHandler.sendMessage(msg);
                     } else if (buffer[0] == 'D' && buffer[1] == 'C') {
-                        Slog.d(TAG, "Received disconnected message");
+                        String key = new String(Arrays.copyOfRange(buffer, 2, count));
+                        Slog.d(TAG, "Received disconnected message: " + key);
                         Message msg = mHandler.obtainMessage(
                                 AdbDebuggingHandler.MESSAGE_ADB_DISCONNECT);
+                        msg.obj = key;
+                        mHandler.sendMessage(msg);
+                    } else if (buffer[0] == 'C' && buffer[1] == 'K') {
+                        String key = new String(Arrays.copyOfRange(buffer, 2, count));
+                        Slog.d(TAG, "Received connected key message: " + key);
+                        Message msg = mHandler.obtainMessage(
+                                AdbDebuggingHandler.MESSAGE_ADB_CONNECTED_KEY);
+                        msg.obj = key;
                         mHandler.sendMessage(msg);
                     } else {
                         Slog.e(TAG, "Wrong message: "
@@ -243,14 +268,13 @@ public class AdbDebuggingManager {
     }
 
     class AdbDebuggingHandler extends Handler {
-        // The time to schedule the job to keep the key store updated with a currently connected
-        // key. This job is required because a deveoper could keep a device connected to their
-        // system beyond the time within which a subsequent connection is allowed. But since the
-        // last connection time is only written when a device is connected and disconnected then
-        // if the device is rebooted while connected to the development system it would appear as
-        // though the adb grant for the system is no longer authorized and the developer would need
-        // to manually allow the connection again.
-        private static final long UPDATE_KEY_STORE_JOB_INTERVAL = 86400000;
+        // The default time to schedule the job to keep the keystore updated with a currently
+        // connected key as well as to removed expired keys.
+        static final long UPDATE_KEYSTORE_JOB_INTERVAL = 86400000;
+        // The minimum interval at which the job should run to update the keystore. This is intended
+        // to prevent the job from running too often if the allowed connection time for adb grants
+        // is set to an extremely small value.
+        static final long UPDATE_KEYSTORE_MIN_JOB_INTERVAL = 60000;
 
         static final int MESSAGE_ADB_ENABLED = 1;
         static final int MESSAGE_ADB_DISABLED = 2;
@@ -259,10 +283,20 @@ public class AdbDebuggingManager {
         static final int MESSAGE_ADB_CONFIRM = 5;
         static final int MESSAGE_ADB_CLEAR = 6;
         static final int MESSAGE_ADB_DISCONNECT = 7;
-        static final int MESSAGE_ADB_PERSIST_KEY_STORE = 8;
-        static final int MESSAGE_ADB_UPDATE_KEY_CONNECTION_TIME = 9;
+        static final int MESSAGE_ADB_PERSIST_KEYSTORE = 8;
+        static final int MESSAGE_ADB_UPDATE_KEYSTORE = 9;
+        static final int MESSAGE_ADB_CONNECTED_KEY = 10;
 
         private AdbKeyStore mAdbKeyStore;
+
+        private ContentObserver mAuthTimeObserver = new ContentObserver(this) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                Slog.d(TAG, "Received notification that uri " + uri
+                        + " was modified; rescheduling keystore job");
+                scheduleJobToUpdateAdbKeyStore();
+            }
+        };
 
         AdbDebuggingHandler(Looper looper) {
             super(looper);
@@ -285,13 +319,15 @@ public class AdbDebuggingManager {
                     if (mAdbEnabled) {
                         break;
                     }
-
+                    registerForAuthTimeChanges();
                     mAdbEnabled = true;
 
                     mThread = new AdbDebuggingThread();
                     mThread.start();
 
                     mAdbKeyStore = new AdbKeyStore();
+                    mAdbKeyStore.updateKeyStore();
+                    scheduleJobToUpdateAdbKeyStore();
                     break;
 
                 case MESSAGE_ADB_DISABLED:
@@ -306,14 +342,20 @@ public class AdbDebuggingManager {
                         mThread = null;
                     }
 
-                    cancelJobToUpdateAdbKeyStore();
-                    mConnectedKey = null;
+                    if (!mConnectedKeys.isEmpty()) {
+                        for (String connectedKey : mConnectedKeys) {
+                            mAdbKeyStore.setLastConnectionTime(connectedKey,
+                                    System.currentTimeMillis());
+                        }
+                        sendPersistKeyStoreMessage();
+                        mConnectedKeys.clear();
+                    }
+                    scheduleJobToUpdateAdbKeyStore();
                     break;
 
                 case MESSAGE_ADB_ALLOW: {
                     String key = (String) msg.obj;
                     String fingerprints = getFingerprints(key);
-
                     if (!fingerprints.equals(mFingerprints)) {
                         Slog.e(TAG, "Fingerprints do not match. Got "
                                 + fingerprints + ", expected " + mFingerprints);
@@ -324,12 +366,12 @@ public class AdbDebuggingManager {
                     if (mThread != null) {
                         mThread.sendResponse("OK");
                         if (alwaysAllow) {
-                            mConnectedKey = key;
+                            if (!mConnectedKeys.contains(key)) {
+                                mConnectedKeys.add(key);
+                            }
                             mAdbKeyStore.setLastConnectionTime(key, System.currentTimeMillis());
+                            sendPersistKeyStoreMessage();
                             scheduleJobToUpdateAdbKeyStore();
-                            // write this key to adb_keys as well so that subsequent connections can
-                            // go through the expected SIGNATURE interaction.
-                            writeKey(key);
                         }
                         logAdbConnectionChanged(key, AdbProtoEnums.USER_ALLOWED, alwaysAllow);
                     }
@@ -369,46 +411,128 @@ public class AdbDebuggingManager {
                 }
 
                 case MESSAGE_ADB_CLEAR: {
-                    deleteKeyFile();
-                    mConnectedKey = null;
+                    Slog.d(TAG, "Received a request to clear the adb authorizations");
+                    mConnectedKeys.clear();
                     mAdbKeyStore.deleteKeyStore();
                     cancelJobToUpdateAdbKeyStore();
                     break;
                 }
 
                 case MESSAGE_ADB_DISCONNECT: {
-                    if (mConnectedKey != null) {
-                        mAdbKeyStore.setLastConnectionTime(mConnectedKey,
-                                System.currentTimeMillis());
-                        cancelJobToUpdateAdbKeyStore();
+                    String key = (String) msg.obj;
+                    boolean alwaysAllow = false;
+                    if (key != null && key.length() > 0) {
+                        if (mConnectedKeys.contains(key)) {
+                            alwaysAllow = true;
+                            mAdbKeyStore.setLastConnectionTime(key, System.currentTimeMillis());
+                            sendPersistKeyStoreMessage();
+                            scheduleJobToUpdateAdbKeyStore();
+                            mConnectedKeys.remove(key);
+                        }
+                    } else {
+                        Slog.w(TAG, "Received a disconnected key message with an empty key");
                     }
-                    logAdbConnectionChanged(mConnectedKey, AdbProtoEnums.DISCONNECTED,
-                            (mConnectedKey != null));
-                    mConnectedKey = null;
+                    logAdbConnectionChanged(key, AdbProtoEnums.DISCONNECTED, alwaysAllow);
                     break;
                 }
 
-                case MESSAGE_ADB_PERSIST_KEY_STORE: {
-                    mAdbKeyStore.persistKeyStore();
+                case MESSAGE_ADB_PERSIST_KEYSTORE: {
+                    if (mAdbKeyStore != null) {
+                        mAdbKeyStore.persistKeyStore();
+                    }
                     break;
                 }
 
-                case MESSAGE_ADB_UPDATE_KEY_CONNECTION_TIME: {
-                    if (mConnectedKey != null) {
-                        mAdbKeyStore.setLastConnectionTime(mConnectedKey,
-                                System.currentTimeMillis());
+                case MESSAGE_ADB_UPDATE_KEYSTORE: {
+                    if (!mConnectedKeys.isEmpty()) {
+                        for (String connectedKey : mConnectedKeys) {
+                            mAdbKeyStore.setLastConnectionTime(connectedKey,
+                                    System.currentTimeMillis());
+                        }
+                        sendPersistKeyStoreMessage();
                         scheduleJobToUpdateAdbKeyStore();
+                    } else if (!mAdbKeyStore.isEmpty()) {
+                        mAdbKeyStore.updateKeyStore();
+                        scheduleJobToUpdateAdbKeyStore();
+                    }
+                    break;
+                }
+
+                case MESSAGE_ADB_CONNECTED_KEY: {
+                    String key = (String) msg.obj;
+                    if (key == null || key.length() == 0) {
+                        Slog.w(TAG, "Received a connected key message with an empty key");
+                    } else {
+                        if (!mConnectedKeys.contains(key)) {
+                            mConnectedKeys.add(key);
+                        }
+                        mAdbKeyStore.setLastConnectionTime(key, System.currentTimeMillis());
+                        sendPersistKeyStoreMessage();
+                        scheduleJobToUpdateAdbKeyStore();
+                        logAdbConnectionChanged(key, AdbProtoEnums.AUTOMATICALLY_ALLOWED, true);
                     }
                     break;
                 }
             }
         }
 
+        void registerForAuthTimeChanges() {
+            Uri uri = Settings.Global.getUriFor(Settings.Global.ADB_ALLOWED_CONNECTION_TIME);
+            mContext.getContentResolver().registerContentObserver(uri, false, mAuthTimeObserver);
+        }
+
         private void logAdbConnectionChanged(String key, int state, boolean alwaysAllow) {
             long lastConnectionTime = mAdbKeyStore.getLastConnectionTime(key);
             long authWindow = mAdbKeyStore.getAllowedConnectionTime();
+            Slog.d(TAG,
+                    "Logging key " + key + ", state = " + state + ", alwaysAllow = " + alwaysAllow
+                            + ", lastConnectionTime = " + lastConnectionTime + ", authWindow = "
+                            + authWindow);
             StatsLog.write(StatsLog.ADB_CONNECTION_CHANGED, lastConnectionTime, authWindow, state,
                     alwaysAllow);
+        }
+
+
+        /**
+         * Schedules a job to update the connection time of the currently connected key and filter
+         * out any keys that are beyond their expiration time.
+         *
+         * @return the time in ms when the next job will run or -1 if the job should not be
+         * scheduled to run.
+         */
+        @VisibleForTesting
+        long scheduleJobToUpdateAdbKeyStore() {
+            cancelJobToUpdateAdbKeyStore();
+            long keyExpiration = mAdbKeyStore.getNextExpirationTime();
+            // if the keyExpiration time is -1 then either the keys are set to never expire or
+            // there are no keys in the keystore, just return for now as a new job will be
+            // scheduled on the next connection or when the auth time changes.
+            if (keyExpiration == -1) {
+                return -1;
+            }
+            long delay;
+            // if the keyExpiration is 0 this indicates a key has already expired; schedule the job
+            // to run now to ensure the key is removed immediately from adb_keys.
+            if (keyExpiration == 0) {
+                delay = 0;
+            } else {
+                // else the next job should be run either daily or when the next key is set to
+                // expire with a min job interval to ensure this job does not run too often if a
+                // small value is set for the key expiration.
+                delay = Math.max(Math.min(UPDATE_KEYSTORE_JOB_INTERVAL, keyExpiration),
+                        UPDATE_KEYSTORE_MIN_JOB_INTERVAL);
+            }
+            Message message = obtainMessage(MESSAGE_ADB_UPDATE_KEYSTORE);
+            sendMessageDelayed(message, delay);
+            return delay;
+        }
+
+        /**
+         * Cancels the scheduled job to update the connection time of the currently connected key
+         * and to remove any expired keys.
+         */
+        private void cancelJobToUpdateAdbKeyStore() {
+            removeMessages(AdbDebuggingHandler.MESSAGE_ADB_UPDATE_KEYSTORE);
         }
     }
 
@@ -534,7 +658,13 @@ public class AdbDebuggingManager {
     }
 
     File getUserKeyFile() {
-        return getAdbFile(ADB_KEYS_FILE);
+        return mTestUserKeyFile == null ? getAdbFile(ADB_KEYS_FILE) : mTestUserKeyFile;
+    }
+
+    private void createKeyFile(File keyFile) throws IOException {
+        keyFile.createNewFile();
+        FileUtils.setPermissions(keyFile.toString(),
+                FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP, -1, -1);
     }
 
     private void writeKey(String key) {
@@ -546,9 +676,7 @@ public class AdbDebuggingManager {
             }
 
             if (!keyFile.exists()) {
-                keyFile.createNewFile();
-                FileUtils.setPermissions(keyFile.toString(),
-                        FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP, -1, -1);
+                createKeyFile(keyFile);
             }
 
             FileOutputStream fo = new FileOutputStream(keyFile, true);
@@ -557,6 +685,35 @@ public class AdbDebuggingManager {
             fo.close();
         } catch (IOException ex) {
             Slog.e(TAG, "Error writing key:" + ex);
+        }
+    }
+
+    private void writeKeys(Iterable<String> keys) {
+        AtomicFile atomicKeyFile = null;
+        FileOutputStream fo = null;
+        try {
+            File keyFile = getUserKeyFile();
+
+            if (keyFile == null) {
+                return;
+            }
+
+            if (!keyFile.exists()) {
+                createKeyFile(keyFile);
+            }
+
+            atomicKeyFile = new AtomicFile(keyFile);
+            fo = atomicKeyFile.startWrite();
+            for (String key : keys) {
+                fo.write(key.getBytes());
+                fo.write('\n');
+            }
+            atomicKeyFile.finishWrite(fo);
+        } catch (IOException ex) {
+            Slog.e(TAG, "Error writing keys: " + ex);
+            if (atomicKeyFile != null) {
+                atomicKeyFile.failWrite(fo);
+            }
         }
     }
 
@@ -604,33 +761,11 @@ public class AdbDebuggingManager {
     }
 
     /**
-     * Sends a message to the handler to persist the key store.
+     * Sends a message to the handler to persist the keystore.
      */
     private void sendPersistKeyStoreMessage() {
-        Message msg = mHandler.obtainMessage(AdbDebuggingHandler.MESSAGE_ADB_PERSIST_KEY_STORE);
+        Message msg = mHandler.obtainMessage(AdbDebuggingHandler.MESSAGE_ADB_PERSIST_KEYSTORE);
         mHandler.sendMessage(msg);
-    }
-
-    /**
-     * Schedules a job to update the connection time of the currently connected key. This is
-     * intended for cases such as development devices that are left connected to a user's
-     * system beyond the window within which a connection is allowed without user interaction.
-     * A job should be rescheduled daily so that if the device is rebooted while connected to
-     * the user's system the last time in the key store will show within 24 hours which should
-     * be within the allowed window.
-     */
-    private void scheduleJobToUpdateAdbKeyStore() {
-        Message message = mHandler.obtainMessage(
-                AdbDebuggingHandler.MESSAGE_ADB_UPDATE_KEY_CONNECTION_TIME);
-        mHandler.sendMessageDelayed(message, AdbDebuggingHandler.UPDATE_KEY_STORE_JOB_INTERVAL);
-    }
-
-    /**
-     * Cancels the scheduled job to update the connection time of the currently connected key.
-     * This should be invoked once the adb session is disconnected.
-     */
-    private void cancelJobToUpdateAdbKeyStore() {
-        mHandler.removeMessages(AdbDebuggingHandler.MESSAGE_ADB_UPDATE_KEY_CONNECTION_TIME);
     }
 
     /**
@@ -657,6 +792,13 @@ public class AdbDebuggingManager {
             Slog.e(TAG, "Cannot read system keys", e);
         }
 
+        try {
+            dump.write("keystore", AdbDebuggingManagerProto.KEYSTORE,
+                    FileUtils.readTextFile(getAdbTempKeysFile(), 0, null));
+        } catch (IOException e) {
+            Slog.e(TAG, "Cannot read keystore: ", e);
+        }
+
         dump.end(token);
     }
 
@@ -667,11 +809,14 @@ public class AdbDebuggingManager {
      */
     class AdbKeyStore {
         private Map<String, Long> mKeyMap;
+        private Set<String> mSystemKeys;
         private File mKeyFile;
         private AtomicFile mAtomicKeyFile;
+
         private static final String XML_TAG_ADB_KEY = "adbKey";
         private static final String XML_ATTRIBUTE_KEY = "key";
         private static final String XML_ATTRIBUTE_LAST_CONNECTION = "lastConnection";
+        private static final String SYSTEM_KEY_FILE = "/adb_keys";
 
         /**
          * Value returned by {@code getLastConnectionTime} when there is no previously saved
@@ -680,21 +825,25 @@ public class AdbDebuggingManager {
         public static final long NO_PREVIOUS_CONNECTION = 0;
 
         /**
-         * Constructor that uses the default location for the persistent adb key store.
+         * Constructor that uses the default location for the persistent adb keystore.
          */
         AdbKeyStore() {
-            initKeyFile();
-            mKeyMap = getKeyMapFromFile();
+            init();
         }
 
         /**
-         * Constructor that uses the specified file as the location for the persistent adb key
-         * store.
+         * Constructor that uses the specified file as the location for the persistent adb keystore.
          */
         AdbKeyStore(File keyFile) {
             mKeyFile = keyFile;
+            init();
+        }
+
+        private void init() {
             initKeyFile();
-            mKeyMap = getKeyMapFromFile();
+            mKeyMap = getKeyMap();
+            mSystemKeys = getSystemKeysFromFile(SYSTEM_KEY_FILE);
+            addUserKeysToKeyStore();
         }
 
         /**
@@ -710,10 +859,46 @@ public class AdbDebuggingManager {
             }
         }
 
+        private Set<String> getSystemKeysFromFile(String fileName) {
+            Set<String> systemKeys = new HashSet<>();
+            File systemKeyFile = new File(fileName);
+            if (systemKeyFile.exists()) {
+                try (BufferedReader in = new BufferedReader(new FileReader(systemKeyFile))) {
+                    String key;
+                    while ((key = in.readLine()) != null) {
+                        key = key.trim();
+                        if (key.length() > 0) {
+                            systemKeys.add(key);
+                        }
+                    }
+                } catch (IOException e) {
+                    Slog.e(TAG, "Caught an exception reading " + fileName + ": " + e);
+                }
+            }
+            return systemKeys;
+        }
+
+        /**
+         * Returns whether there are any 'always allowed' keys in the keystore.
+         */
+        public boolean isEmpty() {
+            return mKeyMap.isEmpty();
+        }
+
+        /**
+         * Iterates through the keys in the keystore and removes any that are beyond the window
+         * within which connections are automatically allowed without user interaction.
+         */
+        public void updateKeyStore() {
+            if (filterOutOldKeys()) {
+                sendPersistKeyStoreMessage();
+            }
+        }
+
         /**
          * Returns the key map with the keys and last connection times from the key file.
          */
-        private Map<String, Long> getKeyMapFromFile() {
+        private Map<String, Long> getKeyMap() {
             Map<String, Long> keyMap = new HashMap<String, Long>();
             // if the AtomicFile could not be instantiated before attempt again; if it still fails
             // return an empty key map.
@@ -760,10 +945,39 @@ public class AdbDebuggingManager {
         }
 
         /**
+         * Updates the keystore with keys that were previously set to be always allowed before the
+         * connection time of keys was tracked.
+         */
+        private void addUserKeysToKeyStore() {
+            File userKeyFile = getUserKeyFile();
+            boolean mapUpdated = false;
+            if (userKeyFile != null && userKeyFile.exists()) {
+                try (BufferedReader in = new BufferedReader(new FileReader(userKeyFile))) {
+                    long time = System.currentTimeMillis();
+                    String key;
+                    while ((key = in.readLine()) != null) {
+                        // if the keystore does not contain the key from the user key file then add
+                        // it to the Map with the current system time to prevent it from expiring
+                        // immediately if the user is actively using this key.
+                        if (!mKeyMap.containsKey(key)) {
+                            mKeyMap.put(key, time);
+                            mapUpdated = true;
+                        }
+                    }
+                } catch (IOException e) {
+                    Slog.e(TAG, "Caught an exception reading " + userKeyFile + ": " + e);
+                }
+            }
+            if (mapUpdated) {
+                sendPersistKeyStoreMessage();
+            }
+        }
+
+        /**
          * Writes the key map to the key file.
          */
         public void persistKeyStore() {
-            // if there is nothing in the key map then ensure any keys left in the key store files
+            // if there is nothing in the key map then ensure any keys left in the keystore files
             // are deleted as well.
             filterOutOldKeys();
             if (mKeyMap.isEmpty()) {
@@ -800,7 +1014,8 @@ public class AdbDebuggingManager {
             }
         }
 
-        private void filterOutOldKeys() {
+        private boolean filterOutOldKeys() {
+            boolean keysDeleted = false;
             long allowedTime = getAllowedConnectionTime();
             long systemTime = System.currentTimeMillis();
             Iterator<Map.Entry<String, Long>> keyMapIterator = mKeyMap.entrySet().iterator();
@@ -809,8 +1024,41 @@ public class AdbDebuggingManager {
                 long connectionTime = keyEntry.getValue();
                 if (allowedTime != 0 && systemTime > (connectionTime + allowedTime)) {
                     keyMapIterator.remove();
+                    keysDeleted = true;
                 }
             }
+            // if any keys were deleted then the key file should be rewritten with the active keys
+            // to prevent authorizing a key that is now beyond the allowed window.
+            if (keysDeleted) {
+                writeKeys(mKeyMap.keySet());
+            }
+            return keysDeleted;
+        }
+
+        /**
+         * Returns the time in ms that the next key will expire or -1 if there are no keys or the
+         * keys will not expire.
+         */
+        public long getNextExpirationTime() {
+            long minExpiration = -1;
+            long allowedTime = getAllowedConnectionTime();
+            // if the allowedTime is 0 then keys never expire; return -1 to indicate this
+            if (allowedTime == 0) {
+                return minExpiration;
+            }
+            long systemTime = System.currentTimeMillis();
+            Iterator<Map.Entry<String, Long>> keyMapIterator = mKeyMap.entrySet().iterator();
+            while (keyMapIterator.hasNext()) {
+                Map.Entry<String, Long> keyEntry = keyMapIterator.next();
+                long connectionTime = keyEntry.getValue();
+                // if the key has already expired then ensure that the result is set to 0 so that
+                // any scheduled jobs to clean up the keystore can run right away.
+                long keyExpiration = Math.max(0, (connectionTime + allowedTime) - systemTime);
+                if (minExpiration == -1 || keyExpiration < minExpiration) {
+                    minExpiration = keyExpiration;
+                }
+            }
+            return minExpiration;
         }
 
         /**
@@ -818,6 +1066,7 @@ public class AdbDebuggingManager {
          */
         public void deleteKeyStore() {
             mKeyMap.clear();
+            deleteKeyFile();
             if (mAtomicKeyFile == null) {
                 return;
             }
@@ -836,37 +1085,31 @@ public class AdbDebuggingManager {
          * Sets the time of the last connection for the specified key to the provided time.
          */
         public void setLastConnectionTime(String key, long connectionTime) {
-            // Do not set the connection time to a value that is earlier than what was previously
-            // stored as the last connection time.
-            if (mKeyMap.containsKey(key) && mKeyMap.get(key) >= connectionTime) {
-                return;
-            }
-            mKeyMap.put(key, connectionTime);
-            sendPersistKeyStoreMessage();
+            setLastConnectionTime(key, connectionTime, false);
         }
 
         /**
-         * Returns whether the specified key should be authroized to connect without user
-         * interaction. This requires that the user previously connected this device and selected
-         * the option to 'Always allow', and the time since the last connection is within the
-         * allowed window.
+         * Sets the time of the last connection for the specified key to the provided time. If force
+         * is set to true the time will be set even if it is older than the previously written
+         * connection time.
          */
-        public boolean isKeyAuthorized(String key) {
-            long lastConnectionTime = getLastConnectionTime(key);
-            if (lastConnectionTime == NO_PREVIOUS_CONNECTION) {
-                return false;
+        public void setLastConnectionTime(String key, long connectionTime, boolean force) {
+            // Do not set the connection time to a value that is earlier than what was previously
+            // stored as the last connection time unless force is set.
+            if (mKeyMap.containsKey(key) && mKeyMap.get(key) >= connectionTime && !force) {
+                return;
             }
-            long allowedConnectionTime = getAllowedConnectionTime();
-            // if the allowed connection time is 0 then revert to the previous behavior of always
-            // allowing previously granted adb grants.
-            if (allowedConnectionTime == 0 || (System.currentTimeMillis() < (lastConnectionTime
-                    + allowedConnectionTime))) {
-                return true;
-            } else {
-                // since this key is no longer auhorized remove it from the Map
-                removeKey(key);
-                return false;
+            // System keys are always allowed so there's no need to keep track of their connection
+            // time.
+            if (mSystemKeys.contains(key)) {
+                return;
             }
+            // if this is the first time the key is being added then write it to the key file as
+            // well.
+            if (!mKeyMap.containsKey(key)) {
+                writeKey(key);
+            }
+            mKeyMap.put(key, connectionTime);
         }
 
         /**
@@ -880,14 +1123,29 @@ public class AdbDebuggingManager {
         }
 
         /**
-         * Removes the specified key from the key store.
+         * Returns whether the specified key should be authroized to connect without user
+         * interaction. This requires that the user previously connected this device and selected
+         * the option to 'Always allow', and the time since the last connection is within the
+         * allowed window.
          */
-        public void removeKey(String key) {
-            if (!mKeyMap.containsKey(key)) {
-                return;
+        public boolean isKeyAuthorized(String key) {
+            // A system key is always authorized to connect.
+            if (mSystemKeys.contains(key)) {
+                return true;
             }
-            mKeyMap.remove(key);
-            sendPersistKeyStoreMessage();
+            long lastConnectionTime = getLastConnectionTime(key);
+            if (lastConnectionTime == NO_PREVIOUS_CONNECTION) {
+                return false;
+            }
+            long allowedConnectionTime = getAllowedConnectionTime();
+            // if the allowed connection time is 0 then revert to the previous behavior of always
+            // allowing previously granted adb grants.
+            if (allowedConnectionTime == 0 || (System.currentTimeMillis() < (lastConnectionTime
+                    + allowedConnectionTime))) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }
