@@ -49,6 +49,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 
@@ -70,6 +71,9 @@ public class BackupManagerService {
     public static final boolean DEBUG = true;
     public static final boolean MORE_DEBUG = false;
     public static final boolean DEBUG_SCHEDULING = true;
+
+    @VisibleForTesting
+    static final String DUMP_RUNNING_USERS_MESSAGE = "Backup Manager is running for users:";
 
     // The published binder is a singleton Trampoline object that calls through to the proper code.
     // This indirection lets us turn down the heavy implementation object on the fly without
@@ -849,6 +853,23 @@ public class BackupManagerService {
 
     /** Prints service state for 'dumpsys backup'. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) {
+            return;
+        }
+
+        if (args != null) {
+            for (String arg : args) {
+                if ("users".equals(arg.toLowerCase())) {
+                    pw.print(DUMP_RUNNING_USERS_MESSAGE);
+                    for (int i = 0; i < mServiceUsers.size(); i++) {
+                        pw.print(" " + mServiceUsers.keyAt(i));
+                    }
+                    pw.println();
+                    return;
+                }
+            }
+        }
+
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(UserHandle.USER_SYSTEM, "dump()");
 

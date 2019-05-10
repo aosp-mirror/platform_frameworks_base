@@ -101,7 +101,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
@@ -3470,8 +3469,6 @@ public class UserBackupManagerService {
 
     /** Prints service state for 'dumpsys backup'. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
-
         long identityToken = Binder.clearCallingIdentity();
         try {
             if (args != null) {
@@ -3480,6 +3477,8 @@ public class UserBackupManagerService {
                         pw.println("'dumpsys backup' optional arguments:");
                         pw.println("  -h       : this help text");
                         pw.println("  a[gents] : dump information about defined backup agents");
+                        pw.println("  users    : dump the list of users for which backup service "
+                                + "is running");
                         return;
                     } else if ("agents".startsWith(arg)) {
                         dumpAgents(pw);
