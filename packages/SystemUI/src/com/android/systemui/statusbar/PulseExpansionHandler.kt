@@ -31,7 +31,7 @@ import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingManagerFactory
-import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
