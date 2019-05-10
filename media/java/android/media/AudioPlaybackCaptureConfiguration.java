@@ -34,21 +34,23 @@ import java.util.function.ToIntFunction;
  *  When capturing audio signals played by other apps (and yours),
  *  you will only capture a mix of the audio signals played by players
  *  (such as AudioTrack or MediaPlayer) which present the following characteristics:
- *  - the usage value MUST be {@link AudioAttributes#USAGE_UNKNOWN} or
- *    {@link AudioAttributes#USAGE_GAME}
- *    or {@link AudioAttributes#USAGE_MEDIA}. All other usages CAN NOT be captured.
- *  - AND the capture policy set by their app (with ${@link AudioManager#setAllowedCapturePolicy})
- *    or on each player (with ${@link AudioAttributes.Builder#setAllowedCapturePolicy}) is
- *    {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}, whichever is the most strict.
- *  - AND their app attribute allowAudioPlaybackCapture in their manifest
- *    MUST either be:
- *      * set to "true"
- *      * not set, and their {@code targetSdkVersion} MUST be equal or higher to
- *        {@link android.os.Build.VERSION_CODES#Q}.
- *        Ie. Apps that do not target at least Android Q must explicitly opt-in to be captured by a
- *            MediaProjection.
- *  - AND their apps MUST be in the same user profile as your app
- *    (eg work profile can not capture user profile apps and vice-versa).
+ *  <ul>
+ *  <li> the usage value MUST be {@link AudioAttributes#USAGE_UNKNOWN} or
+ *       {@link AudioAttributes#USAGE_GAME}
+ *       or {@link AudioAttributes#USAGE_MEDIA}. All other usages CAN NOT be captured. </li>
+ *  <li> AND the capture policy set by their app (with {@link AudioManager#setAllowedCapturePolicy})
+ *       or on each player (with {@link AudioAttributes.Builder#setAllowedCapturePolicy}) is
+ *       {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}, whichever is the most strict. </li>
+ *  <li> AND their app attribute allowAudioPlaybackCapture in their manifest
+ *       MUST either be: <ul>
+ *       <li> set to "true" </li>
+ *       <li> not set, and their {@code targetSdkVersion} MUST be equal to or greater than
+ *            {@link android.os.Build.VERSION_CODES#Q}.
+ *            Ie. Apps that do not target at least Android Q must explicitly opt-in to be captured
+ *            by a MediaProjection. </li></ul>
+ *  <li> AND their apps MUST be in the same user profile as your app
+ *       (eg work profile cannot capture user profile apps and vice-versa). </li>
+ *  </ul>
  *
  * <p>An example for creating a capture configuration for capturing all media playback:
  *
@@ -56,7 +58,7 @@ import java.util.function.ToIntFunction;
  *     MediaProjection mediaProjection;
  *     // Retrieve a audio capable projection from the MediaProjectionManager
  *     AudioPlaybackCaptureConfiguration config =
- *              new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
+ *         new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
  *         .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
  *         .build();
  *     AudioRecord record = new AudioRecord.Builder()
@@ -64,7 +66,8 @@ import java.util.function.ToIntFunction;
  *         .build();
  * </pre>
  *
- * @see MediaProjectionManager#getMediaProjection(int, Intent)
+ * @see Builder
+ * @see android.media.projection.MediaProjectionManager#getMediaProjection(int, Intent)
  * @see AudioRecord.Builder#setAudioPlaybackCaptureConfig(AudioPlaybackCaptureConfiguration)
  */
 public final class AudioPlaybackCaptureConfiguration {
@@ -80,7 +83,7 @@ public final class AudioPlaybackCaptureConfiguration {
 
     /**
      * @return the {@code MediaProjection} used to build this object.
-     * @see {@code Builder.Builder}
+     * @see Builder#Builder(MediaProjection)
      */
     public @NonNull MediaProjection getMediaProjection() {
         return mProjection;
