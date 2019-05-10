@@ -294,6 +294,8 @@ message Atom {
         MediametricsMediadrmReported mediametrics_mediadrm_reported = 198;
         MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
         MediametricsRecorderReported mediametrics_recorder_reported = 200;
+        VehicleMapServicePacketReported vms_packet_reported = 201;
+        VehicleMapServicePacketFailureReported vms_packet_failure_reported = 202;
     }
 
     // Pulled events will start at field 10000.
@@ -6265,4 +6267,40 @@ message CoolingDevice {
 message IntelligenceEventReported {
   optional android.stats.intelligence.EventType event_id = 1;
   optional android.stats.intelligence.Status status = 2;
+}
+
+/**
+ * Logs information about Vehicle Map Service packets. It specifies the layer
+ * type, subtype, data version and size of the packet.
+ */
+message VehicleMapServicePacketReported {
+  // Identifies the type of data being transported by a Vehicle Maps Service
+  // packet.
+  optional int32 layer_type = 1;
+  // Identifies the subtype of the layer.
+  optional int32 layer_subtype = 2;
+  // Identifies the version of the data being transported by a Vehicle Maps
+  // Service packet.
+  optional int32 version = 3;
+  // Size in bytes of the packet.
+  optional int64 size_in_bytes = 4;
+}
+
+/**
+ * Logs that a Vehicle Map Service packet failed to be delivered.
+ */
+message VehicleMapServicePacketFailureReported {
+  // Identifies the type of data being transported by a Vehicle Map Service
+  // packet.
+  optional int32 layer_type = 1;
+  // Identifies the subtype of the layer.
+  optional int32 layer_subtype = 2;
+  // Identifies the version of the data being transported by a Vehicle Map
+  // Service packet.
+  optional int32 version = 3;
+  // Identifies the package name of the publisher of the data.
+  optional string publisher_name = 4;
+  // Identifies the package name of the subscriber of the data. An empty string
+  // signifies that there are zero subscribers for the packet.
+  optional string subscriber_name = 5;
 }
