@@ -331,7 +331,7 @@ class ZygoteConnection {
             if (zygoteServer.isUsapPoolEnabled()) {
                 Runnable fpResult =
                         zygoteServer.fillUsapPool(
-                                new int[]{mSocket.getFileDescriptor().getInt$()});
+                                new int[]{mSocket.getFileDescriptor().getInt$()}, false);
 
                 if (fpResult != null) {
                     zygoteServer.setForkChild();

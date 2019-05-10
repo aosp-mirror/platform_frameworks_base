@@ -819,6 +819,9 @@ public class ZygoteInit {
     public static void main(String argv[]) {
         ZygoteServer zygoteServer = null;
 
+        // Set the initial thread priority to the "normal" value.
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+
         // Mark zygote start. This ensures that thread creation will throw
         // an error.
         ZygoteHooks.startZygoteNoThreadCreation();
@@ -878,8 +881,6 @@ public class ZygoteInit {
                 EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                         SystemClock.uptimeMillis());
                 bootTimingsTraceLog.traceEnd(); // ZygotePreload
-            } else {
-                Zygote.resetNicePriority();
             }
 
             // Do an initial gc to clean up after startup
