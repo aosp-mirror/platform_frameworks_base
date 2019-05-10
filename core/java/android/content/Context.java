@@ -329,21 +329,24 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
-     * Flag for {@link #bindService}: If binding from something better than perceptible,
-     * still set the adjust below perceptible. This would be used for bound services that can
-     * afford to be evicted when under extreme memory pressure, but should be restarted as soon
-     * as possible.
-     * @hide
-     */
-    public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
-
-    /**
      * Flag for {@link #bindService}: If binding from an app that has specific capabilities
      * due to its foreground state such as an activity or foreground service, then this flag will
      * allow the bound app to get the same capabilities, as long as it has the required permissions
      * as well.
      */
     public static final int BIND_INCLUDE_CAPABILITIES = 0x00001000;
+
+    /***********    Public flags above this line ***********/
+    /***********    Hidden flags below this line ***********/
+
+    /**
+     * Flag for {@link #bindService}: If binding from something better than perceptible,
+     * still set the adjust below perceptible. This would be used for bound services that can
+     * afford to be evicted when under extreme memory pressure, but should be restarted as soon
+     * as possible.
+     * @hide
+     */
+    public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x00040000;
 
     /**
      * Flag for {@link #bindService}: This flag is intended to be used only by the system to adjust
