@@ -67,6 +67,15 @@ class ZygoteServer {
     private static final String USAP_POOL_SIZE_MIN_DEFAULT = "1";
 
     /**
+     * Number of milliseconds to delay before refilling the pool if it hasn't reached its
+     * minimum value.
+     */
+    private static final int USAP_REFILL_DELAY_MS = 3000;
+
+    /** The "not a timestamp" value for the refill delay timestamp mechanism. */
+    private static final int INVALID_TIMESTAMP = -1;
+
+    /**
      * Indicates if this Zygote server can support a unspecialized app process pool.  Currently this
      * should only be true for the primary and secondary Zygotes, and not the App Zygotes or the
      * WebView Zygote.
@@ -130,6 +139,12 @@ class ZygoteServer {
      * be re-filled when (mUsapPoolMax - gUsapPoolCount) >= sUsapPoolRefillThreshold.
      */
     private int mUsapPoolRefillThreshold = 0;
+
+    private enum UsapPoolRefillAction {
+        DELAYED,
+        IMMEDIATE,
+        NONE
+    }
 
     ZygoteServer() {
         mUsapPoolEventFD = null;
@@ -293,9 +308,16 @@ class ZygoteServer {
         }
     }
 
+    private void fetchUsapPoolPolicyPropsIfUnfetched() {
+        if (mIsFirstPropertyCheck) {
+            mIsFirstPropertyCheck = false;
+            fetchUsapPoolPolicyProps();
+        }
+    }
+
     /**
-     * Checks to see if the current policy says that pool should be refilled, and spawns new USAPs
-     * if necessary.
+     * Refill the USAP Pool to the appropriate level, determined by whether this is a priority
+     * refill event or not.
      *
      * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
      * @return In the Zygote process this function will always return null; in unspecialized app
@@ -303,38 +325,45 @@ class ZygoteServer {
      *         application that is passed up from usapMain.
      */
 
-    Runnable fillUsapPool(int[] sessionSocketRawFDs) {
+    Runnable fillUsapPool(int[] sessionSocketRawFDs, boolean isPriorityRefill) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillUsapPool");
 
         // Ensure that the pool properties have been fetched.
-        fetchUsapPoolPolicyPropsWithMinInterval();
+        fetchUsapPoolPolicyPropsIfUnfetched();
 
         int usapPoolCount = Zygote.getUsapPoolCount();
-        int numUsapsToSpawn = mUsapPoolSizeMax - usapPoolCount;
+        int numUsapsToSpawn;
 
-        if (usapPoolCount < mUsapPoolSizeMin
-                || numUsapsToSpawn >= mUsapPoolRefillThreshold) {
-
-            // Disable some VM functionality and reset some system values
-            // before forking.
-            ZygoteHooks.preFork();
-            Zygote.resetNicePriority();
-
-            while (usapPoolCount++ < mUsapPoolSizeMax) {
-                Runnable caller = Zygote.forkUsap(mUsapPoolSocket, sessionSocketRawFDs);
-
-                if (caller != null) {
-                    return caller;
-                }
-            }
-
-            // Re-enable runtime services for the Zygote.  Services for unspecialized app process
-            // are re-enabled in specializeAppProcess.
-            ZygoteHooks.postForkCommon();
+        if (isPriorityRefill) {
+            // Refill to min
+            numUsapsToSpawn = mUsapPoolSizeMin - usapPoolCount;
 
             Log.i("zygote",
-                    "Filled the USAP pool. New USAPs: " + numUsapsToSpawn);
+                    "Priority USAP Pool refill. New USAPs: " + numUsapsToSpawn);
+        } else {
+            // Refill up to max
+            numUsapsToSpawn = mUsapPoolSizeMax - usapPoolCount;
+
+            Log.i("zygote",
+                    "Delayed USAP Pool refill. New USAPs: " + numUsapsToSpawn);
         }
+
+        // Disable some VM functionality and reset some system values
+        // before forking.
+        ZygoteHooks.preFork();
+
+        while (--numUsapsToSpawn >= 0) {
+            Runnable caller =
+                    Zygote.forkUsap(mUsapPoolSocket, sessionSocketRawFDs, isPriorityRefill);
+
+            if (caller != null) {
+                return caller;
+            }
+        }
+
+        // Re-enable runtime services for the Zygote.  Services for unspecialized app process
+        // are re-enabled in specializeAppProcess.
+        ZygoteHooks.postForkCommon();
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
@@ -358,7 +387,7 @@ class ZygoteServer {
         mUsapPoolEnabled = newStatus;
 
         if (newStatus) {
-            return fillUsapPool(new int[]{ sessionSocket.getFileDescriptor().getInt$() });
+            return fillUsapPool(new int[]{ sessionSocket.getFileDescriptor().getInt$() }, false);
         } else {
             Zygote.emptyUsapPool();
             return null;
@@ -376,6 +405,8 @@ class ZygoteServer {
 
         socketFDs.add(mZygoteSocket.getFileDescriptor());
         peers.add(null);
+
+        long usapPoolRefillTriggerTimestamp = INVALID_TIMESTAMP;
 
         while (true) {
             fetchUsapPoolPolicyPropsWithMinInterval();
@@ -428,140 +459,192 @@ class ZygoteServer {
                 }
             }
 
+            int pollTimeoutMs;
+
+            if (usapPoolRefillTriggerTimestamp == INVALID_TIMESTAMP) {
+                pollTimeoutMs = -1;
+            } else {
+                int elapsedTimeMs =
+                        (int) (System.currentTimeMillis() - usapPoolRefillTriggerTimestamp);
+
+                if (elapsedTimeMs >= USAP_REFILL_DELAY_MS) {
+                    // Normalize the poll timeout value when the time between one poll event and the
+                    // next pushes us over the delay value.  This prevents poll receiving a 0
+                    // timeout value, which would result in it returning immediately.
+                    pollTimeoutMs = -1;
+                } else {
+                    pollTimeoutMs = USAP_REFILL_DELAY_MS - elapsedTimeMs;
+                }
+            }
+
+            int pollReturnValue;
             try {
-                Os.poll(pollFDs, -1);
+                pollReturnValue = Os.poll(pollFDs, pollTimeoutMs);
             } catch (ErrnoException ex) {
                 throw new RuntimeException("poll failed", ex);
             }
 
-            boolean usapPoolFDRead = false;
+            UsapPoolRefillAction usapPoolRefillAction = UsapPoolRefillAction.NONE;
+            if (pollReturnValue == 0) {
+                // The poll timeout has been exceeded.  This only occurs when we have finished the
+                // USAP pool refill delay period.
 
-            while (--pollIndex >= 0) {
-                if ((pollFDs[pollIndex].revents & POLLIN) == 0) {
-                    continue;
-                }
+                usapPoolRefillTriggerTimestamp = INVALID_TIMESTAMP;
+                usapPoolRefillAction = UsapPoolRefillAction.DELAYED;
 
-                if (pollIndex == 0) {
-                    // Zygote server socket
+            } else {
+                boolean usapPoolFDRead = false;
 
-                    ZygoteConnection newPeer = acceptCommandPeer(abiList);
-                    peers.add(newPeer);
-                    socketFDs.add(newPeer.getFileDescriptor());
-
-                } else if (pollIndex < usapPoolEventFDIndex) {
-                    // Session socket accepted from the Zygote server socket
-
-                    try {
-                        ZygoteConnection connection = peers.get(pollIndex);
-                        final Runnable command = connection.processOneCommand(this);
-
-                        // TODO (chriswailes): Is this extra check necessary?
-                        if (mIsForkChild) {
-                            // We're in the child. We should always have a command to run at this
-                            // stage if processOneCommand hasn't called "exec".
-                            if (command == null) {
-                                throw new IllegalStateException("command == null");
-                            }
-
-                            return command;
-                        } else {
-                            // We're in the server - we should never have any commands to run.
-                            if (command != null) {
-                                throw new IllegalStateException("command != null");
-                            }
-
-                            // We don't know whether the remote side of the socket was closed or
-                            // not until we attempt to read from it from processOneCommand. This
-                            // shows up as a regular POLLIN event in our regular processing loop.
-                            if (connection.isClosedByPeer()) {
-                                connection.closeSocket();
-                                peers.remove(pollIndex);
-                                socketFDs.remove(pollIndex);
-                            }
-                        }
-                    } catch (Exception e) {
-                        if (!mIsForkChild) {
-                            // We're in the server so any exception here is one that has taken place
-                            // pre-fork while processing commands or reading / writing from the
-                            // control socket. Make a loud noise about any such exceptions so that
-                            // we know exactly what failed and why.
-
-                            Slog.e(TAG, "Exception executing zygote command: ", e);
-
-                            // Make sure the socket is closed so that the other end knows
-                            // immediately that something has gone wrong and doesn't time out
-                            // waiting for a response.
-                            ZygoteConnection conn = peers.remove(pollIndex);
-                            conn.closeSocket();
-
-                            socketFDs.remove(pollIndex);
-                        } else {
-                            // We're in the child so any exception caught here has happened post
-                            // fork and before we execute ActivityThread.main (or any other main()
-                            // method). Log the details of the exception and bring down the process.
-                            Log.e(TAG, "Caught post-fork exception in child process.", e);
-                            throw e;
-                        }
-                    } finally {
-                        // Reset the child flag, in the event that the child process is a child-
-                        // zygote. The flag will not be consulted this loop pass after the Runnable
-                        // is returned.
-                        mIsForkChild = false;
-                    }
-                } else {
-                    // Either the USAP pool event FD or a USAP reporting pipe.
-
-                    // If this is the event FD the payload will be the number of USAPs removed.
-                    // If this is a reporting pipe FD the payload will be the PID of the USAP
-                    // that was just specialized.
-                    long messagePayload = -1;
-
-                    try {
-                        byte[] buffer = new byte[Zygote.USAP_MANAGEMENT_MESSAGE_BYTES];
-                        int readBytes = Os.read(pollFDs[pollIndex].fd, buffer, 0, buffer.length);
-
-                        if (readBytes == Zygote.USAP_MANAGEMENT_MESSAGE_BYTES) {
-                            DataInputStream inputStream =
-                                    new DataInputStream(new ByteArrayInputStream(buffer));
-
-                            messagePayload = inputStream.readLong();
-                        } else {
-                            Log.e(TAG, "Incomplete read from USAP management FD of size "
-                                    + readBytes);
-                            continue;
-                        }
-                    } catch (Exception ex) {
-                        if (pollIndex == usapPoolEventFDIndex) {
-                            Log.e(TAG, "Failed to read from USAP pool event FD: "
-                                    + ex.getMessage());
-                        } else {
-                            Log.e(TAG, "Failed to read from USAP reporting pipe: "
-                                    + ex.getMessage());
-                        }
-
+                while (--pollIndex >= 0) {
+                    if ((pollFDs[pollIndex].revents & POLLIN) == 0) {
                         continue;
                     }
 
-                    if (pollIndex > usapPoolEventFDIndex) {
-                        Zygote.removeUsapTableEntry((int) messagePayload);
-                    }
+                    if (pollIndex == 0) {
+                        // Zygote server socket
 
-                    usapPoolFDRead = true;
+                        ZygoteConnection newPeer = acceptCommandPeer(abiList);
+                        peers.add(newPeer);
+                        socketFDs.add(newPeer.getFileDescriptor());
+
+                    } else if (pollIndex < usapPoolEventFDIndex) {
+                        // Session socket accepted from the Zygote server socket
+
+                        try {
+                            ZygoteConnection connection = peers.get(pollIndex);
+                            final Runnable command = connection.processOneCommand(this);
+
+                            // TODO (chriswailes): Is this extra check necessary?
+                            if (mIsForkChild) {
+                                // We're in the child. We should always have a command to run at
+                                // this stage if processOneCommand hasn't called "exec".
+                                if (command == null) {
+                                    throw new IllegalStateException("command == null");
+                                }
+
+                                return command;
+                            } else {
+                                // We're in the server - we should never have any commands to run.
+                                if (command != null) {
+                                    throw new IllegalStateException("command != null");
+                                }
+
+                                // We don't know whether the remote side of the socket was closed or
+                                // not until we attempt to read from it from processOneCommand. This
+                                // shows up as a regular POLLIN event in our regular processing
+                                // loop.
+                                if (connection.isClosedByPeer()) {
+                                    connection.closeSocket();
+                                    peers.remove(pollIndex);
+                                    socketFDs.remove(pollIndex);
+                                }
+                            }
+                        } catch (Exception e) {
+                            if (!mIsForkChild) {
+                                // We're in the server so any exception here is one that has taken
+                                // place pre-fork while processing commands or reading / writing
+                                // from the control socket. Make a loud noise about any such
+                                // exceptions so that we know exactly what failed and why.
+
+                                Slog.e(TAG, "Exception executing zygote command: ", e);
+
+                                // Make sure the socket is closed so that the other end knows
+                                // immediately that something has gone wrong and doesn't time out
+                                // waiting for a response.
+                                ZygoteConnection conn = peers.remove(pollIndex);
+                                conn.closeSocket();
+
+                                socketFDs.remove(pollIndex);
+                            } else {
+                                // We're in the child so any exception caught here has happened post
+                                // fork and before we execute ActivityThread.main (or any other
+                                // main() method). Log the details of the exception and bring down
+                                // the process.
+                                Log.e(TAG, "Caught post-fork exception in child process.", e);
+                                throw e;
+                            }
+                        } finally {
+                            // Reset the child flag, in the event that the child process is a child-
+                            // zygote. The flag will not be consulted this loop pass after the
+                            // Runnable is returned.
+                            mIsForkChild = false;
+                        }
+                    } else {
+                        // Either the USAP pool event FD or a USAP reporting pipe.
+
+                        // If this is the event FD the payload will be the number of USAPs removed.
+                        // If this is a reporting pipe FD the payload will be the PID of the USAP
+                        // that was just specialized.  The `continue` statements below ensure that
+                        // the messagePayload will always be valid if we complete the try block
+                        // without an exception.
+                        long messagePayload;
+
+                        try {
+                            byte[] buffer = new byte[Zygote.USAP_MANAGEMENT_MESSAGE_BYTES];
+                            int readBytes =
+                                    Os.read(pollFDs[pollIndex].fd, buffer, 0, buffer.length);
+
+                            if (readBytes == Zygote.USAP_MANAGEMENT_MESSAGE_BYTES) {
+                                DataInputStream inputStream =
+                                        new DataInputStream(new ByteArrayInputStream(buffer));
+
+                                messagePayload = inputStream.readLong();
+                            } else {
+                                Log.e(TAG, "Incomplete read from USAP management FD of size "
+                                        + readBytes);
+                                continue;
+                            }
+                        } catch (Exception ex) {
+                            if (pollIndex == usapPoolEventFDIndex) {
+                                Log.e(TAG, "Failed to read from USAP pool event FD: "
+                                        + ex.getMessage());
+                            } else {
+                                Log.e(TAG, "Failed to read from USAP reporting pipe: "
+                                        + ex.getMessage());
+                            }
+
+                            continue;
+                        }
+
+                        if (pollIndex > usapPoolEventFDIndex) {
+                            Zygote.removeUsapTableEntry((int) messagePayload);
+                        }
+
+                        usapPoolFDRead = true;
+                    }
+                }
+
+                if (usapPoolFDRead) {
+                    int usapPoolCount = Zygote.getUsapPoolCount();
+
+                    if (usapPoolCount < mUsapPoolSizeMin) {
+                        // Immediate refill
+                        usapPoolRefillAction = UsapPoolRefillAction.IMMEDIATE;
+                    } else if (mUsapPoolSizeMax - usapPoolCount >= mUsapPoolRefillThreshold) {
+                        // Delayed refill
+                        usapPoolRefillTriggerTimestamp = System.currentTimeMillis();
+                    }
                 }
             }
 
-            // Check to see if the USAP pool needs to be refilled.
-            if (usapPoolFDRead) {
+            if (usapPoolRefillAction != UsapPoolRefillAction.NONE) {
                 int[] sessionSocketRawFDs =
                         socketFDs.subList(1, socketFDs.size())
                                 .stream()
                                 .mapToInt(fd -> fd.getInt$())
                                 .toArray();
 
-                final Runnable command = fillUsapPool(sessionSocketRawFDs);
+                final boolean isPriorityRefill =
+                        usapPoolRefillAction == UsapPoolRefillAction.IMMEDIATE;
+
+                final Runnable command =
+                        fillUsapPool(sessionSocketRawFDs, isPriorityRefill);
 
                 if (command != null) {
                     return command;
+                } else if (isPriorityRefill) {
+                    // Schedule a delayed refill to finish refilling the pool.
+                    usapPoolRefillTriggerTimestamp = System.currentTimeMillis();
                 }
             }
         }
