@@ -36,6 +36,7 @@ import android.net.INetworkStatsSession;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 
@@ -57,26 +58,31 @@ public class DataUsageControllerTest {
     @Mock
     private TelephonyManager mTelephonyManager;
     @Mock
+    private SubscriptionManager mSubscriptionManager;
+    @Mock
     private NetworkStatsManager mNetworkStatsManager;
     @Mock
     private Context mContext;
 
     private DataUsageController mController;
     private NetworkStatsHistory mNetworkStatsHistory;
+    private final int mDefaultSubscriptionId = 1234;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
+        when(mTelephonyManager.createForSubscriptionId(anyInt())).thenReturn(mTelephonyManager);
         when(mContext.getSystemService(Context.TELEPHONY_SERVICE)).thenReturn(mTelephonyManager);
+        when(mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE))
+                .thenReturn(mSubscriptionManager);
         when(mContext.getSystemService(NetworkStatsManager.class)).thenReturn(mNetworkStatsManager);
         mController = new DataUsageController(mContext);
         mNetworkStatsHistory = spy(
                 new NetworkStatsHistory(DateUtils.DAY_IN_MILLIS /* bucketDuration */));
         doReturn(mNetworkStatsHistory)
                 .when(mSession).getHistoryForNetwork(any(NetworkTemplate.class), anyInt());
-        final int defaultSubscriptionId = 1234;
-        ShadowSubscriptionManager.setDefaultDataSubscriptionId(defaultSubscriptionId);
-        doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId(eq(defaultSubscriptionId));
+        ShadowSubscriptionManager.setDefaultDataSubscriptionId(mDefaultSubscriptionId);
+        doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId();
     }
 
     @Test
@@ -130,19 +136,63 @@ public class DataUsageControllerTest {
         final NetworkStats.Bucket nonDefaultSubscriberBucket = mock(NetworkStats.Bucket.class);
         when(nonDefaultSubscriberBucket.getRxBytes()).thenReturn(nonDefaultSubRx);
         when(nonDefaultSubscriberBucket.getTxBytes()).thenReturn(nonDefaultSubTx);
-        final int explictSubscriptionId = 55;
+        final int explicitSubscriptionId = 55;
         final String subscriberId2 = "Test Subscriber 2";
         when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_MOBILE),
                 eq(subscriberId2), eq(0L)/* startTime */, anyLong() /* endTime */)).thenReturn(
                 nonDefaultSubscriberBucket);
-        doReturn(subscriberId2).when(mTelephonyManager).getSubscriberId(explictSubscriptionId);
+        doReturn(subscriberId2).when(mTelephonyManager).getSubscriberId();
 
         // Now verify that when we're asking for stats on the non-default subscription, we get
         // the data back for that subscription and *not* the default one.
-        mController.setSubscriptionId(explictSubscriptionId);
+        mController.setSubscriptionId(explicitSubscriptionId);
 
         assertThat(mController.getHistoricalUsageLevel(
                 NetworkTemplate.buildTemplateMobileAll(subscriberId2))).isEqualTo(
                 nonDefaultSubRx + nonDefaultSubTx);
+
+        verify(mTelephonyManager).createForSubscriptionId(explicitSubscriptionId);
+    }
+
+    @Test
+    public void getTelephonyManager_shouldCreateWithExplicitSubId() throws Exception {
+        int explicitSubId = 1;
+        TelephonyManager tmForSub1 = new TelephonyManager(mContext, explicitSubId);
+        when(mTelephonyManager.createForSubscriptionId(eq(explicitSubId))).thenReturn(tmForSub1);
+
+        // Set a specific subId.
+        mController.setSubscriptionId(explicitSubId);
+
+        assertThat(mController.getTelephonyManager()).isEqualTo(tmForSub1);
+        verify(mTelephonyManager).createForSubscriptionId(eq(explicitSubId));
+    }
+
+    @Test
+    public void getTelephonyManager_noExplicitSubId_shouldCreateWithDefaultDataSubId()
+            throws Exception {
+        TelephonyManager tmForDefaultSub = new TelephonyManager(mContext, mDefaultSubscriptionId);
+        when(mTelephonyManager.createForSubscriptionId(mDefaultSubscriptionId))
+                .thenReturn(tmForDefaultSub);
+
+        // No subId is set. It should use default data sub.
+        assertThat(mController.getTelephonyManager()).isEqualTo(tmForDefaultSub);
+        verify(mTelephonyManager).createForSubscriptionId(mDefaultSubscriptionId);
+    }
+
+    @Test
+    public void getTelephonyManager_noExplicitSubIdOrDefaultSub_shouldCreateWithActiveSub()
+            throws Exception {
+        int activeSubId = 2;
+        ShadowSubscriptionManager.setDefaultDataSubscriptionId(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+        when(mSubscriptionManager.getActiveSubscriptionIdList())
+                .thenReturn(new int[] {activeSubId});
+        TelephonyManager tmForActiveSub = new TelephonyManager(mContext, activeSubId);
+        when(mTelephonyManager.createForSubscriptionId(activeSubId))
+                .thenReturn(tmForActiveSub);
+
+        // No subId is set, default data subId is also not set. So should use the only active subId.
+        assertThat(mController.getTelephonyManager()).isEqualTo(tmForActiveSub);
+        verify(mTelephonyManager).createForSubscriptionId(activeSubId);
     }
 }
