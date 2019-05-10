@@ -159,6 +159,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
+        // Invalidate the internal active source record when goes to standby
+        // This set will also update mIsActiveSource
+        mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
         if (!mService.isControlEnabled() || initiatedByCec || !mAutoTvOff) {
             return;
         }
