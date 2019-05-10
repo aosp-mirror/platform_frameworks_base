@@ -45,7 +45,7 @@ public class ConnectivityConstants {
     //
     // This ensures that a) the explicitly selected network is never trumped by anything else, and
     // b) the explicitly selected network is never torn down.
-    public static final int MAXIMUM_NETWORK_SCORE = 100;
+    public static final int EXPLICITLY_SELECTED_NETWORK_SCORE = 100;
     // VPNs typically have priority over other networks. Give them a score that will
     // let them win every single time.
     public static final int VPN_DEFAULT_SCORE = 101;

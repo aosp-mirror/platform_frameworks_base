@@ -26,6 +26,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
@@ -388,7 +389,7 @@ public class ConnectivityServiceTest {
 
         MockNetworkAgent(int transport, LinkProperties linkProperties) {
             final int type = transportToLegacyType(transport);
-            final String typeName = ConnectivityManager.getNetworkTypeName(transport);
+            final String typeName = ConnectivityManager.getNetworkTypeName(type);
             mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
             mNetworkCapabilities = new NetworkCapabilities();
             mNetworkCapabilities.addTransportType(transport);
@@ -1111,6 +1112,8 @@ public class ConnectivityServiceTest {
                 return TYPE_WIFI;
             case TRANSPORT_CELLULAR:
                 return TYPE_MOBILE;
+            case TRANSPORT_VPN:
+                return TYPE_VPN;
             default:
                 return TYPE_NONE;
         }
@@ -4468,7 +4471,7 @@ public class ConnectivityServiceTest {
         callback.expectAvailableThenValidatedCallbacks(mEthernetNetworkAgent);
         callback.assertNoCallback();
 
-        // Bring up a VPN that has the INTERNET capability but does not provide Internet access.
+        // Bring up a VPN that has the INTERNET capability but does not validate.
         final int uid = Process.myUid();
         final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
         vpnNetworkAgent.getWrappedNetworkMonitor().gen204ProbeResult = 500;
@@ -4481,8 +4484,8 @@ public class ConnectivityServiceTest {
         vpnNetworkAgent.connect(false /* validated */, true /* hasInternet */);
         mMockVpn.connect();
 
-        // The VPN validates and becomes the default network for our app.
-        callback.expectAvailableCallbacksValidated(vpnNetworkAgent);
+        // Even though the VPN is unvalidated, it becomes the default network for our app.
+        callback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
         // TODO: this looks like a spurious callback.
         callback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
         callback.assertNoCallback();
@@ -4492,8 +4495,23 @@ public class ConnectivityServiceTest {
         assertEquals(vpnNetworkAgent.getNetwork(), mCm.getActiveNetwork());
 
         NetworkCapabilities nc = mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork());
-        assertTrue(nc.hasCapability(NET_CAPABILITY_VALIDATED));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_VALIDATED));
         assertTrue(nc.hasCapability(NET_CAPABILITY_INTERNET));
+
+        assertFalse(vpnNetworkAgent.getWrappedNetworkMonitor().isValidationRequired());
+        assertTrue(vpnNetworkAgent.getWrappedNetworkMonitor().isPrivateDnsValidationRequired());
+
+        // Pretend that the strict mode private DNS hostname now resolves. Even though the
+        // connectivity probe still returns 500, the network validates because the connectivity
+        // probe is not used on VPNs.
+        vpnNetworkAgent.getWrappedNetworkMonitor().dnsLookupResults =
+                new InetAddress[]{ InetAddress.getByName("2001:db8::1") };
+        mCm.reportNetworkConnectivity(vpnNetworkAgent.getNetwork(), true);
+
+        // Expect to see the validated capability, but no other changes, because the VPN is already
+        // the default network for the app.
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, vpnNetworkAgent);
+        callback.assertNoCallback();
 
         vpnNetworkAgent.disconnect();
         callback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
