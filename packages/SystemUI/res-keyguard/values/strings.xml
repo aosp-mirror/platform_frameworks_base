@@ -112,6 +112,8 @@
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
     <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <!-- Composes together the carrier name and the SIM card locked message. Example: CarrierName (SIM LOCKED) -->
+    <string name="keyguard_carrier_name_with_sim_locked_template" translatable="false"><xliff:g id="carrier">%s</xliff:g> (<xliff:g id="message">%s</xliff:g>)</string>
 
     <!-- Time format strings for fall-back clock widget -->
     <string name="keyguard_widget_12_hours_format" translatable="false">h:mm</string>
