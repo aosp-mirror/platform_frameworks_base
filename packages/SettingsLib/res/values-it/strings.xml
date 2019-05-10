@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Impossibile cercare reti"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nessuna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Salvata"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Nessuna connessione"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Disattivata"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Errore configurazione IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Impossibile connettersi a causa della bassa qualità della rete"</string>
@@ -218,7 +219,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"App di posizione fittizia: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Reti"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificazione display wireless"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Attiva registrazione dettagliata Wi-Fi"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Attiva logging dettagliato Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dati mobili sempre attivi"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostra dispositivi Bluetooth senza nome"</string>
@@ -227,7 +228,7 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Seleziona versione Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Attiva il codec audio Bluetooth\nSelezione"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Freq. di campionamento audio Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frequenza campionamento audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Attiva il codec audio Bluetooth\nSelezione: Frequenza di campionamento"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit per campione dell\'audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Attiva il codec audio Bluetooth\nSelezione: bit per campione"</string>
@@ -244,11 +245,11 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Inserisci il nome host del provider DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Impossibile collegarsi"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra opzioni per la certificazione display wireless"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumenta il livello di registrazione Wi-Fi, mostrando il SSID RSSI nel selettore Wi-Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Non a consumo"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensioni buffer Logger"</string>
-    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleziona dimensioni Logger per buffer log"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensioni buffer logger"</string>
+    <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleziona dimensioni logger per buffer log"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Cancellare i dati nello spazio di archiviazione permanente del logger?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Quando il monitoraggio tramite logger permanente viene interrotto, siamo obbligati a eliminare i dati del logger memorizzati sul dispositivo."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Salva dati del logger in modo permanente"</string>
@@ -297,7 +298,7 @@
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Aggiornam. visualizzazione"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Flash visualizzazioni dentro finestre se disegnate"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Lampeggia verde se aggiornam. livelli hardware"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Lampeggia in verde livelli hardware durante aggiornamento"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Usa sempre GPU per la composizione dello schermo"</string>
@@ -314,7 +315,7 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"Debug operazioni ritaglio non rettangolare"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Rendering HWUI profilo"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Attiva livelli debug GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Consenti caricamento livelli debug GPU app debug"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Consenti caricamento livelli debug GPU per app di debug"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Scala animazione finestra"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Scala animazione transizione"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Scala durata animatore"</string>

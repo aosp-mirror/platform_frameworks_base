@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ନେଟ୍‌ୱର୍କଗୁଡ଼ିକୁ ଖୋଜିପାରୁନାହିଁ"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"କିଛି ନାହିଁ"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ସେଭ୍‌ ହୋଇଗଲା"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"ବିଛିନ୍ନ କରାଯାଇଛି"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ଅକ୍ଷମ ହୋଇଛି"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP କନଫିଗରେଶନ ବିଫଳ ହୋଇଛି"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ନିମ୍ନ ମାନର ନେଟ୍‌ୱର୍କ କାରଣରୁ ସଂଯୁକ୍ତ ହୋଇନାହିଁ"</string>
@@ -153,7 +154,7 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"କୌଣସି ପୂର୍ବ-ନିର୍ଦ୍ଧାରଣ ସେଟ୍‍ ହୋଇନାହିଁ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ଲେଖା-ରୁ-କଥା ସେଟିଙ୍ଗ୍‌"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"ଲେଖା-ରୁ-କଥା ଆଉଟପୁଟ୍‌"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"ସ୍ପୀଚ୍‌ ଦର"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"ସ୍ପୀଚ୍‌ ବେଗ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ଲେଖା ପଢ଼ିବାର ବେଗ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ପିଚ୍‌"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"ସଂଶ୍ଳେଷିତ ସ୍ପିଚ୍‌‌ର ଟୋନ୍‌ରେ ପ୍ରଭାବ ପକାଏ"</string>
@@ -203,8 +204,8 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB ଡିବଗ୍‌ ହେଉଛି"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB ସଂଯୁକ୍ତ ହେବାବେଳେ ଡିବଗ୍‌ ମୋଡ୍‌"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ଡିବଗିଙ୍ଗ ଅଧିକାରକୁ କାଢ଼ିଦିଅନ୍ତୁ"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"ତ୍ରୁଟି ରିପୋର୍ଟ ଶର୍ଟକଟ୍‌"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ତ୍ରୁଟି ରିପୋର୍ଟ ଦେବାପାଇଁ ପାୱର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖନ୍ତୁ"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"ବଗ୍ ରିପୋର୍ଟ ସର୍ଟକଟ୍‌"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ବଗ୍ ରିପୋର୍ଟ ଦେବାପାଇଁ ପାୱାର୍‌ ମେନୁରେ ଏକ ବଟନ୍‌ ଦେଖନ୍ତୁ"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ଜାଗ୍ରତ ରଖନ୍ତୁ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରୀନ୍‌ ଆଦୌ ବନ୍ଦ ହେବନାହିଁ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ବ୍ଲୁଟୂଥ୍‍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
@@ -215,12 +216,12 @@
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ଚେତାବନୀ: ଏହି ସେଟିଙ୍ଗ ଚାଲୁ ଥିବାବେଳେ ଡିଭାଇସ୍‌ର ସୁରକ୍ଷା ବୈଶିଷ୍ଟ୍ୟ କାମ କରିବ ନାହିଁ"</string>
     <string name="mock_location_app" msgid="7966220972812881854">"ମକ୍ ଲୋକେସନ୍‌ ଆପ୍‌ର ଚୟନ କରନ୍ତୁ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"କୌଣସି ନକଲି ଲୋକେଶନ ଆପ୍ ସେଟ୍ କରାଯାଇନାହିଁ"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"ନକଲି ଲୋକେସନ୍‌ ଆପ୍‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"ମକ୍ ଲୋକେସନ୍‌ ଆପ୍‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ନେଟ୍‌ୱର୍କିଙ୍ଗ"</string>
-    <string name="wifi_display_certification" msgid="8611569543791307533">"ୱାୟରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସର୍ଟିଫିକେଶନ୍‌"</string>
+    <string name="wifi_display_certification" msgid="8611569543791307533">"ୱାୟରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ୱାଇ-ଫାଇ ଭର୍ବୋସ୍‌ ଲଗିଙ୍ଗ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ମୋବାଇଲ୍‌ ଡାଟା ସର୍ବଦା ସକ୍ରିୟ"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ବେଗ"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ଆକ୍ସିଲିରେସନ୍"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ବ୍ଲୁଟୂଥ୍‍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍‌ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
@@ -243,7 +244,7 @@
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ବ୍ୟକ୍ତିଗତ DNS ପ୍ରଦାତା ହୋଷ୍ଟନାମ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ପ୍ରଦାନକାରୀଙ୍କ ହୋଷ୍ଟନାମ ପ୍ରବେଶ କରନ୍ତୁ"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"କନେକ୍ଟ କରିହେଲା ନାହିଁ"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ୱେୟାରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସର୍ଟିଫିକେଶନ୍‌ ପାଇଁ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ୱେୟାରଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସାର୍ଟିଫିକେସନ୍ ପାଇଁ ବିକଳ୍ପ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"ମପାଯାଉଥିବା"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ମପାଯାଉନଥିବା"</string>
@@ -259,14 +260,14 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"ନକଲି ଲୋକେଶନ୍‌ର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"ବିଶେଷତା ଯାଞ୍ଚ ଭ୍ୟୁକୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ୱାଇ-ଫାଇ ସକ୍ରିୟ ଥିଲେ ମଧ୍ୟ ସର୍ବଦା ମୋବାଇଲ୍‌ ଡାଟାକୁ ସକ୍ରିୟ ରଖନ୍ତୁ (ଦ୍ରୁତ ନେଟ୍‌ୱର୍କ ସ୍ୱିଚିଙ୍ଗ ପାଇଁ)।"</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ଯଦି ଉପଲବ୍ଧ ଥାଏ, ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର୍‌ ଆକ୍ସଲରେଶନ୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ଯଦି ଉପଲବ୍ଧ ଥାଏ, ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର୍‌ ଆକ୍ସିଲିରେସନ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ଡିବଗିଙ୍ଗ କରିବେ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ଡିବଗିଂ କେବଳ ଡେଭଲପମେଣ୍ଟ ଉଦ୍ଦେଶ୍ୟ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ ଅଟେ। ଆପଣଙ୍କ କମ୍ପ୍ୟୁଟର ଏବଂ ଡିଭାଇସ୍‌ ମଧ୍ୟରେ ଡାଟା କପି କରିବାକୁ, ବିନା ବିଜ୍ଞପ୍ତିରେ ଆପଣଙ୍କ ଡିଭାଇସରେ ଆପସ୍‌ ସଂସ୍ଥାପନ କରିବାକୁ, ଏବଂ ଲଗ୍‌ ଡାଟା ପଢିବାକୁ ଏହା ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ଅଧିକୃତ ସମସ୍ତ କମ୍ପ୍ୟୁଟରରୁ USB ଡିବଗ୍‌ କରିବା ଆକ୍ସେସ୍‌ ପ୍ରତ୍ୟାହାର କରିବେ କି?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"ଡେଭଲପମେଣ୍ଟ ସେଟିଙ୍ଗ ଅନୁମତି ଦେବେ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ଏହି ସେଟିଙ୍ଗଗୁଡ଼ିକ କେବଳ ବିକାଶ ବ୍ୟବହାର ପାଇଁ ଉଦ୍ଦିଷ୍ଟ। ସେଗୁଡ଼ିକ କାରଣରୁ ଆପଣଙ୍କ ଡିଭାଇସ୍‌ ଓ ଆପ୍ଲିକେଶନ୍‍‍ଗୁଡ଼ିକ ଠିକ୍‌ ଭାବେ କାମ ନକରିପାରେ।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ଜରିଆରେ ଆପ୍‌ଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT ମାଧ୍ୟମରେ ଇନଷ୍ଟଲ ହୋଇଥିବା ଆପ୍‌ଗୁଡ଼ିକ ହାନିକାରକ କାର୍ଯ୍ୟକଳାପ କରୁଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT ମାଧ୍ୟମରେ ଇନଷ୍ଟଲ ହୋଇଥିବା ଆପ୍‌ଗୁଡ଼ିକ କ୍ଷତିକାରକ କି ନୁହେଁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"(କେବଳ MAC ଠିକଣା ଥାଇ) ନାମ ବିନା ବ୍ଲୁଟୂଥ ଡିଭାଇସଗୁଡ଼ିକ ପ୍ରଦର୍ଶିତ ହେବ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ରିମୋଟ୍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକରେ ଯଦି ଅସ୍ୱୀକାର୍ଯ୍ୟ ଭାବେ ଉଚ୍ଚ ଭଲ୍ୟୁମ୍ କିମ୍ବା ନିୟନ୍ତ୍ରଣର ଅଭାବ ପରି ଭଲ୍ୟୁମ୍ ସମସ୍ୟା ଥାଏ, ବ୍ଲୁଟୂଥ୍‌ ପୂର୍ଣ୍ଣ ଭଲ୍ୟୁମ୍ ଫିଚର୍ ଅକ୍ଷମ କରିଥାଏ।"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
@@ -275,12 +276,12 @@
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCPର ଯାଞ୍ଚ ଗତିବିଧି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"ଡିବଗ୍‌ କରୁଛି"</string>
     <string name="debug_app" msgid="8349591734751384446">"ଡିବଗ୍‌ ଆପ୍‌ ବାଛନ୍ତୁ"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"କୌଣସି ଡିବଗ୍‌ ଆପ୍ଲିକେଶନ୍‌ ସେଟ୍‌ ହୋଇନାହିଁ"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"କୌଣସି ଡିବଗ୍‌ ଆପ୍ଲିକେସନ୍‌ ସେଟ୍‌ ହୋଇନାହିଁ"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"ଆପ୍ଲିକେଶନ୍‌ ଡିବଗ୍‌ କରୁଛି: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"ଆପ୍ଲିକେଶନ୍‌ ବାଛନ୍ତୁ"</string>
     <string name="no_application" msgid="2813387563129153880">"କିଛି ନୁହେଁ"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ଡିବଗର୍‌ ପାଇଁ ଅପେକ୍ଷା କରନ୍ତୁ"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ଡିବଗ୍‌ ହୋଇଥିବା ଆପ୍ଲିକେଶନ୍‍, ନିଷ୍ପାଦନ ପୂର୍ବରୁ ଆଟାଚ୍‌ କରିବା ପାଇଁ ଡିବଗର୍‌କୁ ଅପେକ୍ଷା କରେ"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ଡିବଗ୍‌ ହୋଇଥିବା ଆପ୍ଲିକେସନ୍‍, ନିଷ୍ପାଦନ ପୂର୍ବରୁ ଆଟାଚ୍‌ କରିବା ପାଇଁ ଡିବଗର୍‌କୁ ଅପେକ୍ଷା କରେ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ଇନପୁଟ୍"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"ଅଙ୍କନ"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"ହାର୍ଡୱେର୍‌ ଆକ୍ସଲରେଟେଡ୍ ରେଣ୍ଡରିଙ୍ଗ"</string>
@@ -295,13 +296,13 @@
     <string name="show_screen_updates" msgid="5470814345876056420">"ସର୍ଫେସ୍‌ ଅପଡେଟ୍‌ ଦେଖାନ୍ତୁ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ସମଗ୍ର ୱିଣ୍ଡୋ ପୃଷ୍ଠ ଅପଡେଟ୍‌ ହେବା ବେଳେ ସେଗୁଡ଼ିକ ଫ୍ଲାସ୍‌ କରନ୍ତୁ"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"ଭ୍ୟୁ ଅପଡେଟ୍‌ଗୁଡ଼ିକୁ ଦେଖାନ୍ତୁ"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"ଅଙ୍କାଯିବାବେଳେ ୱିଣ୍ଡୋସ୍ ଭିତରେ ଫ୍ଲାଶ୍ ଭ୍ୟୁ"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"ଡ୍ର କରାଯିବା ବେଳେ ୱିଣ୍ଡୋସ୍ ଭିତରେ ଫ୍ଲାଶ୍ ଭ୍ୟୁ"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ହାର୍ଡୱେର୍‌ ଲେୟର୍‌ର ଅପଡେଟ୍ ଦେଖାନ୍ତୁ"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ହାର୍ଡୱେର୍ ଲେୟାର୍ ଅପଡେଟ୍‌ ହେବାବେଳେ ସେଗୁଡ଼ିକୁ ସବୁଜ ରଙ୍ଗରେ ଦେଖାନ୍ତୁ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ଓଭର୍‌ଡ୍ର\' ଡିବଗ୍‌ କରନ୍ତୁ"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW ଓଭର୍‌ଲେ\' ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"ସ୍କ୍ରୀନ୍‌ କମ୍ପୋଜିଟିଙ୍ଗ ପାଇଁ ସର୍ବଦା GPU ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"ରଙ୍ଗ ସ୍ଥାନ ଅନୁକରଣ କରନ୍ତୁ"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"ରଙ୍ଗ ସ୍ଥାନ ସିମୁଲେଟ୍ କରନ୍ତୁ"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ଟ୍ରେସ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ଅଡିଓ ରାଉଟିଙ୍ଗ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ଅଡିଓ ଉପକରଣଗୁଡ଼ିକ ପ୍ରତି ସ୍ୱଚାଳିତ ରାଉଟିଙ୍ଗ ଅକ୍ଷମ କରନ୍ତୁ"</string>
@@ -315,19 +316,19 @@
     <string name="track_frame_time" msgid="6094365083096851167">"ପ୍ରୋଫାଇଲ୍ HWUI ରେଣ୍ଡର୍ ହେଉଛି"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ଡିବଗ୍‌ ଲେୟର୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ଡିବଗ୍‌ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ GPU ଡିବଗ୍‌ ଲେୟର୍‌ ଲୋଡ୍ କରିବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"ୱିଣ୍ଡୋ ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"ଟ୍ରାଞ୍ଜିଶନ୍‌ ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"ୱିଣ୍ଡୋ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"ଟ୍ରାଞ୍ଜିସନ୍‌ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"ଆନିମେଟର୍‌ ଅବଧି ସ୍କେଲ୍‌"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"ମାଧ୍ୟମିକ ଡିସ୍‌ପ୍ଲେ ସିମୁଲେଟ୍ କରନ୍ତୁ"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"ସେକେଣ୍ଡାରୀ ଡିସ୍‌ପ୍ଲେ ସିମୁଲେଟ୍ କରନ୍ତୁ"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"ଆପ୍‌ଗୁଡ଼ିକ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ରଖନ୍ତୁ ନାହିଁ"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ୟୁଜର୍ ଏହାକୁ ଛାଡ଼ିବା କ୍ଷଣି ସମସ୍ତ କାର୍ଯ୍ୟକଳାପ ନଷ୍ଟ କରିଦିଅନ୍ତୁ"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ପ୍ରୋସେସ୍ ସୀମା"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ବ୍ୟାକଗ୍ରାଉଣ୍ଡରେ ଥିବା ANRଗୁଡ଼ିକୁ ଦେଖାନ୍ତୁ"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ \"ଆପ୍‌ ଉତ୍ତର ଦେଉନାହିଁ\" ଡାୟଲଗ୍‌ ଦେଖାନ୍ତୁ"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ବିଜ୍ଞପ୍ତି ଚାନେଲ୍‌ ଚେତାବନୀ ଦେଖାଦେଉ"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ବିଜ୍ଞପ୍ତି ଚେନାଲ୍ ଚେତାବନୀ ଦେଖାନ୍ତୁ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ବୈଧ ଚ୍ୟାନେଲ୍‌ ବିନା ଗୋଟିଏ ଆପ୍‌ ଏକ ବିଜ୍ଞପ୍ତି ପୋଷ୍ଟ କରିବାବେଳେ ଅନ୍‌-ସ୍କ୍ରୀନ୍‌ ସତର୍କତା ଦେଖାଏ"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ମେମୋରୀରେ ହିଁ ଚଲାନ୍ତୁ"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ମେମୋରୀରେ ଫୋର୍ସ୍ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ଯେକୌଣସି ଆପ୍‌କୁ ଏକ୍ସଟର୍ନଲ୍ ଷ୍ଟୋରେଜ୍‌ରେ ଲେଖାଯୋଗ୍ୟ କରନ୍ତୁ, ମେନିଫେଷ୍ଟ ମୂଲ୍ୟ ଯାହା ହୋଇଥାଉ ନା କାହିଁକି"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ୱିଣ୍ଡୋ ହିସାବରେ କାର୍ଯ୍ୟକଳାପର ଆକାର ବଦଳାନ୍ତୁ"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ୱିଣ୍ଡୋ ହିସାବରେ କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ବଦଳାନ୍ତୁ, ସେଗୁଡ଼ିକର ମାନିଫେଷ୍ଟ ଭାଲ୍ୟୁ ଯାହା ହୋଇଥାଉ ନା କାହିଁକି"</string>

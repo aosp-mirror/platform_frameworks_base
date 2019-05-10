@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Der kan ikke søges efter netværk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gemt"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Afbrudt"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiveret"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurationsfejl"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ingen forbindelse på grund af lav netværkskvalitet"</string>
@@ -273,10 +274,10 @@
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivér terminalappen, der giver lokal shell-adgang"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontrol"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Angiv HDCP-kontroladfærd"</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"Fejlfinding"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Fejlretning"</string>
     <string name="debug_app" msgid="8349591734751384446">"Vælg app til fejlretning"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Ingen applikation til fejlretning er angivet"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"Applikation til fejlfinding: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Ingen app til fejlretning er angivet"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"App til fejlretning: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Vælg applikation"</string>
     <string name="no_application" msgid="2813387563129153880">"Ingen"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Vent på fejlfinder"</string>
