@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"لا يمكن فحص الشبكات"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"بلا أمان"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"تم الحفظ"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"غير متصلة"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غير مفعّلة"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏تعذّرت تهيئة عنوان IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"الجهاز غير متصل بسبب انخفاض جودة الشبكة"</string>
@@ -209,9 +208,9 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"عرض زر في قائمة خيارات التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"البقاء في الوضع النشط"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"تفعيل سجلّ تطفّل بواجهة وحدة تحكّم المضيف عبر بلوتوث"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"تفعيل سجلّ تطفل بواجهة وحدة تحكم المضيف في بلوتوث"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"رَقمِن محتوى حزم بيانات البلوتوث. (تبديل البلوتوث بعد تغيير هذا الإعداد)"</string>
-    <string name="oem_unlock_enable" msgid="6040763321967327691">"إلغاء قفل المصنّع الأصلي للجهاز"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"فتح قفل المصنّع الأصلي للجهاز"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"‏السماح بإلغاء قفل برنامج bootloader"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"هل تريد السماح بإلغاء قفل المصنّع الأصلي للجهاز؟"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"تحذير: لن تعمل ميزات الحماية على هذا الجهاز أثناء تشغيل هذا الإعداد."</string>
@@ -284,7 +283,7 @@
     <string name="wait_for_debugger" msgid="1202370874528893091">"انتظار برنامج التصحيح"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ينتظر التطبيق قيد التصحيح انضمام برنامج التصحيح قبل التنفيذ"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"الإدخال"</string>
-    <string name="debug_drawing_category" msgid="6755716469267367852">"رسم"</string>
+    <string name="debug_drawing_category" msgid="6755716469267367852">"الرسم"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"عرض تسارع الأجهزة"</string>
     <string name="media_category" msgid="4388305075496848353">"الوسائط"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"المراقبة"</string>

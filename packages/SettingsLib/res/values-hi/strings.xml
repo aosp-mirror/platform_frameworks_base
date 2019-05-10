@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"नेटवर्क के लिए स्‍कैन नहीं कर सकता"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"कोई नहीं"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"सेव किया गया"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"डिसकनेक्ट किया गया"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"अक्षम"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP कॉन्‍फ़िगरेशन की विफलता"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"खराब नेटवर्क होने के कारण कनेक्ट नहीं हुआ"</string>
@@ -147,7 +146,7 @@
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ब्लूटूथ टेदरिंग"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"टेदरिंग"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"टेदरिंग और पोर्टेबल हॉटस्‍पॉट"</string>
-    <string name="managed_user_title" msgid="8109605045406748842">"सभी कार्यस्थल ऐप्लिकेशन"</string>
+    <string name="managed_user_title" msgid="8109605045406748842">"सभी दफ़्तर ऐप्लिकेशन"</string>
     <string name="user_guest" msgid="8475274842845401871">"मेहमान"</string>
     <string name="unknown" msgid="1592123443519355854">"अज्ञात"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"उपयोगकर्ता: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
@@ -167,7 +166,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"लिखे हुए को बोली में बदलने की सुविधा की एक छोटी सी झलक चलाएं"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"आवाज़ का डेटा इंस्टॉल करें"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"बोली-संश्लेषण के लिए आवश्‍यक ध्‍वनि डेटा इंस्‍टॉल करें"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"यह स्पीच सिंथेसिस (लिखे हुए को मशीन द्वारा बोली में बदलना) इंजन, पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा सहित आपके द्वारा बोले जाने वाले सभी लेख इकट्ठा कर सकता है. यह <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> इंजन से आता है. स्पीच सिंथेसिस इंजन के इस्तेमाल को चालू करें?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"यह स्पीच सिंथेसिस (लिखे हुए को मशीन द्वारा बोली में बदलना) इंजन, पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा सहित   बोले जाने वाले सभी लेख इकट्ठा कर सकता है. यह <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> इंजन से आता है. स्पीच सिंथेसिस इंजन के इस्तेमाल को चालू करें?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"लेख-से-बोली आउटपुट के लिए इस भाषा को क्रियाशील नेटवर्क कनेक्शन की आवश्यकता है."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"यह बोली संश्लेषण का एक उदाहरण है"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"डिफ़ॉल्ट भाषा स्थिति"</string>
@@ -435,7 +434,7 @@
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"टाइप करने की सक्रीय पद्धतियां"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम की भाषाओं का उपयोग करें"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> के लिए सेटिंग खोलने में विफल रहा"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"यह इनपुट विधि, पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा सहित आपके द्वारा लिखे जाने वाले सभी लेख को एकत्र कर सकती है. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आती है. इस इनपुट विधि का उपयोग करें?"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"यह इनपुट विधि, पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा सहित   लिखे जाने वाले सभी लेख को एकत्र कर सकती है. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आती है. इस इनपुट विधि का उपयोग करें?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"नोट: पुनः बूट करने के बाद, यह ऐप्लिकेशन तब तक शुरू नहीं हो सकता है जब तक कि आप अपना फ़ोन अनलॉक ना कर लें"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS रजिस्ट्रेशन की स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"रजिस्टर है"</string>

@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ne može skenirati mreže"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nema"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Sačuvano"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Veza je prekinuta"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Greška u konfiguraciji IP-a"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Niste povezani zbog slabog kvaliteta mreže"</string>
@@ -57,7 +56,7 @@
     <string name="osu_sign_up_complete" msgid="8207626049093289203">"Registracija je završena. Povezivanje…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Veoma sporo"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Sporo"</string>
-    <string name="speed_label_okay" msgid="2331665440671174858">"UREDU"</string>
+    <string name="speed_label_okay" msgid="2331665440671174858">"Uredu"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Srednja brzina"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Brzo"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Veoma brzo"</string>
@@ -157,7 +156,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Pretvaranje teksta u govor"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina kojom se izgovara tekst"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina glasa"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Utiče na ton sintetiziranog govora"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Jezik"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Korištenje sistemskog jezika"</string>
@@ -215,7 +214,7 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Dozvoli otključavanje bootloadera"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite li dozvoliti OEM otključavanje?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORENJE: Funkcije zaštite ovog uređaja neće funkcionirati dok je ova postavka uključena."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Odaberite aplikaciju za lažnu lokaciju"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Odabir aplikacije za lažnu lokaciju"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Aplikacija za lažnu lokaciju nije postavljena"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacija za lažnu lokaciju: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>

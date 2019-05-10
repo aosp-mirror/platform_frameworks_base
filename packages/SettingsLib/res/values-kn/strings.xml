@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ನೆಟ್‌ವರ್ಕ್‌ಗಳಿಗಾಗಿ ಸ್ಕ್ಯಾನ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ಯಾವುದೂ ಇಲ್ಲ"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ಉಳಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP ಕಾನ್ಫಿಗರೇಶನ್ ವಿಫಲತೆ"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ಕಡಿಮೆ ಗುಣಮಟ್ಟದ ನೆಟ್‌ವರ್ಕ್‌ನಿಂದಾಗಿ ಸಂಪರ್ಕ ಸಾಧಿಸಿಲ್ಲ"</string>
@@ -270,7 +269,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ಮೂಲಕ ಆಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ಹೆಸರುಗಳಿಲ್ಲದ (ಕೇವಲ MAC ವಿಳಾಸಗಳು ಮಾತ್ರ) ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ರಿಮೋಟ್ ಸಾಧನಗಳೊಂದಿಗೆ ಒಪ್ಪಲಾಗದ ಜೋರಾದ ವಾಲ್ಯೂಮ್ ಅಥವಾ ನಿಯಂತ್ರಣದ ಕೊರತೆಯಂತಹ ವಾಲ್ಯೂಮ್ ಸಮಸ್ಯೆಗಳಂತಹ ಸಂದರ್ಭದಲ್ಲಿ ಬ್ಲೂಟೂತ್ ಸಂಪೂರ್ಣ ವಾಲ್ಯೂಮ್ ವೈಶಿಷ್ಟ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬಹುದು."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ರಿಮೋಟ್ ಸಾಧನಗಳಲ್ಲಿ ಕಂಡುಬರುವ ಸ್ವೀಕಾರಾರ್ಹವಲ್ಲದ ಜೋರಾದ ವಾಲ್ಯೂಮ್ ಅಥವಾ ನಿಯಂತ್ರಣದ ಕೊರತೆಯಂತಹ ವಾಲ್ಯೂಮ್ ಸಮಸ್ಯೆಗಳಂತಹ ಸಂದರ್ಭದಲ್ಲಿ ಬ್ಲೂಟೂತ್‍ನ ನಿಚ್ಚಳ ವಾಲ್ಯೂಮ್ ವೈಶಿಷ್ಟ್ಯವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಅಪ್ಲಿಕೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
@@ -296,7 +295,7 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ ತೋರಿಸಿ"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"\'ಅಪ್‌ಡೇಟ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ\' ತೋರಿಸಿ"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"ಡ್ರಾ ಮಾಡಿದಾಗ ವಿಂಡೊದಲ್ಲಿ ವೀಕ್ಷಣೆ ಫ್ಲ್ಯಾಶ್‌"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ಹಾರ್ಡ್‌ವೇರ್‌ ಲೇಯರ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ಅವುಗಳು ನವೀಕರಿಸಿದಾಗ ಹಾರ್ಡ್‌ವೇರ್‌‌ ಲೇಯರ್‌ಗಳು ಹಸಿರು ಫ್ಲ್ಯಾಶ್‌‌ ಆಗುತ್ತದೆ"</string>

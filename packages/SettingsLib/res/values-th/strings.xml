@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ไม่สามารถสแกนหาเครือข่าย"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ไม่มี"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"บันทึกแล้ว"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"เลิกเชื่อมต่อแล้ว"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ปิดอยู่"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"การกำหนดค่า IP ล้มเหลว"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ไม่ได้เชื่อมต่อเนื่องจากเครือข่ายคุณภาพต่ำ"</string>
@@ -215,9 +214,9 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"อนุญาตการปลดล็อก OEM ไหม"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: ฟีเจอร์การปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองตำแหน่ง"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองตำแหน่ง"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองตำแหน่ง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองสถานที่"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองสถานที่"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองสถานที่: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"เครือข่าย"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
@@ -227,7 +226,7 @@
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"อัตราตัวอย่างเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: อัตราตัวอย่าง"</string>
@@ -291,7 +290,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"เปิดใช้งานโหมดเข้มงวด"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"กะพริบหน้าจอเมื่อแอปทำงานในชุดข้อความหลักนาน"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ตำแหน่งของตัวชี้"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะ ในปัจจุบัน"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะในปัจจุบัน"</string>
     <string name="show_touches" msgid="2642976305235070316">"แสดงการแตะ"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"แสดงผลตอบสนองแบบภาพเมื่อแตะ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"แสดงการอัปเดตพื้นผิว"</string>

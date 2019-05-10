@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"నెట్‌వర్క్‌ల కోసం స్కాన్ చేయడం సాధ్యపడదు"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ఏదీ లేదు"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"సేవ్ చేయబడింది"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"డిస్‌కనెక్ట్ అయ్యింది"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"నిలిపివేయబడింది"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP కాన్ఫిగరేషన్ వైఫల్యం"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"తక్కువ నాణ్యతా నెట్‌వర్క్ కారణంగా కనెక్ట్ చేయబడలేదు"</string>
@@ -217,7 +216,7 @@
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"హెచ్చరిక: ఈ సెట్టింగ్ ఆన్ చేయబడినప్పుడు పరికరం రక్షణ లక్షణాలు ఈ పరికరంలో పని చేయవు."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"కృత్రిమ స్థాన యాప్‌ను ఎంచుకోండి"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"అనుకృత స్థాన యాప్ ఏదీ సెట్ చేయబడలేదు"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"అనుకృత స్థాన యాప్: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"కృత్రిమ స్థాన యాప్‌: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"నెట్‌వర్కింగ్"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"వైర్‌లెస్ ప్రదర్శన ప్రామాణీకరణ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
@@ -303,10 +302,10 @@
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ఓవర్‌డ్రాను డీబగ్ చేయండి"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW ప్రదర్శనలను నిలిపివేయి"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"స్క్రీన్ కంపాజిటింగ్‌కు ఎల్లప్పుడూ GPUని ఉపయోగించు"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"రంగు అంతరాన్ని అనుకరించు"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"వివిధ రంగుల‌ను అనుక‌రించు"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ట్రేస్‌లను ప్రారంభించండి"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ఆడియో రూటింగ్ నిలిపివేయి"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ఆడియో పరికరాలకు ఆటో. రూటింగ్‌ను నిలిపివేయండి"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ఆడియో ప‌రిక‌రాల‌కు ఆటోమేటిక్ రూటింగ్‌ను నిలిపివేయండి"</string>
     <string name="debug_layout" msgid="5981361776594526155">"లేఅవుట్ బౌండ్‌లు చూపు"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL లేఅవుట్ దిశను నిర్బంధం చేయండి"</string>
@@ -331,7 +330,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా యాప్ నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"యాప్‌లను బాహ్య నిల్వలో తప్పనిసరిగా అనుమతించు"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ఏ యాప్‌ని అయినా మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా బాహ్య నిల్వలో సేవ్ చేయడానికి అనుమతిస్తుంది"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"కార్యకలాపాలను పరిమాణం మార్చగలిగేలా నిర్బంధించు"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"కార్య‌క‌లాపాల విండోల ప‌రిమాణం మార్చ‌గ‌లిగేలా నిర్బంధించు"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"మానిఫెస్ట్ విలువలతో సంబంధం లేకుండా అన్ని కార్యకలాపాలను పలు రకాల విండోల్లో సరిపోయేట్లు పరిమాణం మార్చగలిగేలా చేస్తుంది."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"స్వతంత్ర రూప విండోలను ప్రారంభించండి"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ప్రయోగాత్మక స్వతంత్ర రూప విండోల కోసం మద్దతును ప్రారంభిస్తుంది."</string>

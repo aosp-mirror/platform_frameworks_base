@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Հնարավոր չէ սկանավորել ցանցերը"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ոչ մեկը"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Պահված է"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Կապ չկա"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Անջատված"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP կարգավորման ձախողում"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Չի կապակցվել ցանցի թույլ ազդանշանի պատճառով"</string>
@@ -384,10 +383,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
     <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Լիցքը պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Լիցքը պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործումից"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործումից"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Երկարացրեք մարտկոցի աշխատաժամանակը <xliff:g id="TIME">%1$s</xliff:g>-ից"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից պակաս"</string>
