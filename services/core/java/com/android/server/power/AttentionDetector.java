@@ -196,7 +196,7 @@ public class AttentionDetector {
             mRequested.set(false);
         }
 
-        Slog.v(TAG, "Checking user attention");
+        Slog.v(TAG, "Checking user attention, ID: " + mRequestId);
         return whenToCheck;
     }
 
@@ -277,12 +277,12 @@ public class AttentionDetector {
     }
 
     public void dump(PrintWriter pw) {
-        pw.print("AttentionDetector:");
-        pw.print(" mMaximumExtensionMillis=" + mMaximumExtensionMillis);
-        pw.print(" mMaxAttentionApiTimeoutMillis=" + mMaxAttentionApiTimeoutMillis);
-        pw.print(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);
-        pw.print(" mAttentionServiceSupported=" + isAttentionServiceSupported());
-        pw.print(" mRequested=" + mRequested);
+        pw.println("AttentionDetector:");
+        pw.println(" mMaximumExtensionMillis=" + mMaximumExtensionMillis);
+        pw.println(" mMaxAttentionApiTimeoutMillis=" + mMaxAttentionApiTimeoutMillis);
+        pw.println(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);
+        pw.println(" mAttentionServiceSupported=" + isAttentionServiceSupported());
+        pw.println(" mRequested=" + mRequested);
     }
 
     @VisibleForTesting
