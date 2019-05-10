@@ -226,11 +226,6 @@ public class NetworkMonitorTest {
 
         /** Starts mocking DNS queries. */
         private void startMocking() throws UnknownHostException {
-            // Queries on mCleartextDnsNetwork using getAllByName.
-            doAnswer(invocation -> {
-                return getAllByName(invocation.getMock(), invocation.getArgument(0));
-            }).when(mCleartextDnsNetwork).getAllByName(any());
-
             // Queries on mNetwork using getAllByName.
             doAnswer(invocation -> {
                 return getAllByName(invocation.getMock(), invocation.getArgument(0));
@@ -251,6 +246,22 @@ public class NetworkMonitorTest {
                 // If no answers, do nothing. sendDnsProbeWithTimeout will time out and throw UHE.
                 return null;
             }).when(mDnsResolver).query(any(), any(), anyInt(), any(), any(), any());
+
+            // Queries on mCleartextDnsNetwork using using DnsResolver#query with QueryType.
+            doAnswer(invocation -> {
+                String hostname = (String) invocation.getArgument(1);
+                Executor executor = (Executor) invocation.getArgument(4);
+                DnsResolver.Callback<List<InetAddress>> callback = invocation.getArgument(6);
+
+                List<InetAddress> answer = getAnswer(invocation.getMock(), hostname);
+                if (answer != null && answer.size() > 0) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        executor.execute(() -> callback.onAnswer(answer, 0));
+                    });
+                }
+                // If no answers, do nothing. sendDnsProbeWithTimeout will time out and throw UHE.
+                return null;
+            }).when(mDnsResolver).query(any(), any(), anyInt(), anyInt(), any(), any(), any());
         }
     }
 
