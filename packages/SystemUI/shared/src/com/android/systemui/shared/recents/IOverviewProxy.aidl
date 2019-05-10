@@ -134,4 +134,9 @@ oneway interface IOverviewProxy {
      * Sent when some system ui state changes.
      */
     void onSystemUiStateChanged(int stateFlags) = 16;
+
+    /**
+     * Sent when the scrim colors (based on wallpaper) change.
+     */
+    void onScrimColorsChanged(int color, int type) = 17;
 }
