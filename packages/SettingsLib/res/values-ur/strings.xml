@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"نیٹ ورکس کیلئے اسکین نہيں کر سکتے ہیں"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"کوئی نہیں"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"محفوظ کردیا گیا"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"غیر منسلک"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیر فعال"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏IP کنفیگریشن کی ناکامی"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"کم معیاری نیٹ ورک کی وجہ سے منسلک نہیں ہے"</string>
@@ -332,7 +331,7 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"بیرونی پر ایپس کو زبردستی اجازت دیں"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"‏manifest اقدار سے قطع نظر، کسی بھی ایپ کو بیرونی اسٹوریج پر لکھے جانے کا اہل بناتا ہے"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"سرگرمیوں کو ری سائز ایبل بنائیں"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"‏manifest اقدار سے قطع نظر، ملٹی ونڈو کیلئے تمام سرگرمیوں کو ری سائز ایبل بنائیں۔"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"مینی فیسٹ اقدار سے قطع نظر، ملٹی ونڈو کیلئے تمام سرگرمیوں کو ری سائز ایبل بنائیں۔"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"‏freeform ونڈوز فعال کریں"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"تجرباتی فری فارم ونڈوز کیلئے سپورٹ فعال کریں۔"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ڈیسک ٹاپ کا بیک اپ پاس ورڈ"</string>

@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Kan nie skandeer vir netwerke nie"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Geen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gestoor"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Ontkoppel"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Gedeaktiveer"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-opstelling het misluk"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nie gekoppel nie weens laegehalte-netwerk"</string>
@@ -324,7 +323,7 @@
     <string name="debug_applications_category" msgid="4206913653849771549">"Programme"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Moenie aktiwiteite behou nie"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Vernietig elke aktiwiteit sodra die gebruiker dit verlaat"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Agtergrondproses-limiet"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Agtergrondproseslimiet"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Wys agtergrond-ANR\'e"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Wys Program Reageer Nie-dialoog vir agtergrondprogramme"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Wys kennisgewingkanaalwaarskuwings"</string>

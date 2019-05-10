@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nije moguće skenirati mreže"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nema"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Sačuvano"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Veza je prekinuta"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfiguracija je otkazala"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nije povezano zbog lošeg kvaliteta mreže"</string>
@@ -154,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Podešene su neke podrazumevane vrednosti"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nisu podešene podrazumevane vrednosti"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Podešavanja prelaska iz teksta u govor"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Izlaz za pretvaranje teksta u govor"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Pretvaranje teksta u govor"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina izgovaranja teksta"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Nivo"</string>
@@ -209,7 +208,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Prikaži dugme u meniju napajanja za pravljenje izveštaja o greškama"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Ne zaključavaj"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekran neće biti u režimu spavanja tokom punjenja"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Omogući snoop evidenciju za Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Omogući snoop evid. za Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Snimi Bluetooth pakete. (Uključite/isključite Bluetooth kada promenite ovo podešavanje)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Otključavanje OEM-a"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Dozvoli otključavanje funkcije za pokretanje"</string>
@@ -313,8 +312,8 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Nametni smer rasporeda ekrana zdesna nalevo za sve lokalitete"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Nametni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Omogući 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Otkloni greške isecanja oblasti koje nisu pravougaonog oblika"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Penderuj pomoću HWUI-a"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Otkloni greške isecanja oblasti nepravougaonog oblika"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Renderuj pomoću HWUI-a"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Omogući slojeve za otklanjanje grešaka GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogući učitavanje otk. greš. GPU-a u apl. za otk. greš."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Razmera animacije prozora"</string>
@@ -365,7 +364,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Konvertuj..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Već se koristi šifrovanje datoteka"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Konvertovanje u šifrovanje pojedinačnih datoteka"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Konvertujte šifrovanje particije podataka u šifrovanje pojedinačnih datoteka.\n !!Upozorenje!! Time brišete sve podatke.\n Ovo je alfa verzija funkcije i verovatno neće funkcionisati ispravno.\n Pritisnite „Izbriši i konvertuj...“ da biste nastavili."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Konvertujte šifrovanje particije podataka u šifrovanje pojedinačnih datoteka.\n !!Upozorenje!! Time brišete sve podatke.\n Ovo je alfa verzija funkcije i verovatno neće raditi ispravno.\n Pritisnite „Izbriši i konvertuj...“ da biste nastavili."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Izbriši i konvertuj..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Režim boja slika"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Koristi sRGB"</string>
@@ -461,7 +460,7 @@
     <string name="alarm_template" msgid="4996153414057676512">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Trajanje"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Uvek pitaj"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Pitaj svaki put"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Dok ne isključite"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Upravo"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Ovaj uređaj"</string>
