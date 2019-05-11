@@ -725,7 +725,6 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_USER_SET = 1; // 0x1
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
-    field public static boolean RESTRICTED_PERMISSIONS_ENABLED;
     field public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
     field public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
   }

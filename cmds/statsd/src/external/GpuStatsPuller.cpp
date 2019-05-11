@@ -65,6 +65,9 @@ static bool pullGpuStatsGlobalInfo(const sp<IGpuService>& gpuService,
         if (!event->write((int64_t)info.glLoadingFailureCount)) return false;
         if (!event->write((int64_t)info.vkLoadingCount)) return false;
         if (!event->write((int64_t)info.vkLoadingFailureCount)) return false;
+        if (!event->write(info.vulkanVersion)) return false;
+        if (!event->write(info.cpuVulkanVersion)) return false;
+        if (!event->write(info.glesVersion)) return false;
         event->init();
         data->emplace_back(event);
     }

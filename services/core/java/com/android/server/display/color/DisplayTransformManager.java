@@ -89,12 +89,6 @@ public class DisplayTransformManager {
     private static final int DISPLAY_COLOR_MANAGED = 0;
     private static final int DISPLAY_COLOR_UNMANAGED = 1;
     private static final int DISPLAY_COLOR_ENHANCED = 2;
-    /**
-     * Display color mode range reserved for vendor customizations by the RenderIntent definition in
-     * hardware/interfaces/graphics/common/1.1/types.hal.
-     */
-    private static final int VENDOR_MODE_RANGE_MIN = 256; // 0x100
-    private static final int VENDOR_MODE_RANGE_MAX = 511; // 0x1ff
 
     /**
      * Map of level -> color transformation matrix.
@@ -270,7 +264,8 @@ public class DisplayTransformManager {
         } else if (colorMode == ColorDisplayManager.COLOR_MODE_AUTOMATIC) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setDisplayColor(DISPLAY_COLOR_ENHANCED);
-        } else if (colorMode >= VENDOR_MODE_RANGE_MIN && colorMode <= VENDOR_MODE_RANGE_MAX) {
+        } else if (colorMode >= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MIN
+                && colorMode <= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MAX) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setDisplayColor(colorMode);
         }

@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.augmented.Helper.logResponse;
+
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -43,6 +45,7 @@ import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.infra.AbstractSinglePendingRequestRemoteService;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 
 final class RemoteAugmentedAutofillService
@@ -173,6 +176,7 @@ final class RemoteAugmentedAutofillService
         private final @Nullable AutofillValue mFocusedValue;
         private final @NonNull IAutoFillManagerClient mClient;
         private final @NonNull ComponentName mActivityComponent;
+        private final int mSessionId;
         private final int mTaskId;
         private final long mRequestTime = SystemClock.elapsedRealtime();
         private final @NonNull IFillCallback mCallback;
@@ -184,6 +188,7 @@ final class RemoteAugmentedAutofillService
                 @Nullable AutofillValue focusedValue) {
             super(service, sessionId);
             mClient = client;
+            mSessionId = sessionId;
             mTaskId = taskId;
             mActivityComponent = activityComponent;
             mFocusedId = focusedId;
@@ -283,6 +288,8 @@ final class RemoteAugmentedAutofillService
                 remoteService.dispatchOnFillTimeout(cancellation);
             }
             finish();
+            logResponse(MetricsEvent.TYPE_ERROR, remoteService.getComponentName().getPackageName(),
+                    mActivityComponent, mSessionId, remoteService.mRequestTimeoutMs);
         }
 
         @Override

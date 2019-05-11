@@ -1029,6 +1029,34 @@ public class ColorDisplayServiceTest {
         assertDwbActive(true);
     }
 
+    @Test
+    public void displayWhiteBalance_disabledWhileAccessibilityColorCorrectionEnabled() {
+        setDisplayWhiteBalanceEnabled(true);
+        startService();
+        setAccessibilityColorCorrection(true);
+
+        mCds.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(false);
+
+        setAccessibilityColorCorrection(false);
+        mCds.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(true);
+    }
+
+    @Test
+    public void displayWhiteBalance_disabledWhileAccessibilityColorInversionEnabled() {
+        setDisplayWhiteBalanceEnabled(true);
+        startService();
+        setAccessibilityColorInversion(true);
+
+        mCds.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(false);
+
+        setAccessibilityColorInversion(false);
+        mCds.updateDisplayWhiteBalanceStatus();
+        assertDwbActive(true);
+    }
+
     /**
      * Configures Night display to use a custom schedule.
      *

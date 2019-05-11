@@ -1134,7 +1134,7 @@ public final class DefaultPermissionGrantPolicy {
     private void grantRuntimePermissions(PackageInfo pkg, Set<String> permissionsWithoutSplits,
             boolean systemFixed, boolean ignoreSystemPackage,
             boolean whitelistRestrictedPermissions, int userId) {
-            UserHandle user = UserHandle.of(userId);
+        UserHandle user = UserHandle.of(userId);
         if (pkg == null) {
             return;
         }
@@ -1203,7 +1203,7 @@ public final class DefaultPermissionGrantPolicy {
                 if (ArrayUtils.isEmpty(disabledPkg.requestedPermissions)) {
                     return;
                 }
-                if (!requestedPermissions.equals(disabledPkg.requestedPermissions)) {
+                if (!Arrays.equals(requestedPermissions, disabledPkg.requestedPermissions)) {
                     grantablePermissions = new ArraySet<>(Arrays.asList(requestedPermissions));
                     requestedPermissions = disabledPkg.requestedPermissions;
                 }
@@ -1213,7 +1213,7 @@ public final class DefaultPermissionGrantPolicy {
         final int numRequestedPermissions = requestedPermissions.length;
 
         // Sort requested permissions so that all permissions that are a foreground permission (i.e.
-        // permisions that have background permission) are before their background permissions.
+        // permissions that have a background permission) are before their background permissions.
         final String[] sortedRequestedPermissions = new String[numRequestedPermissions];
         int numForeground = 0;
         int numOther = 0;
@@ -1258,9 +1258,16 @@ public final class DefaultPermissionGrantPolicy {
                         continue;
                     }
 
-                    int uid = UserHandle.getUid(userId,
-                            UserHandle.getAppId(pkg.applicationInfo.uid));
-                    String op = AppOpsManager.permissionToOp(permission);
+                    // Preserve whitelisting flags.
+                    newFlags |= (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT);
+
+                    // If we are whitelisting the permission, update the exempt flag before grant.
+                    if (whitelistRestrictedPermissions && isPermissionRestricted(permission)) {
+                        mContext.getPackageManager().updatePermissionFlags(permission,
+                                pkg.packageName,
+                                PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT,
+                                PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, user);
+                    }
 
                     if (pm.checkPermission(permission, pkg.packageName)
                             != PackageManager.PERMISSION_GRANTED) {
@@ -1268,12 +1275,11 @@ public final class DefaultPermissionGrantPolicy {
                                 .grantRuntimePermission(pkg.packageName, permission, user);
                     }
 
-                    if (whitelistRestrictedPermissions && isPermissionRestricted(permission)) {
-                        newFlags |= PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
-                    }
-
                     mContext.getPackageManager().updatePermissionFlags(permission, pkg.packageName,
                             newFlags, newFlags, user);
+
+                    int uid = UserHandle.getUid(userId,
+                            UserHandle.getAppId(pkg.applicationInfo.uid));
 
                     List<String> fgPerms = mPermissionManager.getBackgroundPermissions()
                             .get(permission);
@@ -1285,6 +1291,7 @@ public final class DefaultPermissionGrantPolicy {
                             if (pm.checkPermission(fgPerm, pkg.packageName)
                                     == PackageManager.PERMISSION_GRANTED) {
                                 // Upgrade the app-op state of the fg permission to allow bg access
+                                // TODO: Dont' call app ops from package manager code.
                                 mContext.getSystemService(AppOpsManager.class).setUidMode(
                                         AppOpsManager.permissionToOp(fgPerm), uid,
                                         AppOpsManager.MODE_ALLOWED);
@@ -1295,8 +1302,10 @@ public final class DefaultPermissionGrantPolicy {
                     }
 
                     String bgPerm = getBackgroundPermission(permission);
+                    String op = AppOpsManager.permissionToOp(permission);
                     if (bgPerm == null) {
                         if (op != null) {
+                            // TODO: Dont' call app ops from package manager code.
                             mContext.getSystemService(AppOpsManager.class).setUidMode(op, uid,
                                     AppOpsManager.MODE_ALLOWED);
                         }

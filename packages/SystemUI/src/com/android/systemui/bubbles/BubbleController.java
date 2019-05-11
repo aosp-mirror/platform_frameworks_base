@@ -29,6 +29,9 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.Nullable;
@@ -73,6 +76,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -88,11 +92,12 @@ import javax.inject.Singleton;
 public class BubbleController implements ConfigurationController.ConfigurationListener {
 
     private static final String TAG = "BubbleController";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     @Retention(SOURCE)
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE})
+    @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
     static final int DISMISS_USER_GESTURE = 1;
@@ -510,6 +515,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void onOrderChanged(List<Bubble> bubbles) {
+            if (mStackView != null) {
+                mStackView.updateBubbleOrder(bubbles);
+            }
         }
 
         @Override
@@ -523,13 +531,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         public void onExpandedChanged(boolean expanded) {
             if (mStackView != null) {
                 mStackView.setExpanded(expanded);
-            }
-        }
-
-        @Override
-        public void showFlyoutText(Bubble bubble, String text) {
-            if (mStackView != null) {
-                mStackView.animateInFlyoutForBubble(bubble);
             }
         }
 

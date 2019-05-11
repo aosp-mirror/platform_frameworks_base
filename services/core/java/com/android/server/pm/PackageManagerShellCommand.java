@@ -2351,9 +2351,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "-g":
                     sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
-                case "-w":
-                    sessionParams.installFlags |=
-                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
+                    break;
+                case "--restrict-permissions":
+                    sessionParams.installFlags &=
+                            ~PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
                     break;
                 case "--dont-kill":
                     sessionParams.installFlags |= PackageManager.INSTALL_DONT_KILL_APP;
@@ -3004,10 +3005,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -d: allow version code downgrade (debuggable packages only)");
         pw.println("      -p: partial application install (new split on top of existing pkg)");
         pw.println("      -g: grant all runtime permissions");
-        pw.println("      -w: whitelist all restricted permissions");
         pw.println("      -S: size in bytes of package, required for stdin");
         pw.println("      --user: install under the given user.");
         pw.println("      --dont-kill: installing a new feature split, don't kill running app");
+        pw.println("      --restrict-permissions: don't whitelist restricted permissions at install");
         pw.println("      --originating-uri: set URI where app was downloaded from");
         pw.println("      --referrer: set URI that instigated the install of the app");
         pw.println("      --pkg: specify expected package name of app being installed");

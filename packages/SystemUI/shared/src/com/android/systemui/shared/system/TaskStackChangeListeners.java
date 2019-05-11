@@ -354,6 +354,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
                             mTaskStackListeners.get(i).onBackPressedOnTaskRoot(
                                     (RunningTaskInfo) msg.obj);
                         }
+                        break;
                     }
                 }
             }

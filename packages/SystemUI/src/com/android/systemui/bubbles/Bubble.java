@@ -46,7 +46,7 @@ class Bubble {
     private long mLastUpdated;
     private long mLastAccessed;
 
-    private static String groupId(NotificationEntry entry) {
+    public static String groupId(NotificationEntry entry) {
         UserHandle user = entry.notification.getUser();
         return user.getIdentifier() + "|" + entry.notification.getPackageName();
     }
@@ -120,8 +120,25 @@ class Bubble {
         }
     }
 
+    /**
+     * @return the newer of {@link #getLastUpdateTime()} and {@link #getLastAccessTime()}
+     */
     public long getLastActivity() {
         return Math.max(mLastUpdated, mLastAccessed);
+    }
+
+    /**
+     * @return the timestamp in milliseconds of the most recent notification entry for this bubble
+     */
+    public long getLastUpdateTime() {
+        return mLastUpdated;
+    }
+
+    /**
+     * @return the timestamp in milliseconds when this bubble was last displayed in expanded state
+     */
+    public long getLastAccessTime() {
+        return mLastAccessed;
     }
 
     /**

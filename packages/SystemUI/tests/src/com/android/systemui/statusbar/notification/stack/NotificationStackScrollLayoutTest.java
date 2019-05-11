@@ -46,6 +46,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.Dependency;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.InitController;
@@ -118,6 +119,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Before
     @UiThreadTest
     public void setUp() throws Exception {
+        mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
@@ -146,7 +152,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null,
                 true /* allowLongPress */, mNotificationRoundnessManager,
                 new AmbientPulseManager(mContext),
-                mock(DynamicPrivacyController.class));
+                mock(DynamicPrivacyController.class),
+                mock(ActivityStarterDelegate.class));
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);
@@ -166,11 +173,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
         doNothing().when(notificationShelf).fadeInTranslating();
-
-        mOriginalInterruptionModelSetting = Settings.Secure.getInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
     }
 
     @After
@@ -347,62 +349,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
         // move footer to end
         verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(-1 /* end */));
-    }
-
-    @Test
-    public void testUpdateGapIndex_allHighPriority() {
-        when(mStackScroller.getChildCount()).thenReturn(3);
-        for (int i = 0; i < 3; i++) {
-            ExpandableNotificationRow row = mock(ExpandableNotificationRow.class,
-                    RETURNS_DEEP_STUBS);
-            String key = Integer.toString(i);
-            when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(row.getEntry().isHighPriority()).thenReturn(true);
-            when(mStackScroller.getChildAt(i)).thenReturn(row);
-        }
-
-        mStackScroller.updateSectionBoundaries();
-        assertEquals(-1, mStackScroller.getSectionBoundaryIndex(0));
-    }
-
-    @Test
-    public void testUpdateGapIndex_allLowPriority() {
-        when(mStackScroller.getChildCount()).thenReturn(3);
-        for (int i = 0; i < 3; i++) {
-            ExpandableNotificationRow row = mock(ExpandableNotificationRow.class,
-                    RETURNS_DEEP_STUBS);
-            String key = Integer.toString(i);
-            when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(row.getEntry().isHighPriority()).thenReturn(false);
-            when(mStackScroller.getChildAt(i)).thenReturn(row);
-        }
-
-        mStackScroller.updateSectionBoundaries();
-        assertEquals(-1, mStackScroller.getSectionBoundaryIndex(0));
-    }
-
-    @Test
-    public void testUpdateGapIndex_gapExists() {
-        when(mStackScroller.getChildCount()).thenReturn(6);
-        for (int i = 0; i < 6; i++) {
-            ExpandableNotificationRow row = mock(ExpandableNotificationRow.class,
-                    RETURNS_DEEP_STUBS);
-            String key = Integer.toString(i);
-            when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(row.getEntry().isHighPriority()).thenReturn(i < 3);
-            when(mStackScroller.getChildAt(i)).thenReturn(row);
-        }
-
-        mStackScroller.updateSectionBoundaries();
-        assertEquals(3, mStackScroller.getSectionBoundaryIndex(0));
-    }
-
-    @Test
-    public void testUpdateGapIndex_empty() {
-        when(mStackScroller.getChildCount()).thenReturn(0);
-
-        mStackScroller.updateSectionBoundaries();
-        assertEquals(-1, mStackScroller.getSectionBoundaryIndex(0));
     }
 
     @Test

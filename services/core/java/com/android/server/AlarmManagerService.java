@@ -1764,8 +1764,7 @@ class AlarmManagerService extends SystemService {
                                 + ", callingPackage: " + callingPackage;
                 // STOPSHIP (b/128866264): Just to catch breakages. Remove before final release.
                 Slog.wtf(TAG, errorMsg);
-                // TODO b/129995049: Resume throwing after some soak time without errors
-                // throw new UnsupportedOperationException(errorMsg);
+                throw new UnsupportedOperationException(errorMsg);
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
                     interval, operation, directReceiver, listenerTag, flags, true, workSource,

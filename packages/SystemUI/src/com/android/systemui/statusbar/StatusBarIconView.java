@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
@@ -73,7 +74,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
      * want to scale them (in a way that doesn't require an asset dump) down 2dp. So
      * 17dp * (15 / 17) = 15dp, the new height.
      */
-    private static final float SYSTEM_ICON_SCALE = 15.f / 17.f;
+    private static final float SYSTEM_ICON_DESIRED_HEIGHT = 15f;
+    private static final float SYSTEM_ICON_INTRINSIC_HEIGHT = 17f;
+    private static final float SYSTEM_ICON_SCALE =
+            SYSTEM_ICON_DESIRED_HEIGHT / SYSTEM_ICON_INTRINSIC_HEIGHT;
     private final int ANIMATION_DURATION_FAST = 100;
 
     public static final int STATE_ICON = 0;
@@ -202,8 +206,25 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         updatePivot();
     }
 
+    // Makes sure that all icons are scaled to the same height (15dp). If we cannot get a height
+    // for the icon, it uses the default SCALE (15f / 17f) which is the old behavior
     private void updateIconScaleForSystemIcons() {
-        mIconScale = SYSTEM_ICON_SCALE;
+        float iconHeight = getIconHeightInDps();
+        if (iconHeight != 0) {
+            mIconScale = SYSTEM_ICON_DESIRED_HEIGHT / iconHeight;
+        } else {
+            mIconScale = SYSTEM_ICON_SCALE;
+        }
+    }
+
+    private float getIconHeightInDps() {
+        Drawable d = getDrawable();
+        if (d != null) {
+            return ((float) getDrawable().getIntrinsicHeight() * DisplayMetrics.DENSITY_DEFAULT)
+                    / mDensity;
+        } else {
+            return SYSTEM_ICON_INTRINSIC_HEIGHT;
+        }
     }
 
     public float getIconScaleFullyDark() {
@@ -221,8 +242,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (density != mDensity) {
             mDensity = density;
             reloadDimens();
-            maybeUpdateIconScaleDimens();
             updateDrawable();
+            maybeUpdateIconScaleDimens();
         }
         boolean nightMode = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
                 == Configuration.UI_MODE_NIGHT_YES;
@@ -305,6 +326,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             if (!updateDrawable(false /* no clear */)) return false;
             // we have to clear the grayscale tag since it may have changed
             setTag(R.id.icon_is_grayscale, null);
+            // Maybe set scale based on icon height
+            maybeUpdateIconScaleDimens();
         }
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);

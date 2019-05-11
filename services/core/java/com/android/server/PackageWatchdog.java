@@ -684,13 +684,13 @@ public class PackageWatchdog {
         }
     }
 
-    /** Adds a {@link DeviceConfig#OnPropertyChangedListener}. */
+    /** Adds a {@link DeviceConfig#OnPropertiesChangedListener}. */
     private void setPropertyChangedListenerLocked() {
-        DeviceConfig.addOnPropertyChangedListener(
+        DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_ROLLBACK,
                 mContext.getMainExecutor(),
-                (namespace, name, value) -> {
-                    if (!DeviceConfig.NAMESPACE_ROLLBACK.equals(namespace)) {
+                (properties) -> {
+                    if (!DeviceConfig.NAMESPACE_ROLLBACK.equals(properties.getNamespace())) {
                         return;
                     }
                     updateConfigs();

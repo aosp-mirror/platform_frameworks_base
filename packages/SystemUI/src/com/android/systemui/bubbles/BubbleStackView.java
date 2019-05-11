@@ -549,6 +549,7 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.addView(bubble.iconView, 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubble.iconView, true, mClippingParameters);
+        animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
     }
@@ -570,9 +571,18 @@ public class BubbleStackView extends FrameLayout {
 
     // via BubbleData.Listener
     void updateBubble(Bubble bubble) {
+        animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__UPDATED);
     }
+
+    public void updateBubbleOrder(List<Bubble> bubbles) {
+        for (int i = 0; i < bubbles.size(); i++) {
+            Bubble bubble = bubbles.get(i);
+            mBubbleContainer.moveViewTo(bubble.iconView, i);
+        }
+    }
+
 
     /**
      * Changes the currently selected bubble. If the stack is already expanded, the newly selected

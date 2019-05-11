@@ -86,7 +86,7 @@ public class PhoneStatusBarPolicy
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final int LOCATION_STATUS_ICON_ID = R.drawable.stat_sys_location;
+    public static final int LOCATION_STATUS_ICON_ID = PrivacyType.TYPE_LOCATION.getIconId();
 
     private final String mSlotCast;
     private final String mSlotHotspot;
@@ -230,10 +230,10 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotDataSaver, false);
 
         // privacy items
-        mIconController.setIcon(mSlotMicrophone, R.drawable.stat_sys_mic_none,
+        mIconController.setIcon(mSlotMicrophone, PrivacyType.TYPE_MICROPHONE.getIconId(),
                 PrivacyType.TYPE_MICROPHONE.getName(mContext));
         mIconController.setIconVisibility(mSlotMicrophone, false);
-        mIconController.setIcon(mSlotCamera, R.drawable.stat_sys_camera,
+        mIconController.setIcon(mSlotCamera, PrivacyType.TYPE_CAMERA.getIconId(),
                 PrivacyType.TYPE_CAMERA.getName(mContext));
         mIconController.setIconVisibility(mSlotCamera, false);
         mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,

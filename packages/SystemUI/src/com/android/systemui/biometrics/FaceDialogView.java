@@ -360,8 +360,6 @@ public class FaceDialogView extends BiometricDialogView {
 
         if (show) {
             mPositiveButton.setVisibility(View.GONE);
-        } else if (!show && requiresConfirmation()) {
-            mPositiveButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -402,6 +400,12 @@ public class FaceDialogView extends BiometricDialogView {
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
             mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             mIconController.startPulsing();
+        } else if (oldState == STATE_ERROR && newState == STATE_PENDING_CONFIRMATION) {
+            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
+            mIconController.animateOnce(R.drawable.face_dialog_wink_from_dark);
+        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
+            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
+            mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_error);
             mHandler.postDelayed(mErrorToIdleAnimationRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);

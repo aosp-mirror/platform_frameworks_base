@@ -16,19 +16,18 @@
 #define DEBUG false
 #include "Log.h"
 
+#include "incidentd_util.h"
 #include "PrivacyFilter.h"
+#include "proto_util.h"
 
 #include "incidentd_util.h"
 #include "proto_util.h"
 #include "Section.h"
 
 #include <android-base/file.h>
-#include <android/util/ProtoFileReader.h>
 #include <android/util/protobuf.h>
+#include <android/util/ProtoFileReader.h>
 #include <log/log.h>
-
-#include "cipher/IncidentKeyStore.h"
-#include "cipher/ProtoEncryption.h"
 
 namespace android {
 namespace os {
@@ -146,8 +145,6 @@ public:
      */
     status_t writeData(int fd);
 
-    sp<ProtoReader> getData() { return mData; }
-
 private:
     /**
      * The global set of field --> required privacy level mapping.
@@ -259,47 +256,8 @@ void PrivacyFilter::addFd(const sp<FilterFd>& output) {
     mOutputs.push_back(output);
 }
 
-static void write_section_to_file(int sectionId, FieldStripper& fieldStripper, sp<FilterFd> output,
-                                  bool encryptIfNeeded) {
-    status_t err;
-
-    if (sectionEncryption(sectionId) && encryptIfNeeded) {
-        ProtoEncryptor encryptor(fieldStripper.getData());
-        size_t encryptedSize = encryptor.encrypt();
-
-        if (encryptedSize <= 0) {
-            output->onWriteError(BAD_VALUE);
-            return;
-        }
-        err = write_section_header(output->getFd(), sectionId, encryptedSize);
-        VLOG("Encrypted: write section header size %lu", (unsigned long)encryptedSize);
-
-        encryptor.flush(output->getFd());
-
-        if (err != NO_ERROR) {
-            output->onWriteError(err);
-            return;
-        }
-    } else {
-        err = write_section_header(output->getFd(), sectionId, fieldStripper.dataSize());
-        VLOG("No encryption: write section header size %lu",
-             (unsigned long)fieldStripper.dataSize());
-
-        if (err != NO_ERROR) {
-            output->onWriteError(err);
-            return;
-        }
-
-        err = fieldStripper.writeData(output->getFd());
-        if (err != NO_ERROR) {
-            output->onWriteError(err);
-            return;
-        }
-    }
-}
-
-status_t PrivacyFilter::writeData(const FdBuffer& buffer, uint8_t bufferLevel, size_t* maxSize,
-                                  bool encryptIfNeeded) {
+status_t PrivacyFilter::writeData(const FdBuffer& buffer, uint8_t bufferLevel,
+        size_t* maxSize) {
     status_t err;
 
     if (maxSize != NULL) {
@@ -309,9 +267,9 @@ status_t PrivacyFilter::writeData(const FdBuffer& buffer, uint8_t bufferLevel, s
     // Order the writes by privacy filter, with increasing levels of filtration,k
     // so we can do the filter once, and then write many times.
     sort(mOutputs.begin(), mOutputs.end(),
-         [](const sp<FilterFd>& a, const sp<FilterFd>& b) -> bool {
-             return a->getPrivacyPolicy() < b->getPrivacyPolicy();
-         });
+        [](const sp<FilterFd>& a, const sp<FilterFd>& b) -> bool { 
+            return a->getPrivacyPolicy() < b->getPrivacyPolicy();
+        });
 
     uint8_t privacyPolicy = PRIVACY_POLICY_LOCAL; // a.k.a. no filtering
     FieldStripper fieldStripper(mRestrictions, buffer.data()->read(), bufferLevel);
@@ -330,7 +288,17 @@ status_t PrivacyFilter::writeData(const FdBuffer& buffer, uint8_t bufferLevel, s
         // Write the resultant buffer to the fd, along with the header.
         ssize_t dataSize = fieldStripper.dataSize();
         if (dataSize > 0) {
-            write_section_to_file(mSectionId, fieldStripper, output, encryptIfNeeded);
+            err = write_section_header(output->getFd(), mSectionId, dataSize);
+            if (err != NO_ERROR) {
+                output->onWriteError(err);
+                continue;
+            }
+
+            err = fieldStripper.writeData(output->getFd());
+            if (err != NO_ERROR) {
+                output->onWriteError(err);
+                continue;
+            }
         }
 
         if (maxSize != NULL) {
@@ -382,18 +350,8 @@ status_t filter_and_write_report(int to, int from, uint8_t bufferLevel,
 
             // Read this section from the reader into an FdBuffer
             size_t sectionSize = reader->readRawVarint();
-
             FdBuffer sectionData;
-
-            // Write data to FdBuffer, if the section was encrypted, decrypt first.
-            if (sectionEncryption(fieldId)) {
-                VLOG("sectionSize %lu", (unsigned long)sectionSize);
-                ProtoDecryptor decryptor(reader, sectionSize);
-                err = decryptor.decryptAndFlush(&sectionData);
-            } else {
-                err = sectionData.write(reader, sectionSize);
-            }
-
+            err = sectionData.write(reader, sectionSize);
             if (err != NO_ERROR) {
                 ALOGW("filter_and_write_report FdBuffer.write failed (this shouldn't happen): %s",
                         strerror(-err));
@@ -401,8 +359,7 @@ status_t filter_and_write_report(int to, int from, uint8_t bufferLevel,
             }
 
             // Do the filter and write.
-            err = filter.writeData(sectionData, bufferLevel, nullptr,
-                                   false /* do not encrypt again*/);
+            err = filter.writeData(sectionData, bufferLevel, nullptr);
             if (err != NO_ERROR) {
                 ALOGW("filter_and_write_report filter.writeData had an error: %s", strerror(-err));
                 return err;
@@ -411,7 +368,6 @@ status_t filter_and_write_report(int to, int from, uint8_t bufferLevel,
             // We don't need this field.  Incident does not have any direct children
             // other than sections.  So just skip them.
             write_field_or_skip(NULL, reader, fieldTag, true);
-            VLOG("Skip this.... section %d", fieldId);
         }
     }
 

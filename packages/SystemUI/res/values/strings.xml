@@ -1102,6 +1102,12 @@
     <!-- The text for the manage notifications link. [CHAR LIMIT=40] -->
     <string name="manage_notifications_text">Manage</string>
 
+    <!-- Section title for notifications that do not vibrate or make noise. [CHAR LIMIT=40] -->
+    <string name="notification_section_header_gentle">Gentle notifications</string>
+
+    <!-- Content description for accessibility: Tapping this button will dismiss all gentle notifications [CHAR LIMIT=NONE] -->
+    <string name="accessibility_notification_section_header_gentle_clear_all">Clear all gentle notifications</string>
+
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
     <string name="dnd_suppressing_shade_text">Notifications paused by Do Not Disturb</string>
 

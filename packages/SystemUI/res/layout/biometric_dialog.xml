@@ -119,7 +119,7 @@
                             android:textSize="12sp"
                             android:gravity="center_horizontal"
                             android:accessibilityLiveRegion="polite"
-                            android:textColor="?android:attr/textColorSecondary"/>
+                            android:textColor="@color/biometric_dialog_gray"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"

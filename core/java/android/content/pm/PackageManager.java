@@ -86,11 +86,6 @@ public abstract class PackageManager {
     /** {@hide} */
     public static final boolean APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE = true;
 
-    /** {@hide} */
-    @TestApi
-    // STOPSHIP: Remove this once we get a Play prebuilt.
-    public static boolean RESTRICTED_PERMISSIONS_ENABLED = false;
-
     /**
      * This exception is thrown when a given package, application, or component
      * name cannot be found.

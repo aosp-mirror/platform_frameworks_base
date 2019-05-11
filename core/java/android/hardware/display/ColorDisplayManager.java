@@ -162,6 +162,20 @@ public final class ColorDisplayManager {
      */
     public static final int COLOR_MODE_AUTOMATIC = 3;
 
+    /**
+     * Display color mode range reserved for vendor customizations by the RenderIntent definition in
+     * hardware/interfaces/graphics/common/1.1/types.hal. These are NOT directly related to (but ARE
+     * mutually exclusive with) the {@link ColorMode} constants, but ARE directly related (and ARE
+     * mutually exclusive with) the DISPLAY_COLOR_* constants in DisplayTransformManager.
+     *
+     * @hide
+     */
+    public static final int VENDOR_COLOR_MODE_RANGE_MIN = 256; // 0x100
+    /**
+     * @hide
+     */
+    public static final int VENDOR_COLOR_MODE_RANGE_MAX = 511; // 0x1ff
+
     private final ColorDisplayManagerInternal mManager;
     private MetricsLogger mMetricsLogger;
 

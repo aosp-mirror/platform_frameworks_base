@@ -3455,10 +3455,25 @@ public final class Settings {
          */
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
-        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(
-                        ColorDisplayManager.COLOR_MODE_NATURAL,
-                        ColorDisplayManager.COLOR_MODE_AUTOMATIC);
+        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR = new Validator() {
+            @Override
+            public boolean validate(@Nullable String value) {
+                // Assume the actual validation that this device can properly handle this kind of
+                // color mode further down in ColorDisplayManager / ColorDisplayService.
+                try {
+                    final int setting = Integer.parseInt(value);
+                    final boolean isInFrameworkRange =
+                            setting >= ColorDisplayManager.COLOR_MODE_NATURAL
+                                    && setting <= ColorDisplayManager.COLOR_MODE_AUTOMATIC;
+                    final boolean isInVendorRange =
+                            setting >= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MIN
+                                    && setting <= ColorDisplayManager.VENDOR_COLOR_MODE_RANGE_MAX;
+                    return isInFrameworkRange || isInVendorRange;
+                } catch (NumberFormatException | NullPointerException e) {
+                    return false;
+                }
+            }
+        };
 
         /**
          * The user selected peak refresh rate in frames per second.
@@ -6484,6 +6499,21 @@ public final class Settings {
                 new SettingsValidators.ComponentNameListValidator(":");
 
         /**
+         * Whether the Global Actions Panel is enabled.
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_PANEL_ENABLED = "global_actions_panel_enabled";
+
+        private static final Validator GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether the Global Actions Panel can be toggled on or off in Settings.
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_PANEL_AVAILABLE =
+                "global_actions_panel_available";
+
+        /**
          * Whether the hush gesture has ever been used
          * @hide
          */
@@ -8243,6 +8273,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether or not the face unlock education screen has been shown to the user.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_EDUCATION_INFO_DISPLAYED =
+                "face_unlock_education_info_displayed";
+
+        private static final Validator FACE_UNLOCK_EDUCATION_INFO_DISPLAYED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Whether or not debugging is enabled.
          * @hide
          */
@@ -8922,7 +8962,8 @@ public final class Settings {
             SILENCE_NOTIFICATION_GESTURE_COUNT,
             SILENCE_CALL_GESTURE_COUNT,
             SILENCE_TIMER_GESTURE_COUNT,
-            DARK_MODE_DIALOG_SEEN
+            DARK_MODE_DIALOG_SEEN,
+            GLOBAL_ACTIONS_PANEL_ENABLED
         };
 
         /**
@@ -9048,6 +9089,8 @@ public final class Settings {
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
+            VALIDATORS.put(FACE_UNLOCK_EDUCATION_INFO_DISPLAYED,
+                    FACE_UNLOCK_EDUCATION_INFO_DISPLAYED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_ENABLED, ASSIST_GESTURE_ENABLED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
                     ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR);
@@ -9106,6 +9149,7 @@ public final class Settings {
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
             VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
             VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);
+            VALIDATORS.put(GLOBAL_ACTIONS_PANEL_ENABLED, GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR);
         }
 
         /**

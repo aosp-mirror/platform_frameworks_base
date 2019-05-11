@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.animation.Animator;
@@ -2992,7 +2993,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public boolean hasActiveClearableNotifications() {
-        return mNotificationStackScroller.hasActiveClearableNotifications();
+        return mNotificationStackScroller.hasActiveClearableNotifications(ROWS_ALL);
     }
 
     @Override

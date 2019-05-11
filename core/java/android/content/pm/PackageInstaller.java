@@ -1278,7 +1278,7 @@ public class PackageInstaller {
         public int mode = MODE_INVALID;
         /** {@hide} */
         @UnsupportedAppUsage
-        public int installFlags;
+        public int installFlags = PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
         /** {@hide} */
         public int installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         /** {@hide} */
@@ -1513,18 +1513,21 @@ public class PackageInstaller {
          * state of the permission can be determined only at install time and cannot be
          * changed on updated or at a later point via the package manager APIs.
          *
+         * <p>Initially, all restricted permissions are whitelisted but you can change
+         * which ones are whitelisted by calling this method or the corresponding ones
+         * on the {@link PackageManager}.
+         *
          * @see PackageManager#addWhitelistedRestrictedPermission(String, String, int)
          * @see PackageManager#removeWhitelistedRestrictedPermission(String, String, int)
          */
         public void setWhitelistedRestrictedPermissions(@Nullable Set<String> permissions) {
             if (permissions == RESTRICTED_PERMISSIONS_ALL) {
                 installFlags |= PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
-            }
-            if (permissions != null) {
-                this.whitelistedRestrictedPermissions = new ArrayList<>(permissions);
+                whitelistedRestrictedPermissions = null;
             } else {
                 installFlags &= ~PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
-                this.whitelistedRestrictedPermissions = null;
+                whitelistedRestrictedPermissions = (permissions != null)
+                        ? new ArrayList<>(permissions) : null;
             }
         }
 

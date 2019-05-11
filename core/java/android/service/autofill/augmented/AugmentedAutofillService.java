@@ -15,6 +15,9 @@
  */
 package android.service.autofill.augmented;
 
+import static android.service.autofill.augmented.Helper.logResponse;
+import static android.util.TimeUtils.formatDuration;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.CallSuper;
@@ -38,9 +41,7 @@ import android.os.SystemClock;
 import android.service.autofill.augmented.PresentationParams.SystemPopupPresentationParams;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -48,6 +49,7 @@ import android.view.autofill.IAugmentedAutofillManagerClient;
 import android.view.autofill.IAutofillWindowPresenter;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -83,6 +85,9 @@ public abstract class AugmentedAutofillService extends Service {
     private Handler mHandler;
 
     private SparseArray<AutofillProxy> mAutofillProxies;
+
+    // Used for metrics / debug only
+    private ComponentName mServiceComponentName;
 
     private final IAugmentedAutofillService mInterface = new IAugmentedAutofillService.Stub() {
 
@@ -125,6 +130,7 @@ public abstract class AugmentedAutofillService extends Service {
     /** @hide */
     @Override
     public final IBinder onBind(Intent intent) {
+        mServiceComponentName = intent.getComponent();
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
@@ -215,8 +221,9 @@ public abstract class AugmentedAutofillService extends Service {
         final CancellationSignal cancellationSignal = CancellationSignal.fromTransport(transport);
         AutofillProxy proxy = mAutofillProxies.get(sessionId);
         if (proxy == null) {
-            proxy = new AutofillProxy(sessionId, client, taskId, componentName, focusedId,
-                    focusedValue, requestTime, callback, cancellationSignal);
+            proxy = new AutofillProxy(sessionId, client, taskId, mServiceComponentName,
+                    componentName, focusedId, focusedValue, requestTime, callback,
+                    cancellationSignal);
             mAutofillProxies.put(sessionId,  proxy);
         } else {
             // TODO(b/123099468): figure out if it's ok to reuse the proxy; add logging
@@ -272,6 +279,8 @@ public abstract class AugmentedAutofillService extends Service {
     @Override
     /** @hide */
     protected final void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("Service component: "); pw.println(
+                ComponentName.flattenToShortString(mServiceComponentName));
         if (mAutofillProxies != null) {
             final int size = mAutofillProxies.size();
             pw.print("Number proxies: "); pw.println(size);
@@ -301,12 +310,12 @@ public abstract class AugmentedAutofillService extends Service {
     /** @hide */
     static final class AutofillProxy {
 
-        static final int REPORT_EVENT_ON_SUCCESS = 1;
+        static final int REPORT_EVENT_NO_RESPONSE = 1;
         static final int REPORT_EVENT_UI_SHOWN = 2;
         static final int REPORT_EVENT_UI_DESTROYED = 3;
 
         @IntDef(prefix = { "REPORT_EVENT_" }, value = {
-                REPORT_EVENT_ON_SUCCESS,
+                REPORT_EVENT_NO_RESPONSE,
                 REPORT_EVENT_UI_SHOWN,
                 REPORT_EVENT_UI_DESTROYED
         })
@@ -319,6 +328,8 @@ public abstract class AugmentedAutofillService extends Service {
         private final int mSessionId;
         public final int taskId;
         public final ComponentName componentName;
+        // Used for metrics / debug only
+        private String mServicePackageName;
         @GuardedBy("mLock")
         private AutofillId mFocusedId;
         @GuardedBy("mLock")
@@ -349,6 +360,7 @@ public abstract class AugmentedAutofillService extends Service {
         private CancellationSignal mCancellationSignal;
 
         private AutofillProxy(int sessionId, @NonNull IBinder client, int taskId,
+                @NonNull ComponentName serviceComponentName,
                 @NonNull ComponentName componentName, @NonNull AutofillId focusedId,
                 @Nullable AutofillValue focusedValue, long requestTime,
                 @NonNull IFillCallback callback, @NonNull CancellationSignal cancellationSignal) {
@@ -357,6 +369,7 @@ public abstract class AugmentedAutofillService extends Service {
             mCallback = callback;
             this.taskId = taskId;
             this.componentName = componentName;
+            mServicePackageName = serviceComponentName.getPackageName();
             mFocusedId = focusedId;
             mFocusedValue = focusedValue;
             mFirstRequestTime = requestTime;
@@ -439,9 +452,9 @@ public abstract class AugmentedAutofillService extends Service {
                             mCallback.cancel();
                         }
                     } catch (RemoteException e) {
-                        Slog.e(TAG, "failed to check current pending request status", e);
+                        Log.e(TAG, "failed to check current pending request status", e);
                     }
-                    Slog.d(TAG, "mCallback is updated.");
+                    Log.d(TAG, "mCallback is updated.");
                 }
                 mCallback = callback;
             }
@@ -463,13 +476,17 @@ public abstract class AugmentedAutofillService extends Service {
 
         // Used (mostly) for metrics.
         public void report(@ReportEvent int event) {
+            if (sVerbose) Log.v(TAG, "report(): " + event);
+            long duration = -1;
+            int type = MetricsEvent.TYPE_UNKNOWN;
             switch (event) {
-                case REPORT_EVENT_ON_SUCCESS:
+                case REPORT_EVENT_NO_RESPONSE:
+                    type = MetricsEvent.TYPE_SUCCESS;
                     if (mFirstOnSuccessTime == 0) {
                         mFirstOnSuccessTime = SystemClock.elapsedRealtime();
+                        duration = mFirstOnSuccessTime - mFirstRequestTime;
                         if (sDebug) {
-                            Slog.d(TAG, "Service responded in " + TimeUtils.formatDuration(
-                                    mFirstOnSuccessTime - mFirstRequestTime));
+                            Log.d(TAG, "Service responded nothing in " + formatDuration(duration));
                         }
                     }
                     try {
@@ -479,27 +496,25 @@ public abstract class AugmentedAutofillService extends Service {
                     }
                     break;
                 case REPORT_EVENT_UI_SHOWN:
+                    type = MetricsEvent.TYPE_OPEN;
                     if (mUiFirstShownTime == 0) {
                         mUiFirstShownTime = SystemClock.elapsedRealtime();
-                        if (sDebug) {
-                            Slog.d(TAG, "UI shown in " + TimeUtils.formatDuration(
-                                    mUiFirstShownTime - mFirstRequestTime));
-                        }
+                        duration = mUiFirstShownTime - mFirstRequestTime;
+                        if (sDebug) Log.d(TAG, "UI shown in " + formatDuration(duration));
                     }
                     break;
                 case REPORT_EVENT_UI_DESTROYED:
+                    type = MetricsEvent.TYPE_CLOSE;
                     if (mUiFirstDestroyedTime == 0) {
                         mUiFirstDestroyedTime = SystemClock.elapsedRealtime();
-                        if (sDebug) {
-                            Slog.d(TAG, "UI destroyed in " + TimeUtils.formatDuration(
-                                    mUiFirstDestroyedTime - mFirstRequestTime));
-                        }
+                        duration =  mUiFirstDestroyedTime - mFirstRequestTime;
+                        if (sDebug) Log.d(TAG, "UI destroyed in " + formatDuration(duration));
                     }
                     break;
                 default:
-                    Slog.w(TAG, "invalid event reported: " + event);
+                    Log.w(TAG, "invalid event reported: " + event);
             }
-            // TODO(b/122858578): log metrics as well
+            logResponse(type, mServicePackageName, componentName, mSessionId, duration);
         }
 
         public void dump(@NonNull String prefix, @NonNull PrintWriter pw) {
@@ -527,19 +542,19 @@ public abstract class AugmentedAutofillService extends Service {
             if (mFirstOnSuccessTime > 0) {
                 final long responseTime = mFirstOnSuccessTime - mFirstRequestTime;
                 pw.print(prefix); pw.print("response time: ");
-                TimeUtils.formatDuration(responseTime, pw); pw.println();
+                formatDuration(responseTime, pw); pw.println();
             }
 
             if (mUiFirstShownTime > 0) {
                 final long uiRenderingTime = mUiFirstShownTime - mFirstRequestTime;
                 pw.print(prefix); pw.print("UI rendering time: ");
-                TimeUtils.formatDuration(uiRenderingTime, pw); pw.println();
+                formatDuration(uiRenderingTime, pw); pw.println();
             }
 
             if (mUiFirstDestroyedTime > 0) {
                 final long uiTotalTime = mUiFirstDestroyedTime - mFirstRequestTime;
                 pw.print(prefix); pw.print("UI life time: ");
-                TimeUtils.formatDuration(uiTotalTime, pw); pw.println();
+                formatDuration(uiTotalTime, pw); pw.println();
             }
         }
 

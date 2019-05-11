@@ -60,12 +60,6 @@ cc_binary {
         "libservices",
         "libutils",
         "libprotobuf-cpp-lite",
-        "libcrypto",
-        "libkeystore_aidl",
-        "libkeystore_binder",
-        "libkeystore_parcelables",
-        "android.hardware.keymaster@4.0",
-        "libkeymaster4support",
     ],
 
     static_libs: [
@@ -119,8 +113,6 @@ cc_test {
         "src/incidentd_util.cpp",
         "src/proto_util.cpp",
         "src/report_directory.cpp",
-        "src/cipher/IncidentKeyStore.cpp",
-        "src/cipher/ProtoEncryption.cpp",
         "src/**/*.proto",
     ],
 
@@ -142,12 +134,6 @@ cc_test {
         "libprotoutil",
         "libservices",
         "libutils",
-        "libcrypto",
-        "libkeystore_aidl",
-        "libkeystore_binder",
-        "libkeystore_parcelables",
-        "android.hardware.keymaster@4.0",
-        "libkeymaster4support",
     ],
 
     target: {

@@ -48,7 +48,10 @@ static const int64_t GL_DRIVER_LOADING_TIME_1   = 666;
 static const int64_t VK_DRIVER_LOADING_TIME_0   = 777;
 static const int64_t VK_DRIVER_LOADING_TIME_1   = 888;
 static const int64_t VK_DRIVER_LOADING_TIME_2   = 999;
-static const size_t NUMBER_OF_VALUES_GLOBAL     = 8;
+static const int32_t VULKAN_VERSION             = 1;
+static const int32_t CPU_VULKAN_VERSION         = 2;
+static const int32_t GLES_VERSION               = 3;
+static const size_t NUMBER_OF_VALUES_GLOBAL     = 11;
 static const size_t NUMBER_OF_VALUES_APP        = 4;
 // clang-format on
 
@@ -93,6 +96,9 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsGlobalInfo) {
     EXPECT_TRUE(event->write(GL_LOADING_FAILURE_COUNT));
     EXPECT_TRUE(event->write(VK_LOADING_COUNT));
     EXPECT_TRUE(event->write(VK_LOADING_FAILURE_COUNT));
+    EXPECT_TRUE(event->write(VULKAN_VERSION));
+    EXPECT_TRUE(event->write(CPU_VULKAN_VERSION));
+    EXPECT_TRUE(event->write(GLES_VERSION));
     event->init();
     inData.emplace_back(event);
     MockGpuStatsPuller mockPuller(android::util::GPU_STATS_GLOBAL_INFO, &inData);
@@ -110,6 +116,9 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsGlobalInfo) {
     EXPECT_EQ(GL_LOADING_FAILURE_COUNT, outData[0]->getValues()[5].mValue.long_value);
     EXPECT_EQ(VK_LOADING_COUNT, outData[0]->getValues()[6].mValue.long_value);
     EXPECT_EQ(VK_LOADING_FAILURE_COUNT, outData[0]->getValues()[7].mValue.long_value);
+    EXPECT_EQ(VULKAN_VERSION, outData[0]->getValues()[8].mValue.int_value);
+    EXPECT_EQ(CPU_VULKAN_VERSION, outData[0]->getValues()[9].mValue.int_value);
+    EXPECT_EQ(GLES_VERSION, outData[0]->getValues()[10].mValue.int_value);
 }
 
 TEST_F(GpuStatsPuller_test, PullGpuStatsAppInfo) {

@@ -72,6 +72,8 @@ final class ContentCaptureServerSession {
 
     private final Object mLock;
 
+    public final ComponentName appComponentName;
+
     ContentCaptureServerSession(@NonNull Object lock, @NonNull IBinder activityToken,
             @NonNull ContentCapturePerUserService service, @NonNull ComponentName appComponentName,
             @NonNull IResultReceiver sessionStateReceiver, int taskId, int displayId, int sessionId,
@@ -79,6 +81,7 @@ final class ContentCaptureServerSession {
         Preconditions.checkArgument(sessionId != NO_SESSION_ID);
         mLock = lock;
         mActivityToken = activityToken;
+        this.appComponentName = appComponentName;
         mService = service;
         mId = sessionId;
         mUid = uid;
@@ -228,6 +231,7 @@ final class ContentCaptureServerSession {
         pw.print(prefix); pw.print("uid: ");  pw.print(mUid); pw.println();
         pw.print(prefix); pw.print("context: ");  mContentCaptureContext.dump(pw); pw.println();
         pw.print(prefix); pw.print("activity token: "); pw.println(mActivityToken);
+        pw.print(prefix); pw.print("app component: "); pw.println(appComponentName);
         pw.print(prefix); pw.print("has autofill callback: ");
     }
 

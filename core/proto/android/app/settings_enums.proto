@@ -2364,4 +2364,9 @@ enum PageId {
 
     // Settings > Apps and notifications > Notifications > Gentle notifications
     GENTLE_NOTIFICATIONS_SCREEN = 1715;
+
+    // OPEN: Settings > System > Gestures > Global Actions Panel
+    // CATEGORY: SETTINGS
+    // OS: Q
+    GLOBAL_ACTIONS_PANEL_SETTINGS = 1800;
 }

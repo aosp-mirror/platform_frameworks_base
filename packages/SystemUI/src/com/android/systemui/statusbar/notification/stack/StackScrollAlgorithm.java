@@ -58,7 +58,9 @@ public class StackScrollAlgorithm {
     private float mHeadsUpInset;
     private int mPinnedZTranslationExtra;
 
-    public StackScrollAlgorithm(Context context, ViewGroup hostView) {
+    public StackScrollAlgorithm(
+            Context context,
+            ViewGroup hostView) {
         mHostView = hostView;
         initView(context);
     }
@@ -364,22 +366,15 @@ public class StackScrollAlgorithm {
      */
     private void updatePositionsForState(StackScrollAlgorithmState algorithmState,
             AmbientState ambientState) {
-
         if (ANCHOR_SCROLLING) {
             float currentYPosition = algorithmState.anchorViewY;
             int childCount = algorithmState.visibleChildren.size();
             for (int i = algorithmState.anchorViewIndex; i < childCount; i++) {
-                if (i > algorithmState.anchorViewIndex && ambientState.beginsNewSection(i)) {
-                    currentYPosition += mGapHeight;
-                }
                 currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
                         false /* reverse */);
             }
             currentYPosition = algorithmState.anchorViewY;
             for (int i = algorithmState.anchorViewIndex - 1; i >= 0; i--) {
-                if (ambientState.beginsNewSection(i + 1)) {
-                    currentYPosition -= mGapHeight;
-                }
                 currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
                         true /* reverse */);
             }
@@ -388,9 +383,6 @@ public class StackScrollAlgorithm {
             float currentYPosition = -algorithmState.scrollY;
             int childCount = algorithmState.visibleChildren.size();
             for (int i = 0; i < childCount; i++) {
-                if (ambientState.beginsNewSection(i)) {
-                    currentYPosition += mGapHeight;
-                }
                 currentYPosition = updateChild(i, algorithmState, ambientState, currentYPosition,
                         false /* reverse */);
             }
@@ -421,8 +413,15 @@ public class StackScrollAlgorithm {
             float currentYPosition,
             boolean reverse) {
         ExpandableView child = algorithmState.visibleChildren.get(i);
+        final boolean applyGapHeight =
+                childNeedsGapHeight(ambientState.getSectionProvider(), algorithmState, i, child);
         ExpandableViewState childViewState = child.getViewState();
         childViewState.location = ExpandableViewState.LOCATION_UNKNOWN;
+
+        if (applyGapHeight && !reverse) {
+            currentYPosition += mGapHeight;
+        }
+
         int paddingAfterChild = getPaddingAfterChild(algorithmState, child);
         int childHeight = getMaxAllowedChildHeight(child);
         if (reverse) {
@@ -459,6 +458,9 @@ public class StackScrollAlgorithm {
 
         if (reverse) {
             currentYPosition = childViewState.yTranslation;
+            if (applyGapHeight) {
+                currentYPosition -= mGapHeight;
+            }
         } else {
             currentYPosition = childViewState.yTranslation + childHeight + paddingAfterChild;
             if (currentYPosition <= 0) {
@@ -471,6 +473,18 @@ public class StackScrollAlgorithm {
 
         childViewState.yTranslation += inset;
         return currentYPosition;
+    }
+
+    private boolean childNeedsGapHeight(
+            SectionProvider sectionProvider,
+            StackScrollAlgorithmState algorithmState,
+            int visibleIndex,
+            View child) {
+        boolean needsGapHeight = sectionProvider.beginsSection(child) && visibleIndex > 0;
+        if (ANCHOR_SCROLLING) {
+            needsGapHeight &= visibleIndex != algorithmState.anchorViewIndex;
+        }
+        return needsGapHeight;
     }
 
     protected int getPaddingAfterChild(StackScrollAlgorithmState algorithmState,
@@ -727,4 +741,15 @@ public class StackScrollAlgorithm {
         }
     }
 
+    /**
+     * Interface for telling the SSA when a new notification section begins (so it can add in
+     * appropriate margins).
+     */
+    public interface SectionProvider {
+        /**
+         * True if this view starts a new "section" of notifications, such as the gentle
+         * notifications section. False if sections are not enabled.
+         */
+        boolean beginsSection(View view);
+    }
 }

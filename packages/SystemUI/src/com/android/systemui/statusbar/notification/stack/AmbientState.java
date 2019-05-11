@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.util.MathUtils;
@@ -30,18 +31,18 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A global state to track all input states for the algorithm.
  */
 public class AmbientState {
 
-    private static final int NO_SECTION_BOUNDARY = -1;
     private static final float MAX_PULSE_HEIGHT = 100000f;
 
+    private final SectionProvider mSectionProvider;
     private ArrayList<ExpandableView> mDraggedViews = new ArrayList<>();
     private int mScrollY;
     private int mAnchorViewIndex;
@@ -51,7 +52,6 @@ public class AmbientState {
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
-    private final List<Integer> mSectionBoundaryIndices = new ArrayList<>();
     private boolean mDark;
     private boolean mHideSensitive;
     private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
@@ -84,8 +84,10 @@ public class AmbientState {
     private float mPulseHeight = MAX_PULSE_HEIGHT;
     private float mDozeAmount = 0.0f;
 
-    public AmbientState(Context context) {
-        mSectionBoundaryIndices.add(NO_SECTION_BOUNDARY);
+    public AmbientState(
+            Context context,
+            @NonNull SectionProvider sectionProvider) {
+        mSectionProvider = sectionProvider;
         reload(context);
     }
 
@@ -245,25 +247,8 @@ public class AmbientState {
         mSpeedBumpIndex = shelfIndex;
     }
 
-    /**
-     * Returns the index of the boundary between two sections, where the first section is at index
-     * {@code boundaryNum}.
-     */
-    public int getSectionBoundaryIndex(int boundaryNum) {
-        return mSectionBoundaryIndices.get(boundaryNum);
-    }
-
-    /** Returns true if the item at {@code index} is directly below a section boundary. */
-    public boolean beginsNewSection(int index) {
-        return mSectionBoundaryIndices.contains(index);
-    }
-
-    /**
-     * Sets the index of the boundary between the section at {@code boundaryNum} and the following
-     * section to {@code boundaryIndex}.
-     */
-    public void setSectionBoundaryIndex(int boundaryNum, int boundaryIndex) {
-        mSectionBoundaryIndices.set(boundaryNum, boundaryIndex);
+    public SectionProvider getSectionProvider() {
+        return mSectionProvider;
     }
 
     public float getStackTranslation() {

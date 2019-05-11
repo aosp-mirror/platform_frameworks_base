@@ -36,6 +36,8 @@ import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.NotificationManager;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
@@ -158,6 +160,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * The implementation of the volume manager service.
@@ -889,7 +892,46 @@ public class AudioService extends IAudioService.Stub
                         0 : SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
 
         initA11yMonitoring();
+
+        mRoleObserver = new RoleObserver();
+        mRoleObserver.register();
+
         onIndicateSystemReady();
+    }
+
+    RoleObserver mRoleObserver;
+
+    class RoleObserver implements OnRoleHoldersChangedListener {
+        private RoleManager mRm;
+        private final Executor mExecutor;
+
+        RoleObserver() {
+            mExecutor = mContext.getMainExecutor();
+        }
+
+        public void register() {
+            mRm = (RoleManager) mContext.getSystemService(Context.ROLE_SERVICE);
+            if (mRm != null) {
+                mRm.addOnRoleHoldersChangedListenerAsUser(mExecutor, this, UserHandle.ALL);
+                updateAssistantUId(true);
+            }
+        }
+
+        @Override
+        public void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+            if (RoleManager.ROLE_ASSISTANT.equals(roleName)) {
+                updateAssistantUId(false);
+            }
+        }
+
+        public String getAssistantRoleHolder() {
+            String assitantPackage = "";
+            if (mRm != null) {
+                List<String> assistants = mRm.getRoleHolders(RoleManager.ROLE_ASSISTANT);
+                assitantPackage = assistants.size() == 0 ? "" : assistants.get(0);
+            }
+            return assitantPackage;
+        }
     }
 
     void onIndicateSystemReady() {
@@ -1391,21 +1433,33 @@ public class AudioService extends IAudioService.Stub
         int assistantUid = 0;
 
         // Consider assistants in the following order of priority:
-        // 1) voice interaction service
-        // 2) assistant
-        String assistantName = Settings.Secure.getStringForUser(
-                        mContentResolver,
-                        Settings.Secure.VOICE_INTERACTION_SERVICE, UserHandle.USER_CURRENT);
-        if (TextUtils.isEmpty(assistantName)) {
-            assistantName = Settings.Secure.getStringForUser(
-                    mContentResolver,
-                    Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
+        // 1) apk in assistant role
+        // 2) voice interaction service
+        // 3) assistant service
+
+        String packageName = "";
+        if (mRoleObserver != null) {
+            packageName = mRoleObserver.getAssistantRoleHolder();
         }
-        if (!TextUtils.isEmpty(assistantName)) {
-            String packageName = ComponentName.unflattenFromString(assistantName).getPackageName();
-            if (!TextUtils.isEmpty(packageName)) {
+        if (TextUtils.isEmpty(packageName)) {
+            String assistantName = Settings.Secure.getStringForUser(
+                            mContentResolver,
+                            Settings.Secure.VOICE_INTERACTION_SERVICE, UserHandle.USER_CURRENT);
+            if (TextUtils.isEmpty(assistantName)) {
+                assistantName = Settings.Secure.getStringForUser(
+                        mContentResolver,
+                        Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
+            }
+            if (!TextUtils.isEmpty(assistantName)) {
+                packageName = ComponentName.unflattenFromString(assistantName).getPackageName();
+            }
+        }
+        if (!TextUtils.isEmpty(packageName)) {
+            PackageManager pm = mContext.getPackageManager();
+            if (pm.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
+                    == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    assistantUid = mContext.getPackageManager().getPackageUid(packageName, 0);
+                    assistantUid = pm.getPackageUid(packageName, 0);
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG,
                             "updateAssistantUId() could not find UID for package: " + packageName);

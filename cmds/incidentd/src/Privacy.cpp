@@ -28,8 +28,6 @@ namespace incidentd {
 using namespace android::os;
 using std::strstream;
 
-static const bool kEncryptionEnabled = false;
-
 uint64_t encode_field_id(const Privacy* p) { return (uint64_t)p->type << 32 | p->field_id; }
 
 string Privacy::toString() const {
@@ -50,10 +48,6 @@ const Privacy* lookup(const Privacy* p, uint32_t fieldId) {
         if (p->children[i]->field_id > fieldId) return NULL;
     }
     return NULL;
-}
-
-bool sectionEncryption(int section_id) {
-    return kEncryptionEnabled ? (section_id == 3025) /*restricted image section*/ : false;
 }
 
 static bool isAllowed(const uint8_t policy, const uint8_t check) {
