@@ -24,7 +24,6 @@ import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.SparseIntArray;
@@ -289,7 +288,8 @@ public class RenderNodeAnimator extends Animator {
         throw new UnsupportedOperationException();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    /** @hide */
+    @UnsupportedAppUsage
     public void setTarget(View view) {
         mViewTarget = view;
         setTarget(mViewTarget.mRenderNode);
@@ -301,7 +301,7 @@ public class RenderNodeAnimator extends Animator {
     }
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+    @UnsupportedAppUsage
     public void setTarget(DisplayListCanvas canvas) {
         setTarget((RecordingCanvas) canvas);
     }

@@ -35,6 +35,7 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -59,6 +60,12 @@ public class RollbackTest {
     private static final String TEST_APP_A = "com.android.tests.rollback.testapp.A";
     private static final String TEST_APP_B = "com.android.tests.rollback.testapp.B";
     private static final String INSTRUMENTED_APP = "com.android.tests.rollback";
+
+    // copied from PackageManagerService#PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS
+    // TODO: find a better place for the property so that it can be imported in tests
+    // maybe android.content.pm.PackageManager?
+    private static final String PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS =
+            "enable_rollback_timeout";
 
     /**
      * Test basic rollbacks.
@@ -948,6 +955,38 @@ public class RollbackTest {
             // Note: Don't ignore flaky failures here.
             assertEquals(3, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
         } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    @Test
+    public void testEnableRollbackTimeoutFailsRollback() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.WRITE_DEVICE_CONFIG);
+
+            //setting the timeout to a very short amount that will definitely be triggered
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                    Long.toString(1), false /* makeDefault*/);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
+        } finally {
+            //setting the timeout back to default
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                    null, false /* makeDefault*/);
             RollbackTestUtils.dropShellPermissionIdentity();
         }
     }

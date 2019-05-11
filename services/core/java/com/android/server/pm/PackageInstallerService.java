@@ -363,8 +363,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                                 System.currentTimeMillis() - session.getUpdatedMillis();
                         final boolean valid;
                         if (session.isStaged()) {
-                            if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS
-                                    && session.isStagedAndInTerminalState()) {
+                            if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS) {
                                 valid = false;
                             } else {
                                 valid = true;

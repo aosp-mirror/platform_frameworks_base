@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Älä näytä uudelleen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Poista kaikki"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Muuta asetuksia"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Älä häiritse ‑tila keskeytti ilmoitukset"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Aloita nyt"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ei ilmoituksia"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Näyttö on kiinnitetty"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Pysyy näkyvissä, kunnes irrotat sen. Irrota painamalla pitkään Edellinen ja Viimeisimmät."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Pysyy näkyvissä, kunnes irrotat sen. Irrota painamalla pitkään Edellinen ja Aloitusnäyttö."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Pysyy näkyvissä, kunnes irrotat sen. Irrota pyyhkäisemällä ylös ja painamalla pitkään."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Pysyy näkyvissä, kunnes irrotat sen. Irrota painamalla pitkään Viimeisimmät."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Pysyy näkyvissä, kunnes irrotat sen. Irrota painamalla pitkään Aloitusnäyttö."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Irrota näyttö koskettamalla pitkään Takaisin- ja Viimeisimmät-painikkeita"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Jatketaanko ilmoitusten näyttämistä tästä sovelluksesta?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Varovainen"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Priorisoitu"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Aina äänetön. Näkyy vedettävällä ilmoitusalueella."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Aina äänetön. Näkyy vedettävällä ilmoitusalueella ja tilapalkissa."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Aina äänetön. Näkyy vedettävällä ilmoitusalueella ja lukitusnäytöllä."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Aina äänetön. Näkyy vedettävällä ilmoitusalueella, tilapalkissa ja lukitusnäytöllä."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Äänellinen ilmoitus näkyy vedettävällä ilmoitusalueella, tilapalkissa ja lukitusnäytöllä."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Keskittyminen on helpompaa, sillä ilmoitukset näkyvät vain alas vedettävällä alueella. Aina äänetön."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Näytetään priorisoitujen ilmoitusten alapuolella. Aina äänetön."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Näytetään priorisoitujen ilmoitusten alapuolella. Aina äänetön."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Näytetään priorisoitujen ilmoitusten alapuolella. Aina äänetön."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Kiinnittää huomion äänellä ja tilapalkin kuvakkeella. Näkyy lukitusnäytöllä."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Välitetty ilmoitus"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Tämä sovellus käyttää kameraa."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Tämä sovellus käyttää mikrofonia."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Tämä sovellus näkyy näytöllä muiden sovellusten päällä."</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Avaa <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Kuplien asetukset: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Sallitaanko kuplat (<xliff:g id="APP_NAME">%1$s</xliff:g>)?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Ylläpidä"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Estä"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Salli"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Kysy myöhemmin"</string>

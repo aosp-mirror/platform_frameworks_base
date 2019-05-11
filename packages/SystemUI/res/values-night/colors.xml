@@ -50,6 +50,7 @@
     <color name="notification_guts_button_color">@color/GM2_blue_200</color>
 
     <color name="notification_section_header_label_color">@color/GM2_grey_200</color>
+    <color name="notification_channel_dialog_separator">@color/GM2_grey_700</color>
 
     <!-- The color of the background in the top part of QSCustomizer -->
     <color name="qs_customize_background">@color/GM2_grey_900</color>

@@ -4886,7 +4886,8 @@ public class Notification implements Parcelable
                         R.id.progress, ColorStateList.valueOf(mContext.getColor(
                                 R.color.notification_progress_background_color)));
                 if (getRawColor(p) != COLOR_DEFAULT) {
-                    ColorStateList colorStateList = ColorStateList.valueOf(resolveContrastColor(p));
+                    int color = isColorized(p) ? getPrimaryTextColor(p) : resolveContrastColor(p);
+                    ColorStateList colorStateList = ColorStateList.valueOf(color);
                     contentView.setProgressTintList(R.id.progress, colorStateList);
                     contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
                 }

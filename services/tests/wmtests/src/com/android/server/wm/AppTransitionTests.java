@@ -18,29 +18,39 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Rect;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
-
-import org.junit.Before;
-import org.junit.Test;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test class for {@link AppTransition}.
@@ -51,7 +61,6 @@ import androidx.test.filters.SmallTest;
 @SmallTest
 @Presubmit
 public class AppTransitionTests extends WindowTestsBase {
-
     private DisplayContent mDc;
 
     @Before
@@ -181,4 +190,55 @@ public class AppTransitionTests extends WindowTestsBase {
                 getInstrumentation().getTargetContext(), -1));
     }
 
+    @Test
+    public void testCancelRemoteAnimationWhenFreeze() {
+        final DisplayContent dc = createNewDisplay(Display.STATE_ON);
+        final WindowState exitingAppWindow = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
+                dc, "exiting app");
+        final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
+        // Wait until everything in animation handler get executed to prevent the exiting window
+        // from being removed during WindowSurfacePlacer Traversal.
+        waitUntilHandlersIdle();
+
+        // Set a remote animator.
+        final TestRemoteAnimationRunner runner = new TestRemoteAnimationRunner();
+        final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
+                runner, 100, 50, true /* changeNeedsSnapshot */);
+        // RemoteAnimationController will tracking RemoteAnimationAdapter's caller with calling pid.
+        adapter.setCallingPid(123);
+
+        // Simulate activity finish flows to prepare app transition & set visibility,
+        // make sure transition is set as expected.
+        dc.prepareAppTransition(TRANSIT_ACTIVITY_CLOSE,
+                false /* alwaysKeepCurrent */, 0 /* flags */, false /* forceOverride */);
+        assertEquals(TRANSIT_ACTIVITY_CLOSE, dc.mAppTransition.getAppTransition());
+        dc.mAppTransition.overridePendingAppTransitionRemote(adapter);
+        exitingAppToken.setVisibility(false, false);
+        assertTrue(dc.mClosingApps.size() > 0);
+
+        // Make sure window is in animating stage before freeze, and cancel after freeze.
+        assertTrue(dc.isAppAnimating());
+        assertFalse(runner.mCancelled);
+        dc.mAppTransition.freeze();
+        assertFalse(dc.isAppAnimating());
+        assertTrue(runner.mCancelled);
+    }
+
+    private class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
+        boolean mCancelled = false;
+        @Override
+        public void onAnimationStart(RemoteAnimationTarget[] apps,
+                IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+        }
+
+        @Override
+        public void onAnimationCancelled() {
+            mCancelled = true;
+        }
+
+        @Override
+        public IBinder asBinder() {
+            return null;
+        }
+    }
 }

@@ -280,7 +280,7 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Pređite na radni profil"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pristupa vašim kontaktima"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup vašim kontaktima?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa vašim kontaktima?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupa lokaciji ovog uređaja"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi lokaciji ovog uređaja?"</string>
@@ -295,22 +295,22 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; slanje i pregled SMS poruka?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pohrana"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupa slikama, medijskim fajlovima i fajlovima na vašem uređaju"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup fotografijama, medijima i fajlovima na vašem uređaju?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa fotografijama, medijima i fajlovima na vašem uređaju?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snima zvuk"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje zvuka?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da snima zvuk?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fizička aktivnost"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"pristup vašoj fizičkoj aktivnosti"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Dopustiti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi informacijama o vašoj fizičkoj aktivnosti?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"snima fotografije i videozapise"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje fotografija i videozapisa?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da snima fotografije i videozapise?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zapisnici poziva"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čitanje i pisanje zapisnika telefonskih poziva"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup zapisnicima poziva?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa zapisnicima poziva?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; upućivanje poziva i upravljanje njima?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da upućuje pozove i upravlja njima?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup senzornim podacima o vašim vitalnim znacima?"</string>
@@ -574,11 +574,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Ponovo registrirajte lice."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nije više moguće prepoznati lice. Pokušajte opet."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Previše slično, promijenite položaj."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Gledajte direktno u ekran."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Gledajte direktno u ekran."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Poravnajte položaj glave vertikalno."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Sklonite prepreke između vaše glave i telefona."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Očistite kameru."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Malo manje zakrenite glavu."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Malo manje zakrenite glavu."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nije moguće potvrditi lice. Hardver nije dostupan."</string>
@@ -1621,7 +1624,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"Emitiranje"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Poveži na uređaj"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emitiranje ekrana na uređaj"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Traženje uređajā…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Traženje uređaja…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Postavke"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Prekini vezu"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skeniranje…"</string>
@@ -2065,4 +2068,5 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajlova</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Direktno dijeljenje nije dostupno"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Spisak aplikacija"</string>
 </resources>

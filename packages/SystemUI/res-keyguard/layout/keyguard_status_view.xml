@@ -29,6 +29,7 @@
     androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:gravity="center_horizontal|top">
     <LinearLayout
+        android:id="@+id/status_view_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/widget_vertical_padding"

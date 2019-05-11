@@ -223,7 +223,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"비행기 모드가 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"비행기 모드를 사용합니다."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"모두 음소거"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"알람만"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"알람만 허용"</string>
     <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"방해 금지 모드"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"방해 금지 모드가 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"방해 금지 모드가 사용 설정되었습니다."</string>
@@ -292,8 +292,8 @@
     <string name="ethernet_label" msgid="7967563676324087464">"이더넷"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"추가 옵션을 보려면 아이콘을 길게 터치하세요."</string>
     <string name="quick_settings_dnd_label" msgid="7112342227663678739">"방해 금지 모드"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"중요 알림만"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"알람만"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"중요 알림만 허용"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"알람만 허용"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"모두 차단"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"블루투스"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"블루투스(<xliff:g id="NUMBER">%d</xliff:g>개의 기기)"</string>
@@ -399,8 +399,8 @@
     <string name="camera_hint" msgid="7939688436797157483">"카메라를 사용하려면 아이콘에서 스와이프하세요."</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"전체 무음입니다. 이렇게 하면 스크린 리더도 무음으로 설정됩니다."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"모두 차단"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"중요 알림만"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"알람만"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"중요 알림만 허용"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"알람만 허용"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"모두\n차단"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"중요 알림만\n허용"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"알람만\n"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"다시 표시 안함"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"관리"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"방해 금지 모드로 일시중지된 알림"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"시작하기"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"알림 없음"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"화면 고정됨"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 홈을 길게 터치하세요."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 위로 스와이프한 다음 탭한 상태를 유지하세요."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 홈을 길게 터치하세요."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"이 화면을 고정 해제하려면 뒤로 및 최근 사용 버튼을 길게 터치하세요."</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"조용히 표시됨"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"우선순위 지정됨"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"항상 음소거됩니다. 풀다운 창에 표시됩니다."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"항상 음소거됩니다. 풀다운 창 및 상태 표시줄에 표시됩니다."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"항상 음소거됩니다. 풀다운 창 및 잠금 화면에 표시됩니다."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"항상 음소거됩니다. 풀다운 창, 상태 표시줄, 잠금 화면에 표시됩니다."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"풀다운 창, 상태 표시줄, 잠금 화면에 소리와 함께 표시됩니다."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"풀다운 창에만 알림을 표시하여 집중에 방해가 되지 않습니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"우선순위 알림 아래에 표시됩니다. 항상 음소거됩니다."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"소리 및 상태 표시줄 아이콘으로 주의를 끕니다. 잠금 화면에 표시됩니다."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"이 알림은 수정할 수 없습니다."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"이 알림 그룹은 여기에서 설정할 수 없습니다."</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"프록시를 통한 알림"</string>
     <string name="appops_camera" msgid="8100147441602585776">"앱이 카메라를 사용 중입니다."</string>
     <string name="appops_microphone" msgid="741508267659494555">"앱이 마이크를 사용 중입니다."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"앱이 화면의 다른 앱 위에 표시되고 있습니다."</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> 열기"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 풍선 설정"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 알림 풍선을 허용하시겠습니까?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"관리"</string>
     <string name="no_bubbles" msgid="337101288173078247">"거부"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"허용"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"나중에 알림"</string>

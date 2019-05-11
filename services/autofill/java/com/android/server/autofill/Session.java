@@ -2407,7 +2407,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                if (mAugmentedAutofillableIds != null && mAugmentedAutofillableIds.contains(id)) {
+                if ((flags & FLAG_MANUAL_REQUEST) == 0 && mAugmentedAutofillableIds != null
+                        && mAugmentedAutofillableIds.contains(id)) {
                     // View was already reported when server could not handle a response, but it
                     // triggered augmented autofill
 
@@ -2538,7 +2539,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             try {
                 if (mHasCallback) {
                     mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinishedState);
-                } else if (sessionFinishedState != 0) {
+                } else if (sessionFinishedState != AutofillManager.STATE_UNKNOWN) {
                     mClient.setSessionFinished(sessionFinishedState, autofillableIds);
                 }
             } catch (RemoteException e) {
@@ -2693,6 +2694,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + "it can be augmented. AutofillableIds: " + autofillableIds);
             }
             mAugmentedAutofillableIds = autofillableIds;
+            try {
+                mClient.setState(AutofillManager.SET_STATE_FLAG_FOR_AUTOFILL_ONLY);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error setting client to autofill-only", e);
+            }
         }
     }
 

@@ -27,7 +27,6 @@ import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
-import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
@@ -41,7 +40,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
-import static android.net.shared.NetworkMonitorUtils.isValidationRequired;
+import static android.net.shared.NetworkMonitorUtils.isPrivateDnsValidationRequired;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
@@ -2825,8 +2824,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private boolean networkRequiresValidation(NetworkAgentInfo nai) {
-        return isValidationRequired(nai.networkCapabilities);
+    private boolean networkRequiresPrivateDnsValidation(NetworkAgentInfo nai) {
+        return isPrivateDnsValidationRequired(nai.networkCapabilities);
     }
 
     private void handleFreshlyValidatedNetwork(NetworkAgentInfo nai) {
@@ -2844,7 +2843,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
             handlePerNetworkPrivateDnsConfig(nai, cfg);
-            if (networkRequiresValidation(nai)) {
+            if (networkRequiresPrivateDnsValidation(nai)) {
                 handleUpdateLinkProperties(nai, new LinkProperties(nai.linkProperties));
             }
         }
@@ -2853,7 +2852,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handlePerNetworkPrivateDnsConfig(NetworkAgentInfo nai, PrivateDnsConfig cfg) {
         // Private DNS only ever applies to networks that might provide
         // Internet access and therefore also require validation.
-        if (!networkRequiresValidation(nai)) return;
+        if (!networkRequiresPrivateDnsValidation(nai)) return;
 
         // Notify the NetworkAgentInfo/NetworkMonitor in case NetworkMonitor needs to cancel or
         // schedule DNS resolutions. If a DNS resolution is required the
@@ -6852,7 +6851,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceKeepalivePermission();
         mKeepaliveTracker.startNattKeepalive(
                 getNetworkAgentInfoForNetwork(network), null /* fd */,
-                INVALID_RESOURCE_ID /* Unused */,
                 intervalSeconds, cb,
                 srcAddr, srcPort, dstAddr, NattSocketKeepalive.NATT_PORT);
     }

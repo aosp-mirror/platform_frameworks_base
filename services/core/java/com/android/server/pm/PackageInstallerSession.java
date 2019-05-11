@@ -1150,7 +1150,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      */
     void sealAndValidateIfNecessary() {
         synchronized (mLock) {
-            if (!mShouldBeSealed) {
+            if (!mShouldBeSealed || isStagedAndInTerminalState()) {
                 return;
             }
         }

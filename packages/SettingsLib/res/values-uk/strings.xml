@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Неможливо здійснити сканування мереж"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Немає"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Збережено"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Від’єднано"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Вимкнено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Помилка конфігурації IP-адреси"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Не під’єднано через низьку якість мережі"</string>
@@ -411,7 +412,7 @@
     <string name="disabled" msgid="9206776641295849915">"Вимкнено"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Дозволено"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Заборонено"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Установлювати невідомі додатки"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Встановлювати невідомі додатки"</string>
     <string name="home" msgid="3256884684164448244">"Головний екран налаштувань"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -461,7 +462,7 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Тривалість"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Запитувати щоразу"</string>
-    <string name="zen_mode_forever" msgid="2704305038191592967">"Доки ви не вимкнете"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"Доки не вимкнути"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Щойно"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Цей пристрій"</string>
 </resources>

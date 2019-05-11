@@ -42,6 +42,8 @@ import android.util.Log;
 import android.util.Range;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
@@ -57,7 +59,6 @@ public class DataUsageController {
             PERIOD_BUILDER, Locale.getDefault());
 
     private final Context mContext;
-    private final TelephonyManager mTelephonyManager;
     private final ConnectivityManager mConnectivityManager;
     private final INetworkStatsService mStatsService;
     private final NetworkPolicyManager mPolicyManager;
@@ -70,7 +71,6 @@ public class DataUsageController {
 
     public DataUsageController(Context context) {
         mContext = context;
-        mTelephonyManager = TelephonyManager.from(context);
         mConnectivityManager = ConnectivityManager.from(context);
         mStatsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
@@ -115,7 +115,8 @@ public class DataUsageController {
             return warn("no subscriber id");
         }
         NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
-        template = NetworkTemplate.normalize(template, mTelephonyManager.getMergedSubscriberIds());
+        template = NetworkTemplate.normalize(template, getTelephonyManager()
+                .getMergedSubscriberIds());
 
         return getDataUsageInfo(template);
     }
@@ -212,9 +213,29 @@ public class DataUsageController {
             .append(']').toString();
     }
 
+    @VisibleForTesting
+    public TelephonyManager getTelephonyManager() {
+        int subscriptionId = mSubscriptionId;
+
+        // If mSubscriptionId is invalid, get default data sub.
+        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
+            subscriptionId = SubscriptionManager.getDefaultDataSubscriptionId();
+        }
+
+        // If data sub is also invalid, get any active sub.
+        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
+            int[] activeSubIds = SubscriptionManager.from(mContext).getActiveSubscriptionIdList();
+            if (!ArrayUtils.isEmpty(activeSubIds)) {
+                subscriptionId = activeSubIds[0];
+            }
+        }
+
+        return TelephonyManager.from(mContext).createForSubscriptionId(subscriptionId);
+    }
+
     public void setMobileDataEnabled(boolean enabled) {
         Log.d(TAG, "setMobileDataEnabled: enabled=" + enabled);
-        mTelephonyManager.setDataEnabled(enabled);
+        getTelephonyManager().setDataEnabled(enabled);
         if (mCallback != null) {
             mCallback.onMobileDataEnabled(enabled);
         }
@@ -223,11 +244,11 @@ public class DataUsageController {
     public boolean isMobileDataSupported() {
         // require both supported network and ready SIM
         return mConnectivityManager.isNetworkSupported(TYPE_MOBILE)
-                && mTelephonyManager.getSimState() == SIM_STATE_READY;
+                && getTelephonyManager().getSimState() == SIM_STATE_READY;
     }
 
     public boolean isMobileDataEnabled() {
-        return mTelephonyManager.getDataEnabled();
+        return getTelephonyManager().isDataEnabled();
     }
 
     static int getNetworkType(NetworkTemplate networkTemplate) {
@@ -250,12 +271,7 @@ public class DataUsageController {
     }
 
     private String getActiveSubscriberId() {
-        final TelephonyManager tele = TelephonyManager.from(mContext);
-        int subscriptionId = mSubscriptionId;
-        if (subscriptionId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            subscriptionId = SubscriptionManager.getDefaultDataSubscriptionId();
-        }
-        final String actualSubscriberId = tele.getSubscriberId(subscriptionId);
+        final String actualSubscriberId = getTelephonyManager().getSubscriberId();
         return actualSubscriberId;
     }
 

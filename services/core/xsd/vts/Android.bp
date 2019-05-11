@@ -25,6 +25,7 @@ cc_test {
     ],
     shared_libs: [
         "liblog",
+        "libbase",
     ],
     cflags: [
         "-Wall",

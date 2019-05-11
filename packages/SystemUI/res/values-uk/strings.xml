@@ -340,7 +340,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi-Fi не під’єднано"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яскравість"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Інвертувати кольори"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Інвертовані кольори"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Режим коригування кольору"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Більше налаштувань"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Готово"</string>
@@ -454,6 +454,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Більше не показувати"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистити все"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Керувати"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Режим \"Не турбувати\" призупинив сповіщення"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Почати зараз"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Сповіщень немає"</string>
@@ -533,6 +537,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екран закріплено"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ви постійно бачитимете екран, доки не відкріпите його. Щоб відкріпити екран, натисніть і втримуйте кнопки \"Назад\" та \"Огляд\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Ви бачитимете цей екран, доки не відкріпите його. Для цього натисніть і утримуйте кнопки \"Назад\" та \"Головний екран\"."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Ви бачитимете цей екран, доки не відкріпите його. Для цього проведіть пальцем угору й утримуйте екран."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ви постійно бачитимете екран, доки не відкріпите його. Щоб відкріпити екран, натисніть і втримуйте кнопку \"Огляд\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ви бачитимете цей екран, доки не відкріпите його. Для цього натисніть і утримуйте кнопку \"Головний екран\"."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Щоб відкріпити цей екран, натисніть і утримуйте кнопки \"Назад\" та \"Огляд\""</string>
@@ -644,15 +649,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Чи показувати сповіщення з цього додатка надалі?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Тихі сповіщення"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Пріоритетні сповіщення"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Завжди без звуку. Показуються на розкривній панелі."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Завжди без звуку. Показуються на розкривній панелі й у рядку стану."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Завжди без звуку. Показуються на розкривній панелі й на заблокованому екрані."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Завжди без звуку. Показуються на розкривній панелі, у рядку стану й на заблокованому екрані."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Подають сигнал і показуються на розкривній панелі, у рядку стану й на заблокованому екрані."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Сповіщення показуються лише на розкривній панелі, щоб не відволікати. Завжди без звуку."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Показуються під пріоритетними сповіщеннями. Завжди без звуку."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Показуються під пріоритетними сповіщеннями. Завжди без звуку."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Показуються під пріоритетними сповіщеннями. Завжди без звуку."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Привертають увагу сигналом і значком у рядку стану. Показуються на заблокованому екрані."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ці сповіщення не можна змінити."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Цю групу сповіщень не можна налаштувати тут"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Проксі-сповіщення"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Цей додаток використовує камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Цей додаток використовує мікрофон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Цей додаток відображається поверх інших додатків на екрані."</string>
@@ -921,6 +925,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Відкрити додаток <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Налаштування спливаючих підказок від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Дозволити спливаючі підказки від додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Керувати"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Заборонити"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Дозволити"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Запитати пізніше"</string>

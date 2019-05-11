@@ -137,4 +137,8 @@
     <!-- Dialog image margin start -->
     <dimen name="image_margin_start">@*android:dimen/car_keyline_1</dimen>
 
+    <dimen name="car_preference_icon_size">@dimen/car_primary_icon_size</dimen>
+    <dimen name="car_preference_category_icon_size">@dimen/car_primary_icon_size</dimen>
+    <dimen name="car_preference_row_vertical_margin">@dimen/car_padding_2</dimen>
+
 </resources>

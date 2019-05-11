@@ -151,6 +151,7 @@ final class FillUi {
         } else {
             decor = (ViewGroup) inflater.inflate(R.layout.autofill_dataset_picker, null);
         }
+        decor.setClipToOutline(true);
         final TextView titleView = decor.findViewById(R.id.autofill_dataset_title);
         if (titleView != null) {
             titleView.setText(mContext.getString(R.string.autofill_window_title, serviceLabel));

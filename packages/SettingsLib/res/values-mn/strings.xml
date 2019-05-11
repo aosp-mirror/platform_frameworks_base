@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Сүлжээнүүдийг скан хийх боломжгүй"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Байхгүй"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Хадгалагдсан"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Салсан"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Идэвхгүйжүүлсэн"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP тохируулга амжилтгүй"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Сүлжээний чанар муу байгаа тул холбогдож чадсангүй"</string>
@@ -220,7 +221,7 @@
     <string name="wifi_display_certification" msgid="8611569543791307533">"Утасгүй дэлгэцийн сертификат"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi дэлгэрэнгүй лог-г идэвхжүүлэх"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобайл дата байнга идэвхтэй"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Модем болгох хардвер хурдасгуур"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Модем болгох техник хангамжийн хурдасгуур"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Нэргүй Bluetooth төхөөрөмжийг харуулах"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Үнэмлэхүй дууны түвшинг идэвхгүй болгох"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP хувилбар"</string>
@@ -259,7 +260,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Хуурамч байршлыг зөвшөөрөх"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Харах тохируулгын шалгалтыг идэвхжүүлэх"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi идэвхтэй байхад ч гэсэн гар утасны датаг идэвхтэй байлгадаг (сүлжээг түргэн солихын тулд)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Модем болгох хардвер хурдасгуурыг боломжтой тохиолдолд ашиглах"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Модем болгох техник хангамжийн хурдасгуурыг боломжтой тохиолдолд ашиглах"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB дебаг хийхийг зөвшөөрөх үү?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB дебаг нь зөвхөн хөгжүүлэлтийн зорилготой. Үүнийг өөрийн компьютер болон төхөөрөмжийн хооронд өгөгдөл хуулах, өөрийн төхөөрөмж дээр мэдэгдэлгүйгээр аппликейшн суулгах, лог датаг унших зэрэгт ашиглаж болно."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>

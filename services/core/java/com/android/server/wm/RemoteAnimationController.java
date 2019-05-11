@@ -132,7 +132,7 @@ class RemoteAnimationController implements DeathRecipient {
         sendRunningRemoteAnimation(true);
     }
 
-    private void cancelAnimation(String reason) {
+    void cancelAnimation(String reason) {
         if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason);
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {

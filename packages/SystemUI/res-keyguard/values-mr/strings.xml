@@ -66,8 +66,8 @@
     <string name="kg_wrong_password" msgid="8060364776224836597">"चुकीचा पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"चुकीचा पिन"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
-      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> सेकंदात पुन्हा प्रयत्न करा.</item>
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> सेकंदांत पुन्हा प्रयत्न करा.</item>
+      <item quantity="one">एका सेकंदात पुन्‍हा प्रयत्न करा.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"तुमचा पॅटर्न काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"सिम पिन एंटर करा"</string>
@@ -104,13 +104,13 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून तुमचा फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"सिम पिन कोड चुकीचा आहे तुम्ही आता तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधावा."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
-      <item quantity="one">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
       <item quantity="other">चुकीचा सिम पिन कोड, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+      <item quantity="one"> चुकीचा सिम पिन कोड, तुमचे डिव्हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधण्‍यापूर्वी तुमच्याकडे <xliff:g id="NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"सिम निरुपयोगी आहे. आपल्या वाहकाशी संपर्क साधा."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
-      <item quantity="one">चुकीचा सिम PUK कोड, सिम कायमचे निरुपयोगी होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
       <item quantity="other">चुकीचा सिम PUK कोड, सिम कायमचे निरुपयोगी होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+      <item quantity="one">चुकीचा सिम PUK कोड, सिम कायमचे निरुपयोगी होण्यापूर्वी आपल्याकडे <xliff:g id="NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"सिम पिन ऑपरेशन अयशस्वी झाले!"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"सिम PUK कार्य अयशस्‍वी झाले!"</string>
@@ -130,25 +130,25 @@
     <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"प्रशासकाद्वारे लॉक केलेले डिव्हाइस"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"डिव्हाइस मॅन्युअली लॉक केले होते"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
-      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
       <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
+      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_0">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पॅटर्नची खात्री करा.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
-      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पिनची खात्री करा.</item>
       <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पिन ची खात्री करा.</item>
+      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_0">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पिनची खात्री करा.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
-      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
       <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
+      <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_0">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
     </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"ओळखले नाही"</string>
     <string name="kg_face_not_recognized" msgid="6382535088345875294">"ओळखले नाही"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
-      <item quantity="one">सिम पिन एंटर करा, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
       <item quantity="other">सिम पिन एंटर करा, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>
+      <item quantity="one">सिम पिन एंटर करा. तुम्ही तुमचे डिव्‍हाइस अनलॉक करण्‍यासाठी तुमच्या वाहकाशी संपर्क साधण्‍यापूर्वी, तुमच्याकडे <xliff:g id="NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
-      <item quantity="one">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
       <item quantity="other">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
+      <item quantity="one">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_0">%d</xliff:g> प्रयत्न शिल्लक आहे. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
     </plurals>
 </resources>

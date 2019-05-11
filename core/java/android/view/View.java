@@ -15608,8 +15608,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     void setFlags(int flags, int mask) {
-        final boolean accessibilityEnabled =
-                AccessibilityManager.getInstance(mContext).isEnabled();
+        final boolean accessibilityEnabled = AccessibilityManager.getInstance(mContext).isEnabled();
         final boolean oldIncludeForAccessibility = accessibilityEnabled && includeForAccessibility();
 
         int old = mViewFlags;
@@ -15824,19 +15823,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (accessibilityEnabled) {
             // If we're an accessibility pane and the visibility changed, we already have sent
             // a state change, so we really don't need to report other changes.
-            if (isAccessibilityPane()) {
-                changed &= ~VISIBILITY_MASK;
-            }
-            if ((changed & FOCUSABLE) != 0 || (changed & VISIBILITY_MASK) != 0
+            // Accessibility Services aren't concerned with changes between GONE and INVISIBLE.
+            boolean visibilityChanged = !isAccessibilityPane() && ((changed & VISIBILITY_MASK) != 0)
+                    && ((old & VISIBILITY_MASK) == VISIBLE || newVisibility == VISIBLE);
+            if (oldIncludeForAccessibility != includeForAccessibility() || visibilityChanged) {
+                notifySubtreeAccessibilityStateChangedIfNeeded();
+            } else if ((changed & ENABLED_MASK) != 0 || (changed & FOCUSABLE) != 0
                     || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
                     || (changed & CONTEXT_CLICKABLE) != 0) {
-                if (oldIncludeForAccessibility != includeForAccessibility()) {
-                    notifySubtreeAccessibilityStateChangedIfNeeded();
-                } else {
-                    notifyViewAccessibilityStateChangedIfNeeded(
-                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
-                }
-            } else if ((changed & ENABLED_MASK) != 0) {
                 notifyViewAccessibilityStateChangedIfNeeded(
                         AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
@@ -22015,23 +22009,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         saveCount = canvas.getSaveCount();
+        int topSaveCount = -1;
+        int bottomSaveCount = -1;
+        int leftSaveCount = -1;
+        int rightSaveCount = -1;
 
         int solidColor = getSolidColor();
         if (solidColor == 0) {
             if (drawTop) {
-                canvas.saveUnclippedLayer(left, top, right, top + length);
+                topSaveCount = canvas.saveUnclippedLayer(left, top, right, top + length);
             }
 
             if (drawBottom) {
-                canvas.saveUnclippedLayer(left, bottom - length, right, bottom);
+                bottomSaveCount = canvas.saveUnclippedLayer(left, bottom - length, right, bottom);
             }
 
             if (drawLeft) {
-                canvas.saveUnclippedLayer(left, top, left + length, bottom);
+                leftSaveCount = canvas.saveUnclippedLayer(left, top, left + length, bottom);
             }
 
             if (drawRight) {
-                canvas.saveUnclippedLayer(right - length, top, right, bottom);
+                rightSaveCount = canvas.saveUnclippedLayer(right - length, top, right, bottom);
             }
         } else {
             scrollabilityCache.setFadeColor(solidColor);
@@ -22048,21 +22046,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Matrix matrix = scrollabilityCache.matrix;
         final Shader fade = scrollabilityCache.shader;
 
-        if (drawTop) {
-            matrix.setScale(1, fadeHeight * topFadeStrength);
-            matrix.postTranslate(left, top);
+        // must be restored in the reverse order that they were saved
+        if (drawRight) {
+            matrix.setScale(1, fadeHeight * rightFadeStrength);
+            matrix.postRotate(90);
+            matrix.postTranslate(right, top);
             fade.setLocalMatrix(matrix);
             p.setShader(fade);
-            canvas.drawRect(left, top, right, top + length, p);
-        }
+            if (solidColor == 0) {
+                canvas.restoreUnclippedLayer(rightSaveCount, p);
 
-        if (drawBottom) {
-            matrix.setScale(1, fadeHeight * bottomFadeStrength);
-            matrix.postRotate(180);
-            matrix.postTranslate(left, bottom);
-            fade.setLocalMatrix(matrix);
-            p.setShader(fade);
-            canvas.drawRect(left, bottom - length, right, bottom, p);
+            } else {
+                canvas.drawRect(right - length, top, right, bottom, p);
+            }
         }
 
         if (drawLeft) {
@@ -22071,16 +22067,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             matrix.postTranslate(left, top);
             fade.setLocalMatrix(matrix);
             p.setShader(fade);
-            canvas.drawRect(left, top, left + length, bottom, p);
+            if (solidColor == 0) {
+                canvas.restoreUnclippedLayer(leftSaveCount, p);
+            } else {
+                canvas.drawRect(left, top, left + length, bottom, p);
+            }
         }
 
-        if (drawRight) {
-            matrix.setScale(1, fadeHeight * rightFadeStrength);
-            matrix.postRotate(90);
-            matrix.postTranslate(right, top);
+        if (drawBottom) {
+            matrix.setScale(1, fadeHeight * bottomFadeStrength);
+            matrix.postRotate(180);
+            matrix.postTranslate(left, bottom);
             fade.setLocalMatrix(matrix);
             p.setShader(fade);
-            canvas.drawRect(right - length, top, right, bottom, p);
+            if (solidColor == 0) {
+                canvas.restoreUnclippedLayer(bottomSaveCount, p);
+            } else {
+                canvas.drawRect(left, bottom - length, right, bottom, p);
+            }
+        }
+
+        if (drawTop) {
+            matrix.setScale(1, fadeHeight * topFadeStrength);
+            matrix.postTranslate(left, top);
+            fade.setLocalMatrix(matrix);
+            p.setShader(fade);
+            if (solidColor == 0) {
+                canvas.restoreUnclippedLayer(topSaveCount, p);
+            } else {
+                canvas.drawRect(left, top, right, top + length, p);
+            }
         }
 
         canvas.restoreToCount(saveCount);

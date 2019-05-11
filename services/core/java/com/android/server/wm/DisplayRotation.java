@@ -39,7 +39,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.DisplayCutout;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -73,8 +72,6 @@ public class DisplayRotation {
     private final int mCarDockRotation;
     private final int mDeskDockRotation;
     private final int mUndockedHdmiRotation;
-
-    private final float mCloseToSquareMaxAspectRatio;
 
     private OrientationListener mOrientationListener;
     private StatusBarManagerInternal mStatusBarManagerInternal;
@@ -163,9 +160,6 @@ public class DisplayRotation {
         mUndockedHdmiRotation = readRotation(
                 com.android.internal.R.integer.config_undockedHdmiRotation);
 
-        mCloseToSquareMaxAspectRatio = mContext.getResources().getFloat(
-                com.android.internal.R.dimen.config_closeToSquareDisplayMaxAspectRatio);
-
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
             mOrientationListener = new OrientationListener(mContext, uiHandler);
@@ -242,29 +236,14 @@ public class DisplayRotation {
         // It's also not likely to rotate a TV screen.
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
-        // Not much of use to rotate the display since it's close to square.
-        final boolean isCloseToSquare =
-                isNonDecorDisplayCloseToSquare(Surface.ROTATION_0, width, height);
         final boolean forceDesktopMode =
                 mService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay;
         mDefaultFixedToUserRotation =
-                (isCar || isTv || mService.mIsPc || forceDesktopMode || isCloseToSquare)
+                (isCar || isTv || mService.mIsPc || forceDesktopMode)
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
                 // $ adb shell wm size reset
                 && !"true".equals(SystemProperties.get("config.override_forced_orient"));
-    }
-
-    private boolean isNonDecorDisplayCloseToSquare(int rotation, int width, int height) {
-        final DisplayCutout displayCutout =
-                mDisplayContent.calculateDisplayCutoutForRotation(rotation).getDisplayCutout();
-        final int uiMode = mService.mPolicy.getUiMode();
-        final int w = mDisplayPolicy.getNonDecorDisplayWidth(
-                width, height, rotation, uiMode, displayCutout);
-        final int h = mDisplayPolicy.getNonDecorDisplayHeight(
-                width, height, rotation, uiMode, displayCutout);
-        final float aspectRatio = Math.max(w, h) / (float) Math.min(w, h);
-        return aspectRatio <= mCloseToSquareMaxAspectRatio;
     }
 
     void setRotation(int rotation) {

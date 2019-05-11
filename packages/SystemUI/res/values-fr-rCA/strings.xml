@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne plus afficher"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tout effacer"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gérer"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Les notifications sont suspendues par le mode Ne pas déranger"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Commencer"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Aucune notification"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"L\'écran est épinglé"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Retour » et « Aperçu »."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur les touches Retour et Accueil."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'épinglage. Pour annuler l\'épinglage, balayez l\'écran vers le haut et gardez le doigt dessus."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Aperçu »."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur la touche Accueil."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Aperçu."</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuer à afficher les notifications de cette application?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Discrètes"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Priorisées"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Toujours silencieux. S\'affiche dans le volet déroulant."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Toujours silencieux. S\'affiche dans le volet déroulant et dans la barre d\'état."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Toujours silencieux. S\'affiche dans le volet déroulant et sur l\'écran de verrouillage."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Toujours silencieux. S\'affiche dans le volet déroulant, dans la barre d\'état et sur l\'écran de verrouillage."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Émet un son et s\'affiche dans le volet déroulant, dans la barre d\'état et sur l\'écran de verrouillage."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Vous aide à vous concentrer en affichant seulement les notifications dans le volet déroulant. Toujours silencieux."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"S\'affiche sous les notifications prioritaires. Toujours silencieux."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"S\'affiche sous les notifications prioritaires. Toujours silencieux."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"S\'affiche sous les notifications prioritaires. Toujours silencieux."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Attire votre attention à l\'aide de sons et d\'une icône dans la barre d\'état. S\'affiche sur l\'écran de verrouillage."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Ces notifications ne peuvent pas être modifiées"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Ce groupe de notifications ne peut pas être configuré ici"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Notification par mandataire"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Cette application utilise l\'appareil photo."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Cette application utilise le microphone."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Cette application superpose du contenu par-dessus d\'autres applications à l\'écran."</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Ouvrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Paramètres pour les bulles de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Autoriser les bulles de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Gérer"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Refuser"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Autoriser"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Me demander plus tard"</string>

@@ -27,12 +27,13 @@
 #
 
 import argparse
+import asyncio
 import csv
 import itertools
 import os
-import subprocess
 import sys
 import tempfile
+import time
 from typing import Any, Callable, Dict, Generic, Iterable, List, NamedTuple, TextIO, Tuple, TypeVar, Optional, Union
 
 # The following command line options participate in the combinatorial generation.
@@ -44,7 +45,7 @@ _RUN_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'run_app_w
 
 RunCommandArgs = NamedTuple('RunCommandArgs', [('package', str), ('readahead', str), ('compiler_filter', Optional[str])])
 CollectorPackageInfo = NamedTuple('CollectorPackageInfo', [('package', str), ('compiler_filter', str)])
-_COLLECTOR_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'collector')
+_COLLECTOR_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), '../iorap/collector')
 _COLLECTOR_TIMEOUT_MULTIPLIER = 2 # take the regular --timeout and multiply by 2; systrace starts up slowly.
 
 _UNLOCK_SCREEN_SCRIPT=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'unlock_screen')
@@ -217,25 +218,95 @@ def make_script_command_with_temp_output(script: str, args: List[str], **kwargs)
   cmd = cmd + ["--output", tmp_output_file.name]
   return cmd, tmp_output_file
 
-def execute_arbitrary_command(cmd: List[str], simulate: bool, timeout: int) -> Tuple[bool, str]:
+async def _run_command(*args : List[str], timeout: Optional[int] = None) -> Tuple[int, bytes]:
+  # start child process
+  # NOTE: universal_newlines parameter is not supported
+  process = await asyncio.create_subprocess_exec(*args,
+      stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
+
+  script_output = b""
+
+  _debug_print("[PID]", process.pid)
+
+#hack
+#  stdout, stderr = await process.communicate()
+#  return (process.returncode, stdout)
+
+  timeout_remaining = timeout
+  time_started = time.time()
+
+  # read line (sequence of bytes ending with b'\n') asynchronously
+  while True:
+    try:
+      line = await asyncio.wait_for(process.stdout.readline(), timeout_remaining)
+      _debug_print("[STDOUT]", line)
+      script_output += line
+
+      if timeout_remaining:
+        time_elapsed = time.time() - time_started
+        timeout_remaining = timeout - time_elapsed
+    except asyncio.TimeoutError:
+      _debug_print("[TIMEDOUT] Process ", process.pid)
+
+#      if process.returncode is not None:
+#        #_debug_print("[WTF] can-write-eof?", process.stdout.can_write_eof())
+#
+#        _debug_print("[TIMEDOUT] Process already terminated")
+#        (remaining_stdout, remaining_stderr) = await process.communicate()
+#        script_output += remaining_stdout
+#
+#        code = await process.wait()
+#        return (code, script_output)
+
+      _debug_print("[TIMEDOUT] Sending SIGTERM.")
+      process.terminate()
+
+      # 1 second timeout for process to handle SIGTERM nicely.
+      try:
+       (remaining_stdout, remaining_stderr) = await asyncio.wait_for(process.communicate(), 5)
+       script_output += remaining_stdout
+      except asyncio.TimeoutError:
+        _debug_print("[TIMEDOUT] Sending SIGKILL.")
+        process.kill()
+
+      # 1 second timeout to finish with SIGKILL.
+      try:
+        (remaining_stdout, remaining_stderr) = await asyncio.wait_for(process.communicate(), 5)
+        script_output += remaining_stdout
+      except asyncio.TimeoutError:
+        # give up, this will leave a zombie process.
+        _debug_print("[TIMEDOUT] SIGKILL failed for process ", process.pid)
+        time.sleep(100)
+        #await process.wait()
+
+      return (-1, script_output)
+    else:
+      if not line: # EOF
+        break
+
+      #if process.returncode is not None:
+      #  _debug_print("[WTF] can-write-eof?", process.stdout.can_write_eof())
+      #  process.stdout.write_eof()
+
+      #if process.stdout.at_eof():
+      #  break
+
+  code = await process.wait() # wait for child process to exit
+  return (code, script_output)
+
+def execute_arbitrary_command(cmd: List[str], simulate: bool, timeout: Optional[int]) -> Tuple[bool, str]:
   if simulate:
     print(" ".join(cmd))
     return (True, "")
   else:
     _debug_print("[EXECUTE]", cmd)
-    proc = subprocess.Popen(cmd,
-                            stderr=subprocess.STDOUT,
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
-    try:
-      script_output = proc.communicate(timeout=timeout)[0]
-    except subprocess.TimeoutExpired:
-      print("[TIMEDOUT]")
-      proc.kill()
-      script_output = proc.communicate()[0]
 
-    _debug_print("[STDOUT]", script_output)
-    return_code = proc.wait()
+    # block until either command finishes or the timeout occurs.
+    loop = asyncio.get_event_loop()
+    (return_code, script_output) = loop.run_until_complete(_run_command(*cmd, timeout=timeout))
+
+    script_output = script_output.decode() # convert bytes to str
+
     passed = (return_code == 0)
     _debug_print("[$?]", return_code)
     if not passed:

@@ -274,6 +274,7 @@ import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -9041,7 +9042,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ? StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__FOREGROUND
                         : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__BACKGROUND)
                         : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN,
-                (r != null) ? r.getProcessClassEnum() : 0
+                processName.equals("system_server") ? ServerProtoEnums.SYSTEM_SERVER
+                        : (r != null) ? r.getProcessClassEnum()
+                                      : ServerProtoEnums.ERROR_SOURCE_UNKNOWN
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -17354,7 +17357,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int stopUser(final int userId, boolean force, final IStopUserCallback callback) {
-        return mUserController.stopUser(userId, force, callback);
+        return mUserController.stopUser(userId, force, callback, null /* keyEvictedCallback */);
     }
 
     @Override

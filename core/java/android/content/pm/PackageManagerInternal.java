@@ -174,6 +174,22 @@ public abstract class PackageManagerInternal {
     }
 
     /**
+     * Provider for default dialer
+     */
+    public interface DefaultDialerProvider {
+
+        /**
+         * Get the package name of the default dialer.
+         *
+         * @param userId the user id
+         *
+         * @return the package name of the default dialer, or {@code null} if none
+         */
+        @Nullable
+        String getDefaultDialer(@UserIdInt int userId);
+    }
+
+    /**
      * Provider for default home
      */
     public interface DefaultHomeProvider {
@@ -228,14 +244,6 @@ public abstract class PackageManagerInternal {
      * @param provider The provider.
      */
     public abstract void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider);
-
-    /**
-     * Called when the package for the default dialer changed
-     *
-     * @param packageName the new dialer package
-     * @param userId user for which the change was made
-     */
-    public void onDefaultDialerAppChanged(String packageName, int userId) {}
 
     /**
      * Called when the package for the default SMS handler changed
@@ -930,6 +938,13 @@ public abstract class PackageManagerInternal {
      * @param provider the provider
      */
     public abstract void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider);
+
+    /**
+     * Sets the default dialer provider.
+     *
+     * @param provider the provider
+     */
+    public abstract void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider);
 
     /**
      * Sets the default home provider.

@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不要再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「零打擾」模式已將通知設為暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定這個螢幕畫面，請按住「返回」按鈕和「總覽」按鈕"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示這個應用程式的通知嗎？"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"無聲通知"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"已設為優先"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"一律不發出音效，但會顯示在下拉式通知欄中。"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"一律不發出音效，但會顯示在下拉式通知欄和狀態列中。"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"一律不發出音效，但會顯示在下拉式通知欄和螢幕鎖定畫面中。"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"一律不發出音效，但會顯示在下拉式通知欄、狀態列和螢幕鎖定畫面中。"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"會發出音效並顯示在下拉式通知欄、狀態列和螢幕鎖定畫面中。"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"只會在下拉式通知欄中顯示通知，且一律不發出音效。"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"顯示在優先通知下方，且一律不發出音效。"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"顯示在優先通知下方，且一律不發出音效。"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"顯示在優先通知下方，且一律不發出音效。"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"發出音效並顯示「狀態列」圖示吸引你的注意力。這類通知會顯示在螢幕鎖定畫面上。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"無法在這裡設定這個通知群組"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"經過 Proxy 處理的通知"</string>
     <string name="appops_camera" msgid="8100147441602585776">"這個應用程式正在使用相機。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"這個應用程式正在使用麥克風。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"這個應用程式顯示在畫面上其他應用程式的上層。"</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"開啟「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」泡泡的設定"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」顯示泡泡嗎？"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"管理"</string>
     <string name="no_bubbles" msgid="337101288173078247">"拒絕"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"允許"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"稍後再詢問我"</string>

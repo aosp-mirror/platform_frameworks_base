@@ -53,7 +53,7 @@ class ListViewAnimation : public TestListViewSceneBase {
         char charToShow = 'A' + (rand() % 26);
         const SkPoint pos = {SkIntToScalar(size / 2),
                                 /*approximate centering*/ SkFloatToScalar(size * 0.7f)};
-        canvas.drawSimpleText(&charToShow, 1, kUTF8_SkTextEncoding, pos.fX, pos.fY, font, paint);
+        canvas.drawSimpleText(&charToShow, 1, SkTextEncoding::kUTF8, pos.fX, pos.fY, font, paint);
         return bitmap;
     }
 

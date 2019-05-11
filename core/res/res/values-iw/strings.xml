@@ -577,11 +577,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"יש לרשום מחדש את הפנים."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"כבר לא ניתן לזהות פנים. יש לנסות שוב."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"דומה מדי, יש לשנות תנוחה."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"יש להביט ישירות אל המצלמה."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"יש להביט ישירות אל המצלמה."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"יש ליישר את הראש במאונך."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"הפנים שלך צריכים להיות גלויים לגמרי."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"צריך לנקות את המצלמה."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"עליך ליישר קצת את הראש."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"עליך ליישר קצת את הראש."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
@@ -815,7 +818,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"לחץ על \'תפריט\' כדי לבטל את הנעילה."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"שרטט קו לביטול נעילת המסך"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"חירום"</string>
-    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"חזור לשיחה"</string>
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"חזרה לשיחה"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"נכון!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"נסה שוב"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"נסה שוב"</string>
@@ -2099,4 +2102,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + קובץ  אחד (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"שיתוף ישיר אינו זמין"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"רשימת האפליקציות"</string>
 </resources>

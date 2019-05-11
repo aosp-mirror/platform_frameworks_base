@@ -20,8 +20,8 @@ import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED;
 import static android.view.autofill.AutofillManager.FLAG_ADD_CLIENT_ENABLED_FOR_AUGMENTED_AUTOFILL_ONLY;
-import static android.view.autofill.AutofillManager.FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY;
 import static android.view.autofill.AutofillManager.NO_SESSION;
+import static android.view.autofill.AutofillManager.RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -283,7 +283,7 @@ final class AutofillManagerServiceImpl
      *
      * @return {@code long} whose right-most 32 bits represent the session id (which is always
      * non-negative), and the left-most contains extra flags (currently either {@code 0} or
-     * {@link AutofillManager#FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY}).
+     * {@link AutofillManager#RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY}).
      */
     @GuardedBy("mLock")
     long startSessionLocked(@NonNull IBinder activityToken, int taskId, int uid,
@@ -357,7 +357,8 @@ final class AutofillManagerServiceImpl
         if (forAugmentedAutofillOnly) {
             // Must embed the flag in the response, at the high-end side of the long.
             // (session is always positive, so we don't have to worry about the signal bit)
-            final long extraFlags = ((long) FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) << 32;
+            final long extraFlags =
+                    ((long) RECEIVER_FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) << 32;
             final long result = extraFlags | newSession.id;
             return result;
         } else {

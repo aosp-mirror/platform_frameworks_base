@@ -91,6 +91,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.leak.RotationUtils;
@@ -207,6 +208,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         Dependency.get(ConfigurationController.class).addCallback(this);
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
+        UnlockMethodCache unlockMethodCache = UnlockMethodCache.getInstance(context);
+        unlockMethodCache.addListener(
+                () -> {
+                    if (mDialog != null && mDialog.mPanelController != null) {
+                        boolean locked = !unlockMethodCache.canSkipBouncer();
+                        mDialog.mPanelController.onDeviceLockStateChanged(locked);
+                    }
+                });
     }
 
     /**
@@ -1576,6 +1585,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         new ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT));
+                mBackgroundDrawable = mPanelController.getBackgroundDrawable();
+                mScrimAlpha = 1f;
             }
         }
 
@@ -1595,16 +1606,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
 
-            if (!shouldUsePanel()) {
-                if (mBackgroundDrawable == null) {
-                    mBackgroundDrawable = new ScrimDrawable();
-                }
-                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
-            } else {
-                mBackgroundDrawable = mContext.getDrawable(
-                        com.android.systemui.R.drawable.global_action_panel_scrim);
-                mScrimAlpha = 1f;
+            if (shouldUsePanel()) {
                 initializePanel();
+            }
+            if (mBackgroundDrawable == null) {
+                mBackgroundDrawable = new ScrimDrawable();
+                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }

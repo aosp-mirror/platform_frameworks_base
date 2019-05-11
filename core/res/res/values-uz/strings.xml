@@ -554,8 +554,8 @@
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"yuzni aniqlash qurilmasidan foydalanish"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Haqiqiylikni tekshirish uchun skanerdan foydalanish imkonini beradi"</string>
     <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Yuz tekshiruvi"</string>
-    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Yuzingizni yana roʻyxatdan oʻtkazing"</string>
-    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Yuzingizni tanishni yaxshilash uchun yuzingizni yana bir marta roʻyxatdan oʻtkazing"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Yuzingizni yana qayd qiling"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Yuzingiz yanada yaxshiroq aniqlanishi uchun uni yana bir marta qayd qiling"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Yuz ravshan suratga olinmadi. Qaytadan urining."</string>
     <string name="face_acquired_too_bright" msgid="5005650874582450967">"Juda yorqin. Biroz soyaroq joy tanlang."</string>
     <string name="face_acquired_too_dark" msgid="1966194696381394616">"Juda qorongʻi. Atrofingizni yoriting."</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Yuzingizni qaytadan qayd qildiring."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Yuz tanilmadi. Qaytadan urining."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Yuz ifodasi oldingiday. Holatingizni oʻzgartiring."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Ekranga tik qarang."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Ekranga tik qarang."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Boshingizni tik tuting."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Boshingiz va telefon orasidagi joyni olib tashlang."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Kamerani tozalang."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Boshingizni asta buring."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Boshingizni asta buring."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
@@ -1596,8 +1599,8 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Simsiz monitor"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Translatsiya qilish"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Qurilmaga ulanish"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Ekrandagi tasvirni qurilmaga uzatish"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Qurilmalar izlanmoqda..."</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Ekran translatsiyasi"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Qurilmalar qidirilmoqda..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Sozlamalar"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Uzish"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Qidirilmoqda..."</string>
@@ -2028,4 +2031,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ta fayl</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Bevosita ulashuv ishlamaydi"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Ilovalar roʻyxati"</string>
 </resources>

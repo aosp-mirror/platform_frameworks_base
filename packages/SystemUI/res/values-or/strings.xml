@@ -324,7 +324,7 @@
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ୟୁଜର୍‌"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ନୂଆ ୟୁଜର୍‌"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"ୱାଇ-ଫାଇ"</string>
-    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"କନେକ୍ଟ ହୋଇନାହିଁ"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ସଂଯୁକ୍ତ ହୋଇନାହିଁ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ନେଟ୍‌ୱର୍କ ନାହିଁ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ୱାଇ-ଫାଇ ଅଫ୍‍"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ୱାଇ-ଫାଇ ଅନ୍‍ ଅଛି"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ବିକଳ୍ପ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତି ପଜ୍‍ ହୋଇଛି"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"ସ୍କ୍ରିନକୁ ପିନ୍‌ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"ଏହି ସ୍କ୍ରୀନ୍‍‍କୁ ଅନପିନ୍‍ କରିବା ପାଇଁ, ବ୍ୟାକ୍ ଏବଂ ଓଭରଭ୍ୟୁ ବଟନ୍‍‌କୁ ଦାବିଧରନ୍ତୁ"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ଏହି ଆପ୍‌ରୁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ଧିରେ"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"ପ୍ରାଥମିକତା ଭିତ୍ତିକ"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍‌ରେ ପ୍ରଦର୍ଶିତ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍ ଏବଂ ସ୍ଥିତି ବାର୍‌ରେ ପ୍ରଦର୍ଶନ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍ ଏବଂ ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ପ୍ରଦର୍ଶିତ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"ସର୍ବଦା ନିରବ। ପୁଲ୍-ଡାଉନ୍ ସେଡ୍, ସ୍ଥିତି ବାର୍ ଏବଂ ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ପ୍ରଦର୍ଶନ କରିଥାଏ।"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"ଶବ୍ଦ କରେ ଏବଂ ପୁଲ୍-ଡାଉନ୍ ସେଡ୍ ସ୍ଥିତି ବାର ଏବଂ ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ପ୍ରଦର୍ଶିତ କରିଥାଏ।"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"କେବଳ ପୁଲ୍-ଡାଉନ୍ ସେଡ୍‌ରେ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଉପରେ ଫୋକସ୍ ରହିବା ପାଇଁ ଆପଣଙ୍କୁ ସାହାଯ୍ୟ କରିଥାଏ। ସର୍ବଦା ନୀରବ।"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ପ୍ରାଥମିକତା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ତଳେ ଡିସ୍‌ପ୍ଲେ ହୁଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ପ୍ରାଥମିକତା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ତଳେ ଡିସ୍‌ପ୍ଲେ ହୁଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ପ୍ରାଥମିକତା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ତଳେ ଡିସ୍‌ପ୍ଲେ ହୁଏ। ସର୍ବଦା ନିରବ।"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ସାଉଣ୍ଡ୍ ଏବଂ ଏକ ଷ୍ଟାଟସ୍ ବାର୍ ଆଇକନ୍ ମାଧ୍ୟମରେ ଆପଣଙ୍କର ଧ୍ୟାନ ଆକର୍ଷିତ କରିଥାଏ। ଲକ୍ ସ୍କ୍ରିନ୍‌ରେ ଦେଖାଯାଇଥାଏ।"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ଏଠାରେ ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ଗ୍ରୁପ୍ କନଫ୍ୟୁଗର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"ବିଜ୍ଞପ୍ତି ପ୍ରକ୍ସୀ ହୋଇଛି"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ଏହି ଆପ୍ କ୍ୟାମେରା ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ଏହି ଆପ୍, ମାଇକ୍ରୋଫୋନ୍‍ ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ଏହି ଆପ୍, ଆପଣଙ୍କର ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍ ଉପରେ ପ୍ରଦର୍ଶିତ ହେଉଛି।"</string>
@@ -714,7 +718,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"କୀ\'ବୋର୍ଡ ସର୍ଟକଟ୍"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"କୀ\'ବୋର୍ଡ୍‍ର ଲେଆଉଟ୍‍କୁ ବଦଳାନ୍ତୁ"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"ଆପ୍ଲିକେଶନ୍‌"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"ଆପ୍ଲିକେସନ୍‌"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"ସହାୟତା"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ବ୍ରାଉଜର୍"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"ଯୋଗାଯୋଗ"</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବବଲ୍‌ଗୁଡ଼ିକ ପାଇଁ ସେଟିଂସ୍"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବବ୍‌ଲ୍‌ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ପ୍ରତ୍ୟାଖ୍ୟାନ କରନ୍ତୁ"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"ମୋତେ ପରେ ପଚାରନ୍ତୁ"</string>

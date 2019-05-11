@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Није могуће скенирати мреже"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Нема"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Сачувано"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Веза је прекинута"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Онемогућено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP конфигурација је отказала"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Није повезано због лошег квалитета мреже"</string>
@@ -152,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Подешене су неке подразумеване вредности"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Нису подешене подразумеване вредности"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Подешавања преласка из текста у говор"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Излаз за претварање текста у говор"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Претварање текста у говор"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Брзина говора"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Брзина изговарања текста"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Ниво"</string>
@@ -207,7 +208,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Прикажи дугме у менију напајања за прављење извештаја о грешкама"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Не закључавај"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Екран неће бити у режиму спавања током пуњења"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Омогући snoop евиденцију за Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Омогући snoop евид. за Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Сними Bluetooth пакете. (Укључите/искључите Bluetooth када промените ово подешавање)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Откључавање OEM-a"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Дозволи откључавање функције за покретање"</string>
@@ -311,8 +312,8 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Наметни смер распореда екрана здесна налево за све локалитете"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Наметни 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Омогући 4x MSAA у OpenGL ES 2.0 апликацијама"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке исецања области које нису правоугаоног облика"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Пендеруј помоћу HWUI-а"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке исецања области неправоугаоног облика"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Рендеруј помоћу HWUI-а"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Омогући слојеве за отклањање грешака GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Омогући учитавање отк. греш. GPU-a у апл. за отк. греш."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Размера анимације прозора"</string>
@@ -363,7 +364,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертуј..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Већ се користи шифровање датотека"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Конвертовање у шифровање појединачних датотека"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Конвертујте шифровање партиције података у шифровање појединачних датотека.\n !!Упозорење!! Тиме бришете све податке.\n Ово је алфа верзија функције и вероватно неће функционисати исправно.\n Притисните „Избриши и конвертуј...“ да бисте наставили."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Конвертујте шифровање партиције података у шифровање појединачних датотека.\n !!Упозорење!! Тиме бришете све податке.\n Ово је алфа верзија функције и вероватно неће радити исправно.\n Притисните „Избриши и конвертуј...“ да бисте наставили."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Избриши и конвертуј..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Режим боја слика"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Користи sRGB"</string>
@@ -459,7 +460,7 @@
     <string name="alarm_template" msgid="4996153414057676512">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Трајање"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Увек питај"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Питај сваки пут"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Док не искључите"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Управо"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Овај уређај"</string>

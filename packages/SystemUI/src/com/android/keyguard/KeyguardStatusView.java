@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.graphics.ColorUtils;
@@ -55,6 +56,7 @@ public class KeyguardStatusView extends GridLayout implements
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
 
+    private LinearLayout mStatusViewContainer;
     private TextView mLogoutView;
     private KeyguardClockSwitch mClockView;
     private TextView mOwnerInfo;
@@ -65,6 +67,14 @@ public class KeyguardStatusView extends GridLayout implements
     private boolean mPulsing;
     private float mDarkAmount = 0;
     private int mTextColor;
+
+    /**
+     * Bottom margin that defines the margin between bottom of smart space and top of notification
+     * icons on AOD.
+     */
+    private int mBottomMargin;
+    private int mBottomMarginWithHeader;
+    private boolean mShowingHeader;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -161,6 +171,7 @@ public class KeyguardStatusView extends GridLayout implements
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mStatusViewContainer = findViewById(R.id.status_view_container);
         mLogoutView = findViewById(R.id.logout);
         if (mLogoutView != null) {
             mLogoutView.setOnClickListener(this::onLogoutClicked);
@@ -190,7 +201,19 @@ public class KeyguardStatusView extends GridLayout implements
      * Moves clock, adjusting margins when slice content changes.
      */
     private void onSliceContentChanged() {
-        mClockView.setKeyguardShowingHeader(mKeyguardSlice.hasHeader());
+        final boolean hasHeader = mKeyguardSlice.hasHeader();
+        mClockView.setKeyguardShowingHeader(hasHeader);
+        if (mShowingHeader == hasHeader) {
+            return;
+        }
+        mShowingHeader = hasHeader;
+        // Update bottom margin since header has appeared/disappeared.
+        if (mStatusViewContainer != null) {
+            MarginLayoutParams params = (MarginLayoutParams) mStatusViewContainer.getLayoutParams();
+            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin,
+                    hasHeader ? mBottomMarginWithHeader : mBottomMargin);
+            mStatusViewContainer.setLayoutParams(params);
+        }
     }
 
     @Override
@@ -209,6 +232,7 @@ public class KeyguardStatusView extends GridLayout implements
             mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
         }
+        loadBottomMargin();
     }
 
     public void dozeTimeTick() {
@@ -316,6 +340,12 @@ public class KeyguardStatusView extends GridLayout implements
         if (mKeyguardSlice != null) {
             mKeyguardSlice.dump(fd, pw, args);
         }
+    }
+
+    private void loadBottomMargin() {
+        mBottomMargin = getResources().getDimensionPixelSize(R.dimen.widget_vertical_padding);
+        mBottomMarginWithHeader = getResources().getDimensionPixelSize(
+                R.dimen.widget_vertical_padding_with_header);
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.

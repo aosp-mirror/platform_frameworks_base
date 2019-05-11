@@ -306,7 +306,6 @@ public class ZygoteProcess {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
-     * @param packagesForUid null-ok all the packages with the same uid as this process.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @param useSystemGraphicsDriver whether the process uses system graphics driver.
      *
@@ -324,8 +323,6 @@ public class ZygoteProcess {
                                                   @Nullable String appDataDir,
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
-                                                  @Nullable String[] packagesForUid,
-                                                  @Nullable String sandboxId,
                                                   boolean useUsapPool,
                                                   boolean useSystemGraphicsDriver,
                                                   @Nullable String[] zygoteArgs) {
@@ -338,8 +335,7 @@ public class ZygoteProcess {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
-                    packageName, packagesForUid, sandboxId,
-                    useUsapPool, useSystemGraphicsDriver, zygoteArgs);
+                    packageName, useUsapPool, useSystemGraphicsDriver, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -532,7 +528,6 @@ public class ZygoteProcess {
      * @param startChildZygote Start a sub-zygote. This creates a new zygote process
      * that has its state cloned from this zygote process.
      * @param packageName null-ok the name of the package this process belongs to.
-     * @param packagesForUid null-ok all the packages with the same uid as this process.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -550,8 +545,6 @@ public class ZygoteProcess {
                                                       @Nullable String invokeWith,
                                                       boolean startChildZygote,
                                                       @Nullable String packageName,
-                                                      @Nullable String[] packagesForUid,
-                                                      @Nullable String sandboxId,
                                                       boolean useUsapPool,
                                                       boolean useSystemGraphicsDriver,
                                                       @Nullable String[] extraArgs)
@@ -623,14 +616,6 @@ public class ZygoteProcess {
 
         if (packageName != null) {
             argsForZygote.add("--package-name=" + packageName);
-        }
-
-        if (packagesForUid != null && packagesForUid.length > 0) {
-            argsForZygote.add("--packages-for-uid=" + String.join(",", packagesForUid));
-        }
-
-        if (sandboxId != null) {
-            argsForZygote.add("--sandbox-id=" + sandboxId);
         }
 
         argsForZygote.add(processClass);
@@ -1147,7 +1132,6 @@ public class ZygoteProcess {
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
-                    null /* packagesForUid */, null /* sandboxId */,
                     false /* useUsapPool */, false /*useSystemGraphicsDriver*/,
                     extraArgs);
         } catch (ZygoteStartFailedEx ex) {

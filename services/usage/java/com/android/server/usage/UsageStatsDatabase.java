@@ -17,7 +17,6 @@
 package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
-import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.Build;
@@ -94,12 +93,10 @@ public class UsageStatsDatabase {
 
     // Persist versioned backup files.
     // Should be false, except when testing new versions
-    // STOPSHIP: b/111422946 this should be false on launch
-    static final boolean KEEP_BACKUP_DIR = true;
+    static final boolean KEEP_BACKUP_DIR = false;
 
     private static final String TAG = "UsageStatsDatabase";
-    // STOPSHIP: b/111422946 this should be boolean DEBUG = UsageStatsService.DEBUG; on launch
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = UsageStatsService.DEBUG;
     private static final String BAK_SUFFIX = ".bak";
     private static final String CHECKED_IN_SUFFIX = UsageStatsXml.CHECKED_IN_SUFFIX;
     private static final String RETENTION_LEN_KEY = "ro.usagestats.chooser.retention";
@@ -872,111 +869,6 @@ public class UsageStatsDatabase {
             Slog.e(TAG, "UsageStatsDatabase", e);
             throw e;
         }
-        // If old version, don't bother sanity checking
-        if (version < 4) return;
-
-        // STOPSHIP: b/111422946, b/115429334
-        // Everything below this comment is sanity check against the new database version.
-        // After the new version has soaked for some time the following should removed.
-        // The goal of this check is to make sure the the ProtoInputStream is properly reading from
-        // the UsageStats files.
-        final StringBuilder sb = new StringBuilder();
-        final int failureLogLimit = 10;
-        int failures = 0;
-
-        final int packagesSize = statsOut.packageStats.size();
-        for (int i = 0; i < packagesSize; i++) {
-            final UsageStats stat = statsOut.packageStats.valueAt(i);
-            if (stat == null) {
-                // ArrayMap may contain null values, skip them
-                continue;
-            }
-            if (stat.mPackageName.isEmpty()) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnexpected empty usage stats package name loaded");
-                }
-            }
-            if (stat.mBeginTimeStamp > statsOut.endTime) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnreasonable usage stats stat begin timestamp ");
-                    sb.append(stat.mBeginTimeStamp);
-                    sb.append(" loaded (beginTime : ");
-                    sb.append(statsOut.beginTime);
-                    sb.append(", endTime : ");
-                    sb.append(statsOut.endTime);
-                    sb.append(")");
-                }
-            }
-            if (stat.mEndTimeStamp > statsOut.endTime) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnreasonable usage stats stat end timestamp ");
-                    sb.append(stat.mEndTimeStamp);
-                    sb.append(" loaded (beginTime : ");
-                    sb.append(statsOut.beginTime);
-                    sb.append(", endTime : ");
-                    sb.append(statsOut.endTime);
-                    sb.append(")");
-                }
-            }
-            if (stat.mLastTimeUsed > statsOut.endTime) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnreasonable usage stats stat last used timestamp ");
-                    sb.append(stat.mLastTimeUsed);
-                    sb.append(" loaded (beginTime : ");
-                    sb.append(statsOut.beginTime);
-                    sb.append(", endTime : ");
-                    sb.append(statsOut.endTime);
-                    sb.append(")");
-                }
-            }
-        }
-
-        final int eventSize = statsOut.events.size();
-        for (int i = 0; i < eventSize; i++) {
-            final UsageEvents.Event event = statsOut.events.get(i);
-            if (event.mPackage.isEmpty()) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnexpected empty empty package name loaded");
-                }
-            }
-            if (event.mTimeStamp < statsOut.beginTime || event.mTimeStamp > statsOut.endTime) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnexpected event timestamp ");
-                    sb.append(event.mTimeStamp);
-                    sb.append(" loaded (beginTime : ");
-                    sb.append(statsOut.beginTime);
-                    sb.append(", endTime : ");
-                    sb.append(statsOut.endTime);
-                    sb.append(")");
-                }
-            }
-            if (event.mEventType < 0 || event.mEventType > UsageEvents.Event.MAX_EVENT_TYPE) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnexpected event type ");
-                    sb.append(event.mEventType);
-                    sb.append(" loaded");
-                }
-            }
-            if ((event.mFlags & ~UsageEvents.Event.VALID_FLAG_BITS) != 0) {
-                if (failures++ < failureLogLimit) {
-                    sb.append("\nUnexpected event flag bit 0b");
-                    sb.append(Integer.toBinaryString(event.mFlags));
-                    sb.append(" loaded");
-                }
-            }
-        }
-
-        if (failures != 0) {
-            if (failures > failureLogLimit) {
-                sb.append("\nFailure log limited (");
-                sb.append(failures);
-                sb.append(" total failures found!)");
-            }
-            sb.append("\nError found in:\n");
-            sb.append(file.getBaseFile().getAbsolutePath());
-            sb.append("\nPlease go to b/115429334 to help root cause this issue");
-            Slog.wtf(TAG, sb.toString());
-        }
     }
 
     private void readLocked(InputStream in, IntervalStats statsOut) throws IOException {
@@ -1278,6 +1170,18 @@ public class UsageStatsDatabase {
                 pw.decreaseIndent();
             }
             pw.decreaseIndent();
+        }
+    }
+
+    IntervalStats readIntervalStatsForFile(int interval, long fileName) {
+        synchronized (mLock) {
+            final IntervalStats stats = new IntervalStats();
+            try {
+                readLocked(mSortedStatFiles[interval].get(fileName, null), stats);
+                return stats;
+            } catch (Exception e) {
+                return null;
+            }
         }
     }
 }

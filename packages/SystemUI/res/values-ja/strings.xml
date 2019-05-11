@@ -67,7 +67,7 @@
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB を有効にする"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"画面サイズに合わせて拡大"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"画面サイズに合わせて拡大"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"スクリーンショット"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"画面の保存"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"スクリーンショットを保存しています..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"スクリーンショットを保存しました"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"次回から表示しない"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"サイレント モードにより通知は一時停止中です"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"画面が固定されました"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [最近] を同時に押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [ホーム] を同時に押し続けると固定が解除されます。"</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"固定を解除するまで常に表示されます。上にスワイプして長押しすると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"この画面の固定を解除するには [戻る] ボタンと [最近] ボタンを押し続けます"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"このアプリからの通知を今後も表示しますか？"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"通知音なし"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"優先"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"常に通知音は鳴りません。プルダウン シェードに表示されます。"</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"常に通知音は鳴りません。プルダウン シェードやステータスバーに表示されます。"</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"常に通知音は鳴りません。プルダウン シェードやロック画面に表示されます。"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"常に通知音は鳴りません。プルダウン シェード、ステータスバー、ロック画面に表示されます。"</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"通知音が鳴り、プルダウン シェード、ステータスバー、ロック画面に表示されます。"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"プルダウン シェードでのみ通知を確認できます。常に通知音は鳴りません。"</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"優先度の低い通知を表示します。常に通知音は鳴りません。"</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"優先度の低い通知を表示します。常に通知音は鳴りません。"</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"優先度の低い通知を表示します。常に通知音は鳴りません。"</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"通知音とステータスバーのアイコンで注意を促します。ロック画面に表示されます。"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"これらの通知は変更できません。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"このグループの通知はここでは設定できません"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"代理通知"</string>
     <string name="appops_camera" msgid="8100147441602585776">"このアプリはカメラを使用しています。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"このアプリはマイクを使用しています。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"このアプリは画面上で他のアプリの上に重ねて表示されます。"</string>
@@ -765,8 +769,8 @@
     <string name="right_keycode" msgid="708447961000848163">"右キーコード"</string>
     <string name="left_icon" msgid="3096287125959387541">"左アイコン"</string>
     <string name="right_icon" msgid="3952104823293824311">"右アイコン"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"タイルを追加するには押し続けながらドラッグ"</string>
-    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"タイルを並べ替えるには押し続けながらドラッグ"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"タイルを追加するには長押ししてドラッグ"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"タイルを並べ替えるには長押ししてドラッグ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"削除するにはここにドラッグ"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"タイルは 6 個以上必要"</string>
     <string name="qs_edit" msgid="2232596095725105230">"編集"</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> を開く"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> のふきだしの設定"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> のふきだしを許可しますか？"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"管理"</string>
     <string name="no_bubbles" msgid="337101288173078247">"拒否"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"許可"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"後で確認"</string>

@@ -328,7 +328,7 @@
     <string name="permlab_statusBarService" msgid="4826835508226139688">"bihurtu egoera-barra"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Egoera-barra izatea baimentzen die aplikazioei."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"zabaldu/tolestu egoera-barra"</string>
-    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Egoera-barra zabaltzea edo tolestea baimentzen die aplikazioei."</string>
+    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Egoera-barra zabaltzeko edo tolesteko aukera ematen die aplikazioei."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"instalatu lasterbideak"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Erabiltzaileak ezer egin gabe hasierako pantailan lasterbideak gehitzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"desinstalatu lasterbideak"</string>
@@ -344,7 +344,7 @@
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"irakurri sare mugikor bidezko igorpen-mezuak"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Gailuak jasotako sare mugikor bidezko igorpenen mezuak irakurtzeko baimena ematen die aplikazioei. Sare mugikor bidezko igorpen-alertak kokapen batzuetan ematen dira larrialdi-egoeren berri emateko. Aplikazio gaiztoek gailuaren errendimendua edo funtzionamendua oztopa dezakete larrialdi-igorpen horietako bat jasotzen denean."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"irakurri harpidetutako jarioak"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Unean sinkronizatutako jarioei buruzko xehetasunak lortzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Unean sinkronizatutako jarioei buruzko xehetasunak lortzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"bidali eta ikusi SMS mezuak"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS mezuak bidaltzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko mezuak bidalita gastuak eragiteko."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"irakurri testu-mezuak (SMSak edo MMSak)"</string>
@@ -376,13 +376,13 @@
     <string name="permlab_foregroundService" msgid="3310786367649133115">"Exekutatu zerbitzuak aurreko planoan"</string>
     <string name="permdesc_foregroundService" msgid="6471634326171344622">"Aurreko planoko zerbitzuak erabiltzea baimentzen dio aplikazioari."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"neurtu aplikazioen biltegiratzeko tokia"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Bere kodea, datuak eta cache-tamainak eskuratzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Bere kodea, datuak eta cache-tamainak eskuratzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"aldatu sistemaren ezarpenak"</string>
-    <string name="permdesc_writeSettings" msgid="7775723441558907181">"Sistemaren ezarpenen datuak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek sistemaren konfigurazioa hondatzeko erabil dezakete."</string>
+    <string name="permdesc_writeSettings" msgid="7775723441558907181">"Sistemaren ezarpenen datuak aldatzeko baimena ematen die aplikazioei. Aplikazio gaiztoek sistemaren konfigurazioa hondatzeko erabil dezakete."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"exekutatu abiaraztean"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Sistema berrabiarazi bezain laster abiaraztea baimentzen die aplikazioei. Horrela, agian denbora gehiago beharko du tabletak abiarazteko, eta tabletaren funtzionamendu orokorra mantso daiteke, baimen hori duten aplikazioak beti abian egongo baitira."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Sistema berrabiarazi bezain laster abiaraztea baimentzen die aplikazioei. Horrela, telebistak denbora gehiago behar izan lezake abiarazteko, eta telebistaren funtzionamendu orokorra motel liteke, baimen hori duten aplikazioak beti abian egongo baitira."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Sistema berrabiarazi bezain laster abiaraztea baimentzen die aplikazioei. Horrela, agian denbora gehiago beharko du telefonoak abiarazteko, eta telefonoaren funtzionamendu orokorra mantso daiteke, baimen hori duten aplikazioak beti abian egongo baitira."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Sistema berrabiarazi bezain laster abiarazteko baimena ematen die aplikazioei. Horrela, agian denbora gehiago beharko du tabletak abiarazteko, eta tabletaren funtzionamendu orokorra mantso daiteke, baimen hori duten aplikazioak beti abian egongo baitira."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Sistema berrabiarazi bezain laster abiarazteko baimena ematen die aplikazioei. Horrela, telebistak denbora gehiago behar izan lezake abiarazteko, eta telebistaren funtzionamendu orokorra motel liteke, baimen hori duten aplikazioak beti abian egongo baitira."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Sistema berrabiarazi bezain laster abiarazteko baimena ematen die aplikazioei. Horrela, agian denbora gehiago beharko du telefonoak abiarazteko, eta telefonoaren funtzionamendu orokorra mantso daiteke, baimen hori duten aplikazioak beti abian egongo baitira."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"bidali igorpen erakargarria"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Igorpen iraunkorrak emateko baimena ematen die; horiek igorpena amaitu ondoren mantentzen dira. Gehiegi erabiliz gero, tableta motel edo ezegonkor ibiliko da, memoria gehiago erabiliko delako."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Igorpen iraunkorrak egitea baimentzen die aplikazioei. Igorpena eten ondoren ere igortzen jarraitzen duten igorpenak dira igorpen iraunkorrak. Gehiegi erabiliz gero, telebista motel edo ezegonkor ibiliko da, memoria gehiago erabiliko delako."</string>
@@ -393,13 +393,13 @@
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Telefonoan gordetako kontaktuei buruzko datuak irakurtzeko baimena ematen die aplikazioei, besteak beste, pertsona zehatzei zer maiztasunekin deitu diezun, mezu elektronikoak bidali dizkiezun edo haiekin harremanetan beste modutara nola jarri zaren. Baimen horrekin, aplikazioek kontaktuen datuak gorde ditzakete, eta aplikazio gaiztoek haiek parteka ditzakete zuk jakin gabe."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"aldatu kontaktuak"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Tabletan gordetako kontaktuei buruzko datuak aldatzeko baimena ematen die aplikazioei, besteak beste, kontatu zehatzei zer maiztasunekin deitu diezun, mezu elektronikoak bidali dizkiezun edo haiekin harremanetan beste modutara nola jarri zaren. Baimen horrekin, aplikazioek kontaktuen datuak ezaba ditzakete."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Telebistan gordetako kontaktuei buruzko datuak aldatzea baimentzen die aplikazioei, besteak beste, kontaktu zehatzei zer maiztasunekin deitu diezun, mezu elektronikoak bidali dizkiezun ala ez, edo haiekin harremanetan zer beste modutara jarri zaren. Baimen horrekin, kontaktuen datuak ezaba ditzakete aplikazioek."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Telebistan gordetako kontaktuei buruzko datuak aldatzeko baimena ematen die aplikazioei, besteak beste, kontaktu zehatzei zer maiztasunekin deitu diezun, mezu elektronikoak bidali dizkiezun ala ez, edo haiekin harremanetan zer beste modutara jarri zaren. Baimen horrekin, kontaktuen datuak ezaba ditzakete aplikazioek."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Telefonoan gordetako kontaktuei buruzko datuak aldatzeko baimena ematen die aplikazioei, besteak beste, kontatu zehatzei zer maiztasunekin deitu diezun, mezu elektronikoak bidali dizkiezun edo haiekin harremanetan beste modutara nola jarri zaren. Baimen horrekin, aplikazioek kontaktuen datuak ezaba ditzakete."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"irakurri deien erregistroa"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Aplikazioak deien historia irakur dezake."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"idatzi deien erregistroan"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Tabletaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Telebistako deien erregistroa aldatzea baimentzen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Telebistako deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Telefonoaren deien erregistroa aldatzeko baimena ematen die aplikazioei, sarrerako eta irteerako deiei buruzko datuak barne. Aplikazio gaiztoek deien erregistroa ezabatzeko edo aldatzeko erabil dezakete."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"Atzitu gorputzaren sentsoreak (adibidez, bihotz-maiztasunarenak)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Zure egoera fisikoa kontrolatzen duten sentsoreetako datuak (adibidez, bihotz-maiztasuna) atzitzeko baimena ematen die aplikazioei."</string>
@@ -432,7 +432,7 @@
     <string name="permlab_camera" msgid="3616391919559751192">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Aplikazioak edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrolatu dardara"</string>
-    <string name="permdesc_vibrate" msgid="6284989245902300945">"Bibragailua kontrolatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_vibrate" msgid="6284989245902300945">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"atzitu IMS dei-zerbitzua"</string>
@@ -458,32 +458,32 @@
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Telebistaren infragorri-igorlea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Telefonoaren infragorri-igorlea erabiltzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ezarri horma-papera"</string>
-    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Sistemaren horma-papera aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Sistemaren horma-papera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"doitu horma-paperaren tamaina"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Sistemaren horma-paperaren tamainaren doitzeak ezartzea baimentzen die aplikazioei."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ezarri ordu-zona"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Tabletaren ordu-zona aldatzea baimentzen die aplikazioei."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Telebistaren ordu-zona aldatzea baimentzen die aplikazioei."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Telefonoaren ordu-zona aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Tabletaren ordu-zona aldatzeko baimena ematen die aplikazioei."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Telebistaren ordu-zona aldatzeko baimena ematen die aplikazioei."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Telefonoaren ordu-zona aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"bilatu gailuko kontuak"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Telebistak ezagutzen dituen kontuen zerrenda lortzea baimentzen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak sar daitezke."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Telebistak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak sar daitezke."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ikusi sareko konexioak"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Sareko konexioei buruzko informazioa ikusteko baimena ematen die aplikazioei; adibidez, zer sare dauden eta zeintzuk dauden konektatuta."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"izan sarerako sarbide osoa"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Sare-socketak sortzeko eta sare-protokolo pertsonalizatuak erabiltzeko baimena ematen die aplikazioei. Arakatzaileak eta beste aplikazio batzuek Internetera konektatzeko moduak eskaintzen dituzte, beraz, baimen hori ez da beharrezkoa datuak Internetera bidaltzeko."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"aldatu sarearen konektagarritasuna"</string>
-    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Sarearen konexioaren egoera aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Sarearen konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"aldatu telefono bidezko konektagarritasuna"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Partekatutako Interneterako konexioaren egoera aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Partekatutako Interneterako konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"ikusi Wi-Fi konexioak"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, Wi-Fi konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"konektatu Wi-Fira edo deskonektatu bertatik"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"onartu Wi-Fi Multicast harrera"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Wi-Fi sareko gailu guztiei bidalitako paketeak jasotzea baimentzen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Wi-Fi sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telefonoa soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"atzitu Bluetooth ezarpenak"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tokiko Bluetooth tableta konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
@@ -512,11 +512,11 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"erabili erreferentzia-gako digitalen hardwarea"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autentifikatzeko erreferentzia-gako digitalen hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"musika-bilduma aldatu"</string>
-    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Musika-bilduma aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_audioWrite" msgid="8888544708166230494">"Musika-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"bideo-bilduma aldatu"</string>
-    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Bideo-bilduma aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_videoWrite" msgid="5448565757490640841">"Bideo-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"argazki-bilduma aldatu"</string>
-    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Argazki-bilduma aldatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Argazki-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"multimedia-edukien bildumako kokapena irakurri"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Multimedia-edukien bildumako kokapena irakurtzeko baimena ematen die aplikazioei."</string>
     <string name="biometric_dialog_default_title" msgid="881952973720613213">"Egiaztatu zeu zarela"</string>
@@ -571,11 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Erregistratu berriro aurpegia."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ez dugu ezagutzen aurpegi hori. Saiatu berriro."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Jarrera berdintsuegia da. Alda ezazu."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Begiratu zuzenago pantailari."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Begiratu zuzenago pantailari."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Jarri burua zuzen."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Kendu buruaren eta telefonoaren arteko oztopoak."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Garbitu kamera"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Biratu burua pixka bat gutxiago."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Biratu burua pixka bat gutxiago."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ezin da egiaztatu aurpegia. Hardwarea ez dago erabilgarri."</string>
@@ -603,7 +606,7 @@
     <string name="permlab_sdcardWrite" msgid="9220937740184960897">"Aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
     <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"Biltegiratze partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"egin/jaso SIP deiak"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP deiak egitea eta jasotzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP deiak egitea eta jasotzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"erregistratu telekomunikabideekiko SIM konexio berriak"</string>
     <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Telekomunikabideekiko SIM konexio berriak erregistratzea baimentzen die aplikazioei."</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"erregistratu telekomunikabideekiko konexio berriak"</string>
@@ -611,7 +614,7 @@
     <string name="permlab_connection_manager" msgid="1116193254522105375">"kudeatu telekomunikabideekiko konexioak"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Telekomunikabideekiko konexioak kudeatzea baimentzen die aplikazioei."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"erabili pantaila deiak abian direnean"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"elkarreragin telefono-zerbitzuekin"</string>
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Deiak egiteko eta jasotzeko telefonia-zerbitzuekin elkarreragitea baimentzen die aplikazioei."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"eskaini erabiltzaileentzako aukerak deiak abian direnean"</string>
@@ -635,11 +638,11 @@
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"hauteman sarearen baldintzei buruzko behaketak"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Sareko baldintzak hautemateko aukera ematen die aplikazioei. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"Aldatu idazteko gailuaren kalibrazioa"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ukipen-pantailaren kalibrazio-parametroak aldatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Ukipen-pantailaren kalibrazio-parametroak aldatzeko baimena ematen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"atzitu DRM ziurtagiriak"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM ziurtagiriak hornitzea eta erabiltzeko baimena ematen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Jaso Android Beam transferentzien egoera"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Uneko Android Beam transferentziei buruzko informazioa jasotzea baimentzen die aplikazioei"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Uneko Android Beam transferentziei buruzko informazioa jasotzeko baimena ematen die aplikazioei"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"kendu DRM ziurtagiriak"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM ziurtagiriak kentzea baimentzen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"lotu operadorearen mezularitza-zerbitzuari"</string>
@@ -933,14 +936,14 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Arakatzailearen bidez bisitatutako URL guztien historia eta arakatzailearen  laster-marka guztiak irakurtzeko baimena ematen die aplikazioei. Oharra: agian baimen hori ez dute aplikatuko hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna duten bestelako aplikazioek."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"idatzi sareko laster-marka eta historian"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Arakatzailearen historia edo tabletan gordetako laster-markak aldatzeko baimena ematen die aplikazioei. Horrela, aplikazioak agian arakatzaile-datuak ezabatu edo aldatu ahal izango ditu. Oharra: baimen hori hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna eskaintzen duten bestelako aplikazioek aplika dezakete."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Arakatzailearen historia edo telebistan gordetako laster-markak aldatzea baimentzen die aplikazioei. Horrela, aplikazioek arakatzaileko datuak ezabatu edo aldatu ahal izango dituzte agian. Oharra: hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna duten bestelako aplikazioek erabil dezakete baimen hori."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Arakatzailearen historia edo telebistan gordetako laster-markak aldatzeko baimena ematen die aplikazioei. Horrela, aplikazioek arakatzaileko datuak ezabatu edo aldatu ahal izango dituzte agian. Oharra: hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna duten bestelako aplikazioek erabil dezakete baimen hori."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Arakatzailearen historia edo telefonoan gordetako laster-markak aldatzeko baimena ematen die aplikazioei. Horrela, aplikazioak agian arakatzaile-datuak ezabatu edo aldatu ahal izango ditu. Oharra: baimen hori hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna eskaintzen duten bestelako aplikazioek aplika dezakete."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ezarri alarmak"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Instalatutako alarma batean alarmak ezartzea baimentzen die aplikazioei. Alarma-aplikazio batzuek agian ez dute eginbide hori inplementatuko."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"gehitu erantzungailua"</string>
-    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Erantzungailuko sarrera-ontzian mezuak gehitzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Erantzungailuko sarrera-ontzian mezuak gehitzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"aldatu arakatzailearen geokokapenaren baimenak"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Arakatzailearen geokokapenaren baimenak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek hori erabil dezakete kokapenari buruzko informazioa haiek hautatutako webguneetara bidaltzeko."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Arakatzailearen geokokapenaren baimenak aldatzeko baimena ematen die aplikazioei. Aplikazio gaiztoek hori erabil dezakete kokapenari buruzko informazioa haiek hautatutako webguneetara bidaltzeko."</string>
     <string name="save_password_message" msgid="767344687139195790">"Arakatzaileak pasahitza gogoratzea nahi duzu?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ez une honetan"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Gogoratu"</string>
@@ -1353,7 +1356,7 @@
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Sakatu USB arazketa desaktibatzeko"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Hautatu USB arazketa desgaitzeko."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Proba-materialeko modua gaitu da"</string>
-    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko ezarpenak."</string>
+    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko datuak."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Likidoa edo zikinkeriak daude USB atakan"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ataka automatikoki desgaitu da. Informazio gehiago lortzeko, sakatu hau."</string>
     <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Segurtasunez erabil daiteke USB ataka"</string>
@@ -2028,4 +2031,5 @@
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fitxategi</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Zuzenean partekatzeko aukera ez dago erabilgarri"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Aplikazioen zerrenda"</string>
 </resources>

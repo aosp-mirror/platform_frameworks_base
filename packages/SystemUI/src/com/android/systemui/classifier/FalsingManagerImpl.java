@@ -22,6 +22,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.biometrics.BiometricSourceType;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,6 +34,8 @@ import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
@@ -80,6 +83,7 @@ public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager 
     private boolean mBouncerOffOnDown = false;
     private boolean mSessionActive = false;
     private boolean mIsTouchScreen = true;
+    private boolean mJustUnlockedWithFace = false;
     private int mState = StatusBarState.SHADE;
     private boolean mScreenOn;
     private boolean mShowingAod;
@@ -120,6 +124,17 @@ public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager 
             updateConfiguration();
         }
     };
+    private final KeyguardUpdateMonitorCallback mKeyguardUpdateCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onBiometricAuthenticated(int userId,
+                        BiometricSourceType biometricSourceType) {
+                    if (userId == KeyguardUpdateMonitor.getCurrentUser()
+                            && biometricSourceType == BiometricSourceType.FACE) {
+                        mJustUnlockedWithFace = true;
+                    }
+                }
+            };
 
     FalsingManagerImpl(Context context) {
         mContext = context;
@@ -138,6 +153,7 @@ public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager 
 
         updateConfiguration();
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
+        KeyguardUpdateMonitor.getInstance(context).registerCallback(mKeyguardUpdateCallback);
     }
 
     private void updateConfiguration() {
@@ -199,6 +215,7 @@ public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager 
         }
         mBouncerOn = false;
         mSessionActive = true;
+        mJustUnlockedWithFace = false;
         mIsFalseTouchCalls = 0;
 
         if (mHumanInteractionClassifier.isEnabled()) {
@@ -283,6 +300,11 @@ public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager 
         if (!mIsTouchScreen) {
             // Unlocking with input devices besides the touchscreen should already be sufficiently
             // anti-falsed.
+            return false;
+        }
+        if (mJustUnlockedWithFace) {
+            // Unlocking with face is a strong user presence signal, we can assume the user
+            // is present until the next session starts.
             return false;
         }
         mIsFalseTouchCalls++;

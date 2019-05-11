@@ -24,7 +24,7 @@ Usage: run_app_with_prefetch --package <name> [OPTIONS]...
     -v, --verbose               enable extra verbose printing
     -i, --input <file>          trace file protobuf (default 'TraceFile.pb')
     -r, --readahead <mode>      cold, warm, fadvise, mlock (default 'warm')
-    -w, --when <when>           aot or jit (default 'aot')
+    -w, --when <when>           aot or jit (default 'jit')
     -c, --count <count>         how many times to run (default 1)
     -s, --sleep <sec>           how long to sleep after readahead
     -t, --timeout <sec>         how many seconds to timeout in between each app run (default 10)
@@ -33,7 +33,7 @@ EOF
 }
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$DIR/lib/common"
+source "$DIR/../iorap/common"
 
 needs_trace_file="n"
 input_file=""
@@ -43,7 +43,7 @@ count=2
 sleep_time=2
 timeout=10
 output="" # stdout by default
-when="aot"
+when="jit"
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -176,16 +176,19 @@ if [[ $? -ne 0 ]]; then
 fi
 verbose_print "Package was in path '$package_path'"
 
-keep_application_trace_file=n
 application_trace_file_path="$package_path/TraceFile.pb"
 trace_file_directory="$package_path"
 if [[ $needs_trace_file == y ]]; then
   # system server always passes down the package path in a hardcoded spot.
   if [[ $when == "jit" ]]; then
-    verbose_print adb push "$input_file" "$application_trace_file_path"
-    adb push "$input_file" "$application_trace_file_path"
+    if ! iorapd_compiler_install_trace_file "$package" "$activity" "$input_file"; then
+      echo "Error: Failed to install compiled TraceFile.pb for '$package/$activity'" >&2
+      exit 1
+    fi
     keep_application_trace_file="y"
   else
+    echo "TODO: --readahead=aot is non-functional and needs to be fixed." >&2
+    exit 1
     # otherwise use a temporary directory to get normal non-jit behavior.
     trace_file_directory="/data/local/tmp/prefetch/$package"
     adb shell mkdir -p "$trace_file_directory"
@@ -198,7 +201,7 @@ fi
 # otherwise system server activity hints will kick in
 # and the new just-in-time app pre-warmup will happen.
 if [[ $keep_application_trace_file == "n" ]]; then
-  adb shell "[[ -f '$application_trace_file_path' ]] && rm '$application_trace_file_path'"
+  iorapd_compiler_purge_trace_file "$package" "$activity"
 fi
 
 # Perform AOT readahead/pinning/etc when an application is about to be launched.
@@ -242,12 +245,20 @@ perform_aot() {
   fi
 }
 
-perform_aot_cleanup() {
+# Perform cleanup at the end of each loop iteration.
+perform_post_launch_cleanup() {
   local the_when="$1" # user: aot, jit
   local the_mode="$2" # warm, cold, fadvise, mlock, etc.
+  local logcat_timestamp="$3"  # timestamp from before am start.
 
   if [[ $the_when != "aot" ]]; then
-    # TODO: just in time implementation.. should probably use system server.
+    if [[ $the_mode != 'warm' && $the_mode != 'cold' ]]; then
+      # Validate that readahead completes.
+      # If this fails for some reason, then this will also discard the timing of the run.
+      iorapd_readahead_wait_until_finished "$package" "$activity" "$logcat_timestamp" "$timeout"
+      return $?
+    fi
+    # Don't need to do anything for warm or cold.
     return 0
   fi
 
@@ -321,6 +332,8 @@ for ((i=0;i<count;++i)) do
 
   verbose_print "Running with timeout $timeout"
 
+  pre_launch_timestamp="$(logcat_save_timestamp)"
+
   # TODO: multiple metrics output.
   total_time="$(timeout $timeout $DIR/launch_application "$package" "$activity")"
 
@@ -330,7 +343,13 @@ for ((i=0;i<count;++i)) do
     continue
   fi
 
-  perform_aot_cleanup "$when" "$mode"
+  perform_post_launch_cleanup "$when" "$mode" "$pre_launch_timestamp"
+
+  if [[ $? -ne 0 ]]; then
+    echo "WARNING: Skip bad cleanup, try iteration again." >&2
+    ((i=i-1))
+    continue
+  fi
 
   echo "Iteration $i. Total time was: $total_time"
 
@@ -354,9 +373,9 @@ if [[ x$output != x ]]; then
   echo " Saved results to '$output'"
 fi
 
-# Temporary hack around multiple activities being launched with different package paths (for same app):
-# Clean up all left-over TraceFile.pb
-adb shell 'for i in $(find /data/app -name TraceFile.pb); do rm \$i; done'
+if [[ $needs_trace_file == y ]] ; then
+  iorapd_compiler_purge_trace_file "$package" "$activity"
+fi
 
 # Kill the process to ensure AM isn't keeping it around.
 remote_pkill "$package"

@@ -232,7 +232,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Закончить сеанс"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Сообщение об ошибке"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивный отчет"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Рекомендуем этот вариант в большинстве случаев, чтобы отслеживать статус отчета, указывать дополнительные данные о проблеме и делать скриншоты. Некоторые разделы могут быть исключены, чтобы сократить время подготовки отчета."</string>
@@ -577,11 +577,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторите попытку."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Не удалось распознать лицо. Повторите попытку."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Слишком похожее выражение лица. Измените позу."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="1852495480382773759">"Смотрите прямо в экран."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="1290820400317982049">"Смотрите прямо в экран."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Выровняйте голову по вертикали."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Лицо не должно быть ничем закрыто."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Протрите камеру."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Держите голову ровнее."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Держите голову ровнее."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
+    <skip />
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Не удалось распознать лицо. Сканер недоступен."</string>
@@ -2099,4 +2102,5 @@
       <item quantity="other">\"<xliff:g id="FILE_NAME_2">%s</xliff:g>\" и ещё <xliff:g id="COUNT_3">%d</xliff:g> файла</item>
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Функция Direct Share недоступна."</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Список приложений"</string>
 </resources>

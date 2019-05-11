@@ -939,7 +939,6 @@ public class PackageManagerService extends IPackageManager.Stub
     ComponentName mCustomResolverComponentName;
 
     boolean mResolverReplaced = false;
-    boolean mOkToReplacePersistentPackages = false;
 
     private final @Nullable ComponentName mIntentFilterVerifierComponent;
     private final @Nullable IntentFilterVerifier<ActivityIntentInfo> mIntentFilterVerifier;
@@ -1007,6 +1006,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mPackages")
     private PackageManagerInternal.DefaultBrowserProvider mDefaultBrowserProvider;
+
+    @GuardedBy("mPackages")
+    private PackageManagerInternal.DefaultDialerProvider mDefaultDialerProvider;
 
     @GuardedBy("mPackages")
     private PackageManagerInternal.DefaultHomeProvider mDefaultHomeProvider;
@@ -1744,6 +1746,15 @@ public class PackageManagerService extends IPackageManager.Stub
                         Trace.asyncTraceEnd(
                                 TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);
                         params.handleRollbackEnabled();
+                        Intent rollbackTimeoutIntent = new Intent(
+                                Intent.ACTION_CANCEL_ENABLE_ROLLBACK);
+                        rollbackTimeoutIntent.putExtra(
+                                PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN,
+                                enableRollbackToken);
+                        rollbackTimeoutIntent.addFlags(
+                                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                        mContext.sendBroadcastAsUser(rollbackTimeoutIntent, UserHandle.SYSTEM,
+                                android.Manifest.permission.PACKAGE_ROLLBACK_AGENT);
                     }
                     break;
                 }
@@ -2375,8 +2386,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
-        mApexManager = LocalServices.getService(ApexManager.class);
-
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "create package manager");
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
@@ -2473,6 +2482,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
+        mApexManager = new ApexManager(context);
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
@@ -10343,31 +10353,6 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (InstallerException e) {
                 Slog.w(TAG, String.valueOf(e));
             }
-            // If this package doesn't have a sharedUserId or there are no other packages
-            // present with same sharedUserId, then delete the sandbox data too.
-            try {
-                final SharedUserSetting sharedUserSetting = mSettings.getSharedUserLPw(
-                        pkg.mSharedUserId, 0 /* pkgFlags */,
-                        0 /* pkgPrivateFlags */, false /* create */);
-                boolean deleteSandboxData = true;
-                if (sharedUserSetting != null && sharedUserSetting.packages != null) {
-                    for (int i = sharedUserSetting.packages.size() - 1; i >= 0; --i) {
-                        final PackageSetting packageSetting = sharedUserSetting.packages.valueAt(i);
-                        if (!packageSetting.name.equals(pkg.packageName)
-                                && packageSetting.readUserState(realUserId).isAvailable(
-                                        MATCH_UNINSTALLED_PACKAGES)) {
-                            deleteSandboxData = false;
-                            break;
-                        }
-                    }
-                }
-                if (deleteSandboxData && getStorageManagerInternal() != null) {
-                    getStorageManagerInternal().destroySandboxForApp(pkg.packageName,
-                            pkg.mSharedUserId, realUserId);
-                }
-            } catch (PackageManagerException e) {
-                // Should not happen
-            }
             mDexManager.notifyPackageDataDestroyed(pkg.packageName, userId);
         }
     }
@@ -14008,10 +13993,17 @@ public class PackageManagerService extends IPackageManager.Stub
         return resolveInfo == null ? null : resolveInfo.activityInfo.packageName;
     }
 
-    private String getDefaultDialerPackageName(int userId) {
+    @Nullable
+    private String getDefaultDialerPackageName(@UserIdInt int userId) {
+        PackageManagerInternal.DefaultDialerProvider provider;
         synchronized (mPackages) {
-            return mSettings.getDefaultDialerPackageNameLPw(userId);
+            provider = mDefaultDialerProvider;
         }
+        if (provider == null) {
+            Slog.e(TAG, "mDefaultDialerProvider is null");
+            return null;
+        }
+        return provider.getDefaultDialer(userId);
     }
 
     @Override
@@ -17397,7 +17389,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     // Prevent persistent apps from being updated
                     if (((oldPackage.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0)
-                            && !mOkToReplacePersistentPackages) {
+                            && ((installFlags & PackageManager.INSTALL_STAGED) == 0)) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_INVALID_APK,
                                 "Package " + oldPackage.packageName + " is a persistent app. "
                                         + "Persistent apps are not updateable.");
@@ -21372,6 +21364,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
                 return null;
             }
+            // InstallerPackageName for Apex is not stored in PackageManager
+            if (ps == null && mApexManager.isApexPackage(packageName)) {
+                return null;
+            }
             return mSettings.getInstallerPackageNameLPr(packageName);
         }
     }
@@ -21536,6 +21532,7 @@ public class PackageManagerService extends IPackageManager.Stub
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
+        mApexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
         getStorageManagerInternal().addExternalStoragePolicy(
@@ -21578,12 +21575,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mModuleInfoProvider.systemReady();
 
-        mOkToReplacePersistentPackages = true;
         // Installer service might attempt to install some packages that have been staged for
         // installation on reboot. Make sure this is the last component to be call since the
         // installation might require other components to be ready.
         mInstallerService.restoreAndApplyStagedSessionIfNeeded();
-        mOkToReplacePersistentPackages = false;
     }
 
     public void waitForAppDataPrepared() {
@@ -22938,10 +22933,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         prepareAppDataContentsLeafLIF(pkg, userId, flags);
-        if (getStorageManagerInternal() != null) {
-            getStorageManagerInternal().prepareSandboxForApp(
-                    pkg.packageName, appId, pkg.mSharedUserId, userId);
-        }
     }
 
     private void prepareAppDataContentsLIF(PackageParser.Package pkg, int userId, int flags) {
@@ -24245,13 +24236,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void onDefaultDialerAppChanged(String packageName, int userId) {
-            synchronized (mPackages) {
-                mSettings.setDefaultDialerPackageNameLPw(packageName, userId);
-            }
-        }
-
-        @Override
         public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
             mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
                     packageName, userId);
@@ -24793,6 +24777,13 @@ public class PackageManagerService extends IPackageManager.Stub
         public void setDefaultBrowserProvider(@NonNull DefaultBrowserProvider provider) {
             synchronized (mPackages) {
                 mDefaultBrowserProvider = provider;
+            }
+        }
+
+        @Override
+        public void setDefaultDialerProvider(@NonNull DefaultDialerProvider provider) {
+            synchronized (mPackages) {
+                mDefaultDialerProvider = provider;
             }
         }
 

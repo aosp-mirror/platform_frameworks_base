@@ -174,7 +174,6 @@ public final class NavigationBarTransitions extends BarTransitions implements
         if (mAutoDim) {
             applyLightsOut(false, true);
         }
-        mView.onDarkIntensityChange(darkIntensity);
     }
 
     @Override

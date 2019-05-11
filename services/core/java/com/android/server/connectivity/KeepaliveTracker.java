@@ -17,7 +17,6 @@
 package com.android.server.connectivity;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.net.NattSocketKeepalive.NATT_PORT;
 import static android.net.NetworkAgent.CMD_ADD_KEEPALIVE_PACKET_FILTER;
 import static android.net.NetworkAgent.CMD_REMOVE_KEEPALIVE_PACKET_FILTER;
@@ -30,6 +29,7 @@ import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
+import static android.net.SocketKeepalive.ERROR_UNSUPPORTED;
 import static android.net.SocketKeepalive.MAX_INTERVAL_SEC;
 import static android.net.SocketKeepalive.MIN_INTERVAL_SEC;
 import static android.net.SocketKeepalive.NO_KEEPALIVE;
@@ -38,7 +38,6 @@ import static android.net.SocketKeepalive.SUCCESS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.net.IIpSecService;
 import android.net.ISocketKeepaliveCallback;
 import android.net.KeepalivePacketData;
 import android.net.NattKeepalivePacketData;
@@ -48,18 +47,19 @@ import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
 import android.net.util.IpUtils;
+import android.net.util.KeepaliveUtils;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.R;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -68,6 +68,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -92,14 +93,30 @@ public class KeepaliveTracker {
     private final TcpKeepaliveController mTcpController;
     @NonNull
     private final Context mContext;
+
+    // Supported keepalive count for each transport type, can be configured through
+    // config_networkSupportedKeepaliveCount. For better error handling, use
+    // {@link getSupportedKeepalivesForNetworkCapabilities} instead of direct access.
     @NonNull
-    private final IIpSecService mIpSec;
+    private final int[] mSupportedKeepalives;
+
+    // Reserved privileged keepalive slots per transport. Caller's permission will be enforced if
+    // the number of remaining keepalive slots is less than or equal to the threshold.
+    private final int mReservedPrivilegedSlots;
+
+    // Allowed unprivileged keepalive slots per uid. Caller's permission will be enforced if
+    // the number of remaining keepalive slots is less than or equal to the threshold.
+    private final int mAllowedUnprivilegedSlotsForUid;
 
     public KeepaliveTracker(Context context, Handler handler) {
         mConnectivityServiceHandler = handler;
         mTcpController = new TcpKeepaliveController(handler);
         mContext = context;
-        mIpSec = IIpSecService.Stub.asInterface(ServiceManager.getService(Context.IPSEC_SERVICE));
+        mSupportedKeepalives = KeepaliveUtils.getSupportedKeepalives(mContext);
+        mReservedPrivilegedSlots = mContext.getResources().getInteger(
+                R.integer.config_reservedPrivilegedKeepaliveSlots);
+        mAllowedUnprivilegedSlotsForUid = mContext.getResources().getInteger(
+                R.integer.config_allowedUnprivilegedKeepalivePerUid);
     }
 
     /**
@@ -118,17 +135,8 @@ public class KeepaliveTracker {
         private final int mType;
         private final FileDescriptor mFd;
 
-        private final int mEncapSocketResourceId;
-        // Stores the NATT keepalive resource ID returned by IpSecService.
-        private int mNattIpsecResourceId = INVALID_RESOURCE_ID;
-
         public static final int TYPE_NATT = 1;
         public static final int TYPE_TCP = 2;
-
-        // Max allowed unprivileged keepalive slots per network. Caller's permission will be
-        // enforced if number of existing keepalives reach this limit.
-        // TODO: consider making this limit configurable via resources.
-        private static final int MAX_UNPRIVILEGED_SLOTS = 3;
 
         // Keepalive slot. A small integer that identifies this keepalive among the ones handled
         // by this network.
@@ -150,8 +158,7 @@ public class KeepaliveTracker {
                 @NonNull KeepalivePacketData packet,
                 int interval,
                 int type,
-                @Nullable FileDescriptor fd,
-                int encapSocketResourceId) throws InvalidSocketException {
+                @Nullable FileDescriptor fd) throws InvalidSocketException {
             mCallback = callback;
             mPid = Binder.getCallingPid();
             mUid = Binder.getCallingUid();
@@ -162,9 +169,6 @@ public class KeepaliveTracker {
             mInterval = interval;
             mType = type;
 
-            mEncapSocketResourceId = encapSocketResourceId;
-            mNattIpsecResourceId = INVALID_RESOURCE_ID;
-
             // For SocketKeepalive, a dup of fd is kept in mFd so the source port from which the
             // keepalives are sent cannot be reused by another app even if the fd gets closed by
             // the user. A null is acceptable here for backward compatibility of PacketKeepalive
@@ -172,7 +176,7 @@ public class KeepaliveTracker {
             try {
                 if (fd != null) {
                     mFd = Os.dup(fd);
-                } else {
+                }  else {
                     Log.d(TAG, toString() + " calls with null fd");
                     if (!mPrivileged) {
                         throw new SecurityException(
@@ -220,8 +224,6 @@ public class KeepaliveTracker {
                     + IpUtils.addressAndPortToString(mPacket.dstAddress, mPacket.dstPort)
                     + " interval=" + mInterval
                     + " uid=" + mUid + " pid=" + mPid + " privileged=" + mPrivileged
-                    + " nattIpsecRId=" + mNattIpsecResourceId
-                    + " encapSocketRId=" + mEncapSocketResourceId
                     + " packetData=" + HexDump.toHexString(mPacket.getPacket())
                     + " ]";
         }
@@ -263,69 +265,54 @@ public class KeepaliveTracker {
 
         private int checkPermission() {
             final HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(mNai);
-            int unprivilegedCount = 0;
             if (networkKeepalives == null) {
                 return ERROR_INVALID_NETWORK;
             }
-            for (KeepaliveInfo ki : networkKeepalives.values()) {
-                if (!ki.mPrivileged) {
-                    unprivilegedCount++;
+
+            if (mPrivileged) return SUCCESS;
+
+            final int supported = KeepaliveUtils.getSupportedKeepalivesForNetworkCapabilities(
+                    mSupportedKeepalives, mNai.networkCapabilities);
+
+            int takenUnprivilegedSlots = 0;
+            for (final KeepaliveInfo ki : networkKeepalives.values()) {
+                if (!ki.mPrivileged) ++takenUnprivilegedSlots;
+            }
+            if (takenUnprivilegedSlots > supported - mReservedPrivilegedSlots) {
+                return ERROR_INSUFFICIENT_RESOURCES;
+            }
+
+            // Count unprivileged keepalives for the same uid across networks.
+            int unprivilegedCountSameUid = 0;
+            for (final HashMap<Integer, KeepaliveInfo> kaForNetwork : mKeepalives.values()) {
+                for (final KeepaliveInfo ki : kaForNetwork.values()) {
+                    if (ki.mUid == mUid) {
+                        unprivilegedCountSameUid++;
+                    }
                 }
-                if (unprivilegedCount >= MAX_UNPRIVILEGED_SLOTS) {
-                    return mPrivileged ? SUCCESS : ERROR_INSUFFICIENT_RESOURCES;
-                }
+            }
+            if (unprivilegedCountSameUid > mAllowedUnprivilegedSlotsForUid) {
+                return ERROR_INSUFFICIENT_RESOURCES;
             }
             return SUCCESS;
         }
 
-        private int checkAndLockNattKeepaliveResource() {
-            // Check that apps should be either privileged or fill in an ipsec encapsulated socket
-            // resource id.
-            if (mEncapSocketResourceId == INVALID_RESOURCE_ID) {
-                if (mPrivileged) {
-                    return SUCCESS;
-                } else {
-                    // Invalid access.
-                    return ERROR_INVALID_SOCKET;
-                }
-            }
-
-            // Check if the ipsec encapsulated socket resource id is registered.
+        private int checkLimit() {
             final HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(mNai);
             if (networkKeepalives == null) {
                 return ERROR_INVALID_NETWORK;
             }
-            for (KeepaliveInfo ki : networkKeepalives.values()) {
-                if (ki.mEncapSocketResourceId == mEncapSocketResourceId
-                        && ki.mNattIpsecResourceId != INVALID_RESOURCE_ID) {
-                    Log.d(TAG, "Registered resource found on keepalive " + mSlot
-                            + " when verify NATT socket with uid=" + mUid + " rid="
-                            + mEncapSocketResourceId);
-                    return ERROR_INVALID_SOCKET;
-                }
-            }
-
-            // Ensure that the socket is created by IpSecService, and lock the resource that is
-            // preserved by IpSecService. If succeed, a resource id is stored to keep tracking
-            // the resource preserved by IpSecServce and must be released when stopping keepalive.
-            try {
-                mNattIpsecResourceId =
-                        mIpSec.lockEncapSocketForNattKeepalive(mEncapSocketResourceId, mUid);
-                return SUCCESS;
-            } catch (IllegalArgumentException e) {
-                // The UID specified does not own the specified UDP encapsulation socket.
-                Log.d(TAG, "Failed to verify NATT socket with uid=" + mUid + " rid="
-                        + mEncapSocketResourceId + ": " + e);
-            } catch (RemoteException e) {
-                Log.wtf(TAG, "Error calling lockEncapSocketForNattKeepalive with "
-                        + this.toString(), e);
-            }
-            return ERROR_INVALID_SOCKET;
+            final int supported = KeepaliveUtils.getSupportedKeepalivesForNetworkCapabilities(
+                    mSupportedKeepalives, mNai.networkCapabilities);
+            if (supported == 0) return ERROR_UNSUPPORTED;
+            if (networkKeepalives.size() > supported) return ERROR_INSUFFICIENT_RESOURCES;
+            return SUCCESS;
         }
 
         private int isValid() {
             synchronized (mNai) {
                 int error = checkInterval();
+                if (error == SUCCESS) error = checkLimit();
                 if (error == SUCCESS) error = checkPermission();
                 if (error == SUCCESS) error = checkNetworkConnected();
                 if (error == SUCCESS) error = checkSourceAddress();
@@ -336,17 +323,12 @@ public class KeepaliveTracker {
         void start(int slot) {
             mSlot = slot;
             int error = isValid();
-
-            // Check and lock ipsec resource needed by natt kepalive. This should be only called
-            // once per keepalive.
-            if (error == SUCCESS && mType == TYPE_NATT) {
-                error = checkAndLockNattKeepaliveResource();
-            }
-
             if (error == SUCCESS) {
                 Log.d(TAG, "Starting keepalive " + mSlot + " on " + mNai.name());
                 switch (mType) {
                     case TYPE_NATT:
+                        mNai.asyncChannel.sendMessage(
+                                CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */, mPacket);
                         mNai.asyncChannel
                                 .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
                         break;
@@ -357,9 +339,8 @@ public class KeepaliveTracker {
                             handleStopKeepalive(mNai, mSlot, ERROR_INVALID_SOCKET);
                             return;
                         }
-                        mNai.asyncChannel
-                                .sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */,
-                                        mPacket);
+                        mNai.asyncChannel.sendMessage(
+                                CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */, mPacket);
                         // TODO: check result from apf and notify of failure as needed.
                         mNai.asyncChannel
                                 .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
@@ -395,14 +376,17 @@ public class KeepaliveTracker {
                     return;
                 default:
                     mStartedState = STOPPING;
-                    if (mType == TYPE_NATT) {
-                        mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                    } else if (mType == TYPE_TCP) {
-                        mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
-                        mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER, mSlot);
-                        mTcpController.stopSocketMonitor(mSlot);
-                    } else {
-                        Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
+                    switch (mType) {
+                        case TYPE_TCP:
+                            mTcpController.stopSocketMonitor(mSlot);
+                            // fall through
+                        case TYPE_NATT:
+                            mNai.asyncChannel.sendMessage(CMD_STOP_SOCKET_KEEPALIVE, mSlot);
+                            mNai.asyncChannel.sendMessage(CMD_REMOVE_KEEPALIVE_PACKET_FILTER,
+                                    mSlot);
+                            break;
+                        default:
+                            Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
                     }
             }
 
@@ -416,20 +400,6 @@ public class KeepaliveTracker {
                     // keepalive offload is running.
                     Log.wtf(TAG, "Error closing fd for keepalive " + mSlot + ": " + e);
                 }
-            }
-
-            // Release the resource held by keepalive in IpSecService.
-            if (mNattIpsecResourceId != INVALID_RESOURCE_ID) {
-                if (mType != TYPE_NATT) {
-                    Log.wtf(TAG, "natt ipsec resource held by incorrect keepalive "
-                            + this.toString());
-                }
-                try {
-                    mIpSec.releaseNattKeepalive(mNattIpsecResourceId, mUid);
-                } catch (RemoteException e) {
-                    Log.wtf(TAG, "error calling releaseNattKeepalive with " + this.toString(), e);
-                }
-                mNattIpsecResourceId = INVALID_RESOURCE_ID;
             }
 
             if (reason == SUCCESS) {
@@ -496,10 +466,11 @@ public class KeepaliveTracker {
         if (networkKeepalives != null) {
             for (KeepaliveInfo ki : networkKeepalives.values()) {
                 ki.stop(reason);
+                // Clean up keepalives since the network agent is disconnected and unable to pass
+                // back asynchronous result of stop().
+                cleanupStoppedKeepalive(nai, ki.mSlot);
             }
         }
-        // Clean up keepalives will be done as a result of calling ki.stop() after the slots are
-        // freed.
     }
 
     public void handleStopKeepalive(NetworkAgentInfo nai, int slot, int reason) {
@@ -620,7 +591,6 @@ public class KeepaliveTracker {
      **/
     public void startNattKeepalive(@Nullable NetworkAgentInfo nai,
             @Nullable FileDescriptor fd,
-            int encapSocketResourceId,
             int intervalSeconds,
             @NonNull ISocketKeepaliveCallback cb,
             @NonNull String srcAddrString,
@@ -652,7 +622,7 @@ public class KeepaliveTracker {
         KeepaliveInfo ki = null;
         try {
             ki = new KeepaliveInfo(cb, nai, packet, intervalSeconds,
-                    KeepaliveInfo.TYPE_NATT, fd, encapSocketResourceId);
+                    KeepaliveInfo.TYPE_NATT, fd);
         } catch (InvalidSocketException | IllegalArgumentException | SecurityException e) {
             Log.e(TAG, "Fail to construct keepalive", e);
             notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
@@ -692,7 +662,7 @@ public class KeepaliveTracker {
         KeepaliveInfo ki = null;
         try {
             ki = new KeepaliveInfo(cb, nai, packet, intervalSeconds,
-                    KeepaliveInfo.TYPE_TCP, fd, INVALID_RESOURCE_ID /* Unused */);
+                    KeepaliveInfo.TYPE_TCP, fd);
         } catch (InvalidSocketException | IllegalArgumentException | SecurityException e) {
             Log.e(TAG, "Fail to construct keepalive e=" + e);
             notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
@@ -711,12 +681,17 @@ public class KeepaliveTracker {
     **/
     public void startNattKeepalive(@Nullable NetworkAgentInfo nai,
             @Nullable FileDescriptor fd,
-            int encapSocketResourceId,
+            int resourceId,
             int intervalSeconds,
             @NonNull ISocketKeepaliveCallback cb,
             @NonNull String srcAddrString,
             @NonNull String dstAddrString,
             int dstPort) {
+        // Ensure that the socket is created by IpSecService.
+        if (!isNattKeepaliveSocketValid(fd, resourceId)) {
+            notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
+        }
+
         // Get src port to adopt old API.
         int srcPort = 0;
         try {
@@ -727,11 +702,29 @@ public class KeepaliveTracker {
         }
 
         // Forward request to old API.
-        startNattKeepalive(nai, fd, encapSocketResourceId, intervalSeconds, cb, srcAddrString,
-                srcPort, dstAddrString, dstPort);
+        startNattKeepalive(nai, fd, intervalSeconds, cb, srcAddrString, srcPort,
+                dstAddrString, dstPort);
+    }
+
+    /**
+     * Verify if the IPsec NAT-T file descriptor and resource Id hold for IPsec keepalive is valid.
+     **/
+    public static boolean isNattKeepaliveSocketValid(@Nullable FileDescriptor fd, int resourceId) {
+        // TODO: 1. confirm whether the fd is called from system api or created by IpSecService.
+        //       2. If the fd is created from the system api, check that it's bounded. And
+        //          call dup to keep the fd open.
+        //       3. If the fd is created from IpSecService, check if the resource ID is valid. And
+        //          hold the resource needed in IpSecService.
+        if (null == fd) {
+            return false;
+        }
+        return true;
     }
 
     public void dump(IndentingPrintWriter pw) {
+        pw.println("Supported Socket keepalives: " + Arrays.toString(mSupportedKeepalives));
+        pw.println("Reserved Privileged keepalives: " + mReservedPrivilegedSlots);
+        pw.println("Allowed Unprivileged keepalives per uid: " + mAllowedUnprivilegedSlotsForUid);
         pw.println("Socket keepalives:");
         pw.increaseIndent();
         for (NetworkAgentInfo nai : mKeepalives.keySet()) {

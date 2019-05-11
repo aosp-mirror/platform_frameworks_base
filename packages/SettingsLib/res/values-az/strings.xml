@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Şəbəkə axtarmaq olmur"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Heç biri"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Yadda saxlanılan"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Bağlantı kəsildi"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiv"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP Konfiqurasiya Uğursuzluğu"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Şəbəkə keyfiyyəti aşağı olduğuna görə qoşulmadı"</string>
@@ -288,7 +289,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorinq"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Məhdud rejim aktivdir"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Əsas axında tətbiqlərin əlavə əməliyyatlar etməsi zamanı ekran işartısı olsun"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Pointer yeri"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Kursor yeri"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Cari əlaqə datasını göstərən ekran örtüyü"</string>
     <string name="show_touches" msgid="2642976305235070316">"Tıklamaları göstərin"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Tıklamalar üçün vizual cavab rəylərini göstərin"</string>

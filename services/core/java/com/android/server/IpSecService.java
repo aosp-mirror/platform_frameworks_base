@@ -28,7 +28,6 @@ import static android.system.OsConstants.SOCK_DGRAM;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -44,7 +43,6 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
 import android.net.Network;
-import android.net.NetworkStack;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
@@ -77,8 +75,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -180,14 +176,6 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     /**
-     * Sentinel value placeholder for a real binder in RefcountedResources.
-     *
-     * <p>Used for cases where there the allocating party is a system service, and thus is expected
-     * to track the resource lifecycles instead of IpSecService.
-     */
-    private static final Binder DUMMY_BINDER = new Binder();
-
-    /**
      * RefcountedResource manages references and dependencies in an exclusively acyclic graph.
      *
      * <p>RefcountedResource implements both explicit and implicit resource management. Creating a
@@ -201,42 +189,24 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @VisibleForTesting
     public class RefcountedResource<T extends IResource> implements IBinder.DeathRecipient {
-
-        @NonNull private final T mResource;
-        @NonNull private final List<RefcountedResource> mChildren;
+        private final T mResource;
+        private final List<RefcountedResource> mChildren;
         int mRefCount = 1; // starts at 1 for user's reference.
+        IBinder mBinder;
 
-        /*
-         * This field can take one of three states:
-         * 1. null, when the object has been released by the user (or the user's binder dies)
-         * 2. DUMMY_BINDER, when the refcounted resource is allocated from another system service
-         *     and the other system service manages the lifecycle of the resource instead of
-         *     IpSecService.
-         * 3. an actual binder, to ensure IpSecService can cleanup after users that forget to close
-         *     their resources.
-         */
-        @Nullable IBinder mBinder;
-
-        RefcountedResource(@NonNull T resource, @NonNull RefcountedResource... children) {
-            this(resource, DUMMY_BINDER, children);
-        }
-
-        RefcountedResource(
-                @NonNull T resource,
-                @NonNull IBinder binder,
-                @NonNull RefcountedResource... children) {
+        RefcountedResource(T resource, IBinder binder, RefcountedResource... children) {
             synchronized (IpSecService.this) {
                 this.mResource = resource;
+                this.mChildren = new ArrayList<>(children.length);
                 this.mBinder = binder;
-                this.mChildren = Collections.unmodifiableList(Arrays.asList(children));
+
                 for (RefcountedResource child : children) {
+                    mChildren.add(child);
                     child.mRefCount++;
                 }
 
                 try {
-                    if (mBinder != DUMMY_BINDER) {
-                        mBinder.linkToDeath(this, 0);
-                    }
+                    mBinder.linkToDeath(this, 0);
                 } catch (RemoteException e) {
                     binderDied();
                     e.rethrowFromSystemServer();
@@ -283,12 +253,11 @@ public class IpSecService extends IIpSecService.Stub {
                 return;
             }
 
-            if (mBinder != DUMMY_BINDER) {
-                mBinder.unlinkToDeath(this, 0);
-            }
+            mBinder.unlinkToDeath(this, 0);
             mBinder = null;
 
             mResource.invalidate();
+
             releaseReference();
         }
 
@@ -413,8 +382,6 @@ public class IpSecService extends IIpSecService.Stub {
                 new RefcountedResourceArray<>(EncapSocketRecord.class.getSimpleName());
         final RefcountedResourceArray<TunnelInterfaceRecord> mTunnelInterfaceRecords =
                 new RefcountedResourceArray<>(TunnelInterfaceRecord.class.getSimpleName());
-        final RefcountedResourceArray<NattKeepaliveRecord> mNattKeepaliveRecords =
-                new RefcountedResourceArray<>(NattKeepaliveRecord.class.getSimpleName());
 
         /**
          * Trackers for quotas for each of the OwnedResource types.
@@ -428,8 +395,6 @@ public class IpSecService extends IIpSecService.Stub {
         final ResourceTracker mSpiQuotaTracker = new ResourceTracker(MAX_NUM_SPIS);
         final ResourceTracker mTransformQuotaTracker = new ResourceTracker(MAX_NUM_TRANSFORMS);
         final ResourceTracker mSocketQuotaTracker = new ResourceTracker(MAX_NUM_ENCAP_SOCKETS);
-        final ResourceTracker mNattKeepaliveQuotaTracker =
-                new ResourceTracker(MAX_NUM_ENCAP_SOCKETS); // Max 1 NATT keepalive per encap socket
         final ResourceTracker mTunnelQuotaTracker = new ResourceTracker(MAX_NUM_TUNNEL_INTERFACES);
 
         void removeSpiRecord(int resourceId) {
@@ -448,10 +413,6 @@ public class IpSecService extends IIpSecService.Stub {
             mEncapSocketRecords.remove(resourceId);
         }
 
-        void removeNattKeepaliveRecord(int resourceId) {
-            mNattKeepaliveRecords.remove(resourceId);
-        }
-
         @Override
         public String toString() {
             return new StringBuilder()
@@ -461,8 +422,6 @@ public class IpSecService extends IIpSecService.Stub {
                     .append(mTransformQuotaTracker)
                     .append(", mSocketQuotaTracker=")
                     .append(mSocketQuotaTracker)
-                    .append(", mNattKeepaliveQuotaTracker=")
-                    .append(mNattKeepaliveQuotaTracker)
                     .append(", mTunnelQuotaTracker=")
                     .append(mTunnelQuotaTracker)
                     .append(", mSpiRecords=")
@@ -471,8 +430,6 @@ public class IpSecService extends IIpSecService.Stub {
                     .append(mTransformRecords)
                     .append(", mEncapSocketRecords=")
                     .append(mEncapSocketRecords)
-                    .append(", mNattKeepaliveRecords=")
-                    .append(mNattKeepaliveRecords)
                     .append(", mTunnelInterfaceRecords=")
                     .append(mTunnelInterfaceRecords)
                     .append("}")
@@ -615,11 +572,6 @@ public class IpSecService extends IIpSecService.Stub {
 
         void remove(int key) {
             mArray.remove(key);
-        }
-
-        @VisibleForTesting
-        int size() {
-            return mArray.size();
         }
 
         @Override
@@ -1033,50 +985,6 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     /**
-     * Tracks a NATT-keepalive instance
-     *
-     * <p>This class ensures that while a NATT-keepalive is active, the UDP encap socket that it is
-     * supporting will stay open until the NATT-keepalive is finished. NATT-keepalive offload
-     * lifecycles will be managed by ConnectivityService, which will validate that the UDP Encap
-     * socket is owned by the requester, and take a reference to it via this NattKeepaliveRecord
-     *
-     * <p>It shall be the responsibility of the caller to ensure that instances of an EncapSocket do
-     * not spawn multiple instances of NATT keepalives (and thereby register duplicate records)
-     */
-    private final class NattKeepaliveRecord extends OwnedResourceRecord {
-        NattKeepaliveRecord(int resourceId) {
-            super(resourceId);
-        }
-
-        @Override
-        @GuardedBy("IpSecService.this")
-        public void freeUnderlyingResources() {
-            Log.d(TAG, "Natt Keepalive released: " + mResourceId);
-
-            getResourceTracker().give();
-        }
-
-        @Override
-        protected ResourceTracker getResourceTracker() {
-            return getUserRecord().mNattKeepaliveQuotaTracker;
-        }
-
-        @Override
-        public void invalidate() {
-            getUserRecord().removeNattKeepaliveRecord(mResourceId);
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder()
-                    .append("{super=")
-                    .append(super.toString())
-                    .append("}")
-                    .toString();
-        }
-    }
-
-    /**
      * Constructs a new IpSecService instance
      *
      * @param context Binder context for this service
@@ -1369,7 +1277,7 @@ public class IpSecService extends IIpSecService.Stub {
     public synchronized IpSecTunnelInterfaceResponse createTunnelInterface(
             String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder,
             String callingPackage) {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         checkNotNull(binder, "Null Binder passed to createTunnelInterface");
         checkNotNull(underlyingNetwork, "No underlying network was specified");
         checkInetAddress(localAddr);
@@ -1455,7 +1363,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void addAddressToTunnelInterface(
             int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1484,7 +1392,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void removeAddressFromTunnelInterface(
             int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1513,7 +1421,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void deleteTunnelInterface(
             int resourceId, String callingPackage) throws RemoteException {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         releaseResource(userRecord.mTunnelInterfaceRecords, resourceId);
     }
@@ -1642,7 +1550,12 @@ public class IpSecService extends IIpSecService.Stub {
 
     private static final String TUNNEL_OP = AppOpsManager.OPSTR_MANAGE_IPSEC_TUNNELS;
 
-    private void enforceTunnelPermissions(String callingPackage) {
+    private void enforceTunnelFeatureAndPermissions(String callingPackage) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_IPSEC_TUNNELS)) {
+            throw new UnsupportedOperationException(
+                    "IPsec Tunnel Mode requires PackageManager.FEATURE_IPSEC_TUNNELS");
+        }
+
         checkNotNull(callingPackage, "Null calling package cannot create IpSec tunnels");
         switch (getAppOpsManager().noteOp(TUNNEL_OP, Binder.getCallingUid(), callingPackage)) {
             case AppOpsManager.MODE_DEFAULT:
@@ -1714,7 +1627,7 @@ public class IpSecService extends IIpSecService.Stub {
             IpSecConfig c, IBinder binder, String callingPackage) throws RemoteException {
         checkNotNull(c);
         if (c.getMode() == IpSecTransform.MODE_TUNNEL) {
-            enforceTunnelPermissions(callingPackage);
+            enforceTunnelFeatureAndPermissions(callingPackage);
         }
         checkIpSecConfig(c);
         checkNotNull(binder, "Null Binder passed to createTransform");
@@ -1822,7 +1735,7 @@ public class IpSecService extends IIpSecService.Stub {
     public synchronized void applyTunnelModeTransform(
             int tunnelResourceId, int direction,
             int transformResourceId, String callingPackage) throws RemoteException {
-        enforceTunnelPermissions(callingPackage);
+        enforceTunnelFeatureAndPermissions(callingPackage);
         checkDirection(direction);
 
         int callingUid = Binder.getCallingUid();
@@ -1909,57 +1822,6 @@ public class IpSecService extends IIpSecService.Stub {
                 throw e;
             }
         }
-    }
-
-    private void verifyNetworkStackCaller() {
-        if (mContext.checkCallingOrSelfPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-                        != PackageManager.PERMISSION_GRANTED
-                && mContext.checkCallingOrSelfPermission(android.Manifest.permission.NETWORK_STACK)
-                        != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "Requires permission NETWORK_STACK or MAINLINE_NETWORK_STACK");
-        }
-    }
-
-    /**
-     * Validates that a provided UID owns the encapSocket, and creates a NATT keepalive record
-     *
-     * <p>For system server use only. Caller must have NETWORK_STACK permission
-     *
-     * @param encapSocketResourceId resource identifier of the encap socket record
-     * @param ownerUid the UID of the caller. Used to verify ownership.
-     * @return
-     */
-    public synchronized int lockEncapSocketForNattKeepalive(
-            int encapSocketResourceId, int ownerUid) {
-        verifyNetworkStackCaller();
-
-        // Verify ownership. Will throw IllegalArgumentException if the UID specified does not
-        // own the specified UDP encapsulation socket
-        UserRecord userRecord = mUserResourceTracker.getUserRecord(ownerUid);
-        RefcountedResource<EncapSocketRecord> refcountedSocketRecord =
-                userRecord.mEncapSocketRecords.getRefcountedResourceOrThrow(encapSocketResourceId);
-
-        // Build NattKeepaliveRecord
-        final int resourceId = mNextResourceId++;
-        userRecord.mNattKeepaliveRecords.put(
-                resourceId,
-                new RefcountedResource<NattKeepaliveRecord>(
-                        new NattKeepaliveRecord(resourceId), refcountedSocketRecord));
-
-        return resourceId;
-    }
-
-    /**
-     * Release a previously allocated NattKeepalive that has been registered with the system server
-     */
-    @Override
-    public synchronized void releaseNattKeepalive(int nattKeepaliveResourceId, int ownerUid)
-            throws RemoteException {
-        verifyNetworkStackCaller();
-
-        UserRecord userRecord = mUserResourceTracker.getUserRecord(ownerUid);
-        releaseResource(userRecord.mNattKeepaliveRecords, nattKeepaliveResourceId);
     }
 
     @Override

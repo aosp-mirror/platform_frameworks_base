@@ -25,7 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.MediaParceledListSlice;
+import android.content.pm.ParceledListSlice;
 import android.media.browse.MediaBrowser;
 import android.media.browse.MediaBrowserUtils;
 import android.media.session.MediaSession;
@@ -684,8 +684,8 @@ public abstract class MediaBrowserService extends Service {
                 List<MediaBrowser.MediaItem> filteredList =
                         (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
                                 ? applyOptions(list, options) : list;
-                final MediaParceledListSlice<MediaBrowser.MediaItem> pls =
-                        filteredList == null ? null : new MediaParceledListSlice<>(filteredList);
+                final ParceledListSlice<MediaBrowser.MediaItem> pls =
+                        filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
                     connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
                 } catch (RemoteException ex) {

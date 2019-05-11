@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"নেটওয়ার্কগুলির জন্য স্ক্যান করা যাবে না"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"কোনো কিছুই নয়"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"সংরক্ষিত"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"কানেকশন নেই"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"অক্ষম হয়েছে"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP কনফিগারেশনের ব্যর্থতা"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"খারাপ নেটওয়ার্কের কারণে কানেক্ট নয়"</string>
@@ -286,7 +287,7 @@
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"হার্ডওয়্যার দ্বারা চালিত রেন্ডারিং"</string>
     <string name="media_category" msgid="4388305075496848353">"মিডিয়া"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"পর্যবেক্ষণে রাখা"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"কঠোর মোড সক্ষম"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"স্ট্রিক্ট মোড চালু আছে"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ অ্যাক্টিভিটির সময় স্ক্রিন ফ্ল্যাশ করে"</string>
     <string name="pointer_location" msgid="6084434787496938001">"পয়েন্টারের লোকেশন"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
@@ -299,11 +300,11 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"হার্ডওয়্যার স্তর আপডেটগুলি প্রদর্শন করুন"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"যখন হার্ডওয়্যার স্তরগুলি আপডেট হয় তখন সেগুলিকে সবুজ রঙে ফ্ল্যাশ করুন"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"ডিবাগ GPU ওভারড্র"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"HW আচ্ছাদনগুলি অক্ষম করুন"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"HW ওভারলে বন্ধ করুন"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"সর্বদা স্ক্রিন কম্পোসিটিংয়ের জন্য GPU ব্যবহার করুন"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"রঙ স্থান নকল করুন"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ট্রেসগুলি সক্ষম করুন"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB অডিও রাউটিং অক্ষম করুন"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB অডিও রাউটিং বন্ধ করুন"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB অডিও যন্ত্রানুষঙ্গে অটোমেটিক রাউটিং অক্ষম করুন"</string>
     <string name="debug_layout" msgid="5981361776594526155">"লেআউট সীমাগুলি দেখান"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>

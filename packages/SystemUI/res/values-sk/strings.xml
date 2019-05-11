@@ -370,7 +370,7 @@
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Nočný režim"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Zapne sa pri západe slnka"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do východu slnka"</string>
-    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Zapne sa o <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Od <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tmavý motív"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
@@ -454,6 +454,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nabudúce nezobrazovať"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Vymazať všetko"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Spravovať"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Upozornenia sú pozastavené režimom bez vyrušení"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Spustiť"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Žiadne upozornenia"</string>
@@ -533,6 +537,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte potiahnutím a pridržaním."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidla Domov."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Ak chcete odopnúť túto obrazovku, pridržte tlačidlá Späť a Prehľad"</string>
@@ -644,15 +649,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Majú sa upozornenia z tejto aplikácie naďalej zobrazovať?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Nenápadné"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritné"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli a stavovom riadku."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli a na uzamknutej obrazovke."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"Vždy potichu. Zobrazuje sa v rozbaľovacom paneli, stavovom riadku a na uzamknutej obrazovke."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"Vydáva zvukový signál a zobrazuje sa v rozbaľovacom paneli, stavovom riadku a na uzamknutej obrazovke."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Pomáha sústrediť sa zobrazovaním upozornení iba v rozbaľovacom paneli. Vždy potichu."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Zobrazuje sa pod prioritnými upozorneniami. Vždy potichu."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Zobrazuje sa pod prioritnými upozorneniami. Vždy potichu."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Zobrazuje sa pod prioritnými upozorneniami. Vždy potichu."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Upúta zvukom a zobrazením ikony v stavovom riadku. Zobrazuje sa na uzamknutej obrazovke."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Tieto upozornenia sa nedajú upraviť."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Túto skupinu upozornení nejde na tomto mieste konfigurovať"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"Približné upozornenie"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Táto aplikácia používa fotoaparát."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Táto aplikácia používa mikrofón."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Táto aplikácia sa zobrazuje cez ďalšie aplikácie na obrazovke."</string>
@@ -890,7 +894,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikácie sú spustené na pozadí"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Klepnutím zobrazíte podrobnosti o batérii a spotrebe dát"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Chcete vypnúť mobilné dáta?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Prostredníctvom operátora <xliff:g id="CARRIER">%s</xliff:g> nebudete mať prístup k dátam ani internetu. Internet bude k dispozícii iba cez Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nebudete mať prístup k dátam ani internetu prostredníctvom operátora <xliff:g id="CARRIER">%s</xliff:g>. Internet bude k dispozícii iba cez Wi‑Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"váš operátor"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Nastavenia nemôžu overiť vašu odpoveď, pretože určitá aplikácia blokuje žiadosť o povolenie."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Povoliť aplikácii <xliff:g id="APP_0">%1$s</xliff:g> zobrazovať rezy z aplikácie <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
@@ -921,6 +925,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Otvoriť <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Nastavenia bublín aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Povoliť bubliny z aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Spravovať"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Zamietnuť"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Povoliť"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Spýtať sa neskôr"</string>

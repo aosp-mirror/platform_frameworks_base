@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nem lehet beolvasni a hálózatokat"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nincs"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Mentve"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Leválasztva"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Letiltva"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurációs hiba"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nem kapcsolódik a hálózat rossz minősége miatt"</string>
@@ -203,7 +204,7 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB hibakeresés"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Hibakeresés mód USB csatlakoztatásakor"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB-s hibakeresésre vonatkozó engedélyek visszavonása"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Hibajelentési gomb"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Hibabejelentési gomb"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Gomb megjelenítése a bekapcsolási menüben hibajelentés készítéséhez"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Nem kapcsolódik ki"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"A képernyő soha nem kapcsol ki töltés során"</string>

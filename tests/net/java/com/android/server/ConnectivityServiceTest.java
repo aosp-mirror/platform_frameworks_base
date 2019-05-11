@@ -28,6 +28,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
@@ -489,7 +490,7 @@ public class ConnectivityServiceTest {
 
         MockNetworkAgent(int transport, LinkProperties linkProperties) {
             final int type = transportToLegacyType(transport);
-            final String typeName = ConnectivityManager.getNetworkTypeName(transport);
+            final String typeName = ConnectivityManager.getNetworkTypeName(type);
             mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
             mNetworkCapabilities = new NetworkCapabilities();
             mNetworkCapabilities.addTransportType(transport);
@@ -617,6 +618,10 @@ public class ConnectivityServiceTest {
         public void adjustScore(int change) {
             mScore += change;
             mNetworkAgent.sendNetworkScore(mScore);
+        }
+
+        public int getScore() {
+            return mScore;
         }
 
         public void explicitlySelected(boolean acceptUnvalidated) {
@@ -1330,6 +1335,8 @@ public class ConnectivityServiceTest {
                 return TYPE_WIFI;
             case TRANSPORT_CELLULAR:
                 return TYPE_MOBILE;
+            case TRANSPORT_VPN:
+                return TYPE_VPN;
             default:
                 return TYPE_NONE;
         }
@@ -3854,6 +3861,9 @@ public class ConnectivityServiceTest {
         networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
         testFactory.waitForRequests();
 
+        // unregister network callback - a no-op, but should not fail
+        mCm.unregisterNetworkCallback(networkCallback);
+
         testFactory.unregister();
         handlerThread.quit();
     }
@@ -4266,25 +4276,6 @@ public class ConnectivityServiceTest {
             callback.expectStarted();
             ka.stop();
             callback.expectStopped();
-
-            // Check that the same NATT socket cannot be used by 2 keepalives.
-            try (SocketKeepalive ka2 = mCm.createSocketKeepalive(
-                    myNet, testSocket, myIPv4, dstIPv4, executor, callback)) {
-                // Check that second keepalive cannot be started if the first one is running.
-                ka.start(validKaInterval);
-                callback.expectStarted();
-                ka2.start(validKaInterval);
-                callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
-                ka.stop();
-                callback.expectStopped();
-
-                // Check that second keepalive can be started/stopped normally if the first one is
-                // stopped.
-                ka2.start(validKaInterval);
-                callback.expectStarted();
-                ka2.stop();
-                callback.expectStopped();
-            }
         }
 
         // Check that deleting the IP address stops the keepalive.
@@ -4348,10 +4339,6 @@ public class ConnectivityServiceTest {
                 testSocket.close();
                 testSocket2.close();
             }
-
-            // Check that the closed socket cannot be used to start keepalive.
-            ka.start(validKaInterval);
-            callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
         }
 
         // Check that there is no port leaked after all keepalives and sockets are closed.
@@ -5387,6 +5374,58 @@ public class ConnectivityServiceTest {
         defaultCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
 
         mCm.unregisterNetworkCallback(defaultCallback);
+    }
+
+    @Test
+    public void testVpnUnvalidated() throws Exception {
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(callback);
+
+        // Bring up Ethernet.
+        mEthernetNetworkAgent = new MockNetworkAgent(TRANSPORT_ETHERNET);
+        mEthernetNetworkAgent.connect(true);
+        callback.expectAvailableThenValidatedCallbacks(mEthernetNetworkAgent);
+        callback.assertNoCallback();
+
+        // Bring up a VPN that has the INTERNET capability, initially unvalidated.
+        final int uid = Process.myUid();
+        final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+        mMockVpn.setNetworkAgent(vpnNetworkAgent);
+        mMockVpn.setUids(ranges);
+        vpnNetworkAgent.connect(false /* validated */, true /* hasInternet */);
+        mMockVpn.connect();
+
+        // Even though the VPN is unvalidated, it becomes the default network for our app.
+        callback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
+        // TODO: this looks like a spurious callback.
+        callback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
+        callback.assertNoCallback();
+
+        assertTrue(vpnNetworkAgent.getScore() > mEthernetNetworkAgent.getScore());
+        assertEquals(ConnectivityConstants.VPN_DEFAULT_SCORE, vpnNetworkAgent.getScore());
+        assertEquals(vpnNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        NetworkCapabilities nc = mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork());
+        assertFalse(nc.hasCapability(NET_CAPABILITY_VALIDATED));
+        assertTrue(nc.hasCapability(NET_CAPABILITY_INTERNET));
+
+        assertFalse(NetworkMonitorUtils.isValidationRequired(vpnNetworkAgent.mNetworkCapabilities));
+        assertTrue(NetworkMonitorUtils.isPrivateDnsValidationRequired(
+                vpnNetworkAgent.mNetworkCapabilities));
+
+        // Pretend that the VPN network validates.
+        vpnNetworkAgent.setNetworkValid();
+        vpnNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
+        // Expect to see the validated capability, but no other changes, because the VPN is already
+        // the default network for the app.
+        callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, vpnNetworkAgent);
+        callback.assertNoCallback();
+
+        vpnNetworkAgent.disconnect();
+        callback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        callback.expectAvailableCallbacksValidated(mEthernetNetworkAgent);
     }
 
     @Test

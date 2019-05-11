@@ -26,7 +26,7 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"اعلان‌ها"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"ممکن است باتری به‌زودی تمام شود"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، براساس میزان مصرف شما حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، براساس اشتفاده شما حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> باقی مانده، حدود <xliff:g id="TIME">%2$s</xliff:g> باقی مانده است"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی مانده است. بهینه‌سازی باتری روشن است."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"‏ازطریق USB شارژ نمی‌شود. از شارژر ارائه‌شده با دستگاه استفاده کنید."</string>
@@ -208,10 +208,10 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"اعلان ردشد."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"تنظیمات سریع."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"قفل صفحه."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"صفحه قفل."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"تنظیمات"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"نمای کلی."</string>
-    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"صفحه حالت قفل نمایه کاری"</string>
+    <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"صفحه قفل کاری"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"بستن"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"‏Wi-Fi خاموش شد."</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوباره نشان داده نشود"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"پاک کردن همه موارد"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"مدیریت"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"اعلان‌ها توسط «مزاحم نشوید» موقتاً متوقف شدند"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"اکنون شروع شود"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"اعلانی موجود نیست"</string>
@@ -527,6 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"صفحه نمایش پین شد"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» و «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، از پایین صفحه تند به‌طرف بالا بکشید و نگه‌دارید."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «نمای کلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"تا برداشتن پین، در نما نگه‌داشته می‌شود. برای برداشتن پین، «صفحه اصلی» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"برای برداشتن پین این صفحه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
@@ -615,7 +620,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"کنترل‌های قدرتمند اعلان"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"روشن"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"خاموش"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"با کنترل‌های قدرتمند اعلان می‌توانید سطح اهمیت اعلان‌های هر برنامه را از ۰ تا ۵ تعیین کنید. \n\n"<b>"سطح ۵"</b>" \n- در صدر فهرست اعلان‌ها نشان داده می‌شود \n- وقفه برای نمایش تمام‌صفحه مجاز است \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۴"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۳"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n\n"<b>"سطح ۲"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا و لرزش ایجاد نمی‌کند \n\n"<b>"سطح ۱"</b>" \n- نمایش تمام صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا یا لرزش ایجاد نمی‌کند \n- در قفل صفحه و نوار وضعیت پنهان است \n- در پایین فهرست اعلان‌ها نشان داده می‌شود \n\n"<b>"سطح ۰"</b>" \n- همه اعلان‌های این برنامه مسدود است"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"با کنترل‌های قدرتمند اعلان می‌توانید سطح اهمیت اعلان‌های هر برنامه را از ۰ تا ۵ تعیین کنید. \n\n"<b>"سطح ۵"</b>" \n- در صدر فهرست اعلان‌ها نشان داده می‌شود \n- وقفه برای نمایش تمام‌صفحه مجاز است \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۴"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۳"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n\n"<b>"سطح ۲"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا و لرزش ایجاد نمی‌کند \n\n"<b>"سطح ۱"</b>" \n- نمایش تمام صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا یا لرزش ایجاد نمی‌کند \n- در صفحه قفل و نوار وضعیت پنهان است \n- در پایین فهرست اعلان‌ها نشان داده می‌شود \n\n"<b>"سطح ۰"</b>" \n- همه اعلان‌های این برنامه مسدود است"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"اعلان‌ها"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"دیگر این اعلان‌ها را نخواهید دید"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"این اعلان‌ها کوچک خواهد شد"</string>
@@ -638,15 +643,14 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"نمایش اعلان از این برنامه ادامه یابد؟"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"آرام"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"دراولویت"</string>
-    <string name="notification_channel_summary_low" msgid="8816251796432620434">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_low_status" msgid="838359173060008373">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش و نوار وضعیت نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_low_lock" msgid="1568361562011497978">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش و در صفحه قفل نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="966512668777695595">"همیشه بی‌صدا. در کشوی اعلان‌های پایین‌کش، نوار وضعیت در صفحه قفل نشان داده می‌شود."</string>
-    <string name="notification_channel_summary_default" msgid="619096010741301745">"صدا پخش می‌شود و در کشوی اعلان‌های پایین‌کش، نوار وضعیت و در صفحه قفل نشان داده می‌شود."</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"با فقط نمایش اعلان در کشوی اعلان‌های پایین‌کش، به شما کمک می‌کند تمرکزتان را ازدست ندهید همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"اعلان‌های با اولویت پایین را نشان می‌دهد. همیشه بی‌صدا."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"با صدا و نماد نوار وضعیت توجه شما را جلب می‌کند. در صفحه قفل نشان داده می‌شود."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
-    <!-- no translation found for notification_delegate_header (2857691673814814270) -->
-    <skip />
+    <string name="notification_delegate_header" msgid="2857691673814814270">"اعلان‌های دارای پراکسی"</string>
     <string name="appops_camera" msgid="8100147441602585776">"این برنامه از دوربین استفاده می‌کند."</string>
     <string name="appops_microphone" msgid="741508267659494555">"این برنامه از میکروفون استفاده می‌کند."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"این برنامه روی برنامه‌های دیگر در صفحه‌نمایش نشان داده می‌شود."</string>
@@ -817,7 +821,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"باز کردن تنظیمات <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ویرایش ترتیب تنظیمات."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"قفل صفحه"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"صفحه قفل"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"بزرگ کردن"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"کوچک کردن"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"بستن"</string>
@@ -911,6 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"باز کردن <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"تنظیم برای ابزارک‌های اعلان <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"برای <xliff:g id="APP_NAME">%1$s</xliff:g>، ابزارک‌های اعلان مجاز شوند؟"</string>
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"مدیریت"</string>
     <string name="no_bubbles" msgid="337101288173078247">"رد کردن"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"اجازه دادن"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"بعداً پرسیده شود"</string>
