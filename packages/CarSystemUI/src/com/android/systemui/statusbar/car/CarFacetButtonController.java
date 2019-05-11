@@ -22,7 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -112,9 +112,11 @@ public class CarFacetButtonController {
      */
     public void taskChanged(List<ActivityManager.StackInfo> stackInfoList) {
         ActivityManager.StackInfo validStackInfo = null;
-        for (ActivityManager.StackInfo stackInfo :stackInfoList) {
-            // Find the first stack info with a topActivity
-            if (stackInfo.topActivity != null) {
+        for (ActivityManager.StackInfo stackInfo : stackInfoList) {
+            // Find the first stack info with a topActivity in the primary display.
+            // TODO: We assume that CarFacetButton will launch an app only in the primary display.
+            // We need to extend the functionality to handle the mutliple display properly.
+            if (stackInfo.topActivity != null && stackInfo.displayId == Display.DEFAULT_DISPLAY) {
                 validStackInfo = stackInfo;
                 break;
             }
