@@ -481,13 +481,13 @@ public class CarrierTextController {
                 break;
 
             case SimLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
+                carrierText = makeCarrierStringOnLocked(
                         getContext().getText(R.string.keyguard_sim_locked_message),
                         text);
                 break;
 
             case SimPukLocked:
-                carrierText = makeCarrierStringOnEmergencyCapable(
+                carrierText = makeCarrierStringOnLocked(
                         getContext().getText(R.string.keyguard_sim_puk_locked_message),
                         text);
                 break;
@@ -513,6 +513,26 @@ public class CarrierTextController {
             return concatenate(simMessage, emergencyCallMessage, mSeparator);
         }
         return simMessage;
+    }
+
+    /*
+     * Add "SIM card is locked" in parenthesis after carrier name, so it is easily associated in
+     * DSDS
+     */
+    private CharSequence makeCarrierStringOnLocked(CharSequence simMessage,
+            CharSequence carrierName) {
+        final boolean simMessageValid = !TextUtils.isEmpty(simMessage);
+        final boolean carrierNameValid = !TextUtils.isEmpty(carrierName);
+        if (simMessageValid && carrierNameValid) {
+            return mContext.getString(R.string.keyguard_carrier_name_with_sim_locked_template,
+                    carrierName, simMessage);
+        } else if (simMessageValid) {
+            return simMessage;
+        } else if (carrierNameValid) {
+            return carrierName;
+        } else {
+            return "";
+        }
     }
 
     /**

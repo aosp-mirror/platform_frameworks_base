@@ -2697,7 +2697,13 @@ public class AudioService extends IAudioService.Stub
             // The isPlatformAutomotive check is added for safety but may not be necessary.
             return;
         }
-        if (getCurrentUserId() == userId) {
+        // For automotive,
+        // - the car service is always running as system user
+        // - foreground users are non-system users
+        // Car service is in charge of dispatching the key event include master mute to Android.
+        // Therefore, the getCurrentUser() is always different to the foreground user.
+        if ((isPlatformAutomotive() && userId == UserHandle.USER_SYSTEM)
+                || (getCurrentUserId() == userId)) {
             if (mute != AudioSystem.getMasterMute()) {
                 setSystemAudioMute(mute);
                 AudioSystem.setMasterMute(mute);
@@ -4974,19 +4980,17 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void onSetVolumeIndexOnDevice(@NonNull DeviceVolumeUpdate update) {
-        synchronized (VolumeStreamState.class) {
-            final VolumeStreamState streamState = mStreamStates[update.mStreamType];
-            if (update.hasVolumeIndex()) {
-                final int index = update.getVolumeIndex();
-                streamState.setIndex(index, update.mDevice, update.mCaller);
-                sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller + " dev:0x"
-                        + Integer.toHexString(update.mDevice) + " volIdx:" + index));
-            } else {
-                sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller
-                        + " update vol on dev:0x" + Integer.toHexString(update.mDevice)));
-            }
-            setDeviceVolume(streamState, update.mDevice);
+        final VolumeStreamState streamState = mStreamStates[update.mStreamType];
+        if (update.hasVolumeIndex()) {
+            final int index = update.getVolumeIndex();
+            streamState.setIndex(index, update.mDevice, update.mCaller);
+            sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller + " dev:0x"
+                    + Integer.toHexString(update.mDevice) + " volIdx:" + index));
+        } else {
+            sVolumeLogger.log(new AudioEventLogger.StringEvent(update.mCaller
+                    + " update vol on dev:0x" + Integer.toHexString(update.mDevice)));
         }
+        setDeviceVolume(streamState, update.mDevice);
     }
 
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {

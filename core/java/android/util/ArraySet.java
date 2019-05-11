@@ -368,6 +368,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     public E valueAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return valueAtUnchecked(index);
@@ -545,6 +546,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     public E removeAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         final Object old = mArray[index];

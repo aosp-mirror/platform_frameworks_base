@@ -5647,6 +5647,27 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
                     ? mPackages.get(packageNames[0])
                     : null;
+            // Additional logs for b/111075456; ignore system UIDs
+            if (pkg == null && UserHandle.getAppId(uid) >= Process.FIRST_APPLICATION_UID) {
+                if (packageNames == null || packageNames.length < 2) {
+                    // unclear if this is shared user or just a missing application
+                    Log.e(TAG, "Failed to find package"
+                            + "; permName: " + permName
+                            + ", uid: " + uid
+                            + ", caller: " + Binder.getCallingUid(),
+                            new Throwable());
+                } else {
+                    // definitely shared user
+                    Log.e(TAG, "Failed to find package"
+                            + "; permName: " + permName
+                            + ", uid: " + uid
+                            + ", caller: " + Binder.getCallingUid()
+                            + ", packages: " + Arrays.toString(packageNames),
+                            new Throwable());
+                }
+                // run again just to try to get debug output
+                getPackagesForUid_debug(uid, true);
+            }
             return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
         }
     }
@@ -6364,15 +6385,25 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String[] getPackagesForUid(int uid) {
+        return getPackagesForUid_debug(uid, false);
+    }
+    // Debug output for b/111075456
+    private String[] getPackagesForUid_debug(int uid, boolean debug) {
         final int callingUid = Binder.getCallingUid();
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
         final int appId = UserHandle.getAppId(uid);
+        if (debug) Slog.e(TAG, "Finding packages for UID"
+                + "; uid: " + uid
+                + ", userId: " + userId
+                + ", appId: " + appId
+                + ", caller: " + callingUid);
         // reader
         synchronized (mPackages) {
             final Object obj = mSettings.getSettingLPr(appId);
             if (obj instanceof SharedUserSetting) {
                 if (isCallerInstantApp) {
+                    if (debug) Slog.e(TAG, "Caller is instant and package has shared users");
                     return null;
                 }
                 final SharedUserSetting sus = (SharedUserSetting) obj;
@@ -6380,8 +6411,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 String[] res = new String[N];
                 final Iterator<PackageSetting> it = sus.packages.iterator();
                 int i = 0;
+                if (debug && !it.hasNext()) Slog.e(TAG, "Shared user, but, no packages");
                 while (it.hasNext()) {
                     PackageSetting ps = it.next();
+                    if (debug) Slog.e(TAG, "Check shared package"
+                            + "; installed? " + ps.getInstalled(userId)
+                            + ", shared setting: " + ps
+                            + ", package setting: " + mSettings.mPackages.get(ps.name));
                     if (ps.getInstalled(userId)) {
                         res[i++] = ps.name;
                     } else {
@@ -6394,6 +6430,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps.getInstalled(userId) && !filterAppAccessLPr(ps, callingUid, userId)) {
                     return new String[]{ps.name};
                 }
+                if (debug) Slog.e(TAG, "Removing normal package"
+                        + "; installed? " + ps.getInstalled(userId)
+                        + ", filtered? " + filterAppAccessLPr(ps, callingUid, userId));
+            } else if (debug) {
+                if (debug) Slog.e(TAG, "No setting found"
+                        + "; obj: " + (obj == null ? "<<NULL>>" : obj.toString()));
             }
         }
         return null;
@@ -21787,6 +21829,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
             } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_SHARED_USERS);
+                if (opti < args.length && "noperm".equals(args[opti])) {
+                    dumpState.setOptionEnabled(DumpState.OPTION_SKIP_PERMISSIONS);
+                }
             } else if ("prov".equals(cmd) || "providers".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PROVIDERS);
             } else if ("m".equals(cmd) || "messages".equals(cmd)) {

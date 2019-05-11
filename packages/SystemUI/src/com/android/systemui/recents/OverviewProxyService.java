@@ -31,6 +31,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_B
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 
+import android.annotation.ColorInt;
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -59,6 +60,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.colorextraction.SysuiColorExtractor.ScrimType;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
@@ -533,6 +535,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void onActiveNavBarRegionChanges(Region activeRegion) {
         mActiveNavBarRegion = activeRegion;
         dispatchNavButtonBounds();
+    }
+
+    public void onScrimColorsChanged(@ColorInt int color, @ScrimType int type) {
+        if (mOverviewProxy != null) {
+            try {
+                mOverviewProxy.onScrimColorsChanged(color, type);
+            } catch (RemoteException e) {
+                Log.e(TAG_OPS, "Failed to call onScrimColorsChanged()", e);
+            }
+        }
     }
 
     private void dispatchNavButtonBounds() {

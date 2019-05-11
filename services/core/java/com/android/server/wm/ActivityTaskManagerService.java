@@ -265,6 +265,7 @@ import com.android.server.am.UserState;
 import com.android.server.appop.AppOpsService;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
+import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
@@ -347,6 +348,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
+    private PermissionPolicyInternal mPermissionPolicyInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     PowerManagerInternal mPowerManagerInternal;
@@ -2934,7 +2936,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r != null) {
-                    final ActivityOptions activityOptions = r.takeOptionsLocked();
+                    final ActivityOptions activityOptions = r.takeOptionsLocked(
+                            true /* fromClient */);
                     return activityOptions == null ? null : activityOptions.toBundle();
                 }
                 return null;
@@ -5822,6 +5825,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         }
         return mPmInternal;
+    }
+
+    PermissionPolicyInternal getPermissionPolicyInternal() {
+        if (mPermissionPolicyInternal == null) {
+            mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
+        }
+        return mPermissionPolicyInternal;
     }
 
     AppWarnings getAppWarningsLocked() {

@@ -26,6 +26,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -745,11 +746,16 @@ public class PointerLocationView extends View implements InputDeviceListener,
         super.onAttachedToWindow();
 
         mIm.registerInputDeviceListener(this, getHandler());
-        try {
-            WindowManagerGlobal.getWindowManagerService().registerSystemGestureExclusionListener(
-                    mSystemGestureExclusionListener, mContext.getDisplayId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (shouldShowSystemGestureExclusion()) {
+            try {
+                WindowManagerGlobal.getWindowManagerService()
+                        .registerSystemGestureExclusionListener(mSystemGestureExclusionListener,
+                                mContext.getDisplayId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            mSystemGestureExclusion.setEmpty();
         }
         logInputDevices();
     }
@@ -796,6 +802,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
         } else {
             Log.i(TAG, state + ": " + deviceId);
         }
+    }
+
+    private static boolean shouldShowSystemGestureExclusion() {
+        return SystemProperties.getBoolean("debug.pointerlocation.showexclusion", false);
     }
 
     // HACK
@@ -920,11 +930,14 @@ public class PointerLocationView extends View implements InputDeviceListener,
         @Override
         public void onSystemGestureExclusionChanged(int displayId, Region systemGestureExclusion) {
             Region exclusion = Region.obtain(systemGestureExclusion);
-            getHandler().post(() -> {
-                mSystemGestureExclusion.set(exclusion);
-                exclusion.recycle();
-                invalidate();
-            });
+            Handler handler = getHandler();
+            if (handler != null) {
+                handler.post(() -> {
+                    mSystemGestureExclusion.set(exclusion);
+                    exclusion.recycle();
+                    invalidate();
+                });
+            }
         }
     };
 }

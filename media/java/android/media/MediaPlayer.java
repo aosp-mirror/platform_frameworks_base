@@ -629,7 +629,6 @@ public class MediaPlayer extends PlayerBase
     private boolean mStayAwake;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private int mUsage = -1;
-    private boolean mBypassInterruptionPolicy;
 
     // Modular DRM
     private UUID mDrmUUID;
@@ -2218,8 +2217,6 @@ public class MediaPlayer extends PlayerBase
         }
         baseUpdateAudioAttributes(attributes);
         mUsage = attributes.getUsage();
-        mBypassInterruptionPolicy = (attributes.getAllFlags()
-                & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
         Parcel pattributes = Parcel.obtain();
         attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
         setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);

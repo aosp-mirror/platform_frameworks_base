@@ -2790,7 +2790,7 @@ public class CarrierConfigManager {
         /**
          * Control Plane / SUPL NI emergency extension time in seconds. Default to "0".
          */
-        public static final String KEY_ES_EXTENSION_SEC = KEY_PREFIX + "es_extension_sec";
+        public static final String KEY_ES_EXTENSION_SEC_STRING = KEY_PREFIX + "es_extension_sec";
 
         /**
          * Space separated list of Android package names of proxy applications representing
@@ -2798,7 +2798,15 @@ public class CarrierConfigManager {
          * the framework, as managed by IGnssVisibilityControl.hal. For example,
          * "com.example.mdt com.example.ims".
          */
-        public static final String KEY_NFW_PROXY_APPS = KEY_PREFIX + "nfw_proxy_apps";
+        public static final String KEY_NFW_PROXY_APPS_STRING = KEY_PREFIX + "nfw_proxy_apps";
+
+        /**
+         * Specify whether to post a notification on the status bar whenever device location is
+         * provided for non-framework location requests in user-initiated emergency use cases.
+         * 0 - Do not post notification. This is default.
+         * 1 - Post notification for all request types.
+         */
+        public static final String KEY_ES_NOTIFY_INT = KEY_PREFIX + "es_notify_int";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
@@ -2812,8 +2820,9 @@ public class CarrierConfigManager {
             defaults.putString(KEY_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL_STRING, "1");
             defaults.putString(KEY_A_GLONASS_POS_PROTOCOL_SELECT_STRING, "0");
             defaults.putString(KEY_GPS_LOCK_STRING, "3");
-            defaults.putString(KEY_ES_EXTENSION_SEC, "0");
-            defaults.putString(KEY_NFW_PROXY_APPS, "");
+            defaults.putString(KEY_ES_EXTENSION_SEC_STRING, "0");
+            defaults.putString(KEY_NFW_PROXY_APPS_STRING, "");
+            defaults.putInt(KEY_ES_NOTIFY_INT, 0);
             return defaults;
         }
     }

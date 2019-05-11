@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
-import static com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-        .DEFAULT_HEADER_VISIBLE_AMOUNT;
 
 import android.app.Notification;
 import android.content.Context;
@@ -53,19 +51,17 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             = new PathInterpolator(0.4f, 0f, 0.7f, 1f);
 
     protected final ViewTransformationHelper mTransformationHelper;
-    private final int mTranslationForHeader;
 
     protected int mColor;
     private ImageView mIcon;
 
     private NotificationExpandButton mExpandButton;
-    private NotificationHeaderView mNotificationHeader;
+    protected NotificationHeaderView mNotificationHeader;
     private TextView mHeaderText;
     private ImageView mWorkProfileImage;
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
     private boolean mShowExpandButtonAtEnd;
-    protected float mHeaderTranslation;
 
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
@@ -101,10 +97,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                 }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         addAppOpsOnClickListener(row);
-        mTranslationForHeader = ctx.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin)
-                - ctx.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.notification_content_margin_top);
     }
 
     protected void resolveHeaderViews() {
@@ -130,9 +122,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
         // Reinspect the notification.
         resolveHeaderViews();
-        if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
-            setHeaderVisibleAmount(row.getHeaderVisibleAmount());
-        }
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
@@ -196,19 +185,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
-    }
-
-    @Override
-    public void setHeaderVisibleAmount(float headerVisibleAmount) {
-        super.setHeaderVisibleAmount(headerVisibleAmount);
-        mNotificationHeader.setAlpha(headerVisibleAmount);
-        mHeaderTranslation = (1.0f - headerVisibleAmount) * mTranslationForHeader;
-        mView.setTranslationY(mHeaderTranslation);
-    }
-
-    @Override
-    public int getHeaderTranslation() {
-        return (int) mHeaderTranslation;
     }
 
     @Override

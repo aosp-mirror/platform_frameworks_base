@@ -56,11 +56,16 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     private static final String KEY_TRY_AGAIN_VISIBILITY = "key_try_again_visibility";
     private static final String KEY_CONFIRM_VISIBILITY = "key_confirm_visibility";
+    private static final String KEY_STATE = "key_state";
+    private static final String KEY_ERROR_TEXT_VISIBILITY = "key_error_text_visibility";
+    private static final String KEY_ERROR_TEXT_STRING = "key_error_text_string";
+    private static final String KEY_ERROR_TEXT_IS_TEMPORARY = "key_error_text_is_temporary";
+    private static final String KEY_ERROR_TEXT_COLOR = "key_error_text_color";
 
     private static final int ANIMATION_DURATION_SHOW = 250; // ms
     private static final int ANIMATION_DURATION_AWAY = 350; // ms
 
-    protected static final int MSG_CLEAR_MESSAGE = 1;
+    protected static final int MSG_RESET_MESSAGE = 1;
 
     protected static final int STATE_IDLE = 0;
     protected static final int STATE_AUTHENTICATING = 1;
@@ -94,7 +99,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private Bundle mBundle;
     private Bundle mRestoredState;
 
-    private int mState;
+    private int mState = STATE_IDLE;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
     private boolean mSkipIntro;
@@ -106,7 +111,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     protected abstract int getIconDescriptionResourceId();
     protected abstract int getDelayAfterAuthenticatedDurationMs();
     protected abstract boolean shouldGrayAreaDismissDialog();
-    protected abstract void handleClearMessage();
+    protected abstract void handleResetMessage();
     protected abstract void updateIcon(int oldState, int newState);
 
     private final Runnable mShowAnimationRunnable = new Runnable() {
@@ -132,8 +137,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         @Override
         public void handleMessage(Message msg) {
             switch(msg.what) {
-                case MSG_CLEAR_MESSAGE:
-                    handleClearMessage();
+                case MSG_RESET_MESSAGE:
+                    handleResetMessage();
                     break;
                 default:
                     Log.e(TAG, "Unhandled message: " + msg.what);
@@ -231,13 +236,16 @@ public abstract class BiometricDialogView extends LinearLayout {
     public void onSaveState(Bundle bundle) {
         bundle.putInt(KEY_TRY_AGAIN_VISIBILITY, mTryAgainButton.getVisibility());
         bundle.putInt(KEY_CONFIRM_VISIBILITY, mPositiveButton.getVisibility());
+        bundle.putInt(KEY_STATE, mState);
+        bundle.putInt(KEY_ERROR_TEXT_VISIBILITY, mErrorText.getVisibility());
+        bundle.putCharSequence(KEY_ERROR_TEXT_STRING, mErrorText.getText());
+        bundle.putBoolean(KEY_ERROR_TEXT_IS_TEMPORARY, mHandler.hasMessages(MSG_RESET_MESSAGE));
+        bundle.putInt(KEY_ERROR_TEXT_COLOR, mErrorText.getCurrentTextColor());
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-        mErrorText.setText(getHintStringResourceId());
 
         final ImageView backgroundView = mLayout.findViewById(R.id.background);
 
@@ -253,14 +261,18 @@ public abstract class BiometricDialogView extends LinearLayout {
         }
 
         mNegativeButton.setVisibility(View.VISIBLE);
-        mErrorText.setVisibility(View.VISIBLE);
 
         if (RotationUtils.getRotation(mContext) != RotationUtils.ROTATION_NONE) {
             mDialog.getLayoutParams().width = (int) mDialogWidth;
         }
 
-        mState = STATE_IDLE;
-        updateState(STATE_AUTHENTICATING);
+        if (mRestoredState == null) {
+            updateState(STATE_AUTHENTICATING);
+            mErrorText.setText(getHintStringResourceId());
+            mErrorText.setVisibility(View.VISIBLE);
+        } else {
+            updateState(mState);
+        }
 
         CharSequence titleText = mBundle.getCharSequence(BiometricPrompt.KEY_TITLE);
 
@@ -329,7 +341,7 @@ public abstract class BiometricDialogView extends LinearLayout {
                 mWindowManager.removeView(BiometricDialogView.this);
                 mAnimatingAway = false;
                 // Set the icons / text back to normal state
-                handleClearMessage();
+                handleResetMessage();
                 showTryAgainButton(false /* show */);
                 updateState(STATE_IDLE);
             }
@@ -401,17 +413,17 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     // Shows an error/help message
     protected void showTemporaryMessage(String message) {
-        mHandler.removeMessages(MSG_CLEAR_MESSAGE);
+        mHandler.removeMessages(MSG_RESET_MESSAGE);
         mErrorText.setText(message);
         mErrorText.setTextColor(mErrorColor);
         mErrorText.setContentDescription(message);
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_MESSAGE),
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RESET_MESSAGE),
                 BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
     public void clearTemporaryMessage() {
-        mHandler.removeMessages(MSG_CLEAR_MESSAGE);
-        mHandler.obtainMessage(MSG_CLEAR_MESSAGE).sendToTarget();
+        mHandler.removeMessages(MSG_RESET_MESSAGE);
+        mHandler.obtainMessage(MSG_RESET_MESSAGE).sendToTarget();
     }
 
     /**
@@ -442,7 +454,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     public void updateState(int newState) {
         if (newState == STATE_PENDING_CONFIRMATION) {
-            mHandler.removeMessages(MSG_CLEAR_MESSAGE);
+            mHandler.removeMessages(MSG_RESET_MESSAGE);
             mErrorText.setVisibility(View.INVISIBLE);
             mPositiveButton.setVisibility(View.VISIBLE);
             mPositiveButton.setEnabled(true);
@@ -470,6 +482,19 @@ public abstract class BiometricDialogView extends LinearLayout {
         mRestoredState = bundle;
         mTryAgainButton.setVisibility(bundle.getInt(KEY_TRY_AGAIN_VISIBILITY));
         mPositiveButton.setVisibility(bundle.getInt(KEY_CONFIRM_VISIBILITY));
+        mState = bundle.getInt(KEY_STATE);
+        mErrorText.setText(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));
+        mErrorText.setVisibility(bundle.getInt(KEY_ERROR_TEXT_VISIBILITY));
+        mErrorText.setTextColor(bundle.getInt(KEY_ERROR_TEXT_COLOR));
+
+        if (bundle.getBoolean(KEY_ERROR_TEXT_IS_TEMPORARY)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RESET_MESSAGE),
+                    BiometricPrompt.HIDE_DIALOG_DELAY);
+        }
+    }
+
+    protected int getState() {
+        return mState;
     }
 
     public WindowManager.LayoutParams getLayoutParams() {

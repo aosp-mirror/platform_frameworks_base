@@ -461,6 +461,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public K keyAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return (K)mArray[index << 1];
@@ -480,6 +481,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public V valueAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         return (V)mArray[(index << 1) + 1];
@@ -500,6 +502,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public V setValueAt(int index, V value) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
         index = (index << 1) + 1;
@@ -703,6 +706,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public V removeAt(int index) {
         if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
             // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
             throw new ArrayIndexOutOfBoundsException(index);
         }
 

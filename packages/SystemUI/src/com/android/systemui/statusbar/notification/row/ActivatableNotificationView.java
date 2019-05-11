@@ -36,7 +36,7 @@ import android.view.animation.PathInterpolator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManagerFactory;
-import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
