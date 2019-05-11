@@ -104,7 +104,8 @@ public final class PermissionPolicyService extends SystemService {
             // there as we are on the main thread and want to block until the work is
             // completed or we time out.
             final PermissionControllerManager permissionControllerManager =
-                    new PermissionControllerManager(context, FgThread.getHandler());
+                    new PermissionControllerManager(getUserContext(context, UserHandle.of(userId)),
+                            FgThread.getHandler());
             permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
                     FgThread.getExecutor(),
                     (Boolean success) -> {
