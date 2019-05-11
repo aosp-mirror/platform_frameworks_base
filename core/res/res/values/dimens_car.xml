@@ -141,4 +141,11 @@
     <dimen name="car_preference_category_icon_size">@dimen/car_primary_icon_size</dimen>
     <dimen name="car_preference_row_vertical_margin">@dimen/car_padding_2</dimen>
 
+    <!-- Action bar -->
+    <dimen name="action_bar_margin">@*android:dimen/car_margin</dimen>
+    <dimen name="action_bar_margin_start">@*android:dimen/car_margin</dimen>
+    <dimen name="action_bar_margin_end">@*android:dimen/car_margin</dimen>
+    <!-- Space between a button and another button or screen edge -->
+    <dimen name="action_bar_button_margin">@*android:dimen/car_padding_4</dimen>
+    <dimen name="action_bar_toggle_internal_padding">@*android:dimen/car_padding_3</dimen>
 </resources>
