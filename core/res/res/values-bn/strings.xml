@@ -573,12 +573,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"একই ধরনের দেখতে, একটু অন্যদিকে ঘুরে দাঁড়ান।"</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"আপনার মাথাটি সামান্য ঘোরান।"</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"আপনার ফেসকে আড়াল করে এমন সব কিছু সরিয়ে দিন।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"স্ক্রিনের উপরের প্রান্তের সেন্সর মুছুন।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>

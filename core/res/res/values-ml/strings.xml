@@ -526,7 +526,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"പിന്നോ പാറ്റേണോ പാസ്‌വേഡോ സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിൽ ചെളിയുണ്ട്. അത് വൃത്തിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"വിരൽ വളരെ വേഗത്തിൽ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
