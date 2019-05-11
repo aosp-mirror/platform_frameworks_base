@@ -203,7 +203,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnACLConnectionStateChange_updatesBluetoothStateOnConnection() {
+    public void testOnACLConnectionStateChange_updatesBluetoothStateOnConnection()
+            throws Exception {
         BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
         mBluetoothControllerImpl.addCallback(callback);
 
@@ -215,6 +216,16 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         reset(callback);
         mBluetoothControllerImpl.onAclConnectionStateChanged(device,
                 BluetoothProfile.STATE_CONNECTED);
+
+        // Grab the main looper, we'll need it later.
+        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
+
+        try {
+            mTestableLooper.processAllMessages();
+            mainLooper.processAllMessages();
+        } finally {
+            mainLooper.destroy();
+        }
         assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
         verify(callback, atLeastOnce()).onBluetoothStateChange(anyBoolean());
     }
