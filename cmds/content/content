@@ -1,6 +1,3 @@
 #!/system/bin/sh
-# Script to start "content" on the device, which has a very rudimentary shell.
-base=/system
-export CLASSPATH=$base/framework/content.jar
-exec app_process $base/bin com.android.commands.content.Content "$@"
-
+export CLASSPATH=/system/framework/content.jar
+exec app_process /system/bin com.android.commands.content.Content "$@"
