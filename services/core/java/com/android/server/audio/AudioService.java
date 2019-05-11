@@ -2697,7 +2697,13 @@ public class AudioService extends IAudioService.Stub
             // The isPlatformAutomotive check is added for safety but may not be necessary.
             return;
         }
-        if (getCurrentUserId() == userId) {
+        // For automotive,
+        // - the car service is always running as system user
+        // - foreground users are non-system users
+        // Car service is in charge of dispatching the key event include master mute to Android.
+        // Therefore, the getCurrentUser() is always different to the foreground user.
+        if ((isPlatformAutomotive() && userId == UserHandle.USER_SYSTEM)
+                || (getCurrentUserId() == userId)) {
             if (mute != AudioSystem.getMasterMute()) {
                 setSystemAudioMute(mute);
                 AudioSystem.setMasterMute(mute);
