@@ -162,6 +162,10 @@ public class TelecomManager {
      *         getActivity().getPackageName());
      * startActivity(intent);
      * </pre>
+     * <p>
+     * This is no longer supported since Q, please use
+     * {@link android.app.role.RoleManager#createRequestRoleIntent(String)} with
+     * {@link android.app.role.RoleManager#ROLE_DIALER} instead.
      */
     public static final String ACTION_CHANGE_DEFAULT_DIALER =
             "android.telecom.action.CHANGE_DEFAULT_DIALER";
