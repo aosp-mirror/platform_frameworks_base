@@ -92,10 +92,7 @@ public class RestrictedLockUtils {
             if (admin.component != null) {
                 intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin.component);
             }
-            final UserHandle adminUser = admin.user != null
-                    ? admin.user
-                    : UserHandle.of(UserHandle.myUserId());
-            intent.putExtra(Intent.EXTRA_USER, adminUser);
+            intent.putExtra(Intent.EXTRA_USER, admin.user);
         }
         return intent;
     }
