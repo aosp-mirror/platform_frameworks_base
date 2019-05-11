@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -52,6 +53,7 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
 
@@ -1980,4 +1982,10 @@ interface ITelephony {
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
 
     boolean isApnMetered(int apnType, int subId);
+
+    /**
+     * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
+     * outgoing SmsManager operation.
+     */
+    oneway void enqueueSmsPickResult(String callingPackage, IIntegerConsumer subIdResult);
 }
