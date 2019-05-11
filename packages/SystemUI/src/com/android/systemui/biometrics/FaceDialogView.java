@@ -44,6 +44,7 @@ public class FaceDialogView extends BiometricDialogView {
 
     private static final String TAG = "FaceDialogView";
     private static final String KEY_DIALOG_SIZE = "key_dialog_size";
+    private static final String KEY_DIALOG_ANIMATED_IN = "key_dialog_animated_in";
 
     private static final int HIDE_DIALOG_DELAY = 500; // ms
     private static final int IMPLICIT_Y_PADDING = 16; // dp
@@ -76,6 +77,10 @@ public class FaceDialogView extends BiometricDialogView {
 
         public void animateOnce(int iconRes) {
             animateIcon(iconRes, false);
+        }
+
+        public void showStatic(int iconRes) {
+            mBiometricIcon.setImageDrawable(mContext.getDrawable(iconRes));
         }
 
         public void startPulsing() {
@@ -276,13 +281,19 @@ public class FaceDialogView extends BiometricDialogView {
     public void onSaveState(Bundle bundle) {
         super.onSaveState(bundle);
         bundle.putInt(KEY_DIALOG_SIZE, mSize);
+        bundle.putBoolean(KEY_DIALOG_ANIMATED_IN, mDialogAnimatedIn);
     }
 
 
     @Override
-    protected void handleClearMessage() {
+    protected void handleResetMessage() {
         mErrorText.setText(getHintStringResourceId());
         mErrorText.setTextColor(mTextColor);
+        if (getState() == STATE_AUTHENTICATING) {
+            mErrorText.setVisibility(View.VISIBLE);
+        } else {
+            mErrorText.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -290,6 +301,7 @@ public class FaceDialogView extends BiometricDialogView {
         super.restoreState(bundle);
         // Keep in mind that this happens before onAttachedToWindow()
         mSize = bundle.getInt(KEY_DIALOG_SIZE);
+        mDialogAnimatedIn = bundle.getBoolean(KEY_DIALOG_ANIMATED_IN);
     }
 
     /**
@@ -386,7 +398,8 @@ public class FaceDialogView extends BiometricDialogView {
     protected void updateIcon(int oldState, int newState) {
         mIconController.mState = newState;
 
-        if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
+        if (newState == STATE_AUTHENTICATING) {
+            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             if (mDialogAnimatedIn) {
                 mIconController.startPulsing();
                 mErrorText.setVisibility(View.VISIBLE);
@@ -397,24 +410,38 @@ public class FaceDialogView extends BiometricDialogView {
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
         } else if (oldState == STATE_ERROR && newState == STATE_IDLE) {
             mIconController.animateOnce(R.drawable.face_dialog_error_to_idle);
-        } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
-            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
-            mIconController.startPulsing();
-        } else if (oldState == STATE_ERROR && newState == STATE_PENDING_CONFIRMATION) {
-            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
-            mIconController.animateOnce(R.drawable.face_dialog_wink_from_dark);
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
             mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
-            mIconController.animateOnce(R.drawable.face_dialog_dark_to_error);
-            mHandler.postDelayed(mErrorToIdleAnimationRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
+        } else if (newState == STATE_ERROR) {
+            // It's easier to only check newState and gate showing the animation on the
+            // mErrorToIdleAnimationRunnable as a proxy, than add a ton of extra state. For example,
+            // we may go from error -> error due to configuration change which is valid and we
+            // should show the animation, or we can go from error -> error by receiving repeated
+            // acquire messages in which case we do not want to repeatedly start the animation.
+            if (!mHandler.hasCallbacks(mErrorToIdleAnimationRunnable)) {
+                mIconController.animateOnce(R.drawable.face_dialog_dark_to_error);
+                mHandler.postDelayed(mErrorToIdleAnimationRunnable,
+                        BiometricPrompt.HIDE_DIALOG_DELAY);
+            }
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_PENDING_CONFIRMATION) {
+        } else if (newState == STATE_PENDING_CONFIRMATION) {
+            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             mIconController.animateOnce(R.drawable.face_dialog_wink_from_dark);
+        } else if (newState == STATE_IDLE) {
+            mIconController.showStatic(R.drawable.face_dialog_idle_static);
         } else {
             Log.w(TAG, "Unknown animation from " + oldState + " -> " + newState);
+        }
+
+        // Note that this must be after the newState == STATE_ERROR check above since this affects
+        // the logic.
+        if (oldState == STATE_ERROR && newState == STATE_ERROR) {
+            // Keep the error icon and text around for a while longer if we keep receiving
+            // STATE_ERROR
+            mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
+            mHandler.postDelayed(mErrorToIdleAnimationRunnable, BiometricPrompt.HIDE_DIALOG_DELAY);
         }
     }
 
