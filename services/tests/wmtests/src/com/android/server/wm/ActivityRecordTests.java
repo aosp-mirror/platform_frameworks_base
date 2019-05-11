@@ -56,9 +56,14 @@ import android.app.servertransaction.PauseActivityItem;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
 import android.util.MutableBoolean;
+import android.view.IRemoteAnimationFinishedCallback;
+import android.view.IRemoteAnimationRunner.Stub;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 
 import androidx.test.filters.MediumTest;
 
@@ -566,6 +571,31 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mService.mH.runWithScissors(() -> { }, TimeUnit.SECONDS.toMillis(3));
         verify(mService.mAmInternal).killProcess(
                 eq(mActivity.app.mName), eq(mActivity.app.mUid), anyString());
+    }
+
+    @Test
+    public void testTakeOptions() {
+        ActivityOptions opts = ActivityOptions.makeRemoteAnimation(
+                new RemoteAnimationAdapter(new Stub() {
+
+                    @Override
+                    public void onAnimationStart(RemoteAnimationTarget[] apps,
+                            IRemoteAnimationFinishedCallback finishedCallback) {
+
+                    }
+
+                    @Override
+                    public void onAnimationCancelled() {
+
+                    }
+                }, 0, 0));
+        mActivity.updateOptionsLocked(opts);
+        assertNotNull(mActivity.takeOptionsLocked(true /* fromClient */));
+        assertNotNull(mActivity.pendingOptions);
+
+        mActivity.updateOptionsLocked(ActivityOptions.makeBasic());
+        assertNotNull(mActivity.takeOptionsLocked(false /* fromClient */));
+        assertNull(mActivity.pendingOptions);
     }
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */

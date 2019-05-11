@@ -1493,7 +1493,7 @@ class TaskRecord extends ConfigurationContainer {
                     if (r.finishing) {
                         continue;
                     }
-                    ActivityOptions opts = r.takeOptionsLocked();
+                    ActivityOptions opts = r.takeOptionsLocked(false /* fromClient */);
                     if (opts != null) {
                         ret.updateOptionsLocked(opts);
                     }
