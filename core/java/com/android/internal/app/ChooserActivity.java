@@ -212,7 +212,7 @@ public class ChooserActivity extends ResolverActivity {
     /** {@link ChooserActivity#getBaseScore} */
     private static final float CALLER_TARGET_SCORE_BOOST = 900.f;
     /** {@link ChooserActivity#getBaseScore} */
-    private static final float SHORTCUT_TARGET_SCORE_BOOST = 10.f;
+    private static final float SHORTCUT_TARGET_SCORE_BOOST = 90.f;
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
     // TODO: Update to handle landscape instead of using static value
     private static final int MAX_RANKED_TARGETS = 4;
@@ -2477,10 +2477,11 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         /**
-          * Use the scoring system along with artificial boosts to create up to 3 distinct buckets:
+          * Use the scoring system along with artificial boosts to create up to 4 distinct buckets:
           * <ol>
           *   <li>App-supplied targets
-          *   <li>Prediction manager targets or Shortcut API targets
+          *   <li>Shortcuts ranked via App Prediction Manager
+          *   <li>Shortcuts ranked via legacy heuristics
           *   <li>Legacy direct share targets
           * </ol>
           */
@@ -2489,7 +2490,7 @@ public class ChooserActivity extends ResolverActivity {
                 return CALLER_TARGET_SCORE_BOOST;
             }
 
-            if (getAppPredictorForDirectShareIfEnabled() != null) {
+            if (isShortcutResult && getAppPredictorForDirectShareIfEnabled() != null) {
                 return SHORTCUT_TARGET_SCORE_BOOST;
             }
 
