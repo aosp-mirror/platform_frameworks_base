@@ -1992,7 +1992,7 @@ public class RelativeLayout extends ViewGroup {
                 // dependencies for a specific set of rules
                 for (int j = 0; j < rulesCount; j++) {
                     final int rule = rules[rulesFilter[j]];
-                    if (ResourceId.isValid(rule)) {
+                    if (rule > 0 || ResourceId.isValid(rule)) {
                         // The node this node depends on
                         final Node dependency = keyNodes.get(rule);
                         // Skip unknowns and self dependencies
