@@ -986,6 +986,11 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
 
     SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
     sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace(bufferItem.mDataSpace);
+    if (cs == nullptr) {
+        // nullptr is treated as SRGB in Skia, thus explicitly use SRGB in order to make sure
+        // the returned bitmap has a color space.
+        cs = SkColorSpace::MakeSRGB();
+    }
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
