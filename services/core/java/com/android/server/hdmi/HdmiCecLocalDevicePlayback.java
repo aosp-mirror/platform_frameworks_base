@@ -87,6 +87,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
+        // Actively send out an OSD name to the TV to update the TV panel in case the TV
+        // does not query the OSD name on time. This is not a required behavior by the spec.
+        // It is used for some TVs that need the OSD name update but don't query it themselves.
+        buildAndSendSetOsdName(Constants.ADDR_TV);
         if (mService.audioSystem() == null) {
             // If current device is not a functional audio system device,
             // send message to potential audio system device in the system to get the system
