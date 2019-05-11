@@ -58,6 +58,11 @@ class GnssVisibilityControl {
     // Max wait time for synchronous method onGpsEnabledChanged() to run.
     private static final long ON_GPS_ENABLED_CHANGED_TIMEOUT_MILLIS = 3 * 1000;
 
+    // Valid values for config parameter es_notify_int for posting notification in the status
+    // bar for non-framework location requests in user-initiated emergency use cases.
+    private static final int ES_NOTIFY_NONE = 0;
+    private static final int ES_NOTIFY_ALL = 1;
+
     // Wakelocks
     private static final String WAKELOCK_KEY = TAG;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
@@ -71,6 +76,7 @@ class GnssVisibilityControl {
     private final GpsNetInitiatedHandler mNiHandler;
 
     private boolean mIsGpsEnabled;
+    private volatile boolean mEsNotify;
 
     // Number of non-framework location access proxy apps is expected to be small (< 5).
     private static final int ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
@@ -128,6 +134,17 @@ class GnssVisibilityControl {
         runOnHandler(() -> handleNfwNotification(
                 new NfwNotification(proxyAppPackageName, protocolStack, otherProtocolStackName,
                         requestor, requestorId, responseType, inEmergencyMode, isCachedLocation)));
+    }
+
+    void setEsNotify(int esNotifyConfig) {
+        if (esNotifyConfig != ES_NOTIFY_NONE && esNotifyConfig != ES_NOTIFY_ALL) {
+            Log.e(TAG, "Config parameter " + GnssConfiguration.CONFIG_ES_NOTIFY_INT
+                    + " is set to invalid value: " + esNotifyConfig
+                    + ". Using default value: " + ES_NOTIFY_NONE);
+            esNotifyConfig = ES_NOTIFY_NONE;
+        }
+
+        mEsNotify = (esNotifyConfig == ES_NOTIFY_ALL);
     }
 
     private void handleInitialize() {
@@ -494,7 +511,7 @@ class GnssVisibilityControl {
 
         logEvent(nfwNotification, isPermissionMismatched);
 
-        if (nfwNotification.isLocationProvided()) {
+        if (mEsNotify && nfwNotification.isLocationProvided()) {
             // Emulate deprecated IGnssNi.hal user notification of emergency NI requests.
             GpsNetInitiatedHandler.GpsNiNotification notification =
                     new GpsNetInitiatedHandler.GpsNiNotification();
