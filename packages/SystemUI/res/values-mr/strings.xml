@@ -651,6 +651,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"या सूचनांमध्ये सुधारणा केली जाऊ शकत नाही."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"या सूचनांचा संच येथे कॉन्फिगर केला जाऊ शकत नाही"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"प्रॉक्सी केलेल्या सूचना"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"हे अ‍ॅप कॅमेरा वापरत आहे."</string>
     <string name="appops_microphone" msgid="741508267659494555">"हे अ‍ॅप मायक्रोफोन वापरत आहे."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"हे अ‍ॅप स्क्रीनवरील इतर अ‍ॅप्स वर प्रदर्शित होत आहे."</string>
@@ -926,4 +930,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"वर उजवीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"तळाशी डावीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"तळाशी उजवीकडे हलवा"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>

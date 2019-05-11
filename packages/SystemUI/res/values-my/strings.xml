@@ -649,6 +649,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ဤအကြောင်းကြားချက်များကို ပြုပြင်၍ မရပါ။"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ဤအကြောင်းကြားချက်အုပ်စုကို ဤနေရာတွင် စီစဉ်သတ်မှတ်၍ မရပါ"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ပရောက်စီထည့်ထားသော အကြောင်းကြားချက်"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ဤအက်ပ်က ကင်မရာကို အသုံးပြုနေသည်။"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ဤအက်ပ်က မိုက်ခရိုဖုန်းကို အသုံးပြုနေသည်။"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ဤအက်ပ်က ဖန်သားမျက်နှာပြင်ပေါ်ရှိ အခြားအက်ပ်များ အပေါ်မှ ထပ်ပြီး ပြသနေပါသည်။"</string>
@@ -924,4 +928,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"ညာဘက်ထိပ်သို့ ရွှေ့ပါ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ဘယ်အောက်ခြေသို့ ရွှေ့ရန်"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ညာအောက်ခြေသို့ ရွှေ့ပါ"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>
