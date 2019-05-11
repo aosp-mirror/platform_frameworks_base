@@ -455,4 +455,12 @@ public class BluetoothMediaManagerTest {
 
         verify(mCallback).onConnectedDeviceChanged(PhoneMediaDevice.ID);
     }
+
+    @Test
+    public void onAudioModeChanged_shouldCallOnDeviceAttributesChanged() {
+        mMediaManager.registerCallback(mCallback);
+        mMediaManager.onAudioModeChanged();
+
+        verify(mCallback).onDeviceAttributesChanged();
+    }
 }
