@@ -28,6 +28,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import javax.inject.Inject;
@@ -39,21 +40,31 @@ import javax.inject.Inject;
  * taken by {@link NightDisplayTile}.
  */
 public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
-        ConfigurationController.ConfigurationListener {
+        ConfigurationController.ConfigurationListener,
+        BatteryController.BatteryStateChangeCallback {
 
     private final Icon mIcon = ResourceIcon.get(
             com.android.internal.R.drawable.ic_qs_ui_mode_night);
-    private UiModeManager mUiModeManager;
+    private final UiModeManager mUiModeManager;
+    private final BatteryController mBatteryController;
 
     @Inject
-    public UiModeNightTile(QSHost host, ConfigurationController configurationController) {
+    public UiModeNightTile(QSHost host, ConfigurationController configurationController,
+            BatteryController batteryController) {
         super(host);
+        mBatteryController = batteryController;
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         configurationController.observe(getLifecycle(), this);
+        batteryController.observe(getLifecycle(), this);
     }
 
     @Override
     public void onUiModeChanged() {
+        refreshState();
+    }
+
+    @Override
+    public void onPowerSaveChanged(boolean isPowerSave) {
         refreshState();
     }
 
@@ -64,6 +75,9 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
 
     @Override
     protected void handleClick() {
+        if (getState().state == Tile.STATE_UNAVAILABLE) {
+            return;
+        }
         boolean newState = !mState.value;
         mUiModeManager.setNightMode(newState ? UiModeManager.MODE_NIGHT_YES
                 : UiModeManager.MODE_NIGHT_NO);
@@ -72,15 +86,22 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        boolean powerSave = mBatteryController.isPowerSave();
         boolean nightMode = (mContext.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
 
         state.value = nightMode;
-        state.label = mContext.getString(R.string.quick_settings_ui_mode_night_label);
+        state.label = mContext.getString(powerSave
+                ? R.string.quick_settings_ui_mode_night_label_battery_saver
+                : R.string.quick_settings_ui_mode_night_label);
         state.contentDescription = state.label;
         state.icon = mIcon;
         state.expandedAccessibilityClassName = Switch.class.getName();
-        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        if (powerSave) {
+            state.state = Tile.STATE_UNAVAILABLE;
+        } else {
+            state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        }
         state.showRippleEffect = false;
     }
 
