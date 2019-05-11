@@ -63,6 +63,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
      */
     public abstract boolean shouldFrameworkHandleLockout();
 
+    public abstract boolean wasUserDetected();
+
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
@@ -105,6 +107,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
         if (!shouldFrameworkHandleLockout()) {
             switch (error) {
                 case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
+                    if (!wasUserDetected() && !isBiometricPrompt()) {
+                        // No vibration if user was not detected on keyguard
+                        break;
+                    }
                 case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
                 case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
                     if (mStarted) {

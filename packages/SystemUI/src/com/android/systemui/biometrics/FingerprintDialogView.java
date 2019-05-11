@@ -38,7 +38,7 @@ public class FingerprintDialogView extends BiometricDialogView {
     }
 
     @Override
-    protected void handleClearMessage() {
+    protected void handleResetMessage() {
         updateState(STATE_AUTHENTICATING);
         mErrorText.setText(getHintStringResourceId());
         mErrorText.setTextColor(mTextColor);
@@ -80,9 +80,7 @@ public class FingerprintDialogView extends BiometricDialogView {
     }
 
     protected boolean shouldAnimateForTransition(int oldState, int newState) {
-        if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
-            return false;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
+        if (newState == STATE_ERROR) {
             return true;
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
             return true;
@@ -91,6 +89,8 @@ public class FingerprintDialogView extends BiometricDialogView {
             return false;
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
             // TODO(b/77328470): add animation when fingerprint is authenticated
+            return false;
+        } else if (newState == STATE_AUTHENTICATING) {
             return false;
         }
         return false;
@@ -109,9 +109,7 @@ public class FingerprintDialogView extends BiometricDialogView {
 
     protected Drawable getAnimationForTransition(int oldState, int newState) {
         int iconRes;
-        if (oldState == STATE_IDLE && newState == STATE_AUTHENTICATING) {
-            iconRes = R.drawable.fingerprint_dialog_fp_to_error;
-        } else if (oldState == STATE_AUTHENTICATING && newState == STATE_ERROR) {
+        if (newState == STATE_ERROR) {
             iconRes = R.drawable.fingerprint_dialog_fp_to_error;
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATING) {
             iconRes = R.drawable.fingerprint_dialog_error_to_fp;
@@ -120,6 +118,8 @@ public class FingerprintDialogView extends BiometricDialogView {
             iconRes = R.drawable.fingerprint_dialog_fp_to_error;
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
             // TODO(b/77328470): add animation when fingerprint is authenticated
+            iconRes = R.drawable.fingerprint_dialog_fp_to_error;
+        } else if (newState == STATE_AUTHENTICATING) {
             iconRes = R.drawable.fingerprint_dialog_fp_to_error;
         } else {
             return null;

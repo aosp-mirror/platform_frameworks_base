@@ -64,8 +64,8 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.Constants;
+import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
@@ -98,6 +98,8 @@ public class FaceService extends BiometricServiceBase {
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
     private final class FaceAuthClient extends AuthenticationClientImpl {
+        private int mLastAcquire;
+
         public FaceAuthClient(Context context,
                 DaemonWrapper daemon, long halDeviceId, IBinder token,
                 ServiceListener listener, int targetUserId, int groupId, long opId,
@@ -114,6 +116,11 @@ public class FaceService extends BiometricServiceBase {
         @Override
         public boolean shouldFrameworkHandleLockout() {
             return false;
+        }
+
+        @Override
+        public boolean wasUserDetected() {
+            return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED;
         }
 
         @Override
@@ -152,6 +159,8 @@ public class FaceService extends BiometricServiceBase {
 
         @Override
         public boolean onAcquired(int acquireInfo, int vendorCode) {
+
+            mLastAcquire = acquireInfo;
 
             if (acquireInfo == FaceManager.FACE_ACQUIRED_RECALIBRATE) {
                 final String name =
