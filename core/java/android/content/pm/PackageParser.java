@@ -238,24 +238,6 @@ public class PackageParser {
         CHILD_PACKAGE_TAGS.add(TAG_EAT_COMMENT);
     }
 
-    // STOPSHIP(b/112545973): remove once feature enabled by default
-    private static final Set<String> FORCE_AUDIO_PACKAGES;
-    private static final Set<String> FORCE_VIDEO_PACKAGES;
-    private static final Set<String> FORCE_IMAGES_PACKAGES;
-    static {
-        FORCE_AUDIO_PACKAGES = parsePackageList(
-                SystemProperties.get(StorageManager.PROP_FORCE_AUDIO));
-        FORCE_VIDEO_PACKAGES = parsePackageList(
-                SystemProperties.get(StorageManager.PROP_FORCE_VIDEO));
-        FORCE_IMAGES_PACKAGES = parsePackageList(
-                SystemProperties.get(StorageManager.PROP_FORCE_IMAGES));
-    }
-
-    private static Set<String> parsePackageList(String pkgs) {
-        if (TextUtils.isEmpty(pkgs)) return Collections.emptySet();
-        return new ArraySet<String>(Arrays.asList(pkgs.split(",")));
-    }
-
     private static final boolean LOG_UNSAFE_BROADCASTS = false;
 
     /**
@@ -2552,34 +2534,6 @@ public class PackageParser {
         // pre-Doughnut applications.
         if (pkg.applicationInfo.usesCompatibilityMode()) {
             adjustPackageToBeUnresizeableAndUnpipable(pkg);
-        }
-
-        // If the storage model feature flag is disabled, we need to fiddle
-        // around with permission definitions to return us to pre-Q behavior.
-        // STOPSHIP(b/112545973): remove once feature enabled by default
-        if (!StorageManager.hasIsolatedStorage()) {
-            if ("android".equals(pkg.packageName)) {
-                final ArraySet<String> newPermissions = new ArraySet<>();
-                newPermissions.add(android.Manifest.permission.ACCESS_MEDIA_LOCATION);
-                newPermissions.add(android.Manifest.permission.WRITE_OBB);
-
-                for (int i = pkg.permissions.size() - 1; i >= 0; i--) {
-                    final Permission p = pkg.permissions.get(i);
-                    if (newPermissions.contains(p.info.name)) {
-                        pkg.permissions.remove(i);
-                    }
-                }
-            }
-        } else {
-            if (FORCE_AUDIO_PACKAGES.contains(pkg.packageName)) {
-                pkg.requestedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-            if (FORCE_VIDEO_PACKAGES.contains(pkg.packageName)) {
-                pkg.requestedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-            if (FORCE_IMAGES_PACKAGES.contains(pkg.packageName)) {
-                pkg.requestedPermissions.add(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
         }
 
         return pkg;

@@ -294,6 +294,10 @@ message Atom {
         MediametricsMediadrmReported mediametrics_mediadrm_reported = 198;
         MediametricsNuPlayerReported mediametrics_nuplayer_reported = 199;
         MediametricsRecorderReported mediametrics_recorder_reported = 200;
+        VehicleMapServicePacketReported vms_packet_reported = 201;
+        VehicleMapServicePacketFailureReported vms_packet_failure_reported = 202;
+        CarPowerStateChanged car_power_state_changed = 203;
+        GarageModeInfo garage_mode_info = 204;
     }
 
     // Pulled events will start at field 10000.
@@ -6140,6 +6144,12 @@ message GpuStatsGlobalInfo {
 
     // Api version of the system GLES driver.
     optional int32 gles_version = 11;
+
+    // Total count of the angle driver gets loaded.
+    optional int64 angle_loading_count = 12;
+
+    // Total count of the angle driver fails to be loaded.
+    optional int64 angle_loading_failure_count = 13;
 }
 
 /**
@@ -6172,6 +6182,13 @@ message GpuStatsAppInfo {
     // Vulkan driver loading time info.
     optional GpuDriverLoadingTime vk_driver_loading_time = 4
             [(android.os.statsd.log_mode) = MODE_BYTES];
+
+    // Angle driver loading time info.
+    optional GpuDriverLoadingTime angle_driver_loading_time = 5
+            [(android.os.statsd.log_mode) = MODE_BYTES];
+
+    // CPU Vulkan implementation is in use.
+    optional bool cpu_vulkan_in_use = 6;
 }
 
 /*
@@ -6255,4 +6272,70 @@ message CoolingDevice {
 message IntelligenceEventReported {
   optional android.stats.intelligence.EventType event_id = 1;
   optional android.stats.intelligence.Status status = 2;
+}
+
+/**
+ * Logs information about Vehicle Map Service packets. It specifies the layer
+ * type, subtype, data version and size of the packet.
+ */
+message VehicleMapServicePacketReported {
+  // Identifies the type of data being transported by a Vehicle Maps Service
+  // packet.
+  optional int32 layer_type = 1;
+  // Identifies the subtype of the layer.
+  optional int32 layer_subtype = 2;
+  // Identifies the version of the data being transported by a Vehicle Maps
+  // Service packet.
+  optional int32 version = 3;
+  // Size in bytes of the packet.
+  optional int64 size_in_bytes = 4;
+}
+
+/**
+ * Logs that a Vehicle Map Service packet failed to be delivered.
+ */
+message VehicleMapServicePacketFailureReported {
+  // Identifies the type of data being transported by a Vehicle Map Service
+  // packet.
+  optional int32 layer_type = 1;
+  // Identifies the subtype of the layer.
+  optional int32 layer_subtype = 2;
+  // Identifies the version of the data being transported by a Vehicle Map
+  // Service packet.
+  optional int32 version = 3;
+  // Identifies the package name of the publisher of the data.
+  optional string publisher_name = 4;
+  // Identifies the package name of the subscriber of the data. An empty string
+  // signifies that there are zero subscribers for the packet.
+  optional string subscriber_name = 5;
+}
+
+/**
+ * Logs when Car Power state changed.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/CarStatsLog.java
+ */
+message CarPowerStateChanged {
+    // States come from CpmsState in CarPowerManagementService.java.
+    enum State {
+       WAIT_FOR_VHAL = 0;
+       ON = 1;
+       SHUTDOWN_PREPARE = 2;
+       WAIT_FOR_FINISH = 3;
+       SUSPEND = 4;
+       SIMULATE_SLEEP = 5;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs whether GarageMode is entered.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/CarStatsLog.java
+ */
+message GarageModeInfo {
+    // Whether GarageMode is entered.
+    optional bool is_garage_mode = 1;
 }

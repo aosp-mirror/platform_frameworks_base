@@ -1632,21 +1632,6 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override  // AnimatesBounds
     public void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
             boolean moveToFullscreen) {
-        if (mAnimationType == BoundsAnimationController.FADE_IN) {
-            setPinnedStackAlpha(1f);
-            try {
-                mWmService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
-            } catch (RemoteException e) {
-                // I don't believe you...
-            }
-            return;
-        }
-
-        onBoundAnimationEnd(schedulePipModeChangedCallback, finalStackSize, moveToFullscreen);
-    }
-
-    private void onBoundAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
-            boolean moveToFullscreen) {
         if (inPinnedWindowingMode()) {
             // Update to the final bounds if requested. This is done here instead of in the bounds
             // animator to allow us to coordinate this after we notify the PiP mode changed
@@ -1658,6 +1643,11 @@ public class TaskStack extends WindowContainer<Task> implements
                         mBoundsAnimationTarget, false /* forceUpdate */);
             }
 
+            if (mAnimationType == BoundsAnimationController.FADE_IN) {
+                setPinnedStackAlpha(1f);
+                mActivityStack.mService.notifyPinnedStackAnimationEnded();
+            }
+
             if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
                 setPinnedStackSize(finalStackSize, null);
             } else {
@@ -1666,14 +1656,9 @@ public class TaskStack extends WindowContainer<Task> implements
                 onPipAnimationEndResize();
             }
 
-            try {
-                mWmService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
-                if (moveToFullscreen) {
-                    mWmService.mActivityTaskManager.moveTasksToFullscreenStack(mStackId,
-                            true /* onTop */);
-                }
-            } catch (RemoteException e) {
-                // I don't believe you...
+            mActivityStack.mService.notifyPinnedStackAnimationEnded();
+            if (moveToFullscreen) {
+                mActivityStack.mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
             }
         } else {
             // No PiP animation, just run the normal animation-end logic

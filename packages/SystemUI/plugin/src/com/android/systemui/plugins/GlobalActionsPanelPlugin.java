@@ -16,7 +16,9 @@
 
 package com.android.systemui.plugins;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -98,5 +100,13 @@ public interface GlobalActionsPanelPlugin extends Plugin {
          * Invoked when the device is either locked or unlocked.
          */
         void onDeviceLockStateChanged(boolean locked);
+
+        /**
+         * Optionally returns a drawable to be used as the background for Global Actions.
+         */
+        @Nullable
+        default Drawable getBackgroundDrawable() {
+            return null;
+        }
     }
 }

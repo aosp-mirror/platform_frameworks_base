@@ -1174,12 +1174,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         // If we didn't request fullscreen layout, but we still got it because of the
         // mForceWindowDrawsBarBackgrounds flag, also consume top inset.
+        // If we should always consume system bars, only consume that if the app wanted to go to
+        // fullscreen, as othrewise we can expect the app to handle it.
+        boolean fullscreen = (sysUiVisibility & SYSTEM_UI_FLAG_FULLSCREEN) != 0
+                || (attrs.flags & FLAG_FULLSCREEN) != 0;
         boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
                 && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
                 && mForceWindowDrawsBarBackgrounds
                 && mLastTopInset != 0
-                || mLastShouldAlwaysConsumeSystemBars;
+                || (mLastShouldAlwaysConsumeSystemBars && fullscreen);
 
         int consumedTop = consumingStatusBar ? mLastTopInset : 0;
         int consumedRight = consumingNavBar ? mLastRightInset : 0;

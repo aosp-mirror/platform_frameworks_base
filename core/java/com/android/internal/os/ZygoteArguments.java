@@ -119,12 +119,6 @@ class ZygoteArguments {
     /** from --package-name */
     String mPackageName;
 
-    /** from --packages-for-uid */
-    String[] mPackagesForUid;
-
-    /** from --sandbox-id */
-    String mSandboxId;
-
     /**
      * Any args after and including the first non-option arg (or after a '--')
      */
@@ -411,13 +405,6 @@ class ZygoteArguments {
                     throw new IllegalArgumentException("Duplicate arg specified");
                 }
                 mPackageName = arg.substring(arg.indexOf('=') + 1);
-            } else if (arg.startsWith("--packages-for-uid=")) {
-                mPackagesForUid = arg.substring(arg.indexOf('=') + 1).split(",");
-            } else if (arg.startsWith("--sandbox-id=")) {
-                if (mSandboxId != null) {
-                    throw new IllegalArgumentException("Duplicate arg specified");
-                }
-                mSandboxId = arg.substring(arg.indexOf('=') + 1);
             } else if (arg.startsWith("--usap-pool-enabled=")) {
                 mUsapPoolStatusSpecified = true;
                 mUsapPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));

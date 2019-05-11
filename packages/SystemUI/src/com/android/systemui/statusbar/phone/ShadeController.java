@@ -43,6 +43,12 @@ public interface ShadeController {
     void instantExpandNotificationsPanel();
 
     /**
+     * Collapse the shade animated, showing the bouncer when on {@link StatusBarState#KEYGUARD} or
+     * dismissing {@link StatusBar} when on {@link StatusBarState#SHADE}.
+     */
+    void animateCollapsePanels(int flags, boolean force);
+
+    /**
      * If the notifications panel is not fully expanded, collapse it animated.
      *
      * @return Seems to always return false

@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 /**
  * service used to communicate with the ip memory store service in network stack,
@@ -46,8 +47,25 @@ public abstract class IpMemoryStoreClient {
         mContext = context;
     }
 
-    @NonNull
-    protected abstract IIpMemoryStore getService() throws InterruptedException, ExecutionException;
+    protected abstract void runWhenServiceReady(Consumer<IIpMemoryStore> cb)
+            throws ExecutionException;
+
+    @FunctionalInterface
+    private interface ThrowingRunnable {
+        void run() throws RemoteException;
+    }
+
+    private void ignoringRemoteException(ThrowingRunnable r) {
+        ignoringRemoteException("Failed to execute remote procedure call", r);
+    }
+
+    private void ignoringRemoteException(String message, ThrowingRunnable r) {
+        try {
+            r.run();
+        } catch (RemoteException e) {
+            Log.e(TAG, message, e);
+        }
+    }
 
     /**
      * Store network attributes for a given L2 key.
@@ -69,14 +87,12 @@ public abstract class IpMemoryStoreClient {
             @NonNull final NetworkAttributes attributes,
             @Nullable final OnStatusListener listener) {
         try {
-            try {
-                getService().storeNetworkAttributes(l2Key, attributes.toParcelable(),
-                        OnStatusListener.toAIDL(listener));
-            } catch (InterruptedException | ExecutionException m) {
-                listener.onComplete(new Status(Status.ERROR_UNKNOWN));
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error storing network attributes", e);
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.storeNetworkAttributes(l2Key, attributes.toParcelable(),
+                            OnStatusListener.toAIDL(listener))));
+        } catch (ExecutionException m) {
+            ignoringRemoteException("Error storing network attributes",
+                    () -> listener.onComplete(new Status(Status.ERROR_UNKNOWN)));
         }
     }
 
@@ -95,14 +111,12 @@ public abstract class IpMemoryStoreClient {
             @NonNull final String name, @NonNull final Blob data,
             @Nullable final OnStatusListener listener) {
         try {
-            try {
-                getService().storeBlob(l2Key, clientId, name, data,
-                        OnStatusListener.toAIDL(listener));
-            } catch (InterruptedException | ExecutionException m) {
-                listener.onComplete(new Status(Status.ERROR_UNKNOWN));
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error storing blob", e);
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.storeBlob(l2Key, clientId, name, data,
+                            OnStatusListener.toAIDL(listener))));
+        } catch (ExecutionException m) {
+            ignoringRemoteException("Error storing blob",
+                    () -> listener.onComplete(new Status(Status.ERROR_UNKNOWN)));
         }
     }
 
@@ -123,14 +137,12 @@ public abstract class IpMemoryStoreClient {
     public void findL2Key(@NonNull final NetworkAttributes attributes,
             @NonNull final OnL2KeyResponseListener listener) {
         try {
-            try {
-                getService().findL2Key(attributes.toParcelable(),
-                        OnL2KeyResponseListener.toAIDL(listener));
-            } catch (InterruptedException | ExecutionException m) {
-                listener.onL2KeyResponse(new Status(Status.ERROR_UNKNOWN), null);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error finding L2 Key", e);
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.findL2Key(attributes.toParcelable(),
+                            OnL2KeyResponseListener.toAIDL(listener))));
+        } catch (ExecutionException m) {
+            ignoringRemoteException("Error finding L2 Key",
+                    () -> listener.onL2KeyResponse(new Status(Status.ERROR_UNKNOWN), null));
         }
     }
 
@@ -146,14 +158,12 @@ public abstract class IpMemoryStoreClient {
     public void isSameNetwork(@NonNull final String l2Key1, @NonNull final String l2Key2,
             @NonNull final OnSameL3NetworkResponseListener listener) {
         try {
-            try {
-                getService().isSameNetwork(l2Key1, l2Key2,
-                        OnSameL3NetworkResponseListener.toAIDL(listener));
-            } catch (InterruptedException | ExecutionException m) {
-                listener.onSameL3NetworkResponse(new Status(Status.ERROR_UNKNOWN), null);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error checking for network sameness", e);
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.isSameNetwork(l2Key1, l2Key2,
+                            OnSameL3NetworkResponseListener.toAIDL(listener))));
+        } catch (ExecutionException m) {
+            ignoringRemoteException("Error checking for network sameness",
+                    () -> listener.onSameL3NetworkResponse(new Status(Status.ERROR_UNKNOWN), null));
         }
     }
 
@@ -169,14 +179,13 @@ public abstract class IpMemoryStoreClient {
     public void retrieveNetworkAttributes(@NonNull final String l2Key,
             @NonNull final OnNetworkAttributesRetrievedListener listener) {
         try {
-            try {
-                getService().retrieveNetworkAttributes(l2Key,
-                        OnNetworkAttributesRetrievedListener.toAIDL(listener));
-            } catch (InterruptedException | ExecutionException m) {
-                listener.onNetworkAttributesRetrieved(new Status(Status.ERROR_UNKNOWN), null, null);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error retrieving network attributes", e);
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.retrieveNetworkAttributes(l2Key,
+                            OnNetworkAttributesRetrievedListener.toAIDL(listener))));
+        } catch (ExecutionException m) {
+            ignoringRemoteException("Error retrieving network attributes",
+                    () -> listener.onNetworkAttributesRetrieved(new Status(Status.ERROR_UNKNOWN),
+                            null, null));
         }
     }
 
@@ -194,14 +203,13 @@ public abstract class IpMemoryStoreClient {
     public void retrieveBlob(@NonNull final String l2Key, @NonNull final String clientId,
             @NonNull final String name, @NonNull final OnBlobRetrievedListener listener) {
         try {
-            try {
-                getService().retrieveBlob(l2Key, clientId, name,
-                        OnBlobRetrievedListener.toAIDL(listener));
-            } catch (InterruptedException | ExecutionException m) {
-                listener.onBlobRetrieved(new Status(Status.ERROR_UNKNOWN), null, null, null);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error retrieving blob", e);
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.retrieveBlob(l2Key, clientId, name,
+                            OnBlobRetrievedListener.toAIDL(listener))));
+        } catch (ExecutionException m) {
+            ignoringRemoteException("Error retrieving blob",
+                    () -> listener.onBlobRetrieved(new Status(Status.ERROR_UNKNOWN),
+                            null, null, null));
         }
     }
 }

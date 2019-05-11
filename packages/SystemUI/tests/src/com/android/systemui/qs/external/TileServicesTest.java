@@ -19,6 +19,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.os.Handler;
@@ -88,7 +89,7 @@ public class TileServicesTest extends SysuiTestCase {
         assertEquals(NUM_FAKES, mManagers.size());
 
         for (int i = 0; i < NUM_FAKES; i++) {
-            Mockito.when(mManagers.get(i).getBindPriority()).thenReturn(i);
+            when(mManagers.get(i).getBindPriority()).thenReturn(i);
         }
         mTileService.recalculateBindAllowance();
         for (int i = 0; i < NUM_FAKES; i++) {
@@ -145,6 +146,7 @@ public class TileServicesTest extends SysuiTestCase {
         protected TileServiceManager onCreateTileService(ComponentName component, Tile qsTile) {
             TileServiceManager manager = mock(TileServiceManager.class);
             mManagers.add(manager);
+            when(manager.isLifecycleStarted()).thenReturn(true);
             return manager;
         }
     }

@@ -155,13 +155,6 @@ public class StorageManager {
     public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
 
     /** {@hide} */
-    public static final String PROP_FORCE_AUDIO = "persist.fw.force_audio";
-    /** {@hide} */
-    public static final String PROP_FORCE_VIDEO = "persist.fw.force_video";
-    /** {@hide} */
-    public static final String PROP_FORCE_IMAGES = "persist.fw.force_images";
-
-    /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
     /** {@hide} */
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
@@ -290,9 +283,6 @@ public class StorageManager {
     /** @hide Underlying data is corrupt */
     public static final int ENCRYPTION_STATE_ERROR_CORRUPT =
             IVold.ENCRYPTION_STATE_ERROR_CORRUPT;
-
-    /** @hide Prefix used in sandboxIds for apps with sharedUserIds */
-    public static final String SHARED_SANDBOX_PREFIX = "shared-";
 
     private static volatile IStorageManager sStorageManager = null;
 
@@ -1618,15 +1608,7 @@ public class StorageManager {
      * @hide
      */
     public File translateAppToSystem(File file, int pid, int uid) {
-        // We can only translate absolute paths
-        if (!file.isAbsolute()) return file;
-
-        try {
-            return new File(mStorageManager.translateAppToSystem(file.getAbsolutePath(),
-                    pid, uid));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return file;
     }
 
     /**
@@ -1636,15 +1618,7 @@ public class StorageManager {
      * @hide
      */
     public File translateSystemToApp(File file, int pid, int uid) {
-        // We can only translate absolute paths
-        if (!file.isAbsolute()) return file;
-
-        try {
-            return new File(mStorageManager.translateSystemToApp(file.getAbsolutePath(),
-                    pid, uid));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return file;
     }
 
     /**

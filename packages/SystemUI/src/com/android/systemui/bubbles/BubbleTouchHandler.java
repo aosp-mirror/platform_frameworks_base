@@ -16,8 +16,6 @@
 
 package com.android.systemui.bubbles;
 
-import static com.android.systemui.pip.phone.PipDismissViewController.SHOW_TARGET_DELAY;
-
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.Handler;
@@ -27,17 +25,35 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.pip.phone.PipDismissViewController;
 
 /**
  * Handles interpreting touches on a {@link BubbleStackView}. This includes expanding, collapsing,
  * dismissing, and flings.
  */
 class BubbleTouchHandler implements View.OnTouchListener {
-    /** Velocity required to dismiss a bubble without dragging it into the dismiss target. */
-    private static final float DISMISS_MIN_VELOCITY = 4000f;
+    /** Velocity required to dismiss the stack without dragging it into the dismiss target. */
+    private static final float STACK_DISMISS_MIN_VELOCITY = 4000f;
+
+    /**
+     * Velocity required to dismiss an individual bubble without dragging it into the dismiss
+     * target.
+     *
+     * This is higher than the stack dismiss velocity since unlike the stack, a downward fling could
+     * also be an attempted gesture to return the bubble to the row of expanded bubbles, which would
+     * usually be below the dragged bubble. By increasing the required velocity, it's less likely
+     * that the user is trying to drop it back into the row vs. fling it away.
+     */
+    private static final float INDIVIDUAL_BUBBLE_DISMISS_MIN_VELOCITY = 6000f;
 
     private static final String TAG = "BubbleTouchHandler";
+    /**
+     * When the stack is flung towards the bottom of the screen, it'll be dismissed if it's flung
+     * towards the center of the screen (where the dismiss target is). This value is the width of
+     * the target area to be considered 'towards the target'. For example 50% means that the stack
+     * needs to be flung towards the middle 50%, and the 25% on the left and right sides won't
+     * count.
+     */
+    private static final float DISMISS_FLING_TARGET_WIDTH_PERCENT = 0.5f;
 
     private final PointF mTouchDown = new PointF();
     private final PointF mViewPositionOnTouchDown = new PointF();
@@ -45,7 +61,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
     private final BubbleData mBubbleData;
 
     private BubbleController mController = Dependency.get(BubbleController.class);
-    private PipDismissViewController mDismissViewController;
 
     private boolean mMovedEnough;
     private int mTouchSlopSquared;
@@ -53,12 +68,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
 
     private boolean mInDismissTarget;
     private Handler mHandler = new Handler();
-    private Runnable mShowDismissAffordance = new Runnable() {
-        @Override
-        public void run() {
-            mDismissViewController.showDismissTarget();
-        }
-    };
 
     /** View that was initially touched, when we received the first ACTION_DOWN event. */
     private View mTouchedView;
@@ -67,7 +76,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
             BubbleData bubbleData, Context context) {
         final int touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mTouchSlopSquared = touchSlop * touchSlop;
-        mDismissViewController = new PipDismissViewController(context);
         mBubbleData = bubbleData;
         mStack = stackView;
     }
@@ -104,11 +112,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
 
                 mTouchDown.set(rawX, rawY);
 
-                if (!isFlyout) {
-                    mDismissViewController.createDismissTarget();
-                    mHandler.postDelayed(mShowDismissAffordance, SHOW_TARGET_DELAY);
-                }
-
                 if (isStack) {
                     mViewPositionOnTouchDown.set(mStack.getStackPosition());
                     mStack.onDragStart();
@@ -140,9 +143,18 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     }
                 }
 
-                // TODO - when we're in the target stick to it / animate in some way?
-                mInDismissTarget = mDismissViewController.updateTarget(
-                        isStack ? mStack.getBubbleAt(0) : mTouchedView);
+                final boolean currentlyInDismissTarget = mStack.isInDismissTarget(event);
+                if (currentlyInDismissTarget != mInDismissTarget) {
+                    mInDismissTarget = currentlyInDismissTarget;
+
+                    mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
+                    final float velX = mVelocityTracker.getXVelocity();
+                    final float velY = mVelocityTracker.getYVelocity();
+
+                    // If the touch event is within the dismiss target, magnet the stack to it.
+                    mStack.animateMagnetToDismissTarget(
+                            mTouchedView, mInDismissTarget, viewX, viewY, velX, velY);
+                }
                 break;
 
             case MotionEvent.ACTION_CANCEL:
@@ -151,28 +163,40 @@ class BubbleTouchHandler implements View.OnTouchListener {
 
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
-                if (mInDismissTarget && isStack) {
-                    mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
-                    mStack.onDragFinishAsDismiss();
+                mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
+                final float velX = mVelocityTracker.getXVelocity();
+                final float velY = mVelocityTracker.getYVelocity();
+
+                final boolean shouldDismiss =
+                        isStack
+                                ? mInDismissTarget
+                                    || isFastFlingTowardsDismissTarget(rawX, rawY, velX, velY)
+                                : mInDismissTarget
+                                        || velY > INDIVIDUAL_BUBBLE_DISMISS_MIN_VELOCITY;
+
+                if (shouldDismiss) {
+                    final String individualBubbleKey =
+                            isStack ? null : ((BubbleView) mTouchedView).getKey();
+                    mStack.magnetToStackIfNeededThenAnimateDismissal(mTouchedView, velX, velY,
+                            () -> {
+                                if (isStack) {
+                                    mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
+                                } else {
+                                    mController.removeBubble(
+                                            individualBubbleKey,
+                                            BubbleController.DISMISS_USER_GESTURE);
+                                }
+                            });
                 } else if (isFlyout) {
                     // TODO(b/129768381): Expand if tapped, dismiss if swiped away.
                     if (!mBubbleData.isExpanded() && !mMovedEnough) {
                         mBubbleData.setExpanded(true);
                     }
                 } else if (mMovedEnough) {
-                    mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
-                    final float velX = mVelocityTracker.getXVelocity();
-                    final float velY = mVelocityTracker.getYVelocity();
                     if (isStack) {
                         mStack.onDragFinish(viewX, viewY, velX, velY);
                     } else {
-                        final boolean dismissed = mInDismissTarget || velY > DISMISS_MIN_VELOCITY;
-                        mStack.onBubbleDragFinish(
-                                mTouchedView, viewX, viewY, velX, velY, /* dismissed */ dismissed);
-                        if (dismissed) {
-                            mController.removeBubble(((BubbleView) mTouchedView).getKey(),
-                                    BubbleController.DISMISS_USER_GESTURE);
-                        }
+                        mStack.onBubbleDragFinish(mTouchedView, viewX, viewY, velX, velY);
                     }
                 } else if (mTouchedView == mStack.getExpandedBubbleView()) {
                     mBubbleData.setExpanded(false);
@@ -191,9 +215,38 @@ class BubbleTouchHandler implements View.OnTouchListener {
         return true;
     }
 
+    /**
+     * Whether the given touch data represents a powerful fling towards the bottom-center of the
+     * screen (the dismiss target).
+     */
+    private boolean isFastFlingTowardsDismissTarget(
+            float rawX, float rawY, float velX, float velY) {
+        // Not a fling downward towards the target if velocity is zero or negative.
+        if (velY <= 0) {
+            return false;
+        }
+
+        float bottomOfScreenInterceptX = rawX;
+
+        // Only do math if the X velocity is non-zero, otherwise X won't change.
+        if (velX != 0) {
+            // Rise over run...
+            final float slope = velY / velX;
+            // ...y = mx + b, b = y / mx...
+            final float yIntercept = rawY - slope * rawX;
+            // ...calculate the x value when y = bottom of the screen.
+            bottomOfScreenInterceptX = (mStack.getHeight() - yIntercept) / slope;
+        }
+
+        final float dismissTargetWidth =
+                mStack.getWidth() * DISMISS_FLING_TARGET_WIDTH_PERCENT;
+        return velY > STACK_DISMISS_MIN_VELOCITY
+                && bottomOfScreenInterceptX > dismissTargetWidth / 2f
+                && bottomOfScreenInterceptX < mStack.getWidth() - dismissTargetWidth / 2f;
+    }
+
     /** Clears all touch-related state. */
     private void resetForNextGesture() {
-        cleanUpDismissTarget();
         if (mVelocityTracker != null) {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
@@ -202,15 +255,6 @@ class BubbleTouchHandler implements View.OnTouchListener {
         mMovedEnough = false;
         mInDismissTarget = false;
     }
-
-    /**
-     * Removes the dismiss target and cancels any pending callbacks to show it.
-     */
-    private void cleanUpDismissTarget() {
-        mHandler.removeCallbacks(mShowDismissAffordance);
-        mDismissViewController.destroyDismissTarget();
-    }
-
 
     private void trackMovement(MotionEvent event) {
         if (mVelocityTracker == null) {

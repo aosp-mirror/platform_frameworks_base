@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -161,6 +162,10 @@ public class TelecomManager {
      *         getActivity().getPackageName());
      * startActivity(intent);
      * </pre>
+     * <p>
+     * This is no longer supported since Q, please use
+     * {@link android.app.role.RoleManager#createRequestRoleIntent(String)} with
+     * {@link android.app.role.RoleManager#ROLE_DIALER} instead.
      */
     public static final String ACTION_CHANGE_DEFAULT_DIALER =
             "android.telecom.action.CHANGE_DEFAULT_DIALER";
@@ -849,15 +854,18 @@ public class TelecomManager {
 
     /**
      * Returns the current SIM call manager. Apps must be prepared for this method to return
-     * {@code null}, indicating that there currently exists no user-chosen default
-     * {@code PhoneAccount}.
+     * {@code null}, indicating that there currently exists no SIM call manager {@link PhoneAccount}
+     * for the default voice subscription.
      *
-     * @return The phone account handle of the current sim call manager.
+     * @return The phone account handle of the current sim call manager for the default voice
+     * subscription.
+     * @see SubscriptionManager#getDefaultVoiceSubscriptionId()
      */
     public PhoneAccountHandle getSimCallManager() {
         try {
             if (isServiceConnected()) {
-                return getTelecomService().getSimCallManager();
+                return getTelecomService().getSimCallManager(
+                        SubscriptionManager.getDefaultSubscriptionId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
@@ -866,9 +874,32 @@ public class TelecomManager {
     }
 
     /**
-     * Returns the current SIM call manager for the specified user. Apps must be prepared for this
-     * method to return {@code null}, indicating that there currently exists no user-chosen default
-     * {@code PhoneAccount}.
+     * Returns current SIM call manager for the Telephony Subscription ID specified. Apps must be
+     * prepared for this method to return {@code null}, indicating that there currently exists no
+     * SIM call manager {@link PhoneAccount} for the subscription specified.
+     *
+     * @param subscriptionId The Telephony Subscription ID that the SIM call manager should be
+     *                       queried for.
+     * @return The phone account handle of the current sim call manager.
+     * @see SubscriptionManager#getActiveSubscriptionInfoList()
+     * @hide
+     */
+    public PhoneAccountHandle getSimCallManagerForSubscription(int subscriptionId) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getSimCallManager(subscriptionId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelecomService#getSimCallManager");
+        }
+        return null;
+    }
+
+    /**
+     * Returns the current SIM call manager for the user-chosen default Telephony Subscription ID
+     * (see {@link SubscriptionManager#getDefaultSubscriptionId()}) and the specified user. Apps
+     * must be prepared for this method to return {@code null}, indicating that there currently
+     * exists no SIM call manager {@link PhoneAccount} for the default voice subscription.
      *
      * @return The phone account handle of the current sim call manager.
      *
@@ -889,8 +920,8 @@ public class TelecomManager {
 
     /**
      * Returns the current connection manager. Apps must be prepared for this method to return
-     * {@code null}, indicating that there currently exists no user-chosen default
-     * {@code PhoneAccount}.
+     * {@code null}, indicating that there currently exists no Connection Manager
+     * {@link PhoneAccount} for the default voice subscription.
      *
      * @return The phone account handle of the current connection manager.
      * @hide

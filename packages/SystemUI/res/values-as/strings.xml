@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"পুনৰাই নেদেখুৱাব"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সকলো মচক"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"পৰিচালনা"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এতিয়াই আৰম্ভ কৰক"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো জাননী নাই"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্ৰীণ পিন কৰা হ’ল"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'পিছলৈ যাওক\' আৰু \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক।"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"এই স্ক্ৰীণখন আনপিন কৰিবলৈ পিছলৈ যাওক আৰু অৱলোকন বুটামত স্পৰ্শ কৰি হেঁচি ধৰক।"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> খোলক"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবলৰ ছেটিংসমূহ"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ বাবলসমূহক অনুমতি দিয়ক?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"পৰিচালনা কৰক"</string>
     <string name="no_bubbles" msgid="337101288173078247">"অস্বীকাৰ কৰক"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"অনুমতি দিয়ক"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"মোক পিছত সুধিব"</string>

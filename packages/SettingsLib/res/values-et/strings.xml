@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Võrke ei saa kontrollida"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Puudub"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Salvestatud"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Pole ühendatud"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Keelatud"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP seadistamise ebaõnnestumine"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Võrgu kehva kvaliteedi tõttu ei ühendatud"</string>
@@ -314,7 +313,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Jõusta 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Luba 4x MSAA OpenGL ES 2.0 rakendustes"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Silu mittetäisnurksed kärpimistoimingud"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Profiili HWUI renderdam."</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Profiili HWUI renderdamine"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU silumise kihtide lubamine"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU silumise kihtide laadimise lubamine silumisrakendustele"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Akna animatsioonimastaap"</string>

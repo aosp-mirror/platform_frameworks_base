@@ -43,16 +43,23 @@ public class NetworkMonitorUtils {
             "android.permission.ACCESS_NETWORK_CONDITIONS";
 
     /**
-     * Return whether validation is required for a network.
-     * @param dfltNetCap Default requested network capabilities.
+     * Return whether validation is required for private DNS in strict mode.
      * @param nc Network capabilities of the network to test.
      */
-    public static boolean isValidationRequired(NetworkCapabilities nc) {
+    public static boolean isPrivateDnsValidationRequired(NetworkCapabilities nc) {
         // TODO: Consider requiring validation for DUN networks.
         return nc != null
                 && nc.hasCapability(NET_CAPABILITY_INTERNET)
                 && nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED)
-                && nc.hasCapability(NET_CAPABILITY_TRUSTED)
-                && nc.hasCapability(NET_CAPABILITY_NOT_VPN);
+                && nc.hasCapability(NET_CAPABILITY_TRUSTED);
+    }
+
+    /**
+     * Return whether validation is required for a network.
+     * @param nc Network capabilities of the network to test.
+     */
+    public static boolean isValidationRequired(NetworkCapabilities nc) {
+        // TODO: Consider requiring validation for DUN networks.
+        return isPrivateDnsValidationRequired(nc) && nc.hasCapability(NET_CAPABILITY_NOT_VPN);
     }
 }

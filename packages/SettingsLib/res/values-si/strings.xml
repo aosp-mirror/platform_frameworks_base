@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ජාල සඳහා පරිලෝකනය කළ නොහැක"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"කිසිවක් නැත"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"සුරකින ලදි"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"විසන්ධි විය"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"අබලයි"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP වින්‍යාස කිරීම අසාර්ථකයි"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"අඩු ගුණත්වයේ ජාලය හේතුවෙන් සම්බන්ධ නොවීය"</string>

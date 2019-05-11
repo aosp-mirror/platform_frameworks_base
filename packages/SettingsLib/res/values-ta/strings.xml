@@ -215,9 +215,9 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"பூட்லோடரைத் திறக்க அனுமதி"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM திறத்தலை அனுமதிக்கவா?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"எச்சரிக்கை: இந்த அமைப்பு இயக்கப்பட்டிருக்கும்போது, சாதன பாதுகாப்பு அம்சங்கள் இந்தச் சாதனத்தில் இயங்காது."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"போலி இருப்பிடப் பயன்பாட்டைத் தேர்ந்தெடு"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"போலி இருப்பிடப் ஆப்ஸ் அமைக்கப்படவில்லை"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"போலி இருப்பிடப் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"போலி இருப்பிட ஆப்ஸைத் தேர்ந்தெடு"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"போலி இருப்பிட ஆப்ஸ் அமைக்கப்படவில்லை"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"போலி இருப்பிட ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"நெட்வொர்க்கிங்"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"வயர்லெஸ் காட்சிக்கான சான்றிதழ்"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"வைஃபை அதிவிவர நுழைவை இயக்கு"</string>

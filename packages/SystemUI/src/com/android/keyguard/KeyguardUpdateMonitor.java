@@ -1686,7 +1686,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 && mFpm.getEnrolledFingerprints(userId).size() > 0;
     }
 
-    private boolean isUnlockWithFacePossible(int userId) {
+    /**
+     * If face hardware is available and user has enrolled. Not considering encryption or
+     * lockdown state.
+     */
+    public boolean isUnlockWithFacePossible(int userId) {
         return mFaceManager != null && mFaceManager.isHardwareDetected()
                 && !isFaceDisabled(userId)
                 && mFaceManager.hasEnrolledTemplates(userId);
@@ -2273,6 +2277,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return isSimPinSecure();
     }
 
+    /**
+     * If any SIM cards are currently secure.
+     * @see #isSimPinSecure(State)
+     */
     public boolean isSimPinSecure() {
         // True if any SIM is pin secure
         for (SubscriptionInfo info : getSubscriptionInfo(false /* forceReload */)) {
@@ -2338,11 +2346,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return changed;
     }
 
+    /**
+     * If the {@code state} is currently requiring a SIM PIN, PUK, or is disabled.
+     */
     public static boolean isSimPinSecure(IccCardConstants.State state) {
-        final IccCardConstants.State simState = state;
-        return (simState == IccCardConstants.State.PIN_REQUIRED
-                || simState == IccCardConstants.State.PUK_REQUIRED
-                || simState == IccCardConstants.State.PERM_DISABLED);
+        return (state == IccCardConstants.State.PIN_REQUIRED
+                || state == IccCardConstants.State.PUK_REQUIRED
+                || state == IccCardConstants.State.PERM_DISABLED);
     }
 
     public DisplayClientState getCachedDisplayClientState() {

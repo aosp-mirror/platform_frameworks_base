@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrer dit ansigt igen."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ansigtet kan ikke længere genkendes. Prøv igen."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Det minder for meget om et andet. Skift stilling."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Sørg for, at hovedet ikke er drejet for meget."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Sørg for, at hovedet ikke er bøjet for meget."</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Hold hovedet helt lodret."</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"Sørg for, at der ikke er noget foran dit ansigt."</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"Rengør kameraet."</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
@@ -1597,7 +1598,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Trådløs skærm"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Cast"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Opret forbindelse til enheden"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Send skærm til enhed"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Cast skærm til enhed"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Søger efter enheder…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Indstillinger"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Afbryd forbindelsen"</string>

@@ -16,6 +16,7 @@
 package android.ext.services.autofill;
 
 import static android.ext.services.autofill.EditDistanceScorer.calculateScore;
+import static android.ext.services.autofill.EditDistanceScorer.editDistance;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -73,9 +74,12 @@ public class EditDistanceScorerTest {
         assertFloat(calculateScore(AutofillValue.forText("DUDx"), "Dude"), 0.75F);
     }
 
+    @Test
+    public void testEditDistance_maxDistance() {
+        assertFloat(editDistance("testing", "b", 4), Integer.MAX_VALUE);
+    }
+
     public static void assertFloat(float actualValue, float expectedValue) {
         assertThat(actualValue).isWithin(0.01F).of(expectedValue);
     }
-
-
 }

@@ -176,8 +176,11 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         dispatchCallbacks(updateSnapshot(configEvent, riid, null));
     }
 
-    void unregisterRecorder(int riid) {
-        dispatchCallbacks(updateSnapshot(AudioManager.RECORD_CONFIG_EVENT_DEATH, riid, null));
+    /**
+     * Stop tracking the recorder
+     */
+    public void releaseRecorder(int riid) {
+        dispatchCallbacks(updateSnapshot(AudioManager.RECORD_CONFIG_EVENT_RELEASE, riid, null));
     }
 
     private void dispatchCallbacks(List<AudioRecordingConfiguration> configs) {
@@ -246,7 +249,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     if (state.isActiveConfiguration()) {
                         configChanged = true;
                         sEventLogger.log(new RecordingEvent(
-                                        AudioManager.RECORD_CONFIG_EVENT_DEATH,
+                                        AudioManager.RECORD_CONFIG_EVENT_RELEASE,
                                         state.getRiid(), state.getConfig()));
                     }
                     it.remove();
@@ -396,7 +399,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             switch (event) {
                 case AudioManager.RECORD_CONFIG_EVENT_START:
                     configChanged = state.setActive(true);
-                    if (config != null) { // ??? Can remove ???
+                    if (config != null) {
                         configChanged = state.setConfig(config) || configChanged;
                     }
                     break;
@@ -412,7 +415,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                         mRecordStates.remove(stateIndex);
                     }
                     break;
-                case AudioManager.RECORD_CONFIG_EVENT_DEATH:
+                case AudioManager.RECORD_CONFIG_EVENT_RELEASE:
                     configChanged = state.isActiveConfiguration();
                     mRecordStates.remove(stateIndex);
                     break;
@@ -504,7 +507,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
 
         public void binderDied() {
-            sMonitor.unregisterRecorder(mRiid);
+            sMonitor.releaseRecorder(mRiid);
         }
 
         boolean init() {
@@ -553,8 +556,8 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     return "update";
                 case AudioManager.RECORD_CONFIG_EVENT_STOP:
                     return "stop";
-                case AudioManager.RECORD_CONFIG_EVENT_DEATH:
-                    return "death";
+                case AudioManager.RECORD_CONFIG_EVENT_RELEASE:
+                    return "release";
                 default:
                     return "unknown (" + recEvent + ")";
             }

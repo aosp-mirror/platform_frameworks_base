@@ -6514,6 +6514,13 @@ public final class Settings {
                 "global_actions_panel_available";
 
         /**
+         * Enables debug mode for the Global Actions Panel.
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_PANEL_DEBUG_ENABLED =
+                "global_actions_panel_debug_enabled";
+
+        /**
          * Whether the hush gesture has ever been used
          * @hide
          */
@@ -9177,6 +9184,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_ENABLED);
             CLONE_TO_MANAGED_PROFILE.add(ALLOW_MOCK_LOCATION);
             CLONE_TO_MANAGED_PROFILE.add(ALLOWED_GEOLOCATION_ORIGINS);
+            CLONE_TO_MANAGED_PROFILE.add(CONTENT_CAPTURE_ENABLED);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);

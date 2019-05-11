@@ -32,27 +32,32 @@ namespace os {
 namespace statsd {
 
 // clang-format off
-static const std::string DRIVER_PACKAGE_NAME    = "TEST_DRIVER";
-static const std::string DRIVER_VERSION_NAME    = "TEST_DRIVER_VERSION";
-static const std::string APP_PACKAGE_NAME       = "TEST_APP";
-static const int64_t TIMESTAMP_WALLCLOCK        = 111;
-static const int64_t TIMESTAMP_ELAPSED          = 222;
-static const int64_t DRIVER_VERSION_CODE        = 333;
-static const int64_t DRIVER_BUILD_TIME          = 444;
-static const int64_t GL_LOADING_COUNT           = 3;
-static const int64_t GL_LOADING_FAILURE_COUNT   = 1;
-static const int64_t VK_LOADING_COUNT           = 4;
-static const int64_t VK_LOADING_FAILURE_COUNT   = 0;
-static const int64_t GL_DRIVER_LOADING_TIME_0   = 555;
-static const int64_t GL_DRIVER_LOADING_TIME_1   = 666;
-static const int64_t VK_DRIVER_LOADING_TIME_0   = 777;
-static const int64_t VK_DRIVER_LOADING_TIME_1   = 888;
-static const int64_t VK_DRIVER_LOADING_TIME_2   = 999;
-static const int32_t VULKAN_VERSION             = 1;
-static const int32_t CPU_VULKAN_VERSION         = 2;
-static const int32_t GLES_VERSION               = 3;
-static const size_t NUMBER_OF_VALUES_GLOBAL     = 11;
-static const size_t NUMBER_OF_VALUES_APP        = 4;
+static const std::string DRIVER_PACKAGE_NAME      = "TEST_DRIVER";
+static const std::string DRIVER_VERSION_NAME      = "TEST_DRIVER_VERSION";
+static const std::string APP_PACKAGE_NAME         = "TEST_APP";
+static const int64_t TIMESTAMP_WALLCLOCK          = 111;
+static const int64_t TIMESTAMP_ELAPSED            = 222;
+static const int64_t DRIVER_VERSION_CODE          = 333;
+static const int64_t DRIVER_BUILD_TIME            = 444;
+static const int64_t GL_LOADING_COUNT             = 3;
+static const int64_t GL_LOADING_FAILURE_COUNT     = 1;
+static const int64_t VK_LOADING_COUNT             = 4;
+static const int64_t VK_LOADING_FAILURE_COUNT     = 0;
+static const int64_t ANGLE_LOADING_COUNT          = 2;
+static const int64_t ANGLE_LOADING_FAILURE_COUNT  = 1;
+static const int64_t GL_DRIVER_LOADING_TIME_0     = 555;
+static const int64_t GL_DRIVER_LOADING_TIME_1     = 666;
+static const int64_t VK_DRIVER_LOADING_TIME_0     = 777;
+static const int64_t VK_DRIVER_LOADING_TIME_1     = 888;
+static const int64_t VK_DRIVER_LOADING_TIME_2     = 999;
+static const int64_t ANGLE_DRIVER_LOADING_TIME_0  = 1010;
+static const int64_t ANGLE_DRIVER_LOADING_TIME_1  = 1111;
+static const int32_t VULKAN_VERSION               = 1;
+static const int32_t CPU_VULKAN_VERSION           = 2;
+static const int32_t GLES_VERSION                 = 3;
+static const bool CPU_VULKAN_IN_USE               = true;
+static const size_t NUMBER_OF_VALUES_GLOBAL       = 13;
+static const size_t NUMBER_OF_VALUES_APP          = 6;
 // clang-format on
 
 class MockGpuStatsPuller : public GpuStatsPuller {
@@ -99,6 +104,8 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsGlobalInfo) {
     EXPECT_TRUE(event->write(VULKAN_VERSION));
     EXPECT_TRUE(event->write(CPU_VULKAN_VERSION));
     EXPECT_TRUE(event->write(GLES_VERSION));
+    EXPECT_TRUE(event->write(ANGLE_LOADING_COUNT));
+    EXPECT_TRUE(event->write(ANGLE_LOADING_FAILURE_COUNT));
     event->init();
     inData.emplace_back(event);
     MockGpuStatsPuller mockPuller(android::util::GPU_STATS_GLOBAL_INFO, &inData);
@@ -119,6 +126,8 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsGlobalInfo) {
     EXPECT_EQ(VULKAN_VERSION, outData[0]->getValues()[8].mValue.int_value);
     EXPECT_EQ(CPU_VULKAN_VERSION, outData[0]->getValues()[9].mValue.int_value);
     EXPECT_EQ(GLES_VERSION, outData[0]->getValues()[10].mValue.int_value);
+    EXPECT_EQ(ANGLE_LOADING_COUNT, outData[0]->getValues()[11].mValue.long_value);
+    EXPECT_EQ(ANGLE_LOADING_FAILURE_COUNT, outData[0]->getValues()[12].mValue.long_value);
 }
 
 TEST_F(GpuStatsPuller_test, PullGpuStatsAppInfo) {
@@ -134,8 +143,13 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsAppInfo) {
     vkDriverLoadingTime.emplace_back(VK_DRIVER_LOADING_TIME_0);
     vkDriverLoadingTime.emplace_back(VK_DRIVER_LOADING_TIME_1);
     vkDriverLoadingTime.emplace_back(VK_DRIVER_LOADING_TIME_2);
+    std::vector<int64_t> angleDriverLoadingTime;
+    angleDriverLoadingTime.emplace_back(ANGLE_DRIVER_LOADING_TIME_0);
+    angleDriverLoadingTime.emplace_back(ANGLE_DRIVER_LOADING_TIME_1);
     EXPECT_TRUE(event->write(int64VectorToProtoByteString(glDriverLoadingTime)));
     EXPECT_TRUE(event->write(int64VectorToProtoByteString(vkDriverLoadingTime)));
+    EXPECT_TRUE(event->write(int64VectorToProtoByteString(angleDriverLoadingTime)));
+    EXPECT_TRUE(event->write(CPU_VULKAN_IN_USE));
     event->init();
     inData.emplace_back(event);
     MockGpuStatsPuller mockPuller(android::util::GPU_STATS_APP_INFO, &inData);
@@ -151,6 +165,9 @@ TEST_F(GpuStatsPuller_test, PullGpuStatsAppInfo) {
               outData[0]->getValues()[2].mValue.str_value);
     EXPECT_EQ(int64VectorToProtoByteString(vkDriverLoadingTime),
               outData[0]->getValues()[3].mValue.str_value);
+    EXPECT_EQ(int64VectorToProtoByteString(angleDriverLoadingTime),
+              outData[0]->getValues()[4].mValue.str_value);
+    EXPECT_EQ(CPU_VULKAN_IN_USE, outData[0]->getValues()[5].mValue.int_value);
 }
 
 }  // namespace statsd

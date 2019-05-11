@@ -311,8 +311,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
 
-    // true if we are enabled, protected by this
-    private boolean mEnabled;
+    // True if we are enabled
+    @GuardedBy("mLock")
+    private boolean mGpsEnabled;
 
     private boolean mShutdown;
 
@@ -406,6 +407,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final static String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
     private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderPsdsDownload";
+    @GuardedBy("mLock")
     private final PowerManager.WakeLock mDownloadPsdsWakeLock;
 
     // Alarms
@@ -517,29 +519,27 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         boolean isKeepLppProfile = false;
         if (!TextUtils.isEmpty(mccMnc)) {
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
-            synchronized (mLock) {
-                if (configManager != null) {
-                    PersistableBundle b = configManager.getConfig();
-                    if (b != null) {
-                        isKeepLppProfile =
-                                b.getBoolean(CarrierConfigManager.Gps.KEY_PERSIST_LPP_MODE_BOOL);
-                    }
+            if (configManager != null) {
+                PersistableBundle b = configManager.getConfig();
+                if (b != null) {
+                    isKeepLppProfile =
+                            b.getBoolean(CarrierConfigManager.Gps.KEY_PERSIST_LPP_MODE_BOOL);
                 }
-                if (isKeepLppProfile) {
-                    // load current properties for the carrier
-                    mGnssConfiguration.loadPropertiesFromCarrierConfig();
-                    String lpp_profile = mGnssConfiguration.getLppProfile();
-                    // set the persist property LPP_PROFILE for the value
-                    if (lpp_profile != null) {
-                        SystemProperties.set(GnssConfiguration.LPP_PROFILE, lpp_profile);
-                    }
-                } else {
-                    // reset the persist property
-                    SystemProperties.set(GnssConfiguration.LPP_PROFILE, "");
-                }
-                reloadGpsProperties();
-                mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
             }
+            if (isKeepLppProfile) {
+                // load current properties for the carrier
+                mGnssConfiguration.loadPropertiesFromCarrierConfig();
+                String lpp_profile = mGnssConfiguration.getLppProfile();
+                // set the persist property LPP_PROFILE for the value
+                if (lpp_profile != null) {
+                    SystemProperties.set(GnssConfiguration.LPP_PROFILE, lpp_profile);
+                }
+            } else {
+                // reset the persist property
+                SystemProperties.set(GnssConfiguration.LPP_PROFILE, "");
+            }
+            reloadGpsProperties();
+            mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
         } else {
             if (DEBUG) Log.d(TAG, "SIM MCC/MNC is still not available");
         }
@@ -579,6 +579,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mSuplEsEnabled = mGnssConfiguration.getSuplEs(0) == 1;
         if (mGnssVisibilityControl != null) {
             mGnssVisibilityControl.updateProxyApps(mGnssConfiguration.getProxyApps());
+            mGnssVisibilityControl.setEsNotify(mGnssConfiguration.getEsNotify(0));
         }
     }
 
@@ -636,14 +637,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             @Override
             protected boolean isGpsEnabled() {
-                return isEnabled();
+                return GnssLocationProvider.this.isGpsEnabled();
             }
         };
 
         mGnssMeasurementsProvider = new GnssMeasurementsProvider(mContext, mHandler) {
             @Override
             protected boolean isGpsEnabled() {
-                return isEnabled();
+                return GnssLocationProvider.this.isGpsEnabled();
             }
         };
 
@@ -652,7 +653,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(mContext, mHandler) {
             @Override
             protected boolean isGpsEnabled() {
-                return isEnabled();
+                return GnssLocationProvider.this.isGpsEnabled();
             }
         };
 
@@ -829,8 +830,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
         mDownloadPsdsDataPending = STATE_DOWNLOADING;
 
-        // hold wake lock while task runs
-        mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
+        synchronized (mLock) {
+            // hold wake lock while task runs
+            mDownloadPsdsWakeLock.acquire(DOWNLOAD_PSDS_DATA_TIMEOUT_MS);
+        }
         Log.i(TAG, "WakeLock acquired by handleDownloadPsdsData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
             GpsPsdsDownloader psdsDownloader = new GpsPsdsDownloader(
@@ -913,14 +916,19 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return GPS_POSITION_MODE_STANDALONE;
     }
 
-    @GuardedBy("mLock")
-    private void handleEnableLocked() {
-        if (DEBUG) Log.d(TAG, "handleEnableLocked");
+    private void setGpsEnabled(boolean enabled) {
+        synchronized (mLock) {
+            mGpsEnabled = enabled;
+        }
+    }
+
+    private void handleEnable() {
+        if (DEBUG) Log.d(TAG, "handleEnable");
 
         boolean inited = native_init();
 
         if (inited) {
-            mEnabled = true;
+            setGpsEnabled(true);
             mSupportsPsds = native_supports_psds();
 
             // TODO: remove the following native calls if we can make sure they are redundant.
@@ -937,26 +945,25 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
             mGnssBatchingProvider.enable();
             if (mGnssVisibilityControl != null) {
-                mGnssVisibilityControl.onGpsEnabledChanged(mEnabled);
+                mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */true);
             }
         } else {
-            mEnabled = false;
+            setGpsEnabled(false);
             Log.w(TAG, "Failed to enable location provider");
         }
     }
 
-    @GuardedBy("mLock")
-    private void handleDisableLocked() {
-        if (DEBUG) Log.d(TAG, "handleDisableLocked");
+    private void handleDisable() {
+        if (DEBUG) Log.d(TAG, "handleDisable");
 
-        mEnabled = false;
+        setGpsEnabled(false);
         updateClientUids(new WorkSource());
         stopNavigating();
         mAlarmManager.cancel(mWakeupIntent);
         mAlarmManager.cancel(mTimeoutIntent);
 
         if (mGnssVisibilityControl != null) {
-            mGnssVisibilityControl.onGpsEnabledChanged(mEnabled);
+            mGnssVisibilityControl.onGpsEnabledChanged(/* isEnabled= */ false);
         }
         mGnssBatchingProvider.disable();
         // do this before releasing wakelock
@@ -967,35 +974,33 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void updateEnabled() {
-        synchronized (mLock) {
-            // Generally follow location setting
-            boolean enabled = mContext.getSystemService(LocationManager.class).isLocationEnabled();
+        // Generally follow location setting
+        boolean enabled = mContext.getSystemService(LocationManager.class).isLocationEnabled();
 
-            // ... but disable if PowerManager overrides
-            enabled &= !mDisableGpsForPowerManager;
+        // ... but disable if PowerManager overrides
+        enabled &= !mDisableGpsForPowerManager;
 
-            // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
-            enabled |= (mProviderRequest != null && mProviderRequest.reportLocation
-                            && mProviderRequest.locationSettingsIgnored);
+        // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
+        enabled |= (mProviderRequest != null && mProviderRequest.reportLocation
+                        && mProviderRequest.locationSettingsIgnored);
 
-            // ... and, finally, disable anyway, if device is being shut down
-            enabled &= !mShutdown;
+        // ... and, finally, disable anyway, if device is being shut down
+        enabled &= !mShutdown;
 
-            if (enabled == mEnabled) {
-                return;
-            }
+        if (enabled == isGpsEnabled()) {
+            return;
+        }
 
-            if (enabled) {
-                handleEnableLocked();
-            } else {
-                handleDisableLocked();
-            }
+        if (enabled) {
+            handleEnable();
+        } else {
+            handleDisable();
         }
     }
 
-    public boolean isEnabled() {
+    private boolean isGpsEnabled() {
         synchronized (mLock) {
-            return mEnabled;
+            return mGpsEnabled;
         }
     }
 
@@ -1036,7 +1041,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         if (DEBUG) Log.d(TAG, "setRequest " + mProviderRequest);
-        if (mProviderRequest.reportLocation && isEnabled()) {
+        if (mProviderRequest.reportLocation && isGpsEnabled()) {
             // update client uids
             updateClientUids(mWorkSource);
 
@@ -1598,10 +1603,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) Log.d(TAG, "reportGnssServiceDied");
         mHandler.post(() -> {
             setupNativeGnssService(/* reinitializeGnssServiceHandle = */ true);
-            if (isEnabled()) {
-                synchronized (mLock) {
-                    mEnabled = false;
-                }
+            if (isGpsEnabled()) {
+                setGpsEnabled(false);
+
                 updateEnabled();
 
                 // resend configuration into the restarted HAL service.
@@ -1809,7 +1813,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     /* requestorIdEncoding= */ 0,
                     /* textEncoding= */ 0,
                     mSuplEsEnabled,
-                    isEnabled(),
+                    isGpsEnabled(),
                     userResponse);
 
             return true;
@@ -1875,7 +1879,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 notification.requestorIdEncoding,
                 notification.textEncoding,
                 mSuplEsEnabled,
-                isEnabled(),
+                isGpsEnabled(),
                 /* userResponse= */ 0);
     }
 
@@ -2055,7 +2059,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             setupNativeGnssService(/* reinitializeGnssServiceHandle = */ false);
 
             if (native_is_gnss_visibility_control_supported()) {
-                mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper);
+                mGnssVisibilityControl = new GnssVisibilityControl(mContext, mLooper, mNIHandler);
             }
 
             // load default GPS configuration

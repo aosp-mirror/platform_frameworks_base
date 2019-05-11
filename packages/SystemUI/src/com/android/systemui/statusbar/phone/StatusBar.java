@@ -149,7 +149,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManagerFactory;
-import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -162,6 +161,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
@@ -318,6 +318,17 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     /** If true, the lockscreen will show a distinct wallpaper */
     public static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
+
+    private static final AudioAttributes AUDIO_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    // Temporary fix for b/123870990. No time in this release to
+                    // introduce a new vibration type, but we need to distinguish these vibrations
+                    // from other haptic feedback vibrations. Fortunately, Alarm vibrations have
+                    // exactly the same behavior as we need
+                    // TODO: refactor within the scope of b/132170758
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build();
 
     static {
         boolean onlyCoreApps;
@@ -3297,11 +3308,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showBouncer(boolean scrimmed) {
-        if (!mIsOccluded && !scrimmed && mState == StatusBarState.KEYGUARD) {
-            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
-        } else {
-            mStatusBarKeyguardViewManager.showBouncer(scrimmed);
-        }
+        mStatusBarKeyguardViewManager.showBouncer(scrimmed);
     }
 
     @Override
@@ -3672,7 +3679,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */);
+        mVibrator.vibrate(mCameraLaunchGestureVibePattern, -1 /* repeat */, AUDIO_ATTRIBUTES);
     }
 
     /**

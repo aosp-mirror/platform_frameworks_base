@@ -362,9 +362,6 @@ public final class Settings {
     // For every user, it is used to find the package name of the default Browser App.
     final SparseArray<String> mDefaultBrowserApp = new SparseArray<String>();
 
-    // For every user, a record of the package name of the default Dialer App.
-    final SparseArray<String> mDefaultDialerApp = new SparseArray<String>();
-
     // App-link priority tracking, per-user
     final SparseIntArray mNextAppLinkGeneration = new SparseIntArray();
 
@@ -1270,19 +1267,6 @@ public final class Settings {
         return (userId == UserHandle.USER_ALL) ? null : mDefaultBrowserApp.removeReturnOld(userId);
     }
 
-    boolean setDefaultDialerPackageNameLPw(String packageName, int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            return false;
-        }
-        mDefaultDialerApp.put(userId, packageName);
-        writePackageRestrictionsLPr(userId);
-        return true;
-    }
-
-    String getDefaultDialerPackageNameLPw(int userId) {
-        return (userId == UserHandle.USER_ALL) ? null : mDefaultDialerApp.get(userId);
-    }
-
     private File getUserPackagesStateFile(int userId) {
         // TODO: Implement a cleaner solution when adding tests.
         // This instead of Environment.getUserSystemDirectory(userId) to support testing.
@@ -1482,8 +1466,7 @@ public final class Settings {
                 String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
                 mDefaultBrowserApp.put(userId, packageName);
             } else if (tagName.equals(TAG_DEFAULT_DIALER)) {
-                String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
-                mDefaultDialerApp.put(userId, packageName);
+                // Ignored.
             } else {
                 String msg = "Unknown element under " +  TAG_DEFAULT_APPS + ": " +
                         parser.getName();
@@ -1937,12 +1920,6 @@ public final class Settings {
             serializer.startTag(null, TAG_DEFAULT_BROWSER);
             serializer.attribute(null, ATTR_PACKAGE_NAME, defaultBrowser);
             serializer.endTag(null, TAG_DEFAULT_BROWSER);
-        }
-        String defaultDialer = mDefaultDialerApp.get(userId);
-        if (!TextUtils.isEmpty(defaultDialer)) {
-            serializer.startTag(null, TAG_DEFAULT_DIALER);
-            serializer.attribute(null, ATTR_PACKAGE_NAME, defaultDialer);
-            serializer.endTag(null, TAG_DEFAULT_DIALER);
         }
         serializer.endTag(null, TAG_DEFAULT_APPS);
     }
@@ -2575,10 +2552,6 @@ public final class Settings {
             writeKernelMappingLPr(ps);
         }
 
-        for (final SharedUserSetting sus : mSharedUsers.values()) {
-            knownSet.remove(sus.getStorageSandboxName());
-        }
-
         // Remove any unclaimed mappings
         for (int i = 0; i < knownSet.size(); i++) {
             final String name = knownSet.valueAt(i);
@@ -2589,20 +2562,10 @@ public final class Settings {
         }
     }
 
-    void writeKernelMappingLPr(SharedUserSetting sus) {
-        if (mKernelMappingFilename == null || sus == null || sus.name == null) return;
-
-        writeKernelMappingLPr(sus.getStorageSandboxName(),
-                sus.userId, sus.getNotInstalledUserIds());
-    }
-
     void writeKernelMappingLPr(PackageSetting ps) {
         if (mKernelMappingFilename == null || ps == null || ps.name == null) return;
 
         writeKernelMappingLPr(ps.name, ps.appId, ps.getNotInstalledUserIds());
-        if (ps.sharedUser != null) {
-            writeKernelMappingLPr(ps.sharedUser);
-        }
     }
 
     void writeKernelMappingLPr(String name, int appId, int[] excludedUserIds) {
@@ -4959,27 +4922,43 @@ public final class Settings {
                     pw.println("Shared users:");
                     printedSomething = true;
                 }
+
                 pw.print("  SharedUser [");
                 pw.print(su.name);
                 pw.print("] (");
                 pw.print(Integer.toHexString(System.identityHashCode(su)));
-                        pw.println("):");
+                pw.println("):");
 
                 String prefix = "    ";
                 pw.print(prefix); pw.print("userId="); pw.println(su.userId);
 
-                PermissionsState permissionsState = su.getPermissionsState();
+                pw.print(prefix); pw.println("Packages");
+                final int numPackages = su.packages.size();
+                for (int i = 0; i < numPackages; i++) {
+                    final PackageSetting ps = su.packages.valueAt(i);
+                    if (ps != null) {
+                        pw.print(prefix + "  "); pw.println(ps.toString());
+                    } else {
+                        pw.print(prefix + "  "); pw.println("NULL?!");
+                    }
+                }
+
+                if (dumpState.isOptionEnabled(DumpState.OPTION_SKIP_PERMISSIONS)) {
+                    continue;
+                }
+
+                final PermissionsState permissionsState = su.getPermissionsState();
                 dumpInstallPermissionsLPr(pw, prefix, permissionNames, permissionsState);
 
                 for (int userId : UserManagerService.getInstance().getUserIds()) {
                     final int[] gids = permissionsState.computeGids(userId);
-                    List<PermissionState> permissions = permissionsState
-                            .getRuntimePermissionStates(userId);
+                    final List<PermissionState> permissions =
+                            permissionsState.getRuntimePermissionStates(userId);
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
                         pw.print(prefix); pw.print("User "); pw.print(userId); pw.println(": ");
                         dumpGidsLPr(pw, prefix + "  ", gids);
-                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames, permissions,
-                                packageName != null);
+                        dumpRuntimePermissionsLPr(pw, prefix + "  ", permissionNames,
+                                permissions, packageName != null);
                     }
                 }
             } else {

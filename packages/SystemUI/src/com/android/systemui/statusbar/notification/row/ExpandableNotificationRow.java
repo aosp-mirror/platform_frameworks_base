@@ -77,7 +77,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManagerFactory;
-import com.android.systemui.classifier.FalsingManagerFactory.FalsingManager;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -770,7 +770,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         if (mHeaderVisibleAmount != headerVisibleAmount) {
             mHeaderVisibleAmount = headerVisibleAmount;
-            mPrivateLayout.setHeaderVisibleAmount(headerVisibleAmount);
+            for (NotificationContentView l : mLayouts) {
+                l.setHeaderVisibleAmount(headerVisibleAmount);
+            }
             if (mChildrenContainer != null) {
                 mChildrenContainer.setHeaderVisibleAmount(headerVisibleAmount);
             }
@@ -1242,7 +1244,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mStatusBarNotification.clearPackageContext();
         mNotificationInflater.clearCachesAndReInflate();
-        onNotificationUpdated();
     }
 
     @Override
@@ -2398,6 +2399,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * it's a summary notification).
      */
     public int getNumUniqueChannels() {
+        return getUniqueChannels().size();
+    }
+
+    /**
+     * Returns the channels covered by the notification row (including its children if
+     * it's a summary notification).
+     */
+    public ArraySet<NotificationChannel> getUniqueChannels() {
         ArraySet<NotificationChannel> channels = new ArraySet<>();
 
         channels.add(mEntry.channel);
@@ -2417,7 +2426,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
             }
         }
-        return channels.size();
+
+        return channels;
     }
 
     public void updateChildrenHeaderAppearance() {
