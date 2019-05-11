@@ -423,6 +423,14 @@ public class CarStatusBar extends StatusBar implements
                 new CarUxRestrictionManagerWrapper();
         carUxRestrictionManagerWrapper.setCarUxRestrictionsManager(carUxRestrictionsManager);
         NotificationDataManager notificationDataManager = new NotificationDataManager();
+
+        notificationDataManager.setOnUnseenCountUpdateListener(
+                () -> {
+                    // TODO: Update Notification Icon based on unseen count
+                    Log.d(TAG, "unseen count: " +
+                            notificationDataManager.getUnseenNotificationCount());
+                });
+
         CarHeadsUpNotificationManager carHeadsUpNotificationManager =
                 new CarSystemUIHeadsUpNotificationManager(mContext, clickHandlerFactory,
                         notificationDataManager);
@@ -433,6 +441,7 @@ public class CarStatusBar extends StatusBar implements
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
         View glassPane = mStatusBarWindow.findViewById(R.id.glass_pane);
         mNotificationView.setClickHandlerFactory(clickHandlerFactory);
+        mNotificationView.setNotificationDataManager(notificationDataManager);
 
         // The glass pane is used to view touch events before passed to the notification list.
         // This allows us to initialize gesture listeners and detect when to close the notifications
@@ -518,7 +527,8 @@ public class CarStatusBar extends StatusBar implements
                 mNotificationView,
                 PreprocessingManager.getInstance(mContext),
                 carNotificationListener,
-                carUxRestrictionManagerWrapper);
+                carUxRestrictionManagerWrapper,
+                notificationDataManager);
         mNotificationViewController.enable();
     }
 
@@ -538,7 +548,6 @@ public class CarStatusBar extends StatusBar implements
         mNotificationList.scrollToPosition(0);
         mStatusBarWindowController.setPanelVisible(true);
         mNotificationView.setVisibility(View.VISIBLE);
-
         animateNotificationPanel(mOpeningVelocity, false);
 
         setPanelExpanded(true);
@@ -625,6 +634,7 @@ public class CarStatusBar extends StatusBar implements
                     setPanelExpanded(false);
                 } else {
                     // let the status bar know that the panel is open
+                    mNotificationView.setVisibleNotificationsAsSeen();
                     setPanelExpanded(true);
                 }
             }
@@ -824,7 +834,6 @@ public class CarStatusBar extends StatusBar implements
             pw.println(entry.getValue());
         }
     }
-
 
     @Override
     public void showBatteryView() {
