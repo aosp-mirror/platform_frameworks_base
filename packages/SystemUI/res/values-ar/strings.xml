@@ -377,6 +377,8 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"تفعيل الإعداد في <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"حتى <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"مظهر الألوان الداكنة"</string>
+    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‏الاتصالات قصيرة المدى (NFC)"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"تم إيقاف الاتصال القريب المدى"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"تم تفعيل الاتصال القريب المدى"</string>
@@ -460,10 +462,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"عدم الإظهار مرة أخرى"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"إدارة"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"إشعارات بسيطة"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"محو جميع الإشعارات البسيطة"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"تم إيقاف الإشعارات مؤقتًا وفقًا لإعداد \"الرجاء عدم الإزعاج\""</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"البدء الآن"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ليس هناك أي اشعارات"</string>
@@ -663,6 +663,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"يتعذّر تعديل هذه الإشعارات."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"إشعار مستند إلى خادم وكيل"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"يستخدم هذا التطبيق الكاميرا."</string>
     <string name="appops_microphone" msgid="741508267659494555">"يستخدم هذا التطبيق الميكروفون."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"يتم عرض هذا التطبيق فوق التطبيقات الأخرى على شاشتك."</string>
@@ -946,4 +950,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"الانتقال إلى أعلى اليسار"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"نقل إلى أسفل يمين الشاشة"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"نقل إلى أسفل اليسار"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>

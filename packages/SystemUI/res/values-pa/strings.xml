@@ -369,6 +369,8 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ਵਜੇ ਚਾਲੂ"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ਤੱਕ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ਗੂੜ੍ਹਾ ਥੀਮ"</string>
+    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
@@ -448,10 +450,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"ਸਰਲ ਸੂਚਨਾਵਾਂ"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"ਸਾਰੀਆਂ ਸਰਲ ਸੂਚਨਾਵਾਂ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ਹੁਣ ਚਾਲੂ ਕਰੋ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ਕੋਈ ਸੂਚਨਾਵਾਂ ਨਹੀਂ"</string>
@@ -651,6 +651,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ਇਹ ਸੂਚਨਾਵਾਂ ਦਾ ਗਰੁੱਪ ਇੱਥੇ ਸੰਰੂਪਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ਇੱਕ ਐਪ ਦੀ ਥਾਂ \'ਤੇ ਦੂਜੀ ਐਪ ਰਾਹੀਂ ਦਿੱਤੀ ਗਈ ਸੂਚਨਾ"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ਇਹ ਐਪ ਕੈਮਰੇ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ਇਹ ਐਪ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ਇਹ ਐਪ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹੈ।"</string>
@@ -926,4 +930,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"ਉੱਪਰ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>
