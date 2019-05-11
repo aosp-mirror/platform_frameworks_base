@@ -1242,7 +1242,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mStatusBarNotification.clearPackageContext();
         mNotificationInflater.clearCachesAndReInflate();
-        onNotificationUpdated();
     }
 
     @Override
