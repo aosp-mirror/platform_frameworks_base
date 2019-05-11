@@ -39,6 +39,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.analytics.DataCollector;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -52,7 +53,7 @@ import java.io.PrintWriter;
  *
  * It does not collect touch events when the bouncer shows up.
  */
-public class FalsingManagerImpl implements FalsingManagerFactory.FalsingManager {
+public class FalsingManagerImpl implements FalsingManager {
     private static final String ENFORCE_BOUNCER = "falsing_manager_enforce_bouncer";
 
     private static final int[] CLASSIFIER_SENSORS = new int[] {
