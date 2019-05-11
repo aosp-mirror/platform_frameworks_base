@@ -77,9 +77,6 @@ class UserUsageStatsService {
     private String mLastBackgroundedPackage;
     private final int mUserId;
 
-    // STOPSHIP: Temporary member variable for debugging b/110930764.
-    private Event mLastEvent;
-
     private static final long[] INTERVAL_LENGTH = new long[] {
             UnixCalendar.DAY_IN_MILLIS, UnixCalendar.WEEK_IN_MILLIS,
             UnixCalendar.MONTH_IN_MILLIS, UnixCalendar.YEAR_IN_MILLIS
@@ -171,8 +168,6 @@ class UserUsageStatsService {
                     + "[" + event.mTimeStamp + "]: "
                     + eventToString(event.mEventType));
         }
-
-        mLastEvent = new Event(event);
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
@@ -329,36 +324,6 @@ class UserUsageStatsService {
                 Slog.d(TAG, mLogPrefix + "Requesting stats after " + beginTime + " but latest is "
                         + currentStats.endTime);
             }
-
-            // STOPSHIP: Temporary logging for b/110930764.
-            if (intervalType == INTERVAL_DAILY
-                    && mLastEvent != null && mLastEvent.mTimeStamp >= beginTime) {
-                final IntervalStats diskStats = mDatabase.getLatestUsageStats(
-                        INTERVAL_DAILY);
-                StringBuilder sb = new StringBuilder(256);
-                sb.append("Recent UsageStats missing! timeRange : ");
-                sb.append(beginTime);
-                sb.append(", ");
-                sb.append(endTime);
-                sb.append("\nLast reported Usage Event time : ");
-                sb.append(mLastEvent.mTimeStamp);
-                if (currentStats == null) {
-                    sb.append("\nNo in memory event stats available.");
-                } else {
-                    sb.append("\nLast in memory event time : ");
-                    sb.append(currentStats.endTime);
-                    sb.append("\nLast save time: ");
-                    sb.append(currentStats.lastTimeSaved);
-                }
-                if (diskStats == null) {
-                    sb.append("\nNo on disk event stats available.");
-                } else {
-                    sb.append("\nLast on disk event time : ");
-                    sb.append(diskStats.endTime);
-                }
-                Slog.wtf(TAG, sb.toString());
-            }
-
             // Nothing newer available.
             return null;
         }
