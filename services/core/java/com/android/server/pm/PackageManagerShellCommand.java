@@ -39,6 +39,7 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -273,6 +274,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return uninstallSystemUpdates();
                 case "rollback-app":
                     return runRollbackApp();
+                case "get-moduleinfo":
+                    return runGetModuleInfo();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -293,6 +296,49 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Remote exception: " + e);
         }
         return -1;
+    }
+
+    /**
+     * Shows module info
+     *
+     * Usage: get-moduleinfo [--all | --installed] [module-name]
+     * Example: get-moduleinfo, get-moduleinfo --all, get-moduleinfo xyz
+     */
+    private int runGetModuleInfo() {
+        final PrintWriter pw = getOutPrintWriter();
+        int flags = 0;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--all":
+                    flags |= PackageManager.MATCH_ALL;
+                    break;
+                case "--installed":
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return -1;
+            }
+        }
+
+        String moduleName = getNextArg();
+        try {
+            if (moduleName != null) {
+                ModuleInfo m = mInterface.getModuleInfo(moduleName, flags);
+                pw.println(m.toString() + " packageName: " + m.getPackageName());
+
+            } else {
+                List<ModuleInfo> modules = mInterface.getInstalledModules(flags);
+                for (ModuleInfo m: modules) {
+                    pw.println(m.toString() + " packageName: " + m.getPackageName());
+                }
+            }
+        } catch (RemoteException e) {
+            pw.println("Failure [" + e.getClass().getName() + " - " + e.getMessage() + "]");
+            return -1;
+        }
+        return 1;
     }
 
     private int getStagedSessions() {
@@ -3205,6 +3251,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Remove updates to all system applications and fall back to their /system " +
                 "version.");
         pw.println();
+        pw.println("  get-moduleinfo [--all | --installed] [module-name]");
+        pw.println("    Displays module info. If module-name is specified only that info is shown");
+        pw.println("    By default, without any argument only installed modules are shown.");
+        pw.println("      --all: show all module info");
+        pw.println("      --installed: show only installed modules");
+        pw.println("");
         Intent.printIntentArgsHelp(pw , "");
     }
 

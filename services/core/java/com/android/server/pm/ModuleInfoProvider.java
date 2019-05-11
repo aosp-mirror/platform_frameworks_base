@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -39,6 +40,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -165,7 +167,27 @@ public class ModuleInfoProvider {
             throw new IllegalStateException("Call to getInstalledModules before metadata loaded");
         }
 
-        return new ArrayList<>(mModuleInfo.values());
+        ArrayList<ModuleInfo> allModules = new ArrayList<>(mModuleInfo.values());
+        if ((flags & PackageManager.MATCH_ALL) != 0) {
+            return allModules;
+        }
+
+        ArraySet<String> allPackages;
+        try {
+            allPackages = new ArraySet<>(mPackageManager.getAllPackages());
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Unable to retrieve all package names", e);
+            return Collections.emptyList();
+        }
+
+        ArrayList<ModuleInfo> installedModules = new ArrayList<>(allPackages.size());
+        for (int i = allModules.size() - 1; i >= 0; --i) {
+            ModuleInfo mi = allModules.get(i);
+            if (allPackages.contains(mi.getPackageName())) {
+                installedModules.add(mi);
+            }
+        }
+        return installedModules;
     }
 
     ModuleInfo getModuleInfo(String packageName, int flags) {
