@@ -153,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Postavljene su neke zadane postavke"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nema zadanih postavki"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Postavke za tekst u govor"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Pretvaranje teksta u govor"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Tekst u govor"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina kojom se izgovara tekst"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina glasa"</string>

@@ -314,7 +314,7 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Активиране на 4x MSAA в прилож. с OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отстр. на грешки при неправоъг. изрязване"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Изобр. на HWUI: Профилир."</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Слоеве за отстр. на грешки в ГП: Актив."</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Активиране на слоевете за отстр. на грешки в ГП"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Разреш. на зарежд. на слоевете за отстр. на грешки в ГП за съотв. прилож."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Скала на аним.: Прозорец"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Скала на преходната анимация"</string>

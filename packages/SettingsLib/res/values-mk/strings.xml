@@ -334,9 +334,9 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Направете сите активности да бидат со променлива големина за повеќе прозорци, без разлика на вредностите на манифестот."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Овозможи прозорци со слободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Овозможи поддршка за експериментални прозорци со слободна форма."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Резервна лозинка за работна површина"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Целосни резервни копии на работната површина кои во моментов не се заштитени"</string>
-    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Допрете за да се промени или отстрани лозинката за целосни резервни копии на работната површина"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Лозинка за бекап на компјутер"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Целосниот бекап на компјутерот во моментов не е заштитен"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Допрете за да се промени или отстрани лозинката за целосен бекап на компјутерот"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Подесена нова лозинка на резервна копија"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Новата лозинка и потврдата не се исти"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Неуспешно подесување лозинка на резервна копија"</string>

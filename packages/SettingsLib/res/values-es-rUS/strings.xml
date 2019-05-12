@@ -259,7 +259,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Ubicaciones de prueba"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permitir ubicaciones de prueba"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Habilitar inspección de atributos de vista"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Siempre mantén los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantener siempre los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar la aceleración de hardware de conexión mediante dispositivo portátil si está disponible"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"¿Permitir depuración por USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuración por USB solo está indicada para actividades de programación. Úsala para copiar datos entre tu computadora y el dispositivo, para instalar aplicaciones en el dispositivo sin recibir notificaciones y para leer datos de registro."</string>
@@ -295,7 +295,7 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar información visual para presiones"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Ver actualiz. de superficie"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Destello en superficie por actualización"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Mostrar actualizaciones"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Mostrar cambios de vista"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Mostrar vistas de ventanas procesadas"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ver actualiz. de capas de hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Luz verde en capas de hardware al actualizarse"</string>
@@ -327,7 +327,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANR en 2.° plano"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Alertas de notificaciones"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"App que publica notificación sin canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar actividades para que cambien de tamaño"</string>

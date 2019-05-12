@@ -237,7 +237,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"藍牙音訊 LDAC 編解碼器：播放品質"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"觸發藍牙音訊 LDAC\n編解碼器選項：播放品質"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"正在串流：<xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
-    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"不公開的網域名稱系統 (DNS)"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"私人 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"選取私人網域名稱系統 (DNS) 模式"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"停用"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"自動"</string>
