@@ -571,16 +571,11 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Енді бет анықтау мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Алдыңғысына тым ұқсас, басқаша қалыпта түсіңіз."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
-    <skip />
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Басыңызды түзурек ұстаңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Басыңызды түзурек ұстаңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Басыңызды кішкене бұрыңыз."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Экранның жоғарғы жиегіндегі датчикті тазалаңыз."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>

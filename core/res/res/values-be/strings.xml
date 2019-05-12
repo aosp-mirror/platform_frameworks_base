@@ -468,9 +468,9 @@
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"наладка памеру шпалер"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дазваляе прыкладанням задаваць падказкі па памеры сістэмных шпалер."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"усталёўваць часавы пояс"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дазваляе прыкладанням змяняць гадзінны пояс планшэта."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дазваляе праграмам змяняць часавы пояс планшэта."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Дазваляе праграме змяняць часавы пояс тэлевізара."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дазваляе прыкладанню змяняць гадзінны пояс тэлефона."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дазваляе праграме змяняць часавы пояс тэлефона."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"пошук уліковых запісаў на прыладзе"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Дазваляе прыкладанню атрымлiваць спіс уліковых запісаў, вядомых планшэту. Сярод iх могуць быць улiковыя запiсы, створаныя прыкладаннямi, якiя вы ўсталявалi."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Дазваляе праграме атрымлiваць спіс уліковых запісаў, вядомых тэлевізару. Сярод iх могуць быць любыя ўлiковыя запiсы, створаныя праграмамі, якiя вы ўсталявалi."</string>
@@ -579,12 +579,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Не бачна розніцы. Памяняйце позу."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Вы занадта моцна павярнулі галаву."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Галава не ў цэнтры."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Вы занадта моцна павярнулі галаву."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Прыміце ўсё, што закрывае ваш твар."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Ачысціце датчык уверсе экрана."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Твар не спраўджаны. Абсталяванне недаступнае."</string>
