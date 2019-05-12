@@ -282,13 +282,13 @@
     <string name="no_application" msgid="2813387563129153880">"Hiçbiri"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Hata ayıklayıcıyı bekle"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Hata ayıklanan uygulama, çalıştırılmadan önce hata ayıklayıcının eklenmesini bekler"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"Girdi"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Giriş"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Çizim"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Donanım hızlandırmalı oluşturma"</string>
     <string name="media_category" msgid="4388305075496848353">"Medya"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"İzleme"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Yüksek düzey modu etkin"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Uyg. ana işlem parçasında uzun işlem yap. ekr. yakıp söndür"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Uygulamalar ana iş parçacığında uzun işlem yaparken ekranı yanıp söndür"</string>
     <string name="pointer_location" msgid="6084434787496938001">"İşaretçi konumu"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Mevcut dokunmatik verilerini gösteren yer paylaşımı"</string>
     <string name="show_touches" msgid="2642976305235070316">"Dokunmayı göster"</string>

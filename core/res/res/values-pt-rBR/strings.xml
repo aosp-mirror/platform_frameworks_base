@@ -573,12 +573,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Muito parecido, mude de posição."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Incline a cabeça um pouco menos."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Incline a cabeça um pouco menos."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Incline a cabeça um pouco menos."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Remova tudo que esteja ocultando seu rosto."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Limpe o sensor na borda superior da tela."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Impossível verificar rosto. Hardware indisponível."</string>
@@ -1549,7 +1546,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Drive USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Armazenamento USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
-    <string name="data_usage_warning_title" msgid="6499834033204801605">"Aviso de dados"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Alerta de uso de dados"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"Você usou <xliff:g id="APP">%s</xliff:g> de dados"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Limite de dados móveis atingido"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Limite de dados Wi-Fi atingido"</string>

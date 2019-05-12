@@ -369,6 +369,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‎‏‏‏‎‏‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‏‏‎‎‏‏‎‏‎‏‎‏‎On at ‎‏‎‎‏‏‎<xliff:g id="TIME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‎‏‏‎‏‏‏‎‏‏‎‏‏‎‏‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‏‏‎‎‎‏‏‏‎‏‎‏‏‎‎Until ‎‏‎‎‏‏‎<xliff:g id="TIME">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‎‎‏‏‏‎‎‏‏‏‎‎‎‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‏‎‏‏‏‎‏‏‎‏‏‏‎‏‏‎‎‏‏‏‏‎‎‏‎Dark Theme‎‏‎‎‏‎"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‎‎‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‏‏‏‎‏‏‎‎‏‎‏‏‎‏‎‏‏‏‏‏‏‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‎Dark Theme‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Battery saver‎‏‎‎‏‎"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‎‏‏‏‏‎‏‎‎‏‏‎‏‏‎‏‎NFC‎‏‎‎‏‎"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎‏‎‎‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‏‎‎‏‎‏‏‎‎‏‎‏‏‏‏‏‎‏‎NFC is disabled‎‏‎‎‏‎"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‏‎‏‎‏‎‏‏‏‎NFC is enabled‎‏‎‎‏‎"</string>
@@ -649,6 +650,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‎‎‎‏‎‎‎‎‎‎‎‏‏‎‎These notifications can\'t be modified.‎‏‎‎‏‎"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‏‎‏‏‎‏‎‎‎‎‏‎‏‎‏‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‎‏‏‎‎This group of notifications cannot be configured here‎‏‎‎‏‎"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‎‏‎‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‏‎‎‏‎‏‏‎‎‏‏‏‎‎‎‏‏‏‏‏‎‎Proxied notification‎‏‎‎‏‎"</string>
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‎‎‎‎‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎All ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ notifications‎‏‎‎‏‎"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‎‎‎‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‎‏‏‎‎‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‎‏‎‏‏‎‎See more‎‏‎‎‏‎"</string>
     <string name="appops_camera" msgid="8100147441602585776">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎‎‎‎This app is using the camera.‎‏‎‎‏‎"</string>
     <string name="appops_microphone" msgid="741508267659494555">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‎‏‎‏‏‏‎‏‏‏‎‏‎‏‏‏‎‎‏‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‏‎‏‏‎This app is using the microphone.‎‏‎‎‏‎"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎‎‎‏‏‏‎‎‎‎‎‎‎‎‏‏‏‎‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎This app is displaying over other apps on your screen.‎‏‎‎‏‎"</string>
@@ -924,4 +927,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‏‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‎‏‎‎‎‎‎‎‏‎‏‎‎‎‎‎‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‏‎‎Move top right‎‏‎‎‏‎"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‎‏‎‎‏‎‏‎‏‏‏‎‎‏‏‎‏‏‎‏‏‎‏‏‎‎‏‎‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‎‎‎‏‎Move bottom left‎‏‎‎‏‎"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‏‎‏‏‎‎‎‏‎‎‎‏‏‏‏‎‏‎‏‎‎‎‎‎‎‏‎‎‏‎Move bottom right‎‏‎‎‏‎"</string>
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‏‏‏‎‎‏‏‎‎‏‏‏‏‏‎‎‎‏‎‏‏‏‎‎‎‎‏‎‎‎Dismiss‎‏‎‎‏‎"</string>
 </resources>

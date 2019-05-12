@@ -369,6 +369,8 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>ত অন কৰক"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> পৰ্যন্ত"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"গাঢ় ৰঙৰ থীম"</string>
+    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC নিষ্ক্ৰিয় হৈ আছে"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC সক্ষম হৈ আছে"</string>
@@ -651,6 +653,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"প্ৰক্সি হিচাপে পঠিওৱা জাননী"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"এই এপে কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই এপে মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"এই এপটো আপোনাৰ স্ক্ৰীণত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ আছে।"</string>
@@ -926,4 +932,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"শীৰ্ষৰ সোঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"বুটামটো বাওঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"তলৰ সোঁফালে নিয়ক"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>

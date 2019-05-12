@@ -573,12 +573,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"너무 비슷합니다. 다른 포즈를 취해 보세요."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"고개를 조금 덜 돌려 보세요."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"고개를 조금 덜 돌려 보세요."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"고개를 조금 덜 돌려 보세요."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"얼굴이 가려지지 않도록 해 주세요."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"화면 상단 가장자리의 센서를 깨끗하게 닦아 주세요."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
@@ -985,8 +982,8 @@
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g>년"</string>
     <string name="day" msgid="8144195776058119424">"일"</string>
     <string name="days" msgid="4774547661021344602">"일"</string>
-    <string name="hour" msgid="2126771916426189481">"시간"</string>
-    <string name="hours" msgid="894424005266852993">"시간"</string>
+    <string name="hour" msgid="2126771916426189481">"시"</string>
+    <string name="hours" msgid="894424005266852993">"시"</string>
     <string name="minute" msgid="9148878657703769868">"분"</string>
     <string name="minutes" msgid="5646001005827034509">"분"</string>
     <string name="second" msgid="3184235808021478">"초"</string>
@@ -1849,7 +1846,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"캘린더 일정"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"캘린더 일정 중"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"수면 중"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>(이)가 일부 소리를 음소거함"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
@@ -1925,7 +1922,7 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"생산성"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"기기 저장용량"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 디버깅"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"시간"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"시"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"분"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"시간 설정"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"올바른 시간을 입력하세요."</string>
