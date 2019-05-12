@@ -571,16 +571,11 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Жүзүңүздү кайра таанытыңыз."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Жүз таанылган жок. Кайра аракет кылыңыз."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Мурункуга окшош болуп калды, башкача туруңуз."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
-    <skip />
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Башыңызды бир аз гана эңкейтиңиз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Башыңызды бир аз гана эңкейтиңиз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Башыңызды бир аз гана эңкейтиңиз."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Экрандын жогору жагындагы сенсорду тазалаңыз."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Жүз ырасталбай жатат. Аппараттык камсыздоо жеткиликсиз."</string>
@@ -1933,7 +1928,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"мүнөт"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Убакытты коюу"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Убакытты туура көрсөтүңүз"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Убакытты жазыңыз"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Убакытты киргизиңиз"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Убакытты текст киргизүү режиминде киргизиңиз."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Убакытты дубал саатынын режиминде киргизиңиз."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Автотолтуруу опциялары"</string>

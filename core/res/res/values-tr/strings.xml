@@ -573,12 +573,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Duruşunuz çok benzer, lütfen pozunuzu değiştirin."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Başınızı biraz daha az çevirin."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Başınızı biraz daha az çevirin."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Başınızı biraz daha az çevirin."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Yüzünüzün görünmesini engelleyen şeyleri kaldırın."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Ekranın üst kenarındaki sensörü temizleyin."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>
@@ -1816,12 +1813,12 @@
       <item quantity="one">1 dakika için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
-      <item quantity="other">%1$d saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d saat (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 saat (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="other">%1$d saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 saat için (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d saat (şu saate kadar: <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 saat (şu saate kadar: <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
       <item quantity="other">%d dakika süreyle</item>
@@ -1832,12 +1829,12 @@
       <item quantity="one">1 dakika için</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
-      <item quantity="other">%d saat için</item>
-      <item quantity="one">1 saat için</item>
+      <item quantity="other">%d saat</item>
+      <item quantity="one">1 saat</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="other">%d saat için</item>
-      <item quantity="one">1 saat için</item>
+      <item quantity="other">%d saat</item>
+      <item quantity="one">1 saat</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sonraki alarma) saatine kadar"</string>
