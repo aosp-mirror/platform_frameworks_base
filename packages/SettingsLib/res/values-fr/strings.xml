@@ -407,7 +407,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"chargement…"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Pas en charge"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Appareil branché, mais impossible de le charger pour le moment"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"pleine"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Pleine"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Contrôlé par l\'administrateur"</string>
     <string name="disabled" msgid="9206776641295849915">"Désactivée"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Autorisé"</string>
