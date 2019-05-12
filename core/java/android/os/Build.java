@@ -976,8 +976,7 @@ public class Build {
          * to come. Con permiso, Capitan. The hall is rented, the orchestra
          * engaged. It's now time to see if you can dance.</em>
          */
-        public static final int Q = CUR_DEVELOPMENT;
-
+        public static final int Q = 29;
     }
 
     /** The type of build, like "user" or "eng". */
