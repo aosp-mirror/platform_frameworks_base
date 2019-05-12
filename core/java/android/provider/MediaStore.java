@@ -46,6 +46,7 @@ import android.graphics.ImageDecoder;
 import android.graphics.Point;
 import android.graphics.PostProcessor;
 import android.media.ExifInterface;
+import android.media.MediaFile;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -1724,18 +1725,25 @@ public final class MediaStore {
             @Deprecated
             public static final String insertImage(ContentResolver cr, String imagePath,
                     String name, String description) throws FileNotFoundException {
-                // Check if file exists with a FileInputStream
-                FileInputStream stream = new FileInputStream(imagePath);
-                try {
-                    Bitmap bm = BitmapFactory.decodeFile(imagePath);
-                    String ret = insertImage(cr, bm, name, description);
-                    bm.recycle();
-                    return ret;
-                } finally {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
+                final File file = new File(imagePath);
+                final String mimeType = MediaFile.getMimeTypeForFile(imagePath);
+
+                if (TextUtils.isEmpty(name)) name = "Image";
+                final PendingParams params = new PendingParams(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, name, mimeType);
+
+                final Context context = AppGlobals.getInitialApplication();
+                final Uri pendingUri = createPending(context, params);
+                try (PendingSession session = openPending(context, pendingUri)) {
+                    try (InputStream in = new FileInputStream(file);
+                         OutputStream out = session.openOutputStream()) {
+                        FileUtils.copy(in, out);
                     }
+                    return session.publish().toString();
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to insert image", e);
+                    context.getContentResolver().delete(pendingUri, null, null);
+                    return null;
                 }
             }
 
@@ -1755,45 +1763,22 @@ public final class MediaStore {
             @Deprecated
             public static final String insertImage(ContentResolver cr, Bitmap source,
                                                    String title, String description) {
-                ContentValues values = new ContentValues();
-                values.put(Images.Media.DISPLAY_NAME, title);
-                values.put(Images.Media.DESCRIPTION, description);
-                values.put(Images.Media.MIME_TYPE, "image/jpeg");
+                if (TextUtils.isEmpty(title)) title = "Image";
+                final PendingParams params = new PendingParams(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, title, "image/jpeg");
 
-                Uri url = null;
-                String stringUrl = null;    /* value to be returned */
-
-                try {
-                    url = cr.insert(getContentUri(VOLUME_EXTERNAL_PRIMARY), values);
-
-                    if (source != null) {
-                        try (OutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(
-                                cr.openFile(url, "w", null))) {
-                            source.compress(Bitmap.CompressFormat.JPEG, 50, out);
-                        }
-
-                        long id = ContentUris.parseId(url);
-                        // Block until we've generated common thumbnails
-                        Images.Thumbnails.getThumbnail(cr, id, Images.Thumbnails.MINI_KIND, null);
-                        Images.Thumbnails.getThumbnail(cr, id, Images.Thumbnails.MICRO_KIND, null);
-                    } else {
-                        Log.e(TAG, "Failed to create thumbnail, removing original");
-                        cr.delete(url, null, null);
-                        url = null;
+                final Context context = AppGlobals.getInitialApplication();
+                final Uri pendingUri = createPending(context, params);
+                try (PendingSession session = openPending(context, pendingUri)) {
+                    try (OutputStream out = session.openOutputStream()) {
+                        source.compress(Bitmap.CompressFormat.JPEG, 90, out);
                     }
+                    return session.publish().toString();
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to insert image", e);
-                    if (url != null) {
-                        cr.delete(url, null, null);
-                        url = null;
-                    }
+                    Log.w(TAG, "Failed to insert image", e);
+                    context.getContentResolver().delete(pendingUri, null, null);
+                    return null;
                 }
-
-                if (url != null) {
-                    stringUrl = url.toString();
-                }
-
-                return stringUrl;
             }
 
             /**
