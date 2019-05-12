@@ -691,6 +691,13 @@ package android.widget {
     method protected <T extends android.view.View> T findViewWithTagTraversal(Object);
   }
 
+  public class PopupWindow {
+    method @Deprecated public boolean isClipToScreenEnabled();
+    method @Deprecated public boolean isLayoutInScreenEnabled();
+    method @Deprecated public void setClipToScreenEnabled(boolean);
+    method @Deprecated public void setLayoutInScreenEnabled(boolean);
+  }
+
   @android.widget.RemoteViews.RemoteView public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
     method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
