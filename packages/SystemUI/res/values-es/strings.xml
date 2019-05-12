@@ -369,6 +369,8 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Hora: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hasta las <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema oscuro"</string>
+    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La conexión NFC está inhabilitada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"La conexión NFC está habilitada"</string>
@@ -418,7 +420,7 @@
     <string name="guest_new_guest" msgid="600537543078847803">"Añadir invitado"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Quitar invitado"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"¿Quitar invitado?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Se eliminarán todas las aplicaciones y datos de esta sesión."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Quitar"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Hola de nuevo, invitado"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"¿Quieres continuar con la sesión?"</string>
@@ -438,7 +440,7 @@
       <item quantity="one">Solo se puede crear un usuario.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"¿Quitar usuario?"</string>
-    <string name="user_remove_user_message" msgid="1453218013959498039">"Se eliminarán todas las aplicaciones y todos los datos de este usuario."</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"Se eliminarán todas las aplicaciones y datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Quitar"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y los datos en segundo plano"</string>
@@ -448,10 +450,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gestionar"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Notificaciones discretas"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Borrar todas las notificaciones discretas"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificaciones pausadas por el modo No molestar"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Iniciar ahora"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"No hay notificaciones"</string>
@@ -651,6 +651,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Estas notificaciones no se pueden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Este grupo de notificaciones no se puede configurar aquí"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notificación mediante proxy"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Esta aplicación está usando la cámara."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Esta aplicación está usando el micrófono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Esta aplicación se está mostrando sobre otras aplicaciones en tu pantalla."</string>
@@ -716,7 +720,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recientes"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Atrás"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notificaciones"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Combinaciones de teclas"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Ver combinaciones de teclas"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Cambiar diseño del teclado"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplicaciones"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Asistencia"</string>
@@ -926,4 +930,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Mover arriba a la derecha"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Mover abajo a la izquierda."</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Mover abajo a la derecha"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>
