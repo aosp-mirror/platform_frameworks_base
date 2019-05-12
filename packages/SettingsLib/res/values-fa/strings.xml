@@ -266,8 +266,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏دسترسی به اشکال‌زدایی USB از تمام رایانه‌هایی که قبلاً مجاز دانسته‌اید لغو شود؟"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"تنظیمات برنامه‌نویسی مجاز باشد؟"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"این تنظیمات فقط برای برنامه‌نویسی در نظر گرفته شده است. ممکن است استفاده از این تنظیمات موجب خرابی یا عملکرد نادرست دستگاه یا برنامه‌های شما شود."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌های نصب شده از طریق USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌ها ازطریق USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب‌شده ازطریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏دستگاه‌های بلوتوث بدون نام (فقط نشانی‌های MAC) نشان داده خواهند شد"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"درصورت وجود مشکل در صدا با دستگاه‌های راه دور مثل صدای بلند ناخوشایند یا عدم کنترل صدا، ویژگی میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
@@ -280,7 +280,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"در حال اشکال‌زدایی برنامه: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"انتخاب برنامه"</string>
     <string name="no_application" msgid="2813387563129153880">"هیچ چیز"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"انتظار برای اشکال‌زدا"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"منتظر اشکال‌زدا"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"برنامه اشکال‌زدایی شده منتظر پیوست شدن اشکال‌زدا قبل از اجرا است"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ورودی"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"طراحی"</string>
@@ -308,8 +308,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏غیرفعال کردن مسیریابی خودکار به وسایل جانبی صوتی USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"نمایش محدوده‌های طرح‌بندی"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"‏اجباری کردن چیدمان RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"‏اجباری کردن چیدمان RTL صفحه برای همه زبان‌ها"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"اجباری کردن چیدمان راست‌چین"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏اجبار 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"‏فعال کردن 4X MSAA در برنامه‌های OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"اشکال‌زدایی عملکردهای کلیپ غیرمربعی"</string>
@@ -324,12 +324,12 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"فعالیت‌ها نگه داشته نشوند"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"از بین بردن هر فعالیت به محض خروج کاربر از آن"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"محدودیت پردازش در پس‌زمینه"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"‏نمایش موارد ANR پس‌زمینه"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"نمایش موارد «برنامه پاسخ نمی‌دهد» پس‌زمینه"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"نمایش گفتگوی \"برنامه پاسخ نمی‌دهد\" برای برنامه‌های پس‌زمینه"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"نمایش هشدارهای کانال اعلان"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"هنگامی که برنامه‌ای بدون وجود کانالی معتبر، اعلانی پست می‌کند، هشدار روی صفحه‌ای نمایش می‌دهد"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"اجازه اجباری به برنامه‌های دستگاه ذخیره خارجی"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"بدون توجه به مقادیر مانیفست، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"بدون توجه به مقادیر آشکار، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"اجبار فعالیت‌ها به قابل تغییر اندازه بودن"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"بدون توجه به مقادیر مانیفست، اندازه همه فعالیت‌ها برای حالت چند پنجره‌ای می‌تواند تغییر کند."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"فعال کردن پنجره‌های آزاد"</string>

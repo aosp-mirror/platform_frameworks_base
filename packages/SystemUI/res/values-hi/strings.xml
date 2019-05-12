@@ -448,10 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी को हटाएं"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"प्रबंधित करें"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"बिना आवाज़ वाली सूचनाएं"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"बिना आवाज़ वाली सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं मिली"</string>
@@ -651,6 +649,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"प्रॉक्सी सूचना"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"यह ऐप्लिकेशन कैमरे का इस्तेमाल कर रहा है."</string>
     <string name="appops_microphone" msgid="741508267659494555">"यह ऐप्लिकेशन माइक्रोफ़ोन का इस्तेमाल कर रहा है."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"यह ऐप्लिकेशन आपकी स्क्रीन पर इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है."</string>
@@ -915,8 +917,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> खोलें"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल की सेटिंग"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> से बबल की अनुमति दें?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"प्रबंधित करें"</string>
     <string name="no_bubbles" msgid="337101288173078247">"अनुमति न दें"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"अनुमति दें"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"मुझसे बाद में पूछें"</string>
@@ -927,4 +928,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"सबसे ऊपर दाईं ओर ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"सबसे नीचे दाईं ओर ले जाएं"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>

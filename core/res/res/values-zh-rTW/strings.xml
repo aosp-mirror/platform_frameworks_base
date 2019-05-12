@@ -573,12 +573,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"與先前的姿勢太相似，請換一個姿勢。"</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"請將你的頭部稍微向左或向右轉動。"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"請將你的頭部稍微向上或向下傾斜。"</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"請將你的頭部稍微向左或向右旋轉。"</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"請移除任何會遮住臉孔的物體。"</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"請清除螢幕頂端感應器的髒汙。"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"相關硬體無法使用，因此無法驗證臉孔。"</string>
