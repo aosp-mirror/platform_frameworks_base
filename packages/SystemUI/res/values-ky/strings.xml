@@ -292,7 +292,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Кошумча параметрлерди ачуу үчүн сүрөтчөлөрдү басып, кармап туруңуз"</string>
     <string name="quick_settings_dnd_label" msgid="7112342227663678739">"Тынчымды алба"</string>
-    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Шашылыш эскертмелер гана"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Шашылыш билдирүүлөр гана"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкуч гана"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Тымтырс"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -399,7 +399,7 @@
     <string name="camera_hint" msgid="7939688436797157483">"Сүрөтчөнү серпип камерага өтүңүз"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
-    <string name="interruption_level_priority" msgid="6426766465363855505">"Шашылыш эскертмелер гана"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"Шашылыш билдирүүлөр гана"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкуч гана"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Тым-\nтырс"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Артыкчылыктуу\nгана"</string>
@@ -448,10 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Экинчи көрсөтүлбөсүн"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Бардыгын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Башкаруу"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Маанилүү эмес билдирмелер"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Бардык маанилүү эмес билдирмелерди тазалоо"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\"Тынчымды алба\" режиминде билдирмелер тындырылды"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Азыр баштоо"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Билдирме жок"</string>
@@ -651,6 +649,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Бул билдирмелерди өзгөртүүгө болбойт."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Бул билдирмелердин тобун бул жерде конфигурациялоого болбойт"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Прокси билдирмеси"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Бул колдонмо камераны колдонууда."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Бул колдонмо микрофонду колдонууда."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Бул колдонмо экрандагы башка терезелердин үстүнөн көрсөтүлүүдө."</string>
@@ -926,4 +928,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Жогорку оң жакка жылдырыңыз"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Төмөнкү сол жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Төмөнкү оң жакка жылдырыңыз"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>

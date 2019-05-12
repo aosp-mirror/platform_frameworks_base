@@ -185,7 +185,7 @@
     <string name="not_default_data_content_description" msgid="9194667237765917844">"ไม่ได้ตั้งค่าให้ใช้อินเทอร์เน็ตมือถือ"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"ปิด"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"การปล่อยสัญญาณบลูทูธ"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดใช้งานบนเครื่องบิน"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"โหมดบนเครื่องบิน"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN เปิดอยู่"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ไม่มีซิมการ์ด"</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"การเปลี่ยนเครือข่ายผู้ให้บริการ"</string>
@@ -448,10 +448,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ล้างทั้งหมด"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"จัดการ"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"การแจ้งเตือนช่วยจำ"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"ล้างการแจ้งเตือนช่วยจำทั้งหมด"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"หยุดการแจ้งเตือนชั่วคราวโดย \"ห้ามรบกวน\""</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"เริ่มเลย"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ไม่มีการแจ้งเตือน"</string>
@@ -651,6 +649,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"การแจ้งเตือนกลุ่มนี้กำหนดค่าที่นี่ไม่ได้"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"การแจ้งเตือนที่ผ่านพร็อกซี"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"แอปนี้กำลังใช้กล้อง"</string>
     <string name="appops_microphone" msgid="741508267659494555">"แอปนี้กำลังใช้ไมโครโฟน"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"แอปนี้กำลังแสดงทับแอปอื่นๆ ในหน้าจอ"</string>
@@ -926,4 +928,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"ย้ายไปด้านขวาบน"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ย้ายไปด้านซ้ายล่าง"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ย้ายไปด้านขาวล่าง"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>
