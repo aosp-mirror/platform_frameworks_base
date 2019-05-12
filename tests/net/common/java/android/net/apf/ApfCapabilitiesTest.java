@@ -17,7 +17,9 @@
 package android.net.apf;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -32,8 +34,12 @@ import org.junit.runner.RunWith;
 @SmallTest
 public class ApfCapabilitiesTest {
     @Test
-    public void testParcelUnparcel() {
+    public void testConstructAndParcel() {
         final ApfCapabilities caps = new ApfCapabilities(123, 456, 789);
+        assertEquals(123, caps.apfVersionSupported);
+        assertEquals(456, caps.maximumApfProgramSize);
+        assertEquals(789, caps.apfPacketFormat);
+
         ParcelableTestUtil.assertFieldCountEquals(3, ApfCapabilities.class);
 
         TestUtils.assertParcelingIsLossless(caps);
@@ -45,5 +51,15 @@ public class ApfCapabilitiesTest {
         assertNotEquals(new ApfCapabilities(2, 2, 3), new ApfCapabilities(1, 2, 3));
         assertNotEquals(new ApfCapabilities(1, 3, 3), new ApfCapabilities(1, 2, 3));
         assertNotEquals(new ApfCapabilities(1, 2, 4), new ApfCapabilities(1, 2, 3));
+    }
+
+    @Test
+    public void testHasDataAccess() {
+        //hasDataAccess is only supported starting at apf version 4.
+        ApfCapabilities caps = new ApfCapabilities(1 /* apfVersionSupported */, 2, 3);
+        assertFalse(caps.hasDataAccess());
+
+        caps = new ApfCapabilities(4 /* apfVersionSupported */, 5, 6);
+        assertTrue(caps.hasDataAccess());
     }
 }
