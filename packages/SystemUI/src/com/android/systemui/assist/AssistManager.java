@@ -343,10 +343,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
         intent.setComponent(assistComponent);
         intent.putExtras(args);
 
-        if (structureEnabled) {
-            showDisclosure();
-        }
-
         try {
             final ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.search_launch_enter, R.anim.search_launch_exit);
@@ -436,9 +432,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         return getAssistInfoForUser(KeyguardUpdateMonitor.getCurrentUser());
     }
 
-    public void showDisclosure() {
-        mAssistDisclosure.postShow();
-    }
+    public void showDisclosure() {}
 
     public void onLockscreenShown() {
         mAssistUtils.onLockscreenShown();
