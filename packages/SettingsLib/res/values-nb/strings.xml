@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Kan ikke søke etter nettverk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Lagret"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Frakoblet"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Slått av"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurasjonsfeil"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ikke tilkoblet på grunn av nettverk av lav kvalitet"</string>
@@ -220,7 +219,7 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"App for fiktiv plassering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Trådløs skjermsertifisering"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktiver detaljert Wi-Fi-loggføring"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Slå på detaljert Wi-Fi-loggføring"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Vis Bluetooth-enheter uten navn"</string>
@@ -268,7 +267,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du aktivere utviklingsinnstillingene?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse innstillingene er bare beregnet for bruk under programutvikling. De kan forårsake problemer med enheten din og tilhørende apper."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Bekreft apper via USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT for skadelig adferd."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT, for skadelig atferd."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-enheter uten navn (bare MAC-adresser) vises"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Slår av funksjonen for absolutt volum via Bluetooth i tilfelle det oppstår volumrelaterte problemer med eksterne enheter, for eksempel uakseptabelt høyt volum eller mangel på kontroll."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>

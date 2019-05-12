@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「請勿騷擾」模式已將通知暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"畫面將會繼續顯示，直至您取消固定為止。按住 [返回] 按鈕和主按鈕即可取消固定。"</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"畫面將會繼續顯示，直至您取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"如要取消固定此畫面，請按住 [返回] 按鈕和 [概覽] 按鈕"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"開啟「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」小視窗設定"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"要允許開啟「<xliff:g id="APP_NAME">%1$s</xliff:g>」的小視窗嗎？"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"管理"</string>
     <string name="no_bubbles" msgid="337101288173078247">"拒絕"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"允許"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"稍後再詢問我"</string>

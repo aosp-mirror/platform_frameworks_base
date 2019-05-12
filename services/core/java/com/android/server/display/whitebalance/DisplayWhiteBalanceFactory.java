@@ -22,6 +22,8 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.util.TypedValue;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * The DisplayWhiteBalanceFactory creates and configures an DisplayWhiteBalanceController.
  */
@@ -40,7 +42,7 @@ public class DisplayWhiteBalanceFactory {
      * @param resources
      *      The resources used to configure the various components.
      *
-     * @return An DisplayWhiteBalanceController.
+     * @return A DisplayWhiteBalanceController.
      *
      * @throws NullPointerException
      *      - handler is null;
@@ -83,14 +85,23 @@ public class DisplayWhiteBalanceFactory {
     // Instantiation is disabled.
     private DisplayWhiteBalanceFactory() { }
 
-    private static AmbientSensor.AmbientBrightnessSensor createBrightnessSensor(Handler handler,
+    /**
+     * Creates a brightness sensor instance to redirect sensor data to callbacks.
+     */
+    @VisibleForTesting
+    public static AmbientSensor.AmbientBrightnessSensor createBrightnessSensor(Handler handler,
             SensorManager sensorManager, Resources resources) {
         final int rate = resources.getInteger(
                 com.android.internal.R.integer.config_displayWhiteBalanceBrightnessSensorRate);
         return new AmbientSensor.AmbientBrightnessSensor(handler, sensorManager, rate);
     }
 
-    private static AmbientFilter createBrightnessFilter(Resources resources) {
+    /**
+     * Creates a BrightnessFilter which functions as a weighted moving average buffer for recent
+     * brightness values.
+     */
+    @VisibleForTesting
+    static AmbientFilter createBrightnessFilter(Resources resources) {
         final int horizon = resources.getInteger(
                 com.android.internal.R.integer.config_displayWhiteBalanceBrightnessFilterHorizon);
         final float intercept = getFloat(resources,
@@ -104,7 +115,11 @@ public class DisplayWhiteBalanceFactory {
     }
 
 
-    private static AmbientSensor.AmbientColorTemperatureSensor createColorTemperatureSensor(
+    /**
+     * Creates an ambient color sensor instance to redirect sensor data to callbacks.
+     */
+    @VisibleForTesting
+    public static AmbientSensor.AmbientColorTemperatureSensor createColorTemperatureSensor(
             Handler handler, SensorManager sensorManager, Resources resources) {
         final String name = resources.getString(
                 com.android.internal.R.string

@@ -21,10 +21,10 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
-import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.MediaSession.QueueItem;
@@ -174,7 +174,7 @@ public final class MediaController {
      */
     public @Nullable List<MediaSession.QueueItem> getQueue() {
         try {
-            MediaParceledListSlice list = mSessionBinder.getQueue();
+            ParceledListSlice list = mSessionBinder.getQueue();
             return list == null ? null : list.getList();
         } catch (RemoteException e) {
             Log.wtf(TAG, "Error calling getQueue.", e);
@@ -1116,7 +1116,7 @@ public final class MediaController {
         }
 
         @Override
-        public void onQueueChanged(MediaParceledListSlice queue) {
+        public void onQueueChanged(ParceledListSlice queue) {
             MediaController controller = mController.get();
             if (controller != null) {
                 controller.postMessage(MSG_UPDATE_QUEUE, queue, null);
@@ -1174,7 +1174,7 @@ public final class MediaController {
                     break;
                 case MSG_UPDATE_QUEUE:
                     mCallback.onQueueChanged(msg.obj == null ? null :
-                            (List<QueueItem>) ((MediaParceledListSlice) msg.obj).getList());
+                            (List<QueueItem>) ((ParceledListSlice) msg.obj).getList());
                     break;
                 case MSG_UPDATE_QUEUE_TITLE:
                     mCallback.onQueueTitleChanged((CharSequence) msg.obj);

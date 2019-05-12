@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"សូម​​ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត។"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"មិន​អាច​សម្គាល់មុខ​បាន​ទៀតទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ស្រដៀងគ្នា​ពេក សូមផ្លាស់ប្ដូរ​កាយវិការ​របស់អ្នក។"</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"សូម​ងើយ​ក្បាល​របស់អ្នកឱ្យត្រង់។"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"កុំឱ្យមានអ្វីបាំងនៅចន្លោះក្បាល និងទូរសព្ទរបស់អ្នក។"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"សូមសម្អាតកាមេរ៉ា។"</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"មិនអាច​ផ្ទៀងផ្ទាត់​មុខបានទេ។ មិនមាន​ហាតវែរទេ។"</string>
@@ -1599,7 +1600,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"បង្ហាញ​បណ្ដាញ​ឥត​ខ្សែ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"បញ្ជូន"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ភ្ជាប់​ឧបករណ៍"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ខាស​អេក្រង់​ទៅ​ឧបករណ៍"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ភ្ជាប់អេក្រង់​ទៅ​ឧបករណ៍"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"កំពុង​ស្វែងរក​ឧបករណ៍..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ការ​កំណត់"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ផ្ដាច់"</string>

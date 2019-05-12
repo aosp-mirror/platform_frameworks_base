@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"නැවත නොපෙන්වන්න"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"සියල්ල හිස් කරන්න"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"කළමනාකරණය කරන්න"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"බාධා නොකරන්න මගින් විරාම කරන ලද දැනුම්දීම්"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"දැන් අරඹන්න"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"දැනුම්දීම් නැත"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"තීරය අමුණන ලදි"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට ඉහළට ස්වයිප් කර අල්ලා සිටින්න."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> විවෘත කරන්න"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> බුබුළු සඳහා සැකසීම්"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> වෙතින් බුබුළුවලට ඉඩ දෙන්නේද?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"කළමනා කරන්න"</string>
     <string name="no_bubbles" msgid="337101288173078247">"ප්‍රතික්‍ෂේප කරන්න"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"ඉඩ දෙන්න"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"පසුව මගෙන් අසන්න"</string>

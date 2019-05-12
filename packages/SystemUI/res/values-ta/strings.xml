@@ -50,7 +50,7 @@
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ஐ அணுக, <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ஐக் கையாள, <xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாட்டைத் திறக்கவா?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ஐக் கையாள, <xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாட்டைத் திறக்கவா?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"நிறுவிய பயன்பாடுகள் எதுவும், USB துணைக்கருவியுடன் இயங்காது. <xliff:g id="URL">%1$s</xliff:g> இல் துணைக்கருவி குறித்து மேலும் அறிக"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"நிறுவிய ஆப்ஸ் எதுவும், USB துணைக்கருவியுடன் இயங்காது. <xliff:g id="URL">%1$s</xliff:g> இல் துணைக்கருவி குறித்து மேலும் அறிக"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB துணைக்கருவி"</string>
     <string name="label_view" msgid="6304565553218192990">"காட்சி"</string>
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> இணைக்கப்பட்டிருக்கையில், <xliff:g id="APPLICATION">%1$s</xliff:g>ஐ எப்போதும் திற"</string>
@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"அறிவிப்புகளை நிர்வகி"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"அறிவிப்புகள் இல்லை"</string>
@@ -638,22 +642,14 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"தொடர்ந்து விழிப்பூட்டு"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"அறிவிப்புகளை முடக்கு"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"இந்தப் பயன்பாட்டின் அறிவிப்புகளைத் தொடர்ந்து காட்டவா?"</string>
-    <!-- no translation found for notification_silence_title (7352089096356977930) -->
-    <skip />
-    <!-- no translation found for notification_alert_title (3966526305405016221) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low (1065819618107531284) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status (2702170424808743755) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_lock (7966605244472624458) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_low_status_lock (7012562768950012739) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (3847289783382316019) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (4556908766584964102) -->
-    <skip />
+    <string name="notification_silence_title" msgid="7352089096356977930">"ஜென்டில்"</string>
+    <string name="notification_alert_title" msgid="3966526305405016221">"முன்னுரிமைப்படுத்தப்பட்டது"</string>
+    <string name="notification_channel_summary_low" msgid="1065819618107531284">"கீழ் இழுக்கும் ஷேடில் வரும் அறிவிப்புகளில் மட்டும் கவனம் செலுத்த உதவுகிறது. எப்போதும் நிசப்தம்."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"குறைந்த முன்னுரிமைப் பெற்ற அறிவிப்புகளைக் காட்டும். எப்போதும் நிசப்தம்."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"குறைந்த முன்னுரிமைப் பெற்ற அறிவிப்புகளைக் காட்டும். எப்போதும் நிசப்தம்."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"குறைந்த முன்னுரிமைப் பெற்ற அறிவிப்புகளைக் காட்டும். எப்போதும் நிசப்தம்."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ஒலி &amp; நிலைப் பட்டி ஐகான் மூலம் உங்கள் கவனத்தைப் பெறுகிறது. பூட்டுத் திரையில் காட்டும்."</string>
+    <string name="notification_unblockable_desc" msgid="4556908766584964102">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ப்ராக்ஸியான அறிவிப்பு"</string>
     <string name="appops_camera" msgid="8100147441602585776">"இந்த ஆப்ஸானது கேமராவை உபயோகிக்கிறது."</string>
@@ -872,7 +868,7 @@
     <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> இயங்குகிறது"</string>
     <string name="instant_apps_message" msgid="1183313016396018086">"நிறுவ வேண்டிய தேவையில்லாமல் ஆப்ஸ் திறக்கப்பட்டது."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"நிறுவ வேண்டிய தேவையில்லாமல் ஆப்ஸ் திறக்கப்பட்டது. மேலும் அறியத் தட்டவும்."</string>
-    <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
+    <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
     <string name="go_to_web" msgid="2650669128861626071">"உலாவிக்குச் செல்"</string>
     <string name="mobile_data" msgid="7094582042819250762">"மொபைல் டேட்டா"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -889,7 +885,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"பின்னணியில் இயங்கும் பயன்பாடுகள்"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"மொபைல் டேட்டாவை ஆஃப் செய்யவா?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> மொபைல் நிறுவனத்தின் மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"உங்கள் மொபைல் நிறுவனம்"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையை ஆப்ஸ் மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> ஆப்ஸை, <xliff:g id="APP_2">%2$s</xliff:g> பயன்பாட்டின் விழிப்பூட்டல்களைக் காண்பிக்க அனுமதிக்கவா?"</string>

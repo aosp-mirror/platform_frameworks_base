@@ -23,12 +23,11 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Skeniranje mreža nije moguće"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nema"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Spremljeno"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Nije povezano"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Onemogućeno"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Konfiguracija IP-a nije uspjela"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Niste povezani jer je mreža loše kvalitete"</string>
-    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Povezivanje s Wi-Fi-jem nije uspjelo"</string>
+    <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Povezivanje s Wi-Fijem nije uspjelo"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem u autentifikaciji"</string>
     <string name="wifi_cant_connect" msgid="5410016875644565884">"Povezivanje nije uspjelo"</string>
     <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Povezivanje s aplikacijom \"<xliff:g id="AP_NAME">%1$s</xliff:g>\" nije uspjelo"</string>
@@ -195,7 +194,7 @@
     <string name="choose_profile" msgid="6921016979430278661">"Odabir profila"</string>
     <string name="category_personal" msgid="1299663247844969448">"Osobno"</string>
     <string name="category_work" msgid="8699184680584175622">"Posao"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opcije za razvojne programere"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Za razvojne programere"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Omogući opcije za razvojne programere"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Postavljanje opcija za razvoj aplikacije"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Opcije razvojnih programera nisu dostupne za ovog korisnika"</string>
@@ -245,7 +244,7 @@
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Naziv hosta davatelja usluge privatnog DNS-a"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Unesite naziv hosta davatelja usluge DNS-a"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Povezivanje nije moguće"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaži opcije za certifikaciju bežičnog prikaza"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećana razina prijave na Wi‑Fi, prikaz po SSID RSSI-ju u Biraču Wi‑Fi-ja"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"S ograničenim prometom"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bez ograničenja prometa"</string>
@@ -303,7 +302,7 @@
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Rješavanje GPU preklapanja"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Onemogući dijeljenje mem."</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Uvijek koristi GPU za slaganje zaslona"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"Simuliraj prostor boja"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Simulacija prostora boja"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Omogući OpenGL praćenja"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Onemogući USB audiousmj."</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Onemogući aut. usmjeravanje na USB audioperiferiju"</string>
@@ -316,11 +315,11 @@
     <string name="show_non_rect_clip" msgid="505954950474595172">"Otkloni pogreške operacija nepravokutnog isječka"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Profil HWUI generiranja"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Omogući slojeve za otklanjanje pogrešaka GPU-a"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogući učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogućite učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Brzina animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Brzina animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Razmjer duljine animatora"</string>
-    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simuliraj sekund. zaslone"</string>
+    <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulacija sek. zaslona"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Uklanjanje aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Aktivnost se prekida čim je korisnik napusti."</string>
@@ -357,7 +356,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivno. Dodirnite da biste to promijenili."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Stanje aplikacije u mirovanju: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Pogledajte i nadzirite pokrenute procese"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Pregledajte i kontrolirajte pokrenute usluge"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacija WebViewa"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Postavi implementaciju WebViewa"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Taj izbor više nije važeći. Pokušajte ponovo."</string>

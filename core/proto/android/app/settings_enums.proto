@@ -666,6 +666,11 @@ enum Action {
     //ACTION: Log result for each card's eligibility check
     ACTION_CONTEXTUAL_CARD_ELIGIBILITY = 1686;
 
+    // ACTION: Display white balance setting enabled or disabled.
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
+
     // ACTION: Share a Wi-Fi network by generating a QR code
     ACTION_SETTINGS_SHARE_WIFI_QR_CODE = 1710;
 
@@ -674,6 +679,15 @@ enum Action {
 
     // ACTION: Share Wi-Fi hotspot by generating a QR code
     ACTION_SETTINGS_SHARE_WIFI_HOTSPOT_QR_CODE = 1712;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Invalid data
+    ACTION_VERIFY_SLICE_ERROR_INVALID_DATA = 1725;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Parsing error
+    ACTION_VERIFY_SLICE_PARSING_ERROR = 1726;
+
+    // ACTION: Settings > Initialize Search bar > Verify Slice > Other exception
+    ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
 }
 
 /**
@@ -2340,11 +2354,6 @@ enum PageId {
 
     // Open: Settings > app > bubble settings > confirmation dialog
     DIALOG_APP_BUBBLE_SETTINGS = 1702;
-
-    // ACTION: Display white balance setting enabled or disabled.
-    // CATEGORY: SETTINGS
-    // OS: Q
-    ACTION_DISPLAY_WHITE_BALANCE_SETTING_CHANGED = 1703;
 
     // OPEN: Settings > Pick SIM dialog
     DIALOG_SIM_LIST = 1707;

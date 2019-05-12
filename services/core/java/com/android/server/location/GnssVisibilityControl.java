@@ -33,6 +33,9 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.StatsLog;
 
+import com.android.internal.R;
+import com.android.internal.location.GpsNetInitiatedHandler;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +58,11 @@ class GnssVisibilityControl {
     // Max wait time for synchronous method onGpsEnabledChanged() to run.
     private static final long ON_GPS_ENABLED_CHANGED_TIMEOUT_MILLIS = 3 * 1000;
 
+    // Valid values for config parameter es_notify_int for posting notification in the status
+    // bar for non-framework location requests in user-initiated emergency use cases.
+    private static final int ES_NOTIFY_NONE = 0;
+    private static final int ES_NOTIFY_ALL = 1;
+
     // Wakelocks
     private static final String WAKELOCK_KEY = TAG;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
@@ -65,8 +73,10 @@ class GnssVisibilityControl {
 
     private final Handler mHandler;
     private final Context mContext;
+    private final GpsNetInitiatedHandler mNiHandler;
 
     private boolean mIsGpsEnabled;
+    private volatile boolean mEsNotify;
 
     // Number of non-framework location access proxy apps is expected to be small (< 5).
     private static final int ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
@@ -76,11 +86,12 @@ class GnssVisibilityControl {
     private PackageManager.OnPermissionsChangedListener mOnPermissionsChangedListener =
             uid -> runOnHandler(() -> handlePermissionsChanged(uid));
 
-    GnssVisibilityControl(Context context, Looper looper) {
+    GnssVisibilityControl(Context context, Looper looper, GpsNetInitiatedHandler niHandler) {
         mContext = context;
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
         mHandler = new Handler(looper);
+        mNiHandler = niHandler;
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mPackageManager = mContext.getPackageManager();
 
@@ -123,6 +134,17 @@ class GnssVisibilityControl {
         runOnHandler(() -> handleNfwNotification(
                 new NfwNotification(proxyAppPackageName, protocolStack, otherProtocolStackName,
                         requestor, requestorId, responseType, inEmergencyMode, isCachedLocation)));
+    }
+
+    void setEsNotify(int esNotifyConfig) {
+        if (esNotifyConfig != ES_NOTIFY_NONE && esNotifyConfig != ES_NOTIFY_ALL) {
+            Log.e(TAG, "Config parameter " + GnssConfiguration.CONFIG_ES_NOTIFY_INT
+                    + " is set to invalid value: " + esNotifyConfig
+                    + ". Using default value: " + ES_NOTIFY_NONE);
+            esNotifyConfig = ES_NOTIFY_NONE;
+        }
+
+        mEsNotify = (esNotifyConfig == ES_NOTIFY_ALL);
     }
 
     private void handleInitialize() {
@@ -250,6 +272,9 @@ class GnssVisibilityControl {
         private static final byte NFW_RESPONSE_TYPE_ACCEPTED_NO_LOCATION_PROVIDED = 1;
         private static final byte NFW_RESPONSE_TYPE_ACCEPTED_LOCATION_PROVIDED = 2;
 
+        // This must match with NfwProtocolStack enum in IGnssVisibilityControlCallback.hal.
+        private static final byte NFW_PROTOCOL_STACK_SUPL = 1;
+
         private final String mProxyAppPackageName;
         private final byte mProtocolStack;
         private final String mOtherProtocolStackName;
@@ -299,12 +324,20 @@ class GnssVisibilityControl {
             return mResponseType != NfwNotification.NFW_RESPONSE_TYPE_REJECTED;
         }
 
+        private boolean isLocationProvided() {
+            return mResponseType == NfwNotification.NFW_RESPONSE_TYPE_ACCEPTED_LOCATION_PROVIDED;
+        }
+
         private boolean isRequestAttributedToProxyApp() {
             return !TextUtils.isEmpty(mProxyAppPackageName);
         }
 
         private boolean isEmergencyRequestNotification() {
             return mInEmergencyMode && !isRequestAttributedToProxyApp();
+        }
+
+        private boolean isRequestTypeSupl() {
+            return mProtocolStack == NFW_PROTOCOL_STACK_SUPL;
         }
     }
 
@@ -430,16 +463,15 @@ class GnssVisibilityControl {
                 return;
             }
 
-            Log.e(TAG, "ProxyAppPackageName field is not set. AppOps service not notified "
-                    + "for non-framework location access notification: " + nfwNotification);
+            Log.e(TAG, "ProxyAppPackageName field is not set. AppOps service not notified"
+                    + " for notification: " + nfwNotification);
             return;
         }
 
         if (isLocationPermissionEnabled == null) {
-            Log.w(TAG, "Could not find proxy app with name: " + proxyAppPkgName + " in the "
-                    + "value specified for config parameter: "
-                    + GnssConfiguration.CONFIG_NFW_PROXY_APPS + ". AppOps service not notified "
-                    + "for non-framework location access notification: " + nfwNotification);
+            Log.w(TAG, "Could not find proxy app " + proxyAppPkgName + " in the value specified for"
+                    + " config parameter: " + GnssConfiguration.CONFIG_NFW_PROXY_APPS
+                    + ". AppOps service not notified for notification: " + nfwNotification);
             return;
         }
 
@@ -447,8 +479,7 @@ class GnssVisibilityControl {
         final ApplicationInfo proxyAppInfo = getProxyAppInfo(proxyAppPkgName);
         if (proxyAppInfo == null) {
             Log.e(TAG, "Proxy app " + proxyAppPkgName + " is not found. AppOps service not "
-                    + "notified for non-framework location access notification: "
-                    + nfwNotification);
+                    + "notified for notification: " + nfwNotification);
             return;
         }
 
@@ -465,13 +496,40 @@ class GnssVisibilityControl {
     }
 
     private void handleEmergencyNfwNotification(NfwNotification nfwNotification) {
-        boolean isPermissionMismatched =
-                (nfwNotification.mResponseType == NfwNotification.NFW_RESPONSE_TYPE_REJECTED);
-        if (isPermissionMismatched) {
+        boolean isPermissionMismatched = false;
+        if (!nfwNotification.isRequestAccepted()) {
             Log.e(TAG, "Emergency non-framework location request incorrectly rejected."
                     + " Notification: " + nfwNotification);
+            isPermissionMismatched = true;
         }
+
+        if (!mNiHandler.getInEmergency()) {
+            Log.w(TAG, "Emergency state mismatch. Device currently not in user initiated emergency"
+                    + " session. Notification: " + nfwNotification);
+            isPermissionMismatched = true;
+        }
+
         logEvent(nfwNotification, isPermissionMismatched);
+
+        if (mEsNotify && nfwNotification.isLocationProvided()) {
+            // Emulate deprecated IGnssNi.hal user notification of emergency NI requests.
+            GpsNetInitiatedHandler.GpsNiNotification notification =
+                    new GpsNetInitiatedHandler.GpsNiNotification();
+            notification.notificationId = 0;
+            notification.niType = nfwNotification.isRequestTypeSupl()
+                    ? GpsNetInitiatedHandler.GPS_NI_TYPE_EMERGENCY_SUPL
+                    : GpsNetInitiatedHandler.GPS_NI_TYPE_UMTS_CTRL_PLANE;
+            notification.needNotify = true;
+            notification.needVerify = false;
+            notification.privacyOverride = false;
+            notification.timeout = 0;
+            notification.defaultResponse = GpsNetInitiatedHandler.GPS_NI_RESPONSE_NORESP;
+            notification.requestorId = nfwNotification.mRequestorId;
+            notification.requestorIdEncoding = GpsNetInitiatedHandler.GPS_ENC_NONE;
+            notification.text = mContext.getString(R.string.global_action_emergency);
+            notification.textEncoding = GpsNetInitiatedHandler.GPS_ENC_NONE;
+            mNiHandler.setNiNotification(notification);
+        }
     }
 
     private void logEvent(NfwNotification notification, boolean isPermissionMismatched) {

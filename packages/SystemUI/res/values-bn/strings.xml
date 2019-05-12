@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"আর দেখাবেন না"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সবকিছু সাফ করুন"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"পরিচালনা করুন"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'বিরক্ত করবেন না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এখন শুরু করুন"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো বিজ্ঞপ্তি নেই"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্রিন পিন করা হয়েছে"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"ফিরে যান\" এবং \"হোম\" বোতামদুটি ট্যাপ করে ধরে রাখুন।"</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"হোম\" বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"এই স্ক্রিনটি আনপিন করতে \"ফিরে যান\" এবং \"এক নজরে\" বোতামদুটি ট্যাপ করে ধরে রাখুন"</string>
@@ -766,7 +769,7 @@
     <string name="right_keycode" msgid="708447961000848163">"ডানদিকের কিকোড"</string>
     <string name="left_icon" msgid="3096287125959387541">"বাঁ দিকের আইকন"</string>
     <string name="right_icon" msgid="3952104823293824311">"ডানদিকের আইকন"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"টাইল যোগ করতে ট্যাপ করে টেনে আনুন"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"টাইল যোগ করতে ধরে থেকে টেনে আনুন"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"টাইলগুলি আবার সাজানোর জন্য ধরে থেকে টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"সরানোর জন্য এখানে টেনে আনুন"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"অন্তত ৬টি টাইল রাখতে হবে"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> খুলুন"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপের বাবল চালু করবেন?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"ম্যানেজ করা"</string>
     <string name="no_bubbles" msgid="337101288173078247">"খারিজ করুন"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"অনুমতি দিন"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"আমাকে পরে জিজ্ঞাসা করুন"</string>

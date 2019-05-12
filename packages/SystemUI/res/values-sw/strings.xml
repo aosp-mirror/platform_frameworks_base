@@ -448,6 +448,10 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Usionyeshe tena"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Futa zote"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Dhibiti"</string>
+    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Kipengele cha Usinisumbue kimesitisha arifa"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Anza sasa"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Hakuna arifa"</string>
@@ -527,8 +531,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"Skrini imebandikwa"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Hali hii huifanya ionekane hadi utakapoibandua. Gusa na ushikilie kipengele cha Nyuma na Muhtasari ili ubandue."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Hali hii huifanya ionekane hadi utakapoibandua. Gusa na ushikilie kitufe cha kurudisha Nyuma na cha Mwanzo kwa pamoja ili ubandue."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Hali hii huifanya ionekane hadi utakapoibandua. Telezesha kidole juu na ushikilie ili uibandue."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Hali hii huifanya ionekane hadi utakapoibandua. Gusa na ushikilie kipengele cha Muhtasari ili ubandue."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Hali hii huifanya ionekane hadi utakapoibandua. Gusa na ushikilie kitufe cha Mwanzo ili ubandue."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Ili ubandue skrini hii, gusa na ushikilie kitufe cha Nyuma na Muhtasari"</string>
@@ -912,8 +915,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Fungua <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"Mipangilio ya viputo vya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"Je, ungependa kuruhusu viputo kutoka <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"Dhibiti"</string>
     <string name="no_bubbles" msgid="337101288173078247">"Kataa"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Ruhusu"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Niulize baadaye"</string>

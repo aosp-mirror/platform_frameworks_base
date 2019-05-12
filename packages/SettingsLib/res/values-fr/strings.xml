@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Impossible de rechercher des réseaux."</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Aucune"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Enregistré"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Déconnecté"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Désactivé"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Échec de configuration de l\'adresse IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Non connecté en raison de la faible qualité du réseau"</string>
@@ -208,7 +207,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Raccourci vers rapport de bug"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Afficher un bouton dans le menu de démarrage permettant de créer un rapport de bug"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Écran toujours actif"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"L\'écran ne se met jamais en veille lorsqu\'il est en charge"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"L\'écran ne se met jamais en veille lorsque l\'appareil est en charge"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Activer journaux HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Capturer les paquets Bluetooth. (Activer/Désactiver le Bluetooth après avoir modifié ce paramètre)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Déverrouillage OEM"</string>
@@ -276,8 +275,8 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Vérification HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Config. vérification HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Débogage"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Sélectionner une application à déboguer"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Aucune application à déboguer définie"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Sélectionner une application de débogage"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Aucune application de débogage définie"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Application à déboguer : <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Sélectionner une appli"</string>
     <string name="no_application" msgid="2813387563129153880">"Aucune"</string>

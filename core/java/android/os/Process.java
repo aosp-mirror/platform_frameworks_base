@@ -511,7 +511,6 @@ public class Process {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
-     * @param packagesForUid null-ok all the packages with the same uid as this process.
      * @param useSystemGraphicsDriver whether the process uses system graphics driver.
      *
      * @param zygoteArgs Additional arguments to supply to the zygote process.
@@ -532,14 +531,12 @@ public class Process {
                                            @Nullable String appDataDir,
                                            @Nullable String invokeWith,
                                            @Nullable String packageName,
-                                           @Nullable String[] packagesForUid,
-                                           @Nullable String sandboxId,
                                            boolean useSystemGraphicsDriver,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    packagesForUid, sandboxId, /*useUsapPool=*/ true,
+                    /*useUsapPool=*/ true,
                     useSystemGraphicsDriver, zygoteArgs);
     }
 
@@ -556,14 +553,12 @@ public class Process {
                                                   @Nullable String appDataDir,
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
-                                                  @Nullable String[] packagesForUid,
-                                                  @Nullable String sandboxId,
                                                   boolean useSystemGraphicsDriver,
                                                   @Nullable String[] zygoteArgs) {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    packagesForUid, sandboxId, /*useUsapPool=*/ false,
+                    /*useUsapPool=*/ false,
                     useSystemGraphicsDriver, zygoteArgs);
     }
 

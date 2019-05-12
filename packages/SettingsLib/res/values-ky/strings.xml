@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Түйүндөрдү издөө мүмкүн эмес"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Жок"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Сакталды"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Ажыратылды"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Өчүрүлгөн"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP конфигурациясы бузулду"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Тармактын сапаты начар болгондуктан туташкан жок"</string>
@@ -262,10 +261,10 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Аттрибуттарды текшерүүнү иштетүү"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi иштеп турганда да дайындар мобилдик тармак аркылуу өткөрүлө берет (бир тармактан экинчисине тезирээк которулуу үчүн)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Мүмкүнчүлүккө жараша, модем режиминде аппарат тезирээк иштей баштайт"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB аркылуу жөндөөгө уруксат бересизби?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
-    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Өндүрүүчүнүн мүмкүнчүлүктөрүнө уруксат берилсинби?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Жөндөөлөрдү өзгөртүү"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Орнотулуучу колдонмону текшерүү"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT аркылуу орнотулган колдонмолордун коопсуздугу текшерилет."</string>

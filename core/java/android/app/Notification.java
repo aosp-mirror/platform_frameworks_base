@@ -4886,7 +4886,8 @@ public class Notification implements Parcelable
                         R.id.progress, ColorStateList.valueOf(mContext.getColor(
                                 R.color.notification_progress_background_color)));
                 if (getRawColor(p) != COLOR_DEFAULT) {
-                    ColorStateList colorStateList = ColorStateList.valueOf(resolveContrastColor(p));
+                    int color = isColorized(p) ? getPrimaryTextColor(p) : resolveContrastColor(p);
+                    ColorStateList colorStateList = ColorStateList.valueOf(color);
                     contentView.setProgressTintList(R.id.progress, colorStateList);
                     contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
                 }
@@ -8709,6 +8710,10 @@ public class Notification implements Parcelable
             /**
              * Sets the intent that will be used when the bubble is expanded. This will display the
              * app content in a floating window over the existing foreground activity.
+             *
+             * <p>An intent is required.</p>
+             *
+             * @throws IllegalArgumentException if intent is null
              */
             @NonNull
             public BubbleMetadata.Builder setIntent(@NonNull PendingIntent intent) {
@@ -8733,6 +8738,8 @@ public class Notification implements Parcelable
              *
              * If your icon is not bitmap-based, you should expect that the icon will be tinted.
              * </p>
+             *
+             * @throws IllegalArgumentException if icon is null or a non-adaptive bitmap
              */
             @NonNull
             public BubbleMetadata.Builder setIcon(@NonNull Icon icon) {
@@ -8750,12 +8757,18 @@ public class Notification implements Parcelable
 
             /**
              * Sets the desired height in DPs for the app content defined by
-             * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
-             * enough space on the screen or if the provided height is too small to be useful.
-             * <p>
-             * If {@link #setDesiredHeightResId(int)} was previously called on this builder, the
+             * {@link #setIntent(PendingIntent)}.
+             *
+             * <p>This height may not be respected if there is not enough space on the screen or if
+             * the provided height is too small to be useful.</p>
+             *
+             * <p>If {@link #setDesiredHeightResId(int)} was previously called on this builder, the
              * previous value set will be cleared after calling this method, and this value will
-             * be used instead.
+             * be used instead.</p>
+             *
+             * <p>A desired height (in DPs or via resID) is optional.</p>
+             *
+             * @see #setDesiredHeightResId(int)
              */
             @NonNull
             public BubbleMetadata.Builder setDesiredHeight(@Dimension(unit = DP) int height) {
@@ -8767,12 +8780,18 @@ public class Notification implements Parcelable
 
             /**
              * Sets the desired height via resId for the app content defined by
-             * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
-             * enough space on the screen or if the provided height is too small to be useful.
-             * <p>
-             * If {@link #setDesiredHeight(int)} was previously called on this builder, the
+             * {@link #setIntent(PendingIntent)}.
+             *
+             * <p>This height may not be respected if there is not enough space on the screen or if
+             * the provided height is too small to be useful.</p>
+             *
+             * <p>If {@link #setDesiredHeight(int)} was previously called on this builder, the
              * previous value set will be cleared after calling this method, and this value will
-             * be used instead.
+             * be used instead.</p>
+             *
+             * <p>A desired height (in DPs or via resID) is optional.</p>
+             *
+             * @see #setDesiredHeight(int)
              */
             @NonNull
             public BubbleMetadata.Builder setDesiredHeightResId(@DimenRes int heightResId) {
@@ -8782,15 +8801,16 @@ public class Notification implements Parcelable
             }
 
             /**
-             * If set and the app creating the bubble is in the foreground, the bubble will be
-             * posted in its expanded state, with the contents of {@link #getIntent()} in a
-             * floating window.
+             * Sets whether the bubble will be posted in its expanded state (with the contents of
+             * {@link #getIntent()} in a floating window).
              *
-             * <p>If the app creating the bubble is not in the foreground this flag has no effect.
+             * <p>This flag has no effect if the app posting the bubble is not in the foreground.
              * </p>
              *
-             * <p>Generally this flag should only be set if the user has performed an action to
+             * <p>Generally, this flag should only be set if the user has performed an action to
              * request or create a bubble.</p>
+             *
+             * <p>Setting this flag is optional; it defaults to false.</p>
              */
             @NonNull
             public BubbleMetadata.Builder setAutoExpandBubble(boolean shouldExpand) {
@@ -8799,15 +8819,17 @@ public class Notification implements Parcelable
             }
 
             /**
-             * If set and the app posting the bubble is in the foreground, the bubble will be
-             * posted <b>without</b> the associated notification in the notification shade.
+             * Sets whether the bubble will be posted <b>without</b> the associated notification in
+             * the notification shade.
              *
-             * <p>If the app posting the bubble is not in the foreground this flag has no effect.
+             * <p>This flag has no effect if the app posting the bubble is not in the foreground.
              * </p>
              *
-             * <p>Generally this flag should only be set if the user has performed an action to
+             * <p>Generally, this flag should only be set if the user has performed an action to
              * request or create a bubble, or if the user has seen the content in the notification
              * and the notification is no longer relevant.</p>
+             *
+             * <p>Setting this flag is optional; it defaults to false.</p>
              */
             @NonNull
             public BubbleMetadata.Builder setSuppressNotification(boolean shouldSupressNotif) {
@@ -8816,7 +8838,9 @@ public class Notification implements Parcelable
             }
 
             /**
-             * Sets an optional intent to send when this bubble is explicitly removed by the user.
+             * Sets an intent to send when this bubble is explicitly removed by the user.
+             *
+             * <p>Setting a delete intent is optional.</p>
              */
             @NonNull
             public BubbleMetadata.Builder setDeleteIntent(@Nullable PendingIntent deleteIntent) {
@@ -8826,8 +8850,10 @@ public class Notification implements Parcelable
 
             /**
              * Creates the {@link BubbleMetadata} defined by this builder.
-             * <p>Will throw {@link IllegalStateException} if required fields have not been set
-             * on this builder.</p>
+             *
+             * @throws IllegalStateException if {@link #setIntent(PendingIntent)} and/or
+             *                               {@link #setIcon(Icon)} have not been called on this
+             *                               builder.
              */
             @NonNull
             public BubbleMetadata build() {

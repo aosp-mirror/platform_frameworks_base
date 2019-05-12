@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -52,6 +53,7 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
 
@@ -1051,7 +1053,17 @@ interface ITelephony {
      */
     String getLine1AlphaTagForDisplay(int subId, String callingPackage);
 
-    String[] getMergedSubscriberIds(String callingPackage);
+    /**
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. This is commonly {@code null} to indicate no merging is required. Any returned
+     * subscribers are sorted in a deterministic order.
+     * <p>
+     * The returned set of subscriber IDs will include the subscriber ID corresponding to this
+     * TelephonyManager's subId.
+     *
+     * @hide
+     */
+    String[] getMergedSubscriberIds(int subId, String callingPackage);
 
     /**
      * Override the operator branding for the current ICCID.
@@ -1970,4 +1982,10 @@ interface ITelephony {
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
 
     boolean isApnMetered(int apnType, int subId);
+
+    /**
+     * Enqueue a pending sms Consumer, which will answer with the user specified selection for an
+     * outgoing SmsManager operation.
+     */
+    oneway void enqueueSmsPickResult(String callingPackage, IIntegerConsumer subIdResult);
 }

@@ -1484,20 +1484,22 @@ public class AudioManager {
      }
 
     /**
-     * Specifies wheather the audio played by this app may or may not be captured by other apps or
+     * Specifies whether the audio played by this app may or may not be captured by other apps or
      * the system.
      *
      * The default is {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
      *
      * There are multiple ways to set this policy:
-     *  - for each tracks independently, see
-     *    {@link AudioAttributes.Builder#setAllowedCapturePolicy(int)}
-     *  - application wide at runtime, with this method
-     *  - application wide at build time, see {@code allowAudioPlaybackCapture} in the application
-     *  manifest.
+     * <ul>
+     * <li> for each track independently, see
+     *    {@link AudioAttributes.Builder#setAllowedCapturePolicy(int)} </li>
+     * <li> application-wide at runtime, with this method </li>
+     * <li> application-wide at build time, see {@code allowAudioPlaybackCapture} in the application
+     *       manifest. </li>
+     * </ul>
      * The most restrictive policy is always applied.
      *
-     * See {@link AudioPlaybackCaptureConfiguration} for more details on the restrictions
+     * See {@link AudioPlaybackCaptureConfiguration} for more details on
      * which audio signals can be captured.
      *
      * @param capturePolicy one of
@@ -3774,7 +3776,7 @@ public class AudioManager {
     /** @hide */
     public static final int RECORD_CONFIG_EVENT_UPDATE = 2;
     /** @hide */
-    public static final int RECORD_CONFIG_EVENT_DEATH = 3;
+    public static final int RECORD_CONFIG_EVENT_RELEASE = 3;
     /**
      * keep in sync with frameworks/native/include/audiomanager/AudioManager.h
      */

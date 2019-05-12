@@ -571,13 +571,14 @@
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"আপনার মুখের ছবি আবার নথিভুক্ত করুন।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"আর মুখ চিনতে পারবেন না। আবার চেষ্টা করুন।"</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"একই ধরনের দেখতে, একটু অন্যদিকে ঘুরে দাঁড়ান।"</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (4581629343077288178) -->
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"আপনার মাথাটি নিচের দিকে সামান্য নামান।"</string>
+    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
     <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (4019954263012496468) -->
+    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
     <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"মাথা সোজা করে রাখুন।"</string>
-    <string name="face_acquired_obscured" msgid="5747521031647744553">"আপনার মুখের উপর কোনও আবরণ থাকলে সেটি সরিয়ে দিন।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="364493868630891300">"ক্যামেরাটি পরিষ্কার করুন।"</string>
+    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>
@@ -1122,7 +1123,7 @@
     <string name="dialog_alert_title" msgid="2049658708609043103">"খেয়াল করুন"</string>
     <string name="loading" msgid="7933681260296021180">"লোড হচ্ছে..."</string>
     <string name="capital_on" msgid="1544682755514494298">"চালু"</string>
-    <string name="capital_off" msgid="6815870386972805832">"বন্ধ করুন"</string>
+    <string name="capital_off" msgid="6815870386972805832">"বন্ধ আছে"</string>
     <string name="whichApplication" msgid="4533185947064773386">"এটি ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s ব্যবহার করে ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"ক্রিয়াকলাপ সম্পূর্ণ করুন"</string>
@@ -1598,7 +1599,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ওয়্যারলেস প্রদর্শন"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"কাস্ট করুন"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ডিভাইসে সংযোগ করুন"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ডিভাইসে স্ক্রীণ কাস্ট করুন"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ডিভাইসে স্ক্রিন কাস্ট করুন"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি সার্চ করা হচ্ছে…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"সেটিংস"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"সংযোগ বিচ্ছিন্ন করুন"</string>
@@ -1842,7 +1843,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত (পরবর্তী অ্যালার্ম)"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"যতক্ষণ না আপনি বন্ধ করছেন"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"যতক্ষণ না পর্যন্ত আপনি বিরক্ত করবেন না বন্ধ করছেন"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"যতক্ষণ পর্যন্ত না আপনি বিরক্ত করবেন না বন্ধ করছেন"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"বিরক্ত করবেন না"</string>

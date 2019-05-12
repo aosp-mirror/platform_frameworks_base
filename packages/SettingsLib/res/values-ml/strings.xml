@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"നെ‌റ്റ്‌വർക്കുകൾക്കായി സ്കാൻ ചെയ്യാനായില്ല"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ഒന്നുമില്ല"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"സംരക്ഷിച്ചു"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"വിച്ഛേദിച്ചു"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP കോൺഫിഗറേഷൻ പരാജയം"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"മോശം നെറ്റ്‌വർക്ക് ‌ആയതിനാൽ കണക്‌റ്റായില്ല"</string>
@@ -203,12 +202,12 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"ഈ ഉപയോക്താവിനായി ടെതറിംഗ് ക്രമീകരണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"ആക്‌സസ്സ് പോയിന്റ് നെയിം ക്രമീകരണങ്ങൾ ഈ ഉപയോക്താവിനായി ലഭ്യമല്ല"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB ഡീബഗ്ഗിംഗ്"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ ഡീബഗ് മോഡ്"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള ഡീബഗ് മോഡ്"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ഡീബഗ്ഗിംഗ് അംഗീകാരം പിൻവലിക്കുക"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ബഗ് റിപ്പോർട്ട് കുറുക്കുവഴി"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നതിന് പവർ മെനുവിൽ ഒരു ബട്ടൺ കാണിക്കുക"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"സജീവമായി തുടരുക"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ്ജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും ഉറങ്ങില്ല"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും സ്ലീപ്പ് മോഡിലാകില്ല"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് സജീവമാക്കൂ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Bluetooth പായ്ക്കറ്റുകൾ ക്യാപ്‌ചർ ചെയ്യുക. (ഈ ക്രമീകരണം മാറ്റിയ ശേഷം Bluetooth മാറ്റുക)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM അൺലോക്ക് ചെയ്യൽ"</string>
@@ -217,7 +216,7 @@
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"മുന്നറിയിപ്പ്: ഈ ക്രമീകരണം ഓണായിരിക്കുമ്പോൾ, ഉപകരണ സുരക്ഷാ ഫീച്ചറുകൾ ഈ ഉപകരണത്തിൽ പ്രവർത്തിക്കില്ല."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"മോക്ക്‌ലൊക്കേഷൻ ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജമാക്കിയിട്ടില്ല"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"വ്യാജ ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"മോക്ക് ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -321,7 +320,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"സംക്രമണ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"രണ്ടാം ഡിസ്‌പ്ലേകൾ പ്രവർത്തിപ്പിക്കുക"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"അപ്ലിക്കേഷനുകൾ"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"ആപ്പുകൾ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"പ്രവർത്തനങ്ങൾ സൂക്ഷിക്കരുത്"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ഉപയോക്താവ് ഉപേക്ഷിക്കുന്നതിനനുസരിച്ച് എല്ലാ പ്രവർത്തനങ്ങളും നശിപ്പിക്കുക"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"പശ്ചാത്തല പ്രോസ‌സ് പരിധി"</string>

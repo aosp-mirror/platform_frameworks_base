@@ -229,4 +229,10 @@
 
     <!-- Default for Settings.Secure.AWARE_ENABLED -->
     <bool name="def_aware_enabled">false</bool>
+
+    <!-- Default for Settings.Secure.SKIP_GESTURE -->
+    <bool name="def_skip_gesture">false</bool>
+
+    <!-- Default for Settings.Secure.SILENCE_GESTURE -->
+    <bool name="def_silence_gesture">false</bool>
 </resources>

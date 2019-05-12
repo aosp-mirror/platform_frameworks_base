@@ -23,8 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ਨੈਟਵਰਕਾਂ ਲਈ ਸਕੈਨ ਨਹੀਂ ਕਰ ਸਕਦਾ"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ਕੋਈ ਨਹੀਂ"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ਰੱਖਿਅਤ ਕੀਤਾ"</string>
-    <!-- no translation found for wifi_disconnected (8085419869003922556) -->
-    <skip />
+    <string name="wifi_disconnected" msgid="8085419869003922556">"ਡਿਸਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ਅਯੋਗ ਬਣਾਇਆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP ਕੌਂਫਿਗਰੇਸ਼ਨ ਅਸਫਲਤਾ"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ਘੱਟ ਗੁਣਵੱਤਾ ਵਾਲੇ ਨੈੱਟਵਰਕ ਕਾਰਨ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
@@ -154,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"ਕੁਝ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਕੀਤੇ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ਕੋਈ ਡਿਫੌਲਟਸ ਸੈਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਸੈਟਿੰਗਾਂ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"ਲਿਖਤ-ਤੋਂ-ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ਬੋਲਣ ਦੀ ਗਤੀ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ਸਪੀਡ ਜਿਸਤੇ ਟੈਕਸਟ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ਪਿਚ"</string>
@@ -307,10 +306,10 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ਟ੍ਰੇਸਿਜ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ਆਡੀਓ ਰੂਟਿੰਗ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ਆਡੀਓ ਪੈਰੀਫੈਰਲ ਲਈ ਸਵੈਚਲਿਤ ਰੂਟਿੰਗ ਬੰਦ ਕਰੋ"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"ਲੇਆਉਟ ਬਾਊਂਡਸ ਦਿਖਾਓ"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"ਕਲਿਪ ਬਾਊਂਡਸ, ਮਾਰਜਿਨ ਆਦਿ ਦਿਖਾਓ"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"ਖਾਕਾ ਸੀਮਾਵਾਂ ਦਿਖਾਓ"</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"ਕਲਿੱਪ ਸੀਮਾਵਾਂ, ਹਾਸ਼ੀਏ ਆਦਿ ਦਿਖਾਓ"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਲੇਆਊਟ ਲਾਗੂ ਕਰੋ"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ਸਾਰੇ ਸਥਾਨਾਂ ਲਈ ਸਕ੍ਰੀਨ \'ਤੇ ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਲੇਆਊਟ ਲਾਗੂ ਕਰੋ"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ ਲਈ ਸਕ੍ਰੀਨ \'ਤੇ ਸੱਜੇ ਤੋਂ ਖੱਬੇ ਵਾਲਾ ਲੇਆਊਟ ਲਾਗੂ ਕਰੋ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ਤੇ ਜ਼ੋਰ ਪਾਓ"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 ਐਪਾਂ ਵਿੱਚ 4x MSAA ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"ਗੈਰ-ਆਇਤਾਕਾਰ ਕਲਿੱਪ ਓਪਰੇਸ਼ਨ ਡੀਬੱਗ ਕਰੋ"</string>

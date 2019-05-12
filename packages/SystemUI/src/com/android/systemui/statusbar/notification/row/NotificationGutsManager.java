@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.row;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
@@ -26,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -125,13 +125,18 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
      * Sends an intent to open the notification settings for a particular package and optional
      * channel.
      */
+    public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = ":settings:show_fragment_args";
     private void startAppNotificationSettingsActivity(String packageName, final int appUid,
             final NotificationChannel channel, ExpandableNotificationRow row) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
+
         if (channel != null) {
+            final Bundle args = new Bundle();
             intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
+            args.putString(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
+            intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, args);
         }
         mNotificationActivityStarter.startNotificationGutsIntent(intent, appUid, row);
     }
@@ -301,7 +306,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 iNotificationManager,
                 packageName,
                 row.getEntry().channel,
-                row.getNumUniqueChannels(),
+                row.getUniqueChannels(),
                 sbn,
                 mCheckSaveListener,
                 onSettingsClick,

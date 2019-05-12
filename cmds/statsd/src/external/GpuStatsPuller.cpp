@@ -68,6 +68,8 @@ static bool pullGpuStatsGlobalInfo(const sp<IGpuService>& gpuService,
         if (!event->write(info.vulkanVersion)) return false;
         if (!event->write(info.cpuVulkanVersion)) return false;
         if (!event->write(info.glesVersion)) return false;
+        if (!event->write((int64_t)info.angleLoadingCount)) return false;
+        if (!event->write((int64_t)info.angleLoadingFailureCount)) return false;
         event->init();
         data->emplace_back(event);
     }
@@ -92,6 +94,8 @@ static bool pullGpuStatsAppInfo(const sp<IGpuService>& gpuService,
         if (!event->write((int64_t)info.driverVersionCode)) return false;
         if (!event->write(int64VectorToProtoByteString(info.glDriverLoadingTime))) return false;
         if (!event->write(int64VectorToProtoByteString(info.vkDriverLoadingTime))) return false;
+        if (!event->write(int64VectorToProtoByteString(info.angleDriverLoadingTime))) return false;
+        if (!event->write(info.cpuVulkanInUse)) return false;
         event->init();
         data->emplace_back(event);
     }

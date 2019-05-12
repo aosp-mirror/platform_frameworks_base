@@ -17,16 +17,17 @@
 package com.android.systemui.classifier;
 
 import android.content.Context;
-import android.net.Uri;
-import android.view.MotionEvent;
 
-import java.io.PrintWriter;
+import com.android.systemui.Dependency;
+import com.android.systemui.plugins.FalsingManager;
 
 /**
  * When the phone is locked, listens to touch, sensor and phone events and sends them to
  * DataCollector and HumanInteractionClassifier.
  *
  * It does not collect touch events when the bouncer shows up.
+ *
+ * TODO: FalsingManager supports dependency injection. Use it.
  */
 public class FalsingManagerFactory {
     private static FalsingManager sInstance = null;
@@ -35,82 +36,9 @@ public class FalsingManagerFactory {
 
     public static FalsingManager getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new FalsingManagerImpl(context);
+            sInstance = Dependency.get(FalsingManager.class);
         }
         return sInstance;
     }
 
-    public interface FalsingManager {
-        void onSucccessfulUnlock();
-
-        void onNotificationActive();
-
-        void setShowingAod(boolean showingAod);
-
-        void onNotificatonStartDraggingDown();
-
-        boolean isUnlockingDisabled();
-
-        boolean isFalseTouch();
-
-        void onNotificatonStopDraggingDown();
-
-        void setNotificationExpanded();
-
-        boolean isClassiferEnabled();
-
-        void onQsDown();
-
-        void setQsExpanded(boolean expanded);
-
-        boolean shouldEnforceBouncer();
-
-        void onTrackingStarted(boolean secure);
-
-        void onTrackingStopped();
-
-        void onLeftAffordanceOn();
-
-        void onCameraOn();
-
-        void onAffordanceSwipingStarted(boolean rightCorner);
-
-        void onAffordanceSwipingAborted();
-
-        void onStartExpandingFromPulse();
-
-        void onExpansionFromPulseStopped();
-
-        Uri reportRejectedTouch();
-
-        void onScreenOnFromTouch();
-
-        boolean isReportingEnabled();
-
-        void onUnlockHintStarted();
-
-        void onCameraHintStarted();
-
-        void onLeftAffordanceHintStarted();
-
-        void onScreenTurningOn();
-
-        void onScreenOff();
-
-        void onNotificatonStopDismissing();
-
-        void onNotificationDismissed();
-
-        void onNotificatonStartDismissing();
-
-        void onNotificationDoubleTap(boolean accepted, float dx, float dy);
-
-        void onBouncerShown();
-
-        void onBouncerHidden();
-
-        void onTouchEvent(MotionEvent ev, int width, int height);
-
-        void dump(PrintWriter pw);
-    }
 }

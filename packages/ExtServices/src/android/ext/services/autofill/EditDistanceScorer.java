@@ -83,7 +83,7 @@ final class EditDistanceScorer {
      *     the edit distance is at least as big as the {@code max} parameter
      */
     // Note: copied verbatim from com.android.tools.lint.detector.api.LintUtils.java
-    private static int editDistance(@NonNull String s, @NonNull String t, int max) {
+    public static int editDistance(@NonNull String s, @NonNull String t, int max) {
         if (s.equals(t)) {
             return 0;
         }

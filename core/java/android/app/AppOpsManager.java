@@ -3119,6 +3119,15 @@ public class AppOpsManager {
             return mHistoricalUidOps.get(uid);
         }
 
+        /** @hide */
+        public void clearHistory(int uid, @NonNull String packageName) {
+            HistoricalUidOps historicalUidOps = getOrCreateHistoricalUidOps(uid);
+            historicalUidOps.clearHistory(packageName);
+            if (historicalUidOps.isEmpty()) {
+                mHistoricalUidOps.remove(uid);
+            }
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -3394,6 +3403,12 @@ public class AppOpsManager {
                 return null;
             }
             return mHistoricalPackageOps.get(packageName);
+        }
+
+        private void clearHistory(@NonNull String packageName) {
+            if (mHistoricalPackageOps != null) {
+                mHistoricalPackageOps.remove(packageName);
+            }
         }
 
         @Override
@@ -4294,6 +4309,12 @@ public class AppOpsManager {
     /**
      * Retrieve current operation state for all applications.
      *
+     * The mode of the ops returned are set for the package but may not reflect their effective
+     * state due to UID policy or because it's controlled by a different master op.
+     *
+     * Use {@link #unsafeCheckOp(String, int, String)}} or {@link #noteOp(String, int, String)}
+     * if the effective mode is needed.
+     *
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
      */
@@ -4312,6 +4333,12 @@ public class AppOpsManager {
     /**
      * Retrieve current operation state for all applications.
      *
+     * The mode of the ops returned are set for the package but may not reflect their effective
+     * state due to UID policy or because it's controlled by a different master op.
+     *
+     * Use {@link #unsafeCheckOp(String, int, String)}} or {@link #noteOp(String, int, String)}
+     * if the effective mode is needed.
+     *
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
      */
@@ -4327,6 +4354,12 @@ public class AppOpsManager {
 
     /**
      * Retrieve current operation state for one application.
+     *
+     * The mode of the ops returned are set for the package but may not reflect their effective
+     * state due to UID policy or because it's controlled by a different master op.
+     *
+     * Use {@link #unsafeCheckOp(String, int, String)}} or {@link #noteOp(String, int, String)}
+     * if the effective mode is needed.
      *
      * @param uid The uid of the application of interest.
      * @param packageName The name of the application of interest.
@@ -4353,6 +4386,12 @@ public class AppOpsManager {
     /**
      * Retrieve current operation state for one application. The UID and the
      * package must match.
+     *
+     * The mode of the ops returned are set for the package but may not reflect their effective
+     * state due to UID policy or because it's controlled by a different master op.
+     *
+     * Use {@link #unsafeCheckOp(String, int, String)}} or {@link #noteOp(String, int, String)}
+     * if the effective mode is needed.
      *
      * @param uid The uid of the application of interest.
      * @param packageName The name of the application of interest.

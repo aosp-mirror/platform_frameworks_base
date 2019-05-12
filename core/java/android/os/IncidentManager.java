@@ -576,7 +576,7 @@ public class IncidentManager {
             }
 
             final String id = uri.getQueryParameter(URI_PARAM_REPORT_ID);
-            if (cls == null) {
+            if (id == null) {
                 throw new RuntimeException("Invalid URI: No "
                         + URI_PARAM_REPORT_ID + " parameter. " + uri);
             }
