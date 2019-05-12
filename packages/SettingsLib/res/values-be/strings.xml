@@ -275,7 +275,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Праверка HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Усталяваць рэжым праверкі HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Адладка"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Выберыце праграму для адладкі"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Выбраць праграму для адладкі"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Праграма для адладкi не зададзена"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Адладка прыкладання: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Выберыце прыкладанне"</string>
@@ -304,7 +304,7 @@
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Заўсёды выкарыстоўваць GPU для экраннай кампаноўкі"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Сімуляцыя каляр. прасторы"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Уключэнне слядоў OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Адключыць аўдыёмаршрутызацыю USB"</string>
+    <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Адключыць аўдыямаршрутызацыю USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Выкл. аўтаперанакіраванне на USB-аўдыяпрылады"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Паказаць межы макета"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Паказаць межы кліпа, палі і г. д."</string>

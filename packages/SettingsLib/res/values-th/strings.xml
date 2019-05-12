@@ -137,7 +137,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"สัญญาณ Wi-Fi เต็ม"</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"เครือข่ายแบบเปิด"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"เครือข่ายที่ปลอดภัย"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการของ Android"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"แอปพลิเคชันที่นำออก"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"แอปพลิเคชันและผู้ใช้ที่นำออก"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"การอัปเดตระบบ"</string>
