@@ -3027,9 +3027,7 @@
   <java-symbol type="string" name="now_string_shortest" />
 
   <!-- Encryption notification while accounts are locked by credential encryption -->
-  <java-symbol type="string" name="user_encrypted_title" />
-  <java-symbol type="string" name="user_encrypted_message" />
-  <java-symbol type="string" name="user_encrypted_detail" />
+  <java-symbol type="string" name="profile_encrypted_title" />
   <java-symbol type="string" name="profile_encrypted_detail" />
   <java-symbol type="string" name="profile_encrypted_message" />
   <java-symbol type="drawable" name="ic_user_secure" />
