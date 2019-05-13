@@ -43,7 +43,12 @@ public class SystemNotificationChannels {
     public static String NETWORK_ALERTS = "NETWORK_ALERTS";
     public static String NETWORK_AVAILABLE = "NETWORK_AVAILABLE";
     public static String VPN = "VPN";
-    public static String DEVICE_ADMIN = "DEVICE_ADMIN";
+    /**
+     * @deprecated Legacy device admin channel with low importance which is no longer used,
+     *  Use the high importance {@link #DEVICE_ADMIN} channel instead.
+     */
+    @Deprecated public static String DEVICE_ADMIN_DEPRECATED = "DEVICE_ADMIN";
+    public static String DEVICE_ADMIN = "DEVICE_ADMIN_ALERTS";
     public static String ALERTS = "ALERTS";
     public static String RETAIL_MODE = "RETAIL_MODE";
     public static String USB = "USB";
@@ -128,7 +133,7 @@ public class SystemNotificationChannels {
         final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,
                 context.getString(R.string.notification_channel_device_admin),
-                NotificationManager.IMPORTANCE_LOW);
+                NotificationManager.IMPORTANCE_HIGH);
         channelsList.add(deviceAdmin);
 
         final NotificationChannel alertsChannel = new NotificationChannel(
@@ -178,6 +183,12 @@ public class SystemNotificationChannels {
         channelsList.add(dndChanges);
 
         nm.createNotificationChannels(channelsList);
+    }
+
+    /** Remove notification channels which are no longer used */
+    public static void removeDeprecated(Context context) {
+        final NotificationManager nm = context.getSystemService(NotificationManager.class);
+        nm.deleteNotificationChannel(DEVICE_ADMIN_DEPRECATED);
     }
 
     public static void createAccountChannelForPackage(String pkg, int uid, Context context) {
