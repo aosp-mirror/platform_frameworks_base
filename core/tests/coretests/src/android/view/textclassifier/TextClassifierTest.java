@@ -40,6 +40,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -411,6 +412,7 @@ public class TextClassifierTest {
         assertThat(textLanguage, isTextLanguage("ja"));
     }
 
+    @Ignore  // Doesn't work without a language-based model.
     @Test
     public void testSuggestConversationActions_textReplyOnly_maxOne() {
         if (isTextClassifierDisabled()) return;
@@ -438,6 +440,7 @@ public class TextClassifierTest {
         Truth.assertThat(conversationAction.getTextReply()).isNotNull();
     }
 
+    @Ignore  // Doesn't work without a language-based model.
     @Test
     public void testSuggestConversationActions_textReplyOnly_noMax() {
         if (isTextClassifierDisabled()) return;
@@ -493,6 +496,7 @@ public class TextClassifierTest {
         Truth.assertThat(actionIntent.getData()).isEqualTo(Uri.parse("https://www.android.com"));
     }
 
+    @Ignore  // Doesn't work without a language-based model.
     @Test
     public void testSuggestConversationActions_copy() {
         if (isTextClassifierDisabled()) return;
