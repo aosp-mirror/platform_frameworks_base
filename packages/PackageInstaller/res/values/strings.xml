@@ -4,9 +4,9 @@
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
-  
+
           http://www.apache.org/licenses/LICENSE-2.0
-  
+
      Unless required by applicable law or agreed to in writing, software
      distributed under the License is distributed on an "AS IS" BASIS,
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -184,9 +184,6 @@
 
     <!-- Placeholder for an app name when it is unknown [CHAR LIMIT=50] -->
     <string name="app_name_unknown">Unknown</string>
-
-    <!-- Help URL, application permissions [DO NOT TRANSLATE] -->
-    <string name="help_app_permissions" translatable="false"></string>
 
     <!-- Text to show in warning dialog on the tablet when the app source is not trusted [CHAR LIMIT=NONE] -->
     <string name="untrusted_external_source_warning" product="tablet">For your security, your tablet is not allowed to install unknown apps from this source.</string>
