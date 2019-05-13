@@ -197,6 +197,7 @@ cc_test_host {
 cc_binary_host {
     name: "aapt2",
     srcs: ["Main.cpp"] + toolSources,
+    use_version_lib: true,
     static_libs: ["libaapt2"],
     defaults: ["aapt2_defaults"],
 }
