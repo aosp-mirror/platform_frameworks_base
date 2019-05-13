@@ -1013,7 +1013,7 @@
     <string name="inputMethod" msgid="1653630062304567879">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Műveletek szöveggel"</string>
     <string name="email" msgid="4560673117055050403">"E-mail"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Kiválasztott cím elküldése e-mailben"</string>
+    <string name="email_desc" msgid="3638665569546416795">"E-mail küldése a kiválasztott címre"</string>
     <string name="dial" msgid="1253998302767701559">"Hívás"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Kiválasztott telefonszám hívása"</string>
     <string name="map" msgid="5441053548030107189">"Térkép"</string>

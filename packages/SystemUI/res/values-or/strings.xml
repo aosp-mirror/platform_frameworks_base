@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ଫୋନ୍‍ ଗରମ ହୋଇଯାଉଛି"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ଫୋନ୍‍ ଥଣ୍ଡା ହେବା ସମୟରେ କିଛି ଫିଚର୍ ସୀମିତ ଭାବେ କାମ କରିଥାଏ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ଆପଣଙ୍କ ଫୋନ୍‍ ସ୍ୱଚାଳିତ ଭାବେ ଥଣ୍ଡା ହେବାକୁ ଚେଷ୍ଟା କରିବ। ଆପଣ ତଥାପି ନିଜ ଫୋନ୍‍ ବ୍ୟବହାର କରିପାରିବେ, କିନ୍ତୁ ଏହା ଧୀରେ ଚାଲିପାରେ।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଥଣ୍ଡା ହୋଇଯିବାପରେ, ଏହା ସାମାନ୍ୟ ଭାବେ ଚାଲିବ।"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ଚାର୍ଜର୍‍ ଅନ୍‍ପ୍ଲଗ୍‌ କରନ୍ତୁ"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"ଏହି ଡିଭାଇସ୍‌ ଚାର୍ଜ କରିବାରେ ଗୋଟିଏ ସମସ୍ୟା ଅଛି ଯେହେତୁ କେବଲ୍‌ ଗରମ ହୋ‍ଇଯାଇପାରେ, ତେଣୁ ପାୱାର୍‌ ଆଡାପ୍ଟର୍‌ ଅନ୍‌ପ୍ଲଗ୍‌ କରନ୍ତୁ ଏବଂ ଯତ୍ନ ନିଅନ୍ତୁ।"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"ସେବା ସମ୍ବନ୍ଧିତ ଷ୍ଟେପ୍‌ଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ବାମ ଶର୍ଟକଟ୍‍"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ଡାହାଣ ଶର୍ଟକଟ୍‍"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ବାମ ଶର୍ଟକଟ୍‍ ମଧ୍ୟ ଅନଲକ୍‍ କରେ"</string>

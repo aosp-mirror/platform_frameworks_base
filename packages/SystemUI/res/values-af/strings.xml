@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Foon raak warm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Sommige kenmerke is beperk terwyl foon afkoel"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Jou foon sal outomaties probeer om af te koel. Jy kan steeds jou foon gebruik, maar dit sal dalk stadiger wees.\n\nJou foon sal normaalweg werk nadat dit afgekoel het."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Trek laaier uit"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Kan nie hierdie toestel laai nie. Trek die kragprop uit en wees versigtig, want die kabel kan warm wees."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Sien versorgingstappe"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Links-kortpad"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Regs-kortpad"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Links-kortpad ontsluit ook"</string>

@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="sysui_overlay_dark" msgid="557336259295713662">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎Dark‎‏‎‎‏‎"</string>
+    <string name="sysui_overlay_dark" msgid="557336259295713662">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎Dark‎‏‎‎‏‎"</string>
 </resources>

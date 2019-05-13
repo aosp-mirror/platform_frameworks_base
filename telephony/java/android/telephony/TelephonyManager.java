@@ -7581,6 +7581,9 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setAllowedCarriers(int slotIndex, List<CarrierIdentifier> carriers) {
+        if (!SubscriptionManager.isValidPhoneId(slotIndex)) {
+            return -1;
+        }
         try {
             ITelephony service = getITelephony();
             if (service != null) {
@@ -7608,15 +7611,17 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<CarrierIdentifier> getAllowedCarriers(int slotIndex) {
-        try {
-            ITelephony service = getITelephony();
-            if (service != null) {
-                return service.getAllowedCarriers(slotIndex);
+        if (SubscriptionManager.isValidPhoneId(slotIndex)) {
+            try {
+                ITelephony service = getITelephony();
+                if (service != null) {
+                    return service.getAllowedCarriers(slotIndex);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
+            } catch (NullPointerException e) {
+                Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
-        } catch (NullPointerException e) {
-            Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
         }
         return new ArrayList<CarrierIdentifier>(0);
     }
@@ -7673,6 +7678,23 @@ public class TelephonyManager {
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#carrierActionReportDefaultNetworkStatus", e);
+        }
+    }
+
+    /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    public void carrierActionResetAll(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionResetAll(subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
         }
     }
 

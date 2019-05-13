@@ -551,8 +551,8 @@
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Aplikazioen sare-erabilera kalkulatzeko modua aldatzeko baimena ematen die aplikazioei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"atzitu jakinarazpenak"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Jakinarazpenak berreskuratu, aztertu eta garbitzeko aukera ematen die aplikazioei, beste aplikazioek argitaratutako jakinarazpenak barne."</string>
-    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"lotu jakinarazpenak hautemateko zerbitzu batera"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Jakinarazpenak hautemateko zerbitzu baten goi-mailako interfazera lotzeko aukera ematen dio titularrari. Aplikazio normalek ez dute baimen hau behar."</string>
+    <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"lotu jakinarazpen-hautemaile bati"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Jakinarazpen-hautemaile baten goi-mailako interfazera lotzeko aukera ematen dio titularrari. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"lotu baldintza-hornitzaileen zerbitzuei"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Baldintza-hornitzaileen zerbitzuen goi-mailako interfazeari lotzea baimentzen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"lotu dream zerbitzuei"</string>
@@ -1012,7 +1012,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Ezabatu"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Idazketa-metodoa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Testu-ekintzak"</string>
-    <string name="email" msgid="4560673117055050403">"Posta"</string>
+    <string name="email" msgid="4560673117055050403">"Bidali mezu bat"</string>
     <string name="email_desc" msgid="3638665569546416795">"Bidali mezu elektroniko bat hautatutako helbidera"</string>
     <string name="dial" msgid="1253998302767701559">"Deitu"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Deitu hautatutako telefono-zenbakira"</string>
@@ -1020,7 +1020,7 @@
     <string name="map_desc" msgid="1836995341943772348">"Bilatu hautatutako helbidea"</string>
     <string name="browse" msgid="1245903488306147205">"Ireki"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ireki hautatutako URLa"</string>
-    <string name="sms" msgid="4560537514610063430">"Bidali mezua"</string>
+    <string name="sms" msgid="4560537514610063430">"Bidali SMS bat"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Bidali testu-mezu bat hautatutako telefono-zenbakira"</string>
     <string name="add_contact" msgid="7867066569670597203">"Gehitu"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Gehitu kontaktuetan"</string>
@@ -1353,7 +1353,7 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Erabilerraztasuna"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Horma-papera"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Aldatu horma-papera"</string>
-    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Jakinarazpenak hautemateko zerbitzua"</string>
+    <string name="notification_listener_binding_label" msgid="2014162835481906429">"Jakinarazpen-hautemailea"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"Errealitate birtualeko hautemailea"</string>
     <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"Baldintza-hornitzailea"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Jakinarazpenen sailkapen-zerbitzua"</string>

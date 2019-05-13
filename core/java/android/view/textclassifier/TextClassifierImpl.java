@@ -64,6 +64,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//TODO: use java.lang.ref.Cleaner once Android supports Java 9
+import sun.misc.Cleaner;
+
 /**
  * Default implementation of the {@link TextClassifier} interface.
  *
@@ -92,6 +95,8 @@ public final class TextClassifierImpl implements TextClassifier {
     private ModelFile mModel;
     @GuardedBy("mLock") // Do not access outside this lock.
     private TextClassifierImplNative mNative;
+    @GuardedBy("mLock")
+    private Cleaner mNativeCleaner;
 
     private final Object mLoggerLock = new Object();
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
@@ -304,12 +309,12 @@ public final class TextClassifierImpl implements TextClassifier {
             if (bestModel == null) {
                 throw new FileNotFoundException("No model for " + localeList.toLanguageTags());
             }
-            if (mNative == null || !Objects.equals(mModel, bestModel)) {
+            if (mNative == null || mNative.isClosed() || !Objects.equals(mModel, bestModel)) {
                 Log.d(DEFAULT_LOG_TAG, "Loading " + bestModel);
-                destroyNativeIfExistsLocked();
                 final ParcelFileDescriptor fd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 mNative = new TextClassifierImplNative(fd.getFd());
+                mNativeCleaner = Cleaner.create(this, new NativeCloser(mNative));
                 closeAndLogError(fd);
                 mModel = bestModel;
             }
@@ -321,14 +326,6 @@ public final class TextClassifierImpl implements TextClassifier {
         synchronized (mLock) {
             return SelectionSessionLogger.createId(text, start, end, mContext, mModel.getVersion(),
                     mModel.getSupportedLocales());
-        }
-    }
-
-    @GuardedBy("mLock") // Do not call outside this lock.
-    private void destroyNativeIfExistsLocked() {
-        if (mNative != null) {
-            mNative.close();
-            mNative = null;
         }
     }
 
@@ -820,6 +817,23 @@ public final class TextClassifierImpl implements TextClassifier {
                             .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
                                     parsedTime.toEpochMilli() + DEFAULT_EVENT_DURATION),
                     parsedTime.hashCode());
+        }
+    }
+
+    /**
+     * Code to close a TextClassifierImplNative. Must not reference the TextClassifierImpl.
+     */
+    private static final class NativeCloser implements Runnable {
+
+        private final TextClassifierImplNative mNative;
+
+        NativeCloser(TextClassifierImplNative nativeImpl) {
+            mNative = Preconditions.checkNotNull(nativeImpl);
+        }
+
+        @Override
+        public void run() {
+            mNative.close();
         }
     }
 }

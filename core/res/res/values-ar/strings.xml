@@ -296,13 +296,13 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتوجيه رسائل SMS وعرضها؟"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"التخزين"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"الوصول إلى الصور والوسائط والملفات على جهازك"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى الصور والوسائط والملفات على جهازك؟"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الصور والوسائط والملفات على جهازك؟"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتسجيل الصوت؟"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط الصور وتسجيل الفيديو؟"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"سجلّ المكالمات"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى سجلات مكالماتك الهاتفية؟"</string>
@@ -1092,15 +1092,15 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"طريقة الإرسال"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
-    <string name="email" msgid="4560673117055050403">"بريد إلكتروني"</string>
+    <string name="email" msgid="4560673117055050403">"إرسال بريد إلكتروني"</string>
     <string name="email_desc" msgid="3638665569546416795">"مراسلة العنوان المختار عبر البريد الإلكتروني"</string>
     <string name="dial" msgid="1253998302767701559">"اتصال"</string>
     <string name="dial_desc" msgid="6573723404985517250">"الاتصال برقم الهاتف المختار"</string>
-    <string name="map" msgid="5441053548030107189">"خريطة"</string>
+    <string name="map" msgid="5441053548030107189">"فتح تطبيق خرائط"</string>
     <string name="map_desc" msgid="1836995341943772348">"تحديد موقع العنوان المختار"</string>
     <string name="browse" msgid="1245903488306147205">"فتح"</string>
     <string name="browse_desc" msgid="8220976549618935044">"‏فتح عنوان URL المختار"</string>
-    <string name="sms" msgid="4560537514610063430">"رسالة"</string>
+    <string name="sms" msgid="4560537514610063430">"إرسال رسائل قصيرة"</string>
     <string name="sms_desc" msgid="7526588350969638809">"مراسلة رقم الهاتف المختار"</string>
     <string name="add_contact" msgid="7867066569670597203">"إضافة"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"إضافة إلى جهات الاتصال"</string>
@@ -1455,7 +1455,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏تغيير إعدادات الشبكة أو الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="upload_file" msgid="2897957172366730416">"اختيار ملف"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"لم يتم اختيار أي ملف"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="submit" msgid="1602335572089911941">"إرسال"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"تطبيق القيادة قيد التشغيل"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"انقر للخروج من تطبيق القيادة."</string>

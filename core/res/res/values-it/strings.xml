@@ -1012,7 +1012,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Elimina"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Metodo inserimento"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Azioni testo"</string>
-    <string name="email" msgid="4560673117055050403">"Invia una email"</string>
+    <string name="email" msgid="4560673117055050403">"Invia email"</string>
     <string name="email_desc" msgid="3638665569546416795">"Invia un\'email all\'indirizzo selezionato"</string>
     <string name="dial" msgid="1253998302767701559">"Chiama"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chiama il numero di telefono selezionato"</string>

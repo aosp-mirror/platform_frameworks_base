@@ -19,7 +19,7 @@
     <string name="app_label" msgid="3701846017049540910">"শ্বেল"</string>
     <string name="bugreport_notification_channel" msgid="2574150205913861141">"বাগ সম্পৰ্কীয় প্ৰতিবেদন"</string>
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"বাগ সম্পর্কীয় অভিযোগ <xliff:g id="ID">#%d</xliff:g> সৃষ্টি কৰি থকা হৈছে"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"বাগ সম্পর্কীয় অভিযোগ <xliff:g id="ID">#%d</xliff:g> ৰেকৰ্ড কৰা হ\'ল"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"বাগ সম্পর্কীয় অভিযোগ <xliff:g id="ID">#%d</xliff:g> ৰেকৰ্ড কৰা হ’ল"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"বাগ সম্পর্কীয় অভিযোগটোত বিশদ তথ্য যোগ কৰি থকা হৈছে"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"অনুগ্রহ কৰি অপেক্ষা কৰক…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ফ\'নত বাগ সম্পর্কীয় অভিযোগ অতি সোনকালে উপলব্ধ হ\'ব"</string>

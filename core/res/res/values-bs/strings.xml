@@ -147,9 +147,9 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"Uredu"</string>
     <string name="httpError" msgid="7956392511146698522">"Došlo je do greške na mreži."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Pronalaženje URL-a nije uspjelo."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Shema za provjeru vjerodostojnosti stranice nije podržana."</string>
-    <string name="httpErrorAuth" msgid="1435065629438044534">"Došlo je do greške prilikom provjere vjerodostojnosti."</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Došlo je do greške prilikom provjere vjerodostojnosti preko proksi servera."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Shema za autentifikaciju stranice nije podržana."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"Došlo je do greške prilikom autentifikacije."</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Došlo je do greške prilikom autentifikacije preko proksi servera."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Povezivanje sa serverom nije uspjelo."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Veza sa serverom nije uspostavljena. Pokušajte ponovo kasnije."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Vrijeme za uspostavljanje veze sa serverom je isteklo."</string>
@@ -494,7 +494,7 @@
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za otiske prstiju"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Omogućava aplikaciji da koristi metode za dodavanje i brisanje šablona otisaka prstiju za upotrebu."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"korištenje hardvera za otiske prstiju"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za provjeru vjerodostojnosti koristi hardver za otiske prstiju"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otiske prstiju"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
@@ -1032,24 +1032,24 @@
     <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Način unosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Akcije za tekst"</string>
-    <string name="email" msgid="4560673117055050403">"E-pošta"</string>
-    <string name="email_desc" msgid="3638665569546416795">"E-pošta odabrane adrese"</string>
-    <string name="dial" msgid="1253998302767701559">"Pozovite"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Pozovite odabrani broj telefona"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Lociranje odabrane adrese"</string>
-    <string name="browse" msgid="1245903488306147205">"Otvorite"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Otvorite odabrani URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Poruka"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Pošaljite poruku odabranom broju telefona"</string>
-    <string name="add_contact" msgid="7867066569670597203">"Dodajte"</string>
+    <string name="email" msgid="4560673117055050403">"Pošalji e-poruku"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Pošalji e-poruku na odabranu adresu"</string>
+    <string name="dial" msgid="1253998302767701559">"Pozovi"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Pozovi odabrani broj telefona"</string>
+    <string name="map" msgid="5441053548030107189">"Prikaži na mapi"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Lociraj odabranu adresu"</string>
+    <string name="browse" msgid="1245903488306147205">"Otvori"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Otvori odabrani URL"</string>
+    <string name="sms" msgid="4560537514610063430">"Pošalji SMS"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Pošalji SMS odabranom broju telefona"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Dodaj"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Dodaj u kontakte"</string>
     <string name="view_calendar" msgid="979609872939597838">"Prikaži"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Pogledajte odabrano vrijeme u kalendaru"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Prikaži odabrano vrijeme u kalendaru"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Zakaži"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakažite događaj za odabrano vrijeme"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Zakaži događaj za odabrano vrijeme"</string>
     <string name="view_flight" msgid="7691640491425680214">"Prati"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Pratite odabrani let"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Prati odabrani let"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ponestaje prostora za pohranu"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Neke funkcije sistema možda neće raditi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Nema dovoljno prostora za sistem. Obezbijedite 250MB slobodnog prostora i ponovo pokrenite uređaj."</string>
@@ -1558,7 +1558,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji će trajno onemogućiti SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-ovi se ne poklapaju"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Previše pokušaja otključavanja pomoću uzorka"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Da otključate, prijavite se sa svojim Google računom."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Da otključate, prijavite se pomoću svog Google računa."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Korisničko ime (adresa e-pošte)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Lozinka"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prijava"</string>

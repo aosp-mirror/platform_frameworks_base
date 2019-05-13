@@ -301,7 +301,7 @@
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਲੱਛਣਾਂ ਸੰਬੰਧੀ ਸੈਂਸਰ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਉਸ ਵਿੰਡੋ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'ਸਪੱਰਸ਼ ਰਾਹੀਂ ਪੜਚੋਲ ਕਰੋ\' ਚਾਲੂ ਕਰਨਾ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ਟੈਪ ਕੀਤੀਆਂ ਆਈਟਮਾਂ ਨੂੰ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਿਆ ਜਾਵੇਗਾ ਅਤੇ ਸਕ੍ਰੀਨ ਦੀ ਸੰਕੇਤਾਂ ਦੀ ਵਰਤੋਂ ਨਾਲ ਪੜਚੋਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀ ਲਿਖਤ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
@@ -1012,7 +1012,7 @@
     <string name="deleteText" msgid="6979668428458199034">"ਮਿਟਾਓ"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ਇਨਪੁੱਟ ਵਿਧੀ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ਟੈਕਸਟ ਕਿਰਿਆਵਾਂ"</string>
-    <string name="email" msgid="4560673117055050403">"ਈਮੇਲ ਕਰੋ"</string>
+    <string name="email" msgid="4560673117055050403">"ਈਮੇਲ ਖੋਲ੍ਹੋ"</string>
     <string name="email_desc" msgid="3638665569546416795">"ਚੁਣੇ ਹੋਏ ਪਤੇ \'ਤੇ ਈਮੇਲ ਭੇਜੋ"</string>
     <string name="dial" msgid="1253998302767701559">"ਕਾਲ ਕਰੋ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ਚੁਣੇ ਗਏ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਕਾਲ ਕਰੋ"</string>
@@ -1026,7 +1026,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"ਸੰਪਰਕਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ਦੇਖੋ"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ਕੈਲੰਡਰ ਵਿੱਚ ਚੁਣਿਆ ਗਿਆ ਸਮਾਂ ਦੇਖੋ"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ਸਮਾਂ-ਸੂਚੀ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ਚੁਣੇ ਗਏ ਸਮੇਂ ਲਈ ਇਵੈਂਟ ਦੀ ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
     <string name="view_flight" msgid="7691640491425680214">"ਟਰੈਕ ਕਰੋ"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ਚੁਣੀ ਗਈ ਉਡਾਣ ਨੂੰ ਟਰੈਕ ਕਰੋ"</string>
@@ -1439,7 +1439,7 @@
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"ਹੋਮ \'ਤੇ ਜਾਓ"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"ਉੱਪਰ ਜਾਓ"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"ਹੋਰ ਚੋਣਾਂ"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"ਹੋਰ ਵਿਕਲਪ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"ਅੰਦਰੂਨੀ ਸਾਂਝੀ ਕੀਤੀ ਸਟੋਰੇਜ"</string>

@@ -284,7 +284,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;发送和查看短信吗？"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储空间"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"访问您设备上的照片、媒体内容和文件"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您设备上的照片、媒体内容和文件吗？"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”&lt;b&gt;&lt;/b&gt;访问您设备上的照片、媒体内容和文件吗？"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"录制音频"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;录音吗？"</string>
@@ -1012,11 +1012,11 @@
     <string name="deleteText" msgid="6979668428458199034">"删除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
-    <string name="email" msgid="4560673117055050403">"电子邮件"</string>
+    <string name="email" msgid="4560673117055050403">"发送电子邮件"</string>
     <string name="email_desc" msgid="3638665569546416795">"将电子邮件发送至所选地址"</string>
     <string name="dial" msgid="1253998302767701559">"拨打电话"</string>
     <string name="dial_desc" msgid="6573723404985517250">"拨打所选电话号码"</string>
-    <string name="map" msgid="5441053548030107189">"地图"</string>
+    <string name="map" msgid="5441053548030107189">"查看地图"</string>
     <string name="map_desc" msgid="1836995341943772348">"找到所选地址"</string>
     <string name="browse" msgid="1245903488306147205">"打开"</string>
     <string name="browse_desc" msgid="8220976549618935044">"打开所选网址"</string>

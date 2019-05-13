@@ -242,7 +242,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Instellingen"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Helpen"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Spraakassistent"</string>
-    <string name="global_action_lockdown" msgid="1099326950891078929">"Afgesloten"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Lockdown"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999 +"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Nieuwe melding"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Virtueel toetsenbord"</string>
@@ -305,7 +305,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Aangetikte items worden hardop benoemd en het scherm kan worden verkend via gebaren."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tekst observeren die je typt"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonsgegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Schermvergroting bedienen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Het zoomniveau en de positionering van het scherm bedienen."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gebaren uitvoeren"</string>
@@ -1012,15 +1012,15 @@
     <string name="deleteText" msgid="6979668428458199034">"Verwijderen"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Invoermethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstacties"</string>
-    <string name="email" msgid="4560673117055050403">"E-mail"</string>
+    <string name="email" msgid="4560673117055050403">"E-mailen"</string>
     <string name="email_desc" msgid="3638665569546416795">"E-mail sturen aan geselecteerd e-mailadres"</string>
     <string name="dial" msgid="1253998302767701559">"Bellen"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Geselecteerd telefoonnummer bellen"</string>
-    <string name="map" msgid="5441053548030107189">"Kaart"</string>
+    <string name="map" msgid="5441053548030107189">"Kaart openen"</string>
     <string name="map_desc" msgid="1836995341943772348">"Geselecteerd adres zoeken"</string>
     <string name="browse" msgid="1245903488306147205">"Openen"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Geselecteerde URL openen"</string>
-    <string name="sms" msgid="4560537514610063430">"Bericht"</string>
+    <string name="sms" msgid="4560537514610063430">"Bericht verzenden"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Sms sturen aan geselecteerd telefoonnummer"</string>
     <string name="add_contact" msgid="7867066569670597203">"Toevoegen"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Toevoegen aan contacten"</string>
@@ -1029,7 +1029,7 @@
     <string name="add_calendar_event" msgid="1953664627192056206">"Plannen"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Evenement plannen voor geselecteerde tijd"</string>
     <string name="view_flight" msgid="7691640491425680214">"Volgen"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Geselecteerde vlucht tonen"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Geselecteerde vlucht volgen"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Opslagruimte is bijna vol"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Bepaalde systeemfuncties werken mogelijk niet"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Onvoldoende opslagruimte voor het systeem. Zorg ervoor dat je 250 MB vrije ruimte hebt en start opnieuw."</string>
@@ -1125,7 +1125,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> heeft geheugenlimiet overschreden"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap dump verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonlijke gegevens bevatten waartoe de app toegang heeft."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonsgegevens bevatten waartoe de app toegang heeft."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>

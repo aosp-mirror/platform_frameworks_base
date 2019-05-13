@@ -40,7 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Tilkoblet via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tilgjengelig via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Tilkoblet – ingen Internett-tilgang"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ingen Internett-tilkobling"</string>
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ingen internettilkobling"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Pålogging kreves"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Tilgangspunktet er midlertidig fullt"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Tilkoblet via %1$s"</string>
@@ -75,7 +75,7 @@
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internett-tilgang"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kontaktdeling"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Bruk til kontaktdeling"</string>
-    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deling av Internett-tilkobling"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deling av internettilkobling"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Tekstmeldinger"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Tilgang til SIM-kortet"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
@@ -90,7 +90,7 @@
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Ikke koblet til tjener for filoverføring"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Koblet til inndataenhet"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Koblet til enhet for Internett-tilgang"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Deler lokal Internett-tilkobling med enhet"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Deler lokal internettilkobling med enhet"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Bruk for Internett-tilgang"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Bruk for kart"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Bruk for tilgang til SIM-kortet"</string>

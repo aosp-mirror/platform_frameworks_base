@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"فون گرم ہو رہا ہے"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"فون کے ٹھنڈے ہو جانے تک کچھ خصوصیات محدود ہیں"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"آپ کا فون خودکار طور پر ٹھنڈا ہونے کی کوشش کرے گا۔ آپ ابھی بھی اپنا فون استعمال کر سکتے ہیں، مگر ہو سکتا ہے یہ سست چلے۔\n\nایک بار آپ کا فون ٹھنڈا ہوجائے تو یہ معمول کے مطابق چلے گا۔"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"چارجر ان پلگ کریں"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"اس آلہ کو چارج کرنے میں ایک مسئلہ ہے۔ پاور ایڈاپٹر کو ان پلگ کریں اور دھیان دیں کیونکہ تار گرم ہو سکتا ہے۔"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"نگہداشت کے اقدامات ملاحظہ کریں"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"بائيں جانب کا شارٹ کٹ"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"دائیں جانب کا شارٹ کٹ"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"بائيں جانب کے شارٹ کٹ سے بھی غیرمقفل ہوتا ہے"</string>

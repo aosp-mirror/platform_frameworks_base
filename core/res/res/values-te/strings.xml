@@ -1012,23 +1012,23 @@
     <string name="deleteText" msgid="6979668428458199034">"తొలగించు"</string>
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
-    <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
+    <string name="email" msgid="4560673117055050403">"ఇమెయిల్ చేయి"</string>
     <string name="email_desc" msgid="3638665569546416795">"ఎంచుకున్న చిరునామాకు ఇమెయిల్‌ను పంపుతుంది"</string>
-    <string name="dial" msgid="1253998302767701559">"కాల్ చేయండి"</string>
+    <string name="dial" msgid="1253998302767701559">"కాల్ చేయి"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ఎంచుకున్న ఫోన్ నంబర్‌కు కాల్ చేస్తుంది"</string>
-    <string name="map" msgid="5441053548030107189">"మ్యాప్"</string>
+    <string name="map" msgid="5441053548030107189">"మ్యాప్ తెరువు"</string>
     <string name="map_desc" msgid="1836995341943772348">"ఎంచుకున్న చిరునామాను గుర్తించు"</string>
-    <string name="browse" msgid="1245903488306147205">"తెరవండి"</string>
+    <string name="browse" msgid="1245903488306147205">"తెరువు"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ఎంచుకున్న URLని తెరుస్తుంది"</string>
-    <string name="sms" msgid="4560537514610063430">"సందేశం"</string>
+    <string name="sms" msgid="4560537514610063430">"సందేశం పంపు"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ఎంచుకున్న ఫోన్ నంబర్‌కి సందేశం పంపుతుంది"</string>
-    <string name="add_contact" msgid="7867066569670597203">"జోడించండి"</string>
+    <string name="add_contact" msgid="7867066569670597203">"జోడించు"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"పరిచయాలకు జోడిస్తుంది"</string>
-    <string name="view_calendar" msgid="979609872939597838">"చూడండి"</string>
+    <string name="view_calendar" msgid="979609872939597838">"చూడు"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"ఎంచుకున్న సమయాన్ని క్యాలెండర్‌లో వీక్షించండి"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్ చేయి"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"ఎంచుకున్న సమయానికి ఈవెంట్‌ను షెడ్యూల్ చేస్తుంది"</string>
-    <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయండి"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయి"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ఎంచుకున్న విమానాన్ని ట్రాక్ చేస్తుంది"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
@@ -1442,7 +1442,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"మరిన్ని ఎంపికలు"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"అంతర్గత భాగస్వామ్య నిల్వ"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"షేర్ చేయబడిన అంతర్గత నిల్వ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD కార్డు"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD కార్డ్"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB డ్రైవ్"</string>

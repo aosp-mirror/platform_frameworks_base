@@ -592,7 +592,7 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"BluetoothをONにしますか？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"タブレットでキーボードに接続するには、最初にBluetoothをONにする必要があります。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ONにする"</string>
-    <string name="show_silently" msgid="6841966539811264192">"通知をマナーモードで表示する"</string>
+    <string name="show_silently" msgid="6841966539811264192">"通知をポップアップで知らせる"</string>
     <string name="block" msgid="2734508760962682611">"通知をすべてブロックする"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"音声で知らせる"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"音声で知らせる / ブロックしない"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"スマートフォンの温度が上昇中"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"スマートフォンのクールダウン中は一部の機能が制限されます"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"充電器を電源から外してください"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"このデバイスの充電中に問題が発生しました。電源アダプターを電源から外してください。ケーブルが熱くなっている可能性がありますのでご注意ください。"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"取り扱いに関する手順をご覧ください"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"左ショートカット"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"右ショートカット"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"左ショートカットでもロックを解除"</string>

@@ -142,9 +142,9 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nenhum padrão definido"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Configurações da conversão de texto em voz"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Conversão de texto em voz"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"Taxa de fala"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Velocidade da fala"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocidade em que o texto é falado"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tom da fala"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tom de voz"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Afeta o tom da voz sintetizada"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Idioma"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Usar idioma do sistema"</string>
@@ -166,8 +166,8 @@
     <string name="tts_engine_settings_button" msgid="1030512042040722285">"Iniciar configurações do mecanismo"</string>
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Mecanismo preferencial"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Gerais"</string>
-    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Redefinir o tom da fala"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Redefinir o tom no qual o texto é falado para o padrão."</string>
+    <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Redefinir o tom de voz"</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Redefinir o tom de voz para o padrão."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Muito devagar"</item>
     <item msgid="4795095314303559268">"Devagar"</item>

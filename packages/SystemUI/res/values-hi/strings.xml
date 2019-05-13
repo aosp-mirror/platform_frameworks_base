@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"सिस्‍टम यूआई"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"साफ़ करें"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"सूची से निकालें"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप की जानकारी"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्लिकेशन की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"आपकी हाल की स्‍क्रीन यहां दिखाई देती हैं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -600,7 +600,7 @@
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
-    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
+    <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचनाएं"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"अब आपको ये सूचनाएं दिखाई नहीं देंगी"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"इन सूचनाओं को छोटा कर दिया जाएगा"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"अाप अक्सर इन सूचनाओं को खारिज कर देते हैं. \nआगे भी इन्हें देखना जारी रखना चाहते हैं?"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"फ़ोन गर्म हो रहा है"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फ़ोन के ठंडा होने के दौरान कुछ सुविधाएं सीमित होती हैं"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपका फ़ोन अपने आप ठंडा होने की कोशिश करेगा. आप अभी भी अपने फ़ोन का उपयोग कर सकते हैं, लेकिन हो सकता है कि यह धीमी गति से चले.\n\nठंडा हो जाने पर आपका फ़ोन सामान्य रूप से चलेगा."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"चार्जर निकालें"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"इस डिवाइस को चार्ज करने में कोई समस्या हुई. पावर अडैप्टर का प्लग निकालें. ऐसा करते समय ध्यान रखें क्योंकि तार गर्म हो सकती है."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"प्रबंधन से जुड़े चरण देखें"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"बायां शॉर्टकट"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"दायां शॉर्टकट"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"बाएं शॉर्टकट से भी अनलॉक होता है"</string>
@@ -820,7 +823,7 @@
     <string name="notification_channel_hints" msgid="7323870212489152689">"संकेत"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इंस्टेंट ऐप"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"झटपट ऐप्स के लिए इंस्टॉलेशन ज़रूरी नहीं है."</string>
-    <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
+    <string name="app_info" msgid="6856026610594615344">"ऐप्लिकेशन की जानकारी"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ब्राउज़र पर जाएं"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>

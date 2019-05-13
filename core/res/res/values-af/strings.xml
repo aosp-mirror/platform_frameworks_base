@@ -1015,7 +1015,7 @@
     <string name="email" msgid="4560673117055050403">"E-pos"</string>
     <string name="email_desc" msgid="3638665569546416795">"Stuur e-pos aan gekose adres"</string>
     <string name="dial" msgid="1253998302767701559">"Bel"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Bel gekose foonnommer"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Bel dié foonnommer"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
     <string name="map_desc" msgid="1836995341943772348">"Soek geselekteerde adres"</string>
     <string name="browse" msgid="1245903488306147205">"Maak oop"</string>

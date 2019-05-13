@@ -1013,22 +1013,22 @@
     <string name="inputMethod" msgid="1653630062304567879">"Kiritish uslubi"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Matn yozish"</string>
     <string name="email" msgid="4560673117055050403">"E-pochta"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Belgilangan manzilga xat yuborish"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Belgilangan e-pochta manziliga xat yuborish"</string>
     <string name="dial" msgid="1253998302767701559">"Chaqiruv"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Belgilangan raqamga telefon qilish"</string>
     <string name="map" msgid="5441053548030107189">"Xarita"</string>
     <string name="map_desc" msgid="1836995341943772348">"Belgilangan manzilni xaritadan topish"</string>
     <string name="browse" msgid="1245903488306147205">"Ochish"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Belgilangan URL manzilini ochish"</string>
-    <string name="sms" msgid="4560537514610063430">"Xabar"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS yozish"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Belgilangan telefon raqamiga SMS yuborish"</string>
-    <string name="add_contact" msgid="7867066569670597203">"Qo‘shish"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Saqlab olish"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Kontaktlarga saqlash"</string>
     <string name="view_calendar" msgid="979609872939597838">"Ochish"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Taqvimda belgilangan vaqtni ko‘rish"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Jadval"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Belgilangan vaqt uchun tadbirni rejalashtirish"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Trek"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Belgilangan vaqtni taqvimda ochish"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Rejalashtirish"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Belgilangan vaqt uchun tadbir rejalashtirish"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Kuzatish"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Belgilangan parvozni kuzatish"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>

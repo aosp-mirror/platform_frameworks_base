@@ -1015,7 +1015,7 @@
     <string name="email" msgid="4560673117055050403">"ኢሜይል"</string>
     <string name="email_desc" msgid="3638665569546416795">"ለተመረጡ አድራሻዎች ኢሜይል ላክ"</string>
     <string name="dial" msgid="1253998302767701559">"ጥሪ"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"ወደተመረጠውን ስልክ ቁጥር ደውል"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"ወደ ተመረጠው ስልክ ቁጥር ደውል"</string>
     <string name="map" msgid="5441053548030107189">"ካርታ"</string>
     <string name="map_desc" msgid="1836995341943772348">"የተመረጠውን አድራሻ ያለበትን አግኝ"</string>
     <string name="browse" msgid="1245903488306147205">"ክፈት"</string>

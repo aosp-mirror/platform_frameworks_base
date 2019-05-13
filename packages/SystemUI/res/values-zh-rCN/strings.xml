@@ -288,7 +288,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"输入"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"正在开启…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"自动旋转屏幕"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g>模式"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"屏幕方向：锁定"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"手机温度上升中"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手机降温时，部分功能的使用会受限制"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"您的手机将自动尝试降温。您依然可以使用您的手机，但是手机运行速度可能会更慢。\n\n手机降温后，就会恢复正常的运行速度。"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"拔下充电器"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"为此设备充电时出现问题。这可能是因为数据线太热，请拔下电源适配器并采取相应的处理措施。"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"查看处理步骤"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"向左快捷方式"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"向右快捷方式"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"向左快捷方式也可以解锁设备"</string>

@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -112,7 +113,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     private static final Uri CUSTOM_SOUND = Settings.System.DEFAULT_ALARM_ALERT_URI;
     private static final AudioAttributes CUSTOM_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
-            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+            .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
             .build();
     private static final int CUSTOM_LIGHT_COLOR = Color.BLACK;
     private static final int CUSTOM_LIGHT_ON = 10000;
@@ -230,11 +231,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
                 false /* noisy */, false /* buzzy*/, true /* lights */);
     }
 
-    private NotificationRecord getCustomLightsNotification() {
-        return getNotificationRecord(mId, false /* insistent */, true /* once */,
-                false /* noisy */, true /* buzzy*/, true /* lights */,
-                true /* defaultVibration */, true /* defaultSound */, false /* defaultLights */,
-                null, Notification.GROUP_ALERT_ALL, false);
+    private NotificationRecord getCallRecord(int id, boolean insistent) {
+        return getNotificationRecord(id, false, false /* once */, true /* noisy */,
+                false /* buzzy */, false /* lights */, false /* default vib */,
+                false /* default sound */, false /* default lights */, "",
+                Notification.GROUP_ALERT_ALL, false);
     }
 
     private NotificationRecord getNotificationRecord(int id, boolean insistent, boolean once,
@@ -341,11 +342,6 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     private void verifyBeepLooped() throws RemoteException {
         verify(mRingtonePlayer, times(1)).playAsync((Uri) anyObject(), (UserHandle) anyObject(),
-                eq(false), (AudioAttributes) anyObject());
-    }
-
-    private void verifyCustomBeep() throws RemoteException {
-        verify(mRingtonePlayer, times(1)).playAsync(eq(CUSTOM_SOUND), (UserHandle) anyObject(),
                 eq(false), (AudioAttributes) anyObject());
     }
 
