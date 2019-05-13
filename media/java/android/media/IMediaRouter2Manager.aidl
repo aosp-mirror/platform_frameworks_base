@@ -24,5 +24,5 @@ import android.media.MediaRoute2ProviderInfo;
 oneway interface IMediaRouter2Manager {
     void notifyRouteSelected(int uid, String routeId);
     void notifyControlCategoriesChanged(int uid, in List<String> categories);
-    void notifyProviderInfoUpdated(in MediaRoute2ProviderInfo info);
+    void notifyProviderInfosUpdated(in List<MediaRoute2ProviderInfo> providers);
 }

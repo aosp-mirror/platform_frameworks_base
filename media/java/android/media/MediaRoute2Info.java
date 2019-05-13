@@ -28,6 +28,7 @@ import android.text.TextUtils;
  * @hide
  */
 public final class MediaRoute2Info implements Parcelable {
+    @NonNull
     public static final Creator<MediaRoute2Info> CREATOR = new Creator<MediaRoute2Info>() {
         @Override
         public MediaRoute2Info createFromParcel(Parcel in) {
@@ -61,6 +62,18 @@ public final class MediaRoute2Info implements Parcelable {
         mName = in.readString();
         mDescription = in.readString();
         mExtras = in.readBundle();
+    }
+
+    /**
+     * Returns true if the route info has all of the required field
+     * @hide
+     */
+    //TODO: Reconsider the validity of a route info when fields are added.
+    public boolean isValid() {
+        if (TextUtils.isEmpty(getId()) || TextUtils.isEmpty(getName())) {
+            return false;
+        }
+        return true;
     }
 
     @NonNull
