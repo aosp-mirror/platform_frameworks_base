@@ -444,7 +444,7 @@
         <activity
             android:name=".media.MediaProjectionPermissionActivity"
             android:exported="true"
-            android:theme="@style/Theme.MediaProjectionAlertDialog"
+            android:theme="@style/Theme.SystemUI.MediaProjectionAlertDialog"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
             android:excludeFromRecents="true"
