@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ഫോൺ ചൂടായിക്കൊണ്ടിരിക്കുന്നു"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ഫോൺ തണുത്തുകൊണ്ടിരിക്കുമ്പോൾ ചില ഫീച്ചറുകൾ പരിമിതപ്പെടുത്തപ്പെടും"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"നിങ്ങളുടെ ഫോൺ സ്വയമേവ തണുക്കാൻ ശ്രമിക്കും. നിങ്ങൾക്ക് അപ്പോഴും ഫോൺ ഉപയോഗിക്കാമെങ്കിലും പ്രവർത്തനം മന്ദഗതിയിലായിരിക്കും.\n\nതണുത്തുകഴിഞ്ഞാൽ, ഫോൺ സാധാരണ ഗതിയിൽ പ്രവർത്തിക്കും."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ചാർജർ അൺപ്ലഗ് ചെയ്യുക"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"ഈ ഉപകരണം ചാർജ് ചെയ്യുന്നതിൽ തടസ്സമുണ്ട്. പവർ അഡാപ്റ്റർ അൺപ്ലഗ് ചെയ്യുക, കേബിൾ ചൂടുണ്ടായിരിക്കുമെന്നതിനാൽ ശ്രദ്ധിക്കണം."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"മുൻകരുതൽ നടപടികൾ കാണുക"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ഇടത് കുറുക്കുവഴി"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"വലത് കുറുക്കുവഴി"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ഇടത് കുറുക്കുവഴിയും അൺലോക്കുചെയ്യുന്നു"</string>

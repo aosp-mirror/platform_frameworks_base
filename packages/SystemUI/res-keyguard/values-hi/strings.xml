@@ -61,7 +61,7 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"किसी गड़बड़ी की वजह से ई-सिम बंद नहीं किया जा सकता."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"पैटर्न भूल गए हैं"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"गलत पैटर्न"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"गलत पैटर्न डाला गया है"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"गलत पिन"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">

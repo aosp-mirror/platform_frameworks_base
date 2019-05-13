@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефонуңуз ысып баратат"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Телефон сууганча айрым элементтердин иши чектелген"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Кубаттагычты сууруңуз"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Бул түзмөктү кубаттоодо маселе келип чыкты. Кабель ысып кетиши мүмкүн, андыктан кубаттагыч адаптерин сууруп коюңуз."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Сол жактагы кыска жол"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Оң жактагы кыска жол"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Сол жактагы кыска жол дагы кулпуну ачат"</string>

@@ -1092,6 +1092,19 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * String to override sim country iso.
+     * Sim country iso is based on sim MCC which is coarse and doesn't work with dual IMSI SIM where
+     * a SIM can have multiple MCC from different countries.
+     * Instead, each sim carrier should have a single country code, apply per carrier based iso
+     * code as an override. The overridden value can be read from
+     * {@link TelephonyManager#getSimCountryIso()} and {@link SubscriptionInfo#getCountryIso()}
+     *
+     * @hide
+     */
+    public static final String KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING =
+            "sim_country_iso_override_string";
+
+    /**
      * Override the registered PLMN name using #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING.
      *
      * If true, then the registered PLMN name (only for CDMA/CDMA-LTE and only when not roaming)
@@ -2057,6 +2070,13 @@ public class CarrierConfigManager {
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
             "undelivered_sms_message_expiration_time";
 
+    /**
+     * Indicates use 3GPP application to replace 3GPP2 application even if it's a CDMA/CDMA-LTE
+     * phone, becasue some carriers's CSIM application is present but not supported.
+     * @hide
+     */
+    public static final String KEY_USE_USIM_BOOL = "use_usim_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2237,6 +2257,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
@@ -2307,12 +2328,9 @@ public class CarrierConfigManager {
                 //6: CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS
                 //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
                 });
-        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE,
-                new String[] {
-                        String.valueOf(false) + ": 7",
-                        //7: CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER
-                        String.valueOf(true) + ": 8"
-                        //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
+        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE, new String[] {
+                String.valueOf(false) + ": 7", //7: CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER
+                String.valueOf(true) + ": 8"  //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
                 });
         sDefaults.putStringArray(KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY, null);
 
@@ -2391,6 +2409,7 @@ public class CarrierConfigManager {
                         -85  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
+        sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
     }
 
     /**

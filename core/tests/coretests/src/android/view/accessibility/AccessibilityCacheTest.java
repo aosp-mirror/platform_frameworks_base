@@ -300,26 +300,6 @@ public class AccessibilityCacheTest {
     }
 
     @Test
-    public void subTreeChangeEventFromUncachedNode_clearsNodeInCache() {
-        AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(CHILD_VIEW_ID, WINDOW_ID_1);
-        long id = nodeInfo.getSourceNodeId();
-        mAccessibilityCache.add(nodeInfo);
-        nodeInfo.recycle();
-
-        AccessibilityEvent event = AccessibilityEvent
-                .obtain(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-        event.setContentChangeTypes(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
-        event.setSource(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
-
-        mAccessibilityCache.onAccessibilityEvent(event);
-        AccessibilityNodeInfo shouldBeNull = mAccessibilityCache.getNode(WINDOW_ID_1, id);
-        if (shouldBeNull != null) {
-            shouldBeNull.recycle();
-        }
-        assertNull(shouldBeNull);
-    }
-
-    @Test
     public void scrollEvent_clearsNodeAndChild() {
         AccessibilityEvent event = AccessibilityEvent
                 .obtain(AccessibilityEvent.TYPE_VIEW_SCROLLED);

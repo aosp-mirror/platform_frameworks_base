@@ -165,7 +165,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM-карты."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мабільная перадача даных"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мабільная перадача даных уключана"</string>
-    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мабільны інтэрнэт выключаны"</string>
+    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мабільная перадача даных выключана"</string>
     <string name="cell_data_off" msgid="1051264981229902873">"Выключаны"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Сувязь па Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Рэжым палёту."</string>
@@ -810,6 +810,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Тэлефон награваецца"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Некаторыя функцыі абмежаваны, пакуль тэлефон астывае"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ваш тэлефон аўтаматычна паспрабуе астыць. Вы можаце па-ранейшаму карыстацца сваім тэлефонам, але ён можа працаваць больш павольна.\n\nПасля таго як ваш тэлефон астыне, ён будзе працаваць у звычайным рэжыме."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Адключыце зарадную прыладу"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Узнікла праблема з зарадкай гэтай прылады. Адключыце адаптар сілкавання і праверце, ці не нагрэўся кабель."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Глядзець паэтапную дапамогу"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ярлык \"улева\""</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Ярлык \"управа\""</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Разблакіроўка таксама ярлыком \"улева\""</string>
@@ -847,7 +850,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяніць"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Адключыць мабільны інтэрнэт?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Выключыць мабільную перадачу даных?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"У вас не будзе доступу да даных ці інтэрнэту праз аператара <xliff:g id="CARRIER">%s</xliff:g>. Інтэрнэт будзе даступны толькі праз Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"ваш аператар"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Праграма хавае запыт на дазвол, таму ваш адказ немагчыма спраўдзіць у Наладах."</string>

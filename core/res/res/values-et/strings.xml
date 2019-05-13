@@ -1013,23 +1013,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"Sisestusmeetod"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoimingud"</string>
     <string name="email" msgid="4560673117055050403">"E-post"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Valitud aadressile meili saatmine"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Saada valitud aadressile meil"</string>
     <string name="dial" msgid="1253998302767701559">"Helista"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Valitud telefoninumbrile helistamine"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Helista valitud telefoninumbrile"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Valitud aadressi leidmine"</string>
+    <string name="map_desc" msgid="1836995341943772348">"Leia valitud aadress"</string>
     <string name="browse" msgid="1245903488306147205">"Ava"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Valitud URL-i avamine"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Ava valitud URL"</string>
     <string name="sms" msgid="4560537514610063430">"Saada sõnum"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Valitud telefoninumbrile sõnumi saatmine"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Saada valitud telefoninumbrile sõnum"</string>
     <string name="add_contact" msgid="7867066569670597203">"Lisa"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Kontaktide hulka lisamine"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Lisa kontaktide hulka"</string>
     <string name="view_calendar" msgid="979609872939597838">"Kuva"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Valitud aja vaatamine kalendris"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Kuva valitud aeg kalendris"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Lisa ajakavasse"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ürituse ajastamine valitud ajale"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ajasta üritus valitud ajale"</string>
     <string name="view_flight" msgid="7691640491425680214">"Jälgi"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"Valitud lennu jälgimine"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Jälgi valitud lendu"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>

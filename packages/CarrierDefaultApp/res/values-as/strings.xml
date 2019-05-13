@@ -2,16 +2,16 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
-    <string name="android_system_label" msgid="2797790869522345065">"ম\'বাইল সেৱা প্ৰদান কৰা কোম্পানী"</string>
-    <string name="portal_notification_id" msgid="5155057562457079297">"ম\'বাইল ডেটা শেষ হৈছে"</string>
-    <string name="no_data_notification_id" msgid="668400731803969521">"আপোনাৰ ম\'বাইল ডেটা সেৱা নিষ্ক্ৰিয় কৰা হৈছে"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"ম’বাইল সেৱা প্ৰদান কৰা কোম্পানী"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"ম’বাইল ডেটা শেষ হৈছে"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"আপোনাৰ ম’বাইল ডেটা সেৱা নিষ্ক্ৰিয় কৰা হৈছে"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s ৱেবছাইটটোলৈ যাবলৈ টিপক"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"অনুগ্ৰহ কৰি আপোনাৰ সেৱা প্ৰদানকাৰী %sৰ সৈতে যোগাযোগ কৰক"</string>
-    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"কোনো ম\'বাইল ডেটা সংযোগ নাই"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"কোনো ম’বাইল ডেটা সংযোগ নাই"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"%sৰ যোগেৰে ডেটা বা ৰ\'মিঙৰ আঁচনি যোগ কৰক"</string>
-    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ম\'বাইল ডেটাৰ স্থিতি"</string>
-    <string name="action_bar_label" msgid="4290345990334377177">"ম\'বাইল নেটৱৰ্কত ছাইন ইন কৰক"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ম’বাইল ডেটাৰ স্থিতি"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"ম’বাইল নেটৱৰ্কত ছাইন ইন কৰক"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"আপুনি সংযোগ কৰিবলৈ বিচৰা নেটৱৰ্কটোত সুৰক্ষাজনিত সমস্যা আছে।"</string>
-    <string name="ssl_error_example" msgid="6188711843183058764">"উদাহৰণ স্বৰূপে, আপোনাক দেখুওৱা লগ ইনৰ পৃষ্ঠাটো প্ৰতিষ্ঠানটোৰ নিজা নহ\'বও পাৰে।"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"উদাহৰণস্বৰূপে, আপোনাক দেখুওৱা লগ ইনৰ পৃষ্ঠাটো প্ৰতিষ্ঠানটোৰ নিজা নহ\'বও পাৰে।"</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"তথাপিও ব্ৰাউজাৰৰ জৰিয়তে অব্যাহত ৰাখক"</string>
 </resources>

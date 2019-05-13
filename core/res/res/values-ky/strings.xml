@@ -1012,15 +1012,15 @@
     <string name="deleteText" msgid="6979668428458199034">"Жок кылуу"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Киргизүү ыкмасы"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Текст боюнча иштер"</string>
-    <string name="email" msgid="4560673117055050403">"Электрондук почта"</string>
+    <string name="email" msgid="4560673117055050403">"Кат жөнөтүү"</string>
     <string name="email_desc" msgid="3638665569546416795">"Тандалган дарекке электрондук кат жөнөтүү"</string>
     <string name="dial" msgid="1253998302767701559">"Чалуу"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Тандалган телефон номерине чалуу"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="map" msgid="5441053548030107189">"Картадан кароо"</string>
     <string name="map_desc" msgid="1836995341943772348">"Тандалган даректи картада табуу"</string>
     <string name="browse" msgid="1245903488306147205">"Ачуу"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Тандалган URL\'ди ачуу"</string>
-    <string name="sms" msgid="4560537514610063430">"Билдирүү"</string>
+    <string name="sms" msgid="4560537514610063430">"Билдирүү жазуу"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Тандалган телефон номерине билдирүү жөнөтүү"</string>
     <string name="add_contact" msgid="7867066569670597203">"Кошуу"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Байланыштарга кошуу"</string>

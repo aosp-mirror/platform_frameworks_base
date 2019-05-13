@@ -27,7 +27,7 @@
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Greška u konfiguraciji IP-a"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Niste povezani zbog slabog kvaliteta mreže"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Greška pri povezivanju na WiFi"</string>
-    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem pri provjeri vjerodostojnosti."</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Problem pri autentifikaciji."</string>
     <string name="wifi_cant_connect" msgid="5410016875644565884">"Nije se moguće povezati"</string>
     <string name="wifi_cant_connect_to_ap" msgid="1222553274052685331">"Nije se moguće povezati na aplikaciju \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Provjerite lozinku i pokušajte ponovo"</string>

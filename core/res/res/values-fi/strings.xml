@@ -1026,7 +1026,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Lisää yhteystietoihin"</string>
     <string name="view_calendar" msgid="979609872939597838">"Näytä"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Näytä valittu aika kalenterissa"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Aikataulu"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Aikatauluta"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Ajoita tapahtuma valitulle ajalle"</string>
     <string name="view_flight" msgid="7691640491425680214">"Seuraa"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Seuraa valittua lentoa"</string>

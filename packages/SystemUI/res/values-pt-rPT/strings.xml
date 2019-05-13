@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"O telemóvel está a aquecer"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Algumas funcionalidades são limitadas enquanto o telemóvel arrefece"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"O telemóvel tenta arrefecer automaticamente. Pode continuar a utilizá-lo, mas este poderá funcionar mais lentamente.\n\nAssim que o telemóvel tiver arrefecido, funcionará normalmente."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desligar o carregador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Ocorreu um problema ao carregar este dispositivo. Desligue o transformador e tenha cuidado porque o cabo pode estar quente."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ver os passos a ter em consideração"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Atalho esquerdo"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Atalho direito"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"O atalho esquerdo também desbloqueia"</string>

@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -174,7 +175,8 @@ public abstract class RegisteredServicesCache<V> {
         mContext.registerReceiver(mUserRemovedReceiver, userFilter);
     }
 
-    private final void handlePackageEvent(Intent intent, int userId) {
+    @VisibleForTesting
+    protected void handlePackageEvent(Intent intent, int userId) {
         // Don't regenerate the services map when the package is removed or its
         // ASEC container unmounted as a step in replacement.  The subsequent
         // _ADDED / _AVAILABLE call will regenerate the map in the final state.
@@ -236,6 +238,9 @@ public abstract class RegisteredServicesCache<V> {
 
     public void invalidateCache(int userId) {
         synchronized (mServicesLock) {
+            if (DEBUG) {
+                Slog.d(TAG, "invalidating cache for " + userId + " " + mInterfaceName);
+            }
             final UserServices<V> user = findOrCreateUserLocked(userId);
             user.services = null;
             onServicesChangedLocked(userId);
@@ -460,32 +465,46 @@ public abstract class RegisteredServicesCache<V> {
      *                    or null to assume that everything is affected.
      * @param userId the user for whom to update the services map.
      */
-    private void generateServicesMap(int[] changedUids, int userId) {
+    private void generateServicesMap(@Nullable int[] changedUids, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "generateServicesMap() for " + userId + ", changed UIDs = "
                     + Arrays.toString(changedUids));
         }
 
-        final ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<>();
-        final List<ResolveInfo> resolveInfos = queryIntentServices(userId);
-        for (ResolveInfo resolveInfo : resolveInfos) {
-            try {
-                ServiceInfo<V> info = parseServiceInfo(resolveInfo);
-                if (info == null) {
-                    Log.w(TAG, "Unable to load service info " + resolveInfo.toString());
-                    continue;
-                }
-                serviceInfos.add(info);
-            } catch (XmlPullParserException|IOException e) {
-                Log.w(TAG, "Unable to load service info " + resolveInfo.toString(), e);
-            }
-        }
-
         synchronized (mServicesLock) {
             final UserServices<V> user = findOrCreateUserLocked(userId);
-            final boolean firstScan = user.services == null;
-            if (firstScan) {
+            final boolean cacheInvalid = user.services == null;
+            if (cacheInvalid) {
                 user.services = Maps.newHashMap();
+            }
+
+            final ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<>();
+            final List<ResolveInfo> resolveInfos = queryIntentServices(userId);
+
+            for (ResolveInfo resolveInfo : resolveInfos) {
+                try {
+                    // when changedUids == null, we want to do a rescan of everything, this means
+                    // it's the initial scan, and containsUid will trivially return true
+                    // when changedUids != null, we got here because a package changed, but
+                    // invalidateCache could have been called (thus user.services == null), and we
+                    // should query from PackageManager again
+                    if (!cacheInvalid
+                            && !containsUid(
+                                    changedUids, resolveInfo.serviceInfo.applicationInfo.uid)) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Skipping parseServiceInfo for " + resolveInfo);
+                        }
+                        continue;
+                    }
+                    ServiceInfo<V> info = parseServiceInfo(resolveInfo);
+                    if (info == null) {
+                        Log.w(TAG, "Unable to load service info " + resolveInfo.toString());
+                        continue;
+                    }
+                    serviceInfos.add(info);
+                } catch (XmlPullParserException | IOException e) {
+                    Log.w(TAG, "Unable to load service info " + resolveInfo.toString(), e);
+                }
             }
 
             StringBuilder changes = new StringBuilder();
@@ -508,7 +527,7 @@ public abstract class RegisteredServicesCache<V> {
                     changed = true;
                     user.services.put(info.type, info);
                     user.persistentServices.put(info.type, info.uid);
-                    if (!(user.mPersistentServicesFileDidNotExist && firstScan)) {
+                    if (!(user.mPersistentServicesFileDidNotExist && cacheInvalid)) {
                         notifyListener(info.type, userId, false /* removed */);
                     }
                 } else if (previousUid == info.uid) {

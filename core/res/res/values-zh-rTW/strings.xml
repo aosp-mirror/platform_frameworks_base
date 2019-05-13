@@ -1012,24 +1012,24 @@
     <string name="deleteText" msgid="6979668428458199034">"刪除"</string>
     <string name="inputMethod" msgid="1653630062304567879">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字動作"</string>
-    <string name="email" msgid="4560673117055050403">"電子郵件"</string>
-    <string name="email_desc" msgid="3638665569546416795">"將電子郵件寄到所選地址"</string>
-    <string name="dial" msgid="1253998302767701559">"通話"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"撥打所選電話號碼"</string>
-    <string name="map" msgid="5441053548030107189">"地圖"</string>
-    <string name="map_desc" msgid="1836995341943772348">"尋找所選地址"</string>
+    <string name="email" msgid="4560673117055050403">"發送電子郵件"</string>
+    <string name="email_desc" msgid="3638665569546416795">"將電子郵件寄到選取的地址"</string>
+    <string name="dial" msgid="1253998302767701559">"撥號通話"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"撥打選取的電話號碼"</string>
+    <string name="map" msgid="5441053548030107189">"查看地圖"</string>
+    <string name="map_desc" msgid="1836995341943772348">"尋找選取的地址"</string>
     <string name="browse" msgid="1245903488306147205">"開啟"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"開啟所選網址"</string>
-    <string name="sms" msgid="4560537514610063430">"訊息"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"將訊息傳送到所選電話號碼"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"開啟選取的網址"</string>
+    <string name="sms" msgid="4560537514610063430">"發送訊息"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"將訊息傳送到選取的電話號碼"</string>
     <string name="add_contact" msgid="7867066569670597203">"新增"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"新增至聯絡人"</string>
     <string name="view_calendar" msgid="979609872939597838">"查看"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"在日曆中查看所選時間"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"時間表"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"將活動安排在所選時間"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"在日曆中查看選取的時間"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"加入日曆"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"將活動安排在選取的時間"</string>
     <string name="view_flight" msgid="7691640491425680214">"追蹤"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"追蹤所選航班"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"追蹤選取的航班"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -1332,7 +1332,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>
     <string name="ime_action_search" msgid="658110271822807811">"搜尋"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"傳送"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"下一頁"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"下一步"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"完成"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"上一步"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"執行"</string>

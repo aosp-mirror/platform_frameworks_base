@@ -1016,7 +1016,7 @@
     <string name="email_desc" msgid="3638665569546416795">"Skicka e-post till vald adress"</string>
     <string name="dial" msgid="1253998302767701559">"Ring"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ring valt telefonnummer"</string>
-    <string name="map" msgid="5441053548030107189">"Karta"</string>
+    <string name="map" msgid="5441053548030107189">"Öppna karta"</string>
     <string name="map_desc" msgid="1836995341943772348">"Hitta den valda adressen"</string>
     <string name="browse" msgid="1245903488306147205">"Öppna"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Öppna vald webbadress"</string>
@@ -1026,9 +1026,9 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Lägg till i Kontakter"</string>
     <string name="view_calendar" msgid="979609872939597838">"Visa"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Visa vald tid i kalendern"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Schema"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Schemalägg"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Schemalägg händelse på den valda tiden"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Spår"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Spåra"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Spåra valt flyg"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
@@ -1257,7 +1257,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Ett tillbehör med analog ljudutgång hittades"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Den anslutna enheten är inte kompatibel med mobilen. Tryck här om du vill veta mer."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Tryck om du vill inaktivera USB-felsökning"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Tryck för att inaktivera USB-felsökning"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Välj för att inaktivera USB-felsökning."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Felrapporten överförs …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>

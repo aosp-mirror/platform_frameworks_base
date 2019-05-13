@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"A telefon melegszik"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Bizonyos funkciók korlátozottan működnek a telefon hűlése közben"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"A telefon automatikusan megpróbál lehűlni. Továbbra is tudja használni a telefont, de elképzelhető, hogy működése lelassul.\n\nAmint a telefon lehűl, újra a szokásos módon működik majd."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Húzza ki a töltőt"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Probléma adódott az eszköz töltése során. Húzza ki a hálózati adaptert. Vigyázzon, a kábel forró lehet."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Olvassa el a megfelelő használat lépéseit"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Bal oldali parancsikon"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Jobb oldali parancsikon"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"A bal oldali parancsikon szintén feloldja a zárolást"</string>

@@ -278,6 +278,10 @@ public class ActivityLaunchAnimator {
             return top;
         }
 
+        public int getBottom() {
+            return bottom;
+        }
+
         public int getWidth() {
             return right - left;
         }

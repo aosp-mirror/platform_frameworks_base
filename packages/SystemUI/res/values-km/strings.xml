@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ទូរសព្ទ​នេះ​កំពុង​កើន​កម្តៅ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"មុខងារ​មួយ​ចំនួន​នឹង​មិន​អាច​ប្រើ​បាន​ពេញលេញ​នោះ​ទេ ខណៈពេល​ដែល​ទូរសព្ទ​កំពុង​បញ្ចុះ​កម្តៅ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ទូរសព្ទ​របស់អ្នក​នឹង​ព្យាយាម​បញ្ចុះ​កម្តៅ​ដោយ​ស្វ័យប្រវត្តិ។ អ្នក​នៅតែ​អាច​ប្រើ​ទូរសព្ទ​របស់អ្នក​បាន​ដដែល​ ប៉ុន្តែ​វា​នឹង​ដំណើរ​ការ​យឺត​ជាង​មុន។\n\nបន្ទាប់​ពី​ទូរសព្ទ​របស់អ្នក​ត្រជាក់​ជាង​មុន​ហើយ វា​នឹង​ដំណើរការ​ដូច​ធម្មតា។"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ផ្ដាច់ឆ្នាំងសាក"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"មានបញ្ហាសាក​ថ្មឧបករណ៍នេះ។ សូមផ្ដាច់​ឆ្នាំងសាក ហើយ​មើល​ថែឱ្យបាន​ល្អ ដោយសារ​ខ្សែអាចមាន​កម្តៅ​ក្តៅ។"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"មើលជំហាន​ថែទាំ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ផ្លូវកាត់​ខាង​ឆ្វេង"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ផ្លូវកាត់​ខាង​ស្តាំ"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ផ្លូវកាត់​ខាង​ឆ្វេង​ក៏​ដោះសោ​ដែរ"</string>
