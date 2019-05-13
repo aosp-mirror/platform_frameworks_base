@@ -71,6 +71,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mIconAppearTopPadding;
     private int mShelfAppearTranslation;
     private float mDarkShelfPadding;
+    private float mDarkShelfIconSize;
     private int mStatusBarHeight;
     private int mStatusBarPaddingStart;
     private AmbientState mAmbientState;
@@ -151,6 +152,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mScrollFastThreshold = res.getDimensionPixelOffset(R.dimen.scroll_fast_threshold);
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
+        mDarkShelfIconSize = res.getDimensionPixelOffset(R.dimen.dark_shelf_icon_size);
         mGapHeight = res.getDimensionPixelSize(R.dimen.qs_notification_padding);
 
         if (!mShowNotificationShelf) {
@@ -705,12 +707,13 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         notificationIconPosition += iconTopPadding;
         float shelfIconPosition = getTranslationY() + icon.getTop();
-        shelfIconPosition += (icon.getHeight() - icon.getIconScale() * mIconSize) / 2.0f;
+        float iconSize = mDark ? mDarkShelfIconSize : mIconSize;
+        shelfIconPosition += (icon.getHeight() - icon.getIconScale() * iconSize) / 2.0f;
         float iconYTranslation = NotificationUtils.interpolate(
                 notificationIconPosition - shelfIconPosition,
                 0,
                 transitionAmount);
-        float shelfIconSize = mIconSize * icon.getIconScale();
+        float shelfIconSize = iconSize * icon.getIconScale();
         float alpha = 1.0f;
         boolean noIcon = !row.isShowingIcon();
         if (noIcon) {
