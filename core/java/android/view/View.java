@@ -1393,10 +1393,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #isImportantForContentCapture()
      * @see #setImportantForContentCapture(int)
-     *
-     * @hide
      */
-    @TestApi
     public static final int IMPORTANT_FOR_CONTENT_CAPTURE_AUTO = 0x0;
 
     /**
@@ -1404,10 +1401,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #isImportantForContentCapture()
      * @see #setImportantForContentCapture(int)
-     *
-     * @hide
      */
-    @TestApi
     public static final int IMPORTANT_FOR_CONTENT_CAPTURE_YES = 0x1;
 
     /**
@@ -1415,10 +1409,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #isImportantForContentCapture()
      * @see #setImportantForContentCapture(int)
-     *
-     * @hide
      */
-    @TestApi
     public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO = 0x2;
 
     /**
@@ -1426,10 +1417,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #isImportantForContentCapture()
      * @see #setImportantForContentCapture(int)
-     *
-     * @hide
      */
-    @TestApi
     public static final int IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS = 0x4;
 
     /**
@@ -1438,10 +1426,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #isImportantForContentCapture()
      * @see #setImportantForContentCapture(int)
-     *
-     * @hide
      */
-    @TestApi
     public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS = 0x8;
 
 
@@ -8602,10 +8587,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>{@link ViewStructure#setTransformation(Matrix)}
      *
      * </ul>
-     *
-     * @hide
      */
-    @TestApi
     public void onProvideContentCaptureStructure(@NonNull ViewStructure structure, int flags) {
         onProvideStructure(structure, VIEW_STRUCTURE_FOR_CONTENT_CAPTURE, flags);
     }
@@ -9256,8 +9238,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setImportantForContentCapture(int)}.
      *
      * @attr ref android.R.styleable#View_importantForContentCapture
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(mapping = {
             @ViewDebug.IntToString(from = IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, to = "auto"),
@@ -9267,16 +9247,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 to = "yesExcludeDescendants"),
             @ViewDebug.IntToString(from = IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS,
                 to = "noExcludeDescendants")})
-//    @InspectableProperty(enumMapping = {
-//            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, name = "auto"),
-//            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES, name = "yes"),
-//            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO, name = "no"),
-//            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS,
-//                    name = "yesExcludeDescendants"),
-//            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS,
-//                    name = "noExcludeDescendants"),
-//    })
-    @TestApi
+    @InspectableProperty(enumMapping = {
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, name = "auto"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES, name = "yes"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO, name = "no"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS,
+                    name = "yesExcludeDescendants"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS,
+                    name = "noExcludeDescendants"),
+    })
     public @ContentCaptureImportance int getImportantForContentCapture() {
         // NOTE: the important for content capture values were the first flags added and are set in
         // the rightmost position, so we don't need to shift them
@@ -9296,10 +9275,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * or {@link #IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS}.
      *
      * @attr ref android.R.styleable#View_importantForContentCapture
-     *
-     * @hide
      */
-    @TestApi
     public void setImportantForContentCapture(@ContentCaptureImportance int mode) {
         // Reset first
         mPrivateFlags4 &= ~PFLAG4_IMPORTANT_FOR_CONTENT_CAPTURE_MASK;
@@ -9324,10 +9300,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #IMPORTANT_FOR_CONTENT_CAPTURE_NO
      * @see #IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS
      * @see #IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS
-     *
-     * @hide
      */
-    @TestApi
     public final boolean isImportantForContentCapture() {
         boolean isImportant;
         if ((mPrivateFlags4 & PFLAG4_CONTENT_CAPTURE_IMPORTANCE_IS_CACHED) != 0) {

@@ -2492,11 +2492,8 @@
             <flag name="noExcludeDescendants" value="0x8" />
         </attr>
 
-        <attr name="__removed6" />
-
         <!-- Hints the Android System whether the view node associated with this View should be
-             use for content capture purposes.
-             @hide -->
+             use for content capture purposes. -->
         <attr name="importantForContentCapture">
             <!-- Let the Android System use its heuristics to determine if the view is important for content capture. -->
             <flag name="auto" value="0" />
