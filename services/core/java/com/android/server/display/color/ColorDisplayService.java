@@ -775,10 +775,10 @@ public final class ColorDisplayService extends SystemService {
         final ContentResolver cr = getContext().getContentResolver();
         if (isAccessibilityEnabled()) {
             // There are restrictions on the available color modes combined with a11y transforms.
-            if (isColorModeAvailable(COLOR_MODE_SATURATED)) {
-                return COLOR_MODE_SATURATED;
-            } else if (isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
-                return COLOR_MODE_AUTOMATIC;
+            final int a11yColorMode = getContext().getResources().getInteger(
+                    R.integer.config_accessibilityColorMode);
+            if (a11yColorMode >= 0) {
+                return a11yColorMode;
             }
         }
 
