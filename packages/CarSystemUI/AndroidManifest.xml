@@ -19,6 +19,6 @@
         package="com.android.systemui"
         android:sharedUserId="android.uid.systemui"
         coreApp="true">
-
-
+    <!-- This permission is required to monitor car power state. -->
+    <uses-permission android:name="android.car.permission.CAR_POWER" />
 </manifest>
