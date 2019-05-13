@@ -825,7 +825,9 @@ public abstract class ContentResolver implements ContentInterface {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY
      *         clause (excluding the ORDER BY itself). Passing null will use the
      *         default sort order, which may be unordered.
-     * @return A Cursor object, which is positioned before the first entry, or null
+     * @return A Cursor object, which is positioned before the first entry. May return
+     *         <code>null</code> if the underlying content provider returns <code>null</code>,
+     *         or if it crashes.
      * @see Cursor
      */
     public final @Nullable Cursor query(@RequiresPermission.Read @NonNull Uri uri,
@@ -865,7 +867,9 @@ public abstract class ContentResolver implements ContentInterface {
      * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
-     * @return A Cursor object, which is positioned before the first entry, or null
+     * @return A Cursor object, which is positioned before the first entry. May return
+     *         <code>null</code> if the underlying content provider returns <code>null</code>,
+     *         or if it crashes.
      * @see Cursor
      */
     public final @Nullable Cursor query(@RequiresPermission.Read @NonNull Uri uri,
@@ -902,7 +906,9 @@ public abstract class ContentResolver implements ContentInterface {
      * @param cancellationSignal A signal to cancel the operation in progress, or null if none.
      * If the operation is canceled, then {@link OperationCanceledException} will be thrown
      * when the query is executed.
-     * @return A Cursor object, which is positioned before the first entry, or null
+     * @return A Cursor object, which is positioned before the first entry. May return
+     *         <code>null</code> if the underlying content provider returns <code>null</code>,
+     *         or if it crashes.
      * @see Cursor
      */
     @Override
@@ -1799,7 +1805,8 @@ public abstract class ContentResolver implements ContentInterface {
      * @param url The URL of the table to insert into.
      * @param values The initial values for the newly inserted row. The key is the column name for
      *               the field. Passing an empty ContentValues will create an empty row.
-     * @return the URL of the newly created row.
+     * @return the URL of the newly created row. May return <code>null</code> if the underlying
+     *         content provider returns <code>null</code>, or if it crashes.
      */
     @Override
     public final @Nullable Uri insert(@RequiresPermission.Write @NonNull Uri url,
