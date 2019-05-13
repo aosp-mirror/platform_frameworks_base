@@ -34,14 +34,10 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Tests color extraction generation.
@@ -57,13 +53,6 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
             ColorExtractor.TYPE_NORMAL,
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
-    @Mock
-    private OverviewProxyService mOverviewProxyService;
-
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void getColors_usesGreyIfWallpaperNotVisible() {
@@ -129,8 +118,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         Tonal tonal = mock(Tonal.class);
         ConfigurationController configurationController = mock(ConfigurationController.class);
         SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(getContext(),
-                tonal, configurationController, false /* registerVisibility */,
-                mOverviewProxyService);
+                tonal, configurationController, false /* registerVisibility */);
         verify(configurationController).addCallback(eq(sysuiColorExtractor));
 
         reset(tonal);
@@ -145,7 +133,7 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
                     outGradientColorsNormal.set(colors);
                     outGradientColorsDark.set(colors);
                     outGradientColorsExtraDark.set(colors);
-                }, mock(ConfigurationController.class), false, mOverviewProxyService);
+                }, mock(ConfigurationController.class), false);
     }
 
     private void simulateEvent(SysuiColorExtractor extractor) {
