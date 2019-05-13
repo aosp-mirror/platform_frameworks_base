@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Phone is getting warm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Some features limited while phone cools down"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Your phone will automatically try to cool down. You can still use your phone, but it may run more slowly.\n\nOnce your phone has cooled down, it will run normally."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Unplug charger"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"There’s an issue charging this device. Unplug the power adaptor and take care as the cable may be warm."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"See care steps"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Left shortcut"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Right shortcut"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Left shortcut also unlocks"</string>

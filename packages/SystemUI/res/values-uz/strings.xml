@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon qizib ketdi"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Telefon sovish paytida ayrim funksiyalar ishlamasligi mumkin"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon avtomatik ravishda o‘zini sovitadi. Telefoningizdan foydalanishda davom etishingiz mumkin, lekin u sekinroq ishlashi mumkin.\n\nTelefon sovishi bilan normal holatda ishlashni boshlaydi."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Quvvatlash moslamasini uzing"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Bu qurilmani quvvatlashda muammo bor. Quvvat adapteri va kabelni tarmoqdan uzing, ular qizib ketgan boʻlishi mumkin."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Batafsil axborot"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Chapga yorlig‘i"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"O‘ngga yorlig‘i"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Chapga tugmasi ham qulfdan chiqaradi"</string>

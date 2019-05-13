@@ -28,7 +28,8 @@ final class TextClassifierImplNative {
         System.loadLibrary("textclassifier");
     }
 
-    private final long mModelPtr;
+    private final Object mCloseLock = new Object();
+    private long mModelPtr;
 
     /**
      * Creates a new instance of TextClassifierImplNative, using the provided model image, given as
@@ -102,7 +103,19 @@ final class TextClassifierImplNative {
 
     /** Frees up the allocated memory. */
     public void close() {
-        nativeClose(mModelPtr);
+        synchronized (mCloseLock) {
+            if (!isClosed()) {
+                nativeClose(mModelPtr);
+                mModelPtr = 0;
+            }
+        }
+    }
+
+    /**
+     * Returns true if this object is closed, returns false otherwise.
+     */
+    public boolean isClosed() {
+        return mModelPtr == 0L;
     }
 
     /** Returns a comma separated list of locales supported by the model as BCP 47 tags. */

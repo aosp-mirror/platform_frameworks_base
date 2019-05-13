@@ -36,14 +36,14 @@
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다."</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 내 사용량을 기준으로 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다. 배터리 세이버를 사용 중입니다."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다. 절전 모드를 사용 중입니다."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"USB로 충전할 수 없습니다. 기기와 함께 제공된 충전기를 사용하세요."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"USB로 충전할 수 없습니다."</string>
     <string name="invalid_charger_text" msgid="6480624964117840005">"기기와 함께 제공된 충전기를 사용하세요."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"설정"</string>
-    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"배터리 세이버를 사용 설정하시겠습니까?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"절전 모드를 사용 설정하시겠습니까?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"사용"</string>
-    <string name="battery_saver_start_action" msgid="8187820911065797519">"배터리 세이버 사용 설정"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"절전 모드 사용 설정"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"설정"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"자동 화면 회전"</string>
@@ -210,9 +210,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"비행기 모드를 사용합니다."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"모두 음소거"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"알람만"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"알림 일시중지"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"알림 일시중지가 사용 중지되었습니다."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"알림 일시중지를 사용합니다."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"방해 금지 모드"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"방해 금지 모드가 사용 중지되었습니다."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"방해 금지 모드를 사용합니다."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"블루투스"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"블루투스: 사용 안함"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"블루투스: 사용"</string>
@@ -274,7 +274,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"화면 보호기"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"이더넷"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"추가 옵션을 보려면 아이콘을 길게 터치하세요."</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"알림 일시중지"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"방해 금지 모드"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"중요 알림만"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"알람만"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"모두 차단"</string>
@@ -429,14 +429,14 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"사용자를 삭제할까요?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"이 사용자의 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"삭제"</string>
-    <string name="battery_saver_notification_title" msgid="8614079794522291840">"배터리 세이버 사용 중"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"절전 모드 사용 중"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"성능 및 백그라운드 데이터를 줄입니다."</string>
-    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"배터리 세이버 사용 중지"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"절전 모드 사용 중지"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>에서 화면에 표시된 모든 것을 캡처하기 시작합니다."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"다시 표시 안함"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"알림 관리"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"알림 일시중지로 일시중지된 알림"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"방해 금지 모드로 일시중지된 알림"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"시작하기"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"알림 없음"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"프로필이 모니터링될 수 있음"</string>
@@ -641,8 +641,8 @@
       <item quantity="one">%d분</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"배터리 사용량"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 절전 모드는 사용할 수 없습니다."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"절전 모드"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"성능 및 백그라운드 데이터를 줄입니다."</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> 버튼"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -687,9 +687,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"캘린더"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"볼륨 컨트롤과 함께 표시"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"알림 일시중지"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"방해 금지 모드"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"볼륨 버튼 단축키"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"볼륨 크게 시 알림 일시중지 종료"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"볼륨 높일 시 방해 금지 모드 종료"</string>
     <string name="battery" msgid="7498329822413202973">"배터리"</string>
     <string name="clock" msgid="7416090374234785905">"시계"</string>
     <string name="headset" msgid="4534219457597457353">"헤드셋"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"휴대전화 온도가 높음"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"휴대전화 온도를 낮추는 동안 일부 기능이 제한됩니다."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"휴대전화 온도를 자동으로 낮추려고 시도합니다. 휴대전화를 계속 사용할 수는 있지만 작동이 느려질 수도 있습니다.\n\n휴대전화 온도가 낮아지면 정상적으로 작동됩니다."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"충전기를 연결 해제하세요"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"기기를 충전하는 중에 문제가 발생했습니다. 케이블이 뜨거울 수 있으므로 주의하여 전원 어댑터를 분리하세요."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"취해야 할 조치 확인"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"왼쪽 바로가기"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"오른쪽 바로가기"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"왼쪽 바로가기도 잠금 해제 가능"</string>
@@ -826,10 +829,10 @@
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g>, <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi가 사용 중지됨"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"블루투스가 사용 중지됨"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"알림 일시중지가 사용 중지됨"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"알림 일시중지가 자동 규칙(<xliff:g id="ID_1">%s</xliff:g>)에 의해 사용 설정되었습니다."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"알림 일시중지가 앱(<xliff:g id="ID_1">%s</xliff:g>)에 의해 사용 설정되었습니다."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"알림 일시중지가 자동 규칙 또는 앱에 의해 사용 설정되었습니다."</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"방해 금지 모드가 사용 중지됨"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"방해 금지 모드가 자동 규칙(<xliff:g id="ID_1">%s</xliff:g>)에 의해 사용 설정되었습니다."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"방해 금지 모드가 앱(<xliff:g id="ID_1">%s</xliff:g>)에 의해 사용 설정되었습니다."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"방해 금지 모드가 자동 규칙 또는 앱에 의해 사용 설정되었습니다."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g>까지"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"유지"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"바꾸기"</string>
@@ -845,11 +848,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g>에서 모든 앱의 슬라이스를 표시하도록 허용"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"허용"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"거부"</string>
-    <string name="auto_saver_title" msgid="1217959994732964228">"탭하여 배터리 세이버 예약"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"탭하여 절전 모드 예약"</string>
     <string name="auto_saver_text" msgid="6324376061044218113">"배터리가 <xliff:g id="PERCENTAGE">%d</xliff:g>%%가 되면 자동으로 켜기"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"사용 안함"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"배터리 세이버 예약 사용 설정됨"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"배터리가 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 아래로 내려가면 배터리 세이버가 자동으로 켜집니다."</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"절전 모드 예약 사용 설정됨"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"배터리가 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 아래로 내려가면 절전 모드가 자동으로 켜집니다."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"설정"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"확인"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>

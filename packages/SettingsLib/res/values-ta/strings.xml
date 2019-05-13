@@ -189,7 +189,7 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"இவரால் VPN அமைப்புகளை மாற்ற முடியாது"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"இவரால் இணைப்புமுறை அமைப்புகளை மாற்ற முடியாது"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"இவரால் ஆக்சஸ் பாயிண்ட் நேம் அமைப்புகளை மாற்ற முடியாது"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"USB பிழைத்திருத்தம்"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB பிழைதிருத்தம்"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB இணைக்கப்பட்டிருக்கும்போது பிழைத்திருத்தப் பயன்முறையை அமை"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB பிழைத்திருத்த அங்கீகரிப்புகளை நிராகரி"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"பிழைப் புகாருக்கான ஷார்ட்கட்"</string>
@@ -251,8 +251,8 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"காட்சி பண்புக்கூறு சோதனையை இயக்கு"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"வைஃபை இயங்கும் போதும் (வேகமான நெட்வொர்க் மாற்றத்திற்கு), மொபைல் டேட்டாவை எப்போதும் இயக்கத்தில் வைக்கும்."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை கிடைக்கும் போது, அதைப் பயன்படுத்தும்"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"USB பிழைத்திருத்தத்தை அனுமதிக்கவா?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைத்திருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் பயன்பாடுகளை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB பிழைதிருத்தத்தை அனுமதிக்கவா?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைதிருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் பயன்பாடுகளை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"நீங்கள் ஏற்கனவே அனுமதித்த எல்லா கணினிகளிலிருந்தும் USB பிழைத்திருத்தத்திற்கான அணுகலைத் திரும்பப்பெற வேண்டுமா?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"மேம்பட்ட அமைப்புகளை அனுமதிக்கவா?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"இந்த அமைப்பு மேம்பட்டப் பயன்பாட்டிற்காக மட்டுமே. உங்கள் சாதனம் மற்றும் அதில் உள்ள பயன்பாடுகளைச் சிதைக்கும் அல்லது தவறாகச் செயல்படும் வகையில் பாதிப்பை ஏற்படுத்தும்."</string>
@@ -264,10 +264,10 @@
     <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் பயன்பாட்டை இயக்கு"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"பிழைத்திருத்தம்"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"பிழைதிருத்தம்"</string>
     <string name="debug_app" msgid="8349591734751384446">"பிழைத்திருத்தப் பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"பிழைத்திருத்தப் பயன்பாடு அமைக்கப்படவில்லை"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"பிழைத்திருத்தும் பயன்பாடு: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"பிழைதிருத்தும் பயன்பாடு: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="no_application" msgid="2813387563129153880">"ஒன்றுமில்லை"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"பிழைதிருத்திக்குக் காத்திருக்கவும்"</string>

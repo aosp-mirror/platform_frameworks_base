@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"โทรศัพท์เริ่มเครื่องร้อน"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ฟีเจอร์บางอย่างจะใช้งานได้จำกัดขณะโทรศัพท์ลดอุณหภูมิลง"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"โทรศัพท์จะพยายามลดอุณหภูมิลงโดยอัตโนมัติ คุณยังสามารถใช้โทรศัพท์ได้ แต่โทรศัพท์อาจทำงานช้าลง\n\nโทรศัพท์จะทำงานตามปกติเมื่อเย็นลงแล้ว"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ถอดปลั๊กที่ชาร์จ"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"พบปัญหาในการชาร์จอุปกรณ์นี้ โปรดถอดปลั๊กอะแดปเตอร์ด้วยความระมัดระวังเพราะสายอาจร้อน"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"ดูขั้นตอนในการดูแลรักษา"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ทางลัดทางซ้าย"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ทางลัดทางขวา"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ทางลัดทางซ้ายปลดล็อกได้ด้วย"</string>

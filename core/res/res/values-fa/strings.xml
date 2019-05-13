@@ -1012,23 +1012,23 @@
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"کنش‌های متنی"</string>
-    <string name="email" msgid="4560673117055050403">"ایمیل"</string>
+    <string name="email" msgid="4560673117055050403">"فرستادن ایمیل"</string>
     <string name="email_desc" msgid="3638665569546416795">"ارسال ایمیل به نشانی انتخابی"</string>
-    <string name="dial" msgid="1253998302767701559">"تماس"</string>
+    <string name="dial" msgid="1253998302767701559">"تماس گرفتن"</string>
     <string name="dial_desc" msgid="6573723404985517250">"تماس با شماره تلفن انتخابی"</string>
     <string name="map" msgid="5441053548030107189">"نقشه"</string>
     <string name="map_desc" msgid="1836995341943772348">"مکان‌یابی نشانی انتخاب‌شده"</string>
     <string name="browse" msgid="1245903488306147205">"باز کردن"</string>
     <string name="browse_desc" msgid="8220976549618935044">"باز کردن نشانی وب انتخابی"</string>
-    <string name="sms" msgid="4560537514610063430">"پیام"</string>
+    <string name="sms" msgid="4560537514610063430">"فرستادن پیام"</string>
     <string name="sms_desc" msgid="7526588350969638809">"ارسال پیام به شماره تلفن انتخابی"</string>
     <string name="add_contact" msgid="7867066569670597203">"افزودن"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"افزودن به مخاطبین"</string>
     <string name="view_calendar" msgid="979609872939597838">"مشاهده"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"مشاهده زمان انتخابی در تقویم"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"زمان‌بندی"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"زمان‌بندی کردن"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"زمان‌بندی رویداد برای زمان انتخابی"</string>
-    <string name="view_flight" msgid="7691640491425680214">"پیگیری"</string>
+    <string name="view_flight" msgid="7691640491425680214">"انجام پیگیری"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"ردیابی پرواز انتخابی"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"حافظه درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>

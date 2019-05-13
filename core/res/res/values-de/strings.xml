@@ -307,7 +307,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Text bei der Eingabe beobachten"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Einschließlich personenbezogener Daten wie Kreditkartennummern und Passwörter."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Displayvergrößerung festlegen"</string>
-    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Legt die Zoom-Stufe des Displays und die Zoom-Position auf dem Display fest."</string>
+    <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Legt die Zoom-Stufe und -Position auf dem Display fest."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Bewegungen möglich"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Tippen, Wischen, Zusammenziehen und andere Bewegungen möglich."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Bewegungen auf dem Fingerabdrucksensor"</string>
@@ -495,7 +495,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Fingerabdruck teilweise erkannt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingerabdrucksensor ist verschmutzt. Reinige ihn und versuche es noch einmal."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Finger zu schnell bewegt. Bitte versuche es noch einmal."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Finger zu schnell bewegt, bitte noch einmal versuchen"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Finger zu langsam bewegt. Bitte versuche es noch einmal."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -506,7 +506,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Zeitüberschreitung für Fingerabdruck. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingerabdruckvorgang abgebrochen"</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Vorgang der Fingerabdruckauthentifizierung vom Nutzer abgebrochen."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zu viele Versuche. Bitte versuche es später noch einmal."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Zu viele Versuche. Der Fingerabdrucksensor wurde deaktiviert."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Bitte versuche es noch einmal."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Keine Fingerabdrücke erfasst."</string>
@@ -552,13 +552,13 @@
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"Auf Benachrichtigungen zugreifen"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Ermöglicht der App das Abrufen, Überprüfen und Löschen von Benachrichtigungen, einschließlich Benachrichtigungen, die von anderen Apps gepostet wurden"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"An Benachrichtigungs-Listener-Dienst binden"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Eigentümer, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"An einen Bedingungsproviderdienst binden"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Eigentümer, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Bedingungsproviderdienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"An Dream-Dienst binden"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Ermöglicht der App, sich an die Oberfläche eines Dream-Dienstes auf oberster Ebene zu binden. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufrufen"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Eigentümer, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Inhaber, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Informationen zu den Netzwerkbedingungen erfassen"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ermöglicht der App, Informationen zu den Netzwerkbedingungen zu erfassen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"Kalibrierung für Eingabegerät ändern"</string>
@@ -570,9 +570,9 @@
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-Zertifikate entfernen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ermöglicht einer App das Entfernen von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-Messaging-Dienst binden"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Eigentümer die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"An Mobilfunkanbieter-Dienste binden"</string>
-    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Eigentümer die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Bitte nicht stören\" zugreifen"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Bitte nicht stören\"-Konfiguration"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
@@ -604,7 +604,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Anforderung, dass gespeicherte App-Daten verschlüsselt werden"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameras deaktivieren"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Nutzung sämtlicher Gerätekameras unterbinden"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Einige Funktionen der Displaysperre deaktivieren"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Displaysperre teilweise deaktivieren"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Verwendung einiger Funktionen der Displaysperre verhindern"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
@@ -1012,21 +1012,21 @@
     <string name="deleteText" msgid="6979668428458199034">"Löschen"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
-    <string name="email" msgid="4560673117055050403">"E-Mail"</string>
+    <string name="email" msgid="4560673117055050403">"E-Mail senden"</string>
     <string name="email_desc" msgid="3638665569546416795">"E-Mail an ausgewählte Adresse senden"</string>
     <string name="dial" msgid="1253998302767701559">"Anrufen"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ausgewählte Telefonnummer anrufen"</string>
-    <string name="map" msgid="5441053548030107189">"Karte"</string>
+    <string name="map" msgid="5441053548030107189">"Karte öffnen"</string>
     <string name="map_desc" msgid="1836995341943772348">"Ausgewählte Adresse finden"</string>
     <string name="browse" msgid="1245903488306147205">"Öffnen"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ausgewählte URL öffnen"</string>
-    <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="sms" msgid="4560537514610063430">"SMS senden"</string>
     <string name="sms_desc" msgid="7526588350969638809">"SMS an ausgewählte Telefonnummer senden"</string>
     <string name="add_contact" msgid="7867066569670597203">"Hinzufügen"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Zu Kontakten hinzufügen"</string>
-    <string name="view_calendar" msgid="979609872939597838">"Anzeigen"</string>
+    <string name="view_calendar" msgid="979609872939597838">"Aufrufen"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Ausgewählte Zeit im Kalender anzeigen"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Terminübersicht"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Termin planen"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Termin für die ausgewählte Zeit planen"</string>
     <string name="view_flight" msgid="7691640491425680214">"Verfolgen"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Ausgewählten Flug verfolgen"</string>

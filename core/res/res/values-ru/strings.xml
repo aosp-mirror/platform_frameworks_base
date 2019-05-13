@@ -581,9 +581,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Приложение сможет подключаться к сервисам оператора связи. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Доступ к режиму \"Не беспокоить\""</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Открывает приложению доступ к настройкам режима \"Не беспокоить\" и позволяет изменять их."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Настройка правил для паролей"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролировать длину и символы при вводе пароля и PIN-кода."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Отслеживать попытки снять блокировку экрана"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Отслеживание попыток разблокировать экран"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Блокировка телевизора или удаление всех данных на нем при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует телефон или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
@@ -604,11 +604,11 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Удалить данные этого пользователя с телефона без предупреждения."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Глобальный прокси-сервер"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Настроить глобальный прокси-сервер устройства, который будет использоваться при активной политике. Это может сделать только владелец устройства."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Задать срок действия пароля"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Настройка срока действия пароля блокировки экрана"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Установить частоту изменения пароля, PIN-кода или графического ключа."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Настроить шифрование хранилища"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Настройка шифрования хранилища"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Шифровать данные приложений в хранилище."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Отключить камеры"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Отключение камер"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Запретить использование камер на устройстве."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Отключение функций"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Запретить использовать некоторые функции блокировки экрана."</string>
@@ -1052,7 +1052,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Удалить"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Способ ввода"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Операции с текстом"</string>
-    <string name="email" msgid="4560673117055050403">"Письмо"</string>
+    <string name="email" msgid="4560673117055050403">"Написать письмо"</string>
     <string name="email_desc" msgid="3638665569546416795">"Отправить письмо выбранному адресату"</string>
     <string name="dial" msgid="1253998302767701559">"Позвонить"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Позвонить по выбранному номеру"</string>
@@ -1066,7 +1066,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Добавить в контакты"</string>
     <string name="view_calendar" msgid="979609872939597838">"Открыть"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Посмотреть выбранный день в календаре"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Расписание"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Запланировать"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Запланировать событие на выбранный день"</string>
     <string name="view_flight" msgid="7691640491425680214">"Отследить"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Отслеживать выбранный рейс"</string>
@@ -1941,7 +1941,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"ОТКРЫТЬ"</string>
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Обнаружено вредоносное приложение"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
-    <string name="screenshot_edit" msgid="7867478911006447565">"Изменить"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Редактировать"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Для звонков и уведомлений включен вибросигнал."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Для звонков и уведомлений отключен звук."</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системные изменения"</string>

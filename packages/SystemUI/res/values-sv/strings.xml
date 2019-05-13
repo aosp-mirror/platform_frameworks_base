@@ -784,7 +784,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimera"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Stäng"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Inställningar"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Tryck och dra nedåt för att avvisa"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Tryck och dra nedåt för att ta bort"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Meny"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> visas i bild-i-bild"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Om du inte vill att den här funktionen används i <xliff:g id="NAME">%s</xliff:g> öppnar du inställningarna genom att trycka. Sedan inaktiverar du funktionen."</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Mobilen börjar bli varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Vissa funktioner är begränsade medan mobilen svalnar"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Mobilen försöker svalna automatiskt. Du kan fortfarande använda mobilen, men den kan vara långsammare än vanligt.\n\nMobilen fungerar som vanligt när den har svalnat."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Koppla ur laddaren"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Det går inte att ladda denna enhet. Koppla ur strömadaptern, men var försiktig eftersom kabeln kan vara varm."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Visa alla skötselråd"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Vänster genväg"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Höger genväg"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Lås även upp enheten med vänster genväg"</string>

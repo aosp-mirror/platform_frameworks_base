@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ტელეფონი ცხელდება"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ზოგიერთი ფუნქცია შეზღუდული იქნება, სანამ ტელეფონი გაგრილდება"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"თქვენი ტელეფონი გაგრილებას ავტომატურად შეეცდება. შეგიძლიათ გააგრძელოთ მისით სარგებლობა, თუმცა ტელეფონმა შეიძლება უფრო ნელა იმუშაოს.\n\nგაგრილების შემდგომ ის ჩვეულებრივად იმუშავებს."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"გამოაერთეთ დამტენი"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"ამ მოწყობილობის დატენა ვერ ხერხდება პრობლემის გამო. გამოაერთეთ ელკვების ადაპტერი და გამოიჩინეთ სიფრთხილე, რადგან კაბელი შეიძლებოდა გაცხელებულიყო."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"მისაღები ზომების გაცნობა"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"მარცხენა მალსახმობი"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"მარჯვენა მალსახმობი"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"მარცხენა მალსახმობი ასევე განბლოკავს"</string>
