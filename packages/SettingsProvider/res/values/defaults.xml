@@ -225,7 +225,7 @@
     <bool name="def_charging_sounds_enabled">true</bool>
 
     <!-- Default for Settings.Secure.NOTIFICATION_BUBBLES -->
-    <bool name="def_notification_bubbles">true</bool>
+    <bool name="def_notification_bubbles">false</bool>
 
     <!-- Default for Settings.Secure.AWARE_ENABLED -->
     <bool name="def_aware_enabled">false</bool>
