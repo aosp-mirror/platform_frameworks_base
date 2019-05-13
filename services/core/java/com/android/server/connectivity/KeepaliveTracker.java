@@ -458,9 +458,10 @@ public class KeepaliveTracker {
     }
 
     public void handleStopAllKeepalives(NetworkAgentInfo nai, int reason) {
-        HashMap <Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(nai);
+        final HashMap<Integer, KeepaliveInfo> networkKeepalives = mKeepalives.get(nai);
         if (networkKeepalives != null) {
-            for (KeepaliveInfo ki : networkKeepalives.values()) {
+            final ArrayList<KeepaliveInfo> kalist = new ArrayList(networkKeepalives.values());
+            for (KeepaliveInfo ki : kalist) {
                 ki.stop(reason);
                 // Clean up keepalives since the network agent is disconnected and unable to pass
                 // back asynchronous result of stop().
