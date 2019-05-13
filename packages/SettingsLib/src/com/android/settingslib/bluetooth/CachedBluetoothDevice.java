@@ -826,11 +826,22 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return resource for string that discribes the connection state of this device.
-     * case 1: idle or playing media, show "Active" on the only one A2DP active device.
-     * case 2: in phone call, show "Active" on the only one HFP active device
+     * Return full summary that describes connection state of this device
+     *
+     * @see #getConnectionSummary(boolean shortSummary)
      */
     public String getConnectionSummary() {
+        return getConnectionSummary(false /* shortSummary */);
+    }
+
+    /**
+     * Return summary that describes connection state of this device. Summary depends on:
+     * 1. Whether device has battery info
+     * 2. Whether device is in active usage(or in phone call)
+     *
+     * @param shortSummary {@code true} if need to return short version summary
+     */
+    public String getConnectionSummary(boolean shortSummary) {
         boolean profileConnected = false;    // Updated as long as BluetoothProfile is connected
         boolean a2dpConnected = true;        // A2DP is connected
         boolean hfpConnected = true;         // HFP is connected
@@ -909,9 +920,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 if ((mIsActiveDeviceHearingAid)
                         || (mIsActiveDeviceHeadset && isOnCall)
                         || (mIsActiveDeviceA2dp && !isOnCall)) {
-                    if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
+                    if (isTwsBatteryAvailable(leftBattery, rightBattery) && !shortSummary) {
                         stringRes = R.string.bluetooth_active_battery_level_untethered;
-                    } else if (batteryLevelPercentageString != null) {
+                    } else if (batteryLevelPercentageString != null && !shortSummary) {
                         stringRes = R.string.bluetooth_active_battery_level;
                     } else {
                         stringRes = R.string.bluetooth_active_no_battery_level;
