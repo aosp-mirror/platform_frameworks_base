@@ -142,6 +142,8 @@ static void android_util_MemoryIntArray_close(JNIEnv* env, jobject clazz, jint f
         jniThrowException(env, "java/io/IOException", "ashmem unpinning failed");
         return;
     }
+
+    close(fd);
 }
 
 static jint android_util_MemoryIntArray_get(JNIEnv* env, jobject clazz,
