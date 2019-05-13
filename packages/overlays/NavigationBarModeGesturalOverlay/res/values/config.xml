@@ -37,6 +37,10 @@
      {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
     <bool name="config_navBarNeedsScrim">false</bool>
 
+    <!-- Controls whether seamless rotation should be allowed even though the navbar can move
+         (which normally prevents seamless rotation). -->
+    <bool name="config_allowSeamlessRotationDespiteNavBarMoving">true</bool>
+
     <!-- Controls whether the side edge gestures can always trigger the transient nav bar to
          show. -->
     <bool name="config_navBarAlwaysShowOnSideEdgeGesture">true</bool>

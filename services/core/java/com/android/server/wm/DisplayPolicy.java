@@ -255,6 +255,7 @@ public class DisplayPolicy {
     private volatile boolean mNavigationBarCanMove;
     private volatile boolean mNavigationBarLetsThroughTaps;
     private volatile boolean mNavigationBarAlwaysShowOnSideGesture;
+    private volatile boolean mAllowSeamlessRotationDespiteNavBarMoving;
 
     // Written by vr manager thread, only read in this class.
     private volatile boolean mPersistentVrModeEnabled;
@@ -2726,6 +2727,8 @@ public class DisplayPolicy {
         mNavigationBarCanMove =
                 mDisplayContent.mBaseDisplayWidth != mDisplayContent.mBaseDisplayHeight
                         && res.getBoolean(R.bool.config_navBarCanMove);
+        mAllowSeamlessRotationDespiteNavBarMoving =
+                res.getBoolean(R.bool.config_allowSeamlessRotationDespiteNavBarMoving);
     }
 
     /**
@@ -3508,8 +3511,9 @@ public class DisplayPolicy {
         }
         // If the navigation bar can't change sides, then it will
         // jump when we change orientations and we don't rotate
-        // seamlessly.
-        if (!navigationBarCanMove()) {
+        // seamlessly - unless that is allowed, eg. with gesture
+        // navigation where the navbar is low-profile enough that this isn't very noticeable.
+        if (!navigationBarCanMove() && !mAllowSeamlessRotationDespiteNavBarMoving) {
             return false;
         }
 
