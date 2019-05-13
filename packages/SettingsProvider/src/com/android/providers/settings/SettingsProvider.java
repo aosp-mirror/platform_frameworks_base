@@ -3240,7 +3240,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 179;
+            private static final int SETTINGS_VERSION = 180;
 
             private final int mUserId;
 
@@ -4390,6 +4390,19 @@ public class SettingsProvider extends ContentProvider {
                     currentVersion = 179;
                 }
 
+                if (currentVersion == 179) {
+                    // Version 178: Reset the default for Secure Settings: NOTIFICATION_BUBBLES
+                    // This is originally set in version 173, however, the default value changed
+                    // so this step is to ensure the value is updated to the correct defaulte
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    secureSettings.insertSettingLocked(Secure.NOTIFICATION_BUBBLES,
+                            getContext().getResources().getBoolean(
+                                    R.bool.def_notification_bubbles) ? "1" : "0", null,
+                                    true, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 180;
+                }
 
                 // vXXX: Add new settings above this point.
 
