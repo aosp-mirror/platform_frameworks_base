@@ -8832,8 +8832,8 @@ public class Notification implements Parcelable
              * <p>Setting this flag is optional; it defaults to false.</p>
              */
             @NonNull
-            public BubbleMetadata.Builder setSuppressNotification(boolean shouldSupressNotif) {
-                setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSupressNotif);
+            public BubbleMetadata.Builder setSuppressNotification(boolean shouldSuppressNotif) {
+                setFlag(FLAG_SUPPRESS_NOTIFICATION, shouldSuppressNotif);
                 return this;
             }
 
