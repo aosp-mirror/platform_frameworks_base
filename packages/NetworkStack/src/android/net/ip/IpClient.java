@@ -372,10 +372,6 @@ public class IpClient extends StateMachine {
     private boolean mMulticastFiltering;
     private long mStartTimeMillis;
 
-    /* This must match the definition in KeepaliveTracker.KeepaliveInfo */
-    private static final int TYPE_NATT = 1;
-    private static final int TYPE_TCP = 2;
-
     /**
      * Reading the snapshot is an asynchronous operation initiated by invoking
      * Callback.startReadPacketFilter() and completed when the WiFi Service responds with an
@@ -705,7 +701,7 @@ public class IpClient extends StateMachine {
      * keepalive offload.
      */
     public void addKeepalivePacketFilter(int slot, @NonNull TcpKeepalivePacketDataParcelable pkt) {
-        sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF, slot, TYPE_TCP, pkt);
+        sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF, slot, 0 /* Unused */, pkt);
     }
 
     /**
@@ -714,7 +710,7 @@ public class IpClient extends StateMachine {
      */
     public void addNattKeepalivePacketFilter(int slot,
             @NonNull NattKeepalivePacketDataParcelable pkt) {
-        sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF, slot, TYPE_NATT, pkt);
+        sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF, slot, 0 /* Unused */ , pkt);
     }
 
     /**
@@ -1626,13 +1622,12 @@ public class IpClient extends StateMachine {
 
                 case CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF: {
                     final int slot = msg.arg1;
-                    final int type = msg.arg2;
 
                     if (mApfFilter != null) {
-                        if (type == TYPE_NATT) {
+                        if (msg.obj instanceof NattKeepalivePacketDataParcelable) {
                             mApfFilter.addNattKeepalivePacketFilter(slot,
                                     (NattKeepalivePacketDataParcelable) msg.obj);
-                        } else {
+                        } else if (msg.obj instanceof TcpKeepalivePacketDataParcelable) {
                             mApfFilter.addTcpKeepalivePacketFilter(slot,
                                     (TcpKeepalivePacketDataParcelable) msg.obj);
                         }
