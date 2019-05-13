@@ -551,7 +551,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             mResId = resId;
         }
 
-        public static Icon get(int resId) {
+        public static synchronized Icon get(int resId) {
             Icon icon = ICONS.get(resId);
             if (icon == null) {
                 icon = new ResourceIcon(resId);
