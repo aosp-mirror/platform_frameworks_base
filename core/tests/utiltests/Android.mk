@@ -18,6 +18,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     androidx.test.rules \
     frameworks-base-testutils \
     mockito-target-minus-junit4 \
+    androidx.test.ext.junit
 
 LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base android.test.mock
 

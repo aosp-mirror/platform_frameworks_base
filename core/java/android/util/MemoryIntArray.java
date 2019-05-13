@@ -20,9 +20,8 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 
-import dalvik.system.CloseGuard;
-
 import libcore.io.IoUtils;
+import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -57,7 +56,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     private final boolean mIsOwner;
     private final long mMemoryAddr;
-    private ParcelFileDescriptor mFd;
+    private int mFd = -1;
 
     /**
      * Creates a new instance.
@@ -72,8 +71,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         }
         mIsOwner = true;
         final String name = UUID.randomUUID().toString();
-        mFd = ParcelFileDescriptor.adoptFd(nativeCreate(name, size));
-        mMemoryAddr = nativeOpen(mFd.getFd(), mIsOwner);
+        mFd = nativeCreate(name, size);
+        mMemoryAddr = nativeOpen(mFd, mIsOwner);
         mCloseGuard.open("close");
     }
 
@@ -83,8 +82,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         if (pfd == null) {
             throw new IOException("No backing file descriptor");
         }
-        mFd = ParcelFileDescriptor.adoptFd(pfd.detachFd());
-        mMemoryAddr = nativeOpen(mFd.getFd(), mIsOwner);
+        mFd = pfd.detachFd();
+        mMemoryAddr = nativeOpen(mFd, mIsOwner);
         mCloseGuard.open("close");
     }
 
@@ -106,7 +105,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     public int get(int index) throws IOException {
         enforceNotClosed();
         enforceValidIndex(index);
-        return nativeGet(mFd.getFd(), mMemoryAddr, index);
+        return nativeGet(mFd, mMemoryAddr, index);
     }
 
     /**
@@ -122,7 +121,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         enforceNotClosed();
         enforceWritable();
         enforceValidIndex(index);
-        nativeSet(mFd.getFd(), mMemoryAddr, index, value);
+        nativeSet(mFd, mMemoryAddr, index, value);
     }
 
     /**
@@ -132,7 +131,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      */
     public int size() throws IOException {
         enforceNotClosed();
-        return nativeSize(mFd.getFd());
+        return nativeSize(mFd);
     }
 
     /**
@@ -143,9 +142,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     @Override
     public void close() throws IOException {
         if (!isClosed()) {
-            nativeClose(mFd.getFd(), mMemoryAddr, mIsOwner);
-            mFd.close();
-            mFd = null;
+            nativeClose(mFd, mMemoryAddr, mIsOwner);
+            mFd = -1;
             mCloseGuard.close();
         }
     }
@@ -154,7 +152,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
      * @return Whether this array is closed and shouldn't be used.
      */
     public boolean isClosed() {
-        return mFd == null;
+        return mFd == -1;
     }
 
     @Override
@@ -177,8 +175,13 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        // Don't let writing to a parcel to close our fd - plz
-        parcel.writeParcelable(mFd, flags & ~Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(mFd);
+        try {
+            // Don't let writing to a parcel to close our fd - plz
+            parcel.writeParcelable(pfd, flags & ~Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } finally {
+            pfd.detachFd();
+        }
     }
 
     @Override
@@ -192,13 +195,13 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-
-        return false;
+        MemoryIntArray other = (MemoryIntArray) obj;
+        return mFd == other.mFd;
     }
 
     @Override
     public int hashCode() {
-        return mFd.hashCode();
+        return mFd;
     }
 
     private void enforceNotClosed() {
