@@ -34,6 +34,7 @@
                   android:layout_height="wrap_content"
                   android:singleLine="true"
                   android:ellipsize="marquee"
+                  android:textAlignment="viewStart"
                   android:textAppearance="?android:attr/textAppearanceMedium"
                   android:duplicateParentState="true" />
 
@@ -42,6 +43,7 @@
                   android:layout_height="wrap_content"
                   android:singleLine="true"
                   android:ellipsize="marquee"
+                  android:textAlignment="viewStart"
                   android:textAppearance="?android:attr/textAppearanceSmall"
                   android:duplicateParentState="true" />
     </LinearLayout>
