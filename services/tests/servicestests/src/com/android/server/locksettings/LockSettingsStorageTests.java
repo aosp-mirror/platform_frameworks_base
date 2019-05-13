@@ -27,6 +27,7 @@ import android.app.trust.TrustManager;
 import android.content.pm.UserInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.FileUtils;
+import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.platform.test.annotations.Presubmit;
@@ -125,7 +126,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             final int threadId = i;
-            threads.add(new Thread() {
+            threads.add(new Thread("testKeyValue_Concurrency_" + i) {
                 @Override
                 public void run() {
                     synchronized (monitor) {
@@ -134,17 +135,17 @@ public class LockSettingsStorageTests extends AndroidTestCase {
                         } catch (InterruptedException e) {
                             return;
                         }
-                        mStorage.writeKeyValue("key", "1 from thread " + threadId, 0);
-                        mStorage.readKeyValue("key", "default", 0);
-                        mStorage.writeKeyValue("key", "2 from thread " + threadId, 0);
-                        mStorage.readKeyValue("key", "default", 0);
-                        mStorage.writeKeyValue("key", "3 from thread " + threadId, 0);
-                        mStorage.readKeyValue("key", "default", 0);
-                        mStorage.writeKeyValue("key", "4 from thread " + threadId, 0);
-                        mStorage.readKeyValue("key", "default", 0);
-                        mStorage.writeKeyValue("key", "5 from thread " + threadId, 0);
-                        mStorage.readKeyValue("key", "default", 0);
                     }
+                    mStorage.writeKeyValue("key", "1 from thread " + threadId, 0);
+                    mStorage.readKeyValue("key", "default", 0);
+                    mStorage.writeKeyValue("key", "2 from thread " + threadId, 0);
+                    mStorage.readKeyValue("key", "default", 0);
+                    mStorage.writeKeyValue("key", "3 from thread " + threadId, 0);
+                    mStorage.readKeyValue("key", "default", 0);
+                    mStorage.writeKeyValue("key", "4 from thread " + threadId, 0);
+                    mStorage.readKeyValue("key", "default", 0);
+                    mStorage.writeKeyValue("key", "5 from thread " + threadId, 0);
+                    mStorage.readKeyValue("key", "default", 0);
                 }
             });
             threads.get(i).start();
@@ -153,12 +154,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         synchronized (monitor) {
             monitor.notifyAll();
         }
-        for (int i = 0; i < threads.size(); i++) {
-            try {
-                threads.get(i).join();
-            } catch (InterruptedException e) {
-            }
-        }
+        joinAll(threads, 10000);
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
         mStorage.clearCache();
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
@@ -514,5 +510,30 @@ public class LockSettingsStorageTests extends AndroidTestCase {
             Log.setWtfHandler(prevWtfHandler);
         }
         return captured[0];
+    }
+
+    private static void joinAll(List<Thread> threads, long timeoutMillis) {
+        long deadline = SystemClock.uptimeMillis() + timeoutMillis;
+        for (Thread t : threads) {
+            try {
+                t.join(deadline - SystemClock.uptimeMillis());
+                if (t.isAlive()) {
+                    t.interrupt();
+                    throw new RuntimeException(
+                            "Joining " + t + " timed out. Stack: \n" + getStack(t));
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Interrupted while joining " + t, e);
+            }
+        }
+    }
+
+    private static String getStack(Thread t) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(t.toString()).append('\n');
+        for (StackTraceElement ste : t.getStackTrace()) {
+            sb.append("\tat ").append(ste.toString()).append('\n');
+        }
+        return sb.toString();
     }
 }
