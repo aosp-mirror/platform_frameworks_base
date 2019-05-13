@@ -337,11 +337,11 @@ public class Painting : View, SpotFilter.Plotter {
                             bits.width.toFloat() / oldBits.height,
                             bits.height.toFloat() / oldBits.width)
                 }
-                c.matrix = matrix
+                c.setMatrix(matrix)
             }
             // paint the old artwork atop the new
             c.drawBitmap(oldBits, 0f, 0f, _drawPaint)
-            c.matrix = Matrix()
+            c.setMatrix(Matrix())
         } else {
             c.drawColor(paperColor)
         }
