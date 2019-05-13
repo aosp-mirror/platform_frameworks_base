@@ -69,7 +69,7 @@
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
-        />
+    />
 
     <LinearLayout
         android:id="@+id/lock_icon_container"
