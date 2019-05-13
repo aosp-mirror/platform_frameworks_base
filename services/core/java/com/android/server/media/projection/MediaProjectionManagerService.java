@@ -282,13 +282,14 @@ public final class MediaProjectionManagerService extends SystemService
                 throw new IllegalArgumentException("package name must not be empty");
             }
 
+            final UserHandle callingUser = Binder.getCallingUserHandle();
             long callingToken = Binder.clearCallingIdentity();
 
             MediaProjection projection;
             try {
                 ApplicationInfo ai;
                 try {
-                    ai = mPackageManager.getApplicationInfo(packageName, 0);
+                    ai = mPackageManager.getApplicationInfoAsUser(packageName, 0, callingUser);
                 } catch (NameNotFoundException e) {
                     throw new IllegalArgumentException("No package matching :" + packageName);
                 }
