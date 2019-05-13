@@ -1249,6 +1249,7 @@ public class TelecomManager {
      * @deprecated Use
      * {@link android.app.role.RoleManager#addRoleHolderAsUser(String, String, int, UserHandle,
      * Executor, java.util.function.Consumer)} instead.
+     * @removed
      */
     @SystemApi
     @Deprecated
