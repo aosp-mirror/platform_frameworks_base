@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -139,7 +140,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             getSecurityView(mCurrentSecuritySelection).onResume(reason);
         }
         updateBiometricRetry();
-        updatePaddings();
     }
 
     @Override
@@ -319,17 +319,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        updatePaddings();
-    }
-
-    private void updatePaddings() {
-        int bottomPadding = getRootWindowInsets().getSystemWindowInsets().bottom;
-        if (getPaddingBottom() == bottomPadding) {
-            return;
-        }
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), bottomPadding);
+    protected boolean fitSystemWindows(Rect insets) {
+        // Consume bottom insets because we're setting the padding locally (for IME and navbar.)
+        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), insets.bottom);
+        insets.bottom = 0;
+        return false;
     }
 
     private void showDialog(String title, String message) {
