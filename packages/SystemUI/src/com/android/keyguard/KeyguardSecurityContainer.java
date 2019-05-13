@@ -180,7 +180,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 }
                 int index = event.findPointerIndex(mActivePointerId);
                 int touchSlop = mViewConfiguration.getScaledTouchSlop();
-                if (mCurrentSecurityView != null
+                if (mCurrentSecurityView != null && index != -1
                         && mStartTouchY - event.getY(index) > touchSlop) {
                     mIsDragging = true;
                     return true;
