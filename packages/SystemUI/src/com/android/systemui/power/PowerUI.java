@@ -54,12 +54,15 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Locale;
 
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long TEMPERATURE_INTERVAL = 30 * DateUtils.SECOND_IN_MILLIS;
     private static final long TEMPERATURE_LOGGING_INTERVAL = DateUtils.HOUR_IN_MILLIS;
+    private static final int TEMPERATURE_OVERHEAT_WARNING = 0;
+    private static final int TEMPERATURE_OVERHEAT_ALARM = 1;
     private static final int MAX_RECENT_TEMPS = 125; // TEMPERATURE_LOGGING_INTERVAL plus a buffer
     static final long THREE_HOURS_IN_MILLIS = DateUtils.HOUR_IN_MILLIS * 3;
     private static final int CHARGE_CYCLE_PERCENT_RESET = 45;
@@ -80,15 +83,22 @@ public class PowerUI extends SystemUI {
     private Estimate mLastEstimate;
     private boolean mLowWarningShownThisChargeCycle;
     private boolean mSevereWarningShownThisChargeCycle;
+    private boolean mEnableTemperatureWarning;
+    private boolean mEnableTemperatureAlarm;
+    private boolean mIsOverheatAlarming;
 
     private int mLowBatteryAlertCloseLevel;
     private final int[] mLowBatteryReminderLevels = new int[2];
 
     private long mScreenOffTime = -1;
 
-    private float mThresholdTemp;
-    private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
-    private int mNumTemps;
+    private float mThresholdWarningTemp;
+    private float mThresholdAlarmTemp;
+    private float mThresholdAlarmTempTolerance;
+    private float[] mRecentSkinTemps = new float[MAX_RECENT_TEMPS];
+    private float[] mRecentAlarmTemps = new float[MAX_RECENT_TEMPS];
+    private int mWarningNumTemps;
+    private int mAlarmNumTemps;
     private long mNextLogTime;
     private IThermalService mThermalService;
 
@@ -98,7 +108,7 @@ public class PowerUI extends SystemUI {
     // by using the same instance (method references are not guaranteed to be the same object
     // We create a method reference here so that we are guaranteed that we can remove a callback
     // each time they are created).
-    private final Runnable mUpdateTempCallback = this::updateTemperatureWarning;
+    private final Runnable mUpdateTempCallback = this::updateTemperature;
 
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -126,7 +136,7 @@ public class PowerUI extends SystemUI {
         // to the temperature being too high.
         showThermalShutdownDialog();
 
-        initTemperatureWarning();
+        initTemperature();
     }
 
     @Override
@@ -135,7 +145,7 @@ public class PowerUI extends SystemUI {
 
         // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).
         if ((mLastConfiguration.updateFrom(newConfig) & mask) != 0) {
-            mHandler.post(this::initTemperatureWarning);
+            mHandler.post(this::initTemperature);
         }
     }
 
@@ -193,6 +203,7 @@ public class PowerUI extends SystemUI {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
             mContext.registerReceiver(this, filter, null, mHandler);
         }
 
@@ -258,6 +269,8 @@ public class PowerUI extends SystemUI {
                 mScreenOffTime = -1;
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 mWarnings.userSwitched();
+            } else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
+                updateTemperature();
             } else {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
@@ -364,18 +377,51 @@ public class PowerUI extends SystemUI {
         return canShowWarning || canShowSevereWarning;
     }
 
-    private void initTemperatureWarning() {
-        ContentResolver resolver = mContext.getContentResolver();
-        Resources resources = mContext.getResources();
-        if (Settings.Global.getInt(resolver, Settings.Global.SHOW_TEMPERATURE_WARNING,
-                resources.getInteger(R.integer.config_showTemperatureWarning)) == 0) {
+    private void initTemperature() {
+        initTemperatureWarning();
+        initTemperatureAlarm();
+        if (mEnableTemperatureWarning || mEnableTemperatureAlarm) {
+            bindThermalService();
+        }
+    }
+
+    private void initTemperatureAlarm() {
+        mEnableTemperatureAlarm = mContext.getResources().getInteger(
+                R.integer.config_showTemperatureAlarm) != 0;
+        if (!mEnableTemperatureAlarm) {
             return;
         }
 
-        mThresholdTemp = Settings.Global.getFloat(resolver, Settings.Global.WARNING_TEMPERATURE,
+        float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
+                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
+                HardwarePropertiesManager.TEMPERATURE_THROTTLING);
+        if (throttlingTemps == null || throttlingTemps.length < TEMPERATURE_OVERHEAT_ALARM + 1) {
+            mThresholdAlarmTemp = mContext.getResources().getInteger(
+                    R.integer.config_alarmTemperature);
+        } else {
+            mThresholdAlarmTemp = throttlingTemps[TEMPERATURE_OVERHEAT_ALARM];
+        }
+        mThresholdAlarmTempTolerance = mThresholdAlarmTemp - mContext.getResources().getInteger(
+                R.integer.config_alarmTemperatureTolerance);
+        Log.d(TAG, "mThresholdAlarmTemp=" + mThresholdAlarmTemp + ", mThresholdAlarmTempTolerance="
+                + mThresholdAlarmTempTolerance);
+    }
+
+    private void initTemperatureWarning() {
+        ContentResolver resolver = mContext.getContentResolver();
+        Resources resources = mContext.getResources();
+        mEnableTemperatureWarning = Settings.Global.getInt(resolver,
+                Settings.Global.SHOW_TEMPERATURE_WARNING,
+                resources.getInteger(R.integer.config_showTemperatureWarning)) != 0;
+        if (!mEnableTemperatureWarning) {
+            return;
+        }
+
+        mThresholdWarningTemp = Settings.Global.getFloat(resolver,
+                Settings.Global.WARNING_TEMPERATURE,
                 resources.getInteger(R.integer.config_warningTemperature));
 
-        if (mThresholdTemp < 0f) {
+        if (mThresholdWarningTemp < 0f) {
             // Get the shutdown temperature, adjust for warning tolerance.
             float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
                     HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
@@ -385,10 +431,12 @@ public class PowerUI extends SystemUI {
                     || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
                 return;
             }
-            mThresholdTemp = throttlingTemps[0] -
-                    resources.getInteger(R.integer.config_warningTemperatureTolerance);
+            mThresholdWarningTemp = throttlingTemps[0] - resources.getInteger(
+                    R.integer.config_warningTemperatureTolerance);
         }
+    }
 
+    private void bindThermalService() {
         if (mThermalService == null) {
             // Enable push notifications of throttling from vendor thermal
             // management subsystem via thermalservice, in addition to our
@@ -416,7 +464,7 @@ public class PowerUI extends SystemUI {
         mHandler.removeCallbacks(mUpdateTempCallback);
 
         // We have passed all of the checks, start checking the temp
-        updateTemperatureWarning();
+        updateTemperature();
     }
 
     private void showThermalShutdownDialog() {
@@ -426,38 +474,110 @@ public class PowerUI extends SystemUI {
         }
     }
 
+    /**
+     * Update temperature depend on config, there are type types of messages by design
+     * TEMPERATURE_OVERHEAT_WARNING Send generic notification to notify user
+     * TEMPERATURE_OVERHEAT_ALARM popup emergency Dialog for user
+     */
     @VisibleForTesting
-    protected void updateTemperatureWarning() {
+    protected void updateTemperature() {
+        if (!mEnableTemperatureWarning && !mEnableTemperatureAlarm) {
+            return;
+        }
+
         float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
                 HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
                 HardwarePropertiesManager.TEMPERATURE_CURRENT);
+        if (temps == null) {
+            Log.e(TAG, "Can't query current temperature value from HardProps SKIN type");
+            return;
+        }
+
+        final float[] temps_compat;
+        if (temps.length < TEMPERATURE_OVERHEAT_ALARM + 1) {
+            temps_compat = new float[] { temps[0], temps[0] };
+        } else {
+            temps_compat = temps;
+        }
+
+        if (mEnableTemperatureWarning) {
+            updateTemperatureWarning(temps_compat);
+            logTemperatureStats(TEMPERATURE_OVERHEAT_WARNING);
+        }
+
+        if (mEnableTemperatureAlarm) {
+            updateTemperatureAlarm(temps_compat);
+            logTemperatureStats(TEMPERATURE_OVERHEAT_ALARM);
+        }
+
+        mHandler.postDelayed(mUpdateTempCallback, TEMPERATURE_INTERVAL);
+    }
+
+    /**
+     * Update legacy overheat warning notification from skin temperatures
+     *
+     * @param temps the array include two types of value from DEVICE_TEMPERATURE_SKIN
+     *              this function only obtain the value of temps[TEMPERATURE_OVERHEAT_WARNING]
+     */
+    @VisibleForTesting
+    protected void updateTemperatureWarning(float[] temps) {
         if (temps.length != 0) {
-            float temp = temps[0];
-            mRecentTemps[mNumTemps++] = temp;
+            float temp = temps[TEMPERATURE_OVERHEAT_WARNING];
+            mRecentSkinTemps[mWarningNumTemps++] = temp;
 
             StatusBar statusBar = getComponent(StatusBar.class);
             if (statusBar != null && !statusBar.isDeviceInVrMode()
-                    && temp >= mThresholdTemp) {
-                logAtTemperatureThreshold(temp);
+                    && temp >= mThresholdWarningTemp) {
+                logAtTemperatureThreshold(TEMPERATURE_OVERHEAT_WARNING, temp,
+                        mThresholdWarningTemp);
                 mWarnings.showHighTemperatureWarning();
             } else {
                 mWarnings.dismissHighTemperatureWarning();
             }
         }
-
-        logTemperatureStats();
-
-        mHandler.postDelayed(mUpdateTempCallback, TEMPERATURE_INTERVAL);
     }
 
-    private void logAtTemperatureThreshold(float temp) {
+    /**
+     * Update overheat alarm from skin temperatures
+     * OEM can config alarm with beep sound by config_alarmTemperatureBeepSound
+     *
+     * @param temps the array include two types of value from DEVICE_TEMPERATURE_SKIN
+     *              this function only obtain the value of temps[TEMPERATURE_OVERHEAT_ALARM]
+     */
+    @VisibleForTesting
+    protected void updateTemperatureAlarm(float[] temps) {
+        if (temps.length != 0) {
+            final float temp = temps[TEMPERATURE_OVERHEAT_ALARM];
+            final boolean shouldBeepSound = mContext.getResources().getBoolean(
+                    R.bool.config_alarmTemperatureBeepSound);
+            mRecentAlarmTemps[mAlarmNumTemps++] = temp;
+            if (temp >= mThresholdAlarmTemp && !mIsOverheatAlarming) {
+                mWarnings.notifyHighTemperatureAlarm(true /* overheat */, shouldBeepSound);
+                mIsOverheatAlarming = true;
+            } else if (temp <= mThresholdAlarmTempTolerance && mIsOverheatAlarming) {
+                mWarnings.notifyHighTemperatureAlarm(false /* overheat */, false /* beepSound */);
+                mIsOverheatAlarming = false;
+            }
+            logAtTemperatureThreshold(TEMPERATURE_OVERHEAT_ALARM, temp, mThresholdAlarmTemp);
+        }
+    }
+
+    private void logAtTemperatureThreshold(int type, float temp, float thresholdTemp) {
         StringBuilder sb = new StringBuilder();
         sb.append("currentTemp=").append(temp)
-                .append(",thresholdTemp=").append(mThresholdTemp)
+                .append(",overheatType=").append(type)
+                .append(",isOverheatAlarm=").append(mIsOverheatAlarming)
+                .append(",thresholdTemp=").append(thresholdTemp)
                 .append(",batteryStatus=").append(mBatteryStatus)
                 .append(",recentTemps=");
-        for (int i = 0; i < mNumTemps; i++) {
-            sb.append(mRecentTemps[i]).append(',');
+        if (type == TEMPERATURE_OVERHEAT_WARNING) {
+            for (int i = 0; i < mWarningNumTemps; i++) {
+                sb.append(mRecentSkinTemps[i]).append(',');
+            }
+        } else {
+            for (int i = 0; i < mAlarmNumTemps; i++) {
+                sb.append(mRecentAlarmTemps[i]).append(',');
+            }
         }
         Slog.i(TAG, sb.toString());
     }
@@ -466,16 +586,20 @@ public class PowerUI extends SystemUI {
      * Calculates and logs min, max, and average
      * {@link HardwarePropertiesManager#DEVICE_TEMPERATURE_SKIN} over the past
      * {@link #TEMPERATURE_LOGGING_INTERVAL}.
+     * @param type TEMPERATURE_OVERHEAT_WARNING Send generic notification to notify user
+     *             TEMPERATURE_OVERHEAT_ALARM Popup emergency Dialog for user
      */
-    private void logTemperatureStats() {
-        if (mNextLogTime > System.currentTimeMillis() && mNumTemps != MAX_RECENT_TEMPS) {
+    private void logTemperatureStats(int type) {
+        int numTemp = type == TEMPERATURE_OVERHEAT_ALARM ? mAlarmNumTemps : mWarningNumTemps;
+        if (mNextLogTime > System.currentTimeMillis() && numTemp != MAX_RECENT_TEMPS) {
             return;
         }
-
-        if (mNumTemps > 0) {
-            float sum = mRecentTemps[0], min = mRecentTemps[0], max = mRecentTemps[0];
-            for (int i = 1; i < mNumTemps; i++) {
-                float temp = mRecentTemps[i];
+        float[] recentTemps =
+                type == TEMPERATURE_OVERHEAT_ALARM ? mRecentAlarmTemps : mRecentSkinTemps;
+        if (numTemp > 0) {
+            float sum = recentTemps[0], min = recentTemps[0], max = recentTemps[0];
+            for (int i = 1; i < numTemp; i++) {
+                float temp = recentTemps[i];
                 sum += temp;
                 if (temp > max) {
                     max = temp;
@@ -485,14 +609,22 @@ public class PowerUI extends SystemUI {
                 }
             }
 
-            float avg = sum / mNumTemps;
-            Slog.i(TAG, "avg=" + avg + ",min=" + min + ",max=" + max);
-            MetricsLogger.histogram(mContext, "device_skin_temp_avg", (int) avg);
-            MetricsLogger.histogram(mContext, "device_skin_temp_min", (int) min);
-            MetricsLogger.histogram(mContext, "device_skin_temp_max", (int) max);
+            float avg = sum / numTemp;
+            Slog.i(TAG, "Type=" + type + ",avg=" + avg + ",min=" + min + ",max=" + max);
+            String t = type == TEMPERATURE_OVERHEAT_WARNING ? "skin" : "alarm";
+            MetricsLogger.histogram(mContext,
+                    String.format(Locale.ENGLISH, "device_%1$s_temp_avg", t), (int) avg);
+            MetricsLogger.histogram(mContext,
+                    String.format(Locale.ENGLISH, "device_%1$s_temp_min", t), (int) min);
+            MetricsLogger.histogram(mContext,
+                    String.format(Locale.ENGLISH, "device_%1$s_temp_max", t), (int) max);
         }
         setNextLogTime();
-        mNumTemps = 0;
+        if (type == TEMPERATURE_OVERHEAT_ALARM) {
+            mAlarmNumTemps = 0;
+        } else {
+            mWarningNumTemps = 0;
+        }
     }
 
     private void setNextLogTime() {
@@ -525,8 +657,10 @@ public class PowerUI extends SystemUI {
                 Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0));
         pw.print("bucket: ");
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
-        pw.print("mThresholdTemp=");
-        pw.println(Float.toString(mThresholdTemp));
+        pw.print("mThresholdWarningTemp=");
+        pw.println(Float.toString(mThresholdWarningTemp));
+        pw.print("mThresholdAlarmTemp=");
+        pw.println(Float.toString(mThresholdAlarmTemp));
         pw.print("mNextLogTime=");
         pw.println(Long.toString(mNextLogTime));
         mWarnings.dump(pw);
@@ -534,18 +668,41 @@ public class PowerUI extends SystemUI {
 
     public interface WarningsUI {
         void update(int batteryLevel, int bucket, long screenOffTime);
+
         void updateEstimate(Estimate estimate);
+
         void updateThresholds(long lowThreshold, long severeThreshold);
+
         void dismissLowBatteryWarning();
+
         void showLowBatteryWarning(boolean playSound);
+
         void dismissInvalidChargerWarning();
+
         void showInvalidChargerWarning();
+
         void updateLowBatteryWarning();
+
         boolean isInvalidChargerWarningShowing();
+
         void dismissHighTemperatureWarning();
+
         void showHighTemperatureWarning();
+
+        /**
+         * PowerUI detect thermal overheat, notify to popup alert dialog strongly.
+         * Alarm with beep sound with un-dismissible dialog until device cool down below threshold,
+         * then popup another dismissible dialog to user.
+         *
+         * @param overheat whether device temperature over threshold
+         * @param beepSound should beep sound once overheat
+         */
+        void notifyHighTemperatureAlarm(boolean overheat, boolean beepSound);
+
         void showThermalShutdownWarning();
+
         void dump(PrintWriter pw);
+
         void userSwitched();
     }
 
@@ -554,9 +711,9 @@ public class PowerUI extends SystemUI {
         @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
             // Trigger an update of the temperature warning.  Only one
             // callback can be enabled at a time, so remove any existing
-            // callback; updateTemperatureWarning will schedule another one.
+            // callback; updateTemperature will schedule another one.
             mHandler.removeCallbacks(mUpdateTempCallback);
-            updateTemperatureWarning();
+            updateTemperature();
         }
     }
 }

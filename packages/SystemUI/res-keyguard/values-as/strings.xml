@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="5761514484663983731">"আপোনাৰ পাছৱৰ্ড দিয়ক"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ভুল পিন ক\'ড।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"চ্চার্জ কৰা হ\'ল"</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"চ্চার্জ কৰা হ’ল"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চ্চার্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • দ্ৰুত গতিৰে চ্চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে"</string>
@@ -71,7 +71,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"আপোনাৰ আৰ্হি আঁকক"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ছিমৰ পিন দিয়ক।"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\"ৰ ছিমৰ পিন দিয়ক।"</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ম\'বাইল সেৱা অবিহনে ডিভাইচ ব্যৱহাৰ কৰিবলৈ ই-ছিম অক্ষম কৰক।"</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ম’বাইল সেৱা অবিহনে ডিভাইচ ব্যৱহাৰ কৰিবলৈ ই-ছিম অক্ষম কৰক।"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"পিন দিয়ক"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"পাছৱৰ্ড দিয়ক"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ছিমখন বর্তমান অক্ষম অৱস্থাত আছে। অব্যাহত ৰাখিবলৈ PUK ক\'ড লিখক। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>
@@ -113,7 +113,7 @@
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"ছিম পিনৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"ছিম PUKৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
-    <string name="kg_pin_accepted" msgid="7637293533973802143">"ক\'ড গ্ৰহণ কৰা হ\'ল!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"ক\'ড গ্ৰহণ কৰা হ’ল!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"কোনো সেৱা নাই।"</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ইনপুট পদ্ধতি সলনি কৰক"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"এয়াৰপ্লেন ম\'ড"</string>
@@ -146,7 +146,7 @@
       <item quantity="other">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
-      <item quantity="one">ছিমখন অক্ষম হ\'ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
-      <item quantity="other">ছিমখন অক্ষম হ\'ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
+      <item quantity="one">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
+      <item quantity="other">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
     </plurals>
 </resources>

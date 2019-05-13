@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Berotzen ari da telefonoa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Eginbide batzuk ezingo dira erabili telefonoa hoztu arte"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonoa automatikoki saiatuko da hozten. Hoztu bitartean, telefonoa erabiltzen jarrai dezakezu, baina mantsoago funtziona lezake.\n\nTelefonoaren tenperatura jaitsi bezain laster, ohi bezala funtzionatzen jarraituko du."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Deskonektatu kargagailua"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Arazo bat izan da gailua kargatzean. Deskonektatu egokigailua eta kontuz ibili, kablea bero egon baitaiteke."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ikusi zaintzeko urratsak"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ezkerreko lasterbidea"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Eskuineko lasterbidea"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ezkerreko lasterbideak desblokeatzeko ere balio du"</string>

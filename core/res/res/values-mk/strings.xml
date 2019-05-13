@@ -1012,23 +1012,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Избриши"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дејства со текст"</string>
-    <string name="email" msgid="4560673117055050403">"E-пошта"</string>
+    <string name="email" msgid="4560673117055050403">"Испрати е-пошта"</string>
     <string name="email_desc" msgid="3638665569546416795">"Испраќа е-порака на избраната адреса"</string>
     <string name="dial" msgid="1253998302767701559">"Повикај"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Го повикува избраниот телефонски број"</string>
-    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <string name="map" msgid="5441053548030107189">"Отвори карта"</string>
     <string name="map_desc" msgid="1836995341943772348">"Лоцирај ја избраната адреса"</string>
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ја отвора избраната URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Порака"</string>
+    <string name="sms" msgid="4560537514610063430">"Испрати порака"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Испраќа порака на избраниот телефонски број"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додај"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Додава во контакти"</string>
     <string name="view_calendar" msgid="979609872939597838">"Прикажи"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Го гледа избраното време во календарот"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Распоред"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Закажи"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Закажува настан за избраното време"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Песна"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Следи го"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Следи избран лет"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Капацитетот е речиси полн"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некои системски функции може да не работат"</string>

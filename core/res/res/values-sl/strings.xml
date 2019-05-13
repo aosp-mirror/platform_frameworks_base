@@ -1052,23 +1052,23 @@
     <string name="deleteText" msgid="6979668428458199034">"Izbriši"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Način vnosa"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Besedilna dejanja"</string>
-    <string name="email" msgid="4560673117055050403">"E-pošta"</string>
+    <string name="email" msgid="4560673117055050403">"Pošlji e-pošto"</string>
     <string name="email_desc" msgid="3638665569546416795">"Pošlji na izbrani naslov"</string>
     <string name="dial" msgid="1253998302767701559">"Pokliči"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Pokliči izbrano telefonsko številko"</string>
-    <string name="map" msgid="5441053548030107189">"Zemljevid"</string>
+    <string name="map" msgid="5441053548030107189">"Odpri zemljevid"</string>
     <string name="map_desc" msgid="1836995341943772348">"Poišči izbrani naslov na zemljevidu"</string>
     <string name="browse" msgid="1245903488306147205">"Odpri"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Odpri izbrani URL"</string>
-    <string name="sms" msgid="4560537514610063430">"Sporočilo"</string>
+    <string name="sms" msgid="4560537514610063430">"Pošlji SMS"</string>
     <string name="sms_desc" msgid="7526588350969638809">"Pošlji sporočilo na izbrano telefonsko številko"</string>
     <string name="add_contact" msgid="7867066569670597203">"Dodaj"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Dodaj med stike"</string>
-    <string name="view_calendar" msgid="979609872939597838">"Ogled"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Ogled izbranega časa v koledarju"</string>
+    <string name="view_calendar" msgid="979609872939597838">"Prikaži"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Prikaži izbrani čas v koledarju"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Dodaj na razpored"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Razporedi dogodek na izbrano uro"</string>
-    <string name="view_flight" msgid="7691640491425680214">"Sledenje"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Sledi"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Sledi izbranemu letu"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Prostor za shranjevanje bo pošel"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Nekatere sistemske funkcije morda ne delujejo"</string>

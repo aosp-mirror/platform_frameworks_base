@@ -740,7 +740,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"مفتاح تبديل لوحة المفاتيح"</string>
     <string name="save" msgid="2311877285724540644">"حفظ"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ضبط عرض الزر"</string>
     <string name="clipboard" msgid="1313879395099896312">"الحافظة"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"زر التنقل المخصص"</string>
@@ -818,6 +818,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"تزداد درجة حرارة الهاتف"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"سيحاول الهاتف تخفيض درجة حرارته تلقائيًا. سيظل بإمكانك استخدام هاتفك، ولكن قد يعمل بشكل أبطأ.\n\nبعد أن تنخفض درجة حرارة الهاتف، سيستعيد سرعته المعتادة."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"فصل الشاحن"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"هناك مشكلة في شحن هذا الجهاز. افصِل محوِّل الطاقة بحرص لأن الكابل قد يكون ساخنًا."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"الاطّلاع على خطوات العناية"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"اختصار اليسار"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"اختصار اليمين"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"اختصار اليسار يلغي أيضًا تأمين"</string>

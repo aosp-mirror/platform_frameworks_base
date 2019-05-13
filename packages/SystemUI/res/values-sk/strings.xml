@@ -230,11 +230,11 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Zavrieť panel"</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Dlhší čas"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Kratší čas"</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Svietidlo je vypnuté."</string>
-    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Svietidlo nie je k dispozícii."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Svietidlo je zapnuté."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Svietidlo je vypnuté."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Svietidlo je zapnuté."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Baterka je vypnutá."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Baterka nie je k dispozícii."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Baterka je zapnutá."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Baterka je vypnutá."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Baterka je zapnutá."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Prevrátenie farieb je vypnuté."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Prevrátenie farieb je zapnuté."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilný hotspot je vypnutý."</string>
@@ -808,6 +808,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Teplota telefónu stúpa"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Niektoré funkcie budú obmedzené, dokým neklesne teplota telefónu"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Váš telefón sa automaticky pokúsi schladiť. Môžete ho naďalej používať, ale môže fungovať pomalšie.\n\nPo poklese teploty bude telefón fungovať ako normálne."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Odpojte nabíjačku"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Vyskytol sa problém s nabíjaním tohto zariadenia. Odpojte nabíjačku a postupujte opatrne, pretože kábel môže byť horúci."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Zobraziť opatrenia"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ľavá skratka"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Pravá skratka"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ľavá skratka tiež odomkne"</string>

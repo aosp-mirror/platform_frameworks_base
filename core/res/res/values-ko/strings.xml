@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"3자 통화"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"원하지 않는 통화 수신 거부"</string>
     <string name="CndMmi" msgid="3116446237081575808">"통화 번호 전달"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"응답 거부"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"방해 금지 모드"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한됨"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
@@ -236,9 +236,9 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"비행기 모드"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"비행기 모드 사용중"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"비행기 모드 사용중이 아님"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"배터리 세이버"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"배터리 세이버 사용 안함"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"배터리 세이버 사용 중"</string>
+    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"절전 모드"</string>
+    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"절전 모드 사용 안함"</string>
+    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"절전 모드 사용 중"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"설정"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"지원"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"음성 지원"</string>
@@ -573,8 +573,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"이동통신사 서비스 사용"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"권한을 가진 애플리케이션에서 이동통신사 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"알림 일시중지에 접근"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"앱에 알림 일시중지 설정을 읽고 작성하도록 허용합니다."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"방해 금지 모드에 접근"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"화면 잠금 해제 시도 모니터링"</string>
@@ -1025,9 +1025,9 @@
     <string name="add_contact" msgid="7867066569670597203">"추가"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"연락처에 추가"</string>
     <string name="view_calendar" msgid="979609872939597838">"보기"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"캘린더에서 선택한 시간 보기"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"일정"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"선택한 시간의 일정 예약"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"선택한 시간 캘린더에서 보기"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"일정 만들기"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"선택한 시간으로 일정 만들기"</string>
     <string name="view_flight" msgid="7691640491425680214">"추적"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"선택한 항공편 추적"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"저장 공간이 부족함"</string>
@@ -1696,8 +1696,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"관리자에 의해 설치되었습니다."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"배터리 세이버를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다. "<annotation id="url">"자세히 알아보기"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"배터리 세이버를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"절전 모드를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다. "<annotation id="url">"자세히 알아보기"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"절전 모드를 사용하면 배터리 수명을 늘리기 위해 기기의 일부 기능이 사용 중지되며 앱이 제한됩니다."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>
@@ -1736,10 +1736,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>(다음 알람)까지"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"사용 중지할 때까지"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"알림 일시중지 기능을 사용 중지할 때까지"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"방해 금지 모드를 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"알림 일시중지"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"방해 금지 모드"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
@@ -1875,10 +1875,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"전화 및 알림이 오면 진동이 사용됩니다."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"전화 및 알림 소리가 음소거됩니다."</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"시스템 변경사항"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"알림 일시중지"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"새로운 기능: 알림 일시중지 기능으로 알림 숨기기"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"방해 금지 모드"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"새로운 기능: 방해 금지 모드로 알림 숨기기"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"자세히 알아보고 변경하려면 탭하세요."</string>
-    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"알림 일시중지 변경"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"방해 금지 모드 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"시스템"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"설정"</string>

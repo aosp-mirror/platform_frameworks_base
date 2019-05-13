@@ -803,6 +803,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефон се загрејао"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Неке функције су ограничене док се телефон не охлади"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефон ће аутоматски покушати да се охлади. И даље ћете моћи да користите телефон, али ће спорије реаговати.\n\nКада се телефон охлади, нормално ће радити."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Искључите пуњач из напајања"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Дошло је до проблема са пуњењем овог уређаја. Искључите адаптер из напајања и будите пажљиви јер кабл може да буде топао."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Погледајте упозорења"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Лева пречица"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Десна пречица"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"И лева пречица откључава"</string>

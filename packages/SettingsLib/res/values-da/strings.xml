@@ -73,8 +73,8 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverførsel"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Inputenhed"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Internetadgang"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Deling af kontaktpersoner"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Brug til deling af kontaktpersoner"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Deling af kontakter"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Brug til deling af kontakter"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deling af internetforbindelse"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Sms-beskeder"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-adgang"</string>
@@ -102,7 +102,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Par"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ACCEPTÉR PARRING"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annuller"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Parring giver adgang til dine kontaktpersoner og din opkaldshistorik, når enhederne er forbundet."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Parring giver adgang til dine kontakter og din opkaldshistorik, når enhederne er forbundet."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Der kunne ikke parres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g> på grund af en forkert pinkode eller adgangsnøgle."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Der kan ikke kommunikeres med <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -252,7 +252,7 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Hold altid mobildata aktiveret, selv når Wi-Fi er aktiveret (for at skifte hurtigt mellem netværk)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Brug hardwareacceleration ved netdeling, hvis det er muligt"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vil du tillade USB-fejlretning?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden underretning og læse logdata."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden notifikation og læse logdata."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlfinding for alle computere, du tidligere har godkendt?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du tillade udviklingsindstillinger?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens apps går ned eller ikke fungerer korrekt."</string>
@@ -318,8 +318,8 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Grænse for baggrundsprocesser"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Vis ANR-fejl i baggrunden"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Vis dialogboksen \"Appen svarer ikke\" for baggrundsapps"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Vis advarsler om underretningskanal"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser en advarsel, når en app sender en underretning uden en gyldig kanal"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Vis advarsler om notifikationskanal"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser en advarsel, når en app sender en notifikation uden en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Gennemtving tilladelse til eksternt lager"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til at kunne tilpasses"</string>

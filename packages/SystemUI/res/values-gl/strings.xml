@@ -299,7 +299,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localización desactivada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimedia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Só chamadas de urxencia"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Só chamadas de emerxencia"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Configuración"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Hora"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Eu"</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"O teléfono está quentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"O uso dalgunhas funcións é limitado mentres o teléfono arrefría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"O teléfono tentará arrefriar automaticamente. Podes utilizalo, pero é probable que funcione máis lento.\n\nUnha vez que arrefríe, funcionará con normalidade."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desconecta o cargador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Produciuse un problema ao cargar este dispositivo. Desconecta o adaptador de corrente e ten coidado porque o cable pode estar quente."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ver pasos de mantemento"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Atallo á esquerda"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Atallo á dereita"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"O atallo á esquerda tamén desbloquea o dispositivo"</string>

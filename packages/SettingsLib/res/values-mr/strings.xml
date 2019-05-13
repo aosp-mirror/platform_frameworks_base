@@ -184,7 +184,7 @@
     <string name="category_work" msgid="8699184680584175622">"कार्य"</string>
     <string name="development_settings_title" msgid="215179176067683667">"डेव्हलपर पर्याय"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"डेव्हलपर पर्याय सुरू करा"</string>
-    <string name="development_settings_summary" msgid="1815795401632854041">"अॅप विकासासाठी पर्याय सेट करा"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"अ‍ॅप विकासासाठी पर्याय सेट करा"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"या वापरकर्त्यासाठी डेव्हलपर पर्याय उपलब्ध नाहीत"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"या वापरकर्त्यासाठी VPN सेटिंग्ज उपलब्ध नाहीत"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"या वापरकर्त्यासाठी टेदरिंग सेटिंग्ज उपलब्ध नाहीत"</string>
@@ -202,9 +202,9 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"बूटलोडर अनलॉक करण्यासाठी अनुमती द्या"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM अनलॉक करण्यास अनुमती द्यायची?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"चेतावणी: हे सेटिंग चालू असताना या डिव्हाइस वर डिव्हाइस संरक्षण वैशिष्ट्ये काम करणार नाहीत."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"बनावट स्थान अॅप निवडा"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"कोणताही बनावट स्थान अॅप सेट केला नाही"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"बनावट स्थान अॅप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"बनावट स्थान अ‍ॅप निवडा"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"कोणताही बनावट स्थान अ‍ॅप सेट केला नाही"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"बनावट स्थान अ‍ॅप: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"वायरलेस डिस्प्ले प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाय-फाय व्हर्बोझ लॉगिंग सुरू करा"</string>
@@ -261,11 +261,11 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"नावांशिवाय ब्‍लूटूथ डीव्‍हाइस (फक्‍त MAC पत्‍ते) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा आवाज किंवा नियंत्रणाचा अभाव यासारखी आवाजाची समस्या असल्यास ब्लूटूथ संपूर्ण आवाज वैशिष्ट्य बंद करते."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानिक टर्मिनल"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानिक शेल प्रवेश देणारा टर्मिनल अॅप सुरू करा"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानिक शेल प्रवेश देणारा टर्मिनल अ‍ॅप सुरू करा"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP तपासणी"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP तपासणी वर्तन सेट करा"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"डीबग करणे"</string>
-    <string name="debug_app" msgid="8349591734751384446">"डीबग अॅप निवडा"</string>
+    <string name="debug_app" msgid="8349591734751384446">"डीबग अ‍ॅप निवडा"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"कोणतेही डीबग अॅप्लिकेशन सेट नाही"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"अॅप्लिकेशन डीबग करत आहे: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"अॅप्लिकेशन निवडा"</string>
@@ -317,7 +317,7 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"वापरकर्त्याने प्रत्येक अॅक्टिव्हिटी सोडताच ती नष्ट करा"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"पार्श्वभूमी प्रक्रिया मर्यादा"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"बॅकग्राउंड ANR दाखवा"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"बॅकग्राउंड अॅप्ससाठी अॅप प्रतिसाद देत नाही दाखवते"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"बॅकग्राउंड अ‍ॅप्ससाठी अ‍ॅप प्रतिसाद देत नाही दाखवते"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"सूचना चॅनेल चेतावण्या दाखवा"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"एखादे अ‍ॅप वैध चॅनेलशिवाय सूचना पोस्ट करते तेव्हा स्क्रीनवर चेतावणी देते"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यवर अॅप्सना अनुमती देण्याची सक्ती करा"</string>
@@ -345,7 +345,7 @@
     <string name="inactive_apps_title" msgid="9042996804461901648">"स्टँडबाय अॅप्स"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"निष्क्रिय. टॉगल करण्यासाठी टॅप करा."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करण्यासाठी टॅप करा."</string>
-    <string name="standby_bucket_summary" msgid="6567835350910684727">"अॅप स्टँडबाय स्थिती: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"अ‍ॅप स्टँडबाय स्थिती: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चालू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"सध्या चालत असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबदृश्य अंमलबजावणी"</string>
@@ -426,7 +426,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम भाषा वापरा"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> साठी सेटिंग्ज उघडण्यात अयशस्वी"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"ही इनपुट पद्धत पासवर्ड आणि क्रेडिट कार्ड नंबर यासह, तुम्ही टाइप करता तो सर्व मजकूर संकलित करण्यात सक्षम होऊ शकते. ही <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> अॅपवरून येते. ही इनपुट पद्धत वापरायची?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करे पर्यंत हे अॅप सुरू होऊ शकत नाही"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"टीप: रीबूट केल्यानंतर, तुम्ही तुमचा फोन अनलॉक करे पर्यंत हे अ‍ॅप सुरू होऊ शकत नाही"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS नोंदणी स्थिती"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"नोंदवलेले"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"नोंदवलेले नाही"</string>

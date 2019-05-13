@@ -774,7 +774,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Lukk hurtiginnstillingene."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm er angitt."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Logget på som <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen Internett-tilkobling"</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Ingen internettilkobling"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Åpne informasjonen."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Åpne <xliff:g id="ID_1">%s</xliff:g>-innstillingene."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Endre rekkefølgen på innstillingene."</string>
@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonen begynner å bli varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Enkelte funksjoner er begrenset mens telefonen kjøles ned"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonen din kommer til å prøve å kjøle seg ned automatisk. Du kan fremdeles bruke telefonen, men den kjører muligens saktere.\n\nTelefonen kommer til å kjøre som normalt, når den har kjølt seg ned."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Koble fra laderen"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Det oppsto et problem med lading av enheten. Koble fra strømadapteren, og vær forsiktig siden kabelen kan være varm."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Se vedlikeholdstrinnene"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Venstre hurtigtast"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Høyre hurtigtast"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Venstre hurtigtast låser også opp"</string>

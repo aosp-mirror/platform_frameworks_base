@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"手機變熱"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"拔除充電器"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"為這個裝置充電時發生問題。這可能是因為傳輸線過熱所致，請拔除電源變壓器並採取處理措施。"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"查看處理步驟"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"向左快速鍵"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"向右快速鍵"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"向左快速鍵可一併解鎖裝置"</string>

@@ -798,6 +798,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Joto la simu linaongezeka"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Chomoa chaja"</string>
+    <string name="high_temp_alarm_notify_message" msgid="519359725058131592">"Kuna tatizo la kuchaji kifaa hiki. Chomoa adapta ya nishati na uwe mwangalifu, huenda kebo ni moto."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Angalia hatua za ulinzi"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Njia ya mkato ya kushoto"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Njia ya mkato ya kulia"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Njia ya mkato ya kushoto pia inafungua"</string>
