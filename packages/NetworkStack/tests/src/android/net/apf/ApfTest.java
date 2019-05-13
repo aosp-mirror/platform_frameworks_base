@@ -40,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NattKeepalivePacketDataParcelable;
 import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.apf.ApfFilter.ApfConfiguration;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
@@ -998,47 +999,54 @@ public class ApfTest {
         }
     }
 
-    private static final int ETH_HEADER_LEN = 14;
-    private static final int ETH_DEST_ADDR_OFFSET = 0;
-    private static final int ETH_ETHERTYPE_OFFSET = 12;
+    private static final int ETH_HEADER_LEN               = 14;
+    private static final int ETH_DEST_ADDR_OFFSET         = 0;
+    private static final int ETH_ETHERTYPE_OFFSET         = 12;
     private static final byte[] ETH_BROADCAST_MAC_ADDRESS =
             {(byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
 
-    private static final int IPV4_HEADER_LEN = 20;
-    private static final int IPV4_VERSION_IHL_OFFSET = ETH_HEADER_LEN + 0;
+    private static final int IPV4_HEADER_LEN          = 20;
+    private static final int IPV4_VERSION_IHL_OFFSET  = ETH_HEADER_LEN + 0;
     private static final int IPV4_TOTAL_LENGTH_OFFSET = ETH_HEADER_LEN + 2;
-    private static final int IPV4_PROTOCOL_OFFSET = ETH_HEADER_LEN + 9;
-    private static final int IPV4_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 12;
-    private static final int IPV4_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 16;
-    private static final int IPV4_TCP_HEADER_LEN = 20;
-    private static final int IPV4_TCP_HEADER_OFFSET = ETH_HEADER_LEN + IPV4_HEADER_LEN;
-    private static final int IPV4_TCP_SRC_PORT_OFFSET = IPV4_TCP_HEADER_OFFSET + 0;
-    private static final int IPV4_TCP_DEST_PORT_OFFSET = IPV4_TCP_HEADER_OFFSET + 2;
-    private static final int IPV4_TCP_SEQ_NUM_OFFSET = IPV4_TCP_HEADER_OFFSET + 4;
-    private static final int IPV4_TCP_ACK_NUM_OFFSET = IPV4_TCP_HEADER_OFFSET + 8;
+    private static final int IPV4_PROTOCOL_OFFSET     = ETH_HEADER_LEN + 9;
+    private static final int IPV4_SRC_ADDR_OFFSET     = ETH_HEADER_LEN + 12;
+    private static final int IPV4_DEST_ADDR_OFFSET    = ETH_HEADER_LEN + 16;
+
+    private static final int IPV4_TCP_HEADER_LEN           = 20;
+    private static final int IPV4_TCP_HEADER_OFFSET        = ETH_HEADER_LEN + IPV4_HEADER_LEN;
+    private static final int IPV4_TCP_SRC_PORT_OFFSET      = IPV4_TCP_HEADER_OFFSET + 0;
+    private static final int IPV4_TCP_DEST_PORT_OFFSET     = IPV4_TCP_HEADER_OFFSET + 2;
+    private static final int IPV4_TCP_SEQ_NUM_OFFSET       = IPV4_TCP_HEADER_OFFSET + 4;
+    private static final int IPV4_TCP_ACK_NUM_OFFSET       = IPV4_TCP_HEADER_OFFSET + 8;
     private static final int IPV4_TCP_HEADER_LENGTH_OFFSET = IPV4_TCP_HEADER_OFFSET + 12;
-    private static final int IPV4_TCP_HEADER_FLAG_OFFSET = IPV4_TCP_HEADER_OFFSET + 13;
+    private static final int IPV4_TCP_HEADER_FLAG_OFFSET   = IPV4_TCP_HEADER_OFFSET + 13;
+
+    private static final int IPV4_UDP_HEADER_OFFSET    = ETH_HEADER_LEN + IPV4_HEADER_LEN;;
+    private static final int IPV4_UDP_SRC_PORT_OFFSET  = IPV4_UDP_HEADER_OFFSET + 0;
+    private static final int IPV4_UDP_DEST_PORT_OFFSET = IPV4_UDP_HEADER_OFFSET + 2;
+    private static final int IPV4_UDP_LENGTH_OFFSET    = IPV4_UDP_HEADER_OFFSET + 4;
+    private static final int IPV4_UDP_PAYLOAD_OFFSET   = IPV4_UDP_HEADER_OFFSET + 8;
     private static final byte[] IPV4_BROADCAST_ADDRESS =
             {(byte) 255, (byte) 255, (byte) 255, (byte) 255};
 
-    private static final int IPV6_NEXT_HEADER_OFFSET = ETH_HEADER_LEN + 6;
-    private static final int IPV6_HEADER_LEN = 40;
-    private static final int IPV6_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 8;
-    private static final int IPV6_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 24;
-    private static final int IPV6_TCP_HEADER_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
-    private static final int IPV6_TCP_SRC_PORT_OFFSET = IPV6_TCP_HEADER_OFFSET + 0;
-    private static final int IPV6_TCP_DEST_PORT_OFFSET = IPV6_TCP_HEADER_OFFSET + 2;
-    private static final int IPV6_TCP_SEQ_NUM_OFFSET = IPV6_TCP_HEADER_OFFSET + 4;
-    private static final int IPV6_TCP_ACK_NUM_OFFSET = IPV6_TCP_HEADER_OFFSET + 8;
+    private static final int IPV6_HEADER_LEN             = 40;
+    private static final int IPV6_NEXT_HEADER_OFFSET     = ETH_HEADER_LEN + 6;
+    private static final int IPV6_SRC_ADDR_OFFSET        = ETH_HEADER_LEN + 8;
+    private static final int IPV6_DEST_ADDR_OFFSET       = ETH_HEADER_LEN + 24;
+    private static final int IPV6_TCP_HEADER_OFFSET      = ETH_HEADER_LEN + IPV6_HEADER_LEN;
+    private static final int IPV6_TCP_SRC_PORT_OFFSET    = IPV6_TCP_HEADER_OFFSET + 0;
+    private static final int IPV6_TCP_DEST_PORT_OFFSET   = IPV6_TCP_HEADER_OFFSET + 2;
+    private static final int IPV6_TCP_SEQ_NUM_OFFSET     = IPV6_TCP_HEADER_OFFSET + 4;
+    private static final int IPV6_TCP_ACK_NUM_OFFSET     = IPV6_TCP_HEADER_OFFSET + 8;
     // The IPv6 all nodes address ff02::1
-    private static final byte[] IPV6_ALL_NODES_ADDRESS =
+    private static final byte[] IPV6_ALL_NODES_ADDRESS   =
             { (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
     private static final byte[] IPV6_ALL_ROUTERS_ADDRESS =
             { (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2 };
 
-    private static final int ICMP6_TYPE_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
-    private static final int ICMP6_ROUTER_SOLICITATION = 133;
-    private static final int ICMP6_ROUTER_ADVERTISEMENT = 134;
+    private static final int ICMP6_TYPE_OFFSET           = ETH_HEADER_LEN + IPV6_HEADER_LEN;
+    private static final int ICMP6_ROUTER_SOLICITATION   = 133;
+    private static final int ICMP6_ROUTER_ADVERTISEMENT  = 134;
     private static final int ICMP6_NEIGHBOR_SOLICITATION = 135;
     private static final int ICMP6_NEIGHBOR_ANNOUNCEMENT = 136;
 
@@ -1050,9 +1058,9 @@ public class ApfTest {
     private static final int ICMP6_RA_OPTION_OFFSET =
             ETH_HEADER_LEN + IPV6_HEADER_LEN + ICMP6_RA_HEADER_LEN;
 
-    private static final int ICMP6_PREFIX_OPTION_TYPE = 3;
-    private static final int ICMP6_PREFIX_OPTION_LEN = 32;
-    private static final int ICMP6_PREFIX_OPTION_VALID_LIFETIME_OFFSET = 4;
+    private static final int ICMP6_PREFIX_OPTION_TYPE                      = 3;
+    private static final int ICMP6_PREFIX_OPTION_LEN                       = 32;
+    private static final int ICMP6_PREFIX_OPTION_VALID_LIFETIME_OFFSET     = 4;
     private static final int ICMP6_PREFIX_OPTION_PREFERRED_LIFETIME_OFFSET = 8;
 
     // From RFC6106: Recursive DNS Server option
@@ -1063,17 +1071,17 @@ public class ApfTest {
     // From RFC4191: Route Information option
     private static final int ICMP6_ROUTE_INFO_OPTION_TYPE = 24;
     // Above three options all have the same format:
-    private static final int ICMP6_4_BYTE_OPTION_LEN = 8;
+    private static final int ICMP6_4_BYTE_OPTION_LEN      = 8;
     private static final int ICMP6_4_BYTE_LIFETIME_OFFSET = 4;
-    private static final int ICMP6_4_BYTE_LIFETIME_LEN = 4;
+    private static final int ICMP6_4_BYTE_LIFETIME_LEN    = 4;
 
-    private static final int UDP_HEADER_LEN = 8;
+    private static final int UDP_HEADER_LEN              = 8;
     private static final int UDP_DESTINATION_PORT_OFFSET = ETH_HEADER_LEN + 22;
 
-    private static final int DHCP_CLIENT_PORT = 68;
+    private static final int DHCP_CLIENT_PORT       = 68;
     private static final int DHCP_CLIENT_MAC_OFFSET = ETH_HEADER_LEN + UDP_HEADER_LEN + 48;
 
-    private static final int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
+    private static final int ARP_HEADER_OFFSET          = ETH_HEADER_LEN;
     private static final byte[] ARP_IPV4_REQUEST_HEADER = {
             0, 1, // Hardware type: Ethernet (1)
             8, 0, // Protocol type: IP (0x0800)
@@ -1711,6 +1719,76 @@ public class ApfTest {
         packet.putShort(IPV6_TCP_DEST_PORT_OFFSET, (short) dport);
         packet.putInt(IPV6_TCP_SEQ_NUM_OFFSET, seq);
         packet.putInt(IPV6_TCP_ACK_NUM_OFFSET, ack);
+        return packet.array();
+    }
+
+    @Test
+    public void testApfFilterNattKeepalivePacket() throws Exception {
+        final MockIpClientCallback cb = new MockIpClientCallback();
+        final ApfConfiguration config = getDefaultConfig();
+        config.multicastFilter = DROP_MULTICAST;
+        config.ieee802_3Filter = DROP_802_3_FRAMES;
+        final TestApfFilter apfFilter = new TestApfFilter(mContext, config, cb, mLog);
+        byte[] program;
+        final int srcPort = 1024;
+        final int dstPort = 4500;
+        final int slot1 = 1;
+        // NAT-T keepalive
+        final byte[] payload = {(byte) 0xff};
+
+        // src: 10.0.0.5, port: 1024
+        // dst: 10.0.0.6, port: 4500
+        InetAddress srcAddr = InetAddress.getByAddress(IPV4_KEEPALIVE_SRC_ADDR);
+        InetAddress dstAddr = InetAddress.getByAddress(IPV4_KEEPALIVE_DST_ADDR);
+
+        final NattKeepalivePacketDataParcelable parcel = new NattKeepalivePacketDataParcelable();
+        parcel.srcAddress = srcAddr.getAddress();
+        parcel.srcPort = srcPort;
+        parcel.dstAddress = dstAddr.getAddress();
+        parcel.dstPort = dstPort;
+
+        apfFilter.addNattKeepalivePacketFilter(slot1, parcel);
+        program = cb.getApfProgram();
+
+        // Verify IPv4 keepalive packet is dropped
+        // src: 10.0.0.6, port: 4500
+        // dst: 10.0.0.5, port: 1024
+        final byte[] nattKaPkt = ipv4UdpPacket(IPV4_KEEPALIVE_DST_ADDR,
+                    IPV4_KEEPALIVE_SRC_ADDR, dstPort, srcPort, 1 /* dataLength */);
+        System.arraycopy(payload, 0, nattKaPkt, IPV4_UDP_PAYLOAD_OFFSET, payload.length);
+        assertDrop(program, nattKaPkt);
+        // Verify IPv4 non-keepalive packet from the same source address is passed
+        assertPass(program,
+                ipv4UdpPacket(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, 10 /* dataLength */));
+        // Verify IPv4 non-keepalive packet from other source address is passed
+        assertPass(program,
+                ipv4UdpPacket(IPV4_ANOTHER_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
+                        dstPort, srcPort, 10 /* dataLength */));
+
+        apfFilter.removeKeepalivePacketFilter(slot1);
+        apfFilter.shutdown();
+    }
+
+    private static byte[] ipv4UdpPacket(byte[] sip, byte[] dip, int sport,
+            int dport, int dataLength) {
+        final int totalLength = dataLength + IPV4_HEADER_LEN + UDP_HEADER_LEN;
+        final int udpLength = UDP_HEADER_LEN + dataLength;
+        ByteBuffer packet = ByteBuffer.wrap(new byte[totalLength + ETH_HEADER_LEN]);
+
+        // ether type
+        packet.putShort(ETH_ETHERTYPE_OFFSET, (short) ETH_P_IP);
+
+        // IPv4 header
+        packet.put(IPV4_VERSION_IHL_OFFSET, (byte) 0x45);
+        packet.putShort(IPV4_TOTAL_LENGTH_OFFSET, (short) totalLength);
+        packet.put(IPV4_PROTOCOL_OFFSET, (byte) IPPROTO_UDP);
+        put(packet, IPV4_SRC_ADDR_OFFSET, sip);
+        put(packet, IPV4_DEST_ADDR_OFFSET, dip);
+        packet.putShort(IPV4_UDP_SRC_PORT_OFFSET, (short) sport);
+        packet.putShort(IPV4_UDP_DEST_PORT_OFFSET, (short) dport);
+        packet.putShort(IPV4_UDP_LENGTH_OFFSET, (short) udpLength);
+
         return packet.array();
     }
 
