@@ -192,7 +192,206 @@ def generate_group_run_combinations(run_combinations: Iterable[NamedTuple], dst_
     (group_key_value, args_it) = args_list_it
     yield (group_key_value, args_it)
 
-def parse_run_script_csv_file(csv_file: TextIO) -> List[int]:
+class DataFrame:
+  """Table-like class for storing a 2D cells table with named columns."""
+  def __init__(self, data: Dict[str, List[object]] = {}):
+    """
+    Create a new DataFrame from a dictionary (keys = headers,
+    values = columns).
+    """
+    self._headers = [i for i in data.keys()]
+    self._rows = []
+
+    row_num = 0
+
+    def get_data_row(idx):
+      r = {}
+      for header, header_data in data.items():
+
+        if not len(header_data) > idx:
+          continue
+
+        r[header] = header_data[idx]
+
+      return r
+
+    while True:
+      row_dict = get_data_row(row_num)
+      if len(row_dict) == 0:
+        break
+
+      self._append_row(row_dict.keys(), row_dict.values())
+      row_num = row_num + 1
+
+  def concat_rows(self, other: 'DataFrame') -> None:
+    """
+    In-place concatenate rows of other into the rows of the
+    current DataFrame.
+
+    None is added in pre-existing cells if new headers
+    are introduced.
+    """
+    other_datas = other._data_only()
+
+    other_headers = other.headers
+
+    for d in other_datas:
+      self._append_row(other_headers, d)
+
+  def _append_row(self, headers: List[str], data: List[object]):
+    new_row = {k:v for k,v in zip(headers, data)}
+    self._rows.append(new_row)
+
+    for header in headers:
+      if not header in self._headers:
+        self._headers.append(header)
+
+  def __repr__(self):
+#     return repr(self._rows)
+    repr = ""
+
+    header_list = self._headers_only()
+
+    row_format = u""
+    for header in header_list:
+      row_format = row_format + u"{:>%d}" %(len(header) + 1)
+
+    repr = row_format.format(*header_list) + "\n"
+
+    for v in self._data_only():
+      repr = repr + row_format.format(*v) + "\n"
+
+    return repr
+
+  def __eq__(self, other):
+    if isinstance(other, self.__class__):
+      return self.headers == other.headers and self.data_table == other.data_table
+    else:
+      print("wrong instance", other.__class__)
+      return False
+
+  @property
+  def headers(self) -> List[str]:
+    return [i for i in self._headers_only()]
+
+  @property
+  def data_table(self) -> List[List[object]]:
+    return list(self._data_only())
+
+  @property
+  def data_table_transposed(self) -> List[List[object]]:
+    return list(self._transposed_data())
+
+  @property
+  def data_row_len(self) -> int:
+    return len(self._rows)
+
+  def data_row_at(self, idx) -> List[object]:
+    """
+    Return a single data row at the specified index (0th based).
+
+    Accepts negative indices, e.g. -1 is last row.
+    """
+    row_dict = self._rows[idx]
+    l = []
+
+    for h in self._headers_only():
+      l.append(row_dict.get(h)) # Adds None in blank spots.
+
+    return l
+
+  def copy(self) -> 'DataFrame':
+    """
+    Shallow copy of this DataFrame.
+    """
+    return self.repeat(count=0)
+
+  def repeat(self, count: int) -> 'DataFrame':
+    """
+    Returns a new DataFrame where each row of this dataframe is repeated count times.
+    A repeat of a row is adjacent to other repeats of that same row.
+    """
+    df = DataFrame()
+    df._headers = self._headers.copy()
+
+    rows = []
+    for row in self._rows:
+      for i in range(count):
+        rows.append(row.copy())
+
+    df._rows = rows
+
+    return df
+
+  def merge_data_columns(self, other: 'DataFrame'):
+    """
+    Merge self and another DataFrame by adding the data from other column-wise.
+    For any headers that are the same, data from 'other' is preferred.
+    """
+    for h in other._headers:
+      if not h in self._headers:
+        self._headers.append(h)
+
+    append_rows = []
+
+    for self_dict, other_dict in itertools.zip_longest(self._rows, other._rows):
+      if not self_dict:
+        d = {}
+        append_rows.append(d)
+      else:
+        d = self_dict
+
+      d_other = other_dict
+      if d_other:
+        for k,v in d_other.items():
+          d[k] = v
+
+    for r in append_rows:
+      self._rows.append(r)
+
+  def data_row_reduce(self, fnc) -> 'DataFrame':
+    """
+    Reduces the data row-wise by applying the fnc to each row (column-wise).
+    Empty cells are skipped.
+
+    fnc(Iterable[object]) -> object
+    fnc is applied over every non-empty cell in that column (descending row-wise).
+
+    Example:
+      DataFrame({'a':[1,2,3]}).data_row_reduce(sum) == DataFrame({'a':[6]})
+
+    Returns a new single-row DataFrame.
+    """
+    df = DataFrame()
+    df._headers = self._headers.copy()
+
+    def yield_by_column(header_key):
+      for row_dict in self._rows:
+        val = row_dict.get(header_key)
+        if val:
+          yield val
+
+    new_row_dict = {}
+    for h in df._headers:
+      cell_value = fnc(yield_by_column(h))
+      new_row_dict[h] = cell_value
+
+    df._rows = [new_row_dict]
+    return df
+
+  def _headers_only(self):
+    return self._headers
+
+  def _data_only(self):
+    row_len = len(self._rows)
+
+    for i in range(row_len):
+      yield self.data_row_at(i)
+
+  def _transposed_data(self):
+    return zip(*self._data_only())
+
+def parse_run_script_csv_file_flat(csv_file: TextIO) -> List[int]:
   """Parse a CSV file full of integers into a flat int list."""
   csv_reader = csv.reader(csv_file)
   arr = []
@@ -201,6 +400,38 @@ def parse_run_script_csv_file(csv_file: TextIO) -> List[int]:
       if i:
         arr.append(int(i))
   return arr
+
+def parse_run_script_csv_file(csv_file: TextIO) -> DataFrame:
+  """Parse a CSV file full of integers into a DataFrame."""
+  csv_reader = csv.reader(csv_file)
+
+  try:
+    header_list = next(csv_reader)
+  except StopIteration:
+    header_list = []
+
+  if not header_list:
+    return None
+
+  headers = [i for i in header_list]
+
+  d = {}
+  for row in csv_reader:
+    header_idx = 0
+
+    for i in row:
+      v = i
+      if i:
+        v = int(i)
+
+      header_key = headers[header_idx]
+      l = d.get(header_key, [])
+      l.append(v)
+      d[header_key] = l
+
+      header_idx = header_idx + 1
+
+  return DataFrame(d)
 
 def make_script_command_with_temp_output(script: str, args: List[str], **kwargs)\
     -> Tuple[str, TextIO]:
@@ -338,27 +569,49 @@ def execute_run_combos(grouped_run_combos: Iterable[Tuple[CollectorPackageInfo, 
         cmd, tmp_output_file = make_script_command_with_temp_output(_RUN_SCRIPT, args, count=loop_count, input=collector_tmp_output_file.name)
         with tmp_output_file:
           (passed, script_output) = execute_arbitrary_command(cmd, simulate, timeout)
-          parsed_output = simulate and [1,2,3] or parse_run_script_csv_file(tmp_output_file)
+          parsed_output = simulate and DataFrame({'fake_ms':[1,2,3]}) or parse_run_script_csv_file(tmp_output_file)
           yield (passed, script_output, parsed_output)
 
-def gather_results(commands: Iterable[Tuple[bool, str, List[int]]], key_list: List[str], value_list: List[Tuple[str, ...]]):
+def gather_results(commands: Iterable[Tuple[bool, str, DataFrame]], key_list: List[str], value_list: List[Tuple[str, ...]]):
   _debug_print("gather_results: key_list = ", key_list)
-  yield key_list + ["time(ms)"]
+#  yield key_list + ["time(ms)"]
 
   stringify_none = lambda s: s is None and "<none>" or s
 
   for ((passed, script_output, run_result_list), values) in itertools.zip_longest(commands, value_list):
+    _debug_print("run_result_list = ", run_result_list)
+    _debug_print("values = ", values)
     if not passed:
       continue
-    for result in run_result_list:
-      yield [stringify_none(i) for i in values] + [result]
 
-    yield ["; avg(%s), min(%s), max(%s), count(%s)" %(sum(run_result_list, 0.0) / len(run_result_list), min(run_result_list), max(run_result_list), len(run_result_list)) ]
+    # RunCommandArgs(package='com.whatever', readahead='warm', compiler_filter=None)
+    # -> {'package':['com.whatever'], 'readahead':['warm'], 'compiler_filter':[None]}
+    values_dict = {k:[v] for k,v in values._asdict().items()}
+
+    values_df = DataFrame(values_dict)
+    # project 'values_df' to be same number of rows as run_result_list.
+    values_df = values_df.repeat(run_result_list.data_row_len)
+
+    # the results are added as right-hand-side columns onto the existing labels for the table.
+    values_df.merge_data_columns(run_result_list)
+
+    yield values_df
 
 def eval_and_save_to_csv(output, annotated_result_values):
+
+  printed_header = False
+
   csv_writer = csv.writer(output)
   for row in annotated_result_values:
-    csv_writer.writerow(row)
+    if not printed_header:
+      headers = row.headers
+      csv_writer.writerow(headers)
+      printed_header = True
+      # TODO: what about when headers change?
+
+    for data_row in row.data_table:
+      csv_writer.writerow(data_row)
+
     output.flush() # see the output live.
 
 def main():

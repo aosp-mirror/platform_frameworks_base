@@ -83,17 +83,7 @@ logcat_save_timestamp() {
 #
 # First use 'logcat_save_timestamp'
 # Then do whatever action you want.
-# Then us 'logcat_from_timestamp $timestamp'
-logcat_from_timestamp() {
-  local timestamp="$1"
-  shift # drop timestamp from args.
-  echo "DONT CALL THIS FUNCTION" >&2
-  exit 1
-
-  verbose_print adb logcat -T \"$timestamp\" \"$@\"
-  adb logcat -T "$timestamp" "$@"
-}
-
+# Then use 'logcat_from_timestamp_bg $timestamp'
 logcat_from_timestamp_bg() {
   local timestamp="$1"
   shift # drop timestamp from args.
@@ -104,9 +94,10 @@ logcat_from_timestamp_bg() {
 
 # Starting at timestamp $2, wait until we seen pattern $3
 # or until a timeout happens in $1 seconds.
+# If successful, also echo the line that matched the pattern.
 #
 # Set VERBOSE_LOGCAT=1 to debug every line of logcat it tries to parse.
-logcat_wait_for_pattern() {
+logcat_select_pattern() {
   local timeout="$1"
   local timestamp="$2"
   local pattern="$3"
@@ -143,6 +134,7 @@ logcat_wait_for_pattern() {
     if [[ "$logcat_output:" == *"$pattern"* ]]; then
       verbose_print "LOGCAT: " "$logcat_output"
       verbose_print "WE DID SEE PATTERN" '<<' "$pattern" '>>.'
+      echo "$logcat_output"
       return_code=0
       break
     fi
@@ -161,4 +153,46 @@ logcat_wait_for_pattern() {
   verbose_print "[LOGCAT] $logcat_pid should be killed"
 
   return $return_code
+}
+
+# Starting at timestamp $2, wait until we seen pattern $3
+# or until a timeout happens in $1 seconds.
+#
+# Set VERBOSE_LOGCAT=1 to debug every line of logcat it tries to parse.
+logcat_wait_for_pattern() {
+  logcat_select_pattern "$@" > /dev/null
+}
+
+# Starting at timestamp $2, wait until we seen pattern $3
+# or until a timeout happens in $1 seconds.
+# If successful, extract with the regular expression pattern in #4
+# and return the first capture group.
+#
+# Set VERBOSE_LOGCAT=1 to debug every line of logcat it tries to parse.
+logcat_extract_pattern() {
+  local timeout="$1"
+  local timestamp="$2"
+  local pattern="$3"
+  local re_pattern="$4"
+
+  local result
+  local exit_code
+
+  result="$(logcat_select_pattern "$@")"
+  exit_code=$?
+
+  if [[ $exit_code -ne 0 ]]; then
+    return $exit_code
+  fi
+
+  echo "$result" | sed 's/'"$re_pattern"'/\1/g'
+}
+
+# Join array
+#   FOO=(a b c)
+#   join_by , "${FOO[@]}" #a,b,c
+join_by() {
+  local IFS="$1"
+  shift
+  echo "$*"
 }
