@@ -176,7 +176,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         out.writeInt(filteredRas);
         out.writeInt(currentRas);
         out.writeInt(programLength);
-        out.writeInt(flags);
+        out.writeInt(this.flags);
     }
 
     /** @hide */
@@ -190,6 +190,18 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
         String lifetimeString = (lifetime < Long.MAX_VALUE) ? lifetime + "s" : "forever";
         return String.format("ApfProgramEvent(%d/%d RAs %dB %ds/%s %s)", filteredRas, currentRas,
                 programLength, actualLifetime, lifetimeString, namesOf(flags));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(ApfProgramEvent.class))) return false;
+        final ApfProgramEvent other = (ApfProgramEvent) obj;
+        return lifetime == other.lifetime
+                && actualLifetime == other.actualLifetime
+                && filteredRas == other.filteredRas
+                && currentRas == other.currentRas
+                && programLength == other.programLength
+                && flags == other.flags;
     }
 
     /** @hide */

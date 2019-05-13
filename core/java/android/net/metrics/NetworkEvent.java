@@ -121,6 +121,14 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
                 Decoder.constants.get(eventType), durationMs);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(NetworkEvent.class))) return false;
+        final NetworkEvent other = (NetworkEvent) obj;
+        return eventType == other.eventType
+                && durationMs == other.durationMs;
+    }
+
     final static class Decoder {
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
                 new Class[]{NetworkEvent.class}, new String[]{"NETWORK_"});
