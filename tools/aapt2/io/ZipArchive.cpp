@@ -114,7 +114,7 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
   }
 
   void* cookie = nullptr;
-  result = StartIteration(collection->handle_, &cookie, nullptr, nullptr);
+  result = StartIteration(collection->handle_, &cookie);
   if (result != 0) {
     if (out_error) *out_error = ErrorCodeString(result);
     return {};
