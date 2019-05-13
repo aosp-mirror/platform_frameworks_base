@@ -23,6 +23,8 @@ import android.util.SparseArray;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.List;
 import java.util.function.Predicate;
@@ -227,4 +229,13 @@ public class NetworkStackUtils {
 
     private static native void addArpEntry(byte[] ethAddr, byte[] netAddr, String ifname,
             FileDescriptor fd) throws IOException;
+
+    /**
+     * Return IP address and port in a string format.
+     */
+    public static String addressAndPortToString(InetAddress address, int port) {
+        return String.format(
+                (address instanceof Inet6Address) ? "[%s]:%d" : "%s:%d",
+                        address.getHostAddress(), port);
+    }
 }
