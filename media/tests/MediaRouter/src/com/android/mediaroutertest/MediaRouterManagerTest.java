@@ -18,8 +18,6 @@ package com.android.mediaroutertest;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -100,8 +98,8 @@ public class MediaRouterManagerTest {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
         mManager.addCallback(mExecutor, mockCallback);
 
-        verify(mockCallback, after(AWAIT_MS).never()).onControlCategoriesChanged(eq(uid),
-                any(List.class));
+        verify(mockCallback, after(AWAIT_MS).never()).onControlCategoriesChanged(uid,
+                TEST_CONTROL_CATEGORIES);
 
         mRouter.setControlCategories(TEST_CONTROL_CATEGORIES);
         verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
