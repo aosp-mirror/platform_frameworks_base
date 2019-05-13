@@ -349,7 +349,7 @@
     <style name="AutoSizingList">
         <item name="enableAutoSizing">true</item>
     </style>
-    <style name="Theme.MediaProjectionAlertDialog" parent="android:Theme.DeviceDefault">
+    <style name="Theme.SystemUI.MediaProjectionAlertDialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
