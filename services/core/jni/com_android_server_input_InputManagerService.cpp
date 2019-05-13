@@ -59,6 +59,7 @@
 #include <android_view_PointerIcon.h>
 #include <android/graphics/GraphicsJNI.h>
 
+#include <nativehelper/ScopedLocalFrame.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
@@ -723,6 +724,7 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     ATRACE_CALL();
 
     JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
 
     jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
@@ -735,8 +737,6 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     } else {
         assert(newTimeout >= 0);
     }
-
-    env->DeleteLocalRef(reasonObj);
     return newTimeout;
 }
 
@@ -747,6 +747,7 @@ void NativeInputManager::notifyInputChannelBroken(const sp<IBinder>& token) {
     ATRACE_CALL();
 
     JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
 
     jobject tokenObj = javaObjectForIBinder(env, token);
     if (tokenObj) {
@@ -764,6 +765,7 @@ void NativeInputManager::notifyFocusChanged(const sp<IBinder>& oldToken,
     ATRACE_CALL();
 
     JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
 
     jobject oldTokenObj = javaObjectForIBinder(env, oldToken);
     jobject newTokenObj = javaObjectForIBinder(env, newToken);
@@ -1139,6 +1141,7 @@ nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
     nsecs_t result = 0;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
+        ScopedLocalFrame localFrame(env);
 
         // Token may be null
         jobject tokenObj = javaObjectForIBinder(env, token);
@@ -1173,6 +1176,7 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
     bool result = false;
     if (policyFlags & POLICY_FLAG_TRUSTED) {
         JNIEnv* env = jniEnv();
+        ScopedLocalFrame localFrame(env);
 
         // Note: tokenObj may be null.
         jobject tokenObj = javaObjectForIBinder(env, token);
@@ -1224,6 +1228,7 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
 void NativeInputManager::onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
 
     jobject touchedTokenObj = javaObjectForIBinder(env, touchedToken);
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.onPointerDownOutsideFocus, touchedTokenObj);
