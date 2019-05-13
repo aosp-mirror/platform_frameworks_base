@@ -7446,6 +7446,19 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerService.this.shouldShowIme(displayId);
             }
         }
+
+        @Override
+        public void addNonHighRefreshRatePackage(@NonNull String packageName) {
+            // TODO
+            Slog.i(TAG, "addNonHighRefreshRatePackage: " + packageName);
+        }
+
+        @Override
+        public void removeNonHighRefreshRatePackage(@NonNull String packageName) {
+            // TODO
+            Slog.i(TAG, "removeNonHighRefreshRatePackage: " + packageName);
+        }
+
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
