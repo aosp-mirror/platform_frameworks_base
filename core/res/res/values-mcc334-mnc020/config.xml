@@ -18,4 +18,12 @@
 -->
 <resources>
     <bool name="config_use_sim_language_file">false</bool>
+
+    <bool name="config_pdp_retry_for_29_33_55_enabled">true</bool>
+    <integer name="data_retry_delay">45000</integer>
+    <integer name="data_retry_idle_delay">7200000</integer>
+    <string name="data_conn_status_title"></string>
+    <string name="user_authentication_failed">AUTHENTICATION FAILURE -29-.</string>
+    <string name="service_not_subscribed">NOT SUBSCRIBED TO SERVICE -33-.</string>
+    <string name="multi_conn_to_same_pdn_not_allowed">Multiple PDN connections for a given APN not allowed -55-.</string>
 </resources>

@@ -4152,4 +4152,16 @@
 
     <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
     <integer name="config_maxShortcutTargetsPerApp">3</integer>
+
+    <!-- pdp data retry for cause 29, 33 and 55-->
+    <bool name="config_pdp_retry_for_29_33_55_enabled">false</bool>
+    <!--pdp data reject retry delay can be configured here -->
+    <integer name="data_retry_delay">-1</integer>
+    <!-- pdp data reject idle timeout delay-->
+    <integer name="data_retry_idle_delay">-1</integer>
+    <!-- pdp data reject dialog string for cause 29, 33 and 55-->
+    <string name="data_conn_status_title"></string>
+    <string name="user_authentication_failed"></string>
+    <string name="service_not_subscribed"></string>
+    <string name="multi_conn_to_same_pdn_not_allowed"></string>
 </resources>

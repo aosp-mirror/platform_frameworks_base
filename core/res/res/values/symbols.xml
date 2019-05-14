@@ -3818,4 +3818,13 @@
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
 
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_retry_for_29_33_55_enabled" />
+  <java-symbol type="integer" name="data_retry_delay" />
+  <java-symbol type="integer" name="data_retry_idle_delay" />
+  <java-symbol type="string" name="data_conn_status_title" />
+  <java-symbol type="string" name="user_authentication_failed" />
+  <java-symbol type="string" name="service_not_subscribed" />
+  <java-symbol type="string" name="multi_conn_to_same_pdn_not_allowed" />
+
 </resources>
