@@ -261,6 +261,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         longClickCaptor.getValue().onLongClick(mLockIcon);
         verify(mLockPatternUtils).requireCredentialEntry(anyInt());
+        verify(mKeyguardUpdateMonitor).onLockIconPressed();
     }
 
     @Test
