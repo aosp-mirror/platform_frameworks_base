@@ -89,6 +89,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private float mDozeAmount;
     private int mIconRes;
     private boolean mWasPulsingOnThisFrame;
+    private boolean mWakeAndUnlockRunning;
 
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
     private final DockManager.DockEventListener mDockEventListener =
@@ -277,7 +278,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             mLastBouncerVisible = mBouncerVisible;
         }
 
-        boolean invisible = mDozing && (!mPulsing || mDocked);
+        boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
+        boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning;
         setVisibility(invisible ? INVISIBLE : VISIBLE);
         updateClickability();
     }
@@ -448,6 +450,25 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     @Override
     public void onUnlockMethodStateChanged() {
+        update();
+    }
+
+    /**
+     * We need to hide the lock whenever there's a fingerprint unlock, otherwise you'll see the
+     * icon on top of the black front scrim.
+     */
+    public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
+        if (wakeAndUnlock) {
+            mWakeAndUnlockRunning = true;
+        }
+        update();
+    }
+
+    /**
+     * Triggered after the unlock animation is over and the user is looking at launcher.
+     */
+    public void onKeyguardFadedAway() {
+        mWakeAndUnlockRunning = false;
         update();
     }
 }

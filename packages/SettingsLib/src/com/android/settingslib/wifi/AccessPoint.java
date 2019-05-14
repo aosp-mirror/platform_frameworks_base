@@ -1240,7 +1240,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 // Special handling for PSK-SAE transition mode. If the AP has advertised both,
                 // we compare the key with both PSK and SAE for a match.
                 return TextUtils.equals(mKey.substring(0, mKey.lastIndexOf(',')),
-                        compareTo.substring(0, mKey.lastIndexOf(',')));
+                        compareTo.substring(0, compareTo.lastIndexOf(',')));
             }
         }
         return mKey.equals(compareTo);
