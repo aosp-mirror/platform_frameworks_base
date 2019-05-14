@@ -123,7 +123,6 @@ import android.provider.Settings;
 import android.renderscript.RenderScriptCacheDir;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
-import android.service.voice.VoiceInteractionSession;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -3555,11 +3554,13 @@ public final class ActivityThread extends ClientTransactionHandler {
             @NonNull RemoteCallback callback) {
         final ActivityClientRecord r = mActivities.get(activityToken);
         if (r == null) {
+            Log.w(TAG, "requestDirectActions(): no activity for " + activityToken);
             callback.sendResult(null);
             return;
         }
         final int lifecycleState = r.getLifecycleState();
         if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
+            Log.w(TAG, "requestDirectActions(" + r + "): wrong lifecycle: " + lifecycleState);
             callback.sendResult(null);
             return;
         }
