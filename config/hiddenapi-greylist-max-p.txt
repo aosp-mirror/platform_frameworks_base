@@ -71,5 +71,5 @@ Lcom/android/internal/telephony/IPhoneSubInfo$Stub;-><init>()V
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCallForwardingChanged(Z)V
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCellLocation(Landroid/os/Bundle;)V
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyDataActivity(I)V
-Lcom/android/internal/telephony/ITelephonyRegistry;->notifyOtaspChanged(I)V
+Lcom/android/internal/telephony/ITelephonyRegistry;->notifyOtaspChanged(II)V
 Lcom/android/internal/view/BaseIWindow;-><init>()V
