@@ -1608,23 +1608,31 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
+        final boolean switchingUsers;
+        synchronized (this) {
+            switchingUsers = mSwitchingUser;
+        }
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
-                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
+                && !switchingUsers && !isFingerprintDisabled(getCurrentUser())
                 && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser;
         return shouldListen;
     }
 
     private boolean shouldListenForFace() {
+        final boolean switchingUsers;
+        synchronized (this) {
+            switchingUsers = mSwitchingUser;
+        }
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
-                && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
+                && !switchingUsers && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser
                 && mUserManager.isUserUnlocked(user) && mIsPrimaryUser;
     }
@@ -2180,13 +2188,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         sendUpdates(callback);
     }
 
-    public boolean isSwitchingUser() {
-        return mSwitchingUser;
-    }
-
     @AnyThread
     public void setSwitchingUser(boolean switching) {
-        mSwitchingUser = switching;
+        synchronized (this) {
+            mSwitchingUser = switching;
+        }
         // Since this comes in on a binder thread, we need to post if first
         mHandler.post(mUpdateBiometricListeningState);
     }
