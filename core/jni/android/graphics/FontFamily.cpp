@@ -74,7 +74,7 @@ static jlong FontFamily_initBuilder(JNIEnv* env, jobject clazz, jstring langs, j
     return toJLong(builder);
 }
 
-static jlong FontFamily_create(jlong builderPtr) {
+static jlong FontFamily_create(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr) {
     if (builderPtr == 0) {
         return 0;
     }
@@ -95,7 +95,7 @@ static void releaseBuilder(jlong builderPtr) {
     delete toNativeBuilder(builderPtr);
 }
 
-static jlong FontFamily_getBuilderReleaseFunc() {
+static jlong FontFamily_getBuilderReleaseFunc(CRITICAL_JNI_PARAMS) {
     return toJLong(&releaseBuilder);
 }
 
@@ -103,7 +103,7 @@ static void releaseFamily(jlong familyPtr) {
     delete toFamily(familyPtr);
 }
 
-static jlong FontFamily_getFamilyReleaseFunc() {
+static jlong FontFamily_getFamilyReleaseFunc(CRITICAL_JNI_PARAMS) {
     return toJLong(&releaseFamily);
 }
 
@@ -219,6 +219,7 @@ static void releaseAsset(const void* ptr, void* context) {
 static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong builderPtr,
         jobject jassetMgr, jstring jpath, jint cookie, jboolean isAsset, jint ttcIndex,
         jint weight, jint isItalic) {
+#ifdef __ANDROID__ // Layoutlib does not support native AssetManager
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
     NPE_CHECK_RETURN_ZERO(env, jpath);
 
@@ -263,9 +264,12 @@ static jboolean FontFamily_addFontFromAssetManager(JNIEnv* env, jobject, jlong b
     sk_sp<SkData> data(SkData::MakeWithProc(buf, asset->getLength(), releaseAsset,
             asset.release()));
     return addSkTypeface(builder, std::move(data), ttcIndex, weight, isItalic);
+#else
+    return false;
+#endif
 }
 
-static void FontFamily_addAxisValue(jlong builderPtr, jint tag, jfloat value) {
+static void FontFamily_addAxisValue(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jint tag, jfloat value) {
     NativeFamilyBuilder* builder = toNativeBuilder(builderPtr);
     builder->axes.push_back({static_cast<minikin::AxisTag>(tag), value});
 }

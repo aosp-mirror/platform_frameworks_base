@@ -398,3 +398,59 @@ phony {
         "hwuimacro",
     ]
 }
+
+cc_library_host_shared {
+    name: "libhwui-host",
+
+    defaults: [
+        "skia_deps",
+    ],
+    whole_static_libs: ["libskia"],
+
+    srcs: [
+        "hwui/AnimatedImageDrawable.cpp",
+        "hwui/AnimatedImageThread.cpp",
+        "hwui/Bitmap.cpp",
+        "hwui/Canvas.cpp",
+        "hwui/Typeface.cpp",
+        "hwui/MinikinSkia.cpp",
+        "hwui/MinikinUtils.cpp",
+        "hwui/PaintImpl.cpp",
+        "utils/Blur.cpp",
+        "utils/LinearAllocator.cpp",
+        "utils/VectorDrawableUtils.cpp",
+        "Animator.cpp",
+        "Interpolator.cpp",
+        "Matrix.cpp",
+        "PathParser.cpp",
+        "Properties.cpp",
+        "PropertyValuesAnimatorSet.cpp",
+        "PropertyValuesHolder.cpp",
+        "SkiaCanvas.cpp",
+        "VectorDrawable.cpp",
+    ],
+    include_dirs: [
+        "external/skia/include/private",
+        "external/skia/src/core",
+        "external/vulkan-headers/include",
+        "system/core/base/include",
+    ],
+    cpp_std: "experimental",
+    cflags: [
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+    ],
+    shared_libs: [
+        "libbase",
+        "libharfbuzz_ng",
+        "libminikin",
+    ],
+    static_libs: [
+        "libandroidfw",
+        "libutils",
+    ],
+    export_include_dirs: ["."],
+    export_static_lib_headers: [
+        "libarect",
+    ],
+}

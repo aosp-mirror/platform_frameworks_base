@@ -17,7 +17,9 @@
 #ifndef CACHEMANAGER_H
 #define CACHEMANAGER_H
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include <GrContext.h>
+#endif
 #include <SkSurface.h>
 #include <ui/DisplayInfo.h>
 #include <utils/String8.h>
@@ -42,7 +44,9 @@ class CacheManager {
 public:
     enum class TrimMemoryMode { Complete, UiHidden };
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void configureContext(GrContextOptions* context, const void* identity, ssize_t size);
+#endif
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
@@ -57,11 +61,15 @@ private:
 
     explicit CacheManager(const DisplayInfo& display);
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     void reset(sk_sp<GrContext> grContext);
+#endif
     void destroy();
 
     const size_t mMaxSurfaceArea;
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     sk_sp<GrContext> mGrContext;
+#endif
 
     int mMaxResources = 0;
     const size_t mMaxResourceBytes;

@@ -30,7 +30,11 @@
 namespace android {
 
 Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::RenderNode* renderNode) {
+#ifdef __ANDROID__ // Layoutlib does not support recording canvas
     return new uirenderer::skiapipeline::SkiaRecordingCanvas(renderNode, width, height);
+#else
+    return NULL;
+#endif
 }
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,

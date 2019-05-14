@@ -18,7 +18,11 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
+#ifdef __ANDROID_
 #include <android/api-level.h>
+#else
+#define __ANDROID_API_P__ 28
+#endif
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
@@ -72,46 +76,46 @@ static void setBitmap(JNIEnv* env, jobject, jlong canvasHandle, jlong bitmapHand
     get_canvas(canvasHandle)->setBitmap(bitmap);
 }
 
-static jboolean isOpaque(jlong canvasHandle) {
+static jboolean isOpaque(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     return get_canvas(canvasHandle)->isOpaque() ? JNI_TRUE : JNI_FALSE;
 }
 
-static jint getWidth(jlong canvasHandle) {
+static jint getWidth(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->width());
 }
 
-static jint getHeight(jlong canvasHandle) {
+static jint getHeight(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->height());
 }
 
-static jint save(jlong canvasHandle, jint flagsHandle) {
+static jint save(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint flagsHandle) {
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->save(flags));
 }
 
-static jint saveLayer(jlong canvasHandle, jfloat l, jfloat t,
+static jint saveLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
                       jfloat r, jfloat b, jlong paintHandle, jint flagsHandle) {
     Paint* paint  = reinterpret_cast<Paint*>(paintHandle);
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayer(l, t, r, b, paint, flags));
 }
 
-static jint saveLayerAlpha(jlong canvasHandle, jfloat l, jfloat t,
+static jint saveLayerAlpha(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
                            jfloat r, jfloat b, jint alpha, jint flagsHandle) {
     SaveFlags::Flags flags = static_cast<SaveFlags::Flags>(flagsHandle);
     return static_cast<jint>(get_canvas(canvasHandle)->saveLayerAlpha(l, t, r, b, alpha, flags));
 }
 
-static jint saveUnclippedLayer(jlong canvasHandle, jint l, jint t, jint r, jint b) {
+static jint saveUnclippedLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint l, jint t, jint r, jint b) {
     return reinterpret_cast<jint>(get_canvas(canvasHandle)->saveUnclippedLayer(l, t, r, b));
 }
 
-static void restoreUnclippedLayer(jlong canvasHandle, jint saveCount, jlong paintHandle) {
+static void restoreUnclippedLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint saveCount, jlong paintHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     get_canvas(canvasHandle)->restoreUnclippedLayer(saveCount, *paint);
 }
 
-static bool restore(jlong canvasHandle) {
+static bool restore(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (canvas->getSaveCount() <= 1) {
         return false; // cannot restore anymore
@@ -120,43 +124,43 @@ static bool restore(jlong canvasHandle) {
     return true; // success
 }
 
-static void restoreToCount(jlong canvasHandle, jint saveCount) {
+static void restoreToCount(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jint saveCount) {
     Canvas* canvas = get_canvas(canvasHandle);
     canvas->restoreToCount(saveCount);
 }
 
-static jint getSaveCount(jlong canvasHandle) {
+static jint getSaveCount(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->getSaveCount());
 }
 
-static void getMatrix(jlong canvasHandle, jlong matrixHandle) {
+static void getMatrix(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong matrixHandle) {
     SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     get_canvas(canvasHandle)->getMatrix(matrix);
 }
 
-static void setMatrix(jlong canvasHandle, jlong matrixHandle) {
+static void setMatrix(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong matrixHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     get_canvas(canvasHandle)->setMatrix(matrix ? *matrix : SkMatrix::I());
 }
 
-static void concat(jlong canvasHandle, jlong matrixHandle) {
+static void concat(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong matrixHandle) {
     const SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
     get_canvas(canvasHandle)->concat(*matrix);
 }
 
-static void rotate(jlong canvasHandle, jfloat degrees) {
+static void rotate(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat degrees) {
     get_canvas(canvasHandle)->rotate(degrees);
 }
 
-static void scale(jlong canvasHandle, jfloat sx, jfloat sy) {
+static void scale(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat sx, jfloat sy) {
     get_canvas(canvasHandle)->scale(sx, sy);
 }
 
-static void skew(jlong canvasHandle, jfloat sx, jfloat sy) {
+static void skew(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat sx, jfloat sy) {
     get_canvas(canvasHandle)->skew(sx, sy);
 }
 
-static void translate(jlong canvasHandle, jfloat dx, jfloat dy) {
+static void translate(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat dx, jfloat dy) {
     get_canvas(canvasHandle)->translate(dx, dy);
 }
 
@@ -174,13 +178,13 @@ static jboolean getClipBounds(JNIEnv* env, jobject, jlong canvasHandle, jobject 
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean quickRejectRect(jlong canvasHandle,
+static jboolean quickRejectRect(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle,
                                 jfloat left, jfloat top, jfloat right, jfloat bottom) {
     bool result = get_canvas(canvasHandle)->quickRejectRect(left, top, right, bottom);
     return result ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean quickRejectPath(jlong canvasHandle, jlong pathHandle) {
+static jboolean quickRejectPath(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong pathHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     bool result = get_canvas(canvasHandle)->quickRejectPath(*path);
     return result ? JNI_TRUE : JNI_FALSE;
@@ -208,14 +212,14 @@ static SkClipOp opHandleToClipOp(jint opHandle) {
     return static_cast<SkClipOp>(rgnOp);
 }
 
-static jboolean clipRect(jlong canvasHandle, jfloat l, jfloat t,
+static jboolean clipRect(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat l, jfloat t,
                          jfloat r, jfloat b, jint opHandle) {
     bool nonEmptyClip = get_canvas(canvasHandle)->clipRect(l, t, r, b,
             opHandleToClipOp(opHandle));
     return nonEmptyClip ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean clipPath(jlong canvasHandle, jlong pathHandle,
+static jboolean clipPath(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong pathHandle,
                          jint opHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     bool nonEmptyClip = get_canvas(canvasHandle)->clipPath(path, opHandleToClipOp(opHandle));
@@ -634,7 +638,7 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     env->ReleaseStringChars(text, jchars);
 }
 
-static void setPaintFilter(jlong canvasHandle, jlong filterHandle) {
+static void setPaintFilter(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong filterHandle) {
     PaintFilter* paintFilter = reinterpret_cast<PaintFilter*>(filterHandle);
     get_canvas(canvasHandle)->setPaintFilter(sk_ref_sp(paintFilter));
 }

@@ -60,7 +60,7 @@ static void releaseMeasuredParagraph(jlong measuredTextPtr) {
 }
 
 // Regular JNI
-static jlong nInitBuilder() {
+static jlong nInitBuilder(CRITICAL_JNI_PARAMS) {
     return toJLong(new minikin::MeasuredTextBuilder());
 }
 
@@ -98,7 +98,7 @@ static void nFreeBuilder(JNIEnv* env, jclass /* unused */, jlong builderPtr) {
 }
 
 // CriticalNative
-static jfloat nGetWidth(jlong ptr, jint start, jint end) {
+static jfloat nGetWidth(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint start, jint end) {
     minikin::MeasuredText* mt = toMeasuredParagraph(ptr);
     float r = 0.0f;
     for (int i = start; i < end; ++i) {
@@ -107,7 +107,7 @@ static jfloat nGetWidth(jlong ptr, jint start, jint end) {
     return r;
 }
 
-static jfloat nGetCharWidthAt(jlong ptr, jint offset) {
+static jfloat nGetCharWidthAt(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint offset) {
     return toMeasuredParagraph(ptr)->widths[offset];
 }
 
@@ -132,11 +132,11 @@ static void nGetBounds(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jin
 }
 
 // CriticalNative
-static jlong nGetReleaseFunc() {
+static jlong nGetReleaseFunc(CRITICAL_JNI_PARAMS) {
     return toJLong(&releaseMeasuredParagraph);
 }
 
-static jint nGetMemoryUsage(jlong ptr) {
+static jint nGetMemoryUsage(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
     return static_cast<jint>(toMeasuredParagraph(ptr)->getMemoryUsage());
 }
 

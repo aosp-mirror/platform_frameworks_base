@@ -51,7 +51,7 @@ static jlong FontFamily_Builder_initBuilder(JNIEnv*, jobject) {
 }
 
 // Critical Native
-static void FontFamily_Builder_addFont(jlong builderPtr, jlong fontPtr) {
+static void FontFamily_Builder_addFont(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jlong fontPtr) {
     toBuilder(builderPtr)->fonts.push_back(toFontWrapper(fontPtr)->font);
 }
 
@@ -79,7 +79,7 @@ static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderP
 }
 
 // CriticalNative
-static jlong FontFamily_Builder_GetReleaseFunc() {
+static jlong FontFamily_Builder_GetReleaseFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(releaseFontFamily);
 }
 

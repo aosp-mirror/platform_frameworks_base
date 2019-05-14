@@ -139,191 +139,191 @@ public:
 
     // ---------------- @CriticalNative -----------------------------
 
-    static jboolean isIdentity(jlong objHandle) {
+    static jboolean isIdentity(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         return obj->isIdentity() ? JNI_TRUE : JNI_FALSE;
     }
 
-    static jboolean isAffine(jlong objHandle) {
+    static jboolean isAffine(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         return obj->asAffine(NULL) ? JNI_TRUE : JNI_FALSE;
     }
 
-    static jboolean rectStaysRect(jlong objHandle) {
+    static jboolean rectStaysRect(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         return obj->rectStaysRect() ? JNI_TRUE : JNI_FALSE;
     }
 
-    static void reset(jlong objHandle) {
+    static void reset(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->reset();
     }
 
-    static void set(jlong objHandle, jlong otherHandle) {
+    static void set(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong otherHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkMatrix* other = reinterpret_cast<SkMatrix*>(otherHandle);
         *obj = *other;
     }
 
-    static void setTranslate(jlong objHandle, jfloat dx, jfloat dy) {
+    static void setTranslate(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setTranslate(dx, dy);
     }
 
-    static void setScale__FFFF(jlong objHandle, jfloat sx, jfloat sy, jfloat px,
+    static void setScale__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sx, jfloat sy, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setScale(sx, sy, px, py);
     }
 
-    static void setScale__FF(jlong objHandle, jfloat sx, jfloat sy) {
+    static void setScale__FF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setScale(sx, sy);
     }
 
-    static void setRotate__FFF(jlong objHandle, jfloat degrees, jfloat px,
+    static void setRotate__FFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat degrees, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setRotate(degrees, px, py);
     }
 
-    static void setRotate__F(jlong objHandle, jfloat degrees) {
+    static void setRotate__F(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setRotate(degrees);
     }
 
-    static void setSinCos__FFFF(jlong objHandle, jfloat sinValue,
+    static void setSinCos__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sinValue,
             jfloat cosValue, jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setSinCos(sinValue, cosValue, px, py);
     }
 
-    static void setSinCos__FF(jlong objHandle, jfloat sinValue,
+    static void setSinCos__FF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sinValue,
             jfloat cosValue) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setSinCos(sinValue, cosValue);
     }
 
-    static void setSkew__FFFF(jlong objHandle, jfloat kx, jfloat ky, jfloat px,
+    static void setSkew__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat kx, jfloat ky, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setSkew(kx, ky, px, py);
     }
 
-    static void setSkew__FF(jlong objHandle, jfloat kx, jfloat ky) {
+    static void setSkew__FF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat kx, jfloat ky) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->setSkew(kx, ky);
     }
 
-    static void setConcat(jlong objHandle, jlong aHandle, jlong bHandle) {
+    static void setConcat(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong aHandle, jlong bHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkMatrix* a = reinterpret_cast<SkMatrix*>(aHandle);
         SkMatrix* b = reinterpret_cast<SkMatrix*>(bHandle);
         obj->setConcat(*a, *b);
     }
 
-    static void preTranslate(jlong objHandle, jfloat dx, jfloat dy) {
+    static void preTranslate(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preTranslate(dx, dy);
     }
 
-    static void preScale__FFFF(jlong objHandle, jfloat sx, jfloat sy, jfloat px,
+    static void preScale__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sx, jfloat sy, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preScale(sx, sy, px, py);
     }
 
-    static void preScale__FF(jlong objHandle, jfloat sx, jfloat sy) {
+    static void preScale__FF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preScale(sx, sy);
     }
 
-    static void preRotate__FFF(jlong objHandle, jfloat degrees, jfloat px,
+    static void preRotate__FFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat degrees, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preRotate(degrees, px, py);
     }
 
-    static void preRotate__F(jlong objHandle, jfloat degrees) {
+    static void preRotate__F(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preRotate(degrees);
     }
 
-    static void preSkew__FFFF(jlong objHandle, jfloat kx, jfloat ky, jfloat px,
+    static void preSkew__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat kx, jfloat ky, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preSkew(kx, ky, px, py);
     }
 
-    static void preSkew__FF(jlong objHandle, jfloat kx, jfloat ky) {
+    static void preSkew__FF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat kx, jfloat ky) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->preSkew(kx, ky);
     }
 
-    static void preConcat(jlong objHandle, jlong otherHandle) {
+    static void preConcat(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong otherHandle) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         SkMatrix* other = reinterpret_cast<SkMatrix*>(otherHandle);
         obj->preConcat(*other);
     }
 
-    static void postTranslate(jlong objHandle, jfloat dx, jfloat dy) {
+    static void postTranslate(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat dx, jfloat dy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->postTranslate(dx, dy);
     }
 
-    static void postScale__FFFF(jlong objHandle, jfloat sx, jfloat sy,
+    static void postScale__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sx, jfloat sy,
             jfloat px, jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->postScale(sx, sy, px, py);
     }
 
-    static void postScale__FF(jlong objHandle, jfloat sx, jfloat sy) {
+    static void postScale__FF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat sx, jfloat sy) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->postScale(sx, sy);
     }
 
-    static void postRotate__FFF(jlong objHandle, jfloat degrees, jfloat px,
+    static void postRotate__FFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat degrees, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->postRotate(degrees, px, py);
     }
 
-    static void postRotate__F(jlong objHandle, jfloat degrees) {
+    static void postRotate__F(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat degrees) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->postRotate(degrees);
     }
 
-    static void postSkew__FFFF(jlong objHandle, jfloat kx, jfloat ky, jfloat px,
+    static void postSkew__FFFF(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jfloat kx, jfloat ky, jfloat px,
             jfloat py) {
         SkMatrix* obj = reinterpret_cast<SkMatrix*>(objHandle);
         obj->postSkew(kx, ky, px, py);
     }
 
-    static void postSkew__FF(jlong matrixHandle, jfloat kx, jfloat ky) {
+    static void postSkew__FF(CRITICAL_JNI_PARAMS_COMMA jlong matrixHandle, jfloat kx, jfloat ky) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         matrix->postSkew(kx, ky);
     }
 
-    static void postConcat(jlong matrixHandle, jlong otherHandle) {
+    static void postConcat(CRITICAL_JNI_PARAMS_COMMA jlong matrixHandle, jlong otherHandle) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         SkMatrix* other = reinterpret_cast<SkMatrix*>(otherHandle);
         matrix->postConcat(*other);
     }
 
-    static jboolean invert(jlong matrixHandle, jlong inverseHandle) {
+    static jboolean invert(CRITICAL_JNI_PARAMS_COMMA jlong matrixHandle, jlong inverseHandle) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         SkMatrix* inverse = reinterpret_cast<SkMatrix*>(inverseHandle);
         return matrix->invert(inverse);
     }
 
-    static jfloat mapRadius(jlong matrixHandle, jfloat radius) {
+    static jfloat mapRadius(CRITICAL_JNI_PARAMS_COMMA jlong matrixHandle, jfloat radius) {
         SkMatrix* matrix = reinterpret_cast<SkMatrix*>(matrixHandle);
         float result;
         result = SkScalarToFloat(matrix->mapRadius(radius));
         return static_cast<jfloat>(result);
     }
 
-    static jboolean equals(jlong aHandle, jlong bHandle) {
+    static jboolean equals(CRITICAL_JNI_PARAMS_COMMA jlong aHandle, jlong bHandle) {
         const SkMatrix* a = reinterpret_cast<SkMatrix*>(aHandle);
         const SkMatrix* b = reinterpret_cast<SkMatrix*>(bHandle);
         return *a == *b;

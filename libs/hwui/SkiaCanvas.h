@@ -16,7 +16,9 @@
 #pragma once
 
 #include "CanvasProperty.h"
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include "DeferredLayerUpdater.h"
+#endif
 #include "RenderNode.h"
 #include "VectorDrawable.h"
 #include "hwui/Canvas.h"

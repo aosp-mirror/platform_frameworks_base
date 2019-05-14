@@ -155,9 +155,11 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
         RenderNode* oldTarget = mTarget;
         mTarget = mStagingTarget;
         mStagingTarget = nullptr;
+#ifdef __ANDROID__ // Layoutlib does not support RenderNode
         if (oldTarget && oldTarget != mTarget) {
             oldTarget->onAnimatorTargetChanged(this);
         }
+#endif
     }
 
     if (!mHasStartValue) {

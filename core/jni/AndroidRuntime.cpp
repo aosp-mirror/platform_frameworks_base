@@ -1235,6 +1235,10 @@ void AndroidRuntime::onVmCreated(JNIEnv* env)
     // If AndroidRuntime had anything to do here, we'd have done it in 'start'.
 }
 
+/*static*/ JavaVM* AndroidRuntime::getJavaVM() {
+    return AndroidRuntime::mJavaVM;
+}
+
 /*
  * Get the JNIEnv pointer for this thread.
  *

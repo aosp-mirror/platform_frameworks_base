@@ -68,7 +68,7 @@ static void nFinish(jlong nativePtr) {
 }
 
 // CriticalNative
-static jlong nGetReleaseFunc() {
+static jlong nGetReleaseFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(nFinish);
 }
 
@@ -98,27 +98,27 @@ static jlong nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     return reinterpret_cast<jlong>(result.release());
 }
 
-static jint nGetLineCount(jlong ptr) {
+static jint nGetLineCount(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
     return reinterpret_cast<minikin::LineBreakResult*>(ptr)->breakPoints.size();
 }
 
-static jint nGetLineBreakOffset(jlong ptr, jint i) {
+static jint nGetLineBreakOffset(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     return reinterpret_cast<minikin::LineBreakResult*>(ptr)->breakPoints[i];
 }
 
-static jfloat nGetLineWidth(jlong ptr, jint i) {
+static jfloat nGetLineWidth(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     return reinterpret_cast<minikin::LineBreakResult*>(ptr)->widths[i];
 }
 
-static jfloat nGetLineAscent(jlong ptr, jint i) {
+static jfloat nGetLineAscent(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     return reinterpret_cast<minikin::LineBreakResult*>(ptr)->ascents[i];
 }
 
-static jfloat nGetLineDescent(jlong ptr, jint i) {
+static jfloat nGetLineDescent(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     return reinterpret_cast<minikin::LineBreakResult*>(ptr)->descents[i];
 }
 
-static jint nGetLineFlag(jlong ptr, jint i) {
+static jint nGetLineFlag(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     return reinterpret_cast<minikin::LineBreakResult*>(ptr)->flags[i];
 }
 
@@ -126,7 +126,7 @@ static void nReleaseResult(jlong ptr) {
     delete reinterpret_cast<minikin::LineBreakResult*>(ptr);
 }
 
-static jlong nGetReleaseResultFunc() {
+static jlong nGetReleaseResultFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(nReleaseResult);
 }
 
