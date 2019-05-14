@@ -76,7 +76,7 @@ class GnssVisibilityControl {
     private final GpsNetInitiatedHandler mNiHandler;
 
     private boolean mIsGpsEnabled;
-    private volatile boolean mEsNotify;
+    private boolean mEsNotify;
 
     // Number of non-framework location access proxy apps is expected to be small (< 5).
     private static final int ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
@@ -124,10 +124,6 @@ class GnssVisibilityControl {
         }
     }
 
-    void updateProxyApps(List<String> nfwLocationAccessProxyApps) {
-        runOnHandler(() -> handleUpdateProxyApps(nfwLocationAccessProxyApps));
-    }
-
     void reportNfwNotification(String proxyAppPackageName, byte protocolStack,
             String otherProtocolStackName, byte requestor, String requestorId, byte responseType,
             boolean inEmergencyMode, boolean isCachedLocation) {
@@ -136,15 +132,25 @@ class GnssVisibilityControl {
                         requestor, requestorId, responseType, inEmergencyMode, isCachedLocation)));
     }
 
-    void setEsNotify(int esNotifyConfig) {
-        if (esNotifyConfig != ES_NOTIFY_NONE && esNotifyConfig != ES_NOTIFY_ALL) {
+    void onConfigurationUpdated(GnssConfiguration configuration) {
+        // The configuration object must be accessed only in the caller thread and not in mHandler.
+        List<String> nfwLocationAccessProxyApps = configuration.getProxyApps();
+        int esNotify = configuration.getEsNotify(ES_NOTIFY_NONE);
+        runOnHandler(() -> {
+            setEsNotify(esNotify);
+            handleUpdateProxyApps(nfwLocationAccessProxyApps);
+        });
+    }
+
+    private void setEsNotify(int esNotify) {
+        if (esNotify != ES_NOTIFY_NONE && esNotify != ES_NOTIFY_ALL) {
             Log.e(TAG, "Config parameter " + GnssConfiguration.CONFIG_ES_NOTIFY_INT
-                    + " is set to invalid value: " + esNotifyConfig
+                    + " is set to invalid value: " + esNotify
                     + ". Using default value: " + ES_NOTIFY_NONE);
-            esNotifyConfig = ES_NOTIFY_NONE;
+            esNotify = ES_NOTIFY_NONE;
         }
 
-        mEsNotify = (esNotifyConfig == ES_NOTIFY_ALL);
+        mEsNotify = (esNotify == ES_NOTIFY_ALL);
     }
 
     private void handleInitialize() {
