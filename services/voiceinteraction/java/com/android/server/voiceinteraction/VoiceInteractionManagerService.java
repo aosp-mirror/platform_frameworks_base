@@ -77,6 +77,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.soundtrigger.SoundTriggerInternal;
@@ -1283,7 +1284,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 mRm.addOnRoleHoldersChangedListenerAsUser(executor, this, UserHandle.ALL);
                 UserHandle currentUser = UserHandle.of(LocalServices.getService(
                         ActivityManagerInternal.class).getCurrentUserId());
-                onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT, currentUser);
+                SystemServerInitThreadPool.get().submit(() -> onRoleHoldersChanged(
+                        RoleManager.ROLE_ASSISTANT, currentUser),
+                        "VoiceInteractionManagerService RoleObserver initialization");
             }
 
             private @NonNull String getDefaultRecognizer(@NonNull UserHandle user) {
