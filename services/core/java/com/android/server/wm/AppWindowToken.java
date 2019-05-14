@@ -2782,6 +2782,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     protected void onAnimationFinished() {
         super.onAnimationFinished();
 
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#onAnimationFinished");
         mTransit = TRANSIT_UNSET;
         mTransitFlags = 0;
         mNeedsZBoost = false;
@@ -2816,6 +2817,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         scheduleAnimation();
 
         mActivityRecord.onAnimationFinished();
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @Override
