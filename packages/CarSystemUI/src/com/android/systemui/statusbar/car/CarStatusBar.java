@@ -131,6 +131,8 @@ public class CarStatusBar extends StatusBar implements
     // The container for the notifications.
     private CarNotificationView mNotificationView;
     private RecyclerView mNotificationList;
+    // The controller for the notification view.
+    private NotificationViewController mNotificationViewController;
     // The state of if the notification list is currently showing the bottom.
     private boolean mNotificationListAtBottom;
     // Was the notification list at the bottom when the user first touched the screen
@@ -544,7 +546,7 @@ public class CarStatusBar extends StatusBar implements
             }
         });
 
-        NotificationViewController mNotificationViewController = new NotificationViewController(
+        mNotificationViewController = new NotificationViewController(
                 mNotificationView,
                 PreprocessingManager.getInstance(mContext),
                 carNotificationListener,
@@ -651,9 +653,11 @@ public class CarStatusBar extends StatusBar implements
                     mStatusBarWindowController.setPanelVisible(false);
                     mNotificationView.setVisibility(View.INVISIBLE);
                     mNotificationList.setClipBounds(null);
+                    mNotificationViewController.setIsInForeground(false);
                     // let the status bar know that the panel is closed
                     setPanelExpanded(false);
                 } else {
+                    mNotificationViewController.setIsInForeground(true);
                     // let the status bar know that the panel is open
                     mNotificationView.setVisibleNotificationsAsSeen();
                     setPanelExpanded(true);
