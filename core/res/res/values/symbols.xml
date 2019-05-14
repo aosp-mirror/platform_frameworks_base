@@ -3818,4 +3818,7 @@
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
 
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_retry_for_29_33_55_enabled" />
+
 </resources>

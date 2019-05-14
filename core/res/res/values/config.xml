@@ -4150,4 +4150,7 @@
 
     <!-- Sharesheet: define a max number of targets per application for new shortcuts-based direct share introduced in Q -->
     <integer name="config_maxShortcutTargetsPerApp">3</integer>
+
+    <!-- pdp data retry for cause 29, 33 and 55-->
+    <bool name="config_pdp_retry_for_29_33_55_enabled">false</bool>
 </resources>
