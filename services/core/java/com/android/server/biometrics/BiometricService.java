@@ -760,7 +760,6 @@ public class BiometricService extends SystemService {
         @Override // Binder call
         public int canAuthenticate(String opPackageName) {
             checkPermission();
-            checkAppOp(opPackageName, Binder.getCallingUid());
 
             final int userId = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
@@ -833,9 +832,9 @@ public class BiometricService extends SystemService {
     }
 
     private void checkPermission() {
-        if (getContext().checkCallingPermission(USE_FINGERPRINT)
+        if (getContext().checkCallingOrSelfPermission(USE_FINGERPRINT)
                 != PackageManager.PERMISSION_GRANTED) {
-            getContext().enforceCallingPermission(USE_BIOMETRIC,
+            getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC,
                     "Must have USE_BIOMETRIC permission");
         }
     }
