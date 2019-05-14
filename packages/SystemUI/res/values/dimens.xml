@@ -252,6 +252,9 @@
     <!-- size at which Notification icons will be drawn on Ambient Display -->
     <dimen name="status_bar_icon_drawing_size_dark">@*android:dimen/notification_header_icon_size_ambient</dimen>
 
+    <!-- size of notification icons on AOD -->
+    <dimen name="dark_shelf_icon_size">16dp</dimen>
+
     <!-- opacity at which Notification icons will be drawn in the status bar -->
     <item type="dimen" name="status_bar_icon_drawing_alpha">90%</item>
 
