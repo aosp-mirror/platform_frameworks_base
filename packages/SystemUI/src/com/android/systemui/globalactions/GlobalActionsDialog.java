@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.StatusBarManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -38,7 +39,9 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -75,6 +78,7 @@ import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.util.EmergencyAffordanceManager;
@@ -1501,6 +1505,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private final Context mContext;
         private final MyAdapter mAdapter;
+        private final IStatusBarService mStatusBarService;
+        private final IBinder mToken = new Binder();
         private MultiListLayout mGlobalActionsLayout;
         private Drawable mBackgroundDrawable;
         private final SysuiColorExtractor mColorExtractor;
@@ -1516,6 +1522,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mContext = context;
             mAdapter = adapter;
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
+            mStatusBarService = Dependency.get(IStatusBarService.class);
 
             // Window initialization
             Window window = getWindow();
@@ -1573,6 +1580,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     RotationPolicy.setRotationLockAtAngle(
                             mContext, true, RotationUtils.ROTATION_NONE);
                 }
+
+                // Disable rotation suggestions, if enabled
+                setRotationSuggestionsEnabled(false);
 
                 FrameLayout panelContainer = new FrameLayout(mContext);
                 FrameLayout.LayoutParams panelParams =
@@ -1732,11 +1742,24 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
+        private void setRotationSuggestionsEnabled(boolean enabled) {
+            try {
+                final int userId = Binder.getCallingUserHandle().getIdentifier();
+                final int what = enabled
+                        ? StatusBarManager.DISABLE2_NONE
+                        : StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
+                mStatusBarService.disable2ForUser(what, mToken, mContext.getPackageName(), userId);
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
+        }
+
         private void resetOrientation() {
             if (mResetOrientationData != null) {
                 RotationPolicy.setRotationLockAtAngle(mContext, mResetOrientationData.locked,
                         mResetOrientationData.rotation);
             }
+            setRotationSuggestionsEnabled(true);
         }
 
         @Override
