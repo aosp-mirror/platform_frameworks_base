@@ -327,7 +327,8 @@ public class TaskStack extends WindowContainer<Task> implements
      * Sets the bounds animation target bounds ahead of an animation.  This can't currently be done
      * in onAnimationStart() since that is started on the UiThread.
      */
-    void setAnimationFinalBounds(Rect sourceHintBounds, Rect destBounds, boolean toFullscreen) {
+    private void setAnimationFinalBounds(Rect sourceHintBounds, Rect destBounds,
+            boolean toFullscreen) {
         mBoundsAnimatingRequested = true;
         mBoundsAnimatingToFullscreen = toFullscreen;
         if (destBounds != null) {
@@ -337,7 +338,11 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         if (sourceHintBounds != null) {
             mBoundsAnimationSourceHintBounds.set(sourceHintBounds);
-        } else {
+        } else if (!mBoundsAnimating) {
+            // If the bounds are already animating, we don't want to reset the source hint. This is
+            // because the source hint is sent when starting the animation from the client that
+            // requested to enter pip. Other requests can adjust the pip bounds during an animation,
+            // but could accidentally reset the source hint bounds.
             mBoundsAnimationSourceHintBounds.setEmpty();
         }
 
