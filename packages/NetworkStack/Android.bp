@@ -118,6 +118,7 @@ android_app {
     defaults: ["NetworkStackAppCommon"],
     certificate: "networkstack",
     manifest: "AndroidManifest.xml",
+    use_embedded_native_libs: true,
 }
 
 genrule {

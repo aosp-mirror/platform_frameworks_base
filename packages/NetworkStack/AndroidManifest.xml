@@ -41,7 +41,7 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <!-- Signature permission defined in NetworkStackStub -->
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK" />
-    <application>
+    <application android:extractNativeLibs="false">
         <service android:name="com.android.server.NetworkStackService">
             <intent-filter>
                 <action android:name="android.net.INetworkStackConnector"/>
