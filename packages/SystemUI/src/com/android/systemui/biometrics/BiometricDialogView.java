@@ -33,7 +33,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -228,9 +227,6 @@ public abstract class BiometricDialogView extends LinearLayout {
             showTryAgainButton(false /* show */);
             mCallback.onTryAgainPressed();
         });
-
-        mLayout.setFocusableInTouchMode(true);
-        mLayout.requestFocus();
     }
 
     public void onSaveState(Bundle bundle) {
@@ -278,7 +274,6 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         mTitleText.setVisibility(View.VISIBLE);
         mTitleText.setText(titleText);
-        mTitleText.setSelected(true);
 
         final CharSequence subtitleText = mBundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
         if (TextUtils.isEmpty(subtitleText)) {
@@ -323,11 +318,10 @@ public abstract class BiometricDialogView extends LinearLayout {
 
     private void setDismissesDialog(View v) {
         v.setClickable(true);
-        v.setOnTouchListener((View view, MotionEvent event) -> {
+        v.setOnClickListener(v1 -> {
             if (mState != STATE_AUTHENTICATED && shouldGrayAreaDismissDialog()) {
                 mCallback.onUserCanceled();
             }
-            return true;
         });
     }
 
