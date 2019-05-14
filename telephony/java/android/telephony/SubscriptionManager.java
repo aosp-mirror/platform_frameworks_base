@@ -396,6 +396,12 @@ public class SubscriptionManager {
     public static final int NAME_SOURCE_USER_INPUT = 2;
 
     /**
+     * The name_source is carrier (carrier app, carrier config, etc.)
+     * @hide
+     */
+    public static final int NAME_SOURCE_CARRIER = 3;
+
+    /**
      * TelephonyProvider column name for the color of a SIM.
      * <P>Type: INTEGER (int)</P>
      */
