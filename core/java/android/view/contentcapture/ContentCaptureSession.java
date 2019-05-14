@@ -441,7 +441,46 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /**
      * Creates a {@link ViewStructure} for a "standard" view.
      *
-     * @hide
+     * <p>This method should be called after a visible view is laid out; the view then must populate
+     * the structure and pass it to {@link #notifyViewAppeared(ViewStructure)}.
+     *
+     * <b>Note: </b>views that manage a virtual structure under this view must populate just the
+     * node representing this view and return right away, then asynchronously report (not
+     * necessarily in the UI thread) when the children nodes appear, disappear or have their text
+     * changed by calling {@link ContentCaptureSession#notifyViewAppeared(ViewStructure)},
+     * {@link ContentCaptureSession#notifyViewDisappeared(AutofillId)}, and
+     * {@link ContentCaptureSession#notifyViewTextChanged(AutofillId, CharSequence)} respectively.
+     * The structure for the a child must be created using
+     * {@link ContentCaptureSession#newVirtualViewStructure(AutofillId, long)}, and the
+     * {@code autofillId} for a child can be obtained either through
+     * {@code childStructure.getAutofillId()} or
+     * {@link ContentCaptureSession#newAutofillId(AutofillId, long)}.
+     *
+     * <p>When the virtual view hierarchy represents a web page, you should also:
+     *
+     * <ul>
+     * <li>Call {@link ContentCaptureManager#getContentCaptureConditions()} to infer content capture
+     * events should be generate for that URL.
+     * <li>Create a new {@link ContentCaptureSession} child for every HTML element that renders a
+     * new URL (like an {@code IFRAME}) and use that session to notify events from that subtree.
+     * </ul>
+     *
+     * <p><b>Note: </b>the following methods of the {@code structure} will be ignored:
+     * <ul>
+     * <li>{@link ViewStructure#setChildCount(int)}
+     * <li>{@link ViewStructure#addChildCount(int)}
+     * <li>{@link ViewStructure#getChildCount()}
+     * <li>{@link ViewStructure#newChild(int)}
+     * <li>{@link ViewStructure#asyncNewChild(int)}
+     * <li>{@link ViewStructure#asyncCommit()}
+     * <li>{@link ViewStructure#setWebDomain(String)}
+     * <li>{@link ViewStructure#newHtmlInfoBuilder(String)}
+     * <li>{@link ViewStructure#setHtmlInfo(android.view.ViewStructure.HtmlInfo)}
+     * <li>{@link ViewStructure#setDataIsSensitive(boolean)}
+     * <li>{@link ViewStructure#setAlpha(float)}
+     * <li>{@link ViewStructure#setElevation(float)}
+     * <li>{@link ViewStructure#setTransformation(android.graphics.Matrix)}
+     * </ul>
      */
     @NonNull
     public final ViewStructure newViewStructure(@NonNull View view) {
