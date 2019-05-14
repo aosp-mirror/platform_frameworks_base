@@ -270,7 +270,7 @@ public class AttentionManagerService extends SystemService {
                 return;
             }
             if (!userState.mCurrentAttentionCheck.mCallbackInternal.equals(callbackInternal)) {
-                Slog.e(LOG_TAG, "Cannot cancel a non-current request");
+                Slog.w(LOG_TAG, "Cannot cancel a non-current request");
                 return;
             }
             cancel(userState);
