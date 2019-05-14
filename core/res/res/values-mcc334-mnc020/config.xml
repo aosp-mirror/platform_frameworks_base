@@ -18,4 +18,5 @@
 -->
 <resources>
     <bool name="config_use_sim_language_file">false</bool>
+    <bool name="config_pdp_retry_for_29_33_55_enabled">true</bool>
 </resources>
