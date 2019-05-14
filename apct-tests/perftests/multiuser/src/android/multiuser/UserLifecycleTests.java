@@ -485,8 +485,9 @@ public class UserLifecycleTests {
         });
 
         final IPackageInstaller installer = AppGlobals.getPackageManager().getPackageInstaller();
-        installer.installExistingPackage(packageName, 0, PackageManager.INSTALL_REASON_UNKNOWN,
-                sender, userId);
+        installer.installExistingPackage(packageName,
+                PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                PackageManager.INSTALL_REASON_UNKNOWN, sender, userId, null);
 
         try {
             latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
