@@ -1549,9 +1549,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private boolean shouldUsePanel() {
-            return isPanelEnabled(mContext)
-                    && mPanelController != null
-                    && mPanelController.getPanelContent() != null;
+            return mPanelController != null && mPanelController.getPanelContent() != null;
         }
 
         private void initializePanel() {
@@ -1812,15 +1810,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private static boolean isForceGridEnabled(Context context) {
         return isPanelDebugModeEnabled(context);
-    }
-
-    /**
-     * Determines whether or not the Global Actions Panel should appear when the power button
-     * is held.
-     */
-    private static boolean isPanelEnabled(Context context) {
-        return FeatureFlagUtils.isEnabled(
-                context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);
     }
 
     /**
