@@ -262,7 +262,9 @@ public class StatusBarWindowView extends FrameLayout {
      * Propagate {@link StatusBar} pulsing state.
      */
     public void setPulsing(boolean pulsing) {
-        mLockIcon.setPulsing(pulsing);
+        if (mLockIcon != null) {
+            mLockIcon.setPulsing(pulsing);
+        }
     }
 
     /**
@@ -270,14 +272,18 @@ public class StatusBarWindowView extends FrameLayout {
      * @param wakeAndUnlock If the type is {@link BiometricUnlockController#isWakeAndUnlock()}
      */
     public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
-        mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock);
+        if (mLockIcon != null) {
+            mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock);
+        }
     }
 
     /**
      * Called after finished unlocking and the status bar window is already collapsed.
      */
     public void onKeyguardFadedAway() {
-        mLockIcon.onKeyguardFadedAway();
+        if (mLockIcon != null) {
+            mLockIcon.onKeyguardFadedAway();
+        }
     }
 
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
