@@ -223,6 +223,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         });
 
         mTryAgainButton.setOnClickListener((View v) -> {
+            handleResetMessage();
             updateState(STATE_AUTHENTICATING);
             showTryAgainButton(false /* show */);
             mCallback.onTryAgainPressed();
@@ -265,6 +266,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         if (mRestoredState == null) {
             updateState(STATE_AUTHENTICATING);
             mErrorText.setText(getHintStringResourceId());
+            mErrorText.setContentDescription(mContext.getString(getHintStringResourceId()));
             mErrorText.setVisibility(View.VISIBLE);
         } else {
             updateState(mState);
@@ -415,11 +417,6 @@ public abstract class BiometricDialogView extends LinearLayout {
                 BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
-    public void clearTemporaryMessage() {
-        mHandler.removeMessages(MSG_RESET_MESSAGE);
-        mHandler.obtainMessage(MSG_RESET_MESSAGE).sendToTarget();
-    }
-
     /**
      * Transient help message (acquire) is received, dialog stays showing. Sensor stays in
      * "authenticating" state.
@@ -478,6 +475,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         mPositiveButton.setVisibility(bundle.getInt(KEY_CONFIRM_VISIBILITY));
         mState = bundle.getInt(KEY_STATE);
         mErrorText.setText(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));
+        mErrorText.setContentDescription(bundle.getCharSequence(KEY_ERROR_TEXT_STRING));
         mErrorText.setVisibility(bundle.getInt(KEY_ERROR_TEXT_VISIBILITY));
         mErrorText.setTextColor(bundle.getInt(KEY_ERROR_TEXT_COLOR));
 
