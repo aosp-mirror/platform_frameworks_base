@@ -845,6 +845,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final Configuration mTempConfiguration = new Configuration();
 
+    final HighRefreshRateBlacklist mHighRefreshRateBlacklist = HighRefreshRateBlacklist.create();
+
     // If true, only the core apps and services are being launched because the device
     // is in a special boot mode, such as being encrypted or waiting for a decryption password.
     // For example, when this flag is true, there will be no wallpaper service.
@@ -7449,16 +7451,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void addNonHighRefreshRatePackage(@NonNull String packageName) {
-            // TODO
-            Slog.i(TAG, "addNonHighRefreshRatePackage: " + packageName);
+            synchronized (mGlobalLock) {
+                mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().getRefreshRatePolicy()
+                        .addNonHighRefreshRatePackage(packageName));
+            }
         }
 
         @Override
         public void removeNonHighRefreshRatePackage(@NonNull String packageName) {
-            // TODO
-            Slog.i(TAG, "removeNonHighRefreshRatePackage: " + packageName);
+            synchronized (mGlobalLock) {
+                mRoot.forAllDisplays(dc -> dc.getDisplayPolicy().getRefreshRatePolicy()
+                        .removeNonHighRefreshRatePackage(packageName));
+            }
         }
-
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {

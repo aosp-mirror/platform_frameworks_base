@@ -381,6 +381,8 @@ public class DisplayPolicy {
      */
     @NonNull private Insets mForwardedInsets = Insets.NONE;
 
+    private RefreshRatePolicy mRefreshRatePolicy;
+
     // -------- PolicyHandler --------
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 1;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 2;
@@ -591,6 +593,10 @@ public class DisplayPolicy {
             mHasStatusBar = false;
             mHasNavigationBar = mDisplayContent.supportsSystemDecorations();
         }
+
+        mRefreshRatePolicy = new RefreshRatePolicy(mService,
+                mDisplayContent.getDisplayInfo(),
+                mService.mHighRefreshRateBlacklist);
     }
 
     void systemReady() {
@@ -3594,6 +3600,10 @@ public class DisplayPolicy {
                     mStatusBar != null && mStatusBar.isVisibleLw(),
                     mNavigationBar != null && mNavigationBar.isVisibleLw(), mHandler);
         }
+    }
+
+    RefreshRatePolicy getRefreshRatePolicy() {
+        return mRefreshRatePolicy;
     }
 
     void dump(String prefix, PrintWriter pw) {
