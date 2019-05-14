@@ -83,7 +83,7 @@ class Bubble {
 
     public void updateDotVisibility() {
         if (iconView != null) {
-            iconView.updateDotVisibility();
+            iconView.updateDotVisibility(true /* animate */);
         }
     }
 

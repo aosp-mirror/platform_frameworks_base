@@ -57,7 +57,7 @@ public class BadgedImageView extends ImageView {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mIconSize = getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mDotRenderer = new BadgeRenderer(mIconSize);
+        mDotRenderer = new BadgeRenderer(getContext());
 
         TypedArray ta = context.obtainStyledAttributes(
                 new int[] {android.R.attr.colorBackgroundFloating});
@@ -81,6 +81,10 @@ public class BadgedImageView extends ImageView {
     public void setDotPosition(boolean onLeft) {
         mOnLeft = onLeft;
         invalidate();
+    }
+
+    public boolean getDotPosition() {
+        return mOnLeft;
     }
 
     /**

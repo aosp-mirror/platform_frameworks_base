@@ -225,8 +225,10 @@ public class StackAnimationController extends
     /**
      * Flings the stack starting with the given velocities, springing it to the nearest edge
      * afterward.
+     *
+     * @return The X value that the stack will end up at after the fling/spring.
      */
-    public void flingStackThenSpringToEdge(float x, float velX, float velY) {
+    public float flingStackThenSpringToEdge(float x, float velX, float velY) {
         final boolean stackOnLeftSide = x - mIndividualBubbleSize / 2 < mLayout.getWidth() / 2;
 
         final boolean stackShouldFlingLeft = stackOnLeftSide
@@ -281,6 +283,7 @@ public class StackAnimationController extends
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         mIsMovingFromFlinging = true;
+        return destinationRelativeX;
     }
 
     /**
