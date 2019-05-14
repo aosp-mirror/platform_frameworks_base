@@ -25,12 +25,17 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -52,6 +57,9 @@ public class MediaRouter2Manager {
 
     @GuardedBy("sLock")
     final ArrayList<CallbackRecord> mCallbacks = new ArrayList<>();
+
+    @NonNull
+    private List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
 
     /**
      * Gets an instance of media router manager that controls media route of other apps.
@@ -183,11 +191,88 @@ public class MediaRouter2Manager {
         }
     }
 
-    void notifyProviderUpdated(MediaRoute2ProviderInfo info) {
-        //TODO: should call back properly
-        for (CallbackRecord record : mCallbacks) {
-            record.mExecutor.execute(() -> record.mCallback.onProviderInfoUpdated(info));
+    int findProviderIndex(MediaRoute2ProviderInfo provider) {
+        final int count = mProviders.size();
+        for (int i = 0; i < count; i++) {
+            if (TextUtils.equals(mProviders.get(i).getUniqueId(), provider.getUniqueId())) {
+                return i;
+            }
         }
+        return -1;
+    }
+
+    MediaRoute2ProviderInfo getProvider(int index) {
+        return mProviders.get(index);
+    }
+
+    void updateProvider(@NonNull MediaRoute2ProviderInfo provider) {
+        if (provider == null || !provider.isValid()) {
+            Log.w(TAG, "Ignoring invalid provider : " + provider);
+            return;
+        }
+
+        final Collection<MediaRoute2Info> routes = provider.getRoutes();
+
+        final int index = findProviderIndex(provider);
+        if (index >= 0) {
+            final MediaRoute2ProviderInfo prevProvider = getProvider(index);
+            final Set<String> updatedRouteIds = new HashSet<>();
+            for (MediaRoute2Info routeInfo : routes) {
+                final MediaRoute2Info prevRoute = prevProvider.getRoute(routeInfo.getId());
+                if (prevRoute == null) {
+                    notifyRouteAdded(routeInfo);
+                } else {
+                    //TODO: Notify only it's really changed.
+                    notifyRouteChanged(routeInfo);
+                    updatedRouteIds.add(routeInfo.getId());
+                }
+            }
+            final Collection<MediaRoute2Info> prevRoutes = prevProvider.getRoutes();
+
+            for (MediaRoute2Info prevRoute : prevRoutes) {
+                notifyRouteRemoved(prevRoute);
+            }
+        } else {
+            for (MediaRoute2Info routeInfo: routes) {
+                notifyRouteAdded(routeInfo);
+            }
+        }
+    }
+
+    void notifyRouteAdded(MediaRoute2Info routeInfo) {
+        for (CallbackRecord record : mCallbacks) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRouteAdded(routeInfo));
+        }
+    }
+
+    void notifyRouteChanged(MediaRoute2Info routeInfo) {
+        for (CallbackRecord record : mCallbacks) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRouteChanged(routeInfo));
+        }
+    }
+
+    void notifyRouteRemoved(MediaRoute2Info routeInfo) {
+        for (CallbackRecord record : mCallbacks) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRouteRemoved(routeInfo));
+        }
+    }
+
+    void notifyProviderInfosUpdated(List<MediaRoute2ProviderInfo> providers) {
+        if (providers == null) {
+            Log.w(TAG, "Providers info is null.");
+            return;
+        }
+
+        for (MediaRoute2ProviderInfo provider : providers) {
+            updateProvider(provider);
+        }
+        //TODO: Call notifyProviderRemoved for removed providers.
+
+        //TODO: Filter invalid providers.
+        mProviders = providers;
     }
 
     void notifyRouteSelected(int uid, String routeId) {
@@ -207,6 +292,21 @@ public class MediaRouter2Manager {
      * Interface for receiving events about media routing changes.
      */
     public abstract static class Callback {
+        /**
+         * Called when a route is added.
+         */
+        public void onRouteAdded(MediaRoute2Info routeInfo) {}
+
+        /**
+         * Called when a route is changed.
+         */
+        public void onRouteChanged(MediaRoute2Info routeInfo) {}
+
+        /**
+         * Called when a route is removed.
+         */
+        public void onRouteRemoved(MediaRoute2Info routeInfo) {}
+
         /**
          * Called when a route is selected for some application uid.
          * @param uid
@@ -252,8 +352,8 @@ public class MediaRouter2Manager {
         }
 
         @Override
-        public void notifyProviderInfoUpdated(MediaRoute2ProviderInfo info) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyProviderUpdated,
+        public void notifyProviderInfosUpdated(List<MediaRoute2ProviderInfo> info) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyProviderInfosUpdated,
                     MediaRouter2Manager.this, info));
         }
     }

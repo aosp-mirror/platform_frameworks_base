@@ -2875,6 +2875,7 @@
   <java-symbol type="bool" name="config_navBarTapThrough" />
   <java-symbol type="bool" name="config_navBarAlwaysShowOnSideEdgeGesture" />
   <java-symbol type="bool" name="config_navBarNeedsScrim" />
+  <java-symbol type="bool" name="config_allowSeamlessRotationDespiteNavBarMoving" />
   <java-symbol type="dimen" name="config_backGestureInset" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
 
@@ -3027,9 +3028,7 @@
   <java-symbol type="string" name="now_string_shortest" />
 
   <!-- Encryption notification while accounts are locked by credential encryption -->
-  <java-symbol type="string" name="user_encrypted_title" />
-  <java-symbol type="string" name="user_encrypted_message" />
-  <java-symbol type="string" name="user_encrypted_detail" />
+  <java-symbol type="string" name="profile_encrypted_title" />
   <java-symbol type="string" name="profile_encrypted_detail" />
   <java-symbol type="string" name="profile_encrypted_message" />
   <java-symbol type="drawable" name="ic_user_secure" />
@@ -3188,6 +3187,7 @@
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficients" />
   <java-symbol type="array" name="config_nightDisplayColorTemperatureCoefficientsNative" />
   <java-symbol type="array" name="config_availableColorModes" />
+  <java-symbol type="integer" name="config_accessibilityColorMode" />
   <java-symbol type="bool" name="config_displayWhiteBalanceAvailable" />
   <java-symbol type="bool" name="config_displayWhiteBalanceEnabledDefault" />
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureMin" />

@@ -123,8 +123,7 @@ TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {
 
   void* cookie = nullptr;
 
-  ZipString prefix("res/theme/10");
-  int32_t result = StartIteration(handle, &cookie, &prefix, nullptr);
+  int32_t result = StartIteration(handle, &cookie, "res/theme/10", "");
 
   // If this is -5, that means we've found a duplicate entry and this test has failed
   EXPECT_THAT(result, Eq(0));

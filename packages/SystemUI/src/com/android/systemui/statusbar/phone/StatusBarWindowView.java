@@ -265,6 +265,21 @@ public class StatusBarWindowView extends FrameLayout {
         mLockIcon.setPulsing(pulsing);
     }
 
+    /**
+     * Called when the biometric authentication mode changes.
+     * @param wakeAndUnlock If the type is {@link BiometricUnlockController#isWakeAndUnlock()}
+     */
+    public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
+        mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock);
+    }
+
+    /**
+     * Called after finished unlocking and the status bar window is already collapsed.
+     */
+    public void onKeyguardFadedAway() {
+        mLockIcon.onKeyguardFadedAway();
+    }
+
     public void setStatusBarView(PhoneStatusBarView statusBarView) {
         mStatusBarView = statusBarView;
     }

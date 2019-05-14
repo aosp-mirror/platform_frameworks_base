@@ -506,7 +506,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void showEncryptionNotificationForProfile(UserHandle user) {
         Resources r = mContext.getResources();
         CharSequence title = r.getText(
-                com.android.internal.R.string.user_encrypted_title);
+                com.android.internal.R.string.profile_encrypted_title);
         CharSequence message = r.getText(
                 com.android.internal.R.string.profile_encrypted_message);
         CharSequence detail = r.getText(
@@ -534,7 +534,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (!StorageManager.isFileEncryptedNativeOrEmulated()) return;
 
         Notification notification =
-                new Notification.Builder(mContext, SystemNotificationChannels.SECURITY)
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
                         .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
                         .setWhen(0)
                         .setOngoing(true)

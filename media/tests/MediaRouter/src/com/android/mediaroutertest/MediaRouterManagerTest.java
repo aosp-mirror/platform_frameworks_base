@@ -16,16 +16,14 @@
 
 package com.android.mediaroutertest;
 
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
-import android.media.MediaRoute2ProviderInfo;
+import android.media.MediaRoute2Info;
 import android.media.MediaRouter;
 import android.media.MediaRouter2Manager;
 import android.support.test.InstrumentationRegistry;
@@ -49,10 +47,13 @@ public class MediaRouterManagerTest {
     private static final String TAG = "MediaRouterManagerTest";
 
     private static final int TARGET_UID = 109992;
-    private static final String ROUTE_1 = "MediaRoute1";
+
+    // Must be the same as SampleMediaRoute2ProviderService
+    public static final String ROUTE_ID1 = "route_id";
+    public static final String ROUTE_NAME1 = "route_name";
 
     private static final int AWAIT_MS = 1000;
-    private static final int TIMEOUT_MS = 1000;
+    private static final int TIMEOUT_MS = 5000;
 
     private Context mContext;
     private MediaRouter2Manager mManager;
@@ -77,16 +78,16 @@ public class MediaRouterManagerTest {
             new SynchronousQueue<Runnable>());
     }
 
+    //TODO: onRouteChanged, onRouteRemoved must be tested
     @Test
-    public void providerTest() {
+    public void testRouteAddedOnce() {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
 
         mManager.addCallback(mExecutor, mockCallback);
 
-        //TODO: should be changed to onRouteAdded
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-                .onProviderInfoUpdated(argThat(
-                        (MediaRoute2ProviderInfo info) -> info.getRoutes().size() == 1));
+        verify(mockCallback, timeout(TIMEOUT_MS)).onRouteAdded(argThat(
+                (MediaRoute2Info info) ->
+                        info.getId().equals(ROUTE_ID1) && info.getName().equals(ROUTE_NAME1)));
         mManager.removeCallback(mockCallback);
     }
 
@@ -97,8 +98,8 @@ public class MediaRouterManagerTest {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
         mManager.addCallback(mExecutor, mockCallback);
 
-        verify(mockCallback, after(AWAIT_MS).never()).onControlCategoriesChanged(eq(uid),
-                any(List.class));
+        verify(mockCallback, after(AWAIT_MS).never()).onControlCategoriesChanged(uid,
+                TEST_CONTROL_CATEGORIES);
 
         mRouter.setControlCategories(TEST_CONTROL_CATEGORIES);
         verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())

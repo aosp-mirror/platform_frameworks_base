@@ -3256,14 +3256,17 @@ public class SyncManager {
                 }
             }
 
-            // On account add, check if there are any settings to be restored.
-            for (AccountAndUser aau : mRunningAccounts) {
-                if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
-                    if (Log.isLoggable(TAG, Log.DEBUG)) {
-                        Log.d(TAG, "Account " + aau.account + " added, checking sync restore data");
+            if (syncTargets != null) {
+                // On account add, check if there are any settings to be restored.
+                for (AccountAndUser aau : mRunningAccounts) {
+                    if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "Account " + aau.account
+                                    + " added, checking sync restore data");
+                        }
+                        AccountSyncSettingsBackupHelper.accountAdded(mContext, syncTargets.userId);
+                        break;
                     }
-                    AccountSyncSettingsBackupHelper.accountAdded(mContext, syncTargets.userId);
-                    break;
                 }
             }
 

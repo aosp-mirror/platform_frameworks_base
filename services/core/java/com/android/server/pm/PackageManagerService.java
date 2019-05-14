@@ -20101,13 +20101,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
         }
-        if (!updateDefaultHomeNotLocked(userId)) {
-            postPreferredActivityChangedBroadcast(userId);
-        }
         synchronized (mPackages) {
             final PreferredIntentResolver pir = mSettings.editPreferredActivitiesLPw(userId);
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
             scheduleWritePackageRestrictionsLocked(userId);
+        }
+        if (!updateDefaultHomeNotLocked(userId)) {
+            postPreferredActivityChangedBroadcast(userId);
         }
     }
 
@@ -20423,13 +20423,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " for user " + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
         }
-        updateDefaultHomeNotLocked(userId);
-        postPreferredActivityChangedBroadcast(userId);
         synchronized (mPackages) {
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity));
             scheduleWritePackageRestrictionsLocked(userId);
         }
+        updateDefaultHomeNotLocked(userId);
+        postPreferredActivityChangedBroadcast(userId);
     }
 
     @Override
