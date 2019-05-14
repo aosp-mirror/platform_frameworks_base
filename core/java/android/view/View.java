@@ -9076,18 +9076,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <pre>
      *   ContentCaptureSession mainSession = rootView.getContentCaptureSession();
      *   mainSession.setContentCaptureContext(ContentCaptureContext.forLocusId(Uri.parse(myUrl));
-     * <pre>
+     * </pre>
      *
      * <p>Then if the page had an {@code IFRAME}, you would create a new session for it:
-     *
-     * <p>For example, if your activity is associated with a web domain, you could create a session
-     * {@code onCreate()} and associate it with the root view of the activity:
      *
      * <pre>
      *   ContentCaptureSession iframeSession = mainSession.createContentCaptureSession(
      *       ContentCaptureContext.forLocusId(Uri.parse(iframeUrl)));
      *   iframeView.setContentCaptureSession(iframeSession);
-     * <pre>
+     * </pre>
      *
      * @param contentCaptureSession a session created by
      * {@link ContentCaptureSession#createContentCaptureSession(
