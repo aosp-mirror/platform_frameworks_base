@@ -79,10 +79,10 @@ public final class VoiceInteractor {
     /** @hide */
     public static final String KEY_KILL_SIGNAL = "key_kill_signal";
 
-    IVoiceInteractor mInteractor;
+    @Nullable IVoiceInteractor mInteractor;
 
-    Context mContext;
-    Activity mActivity;
+    @Nullable Context mContext;
+    @Nullable Activity mActivity;
     boolean mRetaining;
 
     final HandlerCaller mHandlerCaller;
@@ -999,7 +999,9 @@ public final class VoiceInteractor {
 
         // destroyed now
         mInteractor = null;
-        mActivity.setVoiceInteractor(null);
+        if (mActivity != null) {
+            mActivity.setVoiceInteractor(null);
+        }
     }
 
     public boolean submitRequest(Request request) {
