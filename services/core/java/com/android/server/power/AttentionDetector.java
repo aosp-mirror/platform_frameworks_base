@@ -75,6 +75,8 @@ public class AttentionDetector {
      */
     private final AtomicBoolean mRequested;
 
+    private long mLastActedOnNextScreenDimming;
+
     /**
      * Monotonously increasing ID for the requests sent.
      */
@@ -150,6 +152,9 @@ public class AttentionDetector {
     }
 
     public long updateUserActivity(long nextScreenDimming) {
+        if (nextScreenDimming == mLastActedOnNextScreenDimming) {
+            return nextScreenDimming;
+        }
         if (!mIsSettingEnabled) {
             return nextScreenDimming;
         }
@@ -190,13 +195,14 @@ public class AttentionDetector {
         // afterwards if AttentionManager couldn't deliver it.
         mRequested.set(true);
         mRequestId++;
+        mLastActedOnNextScreenDimming = nextScreenDimming;
         mCallback = new AttentionCallbackInternalImpl(mRequestId);
+        Slog.v(TAG, "Checking user attention, ID: " + mRequestId);
         final boolean sent = mAttentionManager.checkAttention(getAttentionTimeout(), mCallback);
         if (!sent) {
             mRequested.set(false);
         }
 
-        Slog.v(TAG, "Checking user attention, ID: " + mRequestId);
         return whenToCheck;
     }
 
