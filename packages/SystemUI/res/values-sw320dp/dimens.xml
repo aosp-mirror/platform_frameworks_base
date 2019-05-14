@@ -16,8 +16,6 @@
   -->
 <resources>
     <!-- Global actions grid -->
-    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
-
     <dimen name="global_actions_grid_vertical_padding">0dp</dimen>
     <dimen name="global_actions_grid_horizontal_padding">3dp</dimen>
 
