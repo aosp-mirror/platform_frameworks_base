@@ -369,6 +369,8 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> मा सक्रिय"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> सम्म"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"अँध्यारो विषयवस्तु"</string>
+    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC लाई असक्षम पारिएको छ"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC लाई सक्षम पारिएको छ"</string>
@@ -448,10 +450,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फेरि नदेखाउनुहोस्"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"व्यवस्थित गर्नुहोस्"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="8356064473678167305">"सामान्य सूचनाहरू"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"सबै सामान्य सूचनाहरू खाली गर्नुहोस्"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"बाधा नपुऱ्याउनुहोस् नामक मोडमार्फत पज पारिएका सूचनाहरू"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अहिले सुरु गर्नुहोस्"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कुनै सूचनाहरू छैनन्"</string>
@@ -482,8 +482,8 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN असक्षम गर्नुहोस्"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"विच्छेद VPN"</string>
     <string name="monitoring_button_view_policies" msgid="100913612638514424">"नीतिहरू हेर्नुहोस्"</string>
-    <string name="monitoring_description_named_management" msgid="5281789135578986303">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्छ।BREAK\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोगहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थान सम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
-    <string name="monitoring_description_management" msgid="4573721970278370790">"तपाईंको संगठनले तपाईंको यन्त्रको व्यवस्थापन गर्छ।\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोगहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थान सम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_named_management" msgid="5281789135578986303">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्छ।BREAK\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोगहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
+    <string name="monitoring_description_management" msgid="4573721970278370790">"तपाईंको संगठनले तपाईंको यन्त्रको व्यवस्थापन गर्छ।\n\nतपाईंका प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोगहरू, तपाईंको यन्त्रसँग सम्बन्धित डेटा र तपाईंको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="monitoring_description_management_ca_certificate" msgid="5202023784131001751">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापित गऱ्यो। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"तपाईंको संगठनले तपाईंको कार्य प्रोफाइलमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरेको छ। तपाईंको सुरक्षित नेटवर्क ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"यस यन्त्रमा एउटा प्रमाणपत्र सम्बन्धी अख्तियार सुविधा स्थापना गरिएको छ। तपाईंको सुरक्षित नेटवर्कको ट्राफिकको अनुगमन वा परिमार्जन हुनसक्छ।"</string>
@@ -494,7 +494,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"तपाईंको व्यक्तिगत प्रोफाइल इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="VPN_APP">%1$s</xliff:g> मा जडान छ।"</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तपाईंको यन्त्र <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> द्वारा व्यवस्थापन गरिएको छ।"</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ले तपाईंको यन्त्रको व्यवस्थापन गर्न <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> को प्रयोग गर्दछ।"</string>
-    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तपाईँको प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोग, तपाईँको यन्त्रसँग सम्बन्धित डेटा र तपाईँको यन्त्रको स्थान सम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तपाईँको प्रशासकले सेटिङहरू, संस्थागत पहुँच, अनुप्रयोग, तपाईँको यन्त्रसँग सम्बन्धित डेटा र तपाईँको यन्त्रको स्थानसम्बन्धी जानकारीको अनुगमन तथा व्यवस्थापन गर्न सक्नुहुन्छ।"</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"थप जान्नुहोस्"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
@@ -651,6 +651,10 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"यहाँबाट सूचनाहरूको यो समूह कन्फिगर गर्न सकिँदैन"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"प्रोक्सीमार्फत आउने सूचना"</string>
+    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
+    <skip />
+    <!-- no translation found for see_more_title (5358726697042112726) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"यो अनुप्रयोगले क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"यो अनुप्रयोगले माइक्रोफोनको प्रयोग गर्दै छ।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्दै छ।"</string>
@@ -926,4 +930,6 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"सिरानमा दायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"पुछारमा बायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"पुछारमा दायाँतिर सार्नुहोस्"</string>
+    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
+    <skip />
 </resources>

@@ -573,12 +573,9 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Премногу слично, сменете ја позата."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Не вртете ја главата толку многу."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Не вртете ја главата толку многу."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Не вртете ја главата толку многу."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Отстранете ги работите што ви го покриваат лицето."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Исчистете го сензорот на горниот врв од екранот."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ликот не може да се потврди. Хардвер - недостапен."</string>
@@ -1807,7 +1804,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"Во ред"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Штедачот на батерија ги исклучува или ограничува активноста во заднина, некои визуелни ефекти и други функции со голема потрошувачка на енергија за да се продолжи траењето на батеријата. "<annotation id="url">"Дознајте повеќе"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Штедачот на батерија ги исклучува или ограничува активноста во заднина, некои визуелни ефекти и други функции со голема потрошувачка на енергија за да се продолжи траењето на батеријата."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
