@@ -55,12 +55,23 @@ public class DnsUtils {
             throws UnknownHostException {
         final List<InetAddress> result = new ArrayList<InetAddress>();
 
-        result.addAll(Arrays.asList(
-                getAllByName(dnsResolver, network, host, TYPE_AAAA, FLAG_NO_CACHE_LOOKUP,
-                timeout)));
-        result.addAll(Arrays.asList(
-                getAllByName(dnsResolver, network, host, TYPE_A, FLAG_NO_CACHE_LOOKUP,
-                timeout)));
+        try {
+            result.addAll(Arrays.asList(
+                    getAllByName(dnsResolver, network, host, TYPE_AAAA, FLAG_NO_CACHE_LOOKUP,
+                    timeout)));
+        } catch (UnknownHostException e) {
+            // Might happen if the host is v4-only, still need to query TYPE_A
+        }
+        try {
+            result.addAll(Arrays.asList(
+                    getAllByName(dnsResolver, network, host, TYPE_A, FLAG_NO_CACHE_LOOKUP,
+                    timeout)));
+        } catch (UnknownHostException e) {
+            // Might happen if the host is v6-only, still need to return AAAA answers
+        }
+        if (result.size() == 0) {
+            throw new UnknownHostException(host);
+        }
         return result.toArray(new InetAddress[0]);
     }
 
