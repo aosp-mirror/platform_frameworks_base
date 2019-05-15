@@ -133,27 +133,33 @@ class KeyguardController {
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(boolean keyguardShowing, boolean aodShowing) {
-        boolean showingChanged = keyguardShowing != mKeyguardShowing || aodShowing != mAodShowing;
         // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
-        showingChanged |= mKeyguardGoingAway && keyguardShowing;
-        if (!showingChanged) {
+        final boolean keyguardChanged = keyguardShowing != mKeyguardShowing
+                || mKeyguardGoingAway && keyguardShowing;
+        final boolean aodChanged = aodShowing != mAodShowing;
+        if (!keyguardChanged && !aodChanged) {
             return;
         }
         mKeyguardShowing = keyguardShowing;
         mAodShowing = aodShowing;
         mWindowManager.setAodShowing(aodShowing);
-        if (showingChanged) {
+
+        if (keyguardChanged) {
+            // Irrelevant to AOD.
             dismissDockedStackIfNeeded();
             setKeyguardGoingAway(false);
-            // TODO(b/113840485): Check usage for non-default display
-            mWindowManager.setKeyguardOrAodShowingOnDefaultDisplay(
-                    isKeyguardOrAodShowing(DEFAULT_DISPLAY));
             if (keyguardShowing) {
                 mDismissalRequested = false;
             }
         }
-        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        // TODO(b/113840485): Check usage for non-default display
+        mWindowManager.setKeyguardOrAodShowingOnDefaultDisplay(
+                isKeyguardOrAodShowing(DEFAULT_DISPLAY));
+
+        // Update the sleep token first such that ensureActivitiesVisible has correct sleep token
+        // state when evaluating visibilities.
         updateKeyguardSleepToken();
+        mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
     }
 
     /**

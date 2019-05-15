@@ -23,6 +23,7 @@ java_library {
         "androidx.test.rules",
         "frameworks-net-testutils",
         "junit",
+        "mockito-target-minus-junit4",
     ],
     libs: [
         "android.test.base.stubs",

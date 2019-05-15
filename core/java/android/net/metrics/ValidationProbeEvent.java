@@ -170,6 +170,15 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
                 getProbeName(probeType), returnCode, getValidationStage(probeType), durationMs);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(ValidationProbeEvent.class))) return false;
+        final ValidationProbeEvent other = (ValidationProbeEvent) obj;
+        return durationMs == other.durationMs
+                && probeType == other.probeType
+                && returnCode == other.returnCode;
+    }
+
     final static class Decoder {
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
                 new Class[]{ValidationProbeEvent.class},
