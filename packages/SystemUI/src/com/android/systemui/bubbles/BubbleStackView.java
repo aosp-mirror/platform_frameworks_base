@@ -176,6 +176,7 @@ public class BubbleStackView extends FrameLayout {
     private int mExpandedViewPadding;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
+    private int mPointerHeight;
     private int mStatusBarHeight;
     private int mPipDismissHeight;
     private int mImeOffset;
@@ -303,6 +304,8 @@ public class BubbleStackView extends FrameLayout {
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
         mExpandedAnimateYDistance =
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_y_distance);
+        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mPipDismissHeight = mContext.getResources().getDimensionPixelSize(
@@ -1282,15 +1285,16 @@ public class BubbleStackView extends FrameLayout {
      */
     int getMaxExpandedHeight() {
         int expandedY = (int) mExpandedAnimationController.getExpandedY();
-        return expandedY - getStatusBarHeight();
+        // PIP dismiss view uses FLAG_LAYOUT_IN_SCREEN so we need to subtract the bottom inset
+        int pipDismissHeight = mPipDismissHeight - getBottomInset();
+        return mDisplaySize.y - expandedY - mBubbleSize - pipDismissHeight;
     }
 
     /**
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getYPositionForExpandedView() {
-        return mExpandedAnimationController.getExpandedY()
-                - mExpandedBubble.expandedView.getExpandedSize() - mBubblePadding;
+        return getStatusBarHeight() + mBubbleSize + mBubblePadding + mPointerHeight;
     }
 
     /**

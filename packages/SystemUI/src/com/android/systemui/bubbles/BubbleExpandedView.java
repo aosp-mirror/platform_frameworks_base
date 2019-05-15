@@ -174,7 +174,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
 
         mPointerDrawable = new ShapeDrawable(TriangleShape.create(
-                mPointerWidth, mPointerHeight, false /* pointUp */));
+                mPointerWidth, mPointerHeight, true /* pointUp */));
         mPointerView.setBackground(mPointerDrawable);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
@@ -186,8 +186,14 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 true /* singleTaskInstance */);
         addView(mActivityView);
 
-        // Make sure pointer is below activity view
-        bringChildToFront(mPointerView);
+        // Expanded stack layout, top to bottom:
+        // Expanded view container
+        // ==> bubble row
+        // ==> expanded view
+        //   ==> activity view
+        //   ==> manage button
+        bringChildToFront(mActivityView);
+        bringChildToFront(mSettingsIcon);
 
         applyThemeAttrs();
 
