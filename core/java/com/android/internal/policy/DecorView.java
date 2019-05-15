@@ -126,7 +126,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     // The height of a window which has not in DIP.
     private final static int DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP = 5;
 
-    private static final int SCRIM_LIGHT = 0x99ffffff; // 60% white
+    private static final int SCRIM_LIGHT = 0xe6ffffff; // 90% white
 
     public static final ColorViewAttributes STATUS_BAR_COLOR_VIEW_ATTRIBUTES =
             new ColorViewAttributes(SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
