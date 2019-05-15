@@ -173,6 +173,11 @@ public class SubscriptionInfo implements Parcelable {
     private ParcelUuid mGroupUUID;
 
     /**
+     * A package name that specifies who created the group. Null if mGroupUUID is null.
+     */
+    private String mGroupOwner;
+
+    /**
      * Whether group of the subscription is disabled.
      * This is only useful if it's a grouped opportunistic subscription. In this case, if all
      * primary (non-opportunistic) subscriptions in the group are deactivated (unplugged pSIM
@@ -203,9 +208,10 @@ public class SubscriptionInfo implements Parcelable {
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
-                roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString,
-                false, null, TelephonyManager.UNKNOWN_CARRIER_ID,
-                SubscriptionManager.PROFILE_CLASS_DEFAULT);
+                roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
+                false, null, false, TelephonyManager.UNKNOWN_CARRIER_ID,
+                SubscriptionManager.PROFILE_CLASS_DEFAULT,
+                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null);
     }
 
     /**
@@ -219,7 +225,7 @@ public class SubscriptionInfo implements Parcelable {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
                 isOpportunistic, groupUUID, false, carrierId, profileClass,
-                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM);
+                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null);
     }
 
     /**
@@ -229,8 +235,8 @@ public class SubscriptionInfo implements Parcelable {
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString, int cardId,
-            boolean isOpportunistic, @Nullable String groupUUID,
-            boolean isGroupDisabled, int carrierId, int profileClass, int subType) {
+            boolean isOpportunistic, @Nullable String groupUUID, boolean isGroupDisabled,
+            int carrierId, int profileClass, int subType, @Nullable String groupOwner) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -254,6 +260,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mCarrierId = carrierId;
         this.mProfileClass = profileClass;
         this.mSubscriptionType = subType;
+        this.mGroupOwner = groupOwner;
     }
 
     /**
@@ -500,6 +507,15 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
+     * Return owner package of group the subscription belongs to.
+     *
+     * @hide
+     */
+    public @Nullable String getGroupOwner() {
+        return mGroupOwner;
+    }
+
+    /**
      * @return the profile class of this subscription.
      * @hide
      */
@@ -646,11 +662,12 @@ public class SubscriptionInfo implements Parcelable {
             int subType = source.readInt();
             String[] ehplmns = source.readStringArray();
             String[] hplmns = source.readStringArray();
+            String groupOwner = source.readString();
 
             SubscriptionInfo info = new SubscriptionInfo(id, iccId, simSlotIndex, displayName,
                     carrierName, nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc,
                     countryIso, isEmbedded, accessRules, cardString, cardId, isOpportunistic,
-                    groupUUID, isGroupDisabled, carrierid, profileClass, subType);
+                    groupUUID, isGroupDisabled, carrierid, profileClass, subType, groupOwner);
             info.setAssociatedPlmns(ehplmns, hplmns);
             return info;
         }
@@ -688,6 +705,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeInt(mSubscriptionType);
         dest.writeStringArray(mEhplmns);
         dest.writeStringArray(mHplmns);
+        dest.writeString(mGroupOwner);
     }
 
     @Override
@@ -727,7 +745,8 @@ public class SubscriptionInfo implements Parcelable {
                 + " profileClass=" + mProfileClass
                 + " ehplmns = " + Arrays.toString(mEhplmns)
                 + " hplmns = " + Arrays.toString(mHplmns)
-                + " subscriptionType=" + mSubscriptionType + "}";
+                + " subscriptionType=" + mSubscriptionType
+                + " mGroupOwner=" + mGroupOwner + "}";
     }
 
     @Override
@@ -735,7 +754,7 @@ public class SubscriptionInfo implements Parcelable {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
                 mIsOpportunistic, mGroupUUID, mIccId, mNumber, mMcc, mMnc,
                 mCountryIso, mCardString, mCardId, mDisplayName, mCarrierName, mAccessRules,
-                mIsGroupDisabled, mCarrierId, mProfileClass);
+                mIsGroupDisabled, mCarrierId, mProfileClass, mGroupOwner);
     }
 
     @Override
@@ -767,6 +786,7 @@ public class SubscriptionInfo implements Parcelable {
                 && Objects.equals(mCountryIso, toCompare.mCountryIso)
                 && Objects.equals(mCardString, toCompare.mCardString)
                 && Objects.equals(mCardId, toCompare.mCardId)
+                && Objects.equals(mGroupOwner, toCompare.mGroupOwner)
                 && TextUtils.equals(mDisplayName, toCompare.mDisplayName)
                 && TextUtils.equals(mCarrierName, toCompare.mCarrierName)
                 && Arrays.equals(mAccessRules, toCompare.mAccessRules)
