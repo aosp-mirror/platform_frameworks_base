@@ -1533,7 +1533,7 @@
     <!-- Message shown during face acquisition when only the left part of the user's face was detected [CHAR LIMIT=50] -->
     <string name="face_acquired_too_left">Move phone to the right.</string>
     <!-- Message shown during face acquisition when the user is not front facing the sensor [CHAR LIMIT=50] -->
-    <string name="face_acquired_poor_gaze">Look at the screen with your eyes open.</string>
+    <string name="face_acquired_poor_gaze">Please look more directly at your device.</string>
     <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
     <string name="face_acquired_not_detected">Can\u2019t see your face. Look at the phone.</string>
     <!-- Message shown during face acquisition when the device is not steady [CHAR LIMIT=50] -->
@@ -1725,6 +1725,11 @@
     <string name="permlab_access_notification_policy">access Do Not Disturb</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_access_notification_policy">Allows the app to read and write Do Not Disturb configuration.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_startViewPermissionUsage">start view permission usage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_startViewPermissionUsage">Allows the holder to start the permission usage for an app. Should never be needed for normal apps.</string>
 
     <!-- Policy administration -->
 

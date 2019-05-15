@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.INetworkStatsSession;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
@@ -52,6 +51,7 @@ import org.robolectric.shadows.ShadowSubscriptionManager;
 public class DataUsageControllerTest {
 
     private static final String SUB_ID = "Test Subscriber";
+    private static final String SUB_ID_2 = "Test Subscriber 2";
 
     @Mock
     private INetworkStatsSession mSession;
@@ -63,6 +63,9 @@ public class DataUsageControllerTest {
     private NetworkStatsManager mNetworkStatsManager;
     @Mock
     private Context mContext;
+    private NetworkTemplate mNetworkTemplate;
+    private NetworkTemplate mNetworkTemplate2;
+    private NetworkTemplate mWifiNetworkTemplate;
 
     private DataUsageController mController;
     private NetworkStatsHistory mNetworkStatsHistory;
@@ -83,24 +86,27 @@ public class DataUsageControllerTest {
                 .when(mSession).getHistoryForNetwork(any(NetworkTemplate.class), anyInt());
         ShadowSubscriptionManager.setDefaultDataSubscriptionId(mDefaultSubscriptionId);
         doReturn(SUB_ID).when(mTelephonyManager).getSubscriberId();
+
+        mNetworkTemplate = NetworkTemplate.buildTemplateMobileAll(SUB_ID);
+        mNetworkTemplate2 = NetworkTemplate.buildTemplateMobileAll(SUB_ID_2);
+        mWifiNetworkTemplate = NetworkTemplate.buildTemplateWifiWildcard();
     }
 
     @Test
     public void getHistoricalUsageLevel_shouldQuerySummaryForDevice() throws Exception {
+        mController.getHistoricalUsageLevel(mWifiNetworkTemplate);
 
-        mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard());
-
-        verify(mNetworkStatsManager).querySummaryForDevice(eq(ConnectivityManager.TYPE_WIFI),
-                eq(SUB_ID), eq(0L) /* startTime */, anyLong() /* endTime */);
+        verify(mNetworkStatsManager).querySummaryForDevice(eq(mWifiNetworkTemplate),
+                eq(0L) /* startTime */, anyLong() /* endTime */);
     }
 
     @Test
     public void getHistoricalUsageLevel_noUsageData_shouldReturn0() throws Exception {
-        when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_WIFI),
-                eq(SUB_ID), eq(0L) /* startTime */, anyLong() /* endTime */))
+        when(mNetworkStatsManager.querySummaryForDevice(eq(mWifiNetworkTemplate),
+                eq(0L) /* startTime */, anyLong() /* endTime */))
                 .thenReturn(mock(NetworkStats.Bucket.class));
-        assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
-            .isEqualTo(0L);
+        assertThat(mController.getHistoricalUsageLevel(mWifiNetworkTemplate))
+                .isEqualTo(0L);
     }
 
     @Test
@@ -110,10 +116,10 @@ public class DataUsageControllerTest {
         final NetworkStats.Bucket bucket = mock(NetworkStats.Bucket.class);
         when(bucket.getRxBytes()).thenReturn(receivedBytes);
         when(bucket.getTxBytes()).thenReturn(transmittedBytes);
-        when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_WIFI),
-                eq(SUB_ID), eq(0L) /* startTime */, anyLong() /* endTime */)).thenReturn(bucket);
+        when(mNetworkStatsManager.querySummaryForDevice(eq(mWifiNetworkTemplate),
+                eq(0L) /* startTime */, anyLong() /* endTime */)).thenReturn(bucket);
 
-        assertThat(mController.getHistoricalUsageLevel(NetworkTemplate.buildTemplateWifiWildcard()))
+        assertThat(mController.getHistoricalUsageLevel(mWifiNetworkTemplate))
                 .isEqualTo(receivedBytes + transmittedBytes);
     }
 
@@ -126,9 +132,8 @@ public class DataUsageControllerTest {
         final NetworkStats.Bucket defaultSubscriberBucket = mock(NetworkStats.Bucket.class);
         when(defaultSubscriberBucket.getRxBytes()).thenReturn(defaultSubRx);
         when(defaultSubscriberBucket.getTxBytes()).thenReturn(defaultSubTx);
-        when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_MOBILE),
-                eq(SUB_ID), eq(0L)/* startTime */, anyLong() /* endTime */)).thenReturn(
-                defaultSubscriberBucket);
+        when(mNetworkStatsManager.querySummaryForDevice(eq(mNetworkTemplate), eq(0L)/* startTime */,
+                anyLong() /* endTime */)).thenReturn(defaultSubscriberBucket);
 
         // Now setup a stats bucket for a different, non-default subscription / subscriber ID.
         final long nonDefaultSubRx = 7654321L;
@@ -137,25 +142,21 @@ public class DataUsageControllerTest {
         when(nonDefaultSubscriberBucket.getRxBytes()).thenReturn(nonDefaultSubRx);
         when(nonDefaultSubscriberBucket.getTxBytes()).thenReturn(nonDefaultSubTx);
         final int explicitSubscriptionId = 55;
-        final String subscriberId2 = "Test Subscriber 2";
-        when(mNetworkStatsManager.querySummaryForDevice(eq(ConnectivityManager.TYPE_MOBILE),
-                eq(subscriberId2), eq(0L)/* startTime */, anyLong() /* endTime */)).thenReturn(
+        when(mNetworkStatsManager.querySummaryForDevice(eq(mNetworkTemplate2),
+                eq(0L)/* startTime */, anyLong() /* endTime */)).thenReturn(
                 nonDefaultSubscriberBucket);
-        doReturn(subscriberId2).when(mTelephonyManager).getSubscriberId();
+        doReturn(SUB_ID_2).when(mTelephonyManager).getSubscriberId();
 
         // Now verify that when we're asking for stats on the non-default subscription, we get
         // the data back for that subscription and *not* the default one.
         mController.setSubscriptionId(explicitSubscriptionId);
 
-        assertThat(mController.getHistoricalUsageLevel(
-                NetworkTemplate.buildTemplateMobileAll(subscriberId2))).isEqualTo(
+        assertThat(mController.getHistoricalUsageLevel(mNetworkTemplate2)).isEqualTo(
                 nonDefaultSubRx + nonDefaultSubTx);
-
-        verify(mTelephonyManager).createForSubscriptionId(explicitSubscriptionId);
     }
 
     @Test
-    public void getTelephonyManager_shouldCreateWithExplicitSubId() throws Exception {
+    public void getTelephonyManager_shouldCreateWithExplicitSubId() {
         int explicitSubId = 1;
         TelephonyManager tmForSub1 = new TelephonyManager(mContext, explicitSubId);
         when(mTelephonyManager.createForSubscriptionId(eq(explicitSubId))).thenReturn(tmForSub1);

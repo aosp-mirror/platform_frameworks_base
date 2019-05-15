@@ -247,7 +247,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             }
             childId = getDocIdForFile(file);
             onDocIdChanged(childId);
-            addFolderToMediaStore(getFileForDocId(childId, true));
         } else {
             try {
                 if (!file.createNewFile()) {
@@ -259,17 +258,9 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new IllegalStateException("Failed to touch " + file + ": " + e);
             }
         }
+        MediaStore.scanFile(getContext(), file);
 
         return childId;
-    }
-
-    private void addFolderToMediaStore(@Nullable File visibleFolder) {
-        // visibleFolder is null if we're adding a folder to external thumb drive or SD card.
-        if (visibleFolder != null) {
-            assert (visibleFolder.isDirectory());
-
-            MediaStore.scanFile(getContext(), visibleFolder);
-        }
     }
 
     @Override
@@ -293,7 +284,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         moveInMediaStore(beforeVisibleFile, afterVisibleFile);
 
         if (!TextUtils.equals(docId, afterDocId)) {
-            scanFile(afterVisibleFile);
             return afterDocId;
         } else {
             return null;

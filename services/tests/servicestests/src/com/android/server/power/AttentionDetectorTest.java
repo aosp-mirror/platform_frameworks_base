@@ -23,6 +23,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -182,10 +183,22 @@ public class AttentionDetectorTest extends AndroidTestCase {
     }
 
     @Test
+    public void testOnUserActivity_ignoresIfAlreadyDoneForThatNextScreenDimming() {
+        long when = registerAttention();
+        verify(mAttentionManagerInternal).checkAttention(anyLong(), any());
+        assertThat(when).isLessThan(mNextDimming);
+        clearInvocations(mAttentionManagerInternal);
+
+        long redundantWhen = mAttentionDetector.updateUserActivity(mNextDimming);
+        assertThat(redundantWhen).isEqualTo(mNextDimming);
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
+    }
+
+    @Test
     public void testOnUserActivity_skipsIfAlreadyScheduled() {
         registerAttention();
         reset(mAttentionManagerInternal);
-        long when = mAttentionDetector.updateUserActivity(mNextDimming);
+        long when = mAttentionDetector.updateUserActivity(mNextDimming + 1);
         verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
         assertThat(when).isLessThan(mNextDimming);
     }

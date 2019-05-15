@@ -48,8 +48,11 @@ public class BubbleView extends FrameLayout {
     private Context mContext;
 
     private BadgedImageView mBadgedImageView;
+    private int mBadgeColor;
     private int mPadding;
     private int mIconInset;
+
+    private boolean mSuppressDot = false;
 
     private NotificationEntry mEntry;
 
@@ -130,18 +133,54 @@ public class BubbleView extends FrameLayout {
         return (mEntry != null) ? mEntry.getRow() : null;
     }
 
+    /** Changes the dot's visibility to match the bubble view's state. */
+    void updateDotVisibility(boolean animate) {
+        updateDotVisibility(animate, null /* after */);
+    }
+
     /**
-     * Marks this bubble as "read", i.e. no badge should show.
+     * Changes the dot's visibility to match the bubble view's state, running the provided callback
+     * after animation if requested.
      */
-    public void updateDotVisibility() {
-        boolean showDot = getEntry().showInShadeWhenBubble();
-        animateDot(showDot);
+    void updateDotVisibility(boolean animate, Runnable after) {
+        boolean showDot = getEntry().showInShadeWhenBubble() && !mSuppressDot;
+
+        if (animate) {
+            animateDot(showDot, after);
+        } else {
+            mBadgedImageView.setShowDot(showDot);
+        }
+    }
+
+    /**
+     * Sets whether or not to hide the dot even if we'd otherwise show it. This is used while the
+     * flyout is visible or animating, to hide the dot until the flyout visually transforms into it.
+     */
+    void setSuppressDot(boolean suppressDot, boolean animate) {
+        mSuppressDot = suppressDot;
+        updateDotVisibility(animate);
+    }
+
+    /** Sets the position of the 'new' dot, animating it out and back in if requested. */
+    void setDotPosition(boolean onLeft, boolean animate) {
+        if (animate && onLeft != mBadgedImageView.getDotPosition() && !mSuppressDot) {
+            animateDot(false /* showDot */, () -> {
+                mBadgedImageView.setDotPosition(onLeft);
+                animateDot(true /* showDot */, null);
+            });
+        } else {
+            mBadgedImageView.setDotPosition(onLeft);
+        }
+    }
+
+    boolean getDotPositionOnLeft() {
+        return mBadgedImageView.getDotPosition();
     }
 
     /**
      * Animates the badge to show or hide.
      */
-    private void animateDot(boolean showDot) {
+    private void animateDot(boolean showDot, Runnable after) {
         if (mBadgedImageView.isShowingDot() != showDot) {
             mBadgedImageView.setShowDot(showDot);
             mBadgedImageView.clearAnimation();
@@ -152,9 +191,13 @@ public class BubbleView extends FrameLayout {
                         fraction = showDot ? fraction : 1 - fraction;
                         mBadgedImageView.setDotScale(fraction);
                     }).withEndAction(() -> {
-                if (!showDot) {
-                    mBadgedImageView.setShowDot(false);
-                }
+                        if (!showDot) {
+                            mBadgedImageView.setShowDot(false);
+                        }
+
+                        if (after != null) {
+                            after.run();
+                        }
             }).start();
         }
     }
@@ -181,8 +224,13 @@ public class BubbleView extends FrameLayout {
             mBadgedImageView.setImageDrawable(iconDrawable);
         }
         int badgeColor = determineDominateColor(iconDrawable, n.color);
+        mBadgeColor = badgeColor;
         mBadgedImageView.setDotColor(badgeColor);
-        animateDot(mEntry.showInShadeWhenBubble() /* showDot */);
+        animateDot(mEntry.showInShadeWhenBubble() /* showDot */, null /* after */);
+    }
+
+    int getBadgeColor() {
+        return mBadgeColor;
     }
 
     private Drawable buildIconWithTint(Drawable iconDrawable, int backgroundColor) {

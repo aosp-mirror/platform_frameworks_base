@@ -49,6 +49,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -1625,6 +1626,15 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /**
+     * Maximum time buffer in which JobScheduler will try to optimize periodic job scheduling. This
+     * does not cause a job's period to be larger than requested (eg: if the requested period is
+     * shorter than this buffer). This is used to put a limit on when JobScheduler will intervene
+     * and try to optimize scheduling if the current job finished less than this amount of time to
+     * the start of the next period
+     */
+    private static final long PERIODIC_JOB_WINDOW_BUFFER = 30 * MINUTE_IN_MILLIS;
+
+    /**
      * Called after a periodic has executed so we can reschedule it. We take the last execution
      * time of the job to be the time of completion (i.e. the time at which this function is
      * called).
@@ -1644,16 +1654,18 @@ public class JobSchedulerService extends com.android.server.SystemService
         final long period = periodicToReschedule.getJob().getIntervalMillis();
         final long latestRunTimeElapsed = periodicToReschedule.getOriginalLatestRunTimeElapsed();
         final long flex = periodicToReschedule.getJob().getFlexMillis();
+        long rescheduleBuffer = 0;
 
+        final long diffMs = Math.abs(elapsedNow - latestRunTimeElapsed);
         if (elapsedNow > latestRunTimeElapsed) {
             // The job ran past its expected run window. Have it count towards the current window
             // and schedule a new job for the next window.
             if (DEBUG) {
                 Slog.i(TAG, "Periodic job ran after its intended window.");
             }
-            final long diffMs = (elapsedNow - latestRunTimeElapsed);
             int numSkippedWindows = (int) (diffMs / period) + 1; // +1 to include original window
-            if (period != flex && diffMs > Math.min(30 * MINUTE_IN_MILLIS, (period - flex) / 2)) {
+            if (period != flex && diffMs > Math.min(PERIODIC_JOB_WINDOW_BUFFER,
+                    (period - flex) / 2)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Custom flex job ran too close to next window.");
                 }
@@ -1664,9 +1676,15 @@ public class JobSchedulerService extends com.android.server.SystemService
             newLatestRuntimeElapsed = latestRunTimeElapsed + (period * numSkippedWindows);
         } else {
             newLatestRuntimeElapsed = latestRunTimeElapsed + period;
+            if (diffMs < PERIODIC_JOB_WINDOW_BUFFER && diffMs < period / 6) {
+                // Add a little buffer to the start of the next window so the job doesn't run
+                // too soon after this completed one.
+                rescheduleBuffer = Math.min(PERIODIC_JOB_WINDOW_BUFFER, period / 6 - diffMs);
+            }
         }
 
-        final long newEarliestRunTimeElapsed = newLatestRuntimeElapsed - flex;
+        final long newEarliestRunTimeElapsed = newLatestRuntimeElapsed
+                - Math.min(flex, period - rescheduleBuffer);
 
         if (DEBUG) {
             Slog.v(TAG, "Rescheduling executed periodic. New execution window [" +
@@ -2764,12 +2782,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public List<JobInfo> getAllPendingJobs() throws RemoteException {
+        public ParceledListSlice<JobInfo> getAllPendingJobs() throws RemoteException {
             final int uid = Binder.getCallingUid();
 
             long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.getPendingJobs(uid);
+                return new ParceledListSlice<>(JobSchedulerService.this.getPendingJobs(uid));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2905,7 +2923,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          * <p class="note">This is a slow operation, so it should be called sparingly.
          */
         @Override
-        public List<JobSnapshot> getAllJobSnapshots() {
+        public ParceledListSlice<JobSnapshot> getAllJobSnapshots() {
             final int uid = Binder.getCallingUid();
             if (uid != Process.SYSTEM_UID) {
                 throw new SecurityException(
@@ -2916,7 +2934,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobs.forEachJob((job) -> snapshots.add(
                         new JobSnapshot(job.getJob(), job.getSatisfiedConstraintFlags(),
                                 isReadyToBeExecutedLocked(job))));
-                return snapshots;
+                return new ParceledListSlice<>(snapshots);
             }
         }
     };

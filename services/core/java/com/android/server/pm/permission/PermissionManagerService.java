@@ -929,6 +929,7 @@ public class PermissionManagerService {
                 final BasePermission bp = mSettings.getPermissionLocked(permName);
                 final boolean appSupportsRuntimePermissions =
                         pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M;
+                String upgradedActivityRecognitionPermission = null;
 
                 if (DEBUG_INSTALL) {
                     Log.i(TAG, "Package " + pkg.packageName + " checking " + permName + ": " + bp);
@@ -947,11 +948,40 @@ public class PermissionManagerService {
                 // Cache newImplicitPermissions before modifing permissionsState as for the shared
                 // uids the original and new state are the same object
                 if (!origPermissions.hasRequestedPermission(permName)
-                        && pkg.implicitPermissions.contains(permName)) {
-                    newImplicitPermissions.add(permName);
+                        && (pkg.implicitPermissions.contains(permName)
+                                || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
+                    if (pkg.implicitPermissions.contains(permName)) {
+                        // If permName is an implicit permission, try to auto-grant
+                        newImplicitPermissions.add(permName);
 
-                    if (DEBUG_PERMISSIONS) {
-                        Slog.i(TAG, permName + " is newly added for " + pkg.packageName);
+                        if (DEBUG_PERMISSIONS) {
+                            Slog.i(TAG, permName + " is newly added for " + pkg.packageName);
+                        }
+                    } else {
+                        // Special case for Activity Recognition permission. Even if AR permission
+                        // is not an implicit permission we want to add it to the list (try to
+                        // auto-grant it) if the app was installed on a device before AR permission
+                        // was split, regardless of if the app now requests the new AR permission
+                        // or has updated its target SDK and AR is no longer implicit to it.
+                        // This is a compatibility workaround for apps when AR permission was
+                        // split in Q.
+                        int numSplitPerms = PermissionManager.SPLIT_PERMISSIONS.size();
+                        for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
+                            PermissionManager.SplitPermissionInfo sp =
+                                    PermissionManager.SPLIT_PERMISSIONS.get(splitPermNum);
+                            String splitPermName = sp.getSplitPermission();
+                            if (sp.getNewPermissions().contains(permName)
+                                    && origPermissions.hasInstallPermission(splitPermName)) {
+                                upgradedActivityRecognitionPermission = splitPermName;
+                                newImplicitPermissions.add(permName);
+
+                                if (DEBUG_PERMISSIONS) {
+                                    Slog.i(TAG, permName + " is newly added for "
+                                            + pkg.packageName);
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -985,7 +1015,8 @@ public class PermissionManagerService {
                     // For all apps normal permissions are install time ones.
                     grant = GRANT_INSTALL;
                 } else if (bp.isRuntime()) {
-                    if (origPermissions.hasInstallPermission(bp.getName())) {
+                    if (origPermissions.hasInstallPermission(bp.getName())
+                            || upgradedActivityRecognitionPermission != null) {
                         // Before Q we represented some runtime permissions as install permissions,
                         // in Q we cannot do this anymore. Hence upgrade them all.
                         grant = GRANT_UPGRADE;
@@ -1161,10 +1192,15 @@ public class PermissionManagerService {
                                     .getInstallPermissionState(perm);
                             int flags = (permState != null) ? permState.getFlags() : 0;
 
+                            BasePermission bpToRevoke =
+                                    upgradedActivityRecognitionPermission == null
+                                    ? bp : mSettings.getPermissionLocked(
+                                            upgradedActivityRecognitionPermission);
                             // Remove install permission
-                            if (origPermissions.revokeInstallPermission(bp)
+                            if (origPermissions.revokeInstallPermission(bpToRevoke)
                                     != PERMISSION_OPERATION_FAILURE) {
-                                origPermissions.updatePermissionFlags(bp, UserHandle.USER_ALL,
+                                origPermissions.updatePermissionFlags(bpToRevoke,
+                                        UserHandle.USER_ALL,
                                         (MASK_PERMISSION_FLAGS_ALL
                                                 & ~FLAG_PERMISSION_APPLY_RESTRICTION), 0);
                                 changedInstallPermission = true;
@@ -1489,9 +1525,11 @@ public class PermissionManagerService {
                     for (int userNum = 0; userNum < numUsers; userNum++) {
                         int userId = users[userNum];
 
-                        ps.updatePermissionFlags(bp, userId,
-                                FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
-                                FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
+                        if (!newPerm.equals(Manifest.permission.ACTIVITY_RECOGNITION)) {
+                            ps.updatePermissionFlags(bp, userId,
+                                    FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
+                                    FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
+                        }
                         updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
 
                         boolean inheritsFromInstallPerm = false;

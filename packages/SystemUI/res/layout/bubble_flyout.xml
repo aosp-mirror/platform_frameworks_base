@@ -13,18 +13,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:paddingLeft="@dimen/bubble_flyout_pointer_size"
-    android:paddingRight="@dimen/bubble_flyout_pointer_size">
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
 
     <FrameLayout
-        android:id="@+id/bubble_flyout"
+        android:id="@+id/bubble_flyout_text_container"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:background="@drawable/bubble_flyout"
+        android:clipToPadding="false"
         android:paddingLeft="@dimen/bubble_flyout_padding_x"
         android:paddingRight="@dimen/bubble_flyout_padding_x"
         android:paddingTop="@dimen/bubble_flyout_padding_y"
@@ -41,4 +36,4 @@
 
     </FrameLayout>
 
-</FrameLayout>
+</merge>
