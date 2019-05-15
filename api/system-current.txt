@@ -3404,7 +3404,7 @@ package android.location {
     method public boolean isExtraLocationControllerPackageEnabled();
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
-    method public boolean isProviderPackage(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
