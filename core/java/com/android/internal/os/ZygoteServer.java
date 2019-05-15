@@ -66,11 +66,8 @@ class ZygoteServer {
     /** The default value used for the USAP_POOL_SIZE_MIN device property */
     private static final String USAP_POOL_SIZE_MIN_DEFAULT = "1";
 
-    /**
-     * Number of milliseconds to delay before refilling the pool if it hasn't reached its
-     * minimum value.
-     */
-    private static final int USAP_REFILL_DELAY_MS = 3000;
+    /** The default value used for the USAP_REFILL_DELAY_MS device property */
+    private static final String USAP_POOL_REFILL_DELAY_MS_DEFAULT = "3000";
 
     /** The "not a timestamp" value for the refill delay timestamp mechanism. */
     private static final int INVALID_TIMESTAMP = -1;
@@ -139,6 +136,12 @@ class ZygoteServer {
      * be re-filled when (mUsapPoolMax - gUsapPoolCount) >= sUsapPoolRefillThreshold.
      */
     private int mUsapPoolRefillThreshold = 0;
+
+    /**
+     * Number of milliseconds to delay before refilling the pool if it hasn't reached its
+     * minimum value.
+     */
+    private int mUsapPoolRefillDelayMs = -1;
 
     private enum UsapPoolRefillAction {
         DELAYED,
@@ -280,6 +283,13 @@ class ZygoteServer {
                 mUsapPoolRefillThreshold = Integer.min(
                         Integer.parseInt(usapPoolRefillThresholdPropString),
                         mUsapPoolSizeMax);
+            }
+
+            final String usapPoolRefillDelayMsPropString = Zygote.getConfigurationProperty(
+                    ZygoteConfig.USAP_POOL_REFILL_DELAY_MS, USAP_POOL_REFILL_DELAY_MS_DEFAULT);
+
+            if (!usapPoolRefillDelayMsPropString.isEmpty()) {
+                mUsapPoolRefillDelayMs = Integer.parseInt(usapPoolRefillDelayMsPropString);
             }
 
             // Sanity check
@@ -467,13 +477,13 @@ class ZygoteServer {
                 int elapsedTimeMs =
                         (int) (System.currentTimeMillis() - usapPoolRefillTriggerTimestamp);
 
-                if (elapsedTimeMs >= USAP_REFILL_DELAY_MS) {
+                if (elapsedTimeMs >= mUsapPoolRefillDelayMs) {
                     // Normalize the poll timeout value when the time between one poll event and the
                     // next pushes us over the delay value.  This prevents poll receiving a 0
                     // timeout value, which would result in it returning immediately.
                     pollTimeoutMs = -1;
                 } else {
-                    pollTimeoutMs = USAP_REFILL_DELAY_MS - elapsedTimeMs;
+                    pollTimeoutMs = mUsapPoolRefillDelayMs - elapsedTimeMs;
                 }
             }
 
