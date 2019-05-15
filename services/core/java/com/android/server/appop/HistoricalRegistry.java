@@ -406,7 +406,7 @@ final class HistoricalRegistry {
             synchronized (mInMemoryLock) {
                 boolean resampleHistory = false;
                 Slog.i(LOG_TAG, "New history parameters: mode:"
-                        + AppOpsManager.historicalModeToString(mMode) + " baseSnapshotInterval:"
+                        + AppOpsManager.historicalModeToString(mode) + " baseSnapshotInterval:"
                         + baseSnapshotInterval + " intervalCompressionMultiplier:"
                         + intervalCompressionMultiplier);
                 if (mMode != mode) {
