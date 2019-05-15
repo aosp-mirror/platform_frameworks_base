@@ -7294,6 +7294,7 @@ message MetricsEvent {
     ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
 
     // ---- Skipping ahead to avoid conflicts between master and release branches.
+
     // OPEN: Settings > System > Gestures > Global Actions Panel
     // CATEGORY: SETTINGS
     // OS: Q
