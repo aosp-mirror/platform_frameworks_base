@@ -14,15 +14,28 @@
 // limitations under the License.
 //
 
-// Stub APK to define permissions for NetworkStack
-android_app {
-    name: "NetworkPermissionConfig",
+java_defaults {
+    name: "NetworkPermissionConfigDefaults",
     // TODO: mark app as hasCode=false in manifest once soong stops complaining about apps without
     // a classes.dex.
     srcs: ["src/**/*.java"],
     platform_apis: true,
     min_sdk_version: "28",
-    certificate: "networkstack",
     privileged: true,
     manifest: "AndroidManifest.xml",
+}
+
+// Stub APK to define permissions for NetworkStack
+android_app {
+    name: "NetworkPermissionConfig",
+    defaults: ["NetworkPermissionConfigDefaults"],
+    certificate: "networkstack",
+}
+
+// Alternative stub APK signed with platform certificate. To use with InProcessNetworkStack.
+android_app {
+    name: "PlatformNetworkPermissionConfig",
+    defaults: ["NetworkPermissionConfigDefaults"],
+    certificate: "platform",
+    overrides: ["NetworkPermissionConfig"],
 }
