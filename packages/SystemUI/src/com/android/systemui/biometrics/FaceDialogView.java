@@ -288,6 +288,7 @@ public class FaceDialogView extends BiometricDialogView {
     @Override
     protected void handleResetMessage() {
         mErrorText.setText(getHintStringResourceId());
+        mErrorText.setContentDescription(mContext.getString(getHintStringResourceId()));
         mErrorText.setTextColor(mTextColor);
         if (getState() == STATE_AUTHENTICATING) {
             mErrorText.setVisibility(View.VISIBLE);
@@ -406,13 +407,21 @@ public class FaceDialogView extends BiometricDialogView {
             } else {
                 mIconController.showIcon(R.drawable.face_dialog_pulse_dark_to_light);
             }
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_authenticating));
         } else if (oldState == STATE_PENDING_CONFIRMATION && newState == STATE_AUTHENTICATED) {
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_confirmed));
         } else if (oldState == STATE_ERROR && newState == STATE_IDLE) {
             mIconController.animateOnce(R.drawable.face_dialog_error_to_idle);
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_idle));
         } else if (oldState == STATE_ERROR && newState == STATE_AUTHENTICATED) {
             mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_authenticated));
         } else if (newState == STATE_ERROR) {
             // It's easier to only check newState and gate showing the animation on the
             // mErrorToIdleAnimationRunnable as a proxy, than add a ton of extra state. For example,
@@ -426,11 +435,17 @@ public class FaceDialogView extends BiometricDialogView {
             }
         } else if (oldState == STATE_AUTHENTICATING && newState == STATE_AUTHENTICATED) {
             mIconController.animateOnce(R.drawable.face_dialog_dark_to_checkmark);
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_authenticated));
         } else if (newState == STATE_PENDING_CONFIRMATION) {
             mHandler.removeCallbacks(mErrorToIdleAnimationRunnable);
             mIconController.animateOnce(R.drawable.face_dialog_wink_from_dark);
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_authenticated));
         } else if (newState == STATE_IDLE) {
             mIconController.showStatic(R.drawable.face_dialog_idle_static);
+            mBiometricIcon.setContentDescription(mContext.getString(
+                    R.string.biometric_dialog_face_icon_description_idle));
         } else {
             Log.w(TAG, "Unknown animation from " + oldState + " -> " + newState);
         }
