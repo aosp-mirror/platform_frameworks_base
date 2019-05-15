@@ -232,7 +232,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         reset(mAuthSecretService);
         mService.onUnlockUser(PRIMARY_USER_ID);
-        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        flushHandlerTasks();
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
     }
 
@@ -242,7 +242,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         reset(mAuthSecretService);
         mService.onUnlockUser(PRIMARY_USER_ID);
-        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        flushHandlerTasks();
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
     }
 
@@ -254,7 +254,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         reset(mAuthSecretService);
         mService.onUnlockUser(PRIMARY_USER_ID);
-        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        flushHandlerTasks();
         verify(mAuthSecretService).primaryUserCredential(any(ArrayList.class));
     }
 
@@ -357,7 +357,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 handle, token, PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
         // Verify DPM gets notified about new device lock
-        mService.mHandler.runWithScissors(() -> {}, 0 /*now*/); // Flush runnables on handler
+        flushHandlerTasks();
         final PasswordMetrics metric = PasswordMetrics.computeForCredential(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN, pattern);
         verify(mDevicePolicyManager).setActivePasswordState(metric, PRIMARY_USER_ID);
@@ -384,6 +384,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         mLocalService.setLockCredentialWithToken(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
                 handle, token, PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+        flushHandlerTasks(); // flush the unlockUser() call before changing password again
         mLocalService.setLockCredentialWithToken(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 handle, token, PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
