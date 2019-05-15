@@ -21,9 +21,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
-import android.net.ConnectivityManager;
 import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 
@@ -43,6 +43,8 @@ public class NetworkCycleChartDataLoaderTest {
     private NetworkPolicyManager mNetworkPolicyManager;
     @Mock
     private Context mContext;
+    @Mock
+    private NetworkTemplate mNetworkTemplate;
 
     private NetworkCycleChartDataLoader mLoader;
 
@@ -60,13 +62,12 @@ public class NetworkCycleChartDataLoaderTest {
     public void recordUsage_shouldQueryNetworkSummaryForDevice() throws RemoteException {
         final long end = System.currentTimeMillis();
         final long start = end - (DateUtils.WEEK_IN_MILLIS * 4);
-        final int networkType = ConnectivityManager.TYPE_MOBILE;
-        final String subId = "TestSubscriber";
         mLoader = NetworkCycleChartDataLoader.builder(mContext)
-            .setSubscriberId(subId).build();
+                .setNetworkTemplate(mNetworkTemplate)
+                .build();
 
         mLoader.recordUsage(start, end);
 
-        verify(mNetworkStatsManager).querySummaryForDevice(networkType, subId, start, end);
+        verify(mNetworkStatsManager).querySummaryForDevice(mNetworkTemplate, start, end);
     }
 }

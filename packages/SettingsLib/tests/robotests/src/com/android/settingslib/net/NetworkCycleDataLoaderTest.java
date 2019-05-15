@@ -126,8 +126,6 @@ public class NetworkCycleDataLoaderTest {
         when(mIterator.next()).thenReturn(cycle);
         mLoader = spy(new NetworkCycleDataTestLoader(mContext));
         ReflectionHelpers.setField(mLoader, "mPolicy", mPolicy);
-        ReflectionHelpers.setField(mLoader, "mNetworkType", networkType);
-        ReflectionHelpers.setField(mLoader, "mSubId", subId);
 
         mLoader.loadPolicyData();
 
