@@ -89,6 +89,7 @@ import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
+import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
@@ -3249,7 +3250,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (Objects.equals(StorageManager.UUID_PRIVATE_INTERNAL, ps.volumeUuid)) {
                         // No apps are running this early, so no need to freeze
                         clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
-                                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
+                                FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
                 }
@@ -3502,8 +3503,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return false;
             }
-            clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
-                    | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+            clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                    | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
             mDexManager.notifyPackageUpdated(pkg.packageName,
                     pkg.baseCodePath, pkg.splitCodePaths);
         }
@@ -15975,6 +15976,9 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mInstallLock) {
                 // Clean up both app data and code
                 // All package moves are frozen until finished
+
+                // We purposefully exclude FLAG_STORAGE_EXTERNAL here, since
+                // this task was only focused on moving data on internal storage.
                 for (int userId : userIds) {
                     try {
                         mInstaller.destroyAppData(volumeUuid, move.packageName, userId,
@@ -17075,8 +17079,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final String packageName = pkg.packageName;
             prepareAppDataAfterInstallLIF(pkg);
             if (reconciledPkg.prepareResult.clearCodeCache) {
-                clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
-                        | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                        | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
             }
             if (reconciledPkg.prepareResult.replace) {
                 mDexManager.notifyPackageUpdated(pkg.packageName,
@@ -18848,7 +18852,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 resolvedPkg.setVolumeUuid(deletedPs.volumeUuid);
             }
             destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
-                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             destroyAppProfilesLIF(resolvedPkg);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
@@ -19600,7 +19604,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             destroyAppDataLIF(pkg, nextUserId,
-                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(nextUserId, ps.appId);
             final SparseBooleanArray changedUsers = new SparseBooleanArray();
@@ -19736,7 +19740,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         clearAppDataLIF(pkg, userId,
-                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
 
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         removeKeystoreDataIfNeeded(userId, appId);
@@ -19967,8 +19971,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (doClearData) {
                 synchronized (mInstallLock) {
-                    final int flags = StorageManager.FLAG_STORAGE_DE
-                            | StorageManager.FLAG_STORAGE_CE;
+                    final int flags = FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL;
                     // We're only clearing cache files, so we don't care if the
                     // app is unfrozen and still able to run
                     clearAppDataLIF(pkg, userId, flags | Installer.FLAG_CLEAR_CACHE_ONLY);
@@ -22516,9 +22519,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 if (!Build.FINGERPRINT.equals(ver.fingerprint)) {
-                    clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
-                            StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
-                                    | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                    clearAppDataLIF(ps.pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                            | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                 }
             }
         }
