@@ -1651,6 +1651,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioAutoInitiationAction.class);
         removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
+
+        if (!mService.isControlEnabled()) {
+            setSystemAudioMode(false);
+        }
     }
 
     @ServiceThreadOnly
