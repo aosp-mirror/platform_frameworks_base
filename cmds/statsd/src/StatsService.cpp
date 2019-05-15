@@ -1478,8 +1478,21 @@ void StatsService::binderDied(const wp <IBinder>& who) {
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());
     if (mProcessor != nullptr) {
         ALOGW("Reset statsd upon system server restarts.");
+        int64_t systemServerRestartNs = getElapsedRealtimeNs();
+        ProtoOutputStream proto;
+        mProcessor->WriteActiveConfigsToProtoOutputStream(systemServerRestartNs,
+                STATSCOMPANION_DIED, &proto);
+
         mProcessor->WriteDataToDisk(STATSCOMPANION_DIED, FAST);
         mProcessor->resetConfigs();
+
+        std::string serializedActiveConfigs;
+        if (proto.serializeToString(&serializedActiveConfigs)) {
+            ActiveConfigList activeConfigs;
+            if (activeConfigs.ParseFromString(serializedActiveConfigs)) {
+                mProcessor->SetConfigsActiveState(activeConfigs, systemServerRestartNs);
+            }
+        }
     }
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);

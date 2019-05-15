@@ -31,17 +31,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// Keep this in sync with DumpReportReason enum in stats_log.proto
-enum DumpReportReason {
-    DEVICE_SHUTDOWN = 1,
-    CONFIG_UPDATED = 2,
-    CONFIG_REMOVED = 3,
-    GET_DATA_CALLED = 4,
-    ADB_DUMP = 5,
-    CONFIG_RESET = 6,
-    STATSCOMPANION_DIED = 7,
-    TERMINATION_SIGNAL_RECEIVED = 8
-};
 
 class StatsLogProcessor : public ConfigListener {
 public:
@@ -92,8 +81,15 @@ public:
     /* Persist configs containing metrics with active activations to disk. */
     void SaveActiveConfigsToDisk(int64_t currentTimeNs);
 
+    /* Writes the current active status/ttl for all configs and metrics to ProtoOutputStream. */
+    void WriteActiveConfigsToProtoOutputStream(
+            int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
+
     /* Load configs containing metrics with active activations from disk. */
     void LoadActiveConfigsFromDisk();
+
+    /* Sets the active status/ttl for all configs and metrics to the status in ActiveConfigList. */
+    void SetConfigsActiveState(const ActiveConfigList& activeConfigList, int64_t currentTimeNs);
 
     // Reset all configs.
     void resetConfigs();
@@ -157,6 +153,12 @@ private:
         const int64_t currentTimestampNs, const ConfigKey& key, const StatsdConfig& config);
 
     void GetActiveConfigsLocked(const int uid, vector<int64_t>& outActiveConfigs);
+
+    void WriteActiveConfigsToProtoOutputStreamLocked(
+            int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
+
+    void SetConfigsActiveStateLocked(const ActiveConfigList& activeConfigList,
+                                     int64_t currentTimeNs);
 
     void WriteDataToDiskLocked(const DumpReportReason dumpReportReason,
                                const DumpLatency dumpLatency);
@@ -224,6 +226,7 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
     FRIEND_TEST(StatsLogProcessorTest,
             TestActivationOnBootMultipleActivationsDifferentActivationTypes);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2);
