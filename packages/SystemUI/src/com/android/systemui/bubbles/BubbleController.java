@@ -193,7 +193,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (shouldCollapse) {
                 collapseStack();
             }
-            updateVisibility();
+            updateStack();
         }
     }
 
@@ -534,10 +534,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
         }
 
+        // Runs on state change.
         @Override
         public void apply() {
             mNotificationEntryManager.updateNotifications();
-            updateVisibility();
+            updateStack();
 
             if (DEBUG) {
                 Log.d(TAG, "[BubbleData]");
@@ -554,34 +555,31 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     };
 
     /**
-     * Lets any listeners know if bubble state has changed.
+     * Updates the visibility of the bubbles based on current state.
+     * Does not un-bubble, just hides or un-hides. Notifies any
+     * {@link BubbleStateChangeListener}s of visibility changes.
+     * Updates stack description for TalkBack focus.
      */
-    private void updateBubblesShowing() {
+    public void updateStack() {
         if (mStackView == null) {
             return;
         }
-
-        boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
-        boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
-        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
-        if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
-            mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
-        }
-    }
-
-    /**
-     * Updates the visibility of the bubbles based on current state.
-     * Does not un-bubble, just hides or un-hides. Will notify any
-     * {@link BubbleStateChangeListener}s if visibility changes.
-     */
-    public void updateVisibility() {
         if (mStatusBarStateListener.getCurrentState() == SHADE && hasBubbles()) {
             // Bubbles only appear in unlocked shade
             mStackView.setVisibility(hasBubbles() ? VISIBLE : INVISIBLE);
         } else if (mStackView != null) {
             mStackView.setVisibility(INVISIBLE);
         }
-        updateBubblesShowing();
+
+        // Let listeners know if bubble state changed.
+        boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
+        boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
+        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
+            mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
+        }
+
+        mStackView.updateContentDescription();
     }
 
     /**
