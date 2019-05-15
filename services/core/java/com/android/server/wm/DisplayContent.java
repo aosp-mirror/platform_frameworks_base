@@ -3340,7 +3340,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final SurfaceControl newParent =
                 shouldAttachToDisplay ? mWindowingLayer : computeImeParent();
         if (newParent != null) {
-            mPendingTransaction.reparent(mImeWindowsContainers.mSurfaceControl, newParent);
+            getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
         }
     }
@@ -3747,7 +3747,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPortalWindowHandle.touchableRegion.getBounds(mTmpRect);
             if (!mTmpBounds.equals(mTmpRect)) {
                 mPortalWindowHandle.touchableRegion.set(mTmpBounds);
-                mPendingTransaction.setInputWindowInfo(mParentSurfaceControl, mPortalWindowHandle);
+                getPendingTransaction().setInputWindowInfo(
+                        mParentSurfaceControl, mPortalWindowHandle);
             }
         }
     }
@@ -4846,18 +4847,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         try {
             final ScreenRotationAnimation screenRotationAnimation =
                     mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+            final Transaction transaction = getPendingTransaction();
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
                 screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
-                mPendingTransaction.setMatrix(mWindowingLayer,
+                transaction.setMatrix(mWindowingLayer,
                         mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                         mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-                mPendingTransaction.setPosition(mWindowingLayer,
+                transaction.setPosition(mWindowingLayer,
                         mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
-                mPendingTransaction.setAlpha(mWindowingLayer,
+                transaction.setAlpha(mWindowingLayer,
                         screenRotationAnimation.getEnterTransformation().getAlpha());
             }
 
             super.prepareSurfaces();
+
+            // TODO: Once we totally eliminate global transaction we will pass transaction in here
+            //       rather than merging to global.
+            SurfaceControl.mergeToGlobalTransaction(transaction);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -5013,7 +5019,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mPortalWindowHandle == null) {
             mPortalWindowHandle = createPortalWindowHandle(sc.toString());
         }
-        mPendingTransaction.setInputWindowInfo(sc, mPortalWindowHandle)
+        getPendingTransaction().setInputWindowInfo(sc, mPortalWindowHandle)
                 .reparent(mWindowingLayer, sc).reparent(mOverlayLayer, sc);
     }
 

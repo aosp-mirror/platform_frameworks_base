@@ -93,10 +93,6 @@ public class TaskStack extends WindowContainer<Task> implements
     /** Unique identifier */
     final int mStackId;
 
-    /** The display this stack sits under. */
-    // TODO: Track parent marks like this in WindowContainer.
-    private DisplayContent mDisplayContent;
-
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
     private Rect mTmpRect2 = new Rect();
@@ -175,10 +171,6 @@ public class TaskStack extends WindowContainer<Task> implements
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
-    }
-
-    DisplayContent getDisplayContent() {
-        return mDisplayContent;
     }
 
     Task findHomeTask() {
@@ -825,8 +817,7 @@ public class TaskStack extends WindowContainer<Task> implements
             throw new IllegalStateException("onDisplayChanged: Already attached");
         }
 
-        final boolean movedToNewDisplay = mDisplayContent == null;
-        mDisplayContent = dc;
+        super.onDisplayChanged(dc);
 
         updateSurfaceBounds();
         if (mAnimationBackgroundSurface == null) {
@@ -834,8 +825,6 @@ public class TaskStack extends WindowContainer<Task> implements
                     .setName("animation background stackId=" + mStackId)
                     .build();
         }
-
-        super.onDisplayChanged(dc);
     }
 
     /**
