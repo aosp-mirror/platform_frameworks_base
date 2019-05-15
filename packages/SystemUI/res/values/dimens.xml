@@ -944,6 +944,12 @@
 
     <!-- Global actions grid layout -->
     <dimen name="global_actions_grid_side_margin">4dp</dimen>
+    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
+
+    <!-- Used to workaround a bug where shadows are clipped during animations by expanding
+         the bounds of the parent view. -->
+    <dimen name="global_actions_grid_container_shadow_offset">20dp</dimen>
+    <dimen name="global_actions_grid_container_negative_shadow_offset">-20dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
