@@ -64,5 +64,16 @@
 
     <include layout="@layout/ongoing_privacy_chip" />
 
+        <com.android.systemui.statusbar.policy.NetworkTraffic
+            android:id="@+id/networkTraffic"
+            android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:singleLine="false"
+            android:lineSpacingMultiplier="1.2"
+            systemui:showDark="false"/>
+
     </LinearLayout>
 </LinearLayout>
