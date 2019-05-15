@@ -421,8 +421,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                     new PasswordSlotManager());
         }
 
-        public boolean hasBiometrics() {
-            return BiometricManager.hasBiometrics(mContext);
+        public boolean hasEnrolledBiometrics() {
+            BiometricManager bm = mContext.getSystemService(BiometricManager.class);
+            return bm.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS;
         }
 
         public int binderGetCallingUid() {
@@ -2502,7 +2503,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         // TODO: When lockout is handled under the HAL for all biometrics (fingerprint),
         // we need to generate challenge for each one, have it signed by GK and reset lockout
         // for each modality.
-        if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+        if (!hasChallenge && pm.hasSystemFeature(PackageManager.FEATURE_FACE)
+                && mInjector.hasEnrolledBiometrics()) {
             challenge = mContext.getSystemService(FaceManager.class).generateChallenge();
         }
 
@@ -2544,8 +2546,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
             notifyActivePasswordMetricsAvailable(credentialType, userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
-            // Reset lockout
-            if (mInjector.hasBiometrics()) {
+            // Reset lockout only if user has enrolled templates
+            if (mInjector.hasEnrolledBiometrics()) {
                 BiometricManager bm = mContext.getSystemService(BiometricManager.class);
                 Slog.i(TAG, "Resetting lockout, length: "
                         + authResult.gkResponse.getPayload().length);
