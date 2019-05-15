@@ -40,6 +40,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
@@ -381,6 +382,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param notif the notification associated with this bubble.
      */
     void updateBubble(NotificationEntry notif) {
+        // If this is an interruptive notif, mark that it's interrupted
+        if (notif.importance >= NotificationManager.IMPORTANCE_HIGH) {
+            notif.setInterruption();
+        }
         mBubbleData.notificationEntryUpdated(notif);
     }
 
