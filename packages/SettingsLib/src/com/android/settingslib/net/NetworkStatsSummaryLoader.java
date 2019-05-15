@@ -16,9 +16,10 @@
 
 package com.android.settingslib.net;
 
-import android.app.usage.NetworkStatsManager;
 import android.app.usage.NetworkStats;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
+import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -33,15 +34,13 @@ public class NetworkStatsSummaryLoader extends AsyncTaskLoader<NetworkStats> {
     private final NetworkStatsManager mNetworkStatsManager;
     private final long mStart;
     private final long mEnd;
-    private final String mSubId;
-    private final int mNetworkType;
+    private final NetworkTemplate mNetworkTemplate;
 
     private NetworkStatsSummaryLoader(Builder builder) {
         super(builder.mContext);
         mStart = builder.mStart;
         mEnd = builder.mEnd;
-        mSubId = builder.mSubId;
-        mNetworkType = builder.mNetworkType;
+        mNetworkTemplate = builder.mNetworkTemplate;
         mNetworkStatsManager = (NetworkStatsManager)
                 builder.mContext.getSystemService(Context.NETWORK_STATS_SERVICE);
     }
@@ -55,7 +54,7 @@ public class NetworkStatsSummaryLoader extends AsyncTaskLoader<NetworkStats> {
     @Override
     public NetworkStats loadInBackground() {
         try {
-            return mNetworkStatsManager.querySummary(mNetworkType, mSubId, mStart, mEnd);
+            return mNetworkStatsManager.querySummary(mNetworkTemplate, mStart, mEnd);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception querying network detail.", e);
             return null;
@@ -78,8 +77,7 @@ public class NetworkStatsSummaryLoader extends AsyncTaskLoader<NetworkStats> {
         private final Context mContext;
         private long mStart;
         private long mEnd;
-        private String mSubId;
-        private int mNetworkType;
+        private NetworkTemplate mNetworkTemplate;
 
         public Builder(Context context) {
             mContext = context;
@@ -95,13 +93,11 @@ public class NetworkStatsSummaryLoader extends AsyncTaskLoader<NetworkStats> {
             return this;
         }
 
-        public Builder setSubscriberId(String subId) {
-            mSubId = subId;
-            return this;
-        }
-
-        public Builder setNetworkType(int networkType) {
-            mNetworkType = networkType;
+        /**
+         * Set {@link NetworkTemplate} for builder
+         */
+        public Builder setNetworkTemplate(NetworkTemplate template) {
+            mNetworkTemplate = template;
             return this;
         }
 

@@ -37,14 +37,14 @@ public class NetworkCycleChartDataLoader
 
     private NetworkCycleChartDataLoader(Builder builder) {
         super(builder);
-        mData = new ArrayList<NetworkCycleChartData>();
+        mData = new ArrayList<>();
     }
 
     @Override
     void recordUsage(long start, long end) {
         try {
             final NetworkStats.Bucket bucket = mNetworkStatsManager.querySummaryForDevice(
-                mNetworkType, mSubId, start, end);
+                    mNetworkTemplate, start, end);
             final long total = bucket == null ? 0L : bucket.getRxBytes() + bucket.getTxBytes();
             if (total > 0L) {
                 final NetworkCycleChartData.Builder builder = new NetworkCycleChartData.Builder();
@@ -81,7 +81,7 @@ public class NetworkCycleChartDataLoader
             long usage = 0L;
             try {
                 final NetworkStats.Bucket bucket = mNetworkStatsManager.querySummaryForDevice(
-                    mNetworkType, mSubId, bucketStart, bucketEnd);
+                        mNetworkTemplate, bucketStart, bucketEnd);
                 if (bucket != null) {
                     usage = bucket.getRxBytes() + bucket.getTxBytes();
                 }
