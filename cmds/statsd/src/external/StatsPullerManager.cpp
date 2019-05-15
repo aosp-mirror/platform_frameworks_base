@@ -260,6 +260,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // Face Settings
         {android::util::FACE_SETTINGS,
          {.puller = new StatsCompanionServicePuller(android::util::FACE_SETTINGS)}},
+        // App ops
+        {android::util::APP_OPS,
+         {.puller = new StatsCompanionServicePuller(android::util::APP_OPS)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
