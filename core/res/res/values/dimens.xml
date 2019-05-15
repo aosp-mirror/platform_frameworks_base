@@ -668,6 +668,16 @@
     <dimen name="autofill_dataset_picker_max_width">90%</dimen>
     <dimen name="autofill_dataset_picker_max_height">90%</dimen>
 
+    <!-- Autofill save dialog padding -->
+    <dimen name="autofill_save_outer_top_margin">32dp</dimen>
+    <dimen name="autofill_save_outer_top_padding">16dp</dimen>
+    <dimen name="autofill_elevation">32dp</dimen>
+    <dimen name="autofill_save_inner_padding">16dp</dimen>
+    <dimen name="autofill_save_icon_size">24dp</dimen>
+    <dimen name="autofill_save_title_start_padding">8dp</dimen>
+    <dimen name="autofill_save_scroll_view_top_margin">4dp</dimen>
+    <dimen name="autofill_save_button_bar_padding">16dp</dimen>
+
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
 
