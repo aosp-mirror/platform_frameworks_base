@@ -189,6 +189,7 @@ public class KeyguardIndicationController implements StateListener,
         mLockscreenGestureLogger.write(MetricsProto.MetricsEvent.ACTION_LS_LOCK,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
         showTransientIndication(R.string.keyguard_indication_trust_disabled);
+        mKeyguardUpdateMonitor.onLockIconPressed();
         mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
 
         return true;

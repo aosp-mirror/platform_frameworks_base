@@ -238,6 +238,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
+    // If the user long pressed the lock icon, disabling face auth for the current session.
+    private boolean mLockIconPressed;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -1384,6 +1386,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOff() {
+        mLockIconPressed = false;
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
         final int count = mCallbacks.size();
@@ -1625,10 +1628,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
-                && !mKeyguardGoingAway && mFaceSettingEnabledForUser
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
                 && mUserManager.isUserUnlocked(user) && mIsPrimaryUser;
     }
 
+    /**
+     * Whenever the lock icon is long pressed, disabling trust agents.
+     * This means that we cannot auth passively (face) until the user presses power.
+     */
+    public void onLockIconPressed() {
+        mLockIconPressed = true;
+        mUserFaceAuthenticated.put(getCurrentUser(), false);
+        updateFaceListeningState();
+    }
 
     private void startListeningForFingerprint() {
         if (mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING) {
