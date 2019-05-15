@@ -138,6 +138,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         setOrientation(SCREEN_ORIENTATION_UNSET);
     }
 
+    @Override
     DisplayContent getDisplayContent() {
         return mStack != null ? mStack.getDisplayContent() : null;
     }
