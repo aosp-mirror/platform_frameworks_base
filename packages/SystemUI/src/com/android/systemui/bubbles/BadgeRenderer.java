@@ -18,11 +18,14 @@ package com.android.systemui.bubbles;
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+
+import com.android.systemui.R;
 
 // XXX: Mostly opied from launcher code / can we share?
 /**
@@ -32,20 +35,31 @@ public class BadgeRenderer {
 
     private static final String TAG = "BadgeRenderer";
 
-    // The badge sizes are defined as percentages of the app icon size.
+    /** The badge sizes are defined as percentages of the app icon size. */
     private static final float SIZE_PERCENTAGE = 0.38f;
 
-    // Extra scale down of the dot
+    /** Extra scale down of the dot. */
     private static final float DOT_SCALE = 0.6f;
 
     private final float mDotCenterOffset;
     private final float mCircleRadius;
     private final Paint mCirclePaint = new Paint(ANTI_ALIAS_FLAG | FILTER_BITMAP_FLAG);
 
-    public BadgeRenderer(int iconSizePx) {
-        mDotCenterOffset = SIZE_PERCENTAGE * iconSizePx;
-        int size = (int) (DOT_SCALE * mDotCenterOffset);
-        mCircleRadius = size / 2f;
+    public BadgeRenderer(Context context) {
+        mDotCenterOffset = getDotCenterOffset(context);
+        mCircleRadius = getDotRadius(mDotCenterOffset);
+    }
+
+    /** Space between the center of the dot and the top or left of the bubble stack. */
+    static float getDotCenterOffset(Context context) {
+        final int iconSizePx =
+                context.getResources().getDimensionPixelSize(R.dimen.individual_bubble_size);
+        return SIZE_PERCENTAGE * iconSizePx;
+    }
+
+    static float getDotRadius(float dotCenterOffset) {
+        int size = (int) (DOT_SCALE * dotCenterOffset);
+        return size / 2f;
     }
 
     /**

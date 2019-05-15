@@ -41,7 +41,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingMessage;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
@@ -122,8 +121,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final int mMaxAllowedKeyguardNotifications;
     private final IStatusBarService mBarService;
-    private boolean mReinflateNotificationsOnUserSwitched;
-    private boolean mDispatchUiModeChangeOnUserSwitched;
     private final UnlockMethodCache mUnlockMethodCache;
     private TextView mNotificationPanelDebugText;
 
@@ -242,20 +239,12 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     public void onDensityOrFontScaleChanged() {
         MessagingMessage.dropCache();
         MessagingGroup.dropCache();
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
-            updateNotificationsOnDensityOrFontScaleChanged();
-        } else {
-            mReinflateNotificationsOnUserSwitched = true;
-        }
+        updateNotificationsOnDensityOrFontScaleChanged();
     }
 
     @Override
     public void onUiModeChanged() {
-        if (!KeyguardUpdateMonitor.getInstance(mContext).isSwitchingUser()) {
-            updateNotificationOnUiModeChanged();
-        } else {
-            mDispatchUiModeChangeOnUserSwitched = true;
-        }
+        updateNotificationOnUiModeChanged();
     }
 
     @Override
@@ -385,14 +374,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         // End old BaseStatusBar.userSwitched
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         mCommandQueue.animateCollapsePanels();
-        if (mReinflateNotificationsOnUserSwitched) {
-            updateNotificationsOnDensityOrFontScaleChanged();
-            mReinflateNotificationsOnUserSwitched = false;
-        }
-        if (mDispatchUiModeChangeOnUserSwitched) {
-            updateNotificationOnUiModeChanged();
-            mDispatchUiModeChangeOnUserSwitched = false;
-        }
         updateNotificationViews();
         mMediaManager.clearCurrentMediaNotification();
         mShadeController.setLockscreenUser(newUserId);

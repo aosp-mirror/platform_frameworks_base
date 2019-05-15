@@ -16,8 +16,6 @@
 
 package com.android.systemui.colorextraction;
 
-import android.annotation.ColorInt;
-import android.annotation.IntDef;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -36,13 +34,10 @@ import com.android.internal.colorextraction.types.ExtractionType;
 import com.android.internal.colorextraction.types.Tonal;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 import javax.inject.Inject;
@@ -55,41 +50,23 @@ import javax.inject.Singleton;
 public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         ConfigurationController.ConfigurationListener {
     private static final String TAG = "SysuiColorExtractor";
-
-    public static final int SCRIM_TYPE_REGULAR = 1;
-    public static final int SCRIM_TYPE_LIGHT = 2;
-    public static final int SCRIM_TYPE_DARK = 3;
-
-    @IntDef(prefix = {"SCRIM_TYPE_"}, value = {
-            SCRIM_TYPE_REGULAR,
-            SCRIM_TYPE_LIGHT,
-            SCRIM_TYPE_DARK
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ScrimType {
-    }
-
     private final Tonal mTonal;
-    private final OverviewProxyService mOverviewProxyService;
     private boolean mWallpaperVisible;
     private boolean mHasBackdrop;
     // Colors to return when the wallpaper isn't visible
     private final GradientColors mWpHiddenColors;
 
     @Inject
-    public SysuiColorExtractor(Context context, ConfigurationController configurationController,
-            OverviewProxyService overviewProxyService) {
-        this(context, new Tonal(context), configurationController, true, overviewProxyService);
+    public SysuiColorExtractor(Context context, ConfigurationController configurationController) {
+        this(context, new Tonal(context), configurationController, true);
     }
 
     @VisibleForTesting
     public SysuiColorExtractor(Context context, ExtractionType type,
-            ConfigurationController configurationController, boolean registerVisibility,
-            OverviewProxyService overviewProxyService) {
+            ConfigurationController configurationController, boolean registerVisibility) {
         super(context, type, false /* immediately */);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mWpHiddenColors = new GradientColors();
-        mOverviewProxyService = overviewProxyService;
         configurationController.addCallback(this);
 
         WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
@@ -133,35 +110,17 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
             return;
         }
 
+        super.onColorsChanged(colors, which);
+
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
             updateDefaultGradients(colors);
         }
-        super.onColorsChanged(colors, which);
     }
 
     @Override
     public void onUiModeChanged() {
         WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
         updateDefaultGradients(systemColors);
-        triggerColorsChanged(WallpaperManager.FLAG_SYSTEM);
-    }
-
-    @Override
-    protected void triggerColorsChanged(int which) {
-        super.triggerColorsChanged(which);
-
-        if (mWpHiddenColors != null && (which & WallpaperManager.FLAG_SYSTEM) != 0) {
-            @ColorInt int colorInt = mWpHiddenColors.getMainColor();
-            @ScrimType int scrimType;
-            if (colorInt == Tonal.MAIN_COLOR_LIGHT) {
-                scrimType = SCRIM_TYPE_LIGHT;
-            } else if (colorInt == Tonal.MAIN_COLOR_DARK) {
-                scrimType = SCRIM_TYPE_DARK;
-            } else {
-                scrimType = SCRIM_TYPE_REGULAR;
-            }
-            mOverviewProxyService.onScrimColorsChanged(colorInt, scrimType);
-        }
     }
 
     /**

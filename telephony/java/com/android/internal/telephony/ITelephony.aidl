@@ -1000,7 +1000,7 @@ interface ITelephony {
     /**
      * Similar to above, but check for the package whose name is pkgName.
      */
-    int checkCarrierPrivilegesForPackage(String pkgName);
+    int checkCarrierPrivilegesForPackage(int subId, String pkgName);
 
     /**
      * Similar to above, but check across all phones.
@@ -1357,9 +1357,14 @@ interface ITelephony {
             in PhoneAccountHandle phoneAccountHandle, boolean enabled);
 
     /**
-     * Returns a list of packages that have carrier privileges.
+     * Returns a list of packages that have carrier privileges for the specific phone.
      */
-    List<String> getPackagesWithCarrierPrivileges();
+    List<String> getPackagesWithCarrierPrivileges(int phoneId);
+
+     /**
+      * Returns a list of packages that have carrier privileges.
+      */
+    List<String> getPackagesWithCarrierPrivilegesForAllPhones();
 
     /**
      * Return the application ID for the app type.

@@ -1658,23 +1658,15 @@ public final class ProcessList {
         app.killed = false;
         final long startSeq = app.startSeq = ++mProcStartSeqCounter;
         app.setStartParams(uid, hostingRecord, seInfo, startTime);
+        app.setUsingWrapper(invokeWith != null
+                || SystemProperties.get("wrap." + app.processName) != null);
+        mPendingStarts.put(startSeq, app);
+
         if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
             if (DEBUG_PROCESSES) Slog.i(TAG_PROCESSES,
                     "Posting procStart msg for " + app.toShortString());
             mService.mProcStartHandler.post(() -> {
                 try {
-                    synchronized (mService) {
-                        final String reason = isProcStartValidLocked(app, startSeq);
-                        if (reason != null) {
-                            Slog.w(TAG_PROCESSES, app + " not valid anymore,"
-                                    + " don't start process, " + reason);
-                            app.pendingStart = false;
-                            return;
-                        }
-                        app.setUsingWrapper(invokeWith != null
-                                || SystemProperties.get("wrap." + app.processName) != null);
-                        mPendingStarts.put(startSeq, app);
-                    }
                     final Process.ProcessStartResult startResult = startProcess(app.hostingRecord,
                             entryPoint, app, app.startUid, gids, runtimeFlags, mountExternal,
                             app.seInfo, requiredAbi, instructionSet, invokeWith, app.startTime);

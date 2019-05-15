@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.function.ToIntFunction;
 
 /**
@@ -369,10 +370,12 @@ public class ThumbnailUtils {
             // If we're okay with something larger than native format, just
             // return a frame without up-scaling it
             if (size.getWidth() > width && size.getHeight() > height) {
-                return mmr.getFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC);
+                return Objects.requireNonNull(
+                        mmr.getFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC));
             } else {
-                return mmr.getScaledFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC,
-                        size.getWidth(), size.getHeight());
+                return Objects.requireNonNull(
+                        mmr.getScaledFrameAtTime(duration / 2, OPTION_CLOSEST_SYNC,
+                        size.getWidth(), size.getHeight()));
             }
         } catch (RuntimeException e) {
             throw new IOException("Failed to create thumbnail", e);

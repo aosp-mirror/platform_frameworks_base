@@ -160,6 +160,11 @@ public class ScanResult implements Parcelable {
     public static final int KEY_MGMT_FT_SAE = 11;
     /**
      * @hide
+     * Security key management scheme: OWE in transition mode.
+     */
+    public static final int KEY_MGMT_OWE_TRANSITION = 12;
+    /**
+     * @hide
      * No cipher suite.
      */
     public static final int CIPHER_NONE = 0;

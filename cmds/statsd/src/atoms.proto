@@ -298,6 +298,7 @@ message Atom {
         VehicleMapServicePacketFailureReported vms_packet_failure_reported = 202;
         CarPowerStateChanged car_power_state_changed = 203;
         GarageModeInfo garage_mode_info = 204;
+        TestAtomReported test_atom_reported = 205 [(log_from_module) = "cts"];
     }
 
     // Pulled events will start at field 10000.
@@ -3340,6 +3341,23 @@ message BinaryPushStateChanged {
     optional TrainExperimentIds experiment_ids = 7 [(log_mode) = MODE_BYTES];
     // user id
     optional int32 user_id = 8;
+}
+
+/* Test atom, is not logged anywhere */
+message TestAtomReported {
+    repeated AttributionNode attribution_node = 1;
+    optional int32 int_field = 2;
+    optional int64 long_field = 3;
+    optional float float_field = 4;
+    optional string string_field = 5;
+    optional bool boolean_field = 6;
+    enum State {
+        UNKNOWN = 0;
+        OFF = 1;
+        ON = 2;
+    }
+    optional State state = 7;
+    optional TrainExperimentIds bytes_field = 8 [(android.os.statsd.log_mode) = MODE_BYTES];
 }
 
 /** Represents USB port overheat event. */

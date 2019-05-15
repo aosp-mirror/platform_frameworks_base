@@ -24,11 +24,20 @@ import android.annotation.Nullable;
 public class ObjectUtils {
     private ObjectUtils() {}
 
+    /**
+     * Returns the first of two given parameters that is not {@code null}, if either is,
+     * or otherwise throws a {@link NullPointerException}.
+     *
+     * @throws NullPointerException if both {@code a} and {@code b} were {@code null}
+     */
     @NonNull
     public static <T> T firstNotNull(@Nullable T a, @NonNull T b) {
         return a != null ? a : Preconditions.checkNotNull(b);
     }
 
+    /**
+     * Nullsafe {@link Comparable#compareTo}
+     */
     public static <T extends Comparable> int compare(@Nullable T a, @Nullable T b) {
         if (a != null) {
             return (b != null) ? a.compareTo(b) : 1;

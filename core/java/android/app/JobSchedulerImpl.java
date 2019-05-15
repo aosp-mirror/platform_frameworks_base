@@ -83,7 +83,7 @@ public class JobSchedulerImpl extends JobScheduler {
     @Override
     public List<JobInfo> getAllPendingJobs() {
         try {
-            return mBinder.getAllPendingJobs();
+            return mBinder.getAllPendingJobs().getList();
         } catch (RemoteException e) {
             return null;
         }
@@ -110,7 +110,7 @@ public class JobSchedulerImpl extends JobScheduler {
     @Override
     public List<JobSnapshot> getAllJobSnapshots() {
         try {
-            return mBinder.getAllJobSnapshots();
+            return mBinder.getAllJobSnapshots().getList();
         } catch (RemoteException e) {
             return null;
         }
