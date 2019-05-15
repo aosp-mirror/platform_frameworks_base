@@ -42,9 +42,9 @@ public class WebResourceResponse {
 
     /**
      * Constructs a resource response with the given MIME type, character encoding,
-     * and input stream. Callers must implement
-     * {@link InputStream#read(byte[]) InputStream.read(byte[])} for the input
-     * stream.
+     * and input stream. Callers must implement {@link InputStream#read(byte[])} for
+     * the input stream. {@link InputStream#close()} will be called after the WebView
+     * has finished with the response.
      *
      * <p class="note"><b>Note:</b> The MIME type and character encoding must
      * be specified as separate parameters (for example {@code "text/html"} and
@@ -67,9 +67,10 @@ public class WebResourceResponse {
     }
 
     /**
-     * Constructs a resource response with the given parameters. Callers must
-     * implement {@link InputStream#read(byte[]) InputStream.read(byte[])} for
-     * the input stream.
+     * Constructs a resource response with the given parameters. Callers must implement
+     * {@link InputStream#read(byte[])} for the input stream. {@link InputStream#close()} will be
+     * called after the WebView has finished with the response.
+     *
      *
      * <p class="note"><b>Note:</b> See {@link #WebResourceResponse(String,String,InputStream)}
      * for details on what should be specified for {@code mimeType} and {@code encoding}.
@@ -201,7 +202,8 @@ public class WebResourceResponse {
 
     /**
      * Sets the input stream that provides the resource response's data. Callers
-     * must implement {@link InputStream#read(byte[]) InputStream.read(byte[])}.
+     * must implement {@link InputStream#read(byte[])}. {@link InputStream#close()}
+     * will be called after the WebView has finished with the response.
      *
      * @param data the input stream that provides the resource response's data. Must not be a
      *             StringBufferInputStream.
