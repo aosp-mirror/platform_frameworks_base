@@ -1734,7 +1734,8 @@ public class ApfTest {
         final int dstPort = 4500;
         final int slot1 = 1;
         // NAT-T keepalive
-        final byte[] payload = {(byte) 0xff};
+        final byte[] kaPayload = {(byte) 0xff};
+        final byte[] nonKaPayload = {(byte) 0xfe};
 
         // src: 10.0.0.5, port: 1024
         // dst: 10.0.0.6, port: 4500
@@ -1753,15 +1754,21 @@ public class ApfTest {
         // Verify IPv4 keepalive packet is dropped
         // src: 10.0.0.6, port: 4500
         // dst: 10.0.0.5, port: 1024
-        final byte[] nattKaPkt = ipv4UdpPacket(IPV4_KEEPALIVE_DST_ADDR,
+        byte[] pkt = ipv4UdpPacket(IPV4_KEEPALIVE_DST_ADDR,
                     IPV4_KEEPALIVE_SRC_ADDR, dstPort, srcPort, 1 /* dataLength */);
-        System.arraycopy(payload, 0, nattKaPkt, IPV4_UDP_PAYLOAD_OFFSET, payload.length);
-        assertDrop(program, nattKaPkt);
-        // Verify IPv4 non-keepalive packet from the same source address is passed
+        System.arraycopy(kaPayload, 0, pkt, IPV4_UDP_PAYLOAD_OFFSET, kaPayload.length);
+        assertDrop(program, pkt);
+
+        // Verify a packet with payload length 1 byte but it is not 0xff will pass the filter.
+        System.arraycopy(nonKaPayload, 0, pkt, IPV4_UDP_PAYLOAD_OFFSET, nonKaPayload.length);
+        assertPass(program, pkt);
+
+        // Verify IPv4 non-keepalive response packet from the same source address is passed
         assertPass(program,
                 ipv4UdpPacket(IPV4_KEEPALIVE_DST_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
                         dstPort, srcPort, 10 /* dataLength */));
-        // Verify IPv4 non-keepalive packet from other source address is passed
+
+        // Verify IPv4 non-keepalive response packet from other source address is passed
         assertPass(program,
                 ipv4UdpPacket(IPV4_ANOTHER_ADDR, IPV4_KEEPALIVE_SRC_ADDR,
                         dstPort, srcPort, 10 /* dataLength */));
