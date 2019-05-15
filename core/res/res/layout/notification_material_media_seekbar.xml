@@ -28,11 +28,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxHeight="3dp"
-        android:paddingTop="24dp"
+        android:paddingTop="12dp"
         android:paddingBottom="24dp"
         android:clickable="true"
         android:layout_marginBottom="-24dp"
-        android:layout_marginTop="-12dp"
+        android:layout_marginTop="-8dp"
         android:splitTrack="false"
     />
     <FrameLayout
