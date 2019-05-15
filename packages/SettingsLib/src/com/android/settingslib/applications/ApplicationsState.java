@@ -139,7 +139,8 @@ public class ApplicationsState {
     String mCurComputingSizePkg;
     int mCurComputingSizeUserId;
     boolean mSessionsChanged;
-    final HashSet<String> mHiddenModules = new HashSet<>();
+    // Maps all installed modules on the system to whether they're hidden or not.
+    final HashMap<String, Boolean> mSystemModules = new HashMap<>();
 
     // Temporary for dispatching session callbacks.  Only touched by main thread.
     final ArrayList<WeakReference<Session>> mActiveSessions = new ArrayList<>();
@@ -212,9 +213,7 @@ public class ApplicationsState {
 
         final List<ModuleInfo> moduleInfos = mPm.getInstalledModules(0 /* flags */);
         for (ModuleInfo info : moduleInfos) {
-            if (info.isHidden()) {
-                mHiddenModules.add(info.getPackageName());
-            }
+            mSystemModules.put(info.getPackageName(), info.isHidden());
         }
 
         /**
@@ -426,7 +425,16 @@ public class ApplicationsState {
     }
 
     boolean isHiddenModule(String packageName) {
-        return mHiddenModules.contains(packageName);
+        Boolean isHidden = mSystemModules.get(packageName);
+        if (isHidden == null) {
+            return false;
+        }
+
+        return isHidden;
+    }
+
+    boolean isSystemModule(String packageName) {
+        return mSystemModules.containsKey(packageName);
     }
 
     void doPauseIfNeededLocked() {
@@ -688,7 +696,10 @@ public class ApplicationsState {
             Log.i(TAG, "Looking up entry of pkg " + info.packageName + ": " + entry);
         }
         if (entry == null) {
-            if (mHiddenModules.contains(info.packageName)) {
+            if (isHiddenModule(info.packageName)) {
+                if (DEBUG) {
+                    Log.i(TAG, "No AppEntry for " + info.packageName + " (hidden module)");
+                }
                 return null;
             }
             if (DEBUG) {
