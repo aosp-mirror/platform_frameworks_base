@@ -286,6 +286,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ATTR_NICKNAME = "nickname";
     private static final String ATTR_USER_FLAGS = "userFlags";
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
+    private static final String ATTR_LAST_SEEN_MILLIS = "lastSeenMillis";
     private static final String ATTR_LAST_TRIM_MILLIS = "lastTrimMillis";
     private static final String ATTR_LAST_BENCH_MILLIS = "lastBenchMillis";
 
@@ -1313,7 +1314,7 @@ class StorageManagerService extends IStorageManager.Stub
     private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
         // Remember that we saw this volume so we're ready to accept user
         // metadata, or so we can annoy them when a private volume is ejected
-        if (vol.isMountedReadable() && !TextUtils.isEmpty(vol.fsUuid)) {
+        if (!TextUtils.isEmpty(vol.fsUuid)) {
             VolumeRecord rec = mRecords.get(vol.fsUuid);
             if (rec == null) {
                 rec = new VolumeRecord(vol.type, vol.fsUuid);
@@ -1323,14 +1324,15 @@ class StorageManagerService extends IStorageManager.Stub
                     rec.nickname = vol.disk.getDescription();
                 }
                 mRecords.put(rec.fsUuid, rec);
-                writeSettingsLocked();
             } else {
                 // Handle upgrade case where we didn't store partition GUID
                 if (TextUtils.isEmpty(rec.partGuid)) {
                     rec.partGuid = vol.partGuid;
-                    writeSettingsLocked();
                 }
             }
+
+            rec.lastSeenMillis = System.currentTimeMillis();
+            writeSettingsLocked();
         }
 
         mCallbacks.notifyVolumeStateChanged(vol, oldState, newState);
@@ -1731,9 +1733,10 @@ class StorageManagerService extends IStorageManager.Stub
         meta.partGuid = readStringAttribute(in, ATTR_PART_GUID);
         meta.nickname = readStringAttribute(in, ATTR_NICKNAME);
         meta.userFlags = readIntAttribute(in, ATTR_USER_FLAGS);
-        meta.createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
-        meta.lastTrimMillis = readLongAttribute(in, ATTR_LAST_TRIM_MILLIS);
-        meta.lastBenchMillis = readLongAttribute(in, ATTR_LAST_BENCH_MILLIS);
+        meta.createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS, 0);
+        meta.lastSeenMillis = readLongAttribute(in, ATTR_LAST_SEEN_MILLIS, 0);
+        meta.lastTrimMillis = readLongAttribute(in, ATTR_LAST_TRIM_MILLIS, 0);
+        meta.lastBenchMillis = readLongAttribute(in, ATTR_LAST_BENCH_MILLIS, 0);
         return meta;
     }
 
@@ -1745,6 +1748,7 @@ class StorageManagerService extends IStorageManager.Stub
         writeStringAttribute(out, ATTR_NICKNAME, rec.nickname);
         writeIntAttribute(out, ATTR_USER_FLAGS, rec.userFlags);
         writeLongAttribute(out, ATTR_CREATED_MILLIS, rec.createdMillis);
+        writeLongAttribute(out, ATTR_LAST_SEEN_MILLIS, rec.lastSeenMillis);
         writeLongAttribute(out, ATTR_LAST_TRIM_MILLIS, rec.lastTrimMillis);
         writeLongAttribute(out, ATTR_LAST_BENCH_MILLIS, rec.lastBenchMillis);
         out.endTag(null, TAG_VOLUME);
