@@ -42,6 +42,8 @@ public class GlobalActionsGridLayout extends GlobalActionsLayout {
         listView.setReverseSublists(shouldReverseSublists());
         listView.setReverseItems(shouldReverseListItems());
         listView.setSwapRowsAndColumns(shouldSwapRowsAndColumns());
+
+        fixNavBarClipping();
     }
 
     @Override
@@ -71,6 +73,19 @@ public class GlobalActionsGridLayout extends GlobalActionsLayout {
             childParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
             childParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
+    }
+
+    /**
+     * Allows the dialog to clip over the navbar, which prevents shadows and animations from being
+     * cut off.
+     */
+    private void fixNavBarClipping() {
+        ViewGroup parent = (ViewGroup) this.getParent();
+        ViewGroup parentParent = (ViewGroup) parent.getParent();
+        parent.setClipChildren(false);
+        parent.setClipToPadding(false);
+        parentParent.setClipChildren(false);
+        parentParent.setClipToPadding(false);
     }
 
     @Override
