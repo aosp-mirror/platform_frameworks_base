@@ -1431,13 +1431,18 @@ public final class SystemServer implements Dumpable {
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
             t.traceEnd();
 
-            t.traceBegin("StartTelecomLoaderService");
-            mSystemServiceManager.startService(TelecomLoaderService.class);
-            t.traceEnd();
+            // TelecomLoader hooks into classes with defined HFP logic,
+            // so check for either telephony or microphone.
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE) ||
+                mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                t.traceBegin("StartTelecomLoaderService");
+                mSystemServiceManager.startService(TelecomLoaderService.class);
+                t.traceEnd();
+            }
 
             t.traceBegin("StartTelephonyRegistry");
             telephonyRegistry = new TelephonyRegistry(
-                    context, new TelephonyRegistry.ConfigurationProvider());
+                context, new TelephonyRegistry.ConfigurationProvider());
             ServiceManager.addService("telephony.registry", telephonyRegistry);
             t.traceEnd();
 
@@ -2524,10 +2529,12 @@ public final class SystemServer implements Dumpable {
             mActivityManagerService.enterSafeMode();
         }
 
-        // MMS service broker
-        t.traceBegin("StartMmsService");
-        mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
-        t.traceEnd();
+        if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            // MMS service broker
+            t.traceBegin("StartMmsService");
+            mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
+            t.traceEnd();
+        }
 
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
             t.traceBegin("StartAutoFillService");
@@ -2913,9 +2920,7 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
             t.traceBegin("MakeTelephonyRegistryReady");
             try {
-                if (telephonyRegistryF != null) {
-                    telephonyRegistryF.systemRunning();
-                }
+                if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
             } catch (Throwable e) {
                 reportWtf("Notifying TelephonyRegistry running", e);
             }
@@ -2929,15 +2934,15 @@ public final class SystemServer implements Dumpable {
                 reportWtf("Notifying MediaRouterService running", e);
             }
             t.traceEnd();
-            t.traceBegin("MakeMmsServiceReady");
-            try {
-                if (mmsServiceF != null) {
-                    mmsServiceF.systemRunning();
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                t.traceBegin("MakeMmsServiceReady");
+                try {
+                    if (mmsServiceF != null) mmsServiceF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying MmsService running", e);
                 }
-            } catch (Throwable e) {
-                reportWtf("Notifying MmsService running", e);
+                t.traceEnd();
             }
-            t.traceEnd();
 
             t.traceBegin("IncidentDaemonReady");
             try {
