@@ -107,6 +107,8 @@ public final class NavigationBarTransitions extends BarTransitions implements
 
     @Override
     public void setAutoDim(boolean autoDim) {
+        // Ensure we aren't in gestural nav if we are triggering auto dim
+        if (autoDim && NavBarTintController.isEnabled(mView.getContext(), mNavBarMode)) return;
         if (mAutoDim == autoDim) return;
         mAutoDim = autoDim;
         applyLightsOut(true, false);
