@@ -248,6 +248,8 @@ public class StorageManager {
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
     /** {@hide} */
     public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
+    /** {@hide} */
+    public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
 
     /** {@hide} */
     public static final int FLAG_FOR_WRITE = 1 << 8;
