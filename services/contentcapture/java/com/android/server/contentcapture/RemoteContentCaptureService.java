@@ -18,6 +18,9 @@ package com.android.server.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 
+import static com.android.server.contentcapture.ContentCaptureMetricsLogger.writeServiceEvent;
+import static com.android.server.contentcapture.ContentCaptureMetricsLogger.writeSessionEvent;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -28,6 +31,7 @@ import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.DataRemovalRequest;
 
@@ -77,6 +81,8 @@ final class RemoteContentCaptureService
             if (connected) {
                 try {
                     mService.onConnected(mServerCallback, sVerbose, sDebug);
+                    writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_CONNECTED,
+                            mComponentName);
                 } finally {
                     // Update the system-service state, in case the service reconnected after
                     // dying
@@ -84,6 +90,8 @@ final class RemoteContentCaptureService
                 }
             } else {
                 mService.onDisconnected();
+                writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_DISCONNECTED,
+                        mComponentName);
             }
         } catch (Exception e) {
             Slog.w(mTag, "Exception calling onConnectedStateChanged(" + connected + "): " + e);
@@ -102,6 +110,10 @@ final class RemoteContentCaptureService
             @NonNull IResultReceiver clientReceiver, int initialState) {
         scheduleAsyncRequest(
                 (s) -> s.onSessionStarted(context, sessionId, uid, clientReceiver, initialState));
+        // Metrics logging.
+        writeSessionEvent(sessionId,
+                StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__ON_SESSION_STARTED, initialState,
+                getComponentName(), context.getActivityComponent(), /* is_child_session= */ false);
     }
 
     /**
@@ -110,6 +122,11 @@ final class RemoteContentCaptureService
      */
     public void onSessionFinished(int sessionId) {
         scheduleAsyncRequest((s) -> s.onSessionFinished(sessionId));
+        // Metrics logging.
+        writeSessionEvent(sessionId,
+                StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__ON_SESSION_FINISHED,
+                /* flags= */ 0, getComponentName(), /* app= */ null,
+                /* is_child_session= */ false);
     }
 
     /**
@@ -124,6 +141,8 @@ final class RemoteContentCaptureService
      */
     public void onDataRemovalRequest(@NonNull DataRemovalRequest request) {
         scheduleAsyncRequest((s) -> s.onDataRemovalRequest(request));
+        writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_USER_DATA_REMOVED,
+                mComponentName);
     }
 
     /**

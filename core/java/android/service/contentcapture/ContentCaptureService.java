@@ -29,6 +29,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
@@ -40,6 +41,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureEvent;
@@ -114,6 +116,9 @@ public abstract class ContentCaptureService extends Service {
     private Handler mHandler;
     private IContentCaptureServiceCallback mCallback;
 
+    private long mCallerMismatchTimeout = 1000;
+    private long mLastCallerMismatchLog;
+
     /**
      * Binder that receives calls from the system server.
      */
@@ -174,9 +179,10 @@ public abstract class ContentCaptureService extends Service {
             new IContentCaptureDirectManager.Stub() {
 
         @Override
-        public void sendEvents(@SuppressWarnings("rawtypes") ParceledListSlice events) {
+        public void sendEvents(@SuppressWarnings("rawtypes") ParceledListSlice events, int reason,
+                ContentCaptureOptions options) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleSendEvents,
-                            ContentCaptureService.this, Binder.getCallingUid(), events));
+                    ContentCaptureService.this, Binder.getCallingUid(), events, reason, options));
         }
     };
 
@@ -422,14 +428,23 @@ public abstract class ContentCaptureService extends Service {
     }
 
     private void handleSendEvents(int uid,
-            @NonNull ParceledListSlice<ContentCaptureEvent> parceledEvents) {
+            @NonNull ParceledListSlice<ContentCaptureEvent> parceledEvents, int reason,
+            @Nullable ContentCaptureOptions options) {
+        final List<ContentCaptureEvent> events = parceledEvents.getList();
+        if (events.isEmpty()) {
+            Log.w(TAG, "handleSendEvents() received empty list of events");
+            return;
+        }
+
+        // Metrics.
+        final FlushMetrics metrics = new FlushMetrics();
+        ComponentName activityComponent = null;
 
         // Most events belong to the same session, so we can keep a reference to the last one
         // to avoid creating too many ContentCaptureSessionId objects
         int lastSessionId = NO_SESSION_ID;
         ContentCaptureSessionId sessionId = null;
 
-        final List<ContentCaptureEvent> events = parceledEvents.getList();
         for (int i = 0; i < events.size(); i++) {
             final ContentCaptureEvent event = events.get(i);
             if (!handleIsRightCallerFor(event, uid)) continue;
@@ -437,22 +452,44 @@ public abstract class ContentCaptureService extends Service {
             if (sessionIdInt != lastSessionId) {
                 sessionId = new ContentCaptureSessionId(sessionIdInt);
                 lastSessionId = sessionIdInt;
+                if (i != 0) {
+                    writeFlushMetrics(lastSessionId, activityComponent, metrics, options, reason);
+                    metrics.reset();
+                }
+            }
+            final ContentCaptureContext clientContext = event.getContentCaptureContext();
+            if (activityComponent == null && clientContext != null) {
+                activityComponent = clientContext.getActivityComponent();
             }
             switch (event.getType()) {
                 case ContentCaptureEvent.TYPE_SESSION_STARTED:
-                    final ContentCaptureContext clientContext = event.getContentCaptureContext();
                     clientContext.setParentSessionId(event.getParentSessionId());
                     mSessionUids.put(sessionIdInt, uid);
                     onCreateContentCaptureSession(clientContext, sessionId);
+                    metrics.sessionStarted++;
                     break;
                 case ContentCaptureEvent.TYPE_SESSION_FINISHED:
                     mSessionUids.delete(sessionIdInt);
                     onDestroyContentCaptureSession(sessionId);
+                    metrics.sessionFinished++;
+                    break;
+                case ContentCaptureEvent.TYPE_VIEW_APPEARED:
+                    onContentCaptureEvent(sessionId, event);
+                    metrics.viewAppearedCount++;
+                    break;
+                case ContentCaptureEvent.TYPE_VIEW_DISAPPEARED:
+                    onContentCaptureEvent(sessionId, event);
+                    metrics.viewDisappearedCount++;
+                    break;
+                case ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED:
+                    onContentCaptureEvent(sessionId, event);
+                    metrics.viewTextChangedCount++;
                     break;
                 default:
                     onContentCaptureEvent(sessionId, event);
             }
         }
+        writeFlushMetrics(lastSessionId, activityComponent, metrics, options, reason);
     }
 
     private void handleOnActivitySnapshot(int sessionId, @NonNull SnapshotData snapshotData) {
@@ -497,7 +534,13 @@ public abstract class ContentCaptureService extends Service {
         if (rightUid != uid) {
             Log.e(TAG, "invalid call from UID " + uid + ": session " + sessionId + " belongs to "
                     + rightUid);
-            //TODO(b/111276913): log metrics as this could be a malicious app forging a sessionId
+            long now = System.currentTimeMillis();
+            if (now - mLastCallerMismatchLog > mCallerMismatchTimeout) {
+                StatsLog.write(StatsLog.CONTENT_CAPTURE_CALLER_MISMATCH_REPORTED,
+                        getPackageManager().getNameForUid(rightUid),
+                        getPackageManager().getNameForUid(uid));
+                mLastCallerMismatchLog = now;
+            }
             return false;
         }
         return true;
@@ -526,6 +569,24 @@ public abstract class ContentCaptureService extends Service {
             clientReceiver.send(sessionState, extras);
         } catch (RemoteException e) {
             Slog.w(TAG, "Error async reporting result to client: " + e);
+        }
+    }
+
+    /**
+     * Logs the metrics for content capture events flushing.
+     */
+    private void writeFlushMetrics(int sessionId, @Nullable ComponentName app,
+            @NonNull FlushMetrics flushMetrics, @Nullable ContentCaptureOptions options,
+            int flushReason) {
+        if (mCallback == null) {
+            Log.w(TAG, "writeSessionFlush(): no server callback");
+            return;
+        }
+
+        try {
+            mCallback.writeSessionFlush(sessionId, app, flushMetrics, options, flushReason);
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to write flush metrics: " + e);
         }
     }
 }
