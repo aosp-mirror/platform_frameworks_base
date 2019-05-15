@@ -1300,7 +1300,7 @@ public abstract class Window {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
         final boolean isOutside =
-                event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(context, event)
+                event.getAction() == MotionEvent.ACTION_UP && isOutOfBounds(context, event)
                 || event.getAction() == MotionEvent.ACTION_OUTSIDE;
         if (mCloseOnTouchOutside && peekDecorView() != null && isOutside) {
             return true;
