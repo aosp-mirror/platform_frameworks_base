@@ -913,7 +913,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (child.getVisibility() != View.GONE
                     && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if ((row.isPinned() || row.isHeadsUpAnimatingAway()) && row.getTranslation() < 0) {
+                if ((row.isPinned() || row.isHeadsUpAnimatingAway()) && row.getTranslation() < 0
+                        && row.getProvider().shouldShowGutsOnSnapOpen()) {
                     top = Math.min(top, row.getTranslationY());
                     bottom = Math.max(bottom, row.getTranslationY() + row.getActualHeight());
                 }
@@ -4378,6 +4379,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         mAmbientState.setShadeExpanded(isExpanded);
         mStateAnimator.setShadeExpanded(isExpanded);
+        mSwipeHelper.setIsExpanded(isExpanded);
         if (changed) {
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
