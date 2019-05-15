@@ -317,7 +317,6 @@ package android.app {
   public class AppOpsManager {
     method @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public void getHistoricalOps(@NonNull android.app.AppOpsManager.HistoricalOpsRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
     method public static String[] getOpStrs();
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable java.lang.String...);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[]);
     method public static int opToDefaultMode(@NonNull String);
@@ -936,8 +935,6 @@ package android.app.backup {
     method public int restorePackage(String, android.app.backup.RestoreObserver);
     method public int restorePackages(long, @Nullable android.app.backup.RestoreObserver, @NonNull java.util.Set<java.lang.String>, @Nullable android.app.backup.BackupManagerMonitor);
     method public int restorePackages(long, @Nullable android.app.backup.RestoreObserver, @NonNull java.util.Set<java.lang.String>);
-    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor, String[]);
-    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, String[]);
   }
 
   public class RestoreSet implements android.os.Parcelable {
@@ -1092,14 +1089,11 @@ package android.app.prediction {
   }
 
   public static final class AppTarget.Builder {
-    ctor @Deprecated public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId);
     ctor public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId, @NonNull String, @NonNull android.os.UserHandle);
     ctor public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId, @NonNull android.content.pm.ShortcutInfo);
     method @NonNull public android.app.prediction.AppTarget build();
     method @NonNull public android.app.prediction.AppTarget.Builder setClassName(@NonNull String);
     method @NonNull public android.app.prediction.AppTarget.Builder setRank(@IntRange(from=0) int);
-    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
-    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
   }
 
   public final class AppTargetEvent implements android.os.Parcelable {
@@ -1602,9 +1596,6 @@ package android.content.pm {
     method public static void forceSafeLabels();
     method @Deprecated @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager);
     method @NonNull public CharSequence loadSafeLabel(@NonNull android.content.pm.PackageManager, @FloatRange(from=0) float, int);
-    field @Deprecated public static final int SAFE_LABEL_FLAG_FIRST_LINE = 4; // 0x4
-    field @Deprecated public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 2; // 0x2
-    field @Deprecated public static final int SAFE_LABEL_FLAG_TRIM = 1; // 0x1
   }
 
   public abstract class PackageManager {
@@ -7102,7 +7093,6 @@ package android.telecom {
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
-    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.WRITE_SECURE_SETTINGS}) public boolean setDefaultDialer(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
     field public static final String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
