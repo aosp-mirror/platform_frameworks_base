@@ -439,7 +439,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     @Override
     protected ConfigurationContainer getParent() {
-        return null;
+        // Returning RootActivityContainer as the parent, so that this process controller always
+        // has full configuration and overrides (e.g. from display) are always added on top of
+        // global config.
+        return mAtm.mRootActivityContainer;
     }
 
     @HotPath(caller = HotPath.PROCESS_CHANGE)
