@@ -46,6 +46,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 
 import javax.inject.Inject;
@@ -71,6 +72,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private final AccessibilityController mAccessibilityController;
     private final DockManager mDockManager;
     private final Handler mMainHandler;
+    private final KeyguardMonitor mKeyguardMonitor;
 
     private int mLastState = 0;
     private boolean mTransientBiometricsError;
@@ -91,7 +93,16 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private int mIconRes;
     private boolean mWasPulsingOnThisFrame;
     private boolean mWakeAndUnlockRunning;
+    private boolean mKeyguardShowing;
 
+    private final KeyguardMonitor.Callback mKeyguardMonitorCallback =
+            new KeyguardMonitor.Callback() {
+                @Override
+                public void onKeyguardShowingChanged() {
+                    mKeyguardShowing = mKeyguardMonitor.isShowing();
+                    update(false /* force */);
+                }
+            };
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
     private final DockManager.DockEventListener mDockEventListener =
             new DockManager.DockEventListener() {
@@ -150,6 +161,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
             AccessibilityController accessibilityController,
+            KeyguardMonitor keyguardMonitor,
             @Nullable DockManager dockManager,
             @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
         super(context, attrs);
@@ -159,6 +171,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mAccessibilityController = accessibilityController;
         mConfigurationController = configurationController;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardMonitor = keyguardMonitor;
         mDockManager = dockManager;
         mMainHandler = mainHandler;
     }
@@ -168,6 +181,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         super.onAttachedToWindow();
         mStatusBarStateController.addCallback(this);
         mConfigurationController.addCallback(this);
+        mKeyguardMonitor.addCallback(mKeyguardMonitorCallback);
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mUnlockMethodCache.addListener(this);
         mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
@@ -183,6 +197,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mStatusBarStateController.removeCallback(this);
         mConfigurationController.removeCallback(this);
         mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
+        mKeyguardMonitor.removeCallback(mKeyguardMonitorCallback);
         mUnlockMethodCache.removeListener(this);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
@@ -379,7 +394,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         if (mTransientBiometricsError) {
             return STATE_BIOMETRICS_ERROR;
-        } else if (mUnlockMethodCache.canSkipBouncer() && !mSimLocked) {
+        } else if ((mUnlockMethodCache.canSkipBouncer() || !mKeyguardShowing) && !mSimLocked) {
             return STATE_LOCK_OPEN;
         } else if (updateMonitor.isFaceDetectionRunning()) {
             return STATE_SCANNING_FACE;
