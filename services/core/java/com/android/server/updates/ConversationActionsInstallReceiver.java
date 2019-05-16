@@ -25,4 +25,9 @@ public class ConversationActionsInstallReceiver extends ConfigUpdateInstallRecei
                 "metadata/actions_suggestions",
                 "version");
     }
+
+    @Override
+    protected boolean verifyVersion(int current, int alternative) {
+        return true;
+    }
 }

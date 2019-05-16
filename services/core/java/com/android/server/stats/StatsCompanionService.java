@@ -15,6 +15,7 @@
  */
 package com.android.server.stats;
 
+import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Process.getPidsForCommands;
@@ -33,6 +34,11 @@ import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
+import android.app.AppOpsManager;
+import android.app.AppOpsManager.HistoricalOps;
+import android.app.AppOpsManager.HistoricalOpsRequest;
+import android.app.AppOpsManager.HistoricalPackageOps;
+import android.app.AppOpsManager.HistoricalUidOps;
 import android.app.ProcessMemoryHighWaterMark;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
@@ -146,6 +152,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -154,6 +162,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -1941,6 +1950,53 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullAppOps(long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+
+            CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
+            HistoricalOpsRequest histOpsRequest =
+                    new HistoricalOpsRequest.Builder(
+                            Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli(),
+                            Long.MAX_VALUE).build();
+            appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
+
+            HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
+                    TimeUnit.MILLISECONDS);
+
+            StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.APP_OPS, elapsedNanos,
+                    wallClockNanos);
+
+            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
+                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
+                final int uid = uidOps.getUid();
+                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
+                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
+                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
+                        final AppOpsManager.HistoricalOp op  = packageOps.getOpAt(opIdx);
+                        e.writeInt(uid);
+                        e.writeString(packageOps.getPackageName());
+                        e.writeInt(op.getOpCode());
+                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+                        pulledData.add(e);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "Could not read appops", t);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+
     /**
      * Add a RoleHolder atom for each package that holds a role.
      *
@@ -2329,6 +2385,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.FACE_SETTINGS: {
                 pullFaceSettings(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.APP_OPS: {
+                pullAppOps(elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

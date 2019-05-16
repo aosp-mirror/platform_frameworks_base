@@ -662,11 +662,17 @@ public class LegacyRecentsImpl implements RecentsImplementation {
 
     public final void onBusEvent(ExpandPipEvent event) {
         PipUI pipUi = getComponent(PipUI.class);
+        if (pipUi == null) {
+            return;
+        }
         pipUi.expandPip();
     }
 
     public final void onBusEvent(HidePipMenuEvent event) {
         PipUI pipUi = getComponent(PipUI.class);
+        if (pipUi == null) {
+            return;
+        }
         event.getAnimationTrigger().increment();
         pipUi.hidePipMenu(() -> {
                 event.getAnimationTrigger().increment();

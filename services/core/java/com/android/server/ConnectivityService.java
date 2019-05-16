@@ -3497,7 +3497,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @Override
     public void startCaptivePortalAppInternal(Network network, Bundle appExtras) {
-        mContext.checkCallingOrSelfPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+        mContext.enforceCallingOrSelfPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                "ConnectivityService");
 
         final Intent appIntent = new Intent(ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
         appIntent.putExtras(appExtras);

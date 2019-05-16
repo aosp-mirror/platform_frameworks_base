@@ -110,7 +110,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public boolean hasBiometrics() {
+        public boolean hasEnrolledBiometrics() {
             return false;
         }
 
@@ -163,5 +163,4 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
         return storedData;
     }
-
 }

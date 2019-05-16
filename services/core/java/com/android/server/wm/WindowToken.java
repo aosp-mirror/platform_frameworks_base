@@ -82,9 +82,6 @@ class WindowToken extends WindowContainer<WindowState> {
     // windows will be put to the bottom of the list.
     boolean sendingToBottom;
 
-    // The display this token is on.
-    protected DisplayContent mDisplayContent;
-
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
 
@@ -249,10 +246,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return null;
     }
 
-    DisplayContent getDisplayContent() {
-        return mDisplayContent;
-    }
-
     @Override
     void removeImmediately() {
         if (mDisplayContent != null) {
@@ -266,7 +259,6 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     void onDisplayChanged(DisplayContent dc) {
         dc.reParentWindowToken(this);
-        mDisplayContent = dc;
 
         // TODO(b/36740756): One day this should perhaps be hooked
         // up with goodToGo, so we don't move a window

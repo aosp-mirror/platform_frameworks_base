@@ -26,7 +26,18 @@ message ActiveEventActivation {
 
     // Time left in activation. When this proto is loaded after device boot,
     // the activation should be set to active for this duration.
+    // This field will only be set when the state is ACTIVE
     optional int64 remaining_ttl_nanos = 2;
+
+    enum State {
+        UNNKNOWN = 0;
+        // This metric should activate for remaining_ttl_nanos when we load the activations.
+        ACTIVE = 1;
+        // When we load the activations, this metric should activate on next boot for the tll
+        // specified in the config.
+        ACTIVATE_ON_BOOT = 2;
+    }
+    optional State state = 3;
 }
 
 message ActiveMetric {

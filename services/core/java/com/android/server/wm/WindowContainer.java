@@ -109,14 +109,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // The owner/creator for this container. No controller if null.
     WindowContainerController mController;
 
+    // The display this window container is on.
+    protected DisplayContent mDisplayContent;
+
     protected SurfaceControl mSurfaceControl;
     private int mLastLayer = 0;
     private SurfaceControl mLastRelativeToLayer = null;
 
+    // TODO(b/132320879): Remove this from WindowContainers except DisplayContent.
+    private final Transaction mPendingTransaction;
+
     /**
      * Applied as part of the animation pass in "prepareSurfaces".
      */
-    protected final Transaction mPendingTransaction;
     protected final SurfaceAnimator mSurfaceAnimator;
     protected final WindowManagerService mWmService;
 
@@ -320,12 +325,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mSurfaceControl != null) {
-            mPendingTransaction.remove(mSurfaceControl);
+            getPendingTransaction().remove(mSurfaceControl);
 
             // Merge to parent transaction to ensure the transactions on this WindowContainer are
             // applied in native even if WindowContainer is removed.
             if (mParent != null) {
-                mParent.getPendingTransaction().merge(mPendingTransaction);
+                mParent.getPendingTransaction().merge(getPendingTransaction());
             }
 
             mSurfaceControl = null;
@@ -508,10 +513,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param dc The display this container is on after changes.
      */
     void onDisplayChanged(DisplayContent dc) {
+        mDisplayContent = dc;
+        if (dc != null && dc != this) {
+            dc.getPendingTransaction().merge(mPendingTransaction);
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onDisplayChanged(dc);
         }
+    }
+
+    DisplayContent getDisplayContent() {
+        return mDisplayContent;
     }
 
     void setWaitingForDrawnIfResizingChanged() {
@@ -1180,13 +1193,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    /**
-     * TODO: Once we totally eliminate global transaction we will pass transaction in here
-     * rather than merging to global.
-     */
     void prepareSurfaces() {
-        SurfaceControl.mergeToGlobalTransaction(getPendingTransaction());
-
         // If a leash has been set when the transaction was committed, then the leash reparent has
         // been committed.
         mCommittedReparentToAnimationLeash = mSurfaceAnimator.hasLeash();
@@ -1204,8 +1211,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Trigger a call to prepareSurfaces from the animation thread, such that
-     * mPendingTransaction will be applied.
+     * Trigger a call to prepareSurfaces from the animation thread, such that pending transactions
+     * will be applied.
      */
     void scheduleAnimation() {
         if (mParent != null) {
@@ -1224,6 +1231,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public Transaction getPendingTransaction() {
+        final DisplayContent displayContent = getDisplayContent();
+        if (displayContent != null && displayContent != this) {
+            return displayContent.getPendingTransaction();
+        }
+        // This WindowContainer has not attached to a display yet or this is a DisplayContent, so we
+        // let the caller to save the surface operations within the local mPendingTransaction.
+        // If this is not a DisplayContent, we will merge it to the pending transaction of its
+        // display once it attaches to it.
         return mPendingTransaction;
     }
 

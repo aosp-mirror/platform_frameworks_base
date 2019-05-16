@@ -2005,7 +2005,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         layoutLetterbox(winHint);
         if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
-            mLetterbox.applySurfaceChanges(mPendingTransaction);
+            mLetterbox.applySurfaceChanges(getPendingTransaction());
         }
     }
 
@@ -3059,13 +3059,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
-                mPendingTransaction.show(mSurfaceControl);
+                getPendingTransaction().show(mSurfaceControl);
             } else if (!show && mLastSurfaceShowing) {
-                mPendingTransaction.hide(mSurfaceControl);
+                getPendingTransaction().hide(mSurfaceControl);
             }
         }
         if (mThumbnail != null) {
-            mThumbnail.setShowing(mPendingTransaction, show);
+            mThumbnail.setShowing(getPendingTransaction(), show);
         }
         mLastSurfaceShowing = show;
         super.prepareSurfaces();
@@ -3225,8 +3225,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private void updateColorTransform() {
         if (mSurfaceControl != null && mLastAppSaturationInfo != null) {
-            mPendingTransaction.setColorTransform(mSurfaceControl, mLastAppSaturationInfo.mMatrix,
-                    mLastAppSaturationInfo.mTranslation);
+            getPendingTransaction().setColorTransform(mSurfaceControl,
+                    mLastAppSaturationInfo.mMatrix, mLastAppSaturationInfo.mTranslation);
             mWmService.scheduleAnimationLocked();
         }
     }
