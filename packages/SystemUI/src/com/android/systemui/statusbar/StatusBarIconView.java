@@ -40,7 +40,6 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
@@ -72,12 +71,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     /**
      * Status icons are currently drawn with the intention of being 17dp tall, but we
      * want to scale them (in a way that doesn't require an asset dump) down 2dp. So
-     * 17dp * (15 / 17) = 15dp, the new height.
+     * 17dp * (15 / 17) = 15dp, the new height. After the first call to {@link #reloadDimens} all
+     * values will be in px.
      */
-    private static final float SYSTEM_ICON_DESIRED_HEIGHT = 15f;
-    private static final float SYSTEM_ICON_INTRINSIC_HEIGHT = 17f;
-    private static final float SYSTEM_ICON_SCALE =
-            SYSTEM_ICON_DESIRED_HEIGHT / SYSTEM_ICON_INTRINSIC_HEIGHT;
+    private float mSystemIconDesiredHeight = 15f;
+    private float mSystemIconIntrinsicHeight = 17f;
+    private float mSystemIconDefaultScale = mSystemIconDesiredHeight / mSystemIconIntrinsicHeight;
     private final int ANIMATION_DURATION_FAST = 100;
 
     public static final int STATE_ICON = 0;
@@ -209,21 +208,20 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     // Makes sure that all icons are scaled to the same height (15dp). If we cannot get a height
     // for the icon, it uses the default SCALE (15f / 17f) which is the old behavior
     private void updateIconScaleForSystemIcons() {
-        float iconHeight = getIconHeightInDps();
+        float iconHeight = getIconHeight();
         if (iconHeight != 0) {
-            mIconScale = SYSTEM_ICON_DESIRED_HEIGHT / iconHeight;
+            mIconScale = mSystemIconDesiredHeight / iconHeight;
         } else {
-            mIconScale = SYSTEM_ICON_SCALE;
+            mIconScale = mSystemIconDefaultScale;
         }
     }
 
-    private float getIconHeightInDps() {
+    private float getIconHeight() {
         Drawable d = getDrawable();
         if (d != null) {
-            return ((float) getDrawable().getIntrinsicHeight() * DisplayMetrics.DENSITY_DEFAULT)
-                    / mDensity;
+            return (float) getDrawable().getIntrinsicHeight();
         } else {
-            return SYSTEM_ICON_INTRINSIC_HEIGHT;
+            return mSystemIconIntrinsicHeight;
         }
     }
 
@@ -265,6 +263,11 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (applyRadius) {
             mDotRadius = mStaticDotRadius;
         }
+        mSystemIconDesiredHeight = res.getDimension(
+                com.android.internal.R.dimen.status_bar_system_icon_size);
+        mSystemIconIntrinsicHeight = res.getDimension(
+                com.android.internal.R.dimen.status_bar_system_icon_intrinsic_size);
+        mSystemIconDefaultScale = mSystemIconDesiredHeight / mSystemIconIntrinsicHeight;
     }
 
     public void setNotification(StatusBarNotification notification) {
@@ -272,6 +275,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         if (notification != null) {
             setContentDescription(notification.getNotification());
         }
+        maybeUpdateIconScaleDimens();
     }
 
     public StatusBarIconView(Context context, AttributeSet attrs) {
@@ -280,7 +284,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mBlocked = false;
         mAlwaysScaleIcon = true;
         reloadDimens();
-        updateIconScaleForNotifications();
+        maybeUpdateIconScaleDimens();
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
@@ -854,7 +858,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public void setDark(boolean dark, boolean fade, long delay) {
         mDozer.setIntensityDark(f -> {
             mDarkAmount = f;
-            updateIconScaleForNotifications();
+            maybeUpdateIconScaleDimens();
             updateDecorColor();
             updateIconColor();
             updateAllowAnimation();
