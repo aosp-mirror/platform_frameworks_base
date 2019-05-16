@@ -195,6 +195,7 @@ class ActivityTestsBase {
         private ActivityStack mStack;
         private int mActivityFlags;
         private int mLaunchMode;
+        private WindowProcessController mWpc;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -245,6 +246,11 @@ class ActivityTestsBase {
             return this;
         }
 
+        ActivityBuilder setUseProcess(WindowProcessController wpc) {
+            mWpc = wpc;
+            return this;
+        }
+
         ActivityRecord build() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
@@ -290,12 +296,18 @@ class ActivityTestsBase {
                 mTaskRecord.addActivityToTop(activity);
             }
 
-            final WindowProcessController wpc = new WindowProcessController(mService,
-                    mService.mContext.getApplicationInfo(), "name", 12345,
-                    UserHandle.getUserId(12345), mock(Object.class),
-                    mock(WindowProcessListener.class));
-            wpc.setThread(mock(IApplicationThread.class));
+            final WindowProcessController wpc;
+            if (mWpc != null) {
+                wpc = mWpc;
+            } else {
+                wpc = new WindowProcessController(mService,
+                        mService.mContext.getApplicationInfo(), "name", 12345,
+                        UserHandle.getUserId(12345), mock(Object.class),
+                        mock(WindowProcessListener.class));
+                wpc.setThread(mock(IApplicationThread.class));
+            }
             activity.setProcess(wpc);
+            wpc.addActivityIfNeeded(activity);
             return activity;
         }
     }
