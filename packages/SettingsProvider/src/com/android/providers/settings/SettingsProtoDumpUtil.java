@@ -2086,6 +2086,10 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
 
+        dumpSetting(s, p,
+                Settings.Secure.NAVIGATION_MODE,
+                SecureSettingsProto.NAVIGATION_MODE);
+
         final long nfcPaymentToken = p.start(SecureSettingsProto.NFC_PAYMENT);
         dumpSetting(s, p,
                 Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
