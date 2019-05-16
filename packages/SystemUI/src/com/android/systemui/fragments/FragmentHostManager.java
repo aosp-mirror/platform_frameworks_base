@@ -156,10 +156,7 @@ public class FragmentHostManager {
      */
     protected void onConfigurationChanged(Configuration newConfig) {
         if (mConfigChanges.applyNewConfig(mContext.getResources())) {
-            // Save the old state.
-            Parcelable p = destroyFragmentHost();
-            // Generate a new fragment host and restore its state.
-            createFragmentHost(p);
+            reloadFragments();
         } else {
             mFragments.dispatchConfigurationChanged(newConfig);
         }
@@ -215,6 +212,13 @@ public class FragmentHostManager {
 
     public static void removeAndDestroy(View view) {
         Dependency.get(FragmentService.class).removeAndDestroy(view);
+    }
+
+    public void reloadFragments() {
+        // Save the old state.
+        Parcelable p = destroyFragmentHost();
+        // Generate a new fragment host and restore its state.
+        createFragmentHost(p);
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {
@@ -291,13 +295,6 @@ public class FragmentHostManager {
                     .replace(id, instantiate(context, currentClass, null), tag)
                     .commit();
             reloadFragments();
-        }
-
-        private void reloadFragments() {
-            // Save the old state.
-            Parcelable p = destroyFragmentHost();
-            // Generate a new fragment host and restore its state.
-            createFragmentHost(p);
         }
 
         Fragment instantiate(Context context, String className, Bundle arguments) {
