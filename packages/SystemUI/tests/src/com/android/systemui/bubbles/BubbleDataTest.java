@@ -103,13 +103,13 @@ public class BubbleDataTest extends SysuiTestCase {
         mEntryB3 = createBubbleEntry(1, "b3", "package.b");
         mEntryC1 = createBubbleEntry(1, "c1", "package.c");
 
-        mBubbleA1 = new Bubble(mEntryA1);
-        mBubbleA2 = new Bubble(mEntryA2);
-        mBubbleA3 = new Bubble(mEntryA3);
-        mBubbleB1 = new Bubble(mEntryB1);
-        mBubbleB2 = new Bubble(mEntryB2);
-        mBubbleB3 = new Bubble(mEntryB3);
-        mBubbleC1 = new Bubble(mEntryC1);
+        mBubbleA1 = new Bubble(mContext, mEntryA1);
+        mBubbleA2 = new Bubble(mContext, mEntryA2);
+        mBubbleA3 = new Bubble(mContext, mEntryA3);
+        mBubbleB1 = new Bubble(mContext, mEntryB1);
+        mBubbleB2 = new Bubble(mContext, mEntryB2);
+        mBubbleB3 = new Bubble(mContext, mEntryB3);
+        mBubbleC1 = new Bubble(mContext, mEntryC1);
 
         mBubbleData = new BubbleData(getContext());
 

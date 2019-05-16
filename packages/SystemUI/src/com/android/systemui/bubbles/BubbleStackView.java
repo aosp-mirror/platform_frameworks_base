@@ -23,6 +23,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.ColorMatrix;
@@ -551,6 +552,43 @@ public class BubbleStackView extends FrameLayout {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Update content description for a11y TalkBack.
+     */
+    public void updateContentDescription() {
+        if (mBubbleData.getBubbles().isEmpty()) {
+            return;
+        }
+        Bubble topBubble = mBubbleData.getBubbles().get(0);
+        String appName = topBubble.getAppName();
+        Notification notification = topBubble.entry.notification.getNotification();
+        CharSequence titleCharSeq = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
+        String titleStr = getResources().getString(R.string.stream_notification);
+        if (titleCharSeq != null) {
+            titleStr = titleCharSeq.toString();
+        }
+        int moreCount = mBubbleContainer.getChildCount() - 1;
+
+        // Example: Title from app name.
+        String singleDescription = getResources().getString(
+                R.string.bubble_content_description_single, titleStr, appName);
+
+        // Example: Title from app name and 4 more.
+        String stackDescription = getResources().getString(
+                R.string.bubble_content_description_stack, titleStr, appName, moreCount);
+
+        if (mIsExpanded) {
+            // TODO(b/129522932) - update content description for each bubble in expanded view.
+        } else {
+            // Collapsed stack.
+            if (moreCount > 0) {
+                mBubbleContainer.setContentDescription(stackDescription);
+            } else {
+                mBubbleContainer.setContentDescription(singleDescription);
+            }
+        }
     }
 
     private void updateSystemGestureExcludeRects() {
