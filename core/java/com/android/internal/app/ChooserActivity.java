@@ -2655,7 +2655,7 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public boolean isEnabled(int position) {
             int viewType = getItemViewType(position);
-            if (viewType == VIEW_TYPE_CONTENT_PREVIEW) {
+            if (viewType == VIEW_TYPE_CONTENT_PREVIEW || viewType == VIEW_TYPE_AZ_LABEL) {
                 return false;
             }
             return true;
