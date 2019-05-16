@@ -27,6 +27,7 @@ import android.provider.Settings;
 import android.view.CompositionSamplingListener;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 
 import com.android.systemui.R;
@@ -153,8 +154,12 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
         boolean isSamplingEnabled = mSamplingEnabled && !mSamplingRequestBounds.isEmpty()
                 && (mSampledView.isAttachedToWindow() || mFirstSamplingAfterStart);
         if (isSamplingEnabled) {
-            SurfaceControl stopLayerControl = mSampledView.getViewRootImpl().getSurfaceControl();
-            if (!stopLayerControl.isValid()) {
+            ViewRootImpl viewRootImpl = mSampledView.getViewRootImpl();
+            SurfaceControl stopLayerControl = null;
+            if (viewRootImpl != null) {
+                 stopLayerControl = viewRootImpl.getSurfaceControl();
+            }
+            if (stopLayerControl == null || !stopLayerControl.isValid()) {
                 if (!mWaitingOnDraw) {
                     mWaitingOnDraw = true;
                     // The view might be attached but we haven't drawn yet, so wait until the
