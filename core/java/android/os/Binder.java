@@ -740,6 +740,8 @@ public class Binder implements IBinder {
                     Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
                 }
             } else {
+                // Clear the parcel before writing the exception
+                reply.setDataSize(0);
                 reply.setDataPosition(0);
                 reply.writeException(e);
             }
