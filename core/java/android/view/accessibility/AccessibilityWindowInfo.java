@@ -634,9 +634,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mId = UNDEFINED_WINDOW_ID;
         mParentId = UNDEFINED_WINDOW_ID;
         mBoundsInScreen.setEmpty();
-        if (mChildIds != null) {
-            mChildIds.clear();
-        }
+        mChildIds = null;
         mConnectionId = UNDEFINED_WINDOW_ID;
         mAnchorId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
         mTitle = null;

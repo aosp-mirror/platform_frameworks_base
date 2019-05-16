@@ -2660,6 +2660,9 @@ public final class SurfaceControl implements Parcelable {
          */
         @NonNull
         public Transaction merge(@NonNull Transaction other) {
+            if (this == other) {
+                return this;
+            }
             mResizedSurfaces.putAll(other.mResizedSurfaces);
             other.mResizedSurfaces.clear();
             nativeMergeTransaction(mNativeObject, other.mNativeObject);

@@ -238,6 +238,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
+    // If the user long pressed the lock icon, disabling face auth for the current session.
+    private boolean mLockIconPressed;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -1384,6 +1386,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOff() {
+        mLockIconPressed = false;
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
         final int count = mCallbacks.size();
@@ -1608,35 +1611,36 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        final boolean switchingUsers;
-        synchronized (this) {
-            switchingUsers = mSwitchingUser;
-        }
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
-                && !switchingUsers && !isFingerprintDisabled(getCurrentUser())
+                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
                 && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser;
         return shouldListen;
     }
 
     private boolean shouldListenForFace() {
-        final boolean switchingUsers;
-        synchronized (this) {
-            switchingUsers = mSwitchingUser;
-        }
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
-                && !switchingUsers && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
-                && !mKeyguardGoingAway && mFaceSettingEnabledForUser
+                && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
                 && mUserManager.isUserUnlocked(user) && mIsPrimaryUser;
     }
 
+    /**
+     * Whenever the lock icon is long pressed, disabling trust agents.
+     * This means that we cannot auth passively (face) until the user presses power.
+     */
+    public void onLockIconPressed() {
+        mLockIconPressed = true;
+        mUserFaceAuthenticated.put(getCurrentUser(), false);
+        updateFaceListeningState();
+    }
 
     private void startListeningForFingerprint() {
         if (mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING) {
@@ -2188,11 +2192,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         sendUpdates(callback);
     }
 
+    public boolean isSwitchingUser() {
+        return mSwitchingUser;
+    }
+
     @AnyThread
     public void setSwitchingUser(boolean switching) {
-        synchronized (this) {
-            mSwitchingUser = switching;
-        }
+        mSwitchingUser = switching;
         // Since this comes in on a binder thread, we need to post if first
         mHandler.post(mUpdateBiometricListeningState);
     }

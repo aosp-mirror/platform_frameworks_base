@@ -396,6 +396,12 @@ public class SubscriptionManager {
     public static final int NAME_SOURCE_USER_INPUT = 2;
 
     /**
+     * The name_source is carrier (carrier app, carrier config, etc.)
+     * @hide
+     */
+    public static final int NAME_SOURCE_CARRIER = 3;
+
+    /**
      * TelephonyProvider column name for the color of a SIM.
      * <P>Type: INTEGER (int)</P>
      */
@@ -686,6 +692,15 @@ public class SubscriptionManager {
      * @hide
      */
     public static final String GROUP_UUID = "group_uuid";
+
+    /**
+     * TelephonyProvider column name for group owner. It's the package name who created
+     * the subscription group.
+     *
+     * @hide
+     */
+    public static final String GROUP_OWNER = "group_owner";
+
     /**
      * TelephonyProvider column name for whether a subscription is metered or not, that is, whether
      * the network it connects to charges for subscription or not. For example, paid CBRS or unpaid.

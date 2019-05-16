@@ -325,7 +325,6 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
     private void handleTryAgainPressed() {
         try {
-            mCurrentDialog.clearTemporaryMessage();
             mReceiver.onTryAgainPressed();
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException when handling try again", e);

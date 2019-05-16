@@ -1479,7 +1479,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
         // By updating the Display info here it will be available to
         // #computeScreenConfiguration() later.
-        updateDisplayAndOrientation(getConfiguration().uiMode);
+        updateDisplayAndOrientation(getConfiguration().uiMode, null /* outConfig */);
 
         // NOTE: We disable the rotation in the emulator because
         //       it doesn't support hardware OpenGL emulation yet.
@@ -1577,7 +1577,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * changed.
      * Do not call if {@link WindowManagerService#mDisplayReady} == false.
      */
-    private DisplayInfo updateDisplayAndOrientation(int uiMode) {
+    private DisplayInfo updateDisplayAndOrientation(int uiMode, Configuration outConfig) {
         // Use the effective "visual" dimensions based on current rotation
         final boolean rotated = (mRotation == ROTATION_90 || mRotation == ROTATION_270);
         final int dw = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
@@ -1608,6 +1608,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             mDisplayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
         }
+
+        computeSizeRangesAndScreenLayout(mDisplayInfo, rotated, uiMode, dw, dh,
+                mDisplayMetrics.density, outConfig);
 
         // We usually set the override info in DisplayManager so that we get consistent display
         // metrics values when displays are changing and don't send out new values until WM is aware
@@ -1657,7 +1660,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Do not call if mDisplayReady == false.
      */
     void computeScreenConfiguration(Configuration config) {
-        final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode);
+        final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode, config);
         calculateBounds(displayInfo, mTmpBounds);
         config.windowConfiguration.setBounds(mTmpBounds);
 
@@ -1686,9 +1689,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 topInset + displayInfo.appHeight /* bottom */);
         final boolean rotated = (displayInfo.rotation == Surface.ROTATION_90
                 || displayInfo.rotation == Surface.ROTATION_270);
-
-        computeSizeRangesAndScreenLayout(displayInfo, rotated, config.uiMode, dw, dh, density,
-                config);
 
         config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
                 | ((displayInfo.flags & Display.FLAG_ROUND) != 0
@@ -1843,6 +1843,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, uiMode, unrotDh, unrotDw);
         adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, uiMode, unrotDw, unrotDh);
         adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, uiMode, unrotDh, unrotDw);
+
+        if (outConfig == null) {
+            return;
+        }
         int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode,
                 displayInfo.displayCutout);
@@ -3339,7 +3343,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final SurfaceControl newParent =
                 shouldAttachToDisplay ? mWindowingLayer : computeImeParent();
         if (newParent != null) {
-            mPendingTransaction.reparent(mImeWindowsContainers.mSurfaceControl, newParent);
+            getPendingTransaction().reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
         }
     }
@@ -3746,7 +3750,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPortalWindowHandle.touchableRegion.getBounds(mTmpRect);
             if (!mTmpBounds.equals(mTmpRect)) {
                 mPortalWindowHandle.touchableRegion.set(mTmpBounds);
-                mPendingTransaction.setInputWindowInfo(mParentSurfaceControl, mPortalWindowHandle);
+                getPendingTransaction().setInputWindowInfo(
+                        mParentSurfaceControl, mPortalWindowHandle);
             }
         }
     }
@@ -4834,18 +4839,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         try {
             final ScreenRotationAnimation screenRotationAnimation =
                     mWmService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+            final Transaction transaction = getPendingTransaction();
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
                 screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
-                mPendingTransaction.setMatrix(mWindowingLayer,
+                transaction.setMatrix(mWindowingLayer,
                         mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                         mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-                mPendingTransaction.setPosition(mWindowingLayer,
+                transaction.setPosition(mWindowingLayer,
                         mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
-                mPendingTransaction.setAlpha(mWindowingLayer,
+                transaction.setAlpha(mWindowingLayer,
                         screenRotationAnimation.getEnterTransformation().getAlpha());
             }
 
             super.prepareSurfaces();
+
+            // TODO: Once we totally eliminate global transaction we will pass transaction in here
+            //       rather than merging to global.
+            SurfaceControl.mergeToGlobalTransaction(transaction);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -5001,7 +5011,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mPortalWindowHandle == null) {
             mPortalWindowHandle = createPortalWindowHandle(sc.toString());
         }
-        mPendingTransaction.setInputWindowInfo(sc, mPortalWindowHandle)
+        getPendingTransaction().setInputWindowInfo(sc, mPortalWindowHandle)
                 .reparent(mWindowingLayer, sc).reparent(mOverlayLayer, sc);
     }
 

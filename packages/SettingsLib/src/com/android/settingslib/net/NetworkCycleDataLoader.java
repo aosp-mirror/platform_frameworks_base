@@ -49,18 +49,14 @@ import java.util.Iterator;
 public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
     private static final String TAG = "NetworkCycleDataLoader";
     protected final NetworkStatsManager mNetworkStatsManager;
-    protected final String mSubId;
-    protected final int mNetworkType;
+    protected final NetworkTemplate mNetworkTemplate;
     private final NetworkPolicy mPolicy;
-    private final NetworkTemplate mNetworkTemplate;
     private final ArrayList<Long> mCycles;
     @VisibleForTesting
     final INetworkStatsService mNetworkStatsService;
 
     protected NetworkCycleDataLoader(Builder<?> builder) {
         super(builder.mContext);
-        mSubId = builder.mSubId;
-        mNetworkType = builder.mNetworkType;
         mNetworkTemplate = builder.mNetworkTemplate;
         mCycles = builder.mCycles;
         mNetworkStatsManager = (NetworkStatsManager)
@@ -180,8 +176,6 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
     public static abstract class Builder<T extends NetworkCycleDataLoader> {
         private final Context mContext;
-        private String mSubId;
-        private int mNetworkType;
         private NetworkTemplate mNetworkTemplate;
         private ArrayList<Long> mCycles;
 
@@ -189,14 +183,8 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
             mContext = context;
         }
 
-        public Builder<T> setSubscriberId(String subId) {
-            mSubId = subId;
-            return this;
-        }
-
         public Builder<T> setNetworkTemplate(NetworkTemplate template) {
             mNetworkTemplate = template;
-            mNetworkType = DataUsageController.getNetworkType(template);
             return this;
         }
 

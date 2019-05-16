@@ -175,9 +175,7 @@ public class DataUsageController {
 
     private long getUsageLevel(NetworkTemplate template, long start, long end) {
         try {
-            final Bucket bucket = mNetworkStatsManager.querySummaryForDevice(
-                    getNetworkType(template), getActiveSubscriberId(),
-                    start, end);
+            final Bucket bucket = mNetworkStatsManager.querySummaryForDevice(template, start, end);
             if (bucket != null) {
                 return bucket.getRxBytes() + bucket.getTxBytes();
             }
