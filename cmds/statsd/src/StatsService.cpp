@@ -35,6 +35,7 @@
 #include <cutils/multiuser.h>
 #include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
+#include <frameworks/base/cmds/statsd/src/uid_data.pb.h>
 #include <private/android_filesystem_config.h>
 #include <statslog.h>
 #include <stdio.h>
@@ -953,16 +954,49 @@ bool StatsService::getUidFromString(const char* s, int32_t& uid) {
             || (callingUid == AID_ROOT && goodUid == AID_SHELL); // ROOT can impersonate SHELL.
 }
 
-Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
-                                      const vector<String16>& version_string,
-                                      const vector<String16>& app,
-                                      const vector<String16>& installer) {
+Status StatsService::informAllUidData(const ParcelFileDescriptor& fd) {
     ENFORCE_UID(AID_SYSTEM);
+    // Read stream into buffer.
+    string buffer;
+    if (!android::base::ReadFdToString(fd.get(), &buffer)) {
+        return exception(Status::EX_ILLEGAL_ARGUMENT, "Failed to read all data from the pipe.");
+    }
 
-    VLOG("StatsService::informAllUidData was called");
-    mUidMap->updateMap(getElapsedRealtimeNs(), uid, version, version_string, app, installer);
-    VLOG("StatsService::informAllUidData succeeded");
+    // Parse buffer.
+    UidData uidData;
+    if (!uidData.ParseFromString(buffer)) {
+        return exception(Status::EX_ILLEGAL_ARGUMENT, "Error parsing proto stream for UidData.");
+    }
 
+    vector<String16> versionStrings;
+    vector<String16> installers;
+    vector<String16> packageNames;
+    vector<int32_t> uids;
+    vector<int64_t> versions;
+
+    const auto numEntries = uidData.app_info_size();
+    versionStrings.reserve(numEntries);
+    installers.reserve(numEntries);
+    packageNames.reserve(numEntries);
+    uids.reserve(numEntries);
+    versions.reserve(numEntries);
+
+    for (const auto& appInfo: uidData.app_info()) {
+        packageNames.emplace_back(String16(appInfo.package_name().c_str()));
+        uids.push_back(appInfo.uid());
+        versions.push_back(appInfo.version());
+        versionStrings.emplace_back(String16(appInfo.version_string().c_str()));
+        installers.emplace_back(String16(appInfo.installer().c_str()));
+    }
+
+    mUidMap->updateMap(getElapsedRealtimeNs(),
+                       uids,
+                       versions,
+                       versionStrings,
+                       packageNames,
+                       installers);
+
+    VLOG("StatsService::informAllUidData UidData proto parsed successfully.");
     return Status::ok();
 }
 
