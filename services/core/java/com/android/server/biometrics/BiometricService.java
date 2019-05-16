@@ -475,7 +475,7 @@ public class BiometricService extends SystemService {
                                 DEFAULT_KEYGUARD_ENABLED ? 1 : 0 /* default */,
                                 userId) != 0);
 
-                if (userId == ActivityManager.getCurrentUser()) {
+                if (userId == ActivityManager.getCurrentUser() && !selfChange) {
                     notifyEnabledOnKeyguardCallbacks(userId);
                 }
             } else if (FACE_UNLOCK_APP_ENABLED.equals(uri)) {
@@ -494,17 +494,25 @@ public class BiometricService extends SystemService {
         }
 
         boolean getFaceEnabledOnKeyguard() {
-            return mFaceEnabledOnKeyguard.getOrDefault(
-                    ActivityManager.getCurrentUser(), DEFAULT_KEYGUARD_ENABLED);
+            final int user = ActivityManager.getCurrentUser();
+            if (!mFaceEnabledOnKeyguard.containsKey(user)) {
+                onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED, user);
+            }
+            return mFaceEnabledOnKeyguard.get(user);
         }
 
         boolean getFaceEnabledForApps(int userId) {
+            if (!mFaceEnabledForApps.containsKey(userId)) {
+                onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED, userId);
+            }
             return mFaceEnabledForApps.getOrDefault(userId, DEFAULT_APP_ENABLED);
         }
 
         boolean getFaceAlwaysRequireConfirmation(int userId) {
-            return mFaceAlwaysRequireConfirmation
-                    .getOrDefault(userId, DEFAULT_ALWAYS_REQUIRE_CONFIRMATION);
+            if (!mFaceAlwaysRequireConfirmation.containsKey(userId)) {
+                onChange(true /* selfChange */, FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION, userId);
+            }
+            return mFaceAlwaysRequireConfirmation.get(userId);
         }
 
         void notifyEnabledOnKeyguardCallbacks(int userId) {
