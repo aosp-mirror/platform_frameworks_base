@@ -131,6 +131,8 @@ public class CarStatusBar extends StatusBar implements
     // The container for the notifications.
     private CarNotificationView mNotificationView;
     private RecyclerView mNotificationList;
+    // The handler bar view at the bottom of notification shade.
+    private View mHandleBar;
     // The controller for the notification view.
     private NotificationViewController mNotificationViewController;
     // The state of if the notification list is currently showing the bottom.
@@ -464,6 +466,7 @@ public class CarStatusBar extends StatusBar implements
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
         View glassPane = mStatusBarWindow.findViewById(R.id.glass_pane);
+        mHandleBar = mStatusBarWindow.findViewById(R.id.handle_bar);
         mNotificationView.setClickHandlerFactory(mNotificationClickHandlerFactory);
         mNotificationView.setNotificationDataManager(mNotificationDataManager);
 
@@ -521,7 +524,7 @@ public class CarStatusBar extends StatusBar implements
 
                 boolean handled = closeGestureDetector.onTouchEvent(event);
                 boolean isTracking = mIsTracking;
-                Rect rect = mNotificationList.getClipBounds();
+                Rect rect = mNotificationView.getClipBounds();
                 float clippedHeight = 0;
                 if (rect != null) {
                     clippedHeight = rect.bottom;
@@ -609,7 +612,7 @@ public class CarStatusBar extends StatusBar implements
             to = mNotificationView.getHeight();
         }
 
-        Rect rect = mNotificationList.getClipBounds();
+        Rect rect = mNotificationView.getClipBounds();
         if (rect != null) {
             float from = rect.bottom;
             animate(from, to, velocity, isClosing);
@@ -653,7 +656,7 @@ public class CarStatusBar extends StatusBar implements
                 if (isClosing) {
                     mStatusBarWindowController.setPanelVisible(false);
                     mNotificationView.setVisibility(View.INVISIBLE);
-                    mNotificationList.setClipBounds(null);
+                    mNotificationView.setClipBounds(null);
                     mNotificationViewController.setIsInForeground(false);
                     // let the status bar know that the panel is closed
                     setPanelExpanded(false);
@@ -1012,8 +1015,12 @@ public class CarStatusBar extends StatusBar implements
         Rect clipBounds = new Rect();
         clipBounds.set(0, 0, mNotificationView.getWidth(), height);
         // Sets the clip region on the notification list view.
-        mNotificationList.setClipBounds(clipBounds);
-
+        mNotificationView.setClipBounds(clipBounds);
+        if (mHandleBar != null) {
+            ViewGroup.MarginLayoutParams lp =
+                    (ViewGroup.MarginLayoutParams) mHandleBar.getLayoutParams();
+            mHandleBar.setTranslationY(height - mHandleBar.getHeight() - lp.bottomMargin);
+        }
         if (mNotificationView.getHeight() > 0) {
             // Calculates the alpha value for the background based on how much of the notification
             // shade is visible to the user. When the notification shade is completely open then
