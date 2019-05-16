@@ -379,6 +379,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 131176283)
     public void testCreateRemoveStartingWindow() {
         mToken.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
