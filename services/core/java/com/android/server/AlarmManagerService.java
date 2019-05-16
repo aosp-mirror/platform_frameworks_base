@@ -1138,8 +1138,8 @@ class AlarmManagerService extends SystemService {
                     ? clampPositive(whenElapsed + a.windowLength)
                     : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
         }
-        a.whenElapsed = whenElapsed;
-        a.maxWhenElapsed = maxElapsed;
+        a.expectedWhenElapsed = a.whenElapsed = whenElapsed;
+        a.expectedMaxWhenElapsed = a.maxWhenElapsed = maxElapsed;
         setImplLocked(a, true, doValidate);
     }
 
@@ -1243,7 +1243,7 @@ class AlarmManagerService extends SystemService {
                 alarm.count += (nowELAPSED - alarm.expectedWhenElapsed) / alarm.repeatInterval;
                 // Also schedule its next recurrence
                 final long delta = alarm.count * alarm.repeatInterval;
-                final long nextElapsed = alarm.whenElapsed + delta;
+                final long nextElapsed = alarm.expectedWhenElapsed + delta;
                 setImplLocked(alarm.type, alarm.when + delta, nextElapsed, alarm.windowLength,
                         maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
                         alarm.repeatInterval, alarm.operation, null, null, alarm.flags, true,
@@ -3596,10 +3596,9 @@ class AlarmManagerService extends SystemService {
                     // this adjustment will be zero if we're late by
                     // less than one full repeat interval
                     alarm.count += (nowELAPSED - alarm.expectedWhenElapsed) / alarm.repeatInterval;
-
                     // Also schedule its next recurrence
                     final long delta = alarm.count * alarm.repeatInterval;
-                    final long nextElapsed = alarm.whenElapsed + delta;
+                    final long nextElapsed = alarm.expectedWhenElapsed + delta;
                     setImplLocked(alarm.type, alarm.when + delta, nextElapsed, alarm.windowLength,
                             maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
                             alarm.repeatInterval, alarm.operation, null, null, alarm.flags, true,
