@@ -25,6 +25,7 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
+import android.util.DisplayMetrics;
 import android.util.MathUtils;
 import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
@@ -47,14 +48,14 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 public class NavigationBarEdgePanel extends View {
 
-    private static final long COLOR_ANIMATION_DURATION_MS = 100;
-    private static final long DISAPPEAR_FADE_ANIMATION_DURATION_MS = 140;
+    private static final long COLOR_ANIMATION_DURATION_MS = 120;
+    private static final long DISAPPEAR_FADE_ANIMATION_DURATION_MS = 80;
     private static final long DISAPPEAR_ARROW_ANIMATION_DURATION_MS = 100;
 
     /**
-     * The minimum time required since the first vibration effect to receive a second one
+     * The time required since the first vibration effect to automatically trigger a click
      */
-    private static final int MIN_TIME_BETWEEN_EFFECTS_MS = 120;
+    private static final int GESTURE_DURATION_FOR_CLICK_MS = 400;
 
     /**
      * The size of the protection of the arrow in px. Only used if this is not background protected
@@ -79,7 +80,7 @@ public class NavigationBarEdgePanel extends View {
     /**
      * The angle that is added per 1000 px speed to the angle of the leg
      */
-    private static final int ARROW_ANGLE_ADDED_PER_1000_SPEED = 8;
+    private static final int ARROW_ANGLE_ADDED_PER_1000_SPEED = 4;
 
     /**
      * The maximum angle offset allowed due to speed
@@ -92,15 +93,15 @@ public class NavigationBarEdgePanel extends View {
     private static final float ARROW_THICKNESS_DP = 2.5f;
 
     /**
-     * The amount of rubber banding we do for the horizontal translation beyond the base translation
+     * The amount of rubber banding we do for the vertical translation
      */
-    private static final int RUBBER_BAND_AMOUNT = 10;
+    private static final int RUBBER_BAND_AMOUNT = 15;
 
     /**
      * The interpolator used to rubberband
      */
     private static final Interpolator RUBBER_BAND_INTERPOLATOR
-            = new PathInterpolator(1.0f / RUBBER_BAND_AMOUNT, 1.0f, 1.0f, 1.0f);
+            = new PathInterpolator(1.0f / 5.0f, 1.0f, 1.0f, 1.0f);
 
     /**
      * The amount of rubber banding we do for the translation before base translation
@@ -189,6 +190,7 @@ public class NavigationBarEdgePanel extends View {
     private int mCurrentArrowColor;
     private float mDisappearAmount;
     private long mVibrationTime;
+    private int mScreenSize;
 
     private DynamicAnimation.OnAnimationEndListener mSetGoneEndListener
             = new DynamicAnimation.OnAnimationEndListener() {
@@ -281,9 +283,8 @@ public class NavigationBarEdgePanel extends View {
         mAngleAnimation =
                 new SpringAnimation(this, CURRENT_ANGLE);
         mAngleAppearForce = new SpringForce()
-                .setStiffness(SpringForce.STIFFNESS_LOW)
-                .setDampingRatio(0.4f)
-                .setFinalPosition(ARROW_ANGLE_WHEN_EXTENDED_DEGREES);
+                .setStiffness(500)
+                .setDampingRatio(0.5f);
         mAngleDisappearForce = new SpringForce()
                 .setStiffness(SpringForce.STIFFNESS_MEDIUM)
                 .setDampingRatio(SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY)
@@ -447,13 +448,14 @@ public class NavigationBarEdgePanel extends View {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        // TODO: read the gesture length from the nav controller.
         mMaxTranslation = getWidth() - mArrowPaddingEnd;
     }
 
     private void loadDimens() {
         mArrowPaddingEnd = getContext().getResources().getDimensionPixelSize(
                 R.dimen.navigation_edge_panel_padding);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mScreenSize = Math.min(metrics.widthPixels, metrics.heightPixels);
     }
 
     private void updateArrowDirection() {
@@ -510,7 +512,7 @@ public class NavigationBarEdgePanel extends View {
         if (!mArrowsPointLeft) {
             x = -x;
         }
-        float extent = 1.0f - mDisappearAmount;
+        float extent = MathUtils.lerp(1.0f, 0.75f, mDisappearAmount);
         x = x * extent;
         y = y * extent;
         mArrowPath.reset();
@@ -529,27 +531,29 @@ public class NavigationBarEdgePanel extends View {
     }
 
     private void triggerBack() {
-        if (SystemClock.uptimeMillis() - mVibrationTime >= MIN_TIME_BETWEEN_EFFECTS_MS) {
-            mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
-        }
         mVelocityTracker.computeCurrentVelocity(1000);
         // Only do the extra translation if we're not already flinging
-        boolean doExtraTranslation = Math.abs(mVelocityTracker.getXVelocity()) < 1000;
-        if (doExtraTranslation) {
-            setDesiredTranslation(mDesiredTranslation + dp(16), true /* animate */);
+        boolean isSlow = Math.abs(mVelocityTracker.getXVelocity()) < 500;
+        if (isSlow
+                || SystemClock.uptimeMillis() - mVibrationTime >= GESTURE_DURATION_FOR_CLICK_MS) {
+            mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
         }
 
         // Let's also snap the angle a bit
-        if (mAngleOffset < -4) {
-            mAngleOffset = Math.max(-16, mAngleOffset - 16);
+        if (mAngleOffset > -4) {
+            mAngleOffset = Math.max(-8, mAngleOffset - 8);
             updateAngle(true /* animated */);
         }
 
         // Finally, after the translation, animate back and disappear the arrow
         Runnable translationEnd = () -> {
-            setTriggerBack(false /* false */, true /* animate */);
+            // let's snap it back
+            mAngleOffset = Math.max(0, mAngleOffset + 8);
+            updateAngle(true /* animated */);
+
             mTranslationAnimation.setSpring(mTriggerBackSpring);
-            setDesiredTranslation(0, true /* animated */);
+            // Translate the arrow back a bit to make for a nice transition
+            setDesiredTranslation(mDesiredTranslation - dp(32), true /* animated */);
             animate().alpha(0f).setDuration(DISAPPEAR_FADE_ANIMATION_DURATION_MS)
                     .withEndAction(() -> setVisibility(GONE));
             mArrowDisappearAnimation.start();
@@ -584,6 +588,7 @@ public class NavigationBarEdgePanel extends View {
         setTriggerBack(false /* triggerBack */, false /* animated */);
         setDesiredTranslation(0, false /* animated */);
         setCurrentTranslation(0);
+        updateAngle(false /* animate */);
         mPreviousTouchTranslation = 0;
         mTotalTouchDelta = 0;
         mVibrationTime = 0;
@@ -621,7 +626,7 @@ public class NavigationBarEdgePanel extends View {
         // Let's make sure we only go to the baseextend and apply rubberbanding afterwards
         if (touchTranslation > mBaseTranslation) {
             float diff = touchTranslation - mBaseTranslation;
-            float progress = MathUtils.saturate(diff / (mBaseTranslation * RUBBER_BAND_AMOUNT));
+            float progress = MathUtils.saturate(diff / (mScreenSize - mBaseTranslation));
             progress = RUBBER_BAND_INTERPOLATOR.getInterpolation(progress)
                     * (mMaxTranslation - mBaseTranslation);
             touchTranslation = mBaseTranslation + progress;
