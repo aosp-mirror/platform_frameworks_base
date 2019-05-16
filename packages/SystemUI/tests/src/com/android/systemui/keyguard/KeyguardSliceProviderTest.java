@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.media.MediaMetadata;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
@@ -105,7 +106,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         MediaMetadata metadata = mock(MediaMetadata.class);
         when(metadata.getText(any())).thenReturn("metadata");
         mProvider.onDozingChanged(true);
-        mProvider.onMetadataChanged(metadata);
+        mProvider.onMetadataOrStateChanged(metadata, PlaybackState.STATE_PLAYING);
         mProvider.onBindSlice(mProvider.getUri());
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_TITLE));
         verify(metadata).getText(eq(MediaMetadata.METADATA_KEY_ARTIST));
@@ -170,7 +171,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     public void onMetadataChanged_updatesSlice() {
         mProvider.onDozingChanged(true);
         reset(mContentResolver);
-        mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        mProvider.onMetadataOrStateChanged(mock(MediaMetadata.class), PlaybackState.STATE_PLAYING);
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
 
         // Hides after waking up
@@ -181,7 +182,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void onDozingChanged_updatesSliceIfMedia() {
-        mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        mProvider.onMetadataOrStateChanged(mock(MediaMetadata.class), PlaybackState.STATE_PLAYING);
         reset(mContentResolver);
         // Show media when dozing
         mProvider.onDozingChanged(true);
