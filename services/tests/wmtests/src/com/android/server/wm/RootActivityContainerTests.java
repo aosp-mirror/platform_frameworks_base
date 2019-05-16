@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -34,6 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
+import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
 import static org.junit.Assert.assertEquals;
@@ -392,6 +394,58 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         // Verify the target stack should resume its activity.
         verify(targetStack, times(1)).resumeTopActivityUncheckedLocked(
                 eq(activity), eq(null /* targetOptions */));
+    }
+
+    /**
+     * Verify that home activity will be started on a display even if another display has a
+     * focusable activity.
+     */
+    @Test
+    public void testResumeFocusedStacksStartsHomeActivity_NoActivities() {
+        mFullscreenStack.remove();
+        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY).getHomeStack().remove();
+        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY)
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+
+        doReturn(true).when(mRootActivityContainer).resumeHomeActivity(any(), any(), anyInt());
+
+        mService.setBooted(true);
+
+        // Trigger resume on all displays
+        mRootActivityContainer.resumeFocusedStacksTopActivities();
+
+        // Verify that home activity was started on the default display
+        verify(mRootActivityContainer).resumeHomeActivity(any(), any(), eq(DEFAULT_DISPLAY));
+    }
+
+    /**
+     * Verify that home activity will be started on a display even if another display has a
+     * focusable activity.
+     */
+    @Test
+    public void testResumeFocusedStacksStartsHomeActivity_ActivityOnSecondaryScreen() {
+        mFullscreenStack.remove();
+        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY).getHomeStack().remove();
+        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY)
+                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+
+        // Create an activity on secondary display.
+        final TestActivityDisplay secondDisplay = addNewActivityDisplayAt(
+                ActivityDisplay.POSITION_TOP);
+        final ActivityStack stack = secondDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        new ActivityBuilder(mService).setTask(task).build();
+
+        doReturn(true).when(mRootActivityContainer).resumeHomeActivity(any(), any(), anyInt());
+
+        mService.setBooted(true);
+
+        // Trigger resume on all displays
+        mRootActivityContainer.resumeFocusedStacksTopActivities();
+
+        // Verify that home activity was started on the default display
+        verify(mRootActivityContainer).resumeHomeActivity(any(), any(), eq(DEFAULT_DISPLAY));
     }
 
     /**
