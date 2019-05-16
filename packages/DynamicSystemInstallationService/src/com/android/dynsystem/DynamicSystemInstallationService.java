@@ -70,6 +70,10 @@ public class DynamicSystemInstallationService extends Service
 
     private static final String TAG = "DynSystemInstallationService";
 
+
+    // TODO (b/131866826): This is currently for test only. Will move this to System API.
+    static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
+
     /*
      * Intent actions
      */
@@ -121,6 +125,9 @@ public class DynamicSystemInstallationService extends Service
     private long mUserdataSize;
     private long mInstalledSize;
     private boolean mJustCancelledByUser;
+
+    // This is for testing only now
+    private boolean mEnableWhenCompleted;
 
     private InstallationAsyncTask mInstallTask;
 
@@ -178,6 +185,11 @@ public class DynamicSystemInstallationService extends Service
     public void onResult(int result, Throwable detail) {
         if (result == RESULT_OK) {
             postStatus(STATUS_READY, CAUSE_INSTALL_COMPLETED, null);
+
+            // For testing: enable DSU and restart the device when install completed
+            if (mEnableWhenCompleted) {
+                executeRebootToDynSystemCommand();
+            }
             return;
         }
 
@@ -224,6 +236,7 @@ public class DynamicSystemInstallationService extends Service
         String url = intent.getDataString();
         mSystemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
         mUserdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
+        mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
 
         mInstallTask = new InstallationAsyncTask(
                 url, mSystemSize, mUserdataSize, this, mDynSystem, this);
@@ -275,7 +288,7 @@ public class DynamicSystemInstallationService extends Service
     private void executeRebootToDynSystemCommand() {
         boolean enabled = false;
 
-        if (mInstallTask != null && mInstallTask.getStatus() == FINISHED) {
+        if (mInstallTask != null && mInstallTask.getResult() == RESULT_OK) {
             enabled = mInstallTask.commit();
         } else if (isDynamicSystemInstalled()) {
             enabled = mDynSystem.setEnable(true);

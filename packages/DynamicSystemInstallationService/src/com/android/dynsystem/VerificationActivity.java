@@ -92,6 +92,8 @@ public class VerificationActivity extends Activity {
         Uri url = callingIntent.getData();
         long systemSize = callingIntent.getLongExtra(KEY_SYSTEM_SIZE, 0);
         long userdataSize = callingIntent.getLongExtra(KEY_USERDATA_SIZE, 0);
+        boolean enableWhenCompleted = callingIntent.getBooleanExtra(
+                DynamicSystemInstallationService.KEY_ENABLE_WHEN_COMPLETED, false);
 
         sVerifiedUrl = url.toString();
 
@@ -101,6 +103,8 @@ public class VerificationActivity extends Activity {
         intent.setAction(DynamicSystemClient.ACTION_START_INSTALL);
         intent.putExtra(KEY_SYSTEM_SIZE, systemSize);
         intent.putExtra(KEY_USERDATA_SIZE, userdataSize);
+        intent.putExtra(
+                DynamicSystemInstallationService.KEY_ENABLE_WHEN_COMPLETED, enableWhenCompleted);
 
         Log.d(TAG, "Starting Installation Service");
         startServiceAsUser(intent, UserHandle.SYSTEM);
