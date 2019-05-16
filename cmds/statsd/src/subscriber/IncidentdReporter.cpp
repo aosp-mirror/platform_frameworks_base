@@ -36,12 +36,14 @@ namespace statsd {
 using android::util::ProtoOutputStream;
 using std::vector;
 
-using util::FIELD_TYPE_MESSAGE;
 using util::FIELD_TYPE_INT32;
 using util::FIELD_TYPE_INT64;
+using util::FIELD_TYPE_MESSAGE;
+using util::FIELD_TYPE_STRING;
 
 // field ids in IncidentHeaderProto
 const int FIELD_ID_ALERT_ID = 1;
+const int FIELD_ID_REASON = 2;
 const int FIELD_ID_CONFIG_KEY = 3;
 const int FIELD_ID_CONFIG_KEY_UID = 1;
 const int FIELD_ID_CONFIG_KEY_ID = 2;
@@ -57,9 +59,11 @@ const int FIELD_ID_PACKAGE_INFO = 3;
 
 namespace {
 void getProtoData(const int64_t& rule_id, int64_t metricId, const MetricDimensionKey& dimensionKey,
-                  int64_t metricValue, const ConfigKey& configKey, vector<uint8_t>* protoData) {
+                  int64_t metricValue, const ConfigKey& configKey, const string& reason,
+                  vector<uint8_t>* protoData) {
     ProtoOutputStream headerProto;
     headerProto.write(FIELD_TYPE_INT64 | FIELD_ID_ALERT_ID, (long long)rule_id);
+    headerProto.write(FIELD_TYPE_STRING | FIELD_ID_REASON, reason);
     uint64_t token =
             headerProto.start(FIELD_TYPE_MESSAGE | FIELD_ID_CONFIG_KEY);
     headerProto.write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_KEY_UID, configKey.GetUid());
@@ -142,7 +146,8 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
     IncidentReportArgs incidentReport;
 
     vector<uint8_t> protoData;
-    getProtoData(rule_id, metricId, dimensionKey, metricValue, configKey, &protoData);
+    getProtoData(rule_id, metricId, dimensionKey, metricValue, configKey,
+                 config.alert_description(), &protoData);
     incidentReport.addHeader(protoData);
 
     for (int i = 0; i < config.section_size(); i++) {
