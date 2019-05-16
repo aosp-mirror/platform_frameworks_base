@@ -26,7 +26,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayInfo;
 
 import org.junit.Test;
 
@@ -76,6 +78,26 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         mRootActivityContainer.removeChild(testActivityDisplay1);
         wpc.unregisterDisplayConfigurationListenerLocked();
         assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+    }
+
+    @Test
+    public void testConfigurationForSecondaryScreen() {
+        final WindowProcessController wpc = new WindowProcessController(
+                mService, mock(ApplicationInfo.class), null, 0, -1, null, null);
+        //By default, the process should not listen to any display.
+        assertEquals(INVALID_DISPLAY, wpc.getDisplayId());
+
+        // Register to a new display as a listener.
+        final DisplayInfo info = new DisplayInfo();
+        info.logicalWidth = 100;
+        info.logicalHeight = 100;
+        TestActivityDisplay display = addNewActivityDisplayAt(info, WindowContainer.POSITION_TOP);
+        wpc.registerDisplayConfigurationListenerLocked(display);
+
+        assertEquals(display.mDisplayId, wpc.getDisplayId());
+        final Configuration expectedConfig = mService.mRootActivityContainer.getConfiguration();
+        expectedConfig.updateFrom(display.getConfiguration());
+        assertEquals(expectedConfig, wpc.getConfiguration());
     }
 
     private TestActivityDisplay createTestActivityDisplayInContainer() {
