@@ -172,6 +172,7 @@ public class BubbleStackView extends FrameLayout {
 
     private int mBubbleSize;
     private int mBubblePadding;
+    private int mExpandedViewPadding;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
     private int mStatusBarHeight;
@@ -313,11 +314,12 @@ public class BubbleStackView extends FrameLayout {
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
-        int padding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
         mStackAnimationController = new StackAnimationController();
-        mExpandedAnimationController = new ExpandedAnimationController(mDisplaySize);
+        mExpandedAnimationController = new ExpandedAnimationController(
+                mDisplaySize, mExpandedViewPadding);
         mSurfaceSynchronizer = synchronizer != null ? synchronizer : DEFAULT_SURFACE_SYNCHRONIZER;
 
         mBubbleContainer = new PhysicsAnimationLayout(context);
@@ -330,7 +332,8 @@ public class BubbleStackView extends FrameLayout {
 
         mExpandedViewContainer = new FrameLayout(context);
         mExpandedViewContainer.setElevation(elevation);
-        mExpandedViewContainer.setPadding(padding, padding, padding, padding);
+        mExpandedViewContainer.setPadding(mExpandedViewPadding, mExpandedViewPadding,
+                mExpandedViewPadding, mExpandedViewPadding);
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
 
@@ -1428,8 +1431,14 @@ public class BubbleStackView extends FrameLayout {
         Bubble expandedBubble = getExpandedBubble();
         if (expandedBubble != null) {
             BubbleView iconView = expandedBubble.iconView;
-            float pointerPosition = iconView.getTranslationX() + (iconView.getWidth() / 2f);
-            expandedBubble.expandedView.setPointerPosition((int) pointerPosition);
+            float bubbleLeft = iconView.getTranslationX();
+            float halfBubbleWidth = (iconView.getWidth() / 2f);
+
+            // Bubbles live in expanded view container (x includes expanded view padding).
+            // Pointer lives in expanded view, which has padding (x does not include padding).
+            // Remove padding when deriving pointer location from bubbles.
+            float pointerX = bubbleLeft - mExpandedViewPadding + halfBubbleWidth;
+            expandedBubble.expandedView.setPointerPosition((int) pointerX);
         }
     }
 
