@@ -537,6 +537,7 @@ public class BatterySaverStateMachine {
             Slog.d(TAG, "doAutoBatterySaverLocked: mBootCompleted=" + mBootCompleted
                     + " mSettingsLoaded=" + mSettingsLoaded
                     + " mBatteryStatusSet=" + mBatteryStatusSet
+                    + " mState=" + mState
                     + " mIsBatteryLevelLow=" + mIsBatteryLevelLow
                     + " mIsPowered=" + mIsPowered
                     + " mSettingAutomaticBatterySaver=" + mSettingAutomaticBatterySaver
@@ -689,9 +690,9 @@ public class BatterySaverStateMachine {
                 final boolean isStickyDisabled =
                         mBatterySaverStickyBehaviourDisabled || !mSettingBatterySaverEnabledSticky;
                 if (isStickyDisabled || shouldTurnOffSticky) {
+                    mState = STATE_OFF;
                     setStickyActive(false);
                     triggerStickyDisabledNotification();
-                    mState = STATE_OFF;
                 } else if (!mIsPowered) {
                     // Re-enable BS.
                     enableBatterySaverLocked(/*enable*/ true, /*manual*/ true,
@@ -797,7 +798,8 @@ public class BatterySaverStateMachine {
                         Intent.ACTION_POWER_USAGE_SUMMARY));
     }
 
-    private void triggerStickyDisabledNotification() {
+    @VisibleForTesting
+    void triggerStickyDisabledNotification() {
         NotificationManager manager = mContext.getSystemService(NotificationManager.class);
         ensureNotificationChannelExists(manager, BATTERY_SAVER_NOTIF_CHANNEL_ID,
                 R.string.battery_saver_notification_channel_name);
