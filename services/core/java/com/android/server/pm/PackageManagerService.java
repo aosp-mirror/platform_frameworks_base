@@ -24068,6 +24068,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
                     | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0));
         }
+
+        @Override
+        public String getModuleMetadataPackageName() throws RemoteException {
+            return PackageManagerService.this.mModuleInfoProvider.getPackageName();
+        }
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
