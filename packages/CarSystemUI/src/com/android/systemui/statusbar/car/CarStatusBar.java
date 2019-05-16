@@ -314,6 +314,7 @@ public class CarStatusBar extends StatusBar implements
     public void showKeyguard() {
         super.showKeyguard();
         updateNavBarForKeyguardContent();
+        dismissKeyguardWhenUserSwitcherNotDisplayed();
     }
 
     /**
