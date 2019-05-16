@@ -917,8 +917,17 @@ public final class DocumentsContract {
      * @see #getDocumentId(Uri)
      */
     public static Uri buildDocumentUri(String authority, String documentId) {
+        return getBaseDocumentUriBuilder(authority).appendPath(documentId).build();
+    }
+
+    /** {@hide} */
+    public static Uri buildBaseDocumentUri(String authority) {
+        return getBaseDocumentUriBuilder(authority).build();
+    }
+
+    private static Uri.Builder getBaseDocumentUriBuilder(String authority) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authority).appendPath(PATH_DOCUMENT).appendPath(documentId).build();
+            .authority(authority).appendPath(PATH_DOCUMENT);
     }
 
     /**
