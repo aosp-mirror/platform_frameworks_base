@@ -192,6 +192,27 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void getConnectionSummary_shortSummary_returnShortSummary() {
+        // Test without battery level
+        // Set A2DP profile to be connected and test connection state summary
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary(true /* shortSummary */)).isNull();
+
+        // Set device as Active for A2DP and test connection state summary
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.A2DP);
+        assertThat(mCachedDevice.getConnectionSummary(true /* shortSummary */)).isEqualTo("Active");
+
+        // Test with battery level
+        mBatteryLevel = 10;
+        assertThat(mCachedDevice.getConnectionSummary(true /* shortSummary */)).isEqualTo(
+                "Active");
+
+        // Set A2DP profile to be disconnected and test connection state summary
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
+    }
+
+    @Test
     public void getConnectionSummary_testA2dpBatteryInactive_returnBattery() {
         // Arrange:
         //   1. Profile:       {A2DP, CONNECTED, Inactive}
