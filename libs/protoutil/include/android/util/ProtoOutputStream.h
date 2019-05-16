@@ -123,6 +123,7 @@ public:
     size_t size(); // Get the size of the serialized protobuf.
     sp<ProtoReader> data(); // Get the reader apis of the data.
     bool flush(int fd); // Flush data directly to a file descriptor.
+    bool serializeToString(std::string* out); // Serializes the proto to a string.
 
     /**
      * Clears the ProtoOutputStream so the buffer can be reused instead of deallocation/allocation again.

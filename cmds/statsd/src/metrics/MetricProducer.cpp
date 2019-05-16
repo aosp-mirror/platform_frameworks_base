@@ -19,6 +19,7 @@
 #include "MetricProducer.h"
 
 using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_ENUM;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
@@ -37,6 +38,7 @@ const int FIELD_ID_ACTIVE_METRIC_ACTIVATION = 2;
 // for ActiveEventActivation
 const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_ATOM_MATCHER_INDEX = 1;
 const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS = 2;
+const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_STATE = 3;
 
 void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) {
     if (!mIsActive) {
@@ -165,17 +167,21 @@ void MetricProducer::loadActiveMetricLocked(const ActiveMetric& activeMetric,
             continue;
         }
         auto& activation = it->second;
-        // We don't want to change the ttl for future activations, so we set the start_ns
-        // such that start_ns + ttl_ns == currentTimeNs + remaining_ttl_nanos
-        activation->start_ns =
-            currentTimeNs + activeEventActivation.remaining_ttl_nanos() - activation->ttl_ns;
-        activation->state = ActivationState::kActive;
-        mIsActive = true;
+        if (activeEventActivation.state() == ActiveEventActivation::ACTIVE) {
+            // We don't want to change the ttl for future activations, so we set the start_ns
+            // such that start_ns + ttl_ns == currentTimeNs + remaining_ttl_nanos
+            activation->start_ns =
+                currentTimeNs + activeEventActivation.remaining_ttl_nanos() - activation->ttl_ns;
+            activation->state = ActivationState::kActive;
+            mIsActive = true;
+        } else if (activeEventActivation.state() == ActiveEventActivation::ACTIVATE_ON_BOOT) {
+            activation->state = ActivationState::kActiveOnBoot;
+        }
     }
 }
 
 void MetricProducer::writeActiveMetricToProtoOutputStream(
-        int64_t currentTimeNs, ProtoOutputStream* proto) {
+        int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto) {
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_METRIC_ID, (long long)mMetricId);
     for (auto& it : mEventActivationMap) {
         const int atom_matcher_index = it.first;
@@ -196,9 +202,22 @@ void MetricProducer::writeActiveMetricToProtoOutputStream(
                     activation->start_ns + activation->ttl_ns - currentTimeNs;
             proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS,
                     (long long)remainingTtlNs);
+            proto->write(FIELD_TYPE_ENUM | FIELD_ID_ACTIVE_EVENT_ACTIVATION_STATE,
+                    ActiveEventActivation::ACTIVE);
+
         } else if (ActivationState::kActiveOnBoot == activation->state) {
-            proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS,
-                    (long long)activation->ttl_ns);
+            if (reason == DEVICE_SHUTDOWN || reason == TERMINATION_SIGNAL_RECEIVED) {
+                proto->write(
+                        FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS,
+                        (long long)activation->ttl_ns);
+                proto->write(FIELD_TYPE_ENUM | FIELD_ID_ACTIVE_EVENT_ACTIVATION_STATE,
+                                    ActiveEventActivation::ACTIVE);
+            } else if (reason == STATSCOMPANION_DIED) {
+                // We are saving because of system server death, not due to a device shutdown.
+                // Next time we load, we do not want to activate metrics that activate on boot.
+                proto->write(FIELD_TYPE_ENUM | FIELD_ID_ACTIVE_EVENT_ACTIVATION_STATE,
+                                                    ActiveEventActivation::ACTIVATE_ON_BOOT);
+            }
         }
         proto->end(activationToken);
     }
