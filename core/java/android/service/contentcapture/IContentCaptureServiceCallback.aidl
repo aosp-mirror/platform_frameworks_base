@@ -18,6 +18,8 @@ package android.service.contentcapture;
 
 import android.content.ComponentName;
 import android.view.contentcapture.ContentCaptureCondition;
+import android.service.contentcapture.FlushMetrics;
+import android.content.ContentCaptureOptions;
 
 import java.util.List;
 
@@ -30,4 +32,8 @@ oneway interface IContentCaptureServiceCallback {
     void setContentCaptureWhitelist(in List<String> packages, in List<ComponentName> activities);
     void setContentCaptureConditions(String packageName, in List<ContentCaptureCondition> conditions);
     void disableSelf();
- }
+
+    // Logs aggregated content capture flush metrics to Statsd
+    void writeSessionFlush(int sessionId, in ComponentName app, in FlushMetrics flushMetrics,
+            in ContentCaptureOptions options, int flushReason);
+}

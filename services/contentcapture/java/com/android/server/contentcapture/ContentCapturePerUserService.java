@@ -24,6 +24,9 @@ import static android.view.contentcapture.ContentCaptureSession.STATE_INTERNAL_E
 import static android.view.contentcapture.ContentCaptureSession.STATE_NOT_WHITELISTED;
 import static android.view.contentcapture.ContentCaptureSession.STATE_NO_SERVICE;
 
+import static com.android.server.contentcapture.ContentCaptureMetricsLogger.writeServiceEvent;
+import static com.android.server.contentcapture.ContentCaptureMetricsLogger.writeSessionEvent;
+import static com.android.server.contentcapture.ContentCaptureMetricsLogger.writeSetWhitelistEvent;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
@@ -35,6 +38,7 @@ import android.app.ActivityManagerInternal;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -48,6 +52,7 @@ import android.service.contentcapture.ActivityEvent;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.ContentCaptureServiceInfo;
+import android.service.contentcapture.FlushMetrics;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
@@ -55,6 +60,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.StatsLog;
 import android.view.contentcapture.ContentCaptureCondition;
 import android.view.contentcapture.DataRemovalRequest;
 
@@ -231,7 +237,6 @@ final class ContentCapturePerUserService
         resurrectSessionsLocked();
     }
 
-    // TODO(b/119613670): log metrics
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
             @NonNull ActivityPresentationInfo activityPresentationInfo, int sessionId, int uid,
@@ -263,9 +268,14 @@ final class ContentCapturePerUserService
 
         if (!enabled) {
             // TODO: it would be better to split in differet reasons, like
-            // STATE_DISABLED_NO_SERVICE and STATE_DISABLED_BY_DEVICE_POLICY
+            // STATE_DISABLED_NO and STATE_DISABLED_BY_DEVICE_POLICY
             setClientState(clientReceiver, STATE_DISABLED | STATE_NO_SERVICE,
                     /* binder= */ null);
+            // Log metrics.
+            writeSessionEvent(sessionId,
+                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
+                    componentName, /* isChildSession= */ false);
             return;
         }
         if (serviceComponentName == null) {
@@ -285,6 +295,11 @@ final class ContentCapturePerUserService
             }
             setClientState(clientReceiver, STATE_DISABLED | STATE_NOT_WHITELISTED,
                     /* binder= */ null);
+            // Log metrics.
+            writeSessionEvent(sessionId,
+                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
+                    componentName, /* isChildSession= */ false);
             return;
         }
 
@@ -294,6 +309,11 @@ final class ContentCapturePerUserService
                     + ": ignoring because it already exists for " + existingSession.mActivityToken);
             setClientState(clientReceiver, STATE_DISABLED | STATE_DUPLICATED_ID,
                     /* binder=*/ null);
+            // Log metrics.
+            writeSessionEvent(sessionId,
+                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    STATE_DISABLED | STATE_DUPLICATED_ID,
+                    serviceComponentName, componentName, /* isChildSession= */ false);
             return;
         }
 
@@ -302,11 +322,15 @@ final class ContentCapturePerUserService
         }
 
         if (mRemoteService == null) {
-            // TODO(b/119613670): log metrics
             Slog.w(TAG, "startSession(id=" + existingSession + ", token=" + activityToken
                     + ": ignoring because service is not set");
             setClientState(clientReceiver, STATE_DISABLED | STATE_NO_SERVICE,
                     /* binder= */ null);
+            // Log metrics.
+            writeSessionEvent(sessionId,
+                    StatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
+                    STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
+                    componentName, /* isChildSession= */ false);
             return;
         }
 
@@ -324,7 +348,6 @@ final class ContentCapturePerUserService
         newSession.notifySessionStartedLocked(clientReceiver);
     }
 
-    // TODO(b/119613670): log metrics
     @GuardedBy("mLock")
     public void finishSessionLocked(int sessionId) {
         if (!isEnabledLocked()) {
@@ -553,6 +576,7 @@ final class ContentCapturePerUserService
                         + " for user " + mUserId);
             }
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
+            writeSetWhitelistEvent(getServiceComponentName(), packages, activities);
 
             // Must disable session that are not the whitelist anymore...
             final int numSessions = mSessions.size();
@@ -602,7 +626,6 @@ final class ContentCapturePerUserService
                     mConditionsByPkg.put(packageName, new ArraySet<>(conditions));
                 }
             }
-            // TODO(b/119613670): log metrics
         }
 
         @Override
@@ -616,6 +639,15 @@ final class ContentCapturePerUserService
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+            writeServiceEvent(StatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_DISABLED,
+                    getServiceComponentName());
+        }
+
+        @Override
+        public void writeSessionFlush(int sessionId, ComponentName app, FlushMetrics flushMetrics,
+                ContentCaptureOptions options, int flushReason) {
+            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(), app,
+                    flushMetrics, options, flushReason);
         }
     }
 }
