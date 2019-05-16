@@ -68,6 +68,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtilsLocked;
+    private final int[] mTmpPosition = new int[2];
+    private final Rect mTempRect = new Rect();
+    private final Rect mLockPatternScreenBounds = new Rect();
 
     private CountDownTimer mCountdownTimer = null;
     private LockPatternUtils mLockPatternUtils;
@@ -92,7 +95,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             mLockPatternView.clearPattern();
         }
     };
-    private Rect mTempRect = new Rect();
     @VisibleForTesting
     KeyguardMessageArea mSecurityMessageDisplay;
     private View mEcaView;
@@ -199,6 +201,15 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        mLockPatternView.getLocationOnScreen(mTmpPosition);
+        mLockPatternScreenBounds.set(mTmpPosition[0], mTmpPosition[1],
+                mTmpPosition[0] + mLockPatternView.getWidth(),
+                mTmpPosition[1] + mLockPatternView.getHeight());
+    }
+
+    @Override
     public void reset() {
         // reset lock pattern
         mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(
@@ -233,9 +244,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public boolean disallowInterceptTouch(MotionEvent event) {
-        mTempRect.set(mLockPatternView.getLeft(), mLockPatternView.getTop(),
-                mLockPatternView.getRight(), mLockPatternView.getBottom());
-        return mTempRect.contains((int) event.getX(), (int) event.getY());
+        return mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
     /** TODO: hook this up */
