@@ -163,5 +163,4 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
         return storedData;
     }
-
 }
