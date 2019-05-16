@@ -66,6 +66,9 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Xml;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
@@ -89,9 +92,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
-
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -2520,7 +2520,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         toAdd.add(new Pair(PKG_O, UID_O));
         mHelper.updateDefaultApps(UserHandle.getUserId(UID_O), null, toAdd);
 
-
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
                 .isImportanceLockedByCriticalDeviceFunction());
         assertFalse(mHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, b.getId(), false)
@@ -2623,15 +2622,19 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         update.setAllowBubbles(false);
 
         mHelper.updateNotificationChannel(PKG_O, UID_O, update, true);
-
         assertEquals(IMPORTANCE_HIGH,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
         assertEquals(false,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).canBubble());
 
         mHelper.updateNotificationChannel(PKG_O, UID_O, update, false);
-
         assertEquals(IMPORTANCE_HIGH,
+                mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
+
+        NotificationChannel updateImportanceLow = new NotificationChannel("a", "a",
+                IMPORTANCE_LOW);
+        mHelper.updateNotificationChannel(PKG_O, UID_O, updateImportanceLow, true);
+        assertEquals(IMPORTANCE_LOW,
                 mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false).getImportance());
     }
 
