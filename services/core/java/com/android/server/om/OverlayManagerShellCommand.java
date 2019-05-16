@@ -120,40 +120,63 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return 1;
             }
         }
-        final String packageName = getNextArg();
 
+        final String packageName = getNextArg();
+        if (packageName != null) {
+            List<OverlayInfo> overlaysForTarget = mInterface.getOverlayInfosForTarget(
+                    packageName, userId);
+
+            // If the package is not targeted by any overlays, check if the package is an overlay.
+            if (overlaysForTarget.isEmpty()) {
+                final OverlayInfo info = mInterface.getOverlayInfo(packageName, userId);
+                if (info != null) {
+                    printListOverlay(out, info);
+                }
+                return 0;
+            }
+
+            out.println(packageName);
+
+            // Print the overlays for the target.
+            final int n = overlaysForTarget.size();
+            for (int i = 0; i < n; i++) {
+                printListOverlay(out, overlaysForTarget.get(i));
+            }
+
+            return 0;
+        }
+
+        // Print all overlays grouped by target package name.
         final Map<String, List<OverlayInfo>> allOverlays = mInterface.getAllOverlays(userId);
         for (final String targetPackageName : allOverlays.keySet()) {
-            if (targetPackageName.equals(packageName)) {
-                out.println(targetPackageName);
-            }
+            out.println(targetPackageName);
+
             List<OverlayInfo> overlaysForTarget = allOverlays.get(targetPackageName);
             final int n = overlaysForTarget.size();
             for (int i = 0; i < n; i++) {
-                final OverlayInfo oi = overlaysForTarget.get(i);
-                if (!targetPackageName.equals(packageName) && !oi.packageName.equals(packageName)) {
-                    continue;
-                }
-                String status;
-                switch (oi.state) {
-                    case OverlayInfo.STATE_ENABLED_STATIC:
-                    case OverlayInfo.STATE_ENABLED:
-                        status = "[x]";
-                        break;
-                    case OverlayInfo.STATE_DISABLED:
-                        status = "[ ]";
-                        break;
-                    default:
-                        status = "---";
-                        break;
-                }
-                out.println(String.format("%s %s", status, oi.packageName));
+                printListOverlay(out, overlaysForTarget.get(i));
             }
-            if (targetPackageName.equals(packageName)) {
-                out.println();
-            }
+            out.println();
         }
+
         return 0;
+    }
+
+    private void printListOverlay(PrintWriter out, OverlayInfo oi) {
+        String status;
+        switch (oi.state) {
+            case OverlayInfo.STATE_ENABLED_STATIC:
+            case OverlayInfo.STATE_ENABLED:
+                status = "[x]";
+                break;
+            case OverlayInfo.STATE_DISABLED:
+                status = "[ ]";
+                break;
+            default:
+                status = "---";
+                break;
+        }
+        out.println(String.format("%s %s", status, oi.packageName));
     }
 
     private int runEnableDisable(final boolean enable) throws RemoteException {
