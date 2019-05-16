@@ -528,14 +528,14 @@ void MetricsManager::loadActiveConfig(const ActiveConfig& config, int64_t curren
 }
 
 void MetricsManager::writeActiveConfigToProtoOutputStream(
-        int64_t currentTimeNs, ProtoOutputStream* proto) {
+        int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto) {
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_ACTIVE_CONFIG_ID, (long long)mConfigKey.GetId());
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_ACTIVE_CONFIG_UID, mConfigKey.GetUid());
     for (int metricIndex : mMetricIndexesWithActivation) {
         const auto& metric = mAllMetricProducers[metricIndex];
         const uint64_t metricToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                 FIELD_ID_ACTIVE_CONFIG_METRIC);
-        metric->writeActiveMetricToProtoOutputStream(currentTimeNs, proto);
+        metric->writeActiveMetricToProtoOutputStream(currentTimeNs, reason, proto);
         proto->end(metricToken);
     }
 }
