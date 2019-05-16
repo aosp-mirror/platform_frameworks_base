@@ -57,6 +57,7 @@ import static org.testng.Assert.assertThrows;
 import android.Manifest.permission;
 import android.annotation.RawRes;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
@@ -379,7 +380,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED),
-                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
 
         verify(getServices().ipackageManager, times(1)).setApplicationEnabledSetting(
                 eq(admin1.getPackageName()),
@@ -657,6 +660,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED),
                 MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
                 isNull(String.class),
+                eq(AppOpsManager.OP_NONE),
+                any(Bundle.class),
                 any(BroadcastReceiver.class),
                 eq(dpms.mHandler),
                 eq(Activity.RESULT_OK),
@@ -707,6 +712,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED),
                 MockUtils.checkUserHandle(DpmMockContext.CALLER_USER_HANDLE),
                 isNull(String.class),
+                eq(AppOpsManager.OP_NONE),
+                any(Bundle.class),
                 any(BroadcastReceiver.class),
                 eq(dpms.mHandler),
                 eq(Activity.RESULT_OK),
@@ -788,10 +795,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
-                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM),
+                eq(null),
+                any(Bundle.class));
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
-                MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID));
+                MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID),
+                eq(null),
+                any(Bundle.class));
     }
 
     /**
@@ -828,10 +839,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(mContext.spiedContext, never()).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
-                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM),
+                eq(null),
+                any(Bundle.class));
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
-                MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID));
+                MockUtils.checkUserHandle(MANAGED_PROFILE_USER_ID),
+                eq(null),
+                any(Bundle.class));
     }
 
     /**
@@ -4298,7 +4313,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
-                MockUtils.checkUserHandle(userHandle));
+                MockUtils.checkUserHandle(userHandle),
+                eq(null),
+                any());
 
         // CertificateMonitor.updateInstalledCertificates is called on the background thread,
         // let it finish with system uid, otherwise it will throw and crash.

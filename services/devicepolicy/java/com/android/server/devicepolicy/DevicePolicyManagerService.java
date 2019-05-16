@@ -108,6 +108,8 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
@@ -2897,12 +2899,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 admin.getUserHandle()).isEmpty()) {
             return false;
         }
+
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setBackgroundActivityStartsAllowed(true);
+
         if (result != null) {
             mContext.sendOrderedBroadcastAsUser(intent, admin.getUserHandle(),
-                    null, result, mHandler, Activity.RESULT_OK, null, null);
+                    null, AppOpsManager.OP_NONE, options.toBundle(),
+                    result, mHandler, Activity.RESULT_OK, null, null);
         } else {
-            mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
+            mContext.sendBroadcastAsUser(intent, admin.getUserHandle(), null, options.toBundle());
         }
+
         return true;
     }
 
