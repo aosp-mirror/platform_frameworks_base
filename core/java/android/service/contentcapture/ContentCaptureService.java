@@ -157,7 +157,7 @@ public abstract class ContentCaptureService extends Service {
         @Override
         public void onDataRemovalRequest(DataRemovalRequest request) {
             mHandler.sendMessage(
-                    obtainMessage(ContentCaptureService::handleOnUserDataRemovalRequest,
+                    obtainMessage(ContentCaptureService::handleOnDataRemovalRequest,
                             ContentCaptureService.this, request));
         }
 
@@ -466,7 +466,7 @@ public abstract class ContentCaptureService extends Service {
         onDestroyContentCaptureSession(new ContentCaptureSessionId(sessionId));
     }
 
-    private void handleOnUserDataRemovalRequest(@NonNull DataRemovalRequest request) {
+    private void handleOnDataRemovalRequest(@NonNull DataRemovalRequest request) {
         onDataRemovalRequest(request);
     }
 
