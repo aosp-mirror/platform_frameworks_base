@@ -154,7 +154,6 @@ class WindowTestsBase {
             context.getDisplay().getDisplayInfo(mDisplayInfo);
             mDisplayContent = createNewDisplay();
             mWm.mDisplayEnabled = true;
-            mWm.mDisplayReady = true;
 
             // Set-up some common windows.
             mCommonWindows = new HashSet<>();
