@@ -223,6 +223,7 @@ public abstract class PackageManager {
 
     /** @hide */
     @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
+            MATCH_ALL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ModuleInfoFlags {}
