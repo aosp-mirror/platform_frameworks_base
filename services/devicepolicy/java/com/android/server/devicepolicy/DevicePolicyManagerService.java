@@ -9680,7 +9680,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Install the profile owner if not present.
                 if (!mIPackageManager.isPackageAvailable(adminPkg, userHandle)) {
                     mIPackageManager.installExistingPackageAsUser(adminPkg, userHandle,
-                            0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
+                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                            PackageManager.INSTALL_REASON_POLICY, null);
                 }
             } catch (RemoteException e) {
                 // Does not happen, same process
@@ -10176,7 +10177,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 // Install the app.
                 mIPackageManager.installExistingPackageAsUser(packageName, userId,
-                        0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_POLICY, null);
                 if (isDemo) {
                     // Ensure the app is also ENABLED for demo users.
                     mIPackageManager.setApplicationEnabledSetting(packageName,
@@ -10230,7 +10232,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             if (isSystemApp(mIPackageManager, packageName, parentUserId)) {
                                 numberOfAppsInstalled++;
                                 mIPackageManager.installExistingPackageAsUser(packageName, userId,
-                                        0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY);
+                                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                                        PackageManager.INSTALL_REASON_POLICY, null);
                             } else {
                                 Slog.d(LOG_TAG, "Not enabling " + packageName + " since is not a"
                                         + " system app");
@@ -10289,9 +10292,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
 
                 // Install the package.
-                result = mIPackageManager
-                        .installExistingPackageAsUser(packageName, callingUserId,
-                        0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY)
+                result = mIPackageManager.installExistingPackageAsUser(packageName, callingUserId,
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_POLICY, null)
                         == PackageManager.INSTALL_SUCCEEDED;
             } catch (RemoteException re) {
                 // shouldn't happen

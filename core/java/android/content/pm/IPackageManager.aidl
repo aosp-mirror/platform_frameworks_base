@@ -634,7 +634,7 @@ interface IPackageManager {
     int getInstallLocation();
 
     int installExistingPackageAsUser(String packageName, int userId, int installFlags,
-            int installReason);
+            int installReason, in List<String> whiteListedPermissions);
 
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);

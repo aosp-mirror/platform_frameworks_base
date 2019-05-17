@@ -627,6 +627,10 @@ public class PackageInstaller {
      * Install the given package, which already exists on the device, for the user for which this
      * installer was created.
      *
+     * <p>This will
+     * {@link PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set) whitelist
+     * all restricted permissions}.
+     *
      * @param packageName The package to install.
      * @param installReason Reason for install.
      * @param statusReceiver Where to deliver the result.
@@ -639,8 +643,9 @@ public class PackageInstaller {
             @Nullable IntentSender statusReceiver) {
         Preconditions.checkNotNull(packageName, "packageName cannot be null");
         try {
-            mInstaller.installExistingPackage(packageName, 0, installReason, statusReceiver,
-                    mUserId);
+            mInstaller.installExistingPackage(packageName,
+                    PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS, installReason,
+                    statusReceiver, mUserId, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
