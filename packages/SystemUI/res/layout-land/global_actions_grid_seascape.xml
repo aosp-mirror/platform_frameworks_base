@@ -6,16 +6,15 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:theme="@style/qs_theme"
-    android:gravity="left"
+    android:gravity="left | center_vertical"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:paddingLeft="@dimen/global_actions_grid_container_shadow_offset"
     android:layout_marginLeft="@dimen/global_actions_grid_container_negative_shadow_offset"
 >
     <LinearLayout
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:gravity="bottom|left"
         android:padding="0dp"
         android:orientation="vertical"
         android:clipChildren="false"
