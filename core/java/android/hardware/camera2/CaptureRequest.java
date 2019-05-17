@@ -235,6 +235,62 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new HashMap<String, CameraMetadataNative>();
 
     private boolean mIsReprocess;
+
+    //
+    // Enumeration values for types of CaptureRequest
+    //
+
+    /**
+     * @hide
+     */
+    public static final int REQUEST_TYPE_REGULAR = 0;
+
+    /**
+     * @hide
+     */
+    public static final int REQUEST_TYPE_REPROCESS = 1;
+
+    /**
+     * @hide
+     */
+    public static final int REQUEST_TYPE_ZSL_STILL = 2;
+
+    /**
+     * Note: To add another request type, the FrameNumberTracker in CameraDeviceImpl must be
+     * adjusted accordingly.
+     * @hide
+     */
+    public static final int REQUEST_TYPE_COUNT = 3;
+
+
+    private int mRequestType = -1;
+
+    /**
+     * Get the type of the capture request
+     *
+     * Return one of REGULAR, ZSL_STILL, or REPROCESS.
+     * @hide
+     */
+    public int getRequestType() {
+        if (mRequestType == -1) {
+            if (mIsReprocess) {
+                mRequestType = REQUEST_TYPE_REPROCESS;
+            } else {
+                Boolean enableZsl = mLogicalCameraSettings.get(CaptureRequest.CONTROL_ENABLE_ZSL);
+                boolean isZslStill = false;
+                if (enableZsl != null && enableZsl) {
+                    int captureIntent = mLogicalCameraSettings.get(
+                            CaptureRequest.CONTROL_CAPTURE_INTENT);
+                    if (captureIntent == CameraMetadata.CONTROL_CAPTURE_INTENT_STILL_CAPTURE) {
+                        isZslStill = true;
+                    }
+                }
+                mRequestType = isZslStill ? REQUEST_TYPE_ZSL_STILL : REQUEST_TYPE_REGULAR;
+            }
+        }
+        return mRequestType;
+    }
+
     // If this request is part of constrained high speed request list that was created by
     // {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}
     private boolean mIsPartOfCHSRequestList = false;
