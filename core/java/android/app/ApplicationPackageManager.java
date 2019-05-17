@@ -1953,8 +1953,8 @@ public class ApplicationPackageManager extends PackageManager {
     private int installExistingPackageAsUser(String packageName, int installReason, int userId)
             throws NameNotFoundException {
         try {
-            int res = mPM.installExistingPackageAsUser(packageName, userId, 0 /*installFlags*/,
-                    installReason);
+            int res = mPM.installExistingPackageAsUser(packageName, userId,
+                    INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS, installReason, null);
             if (res == INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }

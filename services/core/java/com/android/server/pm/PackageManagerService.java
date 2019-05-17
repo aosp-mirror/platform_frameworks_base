@@ -13414,8 +13414,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 installExistingPackageAsUser(
                         packageName,
                         userId,
-                        0 /*installFlags*/,
-                        PackageManager.INSTALL_REASON_DEVICE_SETUP);
+                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                        PackageManager.INSTALL_REASON_DEVICE_SETUP,
+                        null);
                 return true;
             }
 
@@ -13503,15 +13504,19 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
-            int installReason) {
-        return installExistingPackageAsUser(packageName, userId, installFlags, installReason, null);
+            int installReason, List<String> whiteListedPermissions) {
+        return installExistingPackageAsUser(packageName, userId, installFlags, installReason,
+                whiteListedPermissions, null);
     }
 
-    int installExistingPackageAsUser(String packageName, int userId, int installFlags,
-            int installReason, IntentSender intentSender) {
+    int installExistingPackageAsUser(@Nullable String packageName, @UserIdInt int userId,
+            @PackageManager.InstallFlags int installFlags,
+            @PackageManager.InstallReason int installReason,
+            @Nullable List<String> whiteListedPermissions, @Nullable IntentSender intentSender) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "installExistingPackageAsUser package=" + packageName + " userId=" + userId
-                    + " installFlags=" + installFlags + " installReason=" + installReason);
+                    + " installFlags=" + installFlags + " installReason=" + installReason
+                    + " whiteListedPermissions=" + whiteListedPermissions);
         }
 
         final int callingUid = Binder.getCallingUid();
@@ -13574,6 +13579,13 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (installed) {
+                if ((installFlags & PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS)
+                        != 0 && pkgSetting.pkg != null) {
+                    whiteListedPermissions = pkgSetting.pkg.requestedPermissions;
+                }
+                setWhitelistedRestrictedPermissions(packageName, whiteListedPermissions,
+                        PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
+
                 if (pkgSetting.pkg != null) {
                     synchronized (mInstallLock) {
                         // We don't need to freeze for a brand new install
