@@ -38,6 +38,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase {
@@ -46,12 +49,13 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     private TestableStackController mStackController = new TestableStackController();
 
     private int mStackOffset;
+    private Runnable mCheckStartPosSet;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        addOneMoreThanRenderLimitBubbles();
         mLayout.setController(mStackController);
+        addOneMoreThanRenderLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
     }
 
@@ -166,6 +170,8 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
                 0,
                 new FrameLayout.LayoutParams(50, 50));
 
+        waitForStartPosToBeSet();
+        waitForLayoutMessageQueue();
         waitForPropertyAnimations(
                 DynamicAnimation.TRANSLATION_X,
                 DynamicAnimation.TRANSLATION_Y,
@@ -290,6 +296,28 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
             assertEquals(x + i * offsetMultiplier * mStackOffset,
                     mViews.get(i).getTranslationX(), 2f);
             assertEquals(y, mViews.get(i).getTranslationY(), 2f);
+        }
+    }
+
+    /** Waits up to 2 seconds for the initial stack position to be initialized. */
+    private void waitForStartPosToBeSet() throws InterruptedException {
+        final CountDownLatch animLatch = new CountDownLatch(1);
+
+        mCheckStartPosSet = () -> {
+            if (mStackController.getStackPosition().x >= 0) {
+                animLatch.countDown();
+            } else {
+                mMainThreadHandler.post(mCheckStartPosSet);
+            }
+        };
+
+        mMainThreadHandler.post(mCheckStartPosSet);
+
+        try {
+            animLatch.await(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            mMainThreadHandler.removeCallbacks(mCheckStartPosSet);
+            throw e;
         }
     }
 
