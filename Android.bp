@@ -421,7 +421,6 @@ java_defaults {
         "core/java/com/android/internal/appwidget/IAppWidgetHost.aidl",
         "core/java/com/android/internal/backup/IBackupTransport.aidl",
         "core/java/com/android/internal/backup/IObbBackupService.aidl",
-        "core/java/com/android/internal/infra/IAndroidFuture.aidl",
         "core/java/com/android/internal/inputmethod/IInputContentUriToken.aidl",
         "core/java/com/android/internal/inputmethod/IInputMethodPrivilegedOperations.aidl",
         "core/java/com/android/internal/inputmethod/IMultiClientInputMethod.aidl",
