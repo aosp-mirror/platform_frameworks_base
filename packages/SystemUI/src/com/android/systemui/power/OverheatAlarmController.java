@@ -53,7 +53,8 @@ public class OverheatAlarmController {
     /**
      * The constructor only used to create singleton sInstance.
      */
-    private OverheatAlarmController(Context context) {
+    @VisibleForTesting
+    public OverheatAlarmController(Context context) {
         mVibrator = (Vibrator) context.getSystemService(VIBRATOR_SERVICE);
     }
 
