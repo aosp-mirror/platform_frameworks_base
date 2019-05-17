@@ -16,15 +16,14 @@
 
 package com.android.settingslib.users;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -43,6 +42,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodInfo;
+
 import com.android.settingslib.BaseTest;
 
 import org.mockito.ArgumentMatcher;
@@ -146,7 +146,8 @@ public class AppRestrictionsHelperTest extends BaseTest {
         mHelper.applyUserAppsStates(mockListener);
 
         verify(mIpm, times(1)).installExistingPackageAsUser("app1", testUserId,
-                0 /*installFlags*/, PackageManager.INSTALL_REASON_UNKNOWN);
+                PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                PackageManager.INSTALL_REASON_UNKNOWN, null);
         verify(mIpm, times(1)).setApplicationHiddenSettingAsUser("app2", false, testUserId);
         verify(mockListener).onDisableUiForPackage("app2");
         verify(mPm, times(1)).deletePackageAsUser(eq("app3"),
