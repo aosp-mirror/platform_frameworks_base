@@ -46,7 +46,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteCallback;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -57,7 +56,6 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.RemoteStream;
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.Preconditions;
 
 import libcore.util.EmptyArray;
 
@@ -67,7 +65,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -93,14 +90,6 @@ public final class PermissionControllerManager {
     @GuardedBy("sLock")
     private static ArrayMap<Pair<Integer, Thread>, ServiceConnector<IPermissionController>>
             sRemoteServices = new ArrayMap<>(1);
-
-    /**
-     * The key for retrieving the result from the returned bundle.
-     *
-     * @hide
-     */
-    public static final String KEY_RESULT =
-            "android.permission.PermissionControllerManager.key.result";
 
     /** @hide */
     @IntDef(prefix = { "REASON_" }, value = {
@@ -291,31 +280,17 @@ public final class PermissionControllerManager {
                         new ArrayList<>(appRequest.getValue()));
             }
 
-            AndroidFuture<Bundle> revokeRuntimePermissionsResult = new AndroidFuture<>();
+            AndroidFuture<Map<String, List<String>>> revokeRuntimePermissionsResult =
+                    new AndroidFuture<>();
             service.revokeRuntimePermissions(bundledizedRequest, doDryRun, reason,
                     mContext.getPackageName(),
-                    new RemoteCallback(revokeRuntimePermissionsResult::complete));
+                    revokeRuntimePermissionsResult);
             return revokeRuntimePermissionsResult;
-        }).thenApply(revokeRuntimePermissionsResult -> {
-            Map<String, List<String>> revoked = new ArrayMap<>();
-            Bundle bundleizedRevoked = revokeRuntimePermissionsResult.getBundle(KEY_RESULT);
-
-            for (String packageName : bundleizedRevoked.keySet()) {
-                Preconditions.checkNotNull(packageName);
-
-                ArrayList<String> permissions =
-                        bundleizedRevoked.getStringArrayList(packageName);
-                Preconditions.checkCollectionElementsNotNull(permissions,
-                        "permissions");
-
-                revoked.put(packageName, permissions);
-            }
-            return revoked;
         }).whenCompleteAsync((revoked, err) -> {
             long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
-                    Log.e(TAG, "Failure when revoking runtime permissions", err);
+                    Log.e(TAG, "Failure when revoking runtime permissions " + revoked, err);
                     callback.onRevokeRuntimePermissions(Collections.emptyMap());
                 } else {
                     callback.onRevokeRuntimePermissions(revoked);
@@ -356,11 +331,10 @@ public final class PermissionControllerManager {
         checkNotNull(callback);
 
         mRemoteService.postAsync(service -> {
-            CompletableFuture<Bundle> setRuntimePermissionGrantStateResult =
-                    new CompletableFuture<>();
+            AndroidFuture<Boolean> setRuntimePermissionGrantStateResult = new AndroidFuture<>();
             service.setRuntimePermissionGrantStateByDeviceAdmin(
                     callerPackageName, packageName, permission, grantState,
-                    new RemoteCallback(setRuntimePermissionGrantStateResult::complete));
+                    setRuntimePermissionGrantStateResult);
             return setRuntimePermissionGrantStateResult;
         }).whenCompleteAsync((setRuntimePermissionGrantStateResult, err) -> {
             long token = Binder.clearCallingIdentity();
@@ -370,8 +344,7 @@ public final class PermissionControllerManager {
                             err);
                     callback.accept(false);
                 } else {
-                    callback.accept(
-                            setRuntimePermissionGrantStateResult.getBoolean(KEY_RESULT, false));
+                    callback.accept(setRuntimePermissionGrantStateResult);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -453,10 +426,10 @@ public final class PermissionControllerManager {
         checkNotNull(callback);
 
         mRemoteService.postAsync(service -> {
-            CompletableFuture<Bundle> restoreDelayedRuntimePermissionBackupResult =
-                    new CompletableFuture<>();
+            AndroidFuture<Boolean> restoreDelayedRuntimePermissionBackupResult =
+                    new AndroidFuture<>();
             service.restoreDelayedRuntimePermissionBackup(packageName, user,
-                    new RemoteCallback(restoreDelayedRuntimePermissionBackupResult::complete));
+                    restoreDelayedRuntimePermissionBackupResult);
             return restoreDelayedRuntimePermissionBackupResult;
         }).whenCompleteAsync((restoreDelayedRuntimePermissionBackupResult, err) -> {
             long token = Binder.clearCallingIdentity();
@@ -466,8 +439,7 @@ public final class PermissionControllerManager {
                     callback.accept(true);
                 } else {
                     callback.accept(
-                            restoreDelayedRuntimePermissionBackupResult
-                                    .getBoolean(KEY_RESULT, false));
+                            Boolean.TRUE.equals(restoreDelayedRuntimePermissionBackupResult));
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -492,20 +464,16 @@ public final class PermissionControllerManager {
         Handler finalHandler = handler != null ? handler : mHandler;
 
         mRemoteService.postAsync(service -> {
-            CompletableFuture<Bundle> getAppPermissionsResult = new CompletableFuture<>();
-            service.getAppPermissions(packageName,
-                    new RemoteCallback(getAppPermissionsResult::complete));
+            AndroidFuture<List<RuntimePermissionPresentationInfo>> getAppPermissionsResult =
+                    new AndroidFuture<>();
+            service.getAppPermissions(packageName, getAppPermissionsResult);
             return getAppPermissionsResult;
         }).whenComplete((getAppPermissionsResult, err) -> finalHandler.post(() -> {
             if (err != null) {
                 Log.e(TAG, "Error getting app permission", err);
                 callback.onGetAppPermissions(Collections.emptyList());
             } else {
-                List<RuntimePermissionPresentationInfo> permissions = null;
-                if (getAppPermissionsResult != null) {
-                    permissions = getAppPermissionsResult.getParcelableArrayList(KEY_RESULT);
-                }
-                callback.onGetAppPermissions(CollectionUtils.emptyIfNull(permissions));
+                callback.onGetAppPermissions(CollectionUtils.emptyIfNull(getAppPermissionsResult));
             }
         }));
     }
@@ -548,18 +516,15 @@ public final class PermissionControllerManager {
         Handler finalHandler = handler != null ? handler : mHandler;
 
         mRemoteService.postAsync(service -> {
-            CompletableFuture<Bundle> countPermissionAppsResult = new CompletableFuture<>();
-            service.countPermissionApps(permissionNames, flags,
-                    new RemoteCallback(countPermissionAppsResult::complete));
+            AndroidFuture<Integer> countPermissionAppsResult = new AndroidFuture<>();
+            service.countPermissionApps(permissionNames, flags, countPermissionAppsResult);
             return countPermissionAppsResult;
         }).whenComplete((countPermissionAppsResult, err) -> finalHandler.post(() -> {
             if (err != null) {
                 Log.e(TAG, "Error counting permission apps", err);
                 callback.onCountPermissionApps(0);
             } else {
-                callback.onCountPermissionApps(countPermissionAppsResult != null
-                        ? countPermissionAppsResult.getInt(KEY_RESULT)
-                        : 0);
+                callback.onCountPermissionApps(countPermissionAppsResult);
             }
         }));
     }
@@ -584,9 +549,9 @@ public final class PermissionControllerManager {
 
 
         mRemoteService.postAsync(service -> {
-            CompletableFuture<Bundle> getPermissionUsagesResult = new CompletableFuture<>();
-            service.getPermissionUsages(countSystem, numMillis,
-                    new RemoteCallback(getPermissionUsagesResult::complete));
+            AndroidFuture<List<RuntimePermissionUsageInfo>> getPermissionUsagesResult =
+                    new AndroidFuture<>();
+            service.getPermissionUsages(countSystem, numMillis, getPermissionUsagesResult);
             return getPermissionUsagesResult;
         }).whenCompleteAsync((getPermissionUsagesResult, err) -> {
             if (err != null) {
@@ -595,9 +560,8 @@ public final class PermissionControllerManager {
             } else {
                 long token = Binder.clearCallingIdentity();
                 try {
-                    callback.onPermissionUsageResult(getPermissionUsagesResult != null
-                            ? getPermissionUsagesResult.getParcelableArrayList(KEY_RESULT)
-                            : Collections.emptyList());
+                    callback.onPermissionUsageResult(
+                            CollectionUtils.emptyIfNull(getPermissionUsagesResult));
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -619,17 +583,17 @@ public final class PermissionControllerManager {
     public void grantOrUpgradeDefaultRuntimePermissions(
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         mRemoteService.postAsync(service -> {
-            CompletableFuture<Bundle> grantOrUpgradeDefaultRuntimePermissionsResult =
-                    new CompletableFuture<>();
+            AndroidFuture<Boolean> grantOrUpgradeDefaultRuntimePermissionsResult =
+                    new AndroidFuture<>();
             service.grantOrUpgradeDefaultRuntimePermissions(
-                    new RemoteCallback(grantOrUpgradeDefaultRuntimePermissionsResult::complete));
+                    grantOrUpgradeDefaultRuntimePermissionsResult);
             return grantOrUpgradeDefaultRuntimePermissionsResult;
         }).whenCompleteAsync((grantOrUpgradeDefaultRuntimePermissionsResult, err) -> {
             if (err != null) {
                 Log.e(TAG, "Error granting or upgrading runtime permissions", err);
                 callback.accept(false);
             } else {
-                callback.accept(grantOrUpgradeDefaultRuntimePermissionsResult != null);
+                callback.accept(grantOrUpgradeDefaultRuntimePermissionsResult);
             }
         }, executor);
     }
