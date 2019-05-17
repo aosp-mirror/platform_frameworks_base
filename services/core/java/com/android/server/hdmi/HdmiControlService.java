@@ -300,7 +300,9 @@ public class HdmiControlService extends SystemService {
 
     // HDMI port information. Stored in the unmodifiable list to keep the static information
     // from being modified.
-    private List<HdmiPortInfo> mPortInfo;
+    // This variable is null if the current device does not have hdmi input.
+    @GuardedBy("mLock")
+    private List<HdmiPortInfo> mPortInfo = null;
 
     // Map from path(physical address) to port ID.
     private UnmodifiableSparseIntArray mPortIdMap;
@@ -827,7 +829,7 @@ public class HdmiControlService extends SystemService {
         // Build HDMI port info list with CEC port info plus MHL supported flag. We can just use
         // cec port info if we do not have have port that supports MHL.
         if (mhlSupportedPorts.isEmpty()) {
-            mPortInfo = Collections.unmodifiableList(Arrays.asList(cecPortInfo));
+            setPortInfo(Collections.unmodifiableList(Arrays.asList(cecPortInfo)));
             return;
         }
         ArrayList<HdmiPortInfo> result = new ArrayList<>(cecPortInfo.length);
@@ -839,11 +841,19 @@ public class HdmiControlService extends SystemService {
                 result.add(info);
             }
         }
-        mPortInfo = Collections.unmodifiableList(result);
+        setPortInfo(Collections.unmodifiableList(result));
     }
 
     List<HdmiPortInfo> getPortInfo() {
-        return mPortInfo;
+        synchronized (mLock) {
+            return mPortInfo;
+        }
+    }
+
+    void setPortInfo(List<HdmiPortInfo> portInfo) {
+        synchronized (mLock) {
+            mPortInfo = portInfo;
+        }
     }
 
     /**
@@ -1641,7 +1651,9 @@ public class HdmiControlService extends SystemService {
         @Override
         public List<HdmiPortInfo> getPortInfo() {
             enforceAccessPermission();
-            return HdmiControlService.this.getPortInfo();
+            return HdmiControlService.this.getPortInfo() == null
+                ? Collections.<HdmiPortInfo>emptyList()
+                : HdmiControlService.this.getPortInfo();
         }
 
         @Override
@@ -2155,7 +2167,7 @@ public class HdmiControlService extends SystemService {
                 synchronized (mLock) {
                     if (!mHotplugEventListenerRecords.contains(record)) return;
                 }
-                for (HdmiPortInfo port : mPortInfo) {
+                for (HdmiPortInfo port : getPortInfo()) {
                     HdmiHotplugEvent event = new HdmiHotplugEvent(port.getId(),
                             mCecController.isConnected(port.getId()));
                     synchronized (mLock) {
