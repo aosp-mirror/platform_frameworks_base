@@ -509,35 +509,16 @@ public class RingtoneManager {
      * @return The position of the {@link Uri}, or -1 if it cannot be found.
      */
     public int getRingtonePosition(Uri ringtoneUri) {
-        
         if (ringtoneUri == null) return -1;
+        final long ringtoneId = ContentUris.parseId(ringtoneUri);
         
         final Cursor cursor = getCursor();
-        final int cursorCount = cursor.getCount();
-        
-        if (!cursor.moveToFirst()) {
-            return -1;
-        }
-        
-        // Only create Uri objects when the actual URI changes
-        Uri currentUri = null;
-        String previousUriString = null;
-        for (int i = 0; i < cursorCount; i++) {
-            String uriString = cursor.getString(URI_COLUMN_INDEX);
-            if (currentUri == null || !uriString.equals(previousUriString)) {
-                currentUri = Uri.parse(uriString);
+        cursor.moveToPosition(-1);
+        while (cursor.moveToNext()) {
+            if (ringtoneId == cursor.getLong(ID_COLUMN_INDEX)) {
+                return cursor.getPosition();
             }
-            
-            if (ringtoneUri.equals(ContentUris.withAppendedId(currentUri, cursor
-                    .getLong(ID_COLUMN_INDEX)))) {
-                return i;
-            }
-            
-            cursor.move(1);
-            
-            previousUriString = uriString;
         }
-        
         return -1;
     }
 
