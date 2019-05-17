@@ -143,10 +143,21 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testTelephonyCapable_SimState_Absent() {
         Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE
-                , IccCardConstants.INTENT_VALUE_ICC_ABSENT);
-        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
-                , putPhoneInfo(intent,null, false));
+        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE,
+                IccCardConstants.INTENT_VALUE_ICC_ABSENT);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
+    }
+
+    @Test
+    public void testTelephonyCapable_SimState_CardIOError() {
+        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE,
+                IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR);
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
+                putPhoneInfo(intent, null, false));
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.mTelephonyCapable).isTrue();
     }
