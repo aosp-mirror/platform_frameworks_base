@@ -91,13 +91,6 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
         } catch (Exception e) {
             Slog.w(TAG, "Exception calling onConnectedStateChanged(" + connected + "): " + e);
         }
-        if (!connected) {
-            try {
-                mCallbacks.onServiceDied(this);
-            } catch (Exception e) {
-                Slog.w(TAG, "Exception calling onServiceDied(): " + e);
-            }
-        }
     }
 
     private void dispatchCancellationSignal(@Nullable ICancellationSignal signal) {
