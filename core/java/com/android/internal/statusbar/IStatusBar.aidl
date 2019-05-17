@@ -167,4 +167,9 @@ oneway interface IStatusBar
      * Notifies System UI that the display is ready to show system decorations.
      */
     void onDisplayReady(int displayId);
+
+    /**
+     * Notifies System UI whether the recents animation is running or not.
+     */
+    void onRecentsAnimationStateChanged(boolean running);
 }

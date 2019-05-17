@@ -2154,6 +2154,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    @Override
+    public void onRecentsAnimationStateChanged(boolean running) {
+        setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, running);
+    }
+
     protected @TransitionMode int computeStatusBarMode(int oldVal, int newVal) {
         return computeBarMode(oldVal, newVal);
     }
