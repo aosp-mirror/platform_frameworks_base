@@ -244,9 +244,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Sets the notification entry used to populate this view.
      */
-    public void setEntry(NotificationEntry entry, BubbleStackView stackView) {
+    public void setEntry(NotificationEntry entry, BubbleStackView stackView, String appName) {
         mStackView = stackView;
         mEntry = entry;
+        mAppName = appName;
 
         ApplicationInfo info;
         try {
@@ -257,12 +258,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
-                mAppName = String.valueOf(mPm.getApplicationLabel(info));
                 mAppIcon = mPm.getApplicationIcon(info);
             }
         } catch (PackageManager.NameNotFoundException e) {
-            // Ahh... just use package name
-            mAppName = entry.notification.getPackageName();
+            // Do nothing.
         }
         if (mAppIcon == null) {
             mAppIcon = mPm.getDefaultActivityIcon();

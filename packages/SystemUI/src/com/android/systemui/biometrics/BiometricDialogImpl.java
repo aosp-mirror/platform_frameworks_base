@@ -31,7 +31,9 @@ import android.util.Log;
 import android.view.WindowManager;
 
 import com.android.internal.os.SomeArgs;
+import com.android.systemui.Dependency;
 import com.android.systemui.SystemUI;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 
 /**
@@ -58,6 +60,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
     private IBiometricServiceReceiverInternal mReceiver;
     private boolean mDialogShowing;
     private Callback mCallback = new Callback();
+    private WakefulnessLifecycle mWakefulnessLifecycle;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -133,6 +136,16 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
     }
 
+    final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
+        @Override
+        public void onStartedGoingToSleep() {
+            if (mDialogShowing) {
+                if (DEBUG) Log.d(TAG, "User canceled due to screen off");
+                mHandler.obtainMessage(MSG_USER_CANCELED).sendToTarget();
+            }
+        }
+    };
+
     @Override
     public void start() {
         final PackageManager pm = mContext.getPackageManager();
@@ -141,6 +154,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
                 || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
             getComponent(CommandQueue.class).addCallback(this);
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
+            mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         }
     }
 
