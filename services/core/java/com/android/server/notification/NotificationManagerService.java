@@ -23,6 +23,7 @@ import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
+import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
@@ -1031,11 +1032,18 @@ public class NotificationManagerService extends SystemService {
                     final StatusBarNotification n = r.sbn;
                     final int callingUid = n.getUid();
                     final String pkg = n.getPackageName();
+                    final boolean wasBubble = r.getNotification().isBubbleNotification();
                     if (isBubble && isNotificationAppropriateToBubble(r, pkg, callingUid,
                             null /* oldEntry */)) {
                         r.getNotification().flags |= FLAG_BUBBLE;
                     } else {
                         r.getNotification().flags &= ~FLAG_BUBBLE;
+                    }
+                    if (wasBubble != r.getNotification().isBubbleNotification()) {
+                        // Add the "alert only once" flag so that the notification won't HUN
+                        // unnecessarily just because the bubble flag was changed.
+                        r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
+                        mListeners.notifyPostedLocked(r, r);
                     }
                 }
             }
@@ -5732,7 +5740,7 @@ public class NotificationManagerService extends SystemService {
         }
         // Suppressed because it's a silent update
         final Notification notification = record.getNotification();
-        if (record.isUpdate && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
+        if (record.isUpdate && (notification.flags & FLAG_ONLY_ALERT_ONCE) != 0) {
             return false;
         }
         // Suppressed because another notification in its group handles alerting
@@ -5751,7 +5759,7 @@ public class NotificationManagerService extends SystemService {
     boolean shouldMuteNotificationLocked(final NotificationRecord record) {
         // Suppressed because it's a silent update
         final Notification notification = record.getNotification();
-        if (record.isUpdate && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0) {
+        if (record.isUpdate && (notification.flags & FLAG_ONLY_ALERT_ONCE) != 0) {
             return true;
         }
 
