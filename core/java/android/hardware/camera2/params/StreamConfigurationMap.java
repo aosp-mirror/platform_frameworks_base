@@ -1507,8 +1507,7 @@ public final class StreamConfigurationMap {
                             dataspace != HAL_DATASPACE_DYNAMIC_DEPTH &&
                             dataspace != HAL_DATASPACE_HEIF) &&
                  mAllOutputFormats.get(format) == 0)) {
-            // Only throw if this is really not supported at all
-            throw new IllegalArgumentException("format not available");
+            return null;
         }
 
         Size[] sizes = new Size[sizesCount];
