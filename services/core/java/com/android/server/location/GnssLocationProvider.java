@@ -966,8 +966,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void updateEnabled() {
-        // Generally follow location setting
-        boolean enabled = mContext.getSystemService(LocationManager.class).isLocationEnabled();
+        // Generally follow location setting for current user
+        boolean enabled = mContext.getSystemService(LocationManager.class)
+                .isLocationEnabledForUser(UserHandle.CURRENT);
 
         // ... but disable if PowerManager overrides
         enabled &= !mDisableGpsForPowerManager;
