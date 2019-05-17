@@ -1095,9 +1095,6 @@ public class CarStatusBar extends StatusBar implements
         @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
-            if (!mNotificationListAtBottomAtTimeOfTouch && !mNotificationListAtBottom) {
-                return false;
-            }
             // should not clip while scroll to the bottom of the list.
             if (!mNotificationListAtBottomAtTimeOfTouch) {
                 return false;
@@ -1134,7 +1131,8 @@ public class CarStatusBar extends StatusBar implements
         @Override
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
-            if (!mNotificationListAtBottomAtTimeOfTouch && !mNotificationListAtBottom) {
+            // should not fling if the touch does not start when view is at the bottom of the list.
+            if (!mNotificationListAtBottomAtTimeOfTouch) {
                 return false;
             }
             if (Math.abs(event1.getX() - event2.getX()) > SWIPE_MAX_OFF_PATH
