@@ -288,7 +288,7 @@ final class RemoteConnectionService {
 
         @Override
         public void queryRemoteConnectionServices(RemoteServiceCallback callback,
-                Session.Info sessionInfo) {
+                String callingPackage, Session.Info sessionInfo) {
             // Not supported from remote connection service.
         }
 
