@@ -23,9 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.RemoteException;
 import android.util.ExceptionUtils;
 import android.util.Log;
 
@@ -48,7 +45,6 @@ import java.util.function.Supplier;
  * A customized {@link CompletableFuture} with focus on reducing the number of allocations involved
  * in a typical future usage scenario for Android.
  *
- * <p>
  * In particular this involves allocations optimizations in:
  * <ul>
  *     <li>{@link #thenCompose(Function)}</li>
@@ -59,20 +55,10 @@ import java.util.function.Supplier;
  * </ul>
  * As well as their *Async versions.
  *
- * <p>
- * You can pass {@link AndroidFuture} across an IPC.
- * When doing so, completing the future on the other side will propagate the completion back,
- * effectively acting as an error-aware remote callback.
- *
- * <p>
- * {@link AndroidFuture} is {@link Parcelable} iff its wrapped type {@code T} is
- * effectively parcelable, i.e. is supported by {@link Parcel#readValue}/{@link Parcel#writeValue}.
- *
  * @param <T> see {@link CompletableFuture}
  */
-public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable {
+public class AndroidFuture<T> extends CompletableFuture<T> {
 
-    private static final boolean DEBUG = false;
     private static final String LOG_TAG = AndroidFuture.class.getSimpleName();
 
     private final @NonNull Object mLock = new Object();
@@ -81,38 +67,6 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
     @GuardedBy("mLock")
     private @Nullable Executor mListenerExecutor = DIRECT_EXECUTOR;
     private @NonNull Handler mTimeoutHandler = Handler.getMain();
-    private final @Nullable IAndroidFuture mRemoteOrigin;
-
-    public AndroidFuture() {
-        super();
-        mRemoteOrigin = null;
-    }
-
-    AndroidFuture(Parcel in) {
-        super();
-        if (in.readBoolean()) {
-            // Done
-            if (in.readBoolean()) {
-                // Failed
-                try {
-                    in.readException();
-                } catch (Throwable e) {
-                    completeExceptionally(e);
-                }
-                if (!isCompletedExceptionally()) {
-                    throw new IllegalStateException(
-                            "Error unparceling AndroidFuture: exception expected");
-                }
-            } else {
-                // Success
-                complete((T) in.readValue(null));
-            }
-            mRemoteOrigin = null;
-        } else {
-            // Not done
-            mRemoteOrigin = IAndroidFuture.Stub.asInterface(in.readStrongBinder());
-        }
-    }
 
     @Override
     public boolean complete(@Nullable T value) {
@@ -136,11 +90,6 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
     protected void onCompleted(@Nullable T res, @Nullable Throwable err) {
         cancelTimeout();
 
-        if (DEBUG) {
-            Log.i(LOG_TAG, this + " completed with result " + (err == null ? res : err),
-                    new RuntimeException());
-        }
-
         BiConsumer<? super T, ? super Throwable> listener;
         synchronized (mLock) {
             listener = mListener;
@@ -149,14 +98,6 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
 
         if (listener != null) {
             callListenerAsync(listener, res, err);
-        }
-
-        if (mRemoteOrigin != null) {
-            try {
-                mRemoteOrigin.complete(this /* resultContainer */);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Failed to propagate completion", e);
-            }
         }
     }
 
@@ -472,49 +413,4 @@ public class AndroidFuture<T> extends CompletableFuture<T> implements Parcelable
             }
         }
     }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        boolean done = isDone();
-        dest.writeBoolean(done);
-        if (done) {
-            T result;
-            try {
-                result = get();
-            } catch (Exception t) {
-                dest.writeBoolean(true);
-                dest.writeException(t);
-                return;
-            }
-            dest.writeBoolean(false);
-            dest.writeValue(result);
-        } else {
-            dest.writeStrongBinder(new IAndroidFuture.Stub() {
-                @Override
-                public void complete(AndroidFuture resultContainer) {
-                    try {
-                        AndroidFuture.this.complete((T) resultContainer.get());
-                    } catch (Throwable t) {
-                        completeExceptionally(t);
-                    }
-                }
-            }.asBinder());
-        }
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final @NonNull Parcelable.Creator<AndroidFuture> CREATOR =
-            new Parcelable.Creator<AndroidFuture>() {
-                public AndroidFuture createFromParcel(Parcel parcel) {
-                    return new AndroidFuture(parcel);
-                }
-
-                public AndroidFuture[] newArray(int size) {
-                    return new AndroidFuture[size];
-                }
-            };
 }

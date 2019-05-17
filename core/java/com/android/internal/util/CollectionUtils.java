@@ -18,7 +18,6 @@ package com.android.internal.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 
@@ -30,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -326,33 +324,6 @@ public class CollectionUtils {
             }
         } catch (Exception e) {
             throw ExceptionUtils.propagate(e);
-        }
-    }
-
-    /**
-     * Applies {@code action} to each element in {@code cur}
-     *
-     * This avoids creating an iterator if the given map is an {@link ArrayMap}
-     * For non-{@link ArrayMap}s it avoids creating {@link Map.Entry} instances
-     */
-    public static <K, V> void forEach(@Nullable Map<K, V> cur, @Nullable BiConsumer<K, V> action) {
-        if (cur == null || action == null) {
-            return;
-        }
-        int size = cur.size();
-        if (size == 0) {
-            return;
-        }
-
-        if (cur instanceof ArrayMap) {
-            ArrayMap<K, V> arrayMap = (ArrayMap<K, V>) cur;
-            for (int i = 0; i < size; i++) {
-                action.accept(arrayMap.keyAt(i), arrayMap.valueAt(i));
-            }
-        } else {
-            for (K key : cur.keySet()) {
-                action.accept(key, cur.get(key));
-            }
         }
     }
 

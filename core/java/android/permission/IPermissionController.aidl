@@ -20,7 +20,6 @@ import android.os.RemoteCallback;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
-import com.android.internal.infra.AndroidFuture;
 
 /**
  * Interface for system apps to communication with the permission controller.
@@ -29,17 +28,17 @@ import com.android.internal.infra.AndroidFuture;
  */
 oneway interface IPermissionController {
     void revokeRuntimePermissions(in Bundle request, boolean doDryRun, int reason,
-            String callerPackageName, in AndroidFuture callback);
+            String callerPackageName, in RemoteCallback callback);
     void getRuntimePermissionBackup(in UserHandle user, in ParcelFileDescriptor pipe);
     void restoreRuntimePermissionBackup(in UserHandle user, in ParcelFileDescriptor pipe);
     void restoreDelayedRuntimePermissionBackup(String packageName, in UserHandle user,
-            in AndroidFuture callback);
-    void getAppPermissions(String packageName, in AndroidFuture callback);
+            in RemoteCallback callback);
+    void getAppPermissions(String packageName, in RemoteCallback callback);
     void revokeRuntimePermission(String packageName, String permissionName);
     void countPermissionApps(in List<String> permissionNames, int flags,
-            in AndroidFuture callback);
-    void getPermissionUsages(boolean countSystem, long numMillis, in AndroidFuture callback);
+            in RemoteCallback callback);
+    void getPermissionUsages(boolean countSystem, long numMillis, in RemoteCallback callback);
     void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName, String packageName,
-                String permission, int grantState, in AndroidFuture callback);
-    void grantOrUpgradeDefaultRuntimePermissions(in AndroidFuture callback);
+            String permission, int grantState, in RemoteCallback callback);
+    void grantOrUpgradeDefaultRuntimePermissions(in RemoteCallback callback);
 }

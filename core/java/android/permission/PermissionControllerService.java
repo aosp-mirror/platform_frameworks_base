@@ -41,13 +41,12 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
 import android.os.UserHandle;
 import android.permission.PermissionControllerManager.CountPermissionAppsFlag;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.internal.infra.AndroidFuture;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
@@ -210,7 +209,7 @@ public abstract class PermissionControllerService extends Service {
             @Override
             public void revokeRuntimePermissions(
                     Bundle bundleizedRequest, boolean doDryRun, int reason,
-                    String callerPackageName, AndroidFuture callback) {
+                    String callerPackageName, RemoteCallback callback) {
                 checkNotNull(bundleizedRequest, "bundleizedRequest");
                 checkNotNull(callerPackageName);
                 checkNotNull(callback);
@@ -238,11 +237,22 @@ public abstract class PermissionControllerService extends Service {
 
                 onRevokeRuntimePermissions(request,
                         doDryRun, reason, callerPackageName, revoked -> {
-                            CollectionUtils.forEach(revoked, (pkg, perms) -> {
-                                Preconditions.checkNotNull(pkg);
-                                Preconditions.checkCollectionElementsNotNull(perms, "permissions");
-                            });
-                            callback.complete(revoked);
+                            checkNotNull(revoked);
+                            Bundle bundledizedRevoked = new Bundle();
+                            for (Map.Entry<String, List<String>> appRevocation :
+                                    revoked.entrySet()) {
+                                checkNotNull(appRevocation.getKey());
+                                checkCollectionElementsNotNull(appRevocation.getValue(),
+                                        "permissions");
+
+                                bundledizedRevoked.putStringArrayList(appRevocation.getKey(),
+                                        new ArrayList<>(appRevocation.getValue()));
+                            }
+
+                            Bundle result = new Bundle();
+                            result.putBundle(PermissionControllerManager.KEY_RESULT,
+                                    bundledizedRevoked);
+                            callback.sendResult(result);
                         });
             }
 
@@ -284,24 +294,40 @@ public abstract class PermissionControllerService extends Service {
 
             @Override
             public void restoreDelayedRuntimePermissionBackup(String packageName, UserHandle user,
-                    AndroidFuture callback) {
+                    RemoteCallback callback) {
                 checkNotNull(packageName);
                 checkNotNull(user);
                 checkNotNull(callback);
 
                 enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
 
-                onRestoreDelayedRuntimePermissionsBackup(packageName, user, callback::complete);
+                onRestoreDelayedRuntimePermissionsBackup(packageName, user,
+                        hasMoreBackup -> {
+                            Bundle result = new Bundle();
+                            result.putBoolean(PermissionControllerManager.KEY_RESULT,
+                                    hasMoreBackup);
+                            callback.sendResult(result);
+                        });
             }
 
             @Override
-            public void getAppPermissions(String packageName, AndroidFuture callback) {
+            public void getAppPermissions(String packageName, RemoteCallback callback) {
                 checkNotNull(packageName, "packageName");
                 checkNotNull(callback, "callback");
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                onGetAppPermissions(packageName, callback::complete);
+                onGetAppPermissions(packageName,
+                        permissions -> {
+                            if (permissions != null && !permissions.isEmpty()) {
+                                Bundle result = new Bundle();
+                                result.putParcelableList(PermissionControllerManager.KEY_RESULT,
+                                        permissions);
+                                callback.sendResult(result);
+                            } else {
+                                callback.sendResult(null);
+                            }
+                        });
             }
 
             @Override
@@ -323,31 +349,43 @@ public abstract class PermissionControllerService extends Service {
 
             @Override
             public void countPermissionApps(List<String> permissionNames, int flags,
-                    AndroidFuture callback) {
+                    RemoteCallback callback) {
                 checkCollectionElementsNotNull(permissionNames, "permissionNames");
                 checkFlagsArgument(flags, COUNT_WHEN_SYSTEM | COUNT_ONLY_WHEN_GRANTED);
                 checkNotNull(callback, "callback");
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                onCountPermissionApps(permissionNames, flags, callback::complete);
+                onCountPermissionApps(permissionNames, flags, numApps -> {
+                    Bundle result = new Bundle();
+                    result.putInt(PermissionControllerManager.KEY_RESULT, numApps);
+                    callback.sendResult(result);
+                });
             }
 
             @Override
             public void getPermissionUsages(boolean countSystem, long numMillis,
-                    AndroidFuture callback) {
+                    RemoteCallback callback) {
                 checkArgumentNonnegative(numMillis);
                 checkNotNull(callback, "callback");
 
                 enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
 
-                onGetPermissionUsages(countSystem, numMillis, callback::complete);
+                onGetPermissionUsages(countSystem, numMillis, users -> {
+                    if (users != null && !users.isEmpty()) {
+                        Bundle result = new Bundle();
+                        result.putParcelableList(PermissionControllerManager.KEY_RESULT, users);
+                        callback.sendResult(result);
+                    } else {
+                        callback.sendResult(null);
+                    }
+                });
             }
 
             @Override
             public void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName,
                     String packageName, String permission, int grantState,
-                    AndroidFuture callback) {
+                    RemoteCallback callback) {
                 checkStringNotEmpty(callerPackageName);
                 checkStringNotEmpty(packageName);
                 checkStringNotEmpty(permission);
@@ -368,17 +406,21 @@ public abstract class PermissionControllerService extends Service {
                         null);
 
                 onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
-                        packageName, permission, grantState, callback::complete);
+                        packageName, permission, grantState, wasSet -> {
+                            Bundle result = new Bundle();
+                            result.putBoolean(PermissionControllerManager.KEY_RESULT, wasSet);
+                            callback.sendResult(result);
+                        });
             }
 
             @Override
-            public void grantOrUpgradeDefaultRuntimePermissions(@NonNull AndroidFuture callback) {
+            public void grantOrUpgradeDefaultRuntimePermissions(@NonNull RemoteCallback callback) {
                 checkNotNull(callback, "callback");
 
                 enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                         null);
 
-                onGrantOrUpgradeDefaultRuntimePermissions(() -> callback.complete(null));
+                onGrantOrUpgradeDefaultRuntimePermissions(() -> callback.sendResult(Bundle.EMPTY));
             }
         };
     }
