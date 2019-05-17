@@ -237,16 +237,16 @@ public class BubbleStackView extends FrameLayout {
     private ViewClippingUtil.ClippingParameters mClippingParameters =
             new ViewClippingUtil.ClippingParameters() {
 
-        @Override
-        public boolean shouldFinish(View view) {
-            return false;
-        }
+                @Override
+                public boolean shouldFinish(View view) {
+                    return false;
+                }
 
-        @Override
-        public boolean isClippingEnablingAllowed(View view) {
-            return !mIsExpanded;
-        }
-    };
+                @Override
+                public boolean isClippingEnablingAllowed(View view) {
+                    return !mIsExpanded;
+                }
+            };
 
     /** Float property that 'drags' the flyout. */
     private final FloatPropertyCompat mFlyoutCollapseProperty =
@@ -288,7 +288,7 @@ public class BubbleStackView extends FrameLayout {
     private Runnable mAfterMagnet;
 
     public BubbleStackView(Context context, BubbleData data,
-                           @Nullable SurfaceSynchronizer synchronizer) {
+            @Nullable SurfaceSynchronizer synchronizer) {
         super(context);
 
         mBubbleData = data;
@@ -693,6 +693,7 @@ public class BubbleStackView extends FrameLayout {
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
+        updatePointerPosition();
     }
 
     // via BubbleData.Listener
@@ -708,6 +709,7 @@ public class BubbleStackView extends FrameLayout {
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
         }
+        updatePointerPosition();
     }
 
     // via BubbleData.Listener
@@ -1067,8 +1069,8 @@ public class BubbleStackView extends FrameLayout {
                     (overscrollingPastDot ? collapsePercent - 1f : collapsePercent * -1)
                             * (overscrollingLeft ? -1 : 1)
                             * (mFlyout.getWidth() / (FLYOUT_OVERSCROLL_ATTENUATION_FACTOR
-                                // Attenuate the smaller dot less than the larger flyout.
-                                / (overscrollingPastDot ? 2 : 1)));
+                            // Attenuate the smaller dot less than the larger flyout.
+                            / (overscrollingPastDot ? 2 : 1)));
         }
 
         mFlyout.setTranslationX(mFlyout.getRestingTranslationX() + overscrollTranslation);
@@ -1470,18 +1472,22 @@ public class BubbleStackView extends FrameLayout {
         if (DEBUG) {
             Log.d(TAG, "updatePointerPosition()");
         }
-        Bubble expandedBubble = getExpandedBubble();
-        if (expandedBubble != null) {
-            BubbleView iconView = expandedBubble.iconView;
-            float bubbleLeft = iconView.getTranslationX();
-            float halfBubbleWidth = (iconView.getWidth() / 2f);
 
-            // Bubbles live in expanded view container (x includes expanded view padding).
-            // Pointer lives in expanded view, which has padding (x does not include padding).
-            // Remove padding when deriving pointer location from bubbles.
-            float pointerX = bubbleLeft - mExpandedViewPadding + halfBubbleWidth;
-            expandedBubble.expandedView.setPointerPosition((int) pointerX);
+        Bubble expandedBubble = getExpandedBubble();
+        if (expandedBubble == null) {
+            return;
         }
+
+        int index = getBubbleIndex(expandedBubble);
+        float bubbleLeftFromScreenLeft = mExpandedAnimationController.getBubbleLeft(index);
+        float halfBubble = mBubbleSize / 2f;
+
+        // Bubbles live in expanded view container (x includes expanded view padding).
+        // Pointer lives in expanded view, which has padding (x does not include padding).
+        // Remove padding when deriving pointer location from bubbles.
+        float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble - mExpandedViewPadding;
+
+        expandedBubble.expandedView.setPointerPosition(bubbleCenter);
     }
 
     /**

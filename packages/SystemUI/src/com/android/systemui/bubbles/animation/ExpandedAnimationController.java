@@ -63,6 +63,8 @@ public class ExpandedAnimationController
     private Point mDisplaySize;
     /** Size of dismiss target at bottom of screen. */
     private float mPipDismissHeight;
+    /** Max number of bubbles shown in row above expanded view.*/
+    private int mBubblesMaxRendered;
 
     /** Whether the dragged-out bubble is in the dismiss target. */
     private boolean mIndividualBubbleWithinDismissTarget = false;
@@ -112,32 +114,25 @@ public class ExpandedAnimationController
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mPipDismissHeight = res.getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height);
+        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
     }
 
     /**
      * Animates expanding the bubbles into a row along the top of the screen.
-     *
-     * @return The y-value to which the bubbles were expanded, in case that's useful.
      */
-    public float expandFromStack(PointF collapseTo, Runnable after) {
+    public void expandFromStack(PointF collapseTo, Runnable after) {
         animationsForChildrenFromIndex(
                 0, /* startIndex */
                 new ChildAnimationConfigurator() {
-                    // How much to translate the next bubble, so that it is not overlapping the
-                    // previous one.
-                    float mTranslateNextBubbleXBy = mExpandedViewPadding + mBubblePaddingPx;
-
                     @Override
                     public void configureAnimationForChildAtIndex(
                             int index, PhysicsAnimationLayout.PhysicsPropertyAnimator animation) {
-                        animation.position(mTranslateNextBubbleXBy, getExpandedY());
-                        mTranslateNextBubbleXBy += mBubbleSizePx + mBubblePaddingPx;
+                        animation.position(getBubbleLeft(index), getExpandedY());
                     }
             })
             .startAll(after);
 
         mCollapseToPoint = collapseTo;
-        return getExpandedY();
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
@@ -189,9 +184,7 @@ public class ExpandedAnimationController
         final boolean draggedOutEnough =
                 y > getExpandedY() + mBubbleSizePx || y < getExpandedY() - mBubbleSizePx;
         if (draggedOutEnough != mBubbleDraggedOutEnough) {
-            animateStackByBubbleWidthsStartingFrom(
-                    /* numBubbleWidths */ draggedOutEnough ? -1 : 0,
-                    /* startIndex */ mLayout.indexOfChild(bubbleView) + 1);
+            updateBubblePositions();
             mBubbleDraggedOutEnough = draggedOutEnough;
         }
     }
@@ -200,17 +193,14 @@ public class ExpandedAnimationController
     public void dismissDraggedOutBubble(Runnable after) {
         mIndividualBubbleWithinDismissTarget = false;
 
-        // Fill the space from the soon to be dismissed bubble.
-        animateStackByBubbleWidthsStartingFrom(
-                /* numBubbleWidths */ -1,
-                /* startIndex */ mLayout.indexOfChild(mBubbleDraggingOut) + 1);
-
         animationForChild(mBubbleDraggingOut)
                 .withStiffness(SpringForce.STIFFNESS_HIGH)
                 .scaleX(1.1f)
                 .scaleY(1.1f)
                 .alpha(0f, after)
                 .start();
+
+        updateBubblePositions();
     }
 
     /** Magnets the given bubble to the dismiss target. */
@@ -251,15 +241,13 @@ public class ExpandedAnimationController
         final int index = mLayout.indexOfChild(bubbleView);
 
         animationForChildAtIndex(index)
-                .position(getXForChildAtIndex(index), getExpandedY())
-                .withPositionStartVelocities(velX, velY)
-                .start(() -> bubbleView.setTranslationZ(0f) /* after */);
-
-        animateStackByBubbleWidthsStartingFrom(
-                /* numBubbleWidths */ 0, /* startIndex */ index + 1);
+            .position(getBubbleLeft(index), getExpandedY())
+            .withPositionStartVelocities(velX, velY)
+            .start(() -> bubbleView.setTranslationZ(0f) /* after */);
 
         mBubbleDraggingOut = null;
         mBubbleDraggedOutEnough = false;
+        updateBubblePositions();
     }
 
     /**
@@ -337,8 +325,6 @@ public class ExpandedAnimationController
 
     @Override
     void onChildAdded(View child, int index) {
-        // Pop in from the top.
-        // TODO: Reverse this when bubbles are at the bottom.
         child.setTranslationX(getXForChildAtIndex(index));
 
         animationForChild(child)
@@ -346,7 +332,7 @@ public class ExpandedAnimationController
                         getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
                         getExpandedY() /* to */)
                 .start();
-        animateBubblesAfterIndexToCorrectX(index);
+        updateBubblePositions();
     }
 
     @Override
@@ -367,7 +353,7 @@ public class ExpandedAnimationController
         }
 
         // Animate all the other bubbles to their new positions sans this bubble.
-        animateBubblesAfterIndexToCorrectX(index);
+        updateBubblePositions();
     }
 
     @Override
@@ -383,26 +369,53 @@ public class ExpandedAnimationController
                 .start(() -> super.setChildVisibility(child, index, visibility) /* after */);
     }
 
-    /**
-     * Animates the bubbles after the given index to the X position they should be in according to
-     * {@link #getXForChildAtIndex}.
-     */
-    private void animateBubblesAfterIndexToCorrectX(int start) {
-        for (int i = start; i < mLayout.getChildCount(); i++) {
+    private void updateBubblePositions() {
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
             final View bubble = mLayout.getChildAt(i);
 
             // Don't animate the dragging out bubble, or it'll jump around while being dragged. It
             // will be snapped to the correct X value after the drag (if it's not dismissed).
-            if (!bubble.equals(mBubbleDraggingOut)) {
-                animationForChild(bubble)
-                        .translationX(getXForChildAtIndex(i))
-                        .start();
+            if (bubble.equals(mBubbleDraggingOut)) {
+                return;
             }
+            animationForChild(bubble)
+                    .translationX(getBubbleLeft(i))
+                    .start();
         }
     }
 
     /** Returns the appropriate X translation value for a bubble at the given index. */
     private float getXForChildAtIndex(int index) {
         return mBubblePaddingPx + (mBubbleSizePx + mBubblePaddingPx) * index;
+    }
+
+    /**
+     * @param index Bubble index in row.
+     * @return Bubble left x from left edge of screen.
+     */
+    public float getBubbleLeft(int index) {
+        float bubbleLeftFromRowLeft = index * (mBubbleSizePx + mBubblePaddingPx);
+        return getRowLeft() + bubbleLeftFromRowLeft;
+    }
+
+    private float getRowLeft() {
+        if (mLayout == null) {
+            return 0;
+        }
+        int bubbleCount = mLayout.getChildCount();
+        if (bubbleCount > mBubblesMaxRendered) {
+            // Only shown bubbles are relevant for calculating position.
+            bubbleCount = mBubblesMaxRendered;
+        }
+        // Width calculations.
+        double bubble = bubbleCount * mBubbleSizePx;
+        float gap = (bubbleCount - 1) * mBubblePaddingPx;
+        float row = gap + (float) bubble;
+
+        float halfRow = row / 2f;
+        float centerScreen = mDisplaySize.x / 2;
+        float rowLeftFromScreenLeft = centerScreen - halfRow;
+
+        return rowLeftFromScreenLeft;
     }
 }
