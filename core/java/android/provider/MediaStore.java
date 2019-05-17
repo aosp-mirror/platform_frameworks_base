@@ -1077,7 +1077,7 @@ public final class MediaStore {
          * Relative path of this media item within the storage device where it
          * is persisted. For example, an item stored at
          * {@code /storage/0000-0000/DCIM/Vacation/IMG1024.JPG} would have a
-         * path of {@code DCIM/Vacation}.
+         * path of {@code DCIM/Vacation/}.
          * <p>
          * This value should only be used for organizational purposes, and you
          * should not attempt to construct or access a raw filesystem path using
