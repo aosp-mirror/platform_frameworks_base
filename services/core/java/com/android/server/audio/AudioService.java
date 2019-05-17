@@ -6698,7 +6698,10 @@ public class AudioService extends IAudioService.Stub
             boolean isVolumeController, IMediaProjection projection) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
-        if (!isPolicyRegisterAllowed(policyConfig, projection)) {
+        if (!isPolicyRegisterAllowed(policyConfig,
+                                     isFocusPolicy || isTestFocusPolicy || hasFocusListener,
+                                     isVolumeController,
+                                     projection)) {
             Slog.w(TAG, "Permission denied to register audio policy for pid "
                     + Binder.getCallingPid() + " / uid " + Binder.getCallingUid()
                     + ", need MODIFY_AUDIO_ROUTING or MediaProjection that can project audio");
@@ -6739,13 +6742,18 @@ public class AudioService extends IAudioService.Stub
      * as those policy do not modify the audio routing.
      */
     private boolean isPolicyRegisterAllowed(AudioPolicyConfig policyConfig,
-             IMediaProjection projection) {
+                                            boolean hasFocusAccess,
+                                            boolean isVolumeController,
+                                            IMediaProjection projection) {
 
         boolean requireValidProjection = false;
         boolean requireCaptureAudioOrMediaOutputPerm = false;
         boolean requireModifyRouting = false;
 
-        if (policyConfig.getMixes().isEmpty()) {
+        if (hasFocusAccess || isVolumeController) {
+            requireModifyRouting |= true;
+        } else if (policyConfig.getMixes().isEmpty()) {
+            // An empty policy could be used to lock the focus or add mixes later
             requireModifyRouting |= true;
         }
         for (AudioMix mix : policyConfig.getMixes()) {
