@@ -265,6 +265,7 @@ public class SettingsBackupTest {
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
+                    Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FORCED_APP_STANDBY_ENABLED,
