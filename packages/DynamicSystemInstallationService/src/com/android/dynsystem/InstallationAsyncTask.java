@@ -37,7 +37,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
     private static final String TAG = "InstallationAsyncTask";
 
-    private static final int READ_BUFFER_SIZE = 1 << 19;
+    private static final int READ_BUFFER_SIZE = 1 << 13;
 
     private class InvalidImageUrlException extends RuntimeException {
         private InvalidImageUrlException(String message) {
