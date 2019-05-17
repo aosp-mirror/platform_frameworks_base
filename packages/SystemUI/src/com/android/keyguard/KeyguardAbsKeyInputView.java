@@ -310,7 +310,9 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
-        mSecurityMessageDisplay.setNextMessageColor(colorState);
+        if (colorState != null) {
+            mSecurityMessageDisplay.setNextMessageColor(colorState);
+        }
         mSecurityMessageDisplay.setMessage(message);
     }
 
