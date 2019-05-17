@@ -117,7 +117,8 @@ public class AppRestrictionsHelper {
                 if (info == null || !info.enabled
                         || (info.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
                     mIPm.installExistingPackageAsUser(packageName, mUser.getIdentifier(),
-                            0 /*installFlags*/, PackageManager.INSTALL_REASON_UNKNOWN);
+                            PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                            PackageManager.INSTALL_REASON_UNKNOWN, null);
                     if (DEBUG) {
                         Log.d(TAG, "Installing " + packageName);
                     }
