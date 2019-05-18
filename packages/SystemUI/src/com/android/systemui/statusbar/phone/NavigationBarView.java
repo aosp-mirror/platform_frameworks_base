@@ -967,12 +967,6 @@ public class NavigationBarView extends FrameLayout implements
             // If car mode or density changes, we need to reset the icons.
             updateNavButtonIcons();
         }
-
-        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mTintController.start();
-        } else {
-            mTintController.stop();
-        }
     }
 
     /**
