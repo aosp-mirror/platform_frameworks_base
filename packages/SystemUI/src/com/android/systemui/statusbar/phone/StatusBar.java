@@ -538,7 +538,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (mKeyguardMonitor.isKeyguardFadingAway()) {
                 mStatusBarKeyguardViewManager.onKeyguardFadedAway();
-                mStatusBarWindow.onKeyguardFadedAway();
             }
         }
 
@@ -928,6 +927,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 scrimsVisible -> {
                     if (mStatusBarWindowController != null) {
                         mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
+                    }
+                    if (mStatusBarWindow != null) {
+                        mStatusBarWindow.onScrimVisibilityChanged(scrimsVisible);
                     }
                 }, DozeParameters.getInstance(mContext),
                 mContext.getSystemService(AlarmManager.class));
