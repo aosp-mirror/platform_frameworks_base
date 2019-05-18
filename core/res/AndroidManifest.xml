@@ -913,6 +913,7 @@
     <permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:permissionGroup="android.permission-group.UNDEFINED"
         android:label="@string/permlab_accessBackgroundLocation"
+        android:permissionFlags="hardRestricted"
         android:description="@string/permdesc_accessBackgroundLocation"
         android:protectionLevel="dangerous|instant" />
 
