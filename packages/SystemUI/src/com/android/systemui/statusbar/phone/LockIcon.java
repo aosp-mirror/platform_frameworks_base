@@ -44,6 +44,7 @@ import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
+import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -484,10 +485,13 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     /**
-     * Triggered after the unlock animation is over and the user is looking at launcher.
+     * Called whenever the scrims become opaque, transparent or semi-transparent.
      */
-    public void onKeyguardFadedAway() {
-        mWakeAndUnlockRunning = false;
-        update();
+    public void onScrimVisibilityChanged(@ScrimVisibility int scrimsVisible) {
+        if (mWakeAndUnlockRunning
+                && scrimsVisible == ScrimController.VISIBILITY_FULLY_TRANSPARENT) {
+            mWakeAndUnlockRunning = false;
+            update();
+        }
     }
 }
