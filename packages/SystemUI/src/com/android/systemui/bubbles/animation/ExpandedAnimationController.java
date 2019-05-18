@@ -78,8 +78,11 @@ public class ExpandedAnimationController
      */
     private boolean mSpringingBubbleToTouch = false;
 
-    public ExpandedAnimationController(Point displaySize) {
+    private int mExpandedViewPadding;
+
+    public ExpandedAnimationController(Point displaySize, int expandedViewPadding) {
         mDisplaySize = displaySize;
+        mExpandedViewPadding = expandedViewPadding;
     }
 
     /**
@@ -122,7 +125,7 @@ public class ExpandedAnimationController
                 new ChildAnimationConfigurator() {
                     // How much to translate the next bubble, so that it is not overlapping the
                     // previous one.
-                    float mTranslateNextBubbleXBy = mBubblePaddingPx;
+                    float mTranslateNextBubbleXBy = mExpandedViewPadding + mBubblePaddingPx;
 
                     @Override
                     public void configureAnimationForChildAtIndex(
