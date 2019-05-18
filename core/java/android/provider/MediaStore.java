@@ -3304,6 +3304,14 @@ public final class MediaStore {
     @TestApi
     public static @NonNull File getVolumePath(@NonNull String volumeName)
             throws FileNotFoundException {
+        final StorageManager sm = AppGlobals.getInitialApplication()
+                .getSystemService(StorageManager.class);
+        return getVolumePath(sm.getVolumes(), volumeName);
+    }
+
+    /** {@hide} */
+    public static @NonNull File getVolumePath(@NonNull List<VolumeInfo> volumes,
+            @NonNull String volumeName) throws FileNotFoundException {
         if (TextUtils.isEmpty(volumeName)) {
             throw new IllegalArgumentException();
         }
@@ -3312,19 +3320,18 @@ public final class MediaStore {
             case VOLUME_INTERNAL:
             case VOLUME_EXTERNAL:
                 throw new FileNotFoundException(volumeName + " has no associated path");
-            case VOLUME_EXTERNAL_PRIMARY:
-                return Environment.getExternalStorageDirectory();
         }
 
-        final StorageManager sm = AppGlobals.getInitialApplication()
-                .getSystemService(StorageManager.class);
-        for (VolumeInfo vi : sm.getVolumes()) {
-            if (Objects.equals(vi.getNormalizedFsUuid(), volumeName)) {
-                final File path = vi.getPathForUser(UserHandle.myUserId());
+        final boolean wantPrimary = VOLUME_EXTERNAL_PRIMARY.equals(volumeName);
+        for (VolumeInfo volume : volumes) {
+            final boolean matchPrimary = wantPrimary
+                    && volume.isPrimary();
+            final boolean matchSecondary = !wantPrimary
+                    && Objects.equals(volume.getNormalizedFsUuid(), volumeName);
+            if (matchPrimary || matchSecondary) {
+                final File path = volume.getPathForUser(UserHandle.myUserId());
                 if (path != null) {
                     return path;
-                } else {
-                    throw new FileNotFoundException("Failed to find path for " + vi);
                 }
             }
         }
