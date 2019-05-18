@@ -32,6 +32,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <binder/IServiceManager.h>
+#include <gui/SurfaceComposerClient.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
 #include <hidl/ServiceManagement.h>
@@ -147,6 +148,8 @@ static void sendPowerHint(PowerHint hintId, uint32_t data) {
             processPowerHalReturn(ret, "powerHint");
         }
     }
+
+    SurfaceComposerClient::notifyPowerHint(static_cast<int32_t>(hintId));
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
