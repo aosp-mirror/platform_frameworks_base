@@ -41,6 +41,8 @@ import android.content.ComponentName;
  * {@link android.content.Context#BIND_EXTERNAL_SERVICE} service. In that case, the packageName
  * and uid in the ApplicationInfo will be set to those of the caller, not of the defining package.
  *
+ * {@code mIsTopApp} will be passed to {@link android.os.Process#start}. So Zygote will initialize
+ * the process with high priority.
  */
 
 public final class HostingRecord {
@@ -53,13 +55,20 @@ public final class HostingRecord {
     private final int mHostingZygote;
     private final String mDefiningPackageName;
     private final int mDefiningUid;
+    private final boolean mIsTopApp;
 
     public HostingRecord(String hostingType) {
-        this(hostingType, null, REGULAR_ZYGOTE, null, -1);
+        this(hostingType, null /* hostingName */, REGULAR_ZYGOTE, null /* definingPackageName */,
+                -1 /* mDefiningUid */, false /* isTopApp */);
     }
 
     public HostingRecord(String hostingType, ComponentName hostingName) {
         this(hostingType, hostingName, REGULAR_ZYGOTE);
+    }
+
+    public HostingRecord(String hostingType, ComponentName hostingName, boolean isTopApp) {
+        this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE,
+                null /* definingPackageName */, -1 /* mDefiningUid */, isTopApp /* isTopApp */);
     }
 
     public HostingRecord(String hostingType, String hostingName) {
@@ -71,16 +80,18 @@ public final class HostingRecord {
     }
 
     private HostingRecord(String hostingType, String hostingName, int hostingZygote) {
-        this(hostingType, hostingName, hostingZygote, null, -1);
+        this(hostingType, hostingName, hostingZygote, null /* definingPackageName */,
+                -1 /* mDefiningUid */, false /* isTopApp */);
     }
 
     private HostingRecord(String hostingType, String hostingName, int hostingZygote,
-            String definingPackageName, int definingUid) {
+            String definingPackageName, int definingUid, boolean isTopApp) {
         mHostingType = hostingType;
         mHostingName = hostingName;
         mHostingZygote = hostingZygote;
         mDefiningPackageName = definingPackageName;
         mDefiningUid = definingUid;
+        mIsTopApp = isTopApp;
     }
 
     public String getType() {
@@ -89,6 +100,10 @@ public final class HostingRecord {
 
     public String getName() {
         return mHostingName;
+    }
+
+    public boolean isTopApp() {
+        return mIsTopApp;
     }
 
     /**
@@ -130,7 +145,7 @@ public final class HostingRecord {
     public static HostingRecord byAppZygote(ComponentName hostingName, String definingPackageName,
             int definingUid) {
         return new HostingRecord("", hostingName.toShortString(), APP_ZYGOTE,
-                definingPackageName, definingUid);
+                definingPackageName, definingUid, false /* isTopApp */);
     }
 
     /**
