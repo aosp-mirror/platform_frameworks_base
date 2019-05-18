@@ -34,4 +34,7 @@ public class ZygoteConfig {
 
     /** The minimum number of processes to keep in the USAP pool */
     public static final String USAP_POOL_SIZE_MIN = "usap_pool_size_min";
+
+    /** The number of milliseconds to delay before refilling the USAP pool */
+    public static final String USAP_POOL_REFILL_DELAY_MS = "usap_pool_refill_delay_ms";
 }

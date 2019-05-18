@@ -169,7 +169,7 @@ class ChannelEditorDialogController @Inject constructor(
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @Suppress("unchecked_cast")
     private fun fetchNotificationChannelGroups(): List<NotificationChannelGroup> {
         return try {
             noMan.getNotificationChannelGroupsForPackage(packageName!!, appUid!!, false)

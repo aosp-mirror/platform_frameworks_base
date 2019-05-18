@@ -404,7 +404,7 @@
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Batterie en charge"</string>
-    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"chargement…"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"en charge…"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Pas en charge"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Appareil branché, mais impossible de le charger pour le moment"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Pleine"</string>

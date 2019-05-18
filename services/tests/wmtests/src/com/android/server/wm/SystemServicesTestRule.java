@@ -41,6 +41,7 @@ import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
@@ -175,6 +176,12 @@ public class SystemServicesTestRule implements TestRule {
         // Display creation is driven by the ActivityManagerService via
         // ActivityStackSupervisor. We emulate those steps here.
         mWindowManagerService.mRoot.createDisplayContent(display, mock(ActivityDisplay.class));
+        mWindowManagerService.displayReady();
+
+        final Configuration defaultDisplayConfig =
+                mWindowManagerService.computeNewConfiguration(DEFAULT_DISPLAY);
+        doReturn(defaultDisplayConfig).when(atms).getGlobalConfiguration();
+        doReturn(defaultDisplayConfig).when(atms).getGlobalConfigurationForPid(anyInt());
 
         mMockTracker.stopTracking();
     }

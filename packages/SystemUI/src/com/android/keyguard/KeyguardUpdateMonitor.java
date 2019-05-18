@@ -1994,7 +1994,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean becameAbsent = false;
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             Log.w(TAG, "invalid subId in handleSimStateChange()");
-            /* Only handle No SIM(ABSENT) due to handleServiceStateChange() handle other case */
+            /* Only handle No SIM(ABSENT) and Card Error(CARD_IO_ERROR) due to
+             * handleServiceStateChange() handle other case */
             if (state == State.ABSENT) {
                 updateTelephonyCapable(true);
                 // Even though the subscription is not valid anymore, we need to notify that the
@@ -2007,6 +2008,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         data.simState = State.ABSENT;
                     }
                 }
+            } else if (state == State.CARD_IO_ERROR) {
+                updateTelephonyCapable(true);
             } else {
                 return;
             }

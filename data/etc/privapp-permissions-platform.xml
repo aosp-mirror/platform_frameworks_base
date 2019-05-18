@@ -195,6 +195,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
+        <permission name="android.permission.WATCH_APPOPS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">

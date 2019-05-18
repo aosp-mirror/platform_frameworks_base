@@ -141,9 +141,9 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicaciones y usuarios eliminados"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"Actualizaciones del sistema"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión mediante USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portátil"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión mediante Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir conexión"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Hotspots y dispositivos portátiles"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Todas las apps de trabajo"</string>

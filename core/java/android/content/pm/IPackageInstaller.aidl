@@ -52,7 +52,7 @@ interface IPackageInstaller {
             in IntentSender statusReceiver, int userId);
 
     void installExistingPackage(String packageName, int installFlags, int installReason,
-            in IntentSender statusReceiver, int userId);
+            in IntentSender statusReceiver, int userId, in List<String> whiteListedPermissions);
 
     void setPermissionsResult(int sessionId, boolean accepted);
 }
