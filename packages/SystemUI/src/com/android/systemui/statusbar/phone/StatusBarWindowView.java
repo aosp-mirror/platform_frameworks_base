@@ -68,6 +68,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
@@ -274,15 +275,6 @@ public class StatusBarWindowView extends FrameLayout {
     public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
         if (mLockIcon != null) {
             mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock);
-        }
-    }
-
-    /**
-     * Called after finished unlocking and the status bar window is already collapsed.
-     */
-    public void onKeyguardFadedAway() {
-        if (mLockIcon != null) {
-            mLockIcon.onKeyguardFadedAway();
         }
     }
 
@@ -507,6 +499,15 @@ public class StatusBarWindowView extends FrameLayout {
         pw.print("  mExpandAnimationRunning="); pw.println(mExpandAnimationRunning);
         pw.print("  mTouchCancelled="); pw.println(mTouchCancelled);
         pw.print("  mTouchActive="); pw.println(mTouchActive);
+    }
+
+    /**
+     * Called whenever the scrims become opaque, transparent or semi-transparent.
+     */
+    public void onScrimVisibilityChanged(@ScrimVisibility int scrimsVisible) {
+        if (mLockIcon != null) {
+            mLockIcon.onScrimVisibilityChanged(scrimsVisible);
+        }
     }
 
     public class LayoutParams extends FrameLayout.LayoutParams {
