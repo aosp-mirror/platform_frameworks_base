@@ -250,6 +250,15 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     }
 
     /**
+     * Sets the list of ignored icon slots clearing the current list.
+     * @param slots names of the icons to ignore
+     */
+    public void setIgnoredSlots(List<String> slots) {
+        mIgnoredSlots.clear();
+        addIgnoredSlots(slots);
+    }
+
+    /**
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {

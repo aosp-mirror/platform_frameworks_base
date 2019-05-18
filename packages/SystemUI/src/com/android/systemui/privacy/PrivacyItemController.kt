@@ -23,9 +23,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.os.UserHandle
 import android.os.UserManager
+import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.Dependency.BG_HANDLER_NAME
 import com.android.systemui.Dependency.MAIN_HANDLER_NAME
 import com.android.systemui.R
@@ -39,6 +43,9 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
+fun isPermissionsHubEnabled() = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false)
+
 @Singleton
 class PrivacyItemController @Inject constructor(
         val context: Context,
@@ -47,7 +54,8 @@ class PrivacyItemController @Inject constructor(
         @Named(BG_HANDLER_NAME) private val bgHandler: Handler
 ) : Dumpable {
 
-    companion object {
+    @VisibleForTesting
+    internal companion object {
         val OPS = intArrayOf(AppOpsManager.OP_CAMERA,
                 AppOpsManager.OP_RECORD_AUDIO,
                 AppOpsManager.OP_COARSE_LOCATION,
@@ -57,6 +65,9 @@ class PrivacyItemController @Inject constructor(
                 Intent.ACTION_MANAGED_PROFILE_REMOVED)
         const val TAG = "PrivacyItemController"
         const val SYSTEM_UID = 1000
+        const val MSG_ADD_CALLBACK = 0
+        const val MSG_REMOVE_CALLBACK = 1
+        const val MSG_UPDATE_LISTENING_STATE = 2
     }
 
     @VisibleForTesting
@@ -70,6 +81,7 @@ class PrivacyItemController @Inject constructor(
     val systemApp =
             PrivacyApplication(context.getString(R.string.device_services), SYSTEM_UID, context)
     private val callbacks = mutableListOf<WeakReference<Callback>>()
+    private val messageHandler = H(WeakReference(this), uiHandler.looper)
 
     private val notifyChanges = Runnable {
         val list = privacyList
@@ -79,6 +91,20 @@ class PrivacyItemController @Inject constructor(
     private val updateListAndNotifyChanges = Runnable {
         updatePrivacyList()
         uiHandler.post(notifyChanges)
+    }
+
+    private var indicatorsAvailable = isPermissionsHubEnabled()
+    @VisibleForTesting
+    internal val devicePropertyChangedListener =
+            object : DeviceConfig.OnPropertyChangedListener {
+        override fun onPropertyChanged(namespace: String, name: String, value: String?) {
+            if (DeviceConfig.NAMESPACE_PRIVACY.equals(namespace) &&
+                    SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED.equals(name)) {
+                indicatorsAvailable = java.lang.Boolean.parseBoolean(value)
+                messageHandler.removeMessages(MSG_UPDATE_LISTENING_STATE)
+                messageHandler.sendEmptyMessage(MSG_UPDATE_LISTENING_STATE)
+            }
+        }
     }
 
     private val cb = object : AppOpsController.Callback {
@@ -103,6 +129,11 @@ class PrivacyItemController @Inject constructor(
             registerReceiver()
         }
 
+    init {
+        DeviceConfig.addOnPropertyChangedListener(
+                DeviceConfig.NAMESPACE_PRIVACY, context.mainExecutor, devicePropertyChangedListener)
+    }
+
     private fun unregisterReceiver() {
         context.unregisterReceiver(userSwitcherReceiver)
     }
@@ -123,8 +154,14 @@ class PrivacyItemController @Inject constructor(
         bgHandler.post(updateListAndNotifyChanges)
     }
 
-    @VisibleForTesting
-    internal fun setListening(listen: Boolean) {
+    /**
+     * Updates listening status based on whether there are callbacks and the indicators are enabled
+     *
+     * This is only called from private (add/remove)Callback and from the config listener, all in
+     * main thread.
+     */
+    private fun setListeningState() {
+        val listen = !callbacks.isEmpty() and indicatorsAvailable
         if (listening == listen) return
         listening = listen
         if (listening) {
@@ -134,32 +171,44 @@ class PrivacyItemController @Inject constructor(
         } else {
             appOpsController.removeCallback(OPS, cb)
             unregisterReceiver()
+            // Make sure that we remove all indicators and notify listeners if we are not
+            // listening anymore due to indicators being disabled
+            update(false)
         }
     }
 
     private fun addCallback(callback: WeakReference<Callback>) {
         callbacks.add(callback)
-        if (callbacks.isNotEmpty() && !listening) setListening(true)
+        if (callbacks.isNotEmpty() && !listening) {
+            messageHandler.removeMessages(MSG_UPDATE_LISTENING_STATE)
+            messageHandler.sendEmptyMessage(MSG_UPDATE_LISTENING_STATE)
+        }
         // Notify this callback if we didn't set to listening
-        else uiHandler.post(NotifyChangesToCallback(callback.get(), privacyList))
+        else if (listening) uiHandler.post(NotifyChangesToCallback(callback.get(), privacyList))
     }
 
     private fun removeCallback(callback: WeakReference<Callback>) {
         // Removes also if the callback is null
         callbacks.removeIf { it.get()?.equals(callback.get()) ?: true }
-        if (callbacks.isEmpty()) setListening(false)
+        if (callbacks.isEmpty()) {
+            messageHandler.removeMessages(MSG_UPDATE_LISTENING_STATE)
+            messageHandler.sendEmptyMessage(MSG_UPDATE_LISTENING_STATE)
+        }
     }
 
     fun addCallback(callback: Callback) {
-        addCallback(WeakReference(callback))
+        messageHandler.obtainMessage(MSG_ADD_CALLBACK, callback).sendToTarget()
     }
 
     fun removeCallback(callback: Callback) {
-        removeCallback(WeakReference(callback))
+        messageHandler.obtainMessage(MSG_REMOVE_CALLBACK, callback).sendToTarget()
     }
 
     private fun updatePrivacyList() {
-
+        if (!listening) {
+            privacyList = emptyList()
+            return
+        }
         val list = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
                 .mapNotNull { toPrivacyItem(it) }.distinct()
         privacyList = list
@@ -214,6 +263,31 @@ class PrivacyItemController @Inject constructor(
             it.get()?.let {
                 pw?.print("    ")
                 pw?.println(it.toString())
+            }
+        }
+    }
+
+    private class H(
+            private val outerClass: WeakReference<PrivacyItemController>,
+            looper: Looper
+    ) : Handler(looper) {
+        override fun handleMessage(msg: Message) {
+            super.handleMessage(msg)
+            when (msg.what) {
+                MSG_UPDATE_LISTENING_STATE -> outerClass.get()?.setListeningState()
+
+                MSG_ADD_CALLBACK -> {
+                    if (msg.obj !is PrivacyItemController.Callback) return
+                    outerClass.get()?.addCallback(
+                            WeakReference(msg.obj as PrivacyItemController.Callback))
+                }
+
+                MSG_REMOVE_CALLBACK -> {
+                    if (msg.obj !is PrivacyItemController.Callback) return
+                    outerClass.get()?.removeCallback(
+                            WeakReference(msg.obj as PrivacyItemController.Callback))
+                }
+                else -> {}
             }
         }
     }
