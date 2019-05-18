@@ -20,9 +20,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 
@@ -67,6 +67,9 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
 
         IntentFilter filter = new IntentFilter();
 
+        // Screen state
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+
         // State of GarageMode
         filter.addAction(ACTION_GARAGE_MODE_ON);
         filter.addAction(ACTION_GARAGE_MODE_OFF);
@@ -97,6 +100,9 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         } else if (action.equals(ACTION_UNFORCE_IDLE)) {
             logIfDebug("Unforcing idle...");
             setForceIdleState(false);
+        } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+            logIfDebug("Screen is on...");
+            handleScreenOn();
         } else if (action.equals(ACTION_GARAGE_MODE_ON)) {
             logIfDebug("GarageMode is on...");
             mGarageModeOn = true;
@@ -147,7 +153,21 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         }
     }
 
-    private void logIfDebug(String msg) {
+    private void handleScreenOn() {
+        if (mForced || mGarageModeOn) {
+            // Even though screen is on, the device remains idle
+            logIfDebug("Screen is on, but device cannot exit idle");
+        } else if (mIdle) {
+            // Exiting idle
+            logIfDebug("Device is exiting idle");
+            mIdle = false;
+        } else {
+            // Already in non-idle state. Nothing to do
+            logIfDebug("Device is already non-idle");
+        }
+    }
+
+    private static void logIfDebug(String msg) {
         if (DEBUG) {
             Slog.v(TAG, msg);
         }
