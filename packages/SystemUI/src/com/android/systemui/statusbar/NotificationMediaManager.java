@@ -150,8 +150,8 @@ public class NotificationMediaManager implements Dumpable {
             if (state != null) {
                 if (!isPlaybackActive(state.getState())) {
                     clearCurrentMediaNotification();
-                    dispatchUpdateMediaMetaData(true /* changed */, true /* allowAnimation */);
                 }
+                dispatchUpdateMediaMetaData(true /* changed */, true /* allowAnimation */);
             }
         }
 
@@ -242,7 +242,8 @@ public class NotificationMediaManager implements Dumpable {
 
     public void addCallback(MediaListener callback) {
         mMediaListeners.add(callback);
-        callback.onMetadataChanged(mMediaMetadata);
+        callback.onMetadataOrStateChanged(mMediaMetadata,
+                getMediaControllerPlaybackState(mMediaController));
     }
 
     public void removeCallback(MediaListener callback) {
@@ -357,9 +358,10 @@ public class NotificationMediaManager implements Dumpable {
         if (mPresenter != null) {
             mPresenter.updateMediaMetaData(changed, allowEnterAnimation);
         }
+        @PlaybackState.State int state = getMediaControllerPlaybackState(mMediaController);
         ArrayList<MediaListener> callbacks = new ArrayList<>(mMediaListeners);
         for (int i = 0; i < callbacks.size(); i++) {
-            callbacks.get(i).onMetadataChanged(mMediaMetadata);
+            callbacks.get(i).onMetadataOrStateChanged(mMediaMetadata, state);
         }
     }
 
@@ -698,6 +700,12 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     public interface MediaListener {
-        void onMetadataChanged(MediaMetadata metadata);
+        /**
+         * Called whenever there's new metadata or playback state.
+         * @param metadata Current metadata.
+         * @param state Current playback state
+         * @see PlaybackState.State
+         */
+        void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state);
     }
 }

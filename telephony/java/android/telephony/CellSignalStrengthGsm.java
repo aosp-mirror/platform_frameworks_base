@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -46,7 +47,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     private int mRssi; // in dBm [-113, -51] or UNAVAILABLE
     @UnsupportedAppUsage
     private int mBitErrorRate; // bit error rate (0-7, 99) TS 27.007 8.5 or UNAVAILABLE
-    @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mTimingAdvance; // range from 0-219 or CellInfo.UNAVAILABLE if unknown
     private int mLevel;
 

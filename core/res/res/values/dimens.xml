@@ -73,6 +73,11 @@
     <dimen name="navigation_bar_width_car_mode">96dp</dimen>
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">22dip</dimen>
+    <!-- Desired size of system icons in status bar. -->
+    <dimen name="status_bar_system_icon_size">15dp</dimen>
+    <!-- Intrinsic size of most system icons in status bar. This is the default value that
+         is used if a Drawable reports an intrinsic size of 0. -->
+    <dimen name="status_bar_system_icon_intrinsic_size">17dp</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
@@ -667,6 +672,16 @@
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_width">90%</dimen>
     <dimen name="autofill_dataset_picker_max_height">90%</dimen>
+
+    <!-- Autofill save dialog padding -->
+    <dimen name="autofill_save_outer_top_margin">32dp</dimen>
+    <dimen name="autofill_save_outer_top_padding">16dp</dimen>
+    <dimen name="autofill_elevation">32dp</dimen>
+    <dimen name="autofill_save_inner_padding">16dp</dimen>
+    <dimen name="autofill_save_icon_size">24dp</dimen>
+    <dimen name="autofill_save_title_start_padding">8dp</dimen>
+    <dimen name="autofill_save_scroll_view_top_margin">4dp</dimen>
+    <dimen name="autofill_save_button_bar_padding">16dp</dimen>
 
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>

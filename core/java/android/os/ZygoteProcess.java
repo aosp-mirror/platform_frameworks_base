@@ -640,14 +640,9 @@ public class ZygoteProcess {
                 ZygoteConfig.USAP_POOL_ENABLED, USAP_POOL_ENABLED_DEFAULT);
 
         if (!propertyString.isEmpty()) {
-            if (SystemProperties.get("dalvik.vm.boot-image", "").endsWith("apex.art")) {
-                // TODO(b/119800099): Tweak usap configuration in jitzygote mode.
-                mUsapPoolEnabled = false;
-            } else {
-                mUsapPoolEnabled = Zygote.getConfigurationPropertyBoolean(
-                    ZygoteConfig.USAP_POOL_ENABLED,
-                    Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
-            }
+            mUsapPoolEnabled = Zygote.getConfigurationPropertyBoolean(
+                  ZygoteConfig.USAP_POOL_ENABLED,
+                  Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
         }
 
         boolean valueChanged = origVal != mUsapPoolEnabled;
@@ -664,6 +659,16 @@ public class ZygoteProcess {
 
     private boolean fetchUsapPoolEnabledPropWithMinInterval() {
         final long currentTimestamp = SystemClock.elapsedRealtime();
+
+        if (SystemProperties.get("dalvik.vm.boot-image", "").endsWith("apex.art")) {
+            // TODO(b/119800099): In jitzygote mode, we want to start using USAP processes
+            // only once the boot classpath has been compiled. There is currently no callback
+            // from the runtime to notify the zygote about end of compilation, so for now just
+            // arbitrarily start USAP processes 15 seconds after boot.
+            if (currentTimestamp <= 15000) {
+                return false;
+            }
+        }
 
         if (mIsFirstPropCheck
                 || (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL)) {

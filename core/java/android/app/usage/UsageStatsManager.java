@@ -281,20 +281,13 @@ public final class UsageStatsManager {
 
     /**
      * Gets application usage stats for the given time range, aggregated by the specified interval.
-     * <p>The returned list will contain a {@link UsageStats} object for each package that
-     * has data for an interval that is a subset of the time range given. To illustrate:</p>
-     * <pre>
-     * intervalType = INTERVAL_YEARLY
-     * beginTime = 2013
-     * endTime = 2015 (exclusive)
      *
-     * Results:
-     * 2013 - com.example.alpha
-     * 2013 - com.example.beta
-     * 2014 - com.example.alpha
-     * 2014 - com.example.beta
-     * 2014 - com.example.charlie
-     * </pre>
+     * <p>
+     * The returned list will contain one or more {@link UsageStats} objects for each package, with
+     * usage data that covers at least the given time range.
+     * Note: The begin and end times of the time range may be expanded to the nearest whole interval
+     * period.
+     * </p>
      *
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
      *

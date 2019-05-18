@@ -229,8 +229,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
         if (action == MotionEvent.ACTION_UP) {
             if (-getTranslationY() > TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    MIN_DRAG_SIZE, getResources().getDisplayMetrics())) {
+                    MIN_DRAG_SIZE, getResources().getDisplayMetrics())
+                    && !mUpdateMonitor.isFaceDetectionRunning()) {
                 mUpdateMonitor.requestFaceAuth();
+                showMessage(null, null);
             }
         }
         return true;
