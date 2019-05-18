@@ -7293,12 +7293,10 @@ message MetricsEvent {
     // ACTION: Settings > Initialize Search bar > Verify Slice > Other exception
     ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
 
-    // ---- Skipping ahead to avoid conflicts between master and release branches.
-
     // OPEN: Settings > System > Gestures > Global Actions Panel
     // CATEGORY: SETTINGS
     // OS: Q
-    GLOBAL_ACTIONS_PANEL_SETTINGS = 1800;
+    GLOBAL_ACTIONS_PANEL_SETTINGS = 1728;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
