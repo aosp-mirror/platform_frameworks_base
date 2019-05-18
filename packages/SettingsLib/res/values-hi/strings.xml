@@ -434,7 +434,7 @@
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"टाइप करने की सक्रीय पद्धतियां"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"सिस्टम की भाषाओं का उपयोग करें"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> के लिए सेटिंग खोलने में विफल रहा"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"यह इनपुट विधि, पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा सहित   लिखे जाने वाले सभी लेख को एकत्र कर सकती है. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आती है. इस इनपुट विधि का उपयोग करें?"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"यह इनपुट विधि, आपके पासवर्ड और क्रेडिट कार्ड नंबर जैसे निजी डेटा के साथ-साथ उस सभी डेटा को इकट्ठा कर सकती है जिसे आप लिखते हैं. यह <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ऐप्लिकेशन से आती है. इस इनपुट विधि का इस्तेमाल करें?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"नोट: पुनः बूट करने के बाद, यह ऐप्लिकेशन तब तक शुरू नहीं हो सकता है जब तक कि आप अपना फ़ोन अनलॉक ना कर लें"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS रजिस्ट्रेशन की स्थिति"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"रजिस्टर है"</string>
