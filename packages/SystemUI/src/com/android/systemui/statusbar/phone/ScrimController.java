@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -52,6 +53,8 @@ import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.function.Consumer;
 
 /**
@@ -84,6 +87,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * When at least 1 scrim is fully opaque (alpha set to 1.)
      */
     public static final int VISIBILITY_FULLY_OPAQUE = 2;
+
+    @IntDef(prefix = { "VISIBILITY_" }, value = {
+            VISIBILITY_FULLY_TRANSPARENT,
+            VISIBILITY_SEMI_TRANSPARENT,
+            VISIBILITY_FULLY_OPAQUE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScrimVisibility {}
+
     /**
      * Default alpha value for most scrims.
      */
