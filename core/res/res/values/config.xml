@@ -4162,4 +4162,8 @@
          one bar higher than they actually are -->
     <bool name="config_inflateSignalStrength">false</bool>
 
+    <!-- The package name for the vendor implementation of ACTION_FACTORY_RESET. For some vendors,
+    the default implementation of ACTION_FACTORY_RESET does not work, so it is needed to re-route
+    this intent to this package. This is being used in MasterClearReceiver.java. -->
+    <string name="config_factoryResetPackage" translatable="false"></string>
 </resources>

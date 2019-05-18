@@ -3812,4 +3812,5 @@
 
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
   <java-symbol type="bool" name="config_inflateSignalStrength" />
+  <java-symbol type="string" name="config_factoryResetPackage" />
 </resources>
