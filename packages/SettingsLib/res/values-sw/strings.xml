@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Simu"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Uhamishaji wa faili"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Kifaa cha kuingiza"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ufikivu wa mtandao"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ufikiaji wa mtandao"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kushiriki anwani"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Tumia kwa kushiriki anwani"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Kushiriki muunganisho wa tovuti"</string>
@@ -137,7 +137,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Nguvu kamili ya mtandao wa Wifi."</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Mtandao unaotumiwa na mtu yeyote"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Mtandao salama"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"OS ya Android"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"Mfumo wa Uendeshaji wa Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Programu zilizoondolewa"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Watumiaji na programu ziilizoondolewa"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"Masasisho ya mfumo"</string>
