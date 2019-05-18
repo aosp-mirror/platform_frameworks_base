@@ -126,7 +126,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"สัญญาณ Wi-Fi เต็ม"</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"เครือข่ายแบบเปิด"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"เครือข่ายที่ปลอดภัย"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการของ Android"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"แอปพลิเคชันที่นำออก"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"แอปพลิเคชันและผู้ใช้ที่นำออก"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"ปล่อยสัญญาณผ่าน USB"</string>
@@ -202,9 +202,9 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"อนุญาตการปลดล็อก OEM ไหม"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: ฟีเจอร์การปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองตำแหน่ง"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองตำแหน่ง"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองตำแหน่ง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองสถานที่"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองสถานที่"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองสถานที่: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"เครือข่าย"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
@@ -215,7 +215,7 @@
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"อัตราตัวอย่างเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: อัตราตัวอย่าง"</string>
@@ -256,8 +256,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ยกเลิกการเข้าถึงเพื่อแก้ปัญหาผ่าน USB จากคอมพิวเตอร์ทุกเครื่องที่คุณได้ให้สิทธิ์ก่อนหน้านี้ไหม"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"อนุญาตการตั้งค่าสำหรับการพัฒนาหรือไม่"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"การตั้งค่านี้มีไว้เพื่อการพัฒนาเท่านั้น จึงอาจทำให้อุปกรณ์และแอปพลิเคชันที่มีอยู่เสียหายหรือทำงานผิดพลาดได้"</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปผ่าน USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ระบบจะแสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ (มีเฉพาะที่อยู่ MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้ฟีเจอร์การควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
@@ -265,7 +265,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"ตั้งค่าการตรวจสอบ HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"การแก้ไขข้อบกพร่อง"</string>
-    <string name="debug_app" msgid="8349591734751384446">"เลือกแอปพลิเคชันที่จะแก้ไขข้อบกพร่อง"</string>
+    <string name="debug_app" msgid="8349591734751384446">"เลือกแอปที่จะแก้ไขข้อบกพร่อง"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"ไม่มีชุดแอปพลิเคชันแก้ไขข้อบกพร่อง"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"แอปพลิเคชันแก้ไขข้อบกพร่อง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"เลือกแอปพลิเคชัน"</string>
@@ -280,11 +280,11 @@
     <string name="strict_mode" msgid="1938795874357830695">"เปิดใช้งานโหมดเข้มงวด"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"กะพริบหน้าจอเมื่อแอปทำงานในชุดข้อความหลักนาน"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ตำแหน่งของตัวชี้"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะ ในปัจจุบัน"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะในปัจจุบัน"</string>
     <string name="show_touches" msgid="2642976305235070316">"แสดงการแตะ"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"แสดงความคิดเห็นด้วยภาพสำหรับการแตะ"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"แสดงผลตอบสนองแบบภาพเมื่อแตะ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"แสดงการอัปเดตพื้นผิว"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"แฟลชพื้นผิวหน้าต่างทั้งหมดเมื่อมีการอัปเดต"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"กะพริบหน้าต่างทั้งหมดเมื่อมีการอัปเดต"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"แสดงการอัปเดตมุมมอง GPU"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"แฟลชมุมมองภายในหน้าต่างเมื่อวาดด้วย GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"แสดงอัปเดตเลเยอร์ฮาร์ดแวร์"</string>
@@ -321,13 +321,13 @@
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ทำให้สามารถเขียนแอปใดๆ ก็ตามไปยังพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"เขียนแอปในพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าไฟล์ Manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"บังคับให้กิจกรรมปรับขนาดได้"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ทำให้กิจกรรมทั้งหมดปรับขนาดได้สำหรับหน้าต่างหลายบาน โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"เปิดใช้หน้าต่างรูปแบบอิสระ"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"เปิดการสนับสนุนหน้าต่างรูปแบบอิสระแบบทดลอง"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"รหัสผ่านการสำรองข้อมูลในเดสก์ท็อป"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"การสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อป ไม่ได้รับการป้องกันในขณะนี้"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"การสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อปไม่ได้รับการป้องกันในขณะนี้"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"แตะเพื่อเปลี่ยนแปลงหรือลบรหัสผ่านสำหรับการสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อป"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ตั้งรหัสผ่านสำหรับการสำรองข้อมูลใหม่แล้ว"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"รหัสผ่านใหม่และการพิมพ์ยืนยันไม่ตรงกัน"</string>

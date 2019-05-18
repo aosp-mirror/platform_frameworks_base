@@ -227,11 +227,11 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Задействане на аудиокодек за Bluetooth с технологията LDAC\nИзбор на кодек: Качество на възпроизвеждане"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Поточно предаване: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Частен DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Изберете режим на частния DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Избор на режим на частния DNS"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Изкл."</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматично"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Име на хоста на доставчика на частния DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Въведете името на хоста на DNS доставчика"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Въведете име на хоста на DNS доставчика"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не можа да се установи връзка"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
@@ -298,15 +298,15 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Авт. маршрут. за периферните у-ва за аудио чрез USB: Деакт."</string>
     <string name="debug_layout" msgid="5981361776594526155">"Граници на оформлението"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Показв. на границите на изрязване, полетата и др."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Принуд. оформл. отдясно наляво"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Принуд. оформл. на екрана отдясно наляво за вс. локали"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Принуд. оформл. от дясно наляво"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Принуд. оформл. на екрана от дясно наляво за вс. локали"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Принудително изобразяване"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Принуд. използв. на GPU за двуизмерно начертаване"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Задаване на 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Активиране на 4x MSAA в прилож. с OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отстр. на грешки при неправоъг. изрязване"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Профилиране на GPU"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Слоеве за отстр. на грешки в ГП: Актив."</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Активиране на слоевете за отстр. на грешки в ГП"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Разреш. на зарежд. на слоевете за отстр. на грешки в ГП за съотв. прилож."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Скала на аним.: Прозорец"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Скала на преходната анимация"</string>
@@ -346,7 +346,7 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивно. Докоснете, за да превключите."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активно. Докоснете, за да превключите."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Състояние на готовност на приложението: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Изпълнявани услуги:"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Изпълнявани услуги"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Преглед и контрол върху изпълняващите се понастоящем услуги"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Внедряване на WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Задаване на внедряването на WebView"</string>

@@ -72,7 +72,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonické hovory"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos súborov"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Vstupné zariadenie"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prístup na Internet"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Prístup na internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Zdieľanie kontaktov"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Použiť na zdieľanie kontaktov"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Zdieľanie pripojenia na Internet"</string>
@@ -167,7 +167,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Preferovaný nástroj"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"Všeobecné"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Obnoviť výšku hlasu"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Obnovte predvolenú výšku hlasu vyslovujúceho text."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Resetuje výšku hlasu čítajúceho text na predvolenú hodnotu."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Veľmi pomaly"</item>
     <item msgid="4795095314303559268">"Pomaly"</item>
@@ -236,7 +236,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Randomizovať adresu MAC pri pripájaní k sieťam Wi-Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"S meraním dát"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávacia pamäť nástroja denníkov"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veľkosť vyrovnávacej pamäte nástroja denníkov"</string>
@@ -259,7 +259,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Overovať aplikácie z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrolovať škodlivosť aplikácií nainštalovaných pomocou nástroja ADB alebo ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Zariadenia Bluetooth sa budú zobrazovať bez názvov (iba adresy MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Umožňuje zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth v prípade problémov s hlasitosťou na vzdialených zariadeniach, ako je napríklad neprijateľne vysoká hlasitosť alebo absencia ovládacích prvkov."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Umožňuje zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth v prípade problémov s hlasitosťou vo vzdialených zariadeniach, ako je napríklad neprijateľne vysoká hlasitosť alebo absencia ovládacích prvkov."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Miestny terminál"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Povoliť terminálovú apl. na miestny prístup k prostrediu shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrola HDCP"</string>
@@ -298,7 +298,7 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Vypnúť automatické smerovanie do audio periférií USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Zobrazovať ohraničenia"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Rozloženia sprava doľava"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Vykresľovať grafickým procesorom"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Vynútiť použitie grafického procesora na dvojrozmerné vykresľovanie"</string>

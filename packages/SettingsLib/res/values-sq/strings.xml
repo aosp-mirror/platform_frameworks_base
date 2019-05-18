@@ -195,7 +195,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Shkurtorja e raportit të defektit në kod"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Shfaq një buton në menynë e fikjes për marrjen e raportit të defekteve"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Qëndro zgjuar"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekrani nuk do të kalojë asnjëherë në gjendje gjumi gjatë ngarkimit"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekrani nuk do të kalojë asnjëherë në gjendje gjumi gjatë karikimit"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivizo regjistrin testues të paketave HCI të Bluetooth-it"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Kap të gjitha paketat HCI të Bluetooth-it në një skedar (ndryshoje Bluetooth-in pas ndryshimit të këtij cilësimi)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Shkyçja e OEM-së"</string>
@@ -391,9 +391,9 @@
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura deri në ngarkimin e plotë"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"I panjohur"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Po ngarkohet"</string>
-    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"po ngarkohet"</string>
-    <string name="battery_info_status_discharging" msgid="310932812698268588">"Nuk po ngarkohet"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Po karikohet"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"po karikohet"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"Nuk po karikohet"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Në prizë, por nuk mund të ngarkohet për momentin"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolluar nga administratori"</string>

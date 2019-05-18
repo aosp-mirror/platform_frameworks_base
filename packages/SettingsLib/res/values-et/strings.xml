@@ -77,7 +77,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Kasutamine kontaktide jagamiseks"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Interneti-ühenduse jagamine"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Tekstsõnumid"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-kaardi juurdepääs"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-i juurdepääs"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-heli: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-heli"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Kuuldeaparaat"</string>
@@ -205,7 +205,7 @@
     <string name="mock_location_app" msgid="7966220972812881854">"Valige asukohateavet imiteeriv rakendus"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Asukohateavet imiteeriv rakendus on määramata"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Asukohateavet imiteeriv rakendus: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="debug_networking_category" msgid="7044075693643009662">"Võrgustik"</string>
+    <string name="debug_networking_category" msgid="7044075693643009662">"Võrgundus"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Luba WiFi sõnaline logimine"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Juhusliku MAC-aadressi määramine ühendamisel"</string>

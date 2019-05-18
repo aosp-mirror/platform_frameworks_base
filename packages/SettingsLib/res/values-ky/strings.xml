@@ -130,10 +130,10 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Алынып салынган колдонмолор"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Өчүрүлгөн колдонмолор жана колдонуучулар"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB модем"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Ташыма кошулуу чекити"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Wi-Fi байланыш түйүнү"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Жалгаштыруу"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Жалгаштыруу жана ташыма чекит"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Модем режими"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Жумуш профилинин колднмлр"</string>
     <string name="user_guest" msgid="8475274842845401871">"Конок"</string>
     <string name="unknown" msgid="1592123443519355854">"Белгисиз"</string>
@@ -251,10 +251,10 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Аттрибуттарды текшерүүнү иштетүү"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi-Fi иштеп турганда да дайындар мобилдик тармак аркылуу өткөрүлө берет (бир тармактан экинчисине тезирээк которулуу үчүн)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Мүмкүнчүлүккө жараша, модем режиминде аппарат тезирээк иштей баштайт"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"USB аркылуу жөндөөгө уруксат берилсинби?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"USB аркылуу жөндөөгө уруксат бересизби?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
-    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Өндүрүүчүнүн мүмкүнчүлүктөрүнө уруксат берилсинби?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Жөндөөлөрдү өзгөртүү"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Бул орнотуулар өндүрүүчүлөр үчүн гана берилген. Булар түзмөгүңүздүн колдонмолорун бузулушуна же туура эмес иштешине алып келиши мүмкүн."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Орнотулуучу колдонмону текшерүү"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT аркылуу орнотулган колдонмолордун коопсуздугу текшерилет."</string>
@@ -443,7 +443,7 @@
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Күйгүзүү"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\"Тынчымды алба\" режимин күйгүзүү"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Эч качан"</string>
-    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Шашылыш эскертмелер гана"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Шашылыш билдирүүлөр гана"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Бул нерсе өчүрүлмөйүнчө <xliff:g id="WHEN">%1$s</xliff:g> боло турган кийинки ойготкучту укпайсыз"</string>
     <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g> боло турган кийинки ойготкучту укпайсыз"</string>

@@ -72,7 +72,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Simu"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Uhamishaji wa faili"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Kifaa cha kuingiza"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ufikivu wa mtandao"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Ufikiaji wa mtandao"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Kushiriki anwani"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Tumia kwa kushiriki anwani"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Kushiriki muunganisho wa tovuti"</string>
@@ -126,7 +126,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Nguvu kamili ya mtandao wa Wifi."</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Mtandao unaotumiwa na mtu yeyote"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Mtandao salama"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"OS ya Android"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"Mfumo wa Uendeshaji wa Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Programu zilizoondolewa"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Watumiaji na programu ziilizoondolewa"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Shiriki intaneti kwa USB"</string>
@@ -135,7 +135,7 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Inazuia"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Kushiriki na kusambaza intaneti"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Programu zote za kazini"</string>
-    <string name="user_guest" msgid="8475274842845401871">"Aliyealikwa"</string>
+    <string name="user_guest" msgid="8475274842845401871">"Mgeni"</string>
     <string name="unknown" msgid="1592123443519355854">"Haijulikani"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Baadhi ya chaguomsingi zimewekwa"</string>
@@ -299,7 +299,7 @@
     <string name="debug_layout" msgid="5981361776594526155">"Onyesha mipaka ya mpangilio"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Onyesha mipaka ya picha, kingo, nk."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Lazimisha uelekezaji wa muundo wa RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Lazimisha uelekezaji wa muundo wa skrini kwa RTL kwa lugha zote"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Lazimisha mkao wa skrini uwe wa kulia kwenda kushoto kwa lugha zote"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Lazimisha kutekeleza kwa GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Lazimisha matumizi ya GPU kwa uchoraji wa 2d"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Lazimisha 4x MSAA"</string>

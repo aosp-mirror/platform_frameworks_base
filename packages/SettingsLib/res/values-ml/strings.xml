@@ -72,7 +72,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ഫോണ്‍‌ കോളുകൾ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ഫയൽ കൈമാറൽ"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ഇൻപുട്ട് ഉപകരണം"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ഇന്റർനെറ്റ് ആക്‌സസ്സ്"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ഇന്‍റർനെറ്റ് ആക്‌സസ്"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"കോൺടാക്‌റ്റ് പങ്കിടൽ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"കോൺടാക്‌റ്റ് പങ്കിടലിനായി ഉപയോഗിക്കുക"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ഇന്റർനെറ്റ് കണക്ഷൻ പങ്കിടൽ"</string>
@@ -142,7 +142,7 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"സ്ഥിരമായൊന്നും സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ക്രമീകരണങ്ങൾ"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"ടെക്‌സ്റ്റ്-ടു-സ്‌പീച്ച് ഔട്ട്‌പുട്ട്"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"വായന നിരക്ക്"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"വായനാ നിരക്ക്"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ടെക്സ്റ്റ് ചെയ്യൽ പറയുമ്പോഴുടെക്കുന്ന വേഗത"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"പിച്ച്"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"സിന്തസൈസ് ചെയ്ത സംസാരത്തിന്റെ സ്വരഭേദത്തെ ബാധിക്കുന്നു"</string>
@@ -190,21 +190,21 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"ഈ ഉപയോക്താവിനായി ടെതറിംഗ് ക്രമീകരണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"ആക്‌സസ്സ് പോയിന്റ് നെയിം ക്രമീകരണങ്ങൾ ഈ ഉപയോക്താവിനായി ലഭ്യമല്ല"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB ഡീബഗ്ഗിംഗ്"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോൾ ഡീബഗ് മോഡ്"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"USB കണ‌ക്റ്റുചെയ്‌തിരിക്കുമ്പോഴുള്ള ഡീബഗ് മോഡ്"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ഡീബഗ്ഗിംഗ് അംഗീകാരം പിൻവലിക്കുക"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"ബഗ് റിപ്പോർട്ട് കുറുക്കുവഴി"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നതിന് പവർ മെനുവിൽ ഒരു ബട്ടൺ കാണിക്കുക"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"സജീവമായി തുടരുക"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ്ജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും ഉറങ്ങില്ല"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ് ചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും സ്ലീപ്പ് മോഡിലാകില്ല"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് സജീവമാക്കൂ"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"എല്ലാ Bluetooth HCI പാക്കറ്റുകളും ഒരു ഫയലിൽ ക്യാപ്‌ചർ ചെയ്യുക (ഈ ക്രമീകരണം മാറ്റിയ ശേഷം Bluetooth മാറ്റുക)"</string>
-    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM അൺലോക്കുചെയ്യൽ"</string>
+    <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM അൺലോക്ക് ചെയ്യൽ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"അൺലോക്കാകാൻ ബൂട്ട്‌ലോഡറിനെ അനുവദിക്കുക"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM അൺലോക്കുചെയ്യൽ അനുവദിക്കണോ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"മുന്നറിയിപ്പ്: ഈ ക്രമീകരണം ഓണായിരിക്കുമ്പോൾ, ഉപകരണ സുരക്ഷാ ഫീച്ചറുകൾ ഈ ഉപകരണത്തിൽ പ്രവർത്തിക്കില്ല."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"മോക്ക്‌ലൊക്കേഷൻ ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"മോക്ക് ലൊക്കേഷൻ ആപ്പ് സജ്ജമാക്കിയിട്ടില്ല"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"വ്യാജ ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"മോക്ക് ലൊക്കേഷൻ ആപ്പ്: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
@@ -229,7 +229,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"സ്വകാര്യ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"സ്വകാര്യ DNS മോഡ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"ഓഫ്"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"സ്വമേധയാ"</string>
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"സ്വയമേവ"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം നൽകുക"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"കണക്റ്റ് ചെയ്യാനായില്ല"</string>
@@ -256,8 +256,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"നിങ്ങൾ മുമ്പ് അംഗീകരിച്ച എല്ലാ കമ്പ്യൂട്ടറുകളിൽ നിന്നും USB ഡീബഗ്ഗുചെയ്യുന്നതിനുള്ള ആക്‌സസ്സ് പിൻവലിക്കണോ?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"വികസന ക്രമീകരണങ്ങൾ അനുവദിക്കണോ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ഈ ക്രമീകരണങ്ങൾ വികസന ഉപയോഗത്തിന് മാത്രമായുള്ളതാണ്. അവ നിങ്ങളുടെ ഉപകരണവും അതിലെ അപ്ലിക്കേഷനുകളും തകരാറിലാക്കുന്നതിനോ തെറ്റായി പ്രവർത്തിക്കുന്നതിനോ ഇടയാക്കാം."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB വഴി ആപ്സ് പരിശോധിച്ചുറപ്പിക്കൂ"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ADB/ADT വഴി ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ പരിശോധിക്കുക."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB വഴി ആപ്പ് പരിശോധിച്ചുറപ്പിക്കൂ"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT വഴി ഇൻസ്റ്റാൾ ചെയ്‌ത കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ആപ്പുകൾ പരിശോധിക്കുക."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ (MAC വിലാസങ്ങൾ മാത്രം) പ്രദർശിപ്പിക്കും"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"അസ്വീകാര്യമായ തരത്തിൽ ഉയർന്ന വോളിയമോ ശബ്ദ നിയന്ത്രണത്തിന്റെ അഭാവമോ പോലെ, വിദൂര ഉപകരണങ്ങളുമായി ബന്ധപ്പെട്ട വോളിയം പ്രശ്നങ്ങൾ ഉണ്ടാകുന്ന സാഹചര്യത്തിൽ, Bluetooth അബ്‌സൊല്യൂട്ട് വോളിയം ഫീച്ചർ പ്രവർത്തനരഹിതമാക്കുന്നു."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"പ്രാദേശിക ടെർമിനൽ"</string>
@@ -265,7 +265,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP പരിശോധന"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP ചെക്കിംഗ്‌രീതി സജ്ജമാക്കുക"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"ഡീബഗ് ചെയ്യുന്നു"</string>
-    <string name="debug_app" msgid="8349591734751384446">"ഡീബഗ് അപ്ലിക്കേഷൻ തിരഞ്ഞെടുക്കുക"</string>
+    <string name="debug_app" msgid="8349591734751384446">"ഡീബഗ് ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"ഡീബഗ് അപ്ലിക്കേഷനുകളൊന്നും സജ്ജമാക്കിയിട്ടില്ല"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"ഡീബഗ്ഗുചെയ്യൽ അപ്ലിക്കേഷൻ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"ആപ്പ് തിരഞ്ഞെടുക്കൂ"</string>
@@ -284,18 +284,18 @@
     <string name="show_touches" msgid="2642976305235070316">"ടാപ്പുകൾ കാണിക്കുക"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"ടാപ്പുകൾക്ക് ദൃശ്യ ഫീഡ്ബാക്ക് കാണിക്കുക"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"സർഫേസ് അപ്‌ഡേറ്റ് കാണിക്കൂ"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"മുഴുവൻ വിൻഡോ സർഫേസുകളും അപ്‌ഡേറ്റുചെയ്‌തുകഴിയുമ്പോൾ അവ ഫ്ലാഷുചെയ്യുക"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"അപ്‍ഡേറ്റ് പൂർത്തിയാകുമ്പോൾ മുഴുവൻ വിൻഡോ സർഫേസുകളും ഫ്ലാഷ് ചെയ്യുക"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU കാഴ്‌ചയുടെ അപ്‌ഡേറ്റുകൾ കാണിക്കൂ"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU ഉപയോഗിച്ച് വലിക്കുമ്പോൾ വിൻഡോകൾക്കുള്ളിൽ കാഴ്‌ചകൾ ഫ്ലാഷുചെയ്യുക"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ഹാർഡ്‌വെയർ ലേയർ അപ്‌ഡേറ്റ് കാണിക്കൂ"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ഹാർഡ്‌വെയർ ലേയറുകളുടെ അപ്‌ഡേറ്റുകൾ പൂർത്തിയാകുമ്പോൾ അവ പച്ച നിറത്തിൽ പ്രകാശിപ്പിക്കുക"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ഓവർഡ്രോ ഡീബഗ്ഗുചെയ്യുക"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ഓവർഡ്രോ ഡീബഗ്ഗ് ചെയ്യുക"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW ഓവർലേ നിഷ്ക്രിയമാക്കൂ"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"സ്‌ക്രീൻ കമ്പോസിറ്റുചെയ്യലിനായി എല്ലായ്‌പ്പോഴും GPU ഉപയോഗിക്കുക"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"സ്‌ക്രീൻ കമ്പോസിറ്റ് ചെയ്യലിനായി GPU ഉപയോഗിക്കൂ"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"വർണ്ണ സ്‌പെയ്‌സ് പ്രവർത്തിപ്പിക്കുക"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ട്രെയ്‌സ് സജീവമാക്കൂ"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ഓഡിയോ റൂട്ടിംഗ് പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ഓഡിയോ പെരിഫറലുകളിലേക്കുള്ള യാന്ത്രിക റൂട്ടിംഗ് പ്രവർത്തനരഹിതമാക്കുക"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ഓഡിയോ പെരിഫറലിലേക്ക് സ്വയമേവയുള്ള റൂട്ടിംഗ് പ്രവർത്തനരഹിതമാക്കൂ"</string>
     <string name="debug_layout" msgid="5981361776594526155">"ലേഔട്ട് ബൗണ്ട് കാണിക്കൂ"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"ക്ലിപ്പ് ബൗണ്ടുകൾ, മാർജിനുകൾ തുടങ്ങിയവ ദൃശ്യമാക്കുക"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ലേഔട്ട് ഡയറക്ഷൻ നിർബന്ധമാക്കുക"</string>
@@ -303,7 +303,7 @@
     <string name="force_hw_ui" msgid="6426383462520888732">"GPU റെൻഡറിംഗ് ഫോഴ്സ്ചെയ്യുക"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"2d ഡ്രോയിംഗിനായുള്ള നി‍‍ർബന്ധിത GPU ഉപയോഗം"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA നിർബന്ധമാക്കുക"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 അപ്ലിക്കേഷനുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കുക"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 ആപ്പുകളിൽ 4x MSAA പ്രവർത്തനക്ഷമമാക്കൂ"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"ചതുരാകൃതിയിലല്ലാത്ത ക്ലിപ്പ്‌പ്രവർത്തനം ഡീബഗുചെയ്യൂ"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"പ്രൊഫൈൽ GPU റെൻഡർചെയ്യൽ"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ഡീബഗ് ലെയറുകൾ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
@@ -312,10 +312,10 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"സംക്രമണ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"രണ്ടാം ഡിസ്‌പ്ലേകൾ പ്രവർത്തിപ്പിക്കുക"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"അപ്ലിക്കേഷനുകൾ"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"ആപ്പുകൾ"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"പ്രവർത്തനങ്ങൾ സൂക്ഷിക്കരുത്"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ഉപയോക്താവ് ഉപേക്ഷിക്കുന്നതിനനുസരിച്ച് എല്ലാ പ്രവർത്തനങ്ങളും നശിപ്പിക്കുക"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"പശ്ചാത്തല പ്രോസ‌സ്സ് പരിധി"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"പശ്ചാത്തല പ്രോസ‌സ് പരിധി"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"പശ്ചാത്തല ANR-കൾ കാണിക്കുക"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"പ‌ശ്ചാത്തല ആപ്പുകൾക്കായി \'ആപ്പ് പ്രതികരിക്കുന്നില്ല\' ഡയലോഗ് പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ചാനൽ മുന്നറിയിപ്പ് കാണിക്കൂ"</string>
@@ -391,7 +391,7 @@
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"മുഴുവൻ ചാർജാകാൻ <xliff:g id="TIME">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - ഫുൾ ചാർജാകാൻ <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"അജ്ഞാതം"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"ചാർജ്ജുചെയ്യുന്നു"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"പ്ലഗ് ഇൻ ചെയ്‌തു, ഇപ്പോൾ ചാർജ് ചെയ്യാനാവില്ല"</string>
@@ -402,7 +402,7 @@
     <string name="disabled" msgid="9206776641295849915">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"അനുവദനീയം"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"അനുവദിച്ചിട്ടില്ല"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"അറിയാത്ത ആപ്‌സ് ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"പരിചയമില്ലാത്ത ആപ്പുകൾ ഇൻസ്റ്റാൾ ചെയ്യുക"</string>
     <string name="home" msgid="3256884684164448244">"ക്രമീകരണ ഹോം"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -442,7 +442,7 @@
     <string name="okay" msgid="1997666393121016642">"ശരി"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ഓണാക്കുക"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\'ശല്യപ്പെടുത്തരുത്\' ഓണാക്കുക"</string>
-    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ഒരിക്കലും ഇല്ല"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ഒരിക്കലും വേണ്ട"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"മുൻഗണന മാത്രം"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"ഇത് ഓഫാക്കിയില്ലെങ്കിൽ <xliff:g id="WHEN">%1$s</xliff:g>-നുള്ള അടുത്ത അലാറം കേൾക്കില്ല"</string>

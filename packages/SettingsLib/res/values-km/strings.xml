@@ -131,7 +131,7 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"បាន​លុប​កម្មវិធី និង​អ្នកប្រើ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"ការ​ភ្ជាប់តាម USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ហតស្ពត​ចល័ត"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ការ​ភ្ជាប់ប៊្លូធូស"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ការ​ភ្ជាប់​តាមប៊្លូធូស"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"ការ​ភ្ជាប់"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"ការ​ភ្ជាប់ &amp; ហតស្ពត​ចល័ត"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"កម្មវិធីការងារទាំងអស់"</string>
@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"លំនាំដើមមួយចំនួនត្រូវបានកំណត់"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"គ្មានការកំណត់លំនាំដើម"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ការ​កំណត់​អត្ថបទ​ទៅ​ជា​កា​និយាយ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"លទ្ធផល​សំឡេងអានអត្ថបទ​"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"លទ្ធផល​នៃការបំប្លែងអត្ថបទទៅជាការនិយាយ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"អត្រា​និយាយ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ល្បឿន​ពេល​អាន​​អត្ថបទ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ឡើង​-ចុះ"</string>
@@ -234,11 +234,11 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"បញ្ចូលឈ្មោះម៉ាស៊ីនរបស់ក្រុមហ៊ុនផ្ដល់សេវា DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"មិន​អាចភ្ជាប់​បានទេ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​សេចក្តីបញ្ជាក់ការបង្ហាញ​ឥត​ខ្សែ"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុវ៉ាយហ្វាយបង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើស​វ៉ាយហ្វាយ"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុ Wi-Fi បង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើសរើស Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ជ្រើសរើសអាសយដ្ឋាន MAC ដោយចៃដន្យ នៅពេល​ភ្ជាប់​បណ្តាញ Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"មានការកំណត់"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"មិនមានការកំណត់"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"ទំហំ buffer របស់ Logger"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"ទំហំកន្លែងផ្ទុករបស់ logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ជ្រើស​ទំហំ Logger per log buffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ជម្រះទំហំផ្ទុក logger ដែលប្រើបានយូរឬ?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"នៅពេលដែលយើងឈប់ធ្វើការត្រួតពិនិត្យតទៅទៀតដោយប្រើ logger ដែលប្រើបានយូរ យើងត្រូវបានតម្រូវឲ្យលុបទិន្នន័យ logger ដែលមាននៅលើឧបករណ៍របស់អ្នក"</string>
@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"ឲ្យ​ក្លែង​ទីតាំង"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"អនុញ្ញាត​ទីតាំង​ក្លែងក្លាយ"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"បើក​ការ​ត្រួតពិនិត្យ​គុណ​លក្ខណៈ​ទិដ្ឋភាព"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"រក្សាទិន្នន័យចល័តឲ្យសកម្មជានិច្ច បើទោះបីជា Wi‑Fi សកម្មក៏ដោយ (សម្រាប់ការប្តូរបណ្តាញដែលមានល្បឿនលឿន)។"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"រក្សាទិន្នន័យទូរសព្ទចល័តឲ្យដំណើរការជានិច្ច ទោះបីជា Wi‑Fi ដំណើរការហើយក៏ដោយ (ដើម្បីប្តូរបណ្តាញឲ្យបានរហ័ស)។"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"ប្រើការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់​ ប្រសិន​បើអាច​ប្រើបាន"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"អនុញ្ញាត​ការ​កែ​កំហុស​តាម USB ឬ?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"ការ​កែ​កំហុស​​យូអេសប៊ី​គឺ​សម្រាប់​តែ​ការ​អភិវឌ្ឍ​ប៉ុណ្ណោះ។ ប្រើ​វា​ដើម្បី​ចម្លង​ទិន្នន័យ​រវាង​កុំព្យូទ័រ និង​ឧបករណ៍​របស់​អ្នក ដំឡើង​កម្មវិធី​ក្នុង​ឧបករណ៍​របស់​អ្នក​ដោយ​មិន​ជូន​ដំណឹង និង​អាន​ទិន្នន័យ​កំណត់ហេតុ។"</string>
@@ -284,7 +284,7 @@
     <string name="show_touches" msgid="2642976305235070316">"បង្ហាញការចុច"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"បង្ហាញដានចុច នៅពេលចុច"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"បង្ហាញ​បច្ចុប្បន្នភាព​ផ្ទៃ"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"ផ្ទៃ​បង្អួច​ទាំង​មូល​បញ្ចេញ​ពន្លឺ​ពេល​ពួកវា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"ផ្ទៃ​វីនដូទាំង​មូល​បាញ់ពន្លឺ​ពេល​ពួកវា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"បង្ហាញ​បច្ចុប្បន្នភាព​ទិដ្ឋភាព GPU"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"មើល Flash ក្នុង​វីនដូ​ពេល​បាន​គូរ​ជា​មួយ GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"បង្ហាញ​​បច្ចុប្បន្នភាព​ស្រទាប់​ផ្នែក​រឹង"</string>
@@ -299,12 +299,12 @@
     <string name="debug_layout" msgid="5981361776594526155">"បង្ហាញ​ព្រំដែន​ប្លង់"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"បង្ខំ​ទិស​ប្លង់​អេក្រង់​ទៅកាន់ RTL សម្រាប់​មូលដ្ឋាន​ទាំងអស់"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ប្តូរទិស​ប្លង់​អេក្រង់​ទៅជា RTL សម្រាប់​គ្រប់ភាសា​ទាំងអស់"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"បង្ខំ​ឲ្យ​បង្ហាញ GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"បង្ខំ​ប្រើ GPU សម្រាប់​ការ​គូរ​ 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"បង្ខំ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"បើក 4x MSAA ក្នុង​កម្មវិធី OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"កែ​ប្រតិបត្តិការ​​ស្រង់ non-rectangular"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"កែ​ប្រតិបត្តិការ​​​ផ្នែកដកចេញដែលមិនមាន​រាង​ចតុកោណកែង"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"ការ​បង្ហាញ​ទម្រង់ GPU"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"បើក​ស្រទាប់​ជួសជុល GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>

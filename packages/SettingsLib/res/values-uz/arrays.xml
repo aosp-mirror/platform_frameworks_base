@@ -145,7 +145,7 @@
     <item msgid="4046665544396189228">", faol (telefon)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"O‘chiq"</item>
+    <item msgid="8665206199209698501">"Yoqilmagan"</item>
     <item msgid="1593289376502312923">"64 KB"</item>
     <item msgid="487545340236145324">"256 KB"</item>
     <item msgid="2423528675294333831">"1 MB"</item>
@@ -153,13 +153,13 @@
     <item msgid="2803199102589126938">"16 MB"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"O‘chiq"</item>
+    <item msgid="6089470720451068364">"Yoqilmagan"</item>
     <item msgid="4622460333038586791">"64 KB"</item>
     <item msgid="2212125625169582330">"256 KB"</item>
     <item msgid="1704946766699242653">"1 MB"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"O‘chiq"</item>
+    <item msgid="6921048829791179331">"Yoqilmagan"</item>
     <item msgid="2969458029344750262">"Bufer: maks. 64 KB"</item>
     <item msgid="1342285115665698168">"Bufer: maks. 256 KB"</item>
     <item msgid="1314234299552254621">"Bufer: maks. 1 MB"</item>
@@ -167,13 +167,13 @@
     <item msgid="5431354956856655120">"Bufer: maks. 16 MB"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="1744840221860799971">"O‘chiq"</item>
+    <item msgid="1744840221860799971">"Yoqilmagan"</item>
     <item msgid="3054662377365844197">"Hammasi"</item>
     <item msgid="688870735111627832">"Radiodan boshqa hammasi"</item>
     <item msgid="2850427388488887328">"faqat yadro"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"O‘chiq"</item>
+    <item msgid="2216470072500521830">"Yoqilmagan"</item>
     <item msgid="172978079776521897">"Barcha jurnallar buferi"</item>
     <item msgid="3873873912383879240">"Radio jurnallar buferidan tashqari hammasi"</item>
     <item msgid="8489661142527693381">"faqat yadro jurnali buferi"</item>

@@ -236,8 +236,8 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi 네트워크에 연결할 때 MAC 주소 임의 선택"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"종량제"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"종량제 네트워크"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"로거 영구 저장소를 삭제하시겠습니까?"</string>
@@ -282,13 +282,13 @@
     <string name="pointer_location" msgid="6084434787496938001">"포인터 위치"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"현재 터치 데이터 오버레이 표시"</string>
     <string name="show_touches" msgid="2642976305235070316">"탭한 항목 표시"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"탭한 항목에 대해 시각적인 의견 표시"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"탭한 항목에 대해 시각적인 피드백 표시"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"표면 업데이트 표시"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 표면이 업데이트되었을 때 플래시 처리"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 화면이 업데이트되었을 때 플래시 처리"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU 보기 업데이트 표시"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU로 드로잉했을 때 창 내부 보기 플래시 처리"</string>
+    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU로 드로잉했을 때 창 내부 보기 깜박이기"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"하드웨어 레이어 업데이트 표시"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"업데이트할 때 하드웨어 레이어 녹색으로 깜박이기"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"하드웨어 레이어 업데이트 시 녹색으로 깜박이기"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 오버드로 디버그"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW 오버레이 사용 안함"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"화면 합성 목적으로 항상 GPU 사용"</string>
@@ -443,7 +443,7 @@
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"켜기"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"사용 안함"</string>
-    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"중요 알림만"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"중요 알림만 허용"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"그때까지 알림 일시중지 상태를 유지하면 <xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
     <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>

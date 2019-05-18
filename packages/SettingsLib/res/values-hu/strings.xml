@@ -192,7 +192,7 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB hibakeresés"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Hibakeresés mód USB csatlakoztatásakor"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB-s hibakeresésre vonatkozó engedélyek visszavonása"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Hibajelentési gomb"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Hibabejelentési gomb"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Gomb megjelenítése a bekapcsolási menüben hibajelentés készítéséhez"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Nem kapcsolódik ki"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"A képernyő soha nem kapcsol ki töltés során"</string>

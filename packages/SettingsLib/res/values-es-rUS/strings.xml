@@ -129,9 +129,9 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"SO Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicaciones y usuarios eliminados"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión mediante USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portátil"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión mediante Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir conexión"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Hotspots y dispositivos portátiles"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Todas las apps de trabajo"</string>
@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desactivado"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nombre de host del proveedor de DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ingresa el nombre de host del proveedor de DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ingresa el host del proveedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No se pudo establecer conexión"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Ubicaciones de prueba"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permitir ubicaciones de prueba"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Habilitar inspección de atributos de vista"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Siempre mantén los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantener siempre los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar la aceleración de hardware de conexión mediante dispositivo portátil si está disponible"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"¿Permitir depuración por USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuración por USB solo está indicada para actividades de programación. Úsala para copiar datos entre tu computadora y el dispositivo, para instalar aplicaciones en el dispositivo sin recibir notificaciones y para leer datos de registro."</string>
@@ -319,7 +319,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANR en 2.° plano"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Alertas de notificaciones"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"App que publica notificación sin canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar actividades para que cambien de tamaño"</string>
