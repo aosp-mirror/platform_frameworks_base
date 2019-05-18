@@ -1011,12 +1011,6 @@ class ActivityStarter {
         if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
             return false;
         }
-        // don't abort if the callingPackage is temporarily whitelisted
-        if (mService.isPackageNameWhitelistedForBgActivityStarts(callingPackage)) {
-            Slog.w(TAG, "Background activity start for " + callingPackage
-                    + " temporarily whitelisted. This will not be supported in future Q builds.");
-            return false;
-        }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
         // That's the case for PendingIntent-based starts, since the creator's process might not be
         // up and alive. If that's the case, we retrieve the WindowProcessController for the send()
@@ -1048,6 +1042,12 @@ class ActivityStarter {
         if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
             Slog.w(TAG, "Background activity start for " + callingPackage
                     + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
+            return false;
+        }
+        // don't abort if the callingPackage is temporarily whitelisted
+        if (mService.isPackageNameWhitelistedForBgActivityStarts(callingPackage)) {
+            Slog.w(TAG, "Background activity start for " + callingPackage
+                    + " temporarily whitelisted. This will not be supported in future Q builds.");
             return false;
         }
         // anything that has fallen through would currently be aborted
