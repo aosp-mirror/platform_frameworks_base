@@ -16,6 +16,9 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -40,6 +43,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
@@ -48,6 +52,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
 import android.util.Log;
 import android.view.Display;
 import android.view.IPinnedStackController;
@@ -74,6 +79,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -139,6 +145,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;
+    private final ZenModeController mZenModeController;
     private StatusBarStateListener mStatusBarStateListener;
 
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
@@ -193,24 +200,38 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (shouldCollapse) {
                 collapseStack();
             }
-            updateVisibility();
+            updateStack();
         }
     }
 
     @Inject
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
             BubbleData data, ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider) {
+            NotificationInterruptionStateProvider interruptionStateProvider,
+            ZenModeController zenModeController) {
         this(context, statusBarWindowController, data, null /* synchronizer */,
-                configurationController, interruptionStateProvider);
+                configurationController, interruptionStateProvider, zenModeController);
     }
 
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
             BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider) {
+            NotificationInterruptionStateProvider interruptionStateProvider,
+            ZenModeController zenModeController) {
         mContext = context;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
+        mZenModeController = zenModeController;
+        mZenModeController.addCallback(new ZenModeController.Callback() {
+            @Override
+            public void onZenChanged(int zen) {
+                updateStackViewForZenConfig();
+            }
+
+            @Override
+            public void onConfigChanged(ZenModeConfig config) {
+                updateStackViewForZenConfig();
+            }
+        });
 
         configurationController.addCallback(this /* configurationListener */);
 
@@ -256,6 +277,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
             }
+
+            updateStackViewForZenConfig();
         }
     }
 
@@ -381,6 +404,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param notif the notification associated with this bubble.
      */
     void updateBubble(NotificationEntry notif) {
+        // If this is an interruptive notif, mark that it's interrupted
+        if (notif.importance >= NotificationManager.IMPORTANCE_HIGH) {
+            notif.setInterruption();
+        }
         mBubbleData.notificationEntryUpdated(notif);
     }
 
@@ -534,10 +561,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
         }
 
+        // Runs on state change.
         @Override
         public void apply() {
             mNotificationEntryManager.updateNotifications();
-            updateVisibility();
+            updateStack();
 
             if (DEBUG) {
                 Log.d(TAG, "[BubbleData]");
@@ -554,34 +582,53 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     };
 
     /**
-     * Lets any listeners know if bubble state has changed.
+     * Updates the stack view's suppression flags from the latest config from the zen (do not
+     * disturb) controller.
      */
-    private void updateBubblesShowing() {
-        if (mStackView == null) {
-            return;
-        }
+    private void updateStackViewForZenConfig() {
+        final int suppressedEffects = mZenModeController.getConfig().suppressedVisualEffects;
+        final boolean hideNotificationDotsSelected =
+                (suppressedEffects & SUPPRESSED_EFFECT_BADGE) != 0;
+        final boolean dontPopNotifsOnScreenSelected =
+                (suppressedEffects & SUPPRESSED_EFFECT_PEEK) != 0;
+        final boolean hideFromPullDownShadeSelected =
+                (suppressedEffects & SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
 
-        boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
-        boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
-        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
-        if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
-            mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
-        }
+        final boolean dndEnabled = mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF;
+
+        mStackView.setSuppressNewDot(
+                dndEnabled && hideNotificationDotsSelected);
+        mStackView.setSuppressFlyout(
+                dndEnabled && (dontPopNotifsOnScreenSelected || hideFromPullDownShadeSelected));
     }
 
     /**
+     * Lets any listeners know if bubble state has changed.
      * Updates the visibility of the bubbles based on current state.
-     * Does not un-bubble, just hides or un-hides. Will notify any
-     * {@link BubbleStateChangeListener}s if visibility changes.
+     * Does not un-bubble, just hides or un-hides. Notifies any
+     * {@link BubbleStateChangeListener}s of visibility changes.
+     * Updates stack description for TalkBack focus.
      */
-    public void updateVisibility() {
+    public void updateStack() {
+        if (mStackView == null) {
+            return;
+        }
         if (mStatusBarStateListener.getCurrentState() == SHADE && hasBubbles()) {
             // Bubbles only appear in unlocked shade
             mStackView.setVisibility(hasBubbles() ? VISIBLE : INVISIBLE);
         } else if (mStackView != null) {
             mStackView.setVisibility(INVISIBLE);
         }
-        updateBubblesShowing();
+
+        // Let listeners know if bubble state changed.
+        boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
+        boolean hasBubblesShowing = hasBubbles() && mStackView.getVisibility() == VISIBLE;
+        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
+            mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
+        }
+
+        mStackView.updateContentDescription();
     }
 
     /**

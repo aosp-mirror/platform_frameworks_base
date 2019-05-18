@@ -14,16 +14,30 @@
 // limitations under the License.
 //
 
-android_app {
-    name: "CaptivePortalLogin",
+java_defaults {
+    name: "CaptivePortalLoginDefaults",
     srcs: ["src/**/*.java"],
     sdk_version: "system_current",
     min_sdk_version: "28",
-    certificate: "networkstack",
     static_libs: [
         "androidx.legacy_legacy-support-v4",
         "metrics-constants-protos",
         "captiveportal-lib",
     ],
     manifest: "AndroidManifest.xml",
+}
+
+android_app {
+    name: "CaptivePortalLogin",
+    defaults: ["CaptivePortalLoginDefaults"],
+    certificate: "networkstack",
+}
+
+// Alternative CaptivePortalLogin signed with the platform cert, to use
+// with InProcessNetworkStack.
+android_app {
+    name: "PlatformCaptivePortalLogin",
+    defaults: ["CaptivePortalLoginDefaults"],
+    certificate: "platform",
+    overrides: ["CaptivePortalLogin"],
 }

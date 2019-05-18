@@ -1533,7 +1533,7 @@
     <!-- Message shown during face acquisition when only the left part of the user's face was detected [CHAR LIMIT=50] -->
     <string name="face_acquired_too_left">Move phone to the right.</string>
     <!-- Message shown during face acquisition when the user is not front facing the sensor [CHAR LIMIT=50] -->
-    <string name="face_acquired_poor_gaze">Look at the screen with your eyes open.</string>
+    <string name="face_acquired_poor_gaze">Please look more directly at your device.</string>
     <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
     <string name="face_acquired_not_detected">Can\u2019t see your face. Look at the phone.</string>
     <!-- Message shown during face acquisition when the device is not steady [CHAR LIMIT=50] -->
@@ -1561,7 +1561,7 @@
     <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=69] -->
     <string name="face_error_hw_not_available">Can\u2019t verify face. Hardware not available.</string>
     <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
-    <string name="face_error_timeout">Face timeout reached. Try again.</string>
+    <string name="face_error_timeout">Try face authentication again.</string>
     <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=69] -->
     <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->

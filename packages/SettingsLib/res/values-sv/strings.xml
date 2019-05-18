@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Det går inte att söka efter nätverk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Sparat"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Frånkopplad"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Inaktiverad"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurationsfel"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ingen anslutning på grund av låg kvalitet på nätverket"</string>
@@ -296,7 +297,7 @@
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Hela fönstret blinkar vid uppdatering"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Visa visningsuppdatering"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Visningar blinkar i fönster vid ritningar"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppd."</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppdatering"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Låt maskinvaruskikt blinka grönt vid uppdateringar"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök GPU-överritning"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Inaktivera HW-överlagringar"</string>
@@ -309,7 +310,7 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Tvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivera 4x MSAA i OpenGL ES 2.0-appar"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Felsök icke-rektangulära urklippsåtgärder"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Profilens HWUI-rendering"</string>

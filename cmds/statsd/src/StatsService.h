@@ -427,6 +427,7 @@ private:
 
     std::shared_ptr<LogEventQueue> mEventQueue;
 
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_invalid);

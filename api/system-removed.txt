@@ -9,6 +9,10 @@ package android {
 
 package android.app {
 
+  public class AppOpsManager {
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
+  }
+
   public class Notification implements android.os.Parcelable {
     method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
   }
@@ -24,6 +28,25 @@ package android.app.admin {
   public class DevicePolicyManager {
     method @Deprecated @Nullable public String getDeviceInitializerApp();
     method @Deprecated @Nullable public android.content.ComponentName getDeviceInitializerComponent();
+  }
+
+}
+
+package android.app.backup {
+
+  public class RestoreSession {
+    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor, String[]);
+    method @Deprecated public int restoreSome(long, android.app.backup.RestoreObserver, String[]);
+  }
+
+}
+
+package android.app.prediction {
+
+  public static final class AppTarget.Builder {
+    ctor @Deprecated public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @Deprecated @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
   }
 
 }
@@ -56,6 +79,16 @@ package android.content {
     field @Deprecated public static final String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
     field @Deprecated public static final String EXTRA_VOICE_REG_STATE = "voiceRegState";
     field @Deprecated public static final String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
+  }
+
+}
+
+package android.content.pm {
+
+  public class PackageItemInfo {
+    field @Deprecated public static final int SAFE_LABEL_FLAG_FIRST_LINE = 4; // 0x4
+    field @Deprecated public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 2; // 0x2
+    field @Deprecated public static final int SAFE_LABEL_FLAG_TRIM = 1; // 0x1
   }
 
 }
@@ -154,6 +187,14 @@ package android.service.notification {
   public static class NotificationListenerService.Ranking {
     method public java.util.List<java.lang.String> getAdditionalPeople();
     method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
+  }
+
+}
+
+package android.telecom {
+
+  public class TelecomManager {
+    method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.WRITE_SECURE_SETTINGS}) public boolean setDefaultDialer(@Nullable String);
   }
 
 }

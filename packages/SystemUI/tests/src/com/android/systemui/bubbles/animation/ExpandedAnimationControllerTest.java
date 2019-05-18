@@ -45,7 +45,8 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     @Spy
     private ExpandedAnimationController mExpandedController =
-            new ExpandedAnimationController(new Point(500, 1000) /* displaySize */);
+            new ExpandedAnimationController(
+                new Point(500, 1000) /* displaySize */, 0 /* expandedViewPadding */);
     private int mStackOffset;
     private float mBubblePadding;
     private float mBubbleSize;

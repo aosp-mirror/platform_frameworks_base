@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Հնարավոր չէ սկանավորել ցանցերը"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ոչ մեկը"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Պահված է"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Կապ չկա"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Անջատված"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP կարգավորման ձախողում"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Չի կապակցվել ցանցի թույլ ազդանշանի պատճառով"</string>
@@ -207,7 +208,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Գործարկման ցանկում ցույց տալ կոճակը՝ վրիպակների հաղորդման համար"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Մնալ արթուն"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Էկրանը երբեք չի քնի լիցքավորման ընթացքում"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Միացնել Bluetooth HCI snoop log-ը"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Միացնել HCI մատյանի վարումը Bluetooth-ի համար"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Պահել Bluetooth փաթեթները (այս կարգավորումը փոխելուց հետո անհրաժեշտ է վերագործարկել Bluetooth-ը)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ապակողպում"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Թույլ տալ սկզբնաբեռնման բեռնիչի ապակողպումը"</string>
@@ -227,7 +228,7 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth աուդիո կոդեկ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth աուդիոյի Ընդհատավորման հաճախականությունը"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth աուդիոյի ընդհատավորման հաճախականությունը"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն՝ ընդհատավորման հաճախականություն"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth աուդիո, բիթ / նմուշ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Գործարկել Bluetooth աուդիո կոդեկը\nԸնտրություն՝ բիթ/նմուշ"</string>
@@ -243,7 +244,7 @@
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Մասնավոր DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Մուտքագրեք DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Չհաջողվեց միանալ"</string>
-    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի հավաստագրման ընտրանքները"</string>
+    <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանների հավաստագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Վճարովի թրաֆիկ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Անսահմանափակ թրաֆիկ"</string>
@@ -293,11 +294,11 @@
     <string name="show_touches" msgid="2642976305235070316">"Ցույց տալ հպումները"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Ցույց տալ հպումների տեսանելի արձագանքը"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Ցույց տալ մակերեսի թարմացումները"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Թող պատուհանի ամբողջական մակերեսները առկայծեն, երբ թարմացվում են"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Թարմացվելիս ընդգծել սարքաշարի ծածկույթները կանաչ գույնով"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Ցուցադրել թարմացումները"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Լուսավորել պատուհանի թարմացված տարածքները"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ցույց տալ սարքաշարի ծածկույթի թարմացումները"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Թող սարքաշարի ծածկույթները կանաչ գույնով առկայծեն, երբ  թարմացվեն"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Թարմացվելիս ընդգծել սարքաշարի ծածկույթները կանաչ գույնով"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Վրիպազերծել GPU գերազանցումները"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Կասեցնել HW վրադրումները"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Միշտ օգտագործել GPU-ն` էկրանի կազմման համար"</string>
@@ -354,8 +355,8 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ակտիվ չէ: Հպեք՝ փոխելու համար:"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ակտիվ է: Հպեք՝ փոխելու համար:"</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Հավելվածի սպասման կարգավիճակ՝ <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Աշխատեցվող ծառայություններ"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Դիտել և վերահսկել ընթացիկ աշխատեցվող ծառայությունները"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Աշխատող ծառայություններ"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Դիտել և վերահսկել ընթացիկ աշխատող ծառայությունները"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ծառայություն"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ընտրեք WebView-ի իրականացումը"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Այս ընտրանքն այլևս վավեր չէ: Փորձեք նորից:"</string>
@@ -382,10 +383,10 @@
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) կբավարարի մոտ <xliff:g id="TIME_REMAINING">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
     <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Լիցքը պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործման եղանակից"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Լիցքը պետք է, որ բավականացնի մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործումից"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>՝ կախված օգտագործումից"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Երկարացրեք մարտկոցի աշխատաժամանակը <xliff:g id="TIME">%1$s</xliff:g>-ից"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից պակաս"</string>

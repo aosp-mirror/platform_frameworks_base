@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Не удалось начать поиск сетей."</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Нет"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Сохранено"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Не подключено"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Отключено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Ошибка IP-конфигурации"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Подключение невозможно из-за низкого качества сети"</string>
@@ -225,11 +226,11 @@
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Отключить абсолютный уровень громкости"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выберите версию Bluetooth AVRCP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек для передачи через Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Запустить аудиокодек для Bluetooth\nВыбор"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частота дискретизации при передаче через Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частота дискретизации аудио Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Запустить аудиокодек для Bluetooth\nВыбор: частота дискретизации"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Глубина кодирования звука при передаче через Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Бит на выборку аудио Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Запустить аудиокодек для Bluetooth\nВыбор: разрядность"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим аудиоканала Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Запустить аудиокодек для Bluetooth\nВыбор: режим канала"</string>
@@ -244,7 +245,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Введите имя хоста поставщика услуг DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ошибка подключения"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показывать параметры сертификации беспроводных мониторов"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"При выборе Wi‑Fi указывать в журнале RSSI для каждого SSID"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размер буфера журнала"</string>
@@ -283,15 +284,15 @@
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Приложение ожидает подключения отладчика"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ввод"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Отрисовка"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Аппаратное ускорение визуализации"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Аппаратное ускорение отрисовки"</string>
     <string name="media_category" msgid="4388305075496848353">"Мультимедиа"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Мониторинг"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Строгий режим"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Подсвечивать экран во время длительных операций"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Место нажатия"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Показывать данные нажатий и жестов"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Место касания"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Показывать данные касаний и жестов"</string>
     <string name="show_touches" msgid="2642976305235070316">"Показывать нажатия"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"Показывать места нажатия на экране"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Визуальный отклик при нажатии"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Показ. обнов. поверхности"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Подсвечивать поверхности окон при обновлении"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Показывать обнов. экрана"</string>
@@ -354,8 +355,8 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Выключено. Нажмите, чтобы включить."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Включено. Нажмите, чтобы отключить."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Статус приложения в режиме ожидания:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Работающие приложения"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Просмотр и управление работающими приложениями"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Работающие службы"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Просмотр и управление работающими службами"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Сервис WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Настройки сервиса WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Вариант недействителен. Повторите попытку."</string>

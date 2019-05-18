@@ -77,7 +77,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
 
     @Override
     public SurfaceControl.Transaction getPendingTransaction() {
-        return mTask.mPendingTransaction;
+        return mTask.getPendingTransaction();
     }
 
     @Override

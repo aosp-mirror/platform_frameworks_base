@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ezin dira sareak bilatu"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Bat ere ez"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gordeta"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Deskonektatuta"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Desgaituta"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Ezin izan da konfiguratu IP helbidea"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ez dago konektatuta sarearen kalitate eskasagatik"</string>
@@ -206,7 +207,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Akatsen txostenerako lasterbidea"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Bateriaren menuan, erakutsi akatsen txostena sortzeko botoia"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Mantendu aktibo"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Pantaila ez da inoiz inaktibo ezarriko kargatu bitartean"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Pantaila ez da ezarriko inoiz inaktibo kargatu bitartean"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Gaitu Bluetooth HCI miatze-erregistroa"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Hauteman Bluetooth paketeak (aktibatu edo desaktibatu Bluetooth konexioa ezarpena aldatu ostean)."</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM desblokeoa"</string>
@@ -245,7 +246,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ezin izan da konektatu"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabe bistaratzeko ziurtagiriaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago wifi-sareetan saioa hastean. Erakutsi sarearen identifikatzailea eta seinalearen indarra wifi-sareen hautagailuan."</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Sare mugatua"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Sare neurtua"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sare ez-mugatua"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Erregistroen buffer-tamainak"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Hautatu erregistroen buffer-tamainak"</string>
@@ -266,7 +267,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Baimendu garapenerako ezarpenak?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ezarpen hauek garapen-xedeetarako pentsatu dira soilik. Baliteke ezarpenen eraginez gailua matxuratzea edo funtzionamendu okerra izatea."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Egiaztatu USBko aplikazioak"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak antzemateko."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak antzemateko"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Bluetooth bidezko bolumen absolutuaren eginbidea desgaitu egiten du urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Tokiko terminala"</string>
@@ -296,12 +297,12 @@
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Distiratu leiho osoen azalak eguneratzen direnean"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Erakutsi ikuspegi-aldaketak"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Nabarmendu leiho barruko ikuspegiak marraztean"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Hardware-geruzen eguneratzeak"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Hardware-geruzen aldaketak"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Eguneratu bitartean, hardware-geruzak berdez"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Araztu GPU gainidazketa"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Desgaitu HW gainjartzeak"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Erabili beti GPU pantaila-muntaietarako"</string>
-    <string name="simulate_color_space" msgid="6745847141353345872">"Simulatu kolore-espazioa"</string>
+    <string name="simulate_color_space" msgid="6745847141353345872">"Simulatu kolore-eremua"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Gaitu OpenGL aztarnak"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desgaitu USB audio-bideratzea"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desgaitu USB audio-gailuetara automatikoki bideratzea"</string>
@@ -313,8 +314,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Araztu angeluzuzenak ez diren klip-eragiketak"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Profilaren HWUI errendatzea"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Gaitu GPUaren arazte-geruzak"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Onartu GPUaren arazte-geruzak kargatzea arazte-aplikazioetarako"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Gaitu GPUaren arazketa-geruzak"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Eman GPUaren arazketa-geruzak kargatzeko baimena arazketa-aplikazioei"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Trantsizioen animazio-eskala"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatzailearen iraupena"</string>
@@ -328,9 +329,9 @@
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Erakutsi jakinarazpenen kanalen abisuak"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Behartu aplikazioak onartzea kanpoko memorian"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Aplikazioek kanpoko memorian idatz dezakete, manifestuaren balioak kontuan izan gabe"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Aplikazioek kanpoko memorian idatz dezakete, ezarritako balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Behartu jardueren tamaina doitu ahal izatea"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Eman aukera jarduera guztien tamaina doitzeko, hainbat leihotan erabili ahal izan daitezen, manifestuan jartzen duena jartzen duela ere."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Eman aukera jarduera guztien tamaina doitzeko, hainbat leihotan erabili ahal izan daitezen, ezarritako balioak kontuan izan gabe"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Gaitu estilo libreko leihoak"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Onartu estilo libreko leiho esperimentalak"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Babeskopien pasahitz lokala"</string>
@@ -427,7 +428,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Handiena"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Pertsonalizatua (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menua"</string>
-    <string name="retail_demo_reset_message" msgid="118771671364131297">"Idatzi pasahitza jatorrizko ezarpenak demo moduan berrezartzeko"</string>
+    <string name="retail_demo_reset_message" msgid="118771671364131297">"Idatzi pasahitza jatorrizko datuak demo moduan berrezartzeko"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Hurrengoa"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Pasahitza behar da"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Idazketa-metodo aktiboak"</string>

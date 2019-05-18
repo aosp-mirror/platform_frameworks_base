@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"No se puede buscar redes."</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ninguna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Guardado"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Desconectada"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Inhabilitado"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Error de configuración de IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"No conectado debido a la baja calidad de la red"</string>
@@ -218,20 +219,20 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplicación para simular ubicación: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificación de pantalla inalámbrica"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Habilitar registro Wi-Fi detallado"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Habilitar registro de Wi-Fi detallado"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móviles siempre activos"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración por hardware para conexión compartida"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sin nombre"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inhabilitar volumen absoluto"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP del Bluetooth"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versión AVRCP del Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP de Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Activar el códec de audio por Bluetooth\nSelección"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frecuencia de muestreo de audio por Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frecuencia de muestreo de audio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Activar el códec de audio por Bluetooth\nSelección: frecuencia de muestreo"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits por muestra del audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Activar el códec de audio por Bluetooth\nSelección: bits por muestra"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modo de canal de audio por Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modo de canal de audio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Activar el códec de audio por Bluetooth\nSelección: modo de canal"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Códec de audio LDAC de Bluetooth: calidad de reproducción"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Activar LDAC de audio por Bluetooth\nSelección de códec: calidad de reproducción"</string>
@@ -244,21 +245,21 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduce el host del proveedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No se ha podido establecer la conexión"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones para la certificación de la pantalla inalámbrica"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de registro de Wi-Fi, mostrar por SSID RSSI en el selector Wi-Fi"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de registro de Wi-Fi y mostrar por SSID RSSI en el selector Wi-Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Medida"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"No medida"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños del búfer para registrar"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"¿Borrar almacenamiento continuo del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Cuando ya no supervisamos la actividad con el registrador de forma continua, estamos obligados a borrar los datos del registrador almacenados en el dispositivo."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Guardar datos de registro de forma continua"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Guardar datos de registro continuamente"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Seleccionar búferes de registro para guardarlos de forma continua en dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Seleccionar configuración de USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Seleccionar configuración de USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Ubicaciones simuladas"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permitir ubicaciones simuladas"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspección de atributos de vista"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantener los datos móviles siempre activos, aunque la conexión Wi‑Fi esté activada (para cambiar de red rápidamente)"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantener los datos móviles siempre activos aunque la conexión Wi‑Fi esté activada (para cambiar de red rápidamente)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar la conexión compartida con aceleración por hardware si está disponible"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"¿Permitir depuración por USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuración por USB solo está indicada para actividades de desarrollo. Puedes utilizarla para intercambiar datos entre el ordenador y el dispositivo, para instalar aplicaciones en el dispositivo sin recibir notificaciones y para leer datos de registro."</string>
@@ -274,13 +275,13 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprobación de HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Establecer comprobación HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Depuración"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Aplicación para depurar"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Elegir aplicación de depuración"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Aplicación de depuración no configurada"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Aplicación de depuración: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Selecciona una aplicación"</string>
     <string name="no_application" msgid="2813387563129153880">"Ninguna"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Esperar al depurador"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"La aplicación depurada espera a que se active el depurador para ejecutarse"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"La aplicación depurada espera a que se active el depurador antes de ejecutarse"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Entrada"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Dibujo"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Renderización acelerada por hardware"</string>
@@ -292,15 +293,15 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"Superponer los datos de las pulsaciones en la pantalla"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar la ubicación de los toques en la pantalla"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Cambios de superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Actualizar superficies de ventana al actualizarse"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Mostrar cambios de superficies"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"Parpadear todas las superficies de la ventana cuando se actualizan"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Ver cambios de vista"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Actualizar vistas de las ventanas creadas"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Parpadear vistas dentro de las ventanas cuando se dibujan"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ver actualizaciones de capas de hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Iluminar capas de hardware en verde al actualizarse"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Parpadear capas de hardware en verde al actualizarse"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depurar sobredibujos de GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Inhabilitar superposiciones de hardware"</string>
-    <string name="disable_overlays_summary" msgid="3578941133710758592">"Usar siempre la GPU para combinar pantallas"</string>
+    <string name="disable_overlays_summary" msgid="3578941133710758592">"Usar siempre la GPU para componer pantallas"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simular espacio de color"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Habilitar seguimiento OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Inhabilitar enrutamiento de audio por USB"</string>
@@ -313,10 +314,10 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Habilitar MSAA 4x en aplicaciones de OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operaciones de recorte no rectangulares"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Trazar la renderización de HWUI"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activar capas depuración GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir cargar capas de depuración de GPU en apps"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activar capas de depuración de GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir cargar capas de depuración de GPU en aplicaciones"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de animación de ventana"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de transición-animación"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de animación de transición"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duración de animación"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular pantallas secundarias"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplicaciones"</string>
@@ -324,13 +325,13 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Destruir actividades cuando el usuario deje de usarlas"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Límitar procesos en segundo plano"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANR en segundo plano"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar el diálogo La aplicación no responde para aplicaciones en segundo plano"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar el diálogo de que la aplicación no responde para aplicaciones en segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Ver advertencias del canal de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Mostrar una advertencia en pantalla cuando una aplicación publica una notificación sin un canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permitir aplicaciones de forma externa"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Hacer que cualquier aplicación se pueda escribir en un dispositivo de almacenamiento externo, independientemente de los valores definidos"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Hacer que cualquier aplicación se pueda escribir en un dispositivo de almacenamiento externo independientemente de los valores definidos"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar el ajuste de tamaño de las actividades"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Hacer que el tamaño de todas las actividades se pueda ajustar para el modo multiventana, independientemente de los valores definidos"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Hacer que el tamaño de todas las actividades se pueda ajustar para el modo multiventana independientemente de los valores definidos"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Habilitar ventanas de forma libre"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Habilitar la opción para utilizar ventanas de forma libre experimentales"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Contraseña para copias de ordenador"</string>
@@ -354,8 +355,8 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Inactiva. Toca para alternar."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Activa. Toca para alternar."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Estado de la aplicación en espera: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Servicios en uso"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Ver y controlar los servicios en uso"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Servicios en ejecución"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Ver y controlar los servicios en ejecución"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementación de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Establecer implementación de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Esta opción ya no está disponible. Vuelve a intentarlo."</string>

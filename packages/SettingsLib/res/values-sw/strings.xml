@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Haiwezi kutambaza mitandao"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Hamna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Imehifadhiwa"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Hujaunganishwa"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Imezimwa"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Haikuweza Kusanidi IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Haijaunganishwa kwa sababu intaneti si thabiti"</string>
@@ -308,7 +309,7 @@
     <string name="debug_layout" msgid="5981361776594526155">"Onyesha mipaka ya mpangilio"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Onyesha mipaka ya picha, kingo, nk."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Lazimisha uelekezaji wa muundo wa RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Lazimisha uelekezaji wa muundo wa skrini kwa RTL kwa lugha zote"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Lazimisha mkao wa skrini uwe wa kulia kwenda kushoto kwa lugha zote"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Lazimisha 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Wezesha 4x MSAA katika programu za OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Tatua uendeshaji wa klipu usio mstatili"</string>

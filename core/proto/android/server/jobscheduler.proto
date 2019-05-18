@@ -276,6 +276,24 @@ message ConstantsProto {
         // The maximum number of jobs that should be allowed to run in the past
         // {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS}.
         optional int32 max_job_count_per_allowed_time = 12;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_active = 13;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_working = 14;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_frequent = 15;
+        // The maximum number of timing sessions an app can run within this particular standby
+        // bucket's window size.
+        optional int32 max_session_count_rare = 16;
+        // The maximum number of timing sessions that should be allowed to run in the past
+        // {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS}.
+        optional int32 max_session_count_per_allowed_time = 17;
+        // Treat two distinct {@link TimingSession}s as the same if they start and end within this
+        // amount of time of each other.
+        optional int64 timing_session_coalescing_duration_ms = 18;
     }
     optional QuotaController quota_controller = 24;
 
@@ -511,6 +529,12 @@ message StateControllerProto {
             optional int32 bg_job_count_in_max_period = 7;
 
             /**
+             * The number of {@link TimingSession}s within the bucket window size. This will include
+             * sessions that started before the window as long as they end within the window.
+             */
+            optional int32 session_count_in_window = 11;
+
+            /**
              * The time after which the sum of all the app's sessions plus
              * ConstantsProto.QuotaController.in_quota_buffer_ms equals the quota. This is only
              * valid if
@@ -535,6 +559,21 @@ message StateControllerProto {
              * ConstantsProto.QuotaController.allowed_time_per_period_ms.
              */
             optional int32 job_count_in_allowed_time = 10;
+
+            /**
+             * The time after which {@link #timingSessionCountInAllowedTime} should be considered
+             * invalid, in the elapsed realtime timebase.
+             */
+            optional int64 session_count_expiration_time_elapsed = 12;
+
+            /**
+             * The number of {@link TimingSession}s that ran in at least the last
+             * {@link #mAllowedTimePerPeriodMs}. It may contain a few stale entries since cleanup won't
+             * happen exactly every {@link #mAllowedTimePerPeriodMs}. This should only be considered
+             * valid before elapsed realtime has reached
+             * {@link #timingSessionCountExpirationTimeElapsed}.
+             */
+            optional int32 session_count_in_allowed_time = 13;
         }
 
         message Package {

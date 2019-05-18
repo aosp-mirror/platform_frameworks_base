@@ -650,7 +650,7 @@ public class PermissionMonitor {
                 case INetd.PERMISSION_UPDATE_DEVICE_STATS:
                     updateStatsPermissionAppIds.add(netdPermissionsAppIds.keyAt(i));
                     break;
-                case INetd.NO_PERMISSIONS:
+                case INetd.PERMISSION_NONE:
                     noPermissionAppIds.add(netdPermissionsAppIds.keyAt(i));
                     break;
                 case INetd.PERMISSION_UNINSTALLED:
@@ -676,7 +676,7 @@ public class PermissionMonitor {
                         ArrayUtils.convertToIntArray(updateStatsPermissionAppIds));
             }
             if (noPermissionAppIds.size() != 0) {
-                mNetd.trafficSetNetPermForUids(INetd.NO_PERMISSIONS,
+                mNetd.trafficSetNetPermForUids(INetd.PERMISSION_NONE,
                         ArrayUtils.convertToIntArray(noPermissionAppIds));
             }
             if (uninstalledAppIds.size() != 0) {

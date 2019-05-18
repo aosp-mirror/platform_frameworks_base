@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Não é possível verificar redes"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nenhuma"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Guardada"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Desligada"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Desativado"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Falha de configuração de IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Não ligado devido à baixa qualidade da rede"</string>
@@ -292,48 +293,48 @@
     <string name="pointer_location_summary" msgid="840819275172753713">"Apresentar dados atuais de toque"</string>
     <string name="show_touches" msgid="2642976305235070316">"Mostrar toques"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar feedback visual para toques"</string>
-    <string name="show_screen_updates" msgid="5470814345876056420">"Atualiz. de superfície"</string>
+    <string name="show_screen_updates" msgid="5470814345876056420">"Mostrar superfície atualizada"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Destacar a superfície da janela ao atualizar"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Ver atualizações de vistas"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Destacar vistas em janelas quando desenhadas"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Mostrar atual. cam. hard."</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Atualizações de camadas de hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Camadas de hard. flash verdes quando estão atuali."</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Depurar sobreposição GPU"</string>
-    <string name="disable_overlays" msgid="2074488440505934665">"Desativ. sobreposições HW"</string>
+    <string name="disable_overlays" msgid="2074488440505934665">"Desativar sobreposições HW"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Utilizar sempre GPU para a composição do ecrã"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simular espaço da cor"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Ativar vestígios OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desativar encaminhamento áudio USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desativar encam. auto. para periféricos áudio USB"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Mostrar limit. do esquema"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Mostrar limites do esquema"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Apresentar limites de clipes, margens, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forçar direção do esquema RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forçar dir. do esq. do ecrã p. RTL tds os locais"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forçar 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Ativar o 4x MSAA em aplicações OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Depurar operações de clipe não retangulares"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Renderiz. HWUI do perfil"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Renderização HWUI do perfil"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Ativar cam. depuração GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Permitir carreg. cam. depuração GPU p/ dep. app"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de anim. da janela"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de anim. de trans."</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Escala de animação de transição"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Escala de animação de transição"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Escala de duração de animação"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simular apresentações secundárias"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplicações"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Não manter atividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Destruir atividades assim que o utilizador sair"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Limite proc. em 2º plano"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Limite do processo em 2º plano"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANRs em 2.º plano"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar caixa de diálogo A aplicação não está a responder para aplicações em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Mostrar avisos do canal de notificações"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Mostra um aviso no ecrã quando uma aplicação publica uma notificação sem o canal ser válido"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Forçar perm. de aplicações no armazenamento ext."</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Forçar permissão de apps no armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Torna qualquer aplicação elegível para ser gravada no armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forçar as atividades a serem redimensionáveis"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Tornar todas as atividades redimensionáveis para várias janelas, independentemente dos valores do manifesto."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ativar janelas de forma livre"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Ativar a compatibilidade com janelas de forma livre experimentais."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Palavra-passe cópia do comp."</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Palavra-passe cópia do computador"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"As cópias de segurança completas no ambiente de trabalho não estão atualmente protegidas"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Tocar para alterar ou remover a palavra-passe para cópias de segurança completas no ambiente de trabalho"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nova palavra-passe da cópia de segurança definida"</string>

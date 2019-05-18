@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Siete sa nedajú vyhľadávať"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Žiadne"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Uložené"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Odpojené"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Vypnuté"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Zlyhanie konfigurácie adresy IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nepripojené z dôvodu siete nízkej kvality"</string>
@@ -268,7 +269,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Overovať aplikácie z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrolovať škodlivosť aplikácií nainštalovaných pomocou nástroja ADB alebo ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Zariadenia Bluetooth sa budú zobrazovať bez názvov (iba adresy MAC)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Umožňuje zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth v prípade problémov s hlasitosťou na vzdialených zariadeniach, ako je napríklad neprijateľne vysoká hlasitosť alebo absencia ovládacích prvkov."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Umožňuje zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth v prípade problémov s hlasitosťou vo vzdialených zariadeniach, ako je napríklad neprijateľne vysoká hlasitosť alebo absencia ovládacích prvkov."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Miestny terminál"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Povoliť terminálovú apl. na miestny prístup k prostrediu shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrola HDCP"</string>
@@ -307,7 +308,7 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Vypnúť automatické smerovanie do audio periférií USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Zobrazovať ohraničenia"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Rozloženia sprava doľava"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>

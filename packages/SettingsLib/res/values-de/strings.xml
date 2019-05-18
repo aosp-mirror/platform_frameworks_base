@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Netzwerkscan nicht möglich"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Keine"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gespeichert"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Nicht verbunden"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiviert"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-Konfigurationsfehler"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Keine Verbindung aufgrund der geringen Netzwerkqualität"</string>
@@ -244,9 +245,9 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Level für WLAN-Protokollierung erhöhen, in WiFi Picker pro SSID-RSSI anzeigen"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"WLAN-Protokollierungsebene erhöhen, in WiFi Picker pro SSID RSSI anzeigen"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Kostenpflichtig"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Nicht kostenpflichtig"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Kostenlos"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-Puffergrößen"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Größe pro Protokollpuffer wählen"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Speicher der dauerhaften Protokollierung löschen?"</string>
@@ -258,7 +259,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Simulierte Standorte"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Simulierte Standorte zulassen"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Inspektion der Anzeigeattribute aktivieren"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Die mobile Datennutzung bleibt auch dann aktiviert, wenn WLAN aktiviert ist. Dies dient einem schnelleren Wechsel zwischen Netzwerken."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Die mobile Datennutzung bleibt auch dann aktiviert, wenn WLAN aktiviert ist. Das ermöglicht einen schnelleren Wechsel zwischen Netzwerken."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Falls verfügbar, Hardwarebeschleunigung für Tethering verwenden"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB-Debugging zulassen?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-Debugging ist nur für Entwicklungszwecke vorgesehen. Damit kannst du Daten zwischen deinem Computer und deinem Gerät kopieren, Apps auf deinem Gerät ohne Benachrichtigung installieren und Protokolldaten lesen."</string>
@@ -289,15 +290,15 @@
     <string name="strict_mode" msgid="1938795874357830695">"Strikter Modus aktiviert"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Bei langen App-Operationen im Hauptthread blinkt Bildschirm"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Zeigerposition"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Overlay mit aktuellen Daten zu Tippaktionen"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Overlay mit aktuellen Daten zu Tippaktionen anzeigen"</string>
     <string name="show_touches" msgid="2642976305235070316">"Fingertipps anzeigen"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"Visuelles Feedback für Fingertipps anzeigen"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Bei Fingertipps visuelles Feedback anzeigen"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Oberflächenaktualisierungen anzeigen"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Gesamte Fensteroberflächen blinken bei Aktualisierung"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Updates anzeigen"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Ansichten in Fenstern blinken beim Rendern"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Hardwareebenen-Updates anzeigen"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardwareebenen blinken beim Aktualisieren grün"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Aktualisierungen von Hardwareschichten anzeigen"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardwareschichten blinken beim Aktualisieren grün"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU-Overdraw debuggen"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW-Overlays deaktivieren"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Für Bildschirm-Compositing immer GPU verwenden"</string>
@@ -315,9 +316,9 @@
     <string name="track_frame_time" msgid="6094365083096851167">"HWUI-Rendering für Profil"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU-Debug-Ebenen zulassen"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Debug-Apps das Laden von GPU-Debug-Ebenen erlauben"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Maßstab Fensteranimation"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Maßstab Übergangsanimation"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Maßstab für Animatorzeit"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Fensteranimationsfaktor"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Übergangsanimationsfaktor"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animationsdauerfaktor"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Sekundäre Displays simulieren"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Aktivitäten nicht speichern"</string>
@@ -411,7 +412,7 @@
     <string name="disabled" msgid="9206776641295849915">"Deaktiviert"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Zugelassen"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Nicht zulässig"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Unbekannte Apps installieren"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Installieren unbekannter Apps"</string>
     <string name="home" msgid="3256884684164448244">"Startseite \"Einstellungen\""</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0 %"</item>
@@ -431,7 +432,7 @@
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Weiter"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Passwort erforderlich"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Aktive Eingabemethoden"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Systemsprache verwenden"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Systemsprachen verwenden"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Einstellungen für <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> konnten nicht geöffnet werden."</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Diese Eingabemethode kann den gesamten von dir eingegebenen Text erfassen, einschließlich personenbezogener Daten wie Passwörter und Kreditkartennummern. Sie ist Teil der App \"<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>\". Möchtest du diese Eingabemethode verwenden?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Hinweis: Nach einem Neustart wird diese App erst gestartet, wenn du dein Smartphone entsperrst"</string>
@@ -460,6 +461,6 @@
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Dauer"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Bis zur Deaktivierung"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Gerade eben"</string>
+    <string name="time_unit_just_now" msgid="6363336622778342422">"gerade eben"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Dieses Gerät"</string>
 </resources>

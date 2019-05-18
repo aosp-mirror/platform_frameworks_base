@@ -1249,6 +1249,7 @@ public class TelecomManager {
      * @deprecated Use
      * {@link android.app.role.RoleManager#addRoleHolderAsUser(String, String, int, UserHandle,
      * Executor, java.util.function.Consumer)} instead.
+     * @removed
      */
     @SystemApi
     @Deprecated
@@ -1451,6 +1452,9 @@ public class TelecomManager {
      * foreground call is ended.
      * <p>
      * Requires permission {@link android.Manifest.permission#ANSWER_PHONE_CALLS}.
+     * <p>
+     * Note: this method CANNOT be used to end ongoing emergency calls and will return {@code false}
+     * if an attempt is made to end an emergency call.
      *
      * @return {@code true} if there is a call which will be rejected or terminated, {@code false}
      * otherwise.
@@ -1458,8 +1462,6 @@ public class TelecomManager {
      * instead.  Apps performing call screening should use the {@link CallScreeningService} API
      * instead.
      */
-
-
     @RequiresPermission(Manifest.permission.ANSWER_PHONE_CALLS)
     @Deprecated
     public boolean endCall() {

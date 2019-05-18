@@ -820,6 +820,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     private String setCallingPackage(String callingPackage) {
         final String original = mCallingPackage.get();
         mCallingPackage.set(callingPackage);
+        onCallingPackageChanged();
         return original;
     }
 
@@ -843,6 +844,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             mTransport.mAppOpsManager.checkPackage(Binder.getCallingUid(), pkg);
         }
         return pkg;
+    }
+
+    /** {@hide} */
+    public final @Nullable String getCallingPackageUnchecked() {
+        return mCallingPackage.get();
+    }
+
+    /** {@hide} */
+    public void onCallingPackageChanged() {
     }
 
     /**

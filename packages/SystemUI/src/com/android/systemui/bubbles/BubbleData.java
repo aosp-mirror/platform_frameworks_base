@@ -178,7 +178,7 @@ public class BubbleData {
         Bubble bubble = getBubbleWithKey(entry.key);
         if (bubble == null) {
             // Create a new bubble
-            bubble = new Bubble(entry, this::onBubbleBlocked);
+            bubble = new Bubble(mContext, entry, this::onBubbleBlocked);
             doAdd(bubble);
             trim();
         } else {

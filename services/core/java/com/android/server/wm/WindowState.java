@@ -1313,6 +1313,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mOrientationChangeTimedOut = true;
     }
 
+    @Override
     DisplayContent getDisplayContent() {
         return mToken.getDisplayContent();
     }
@@ -3103,7 +3104,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mWindowFrames.mCompatFrame);
             final MergedConfiguration mergedConfiguration =
-                    new MergedConfiguration(mWmService.mRoot.getConfiguration(),
+                    new MergedConfiguration(getProcessGlobalConfiguration(),
                     getMergedOverrideConfiguration());
 
             setLastReportedMergedConfiguration(mergedConfiguration);
@@ -4602,7 +4603,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */,
                         0 /* windowCornerRadius */),
                 mWmService.mSurfaceAnimationRunner);
-        startAnimation(mPendingTransaction, adapter);
+        startAnimation(getPendingTransaction(), adapter);
         commitPendingTransaction();
     }
 

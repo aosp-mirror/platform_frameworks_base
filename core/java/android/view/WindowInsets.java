@@ -156,7 +156,9 @@ public final class WindowInsets {
      * @param src Source to copy insets from
      */
     public WindowInsets(WindowInsets src) {
-        this(src.mTypeInsetsMap, src.mTypeMaxInsetsMap, src.mTypeVisibilityMap, src.mIsRound,
+        this(src.mSystemWindowInsetsConsumed ? null : src.mTypeInsetsMap,
+                src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
+                src.mTypeVisibilityMap, src.mIsRound,
                 src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src));
     }
 

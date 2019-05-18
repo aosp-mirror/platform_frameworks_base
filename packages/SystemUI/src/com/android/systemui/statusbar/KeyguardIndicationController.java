@@ -78,6 +78,7 @@ public class KeyguardIndicationController implements StateListener,
 
     private static final int MSG_HIDE_TRANSIENT = 1;
     private static final int MSG_CLEAR_BIOMETRIC_MSG = 2;
+    private static final int MSG_SWIPE_UP_TO_UNLOCK = 3;
     private static final long TRANSIENT_BIOMETRIC_ERROR_TIMEOUT = 1300;
 
     private final Context mContext;
@@ -189,6 +190,7 @@ public class KeyguardIndicationController implements StateListener,
         mLockscreenGestureLogger.write(MetricsProto.MetricsEvent.ACTION_LS_LOCK,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
         showTransientIndication(R.string.keyguard_indication_trust_disabled);
+        mKeyguardUpdateMonitor.onLockIconPressed();
         mLockPatternUtils.requireCredentialEntry(KeyguardUpdateMonitor.getCurrentUser());
 
         return true;
@@ -317,6 +319,7 @@ public class KeyguardIndicationController implements StateListener,
         mTransientIndication = transientIndication;
         mTransientTextColorState = textColorState;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
+        mHandler.removeMessages(MSG_SWIPE_UP_TO_UNLOCK);
         if (mDozing && !TextUtils.isEmpty(mTransientIndication)) {
             // Make sure this doesn't get stuck and burns in. Acquire wakelock until its cleared.
             mWakeLock.setAcquired(true);
@@ -535,9 +538,25 @@ public class KeyguardIndicationController implements StateListener,
                 hideTransientIndication();
             } else if (msg.what == MSG_CLEAR_BIOMETRIC_MSG) {
                 mLockIcon.setTransientBiometricsError(false);
+            } else if (msg.what == MSG_SWIPE_UP_TO_UNLOCK) {
+                showSwipeUpToUnlock();
             }
         }
     };
+
+    private void showSwipeUpToUnlock() {
+        if (mDozing) {
+            return;
+        }
+
+        String message = mContext.getString(R.string.keyguard_unlock);
+        if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
+            mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
+        } else if (mKeyguardUpdateMonitor.isScreenOn()) {
+            showTransientIndication(message);
+            hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
+        }
+    }
 
     public void setDozing(boolean dozing) {
         if (mDozing == dozing) {
@@ -619,12 +638,20 @@ public class KeyguardIndicationController implements StateListener,
                 return;
             }
             animatePadlockError();
+            boolean showSwipeToUnlock =
+                    msgId == KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
             } else if (updateMonitor.isScreenOn()) {
                 showTransientIndication(helpString);
-                hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
+                if (!showSwipeToUnlock) {
+                    hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
+                }
+            }
+            if (showSwipeToUnlock) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SWIPE_UP_TO_UNLOCK),
+                        TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
             }
         }
 

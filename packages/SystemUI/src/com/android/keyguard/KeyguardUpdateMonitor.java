@@ -168,6 +168,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     private static final int BIOMETRIC_STATE_CANCELLING_RESTARTING = 3;
 
+    private static final int BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED = -1;
+    public static final int BIOMETRIC_HELP_FACE_NOT_RECOGNIZED = -2;
+
     private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
     private static final ComponentName FALLBACK_HOME_COMPONENT = new ComponentName(
@@ -238,6 +241,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
+    // If the user long pressed the lock icon, disabling face auth for the current session.
+    private boolean mLockIconPressed;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -568,7 +573,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onBiometricAuthFailed(BiometricSourceType.FINGERPRINT);
             }
         }
-        handleFingerprintHelp(-1, mContext.getString(R.string.kg_fingerprint_not_recognized));
+        handleFingerprintHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                mContext.getString(R.string.kg_fingerprint_not_recognized));
     }
 
     private void handleFingerprintAcquired(int acquireInfo) {
@@ -720,7 +726,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onBiometricAuthFailed(BiometricSourceType.FACE);
             }
         }
-        handleFaceHelp(-1, mContext.getString(R.string.kg_face_not_recognized));
+        handleFaceHelp(BIOMETRIC_HELP_FACE_NOT_RECOGNIZED,
+                mContext.getString(R.string.kg_face_not_recognized));
     }
 
     private void handleFaceAcquired(int acquireInfo) {
@@ -801,6 +808,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     getCurrentUser());
         }
 
+        // The face timeout message is not very actionable, let's ask the user to
+        // manually retry.
+        if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
+            errString = mContext.getString(R.string.keyguard_unlock);
+        }
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1384,6 +1396,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOff() {
+        mLockIconPressed = false;
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
         final int count = mCallbacks.size();
@@ -1608,35 +1621,36 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        final boolean switchingUsers;
-        synchronized (this) {
-            switchingUsers = mSwitchingUser;
-        }
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
-                && !switchingUsers && !isFingerprintDisabled(getCurrentUser())
+                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
                 && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser;
         return shouldListen;
     }
 
     private boolean shouldListenForFace() {
-        final boolean switchingUsers;
-        synchronized (this) {
-            switchingUsers = mSwitchingUser;
-        }
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
-                && !switchingUsers && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
-                && !mKeyguardGoingAway && mFaceSettingEnabledForUser
+                && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser && !mLockIconPressed
                 && mUserManager.isUserUnlocked(user) && mIsPrimaryUser;
     }
 
+    /**
+     * Whenever the lock icon is long pressed, disabling trust agents.
+     * This means that we cannot auth passively (face) until the user presses power.
+     */
+    public void onLockIconPressed() {
+        mLockIconPressed = true;
+        mUserFaceAuthenticated.put(getCurrentUser(), false);
+        updateFaceListeningState();
+    }
 
     private void startListeningForFingerprint() {
         if (mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING) {
@@ -1990,7 +2004,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean becameAbsent = false;
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             Log.w(TAG, "invalid subId in handleSimStateChange()");
-            /* Only handle No SIM(ABSENT) due to handleServiceStateChange() handle other case */
+            /* Only handle No SIM(ABSENT) and Card Error(CARD_IO_ERROR) due to
+             * handleServiceStateChange() handle other case */
             if (state == State.ABSENT) {
                 updateTelephonyCapable(true);
                 // Even though the subscription is not valid anymore, we need to notify that the
@@ -2003,6 +2018,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         data.simState = State.ABSENT;
                     }
                 }
+            } else if (state == State.CARD_IO_ERROR) {
+                updateTelephonyCapable(true);
             } else {
                 return;
             }
@@ -2188,11 +2205,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         sendUpdates(callback);
     }
 
+    public boolean isSwitchingUser() {
+        return mSwitchingUser;
+    }
+
     @AnyThread
     public void setSwitchingUser(boolean switching) {
-        synchronized (this) {
-            mSwitchingUser = switching;
-        }
+        mSwitchingUser = switching;
         // Since this comes in on a binder thread, we need to post if first
         mHandler.post(mUpdateBiometricListeningState);
     }

@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nelze hledat sítě"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Žádné"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Uloženo"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Odpojeno"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Vypnuto"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Selhání konfigurace protokolu IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nejste připojeni, protože síť je příliš slabá"</string>

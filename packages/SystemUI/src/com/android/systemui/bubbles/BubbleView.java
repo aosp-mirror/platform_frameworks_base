@@ -138,19 +138,6 @@ public class BubbleView extends FrameLayout {
         updateDotVisibility(animate, null /* after */);
     }
 
-    /**
-     * Changes the dot's visibility to match the bubble view's state, running the provided callback
-     * after animation if requested.
-     */
-    void updateDotVisibility(boolean animate, Runnable after) {
-        boolean showDot = getEntry().showInShadeWhenBubble() && !mSuppressDot;
-
-        if (animate) {
-            animateDot(showDot, after);
-        } else {
-            mBadgedImageView.setShowDot(showDot);
-        }
-    }
 
     /**
      * Sets whether or not to hide the dot even if we'd otherwise show it. This is used while the
@@ -178,17 +165,34 @@ public class BubbleView extends FrameLayout {
     }
 
     /**
+     * Changes the dot's visibility to match the bubble view's state, running the provided callback
+     * after animation if requested.
+     */
+    private void updateDotVisibility(boolean animate, Runnable after) {
+        boolean showDot = getEntry().showInShadeWhenBubble() && !mSuppressDot;
+
+        if (animate) {
+            animateDot(showDot, after);
+        } else {
+            mBadgedImageView.setShowDot(showDot);
+        }
+    }
+
+    /**
      * Animates the badge to show or hide.
      */
     private void animateDot(boolean showDot, Runnable after) {
         if (mBadgedImageView.isShowingDot() != showDot) {
-            mBadgedImageView.setShowDot(showDot);
+            if (showDot) {
+                mBadgedImageView.setShowDot(true);
+            }
+
             mBadgedImageView.clearAnimation();
             mBadgedImageView.animate().setDuration(200)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setUpdateListener((valueAnimator) -> {
                         float fraction = valueAnimator.getAnimatedFraction();
-                        fraction = showDot ? fraction : 1 - fraction;
+                        fraction = showDot ? fraction : 1f - fraction;
                         mBadgedImageView.setDotScale(fraction);
                     }).withEndAction(() -> {
                         if (!showDot) {

@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Не може да се сканира за мрежи"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Няма"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Запазено"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Няма връзка"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Деактивирани"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Неуспешно конфигуриране на IP адреса"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Не е установена връзка поради ниското качество на мрежата"</string>
@@ -313,7 +314,7 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Активиране на 4x MSAA в прилож. с OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отстр. на грешки при неправоъг. изрязване"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Изобр. на HWUI: Профилир."</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Слоеве за отстр. на грешки в ГП: Актив."</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Активиране на слоевете за отстр. на грешки в ГП"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Разреш. на зарежд. на слоевете за отстр. на грешки в ГП за съотв. прилож."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Скала на аним.: Прозорец"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Скала на преходната анимация"</string>

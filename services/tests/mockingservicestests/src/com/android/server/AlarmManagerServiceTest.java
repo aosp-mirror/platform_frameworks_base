@@ -43,6 +43,8 @@ import static com.android.server.AlarmManagerService.Constants.KEY_LISTENER_TIME
 import static com.android.server.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
 import static com.android.server.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
+import static com.android.server.AlarmManagerService.IS_WAKEUP_MASK;
+import static com.android.server.AlarmManagerService.TIME_CHANGED_MASK;
 import static com.android.server.AlarmManagerService.WORKING_INDEX;
 
 import static org.junit.Assert.assertEquals;
@@ -126,13 +128,15 @@ public class AlarmManagerServiceTest {
     private MockitoSession mMockingSession;
     private Injector mInjector;
     private volatile long mNowElapsedTest;
+    private volatile long mNowRtcTest;
     @GuardedBy("mTestTimer")
     private TestTimer mTestTimer = new TestTimer();
 
     static class TestTimer {
         private long mElapsed;
         boolean mExpired;
-        int mType;
+        private int mType;
+        private int mFlags; // Flags used to decide what needs to be evaluated.
 
         synchronized long getElapsed() {
             return mElapsed;
@@ -147,7 +151,16 @@ public class AlarmManagerServiceTest {
             return mType;
         }
 
+        synchronized int getFlags() {
+            return mFlags;
+        }
+
         synchronized void expire() throws InterruptedException {
+            expire(IS_WAKEUP_MASK); // Default: evaluate eligibility of all alarms
+        }
+
+        synchronized void expire(int flags) throws InterruptedException {
+            mFlags = flags;
             mExpired = true;
             notifyAll();
             // Now wait for the alarm thread to finish execution.
@@ -181,7 +194,7 @@ public class AlarmManagerServiceTest {
                 }
                 mTestTimer.mExpired = false;
             }
-            return AlarmManagerService.IS_WAKEUP_MASK; // Doesn't matter, just evaluate.
+            return mTestTimer.getFlags();
         }
 
         @Override
@@ -212,6 +225,11 @@ public class AlarmManagerServiceTest {
         @Override
         long getElapsedRealtime() {
             return mNowElapsedTest;
+        }
+
+        @Override
+        long getCurrentTimeMillis() {
+            return mNowRtcTest;
         }
 
         @Override
@@ -340,11 +358,38 @@ public class AlarmManagerServiceTest {
     }
 
     @Test
-    public void testSingleAlarmSet() {
+    public void singleElapsedAlarmSet() {
         final long triggerTime = mNowElapsedTest + 5000;
         final PendingIntent alarmPi = getNewMockPendingIntent();
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, alarmPi);
         assertEquals(triggerTime, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void singleRtcAlarmSet() {
+        mNowElapsedTest = 54;
+        mNowRtcTest = 1243;     // arbitrary values of time
+        final long triggerRtc = mNowRtcTest + 5000;
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        setTestAlarm(RTC_WAKEUP, triggerRtc, alarmPi);
+        final long triggerElapsed = triggerRtc - (mNowRtcTest - mNowElapsedTest);
+        assertEquals(triggerElapsed, mTestTimer.getElapsed());
+    }
+
+    @Test
+    public void timeChangeMovesRtcAlarm() throws Exception {
+        mNowElapsedTest = 42;
+        mNowRtcTest = 4123;     // arbitrary values of time
+        final long triggerRtc = mNowRtcTest + 5000;
+        final PendingIntent alarmPi = getNewMockPendingIntent();
+        setTestAlarm(RTC_WAKEUP, triggerRtc, alarmPi);
+        final long triggerElapsed1 = mTestTimer.getElapsed();
+        final long timeDelta = -123;
+        mNowRtcTest += timeDelta;
+        mTestTimer.expire(TIME_CHANGED_MASK);
+        final long triggerElapsed2 = mTestTimer.getElapsed();
+        assertEquals("Invalid movement of triggerElapsed following time change", triggerElapsed2,
+                triggerElapsed1 - timeDelta);
     }
 
     @Test

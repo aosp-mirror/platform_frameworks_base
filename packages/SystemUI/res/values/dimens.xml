@@ -41,10 +41,10 @@
 
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
-    <dimen name="navigation_edge_panel_width">76dp</dimen>
+    <dimen name="navigation_edge_panel_width">70dp</dimen>
     <!-- Padding at the end of the navigation panel to allow the arrow not to be clipped off -->
-    <dimen name="navigation_edge_panel_padding">24dp</dimen>
-    <dimen name="navigation_edge_panel_height">84dp</dimen>
+    <dimen name="navigation_edge_panel_padding">8dp</dimen>
+    <dimen name="navigation_edge_panel_height">96dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
@@ -89,7 +89,7 @@
     <dimen name="status_bar_wifi_signal_spacer_width">2.5dp</dimen>
 
     <!-- Size of the view displaying the wifi signal icon in the status bar. -->
-    <dimen name="status_bar_wifi_signal_size">15dp</dimen>
+    <dimen name="status_bar_wifi_signal_size">@*android:dimen/status_bar_system_icon_size</dimen>
 
     <!-- Spacing before the airplane mode icon if there are any icons preceding it. -->
     <dimen name="status_bar_airplane_spacer_width">4dp</dimen>
@@ -944,6 +944,12 @@
 
     <!-- Global actions grid layout -->
     <dimen name="global_actions_grid_side_margin">4dp</dimen>
+    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
+
+    <!-- Used to workaround a bug where shadows are clipped during animations by expanding
+         the bounds of the parent view. -->
+    <dimen name="global_actions_grid_container_shadow_offset">20dp</dimen>
+    <dimen name="global_actions_grid_container_negative_shadow_offset">-20dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->

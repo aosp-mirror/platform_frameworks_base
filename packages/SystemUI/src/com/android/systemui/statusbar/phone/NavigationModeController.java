@@ -63,6 +63,7 @@ public class NavigationModeController implements Dumpable {
     }
 
     private final Context mContext;
+    private Context mCurrentUserContext;
     private final IOverlayManager mOverlayManager;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final UiOffloadThread mUiOffloadThread;
@@ -127,6 +128,7 @@ public class NavigationModeController implements Dumpable {
             DeviceProvisionedController deviceProvisionedController,
             UiOffloadThread uiOffloadThread) {
         mContext = context;
+        mCurrentUserContext = context;
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         mUiOffloadThread = uiOffloadThread;
@@ -145,13 +147,13 @@ public class NavigationModeController implements Dumpable {
     }
 
     public void updateCurrentInteractionMode(boolean notify) {
-        Context context = getCurrentUserContext();
-        int mode = getCurrentInteractionMode(context);
+        mCurrentUserContext = getCurrentUserContext();
+        int mode = getCurrentInteractionMode(mCurrentUserContext);
         mMode = mode;
         if (DEBUG) {
             Log.e(TAG, "updateCurrentInteractionMode: mode=" + mMode
-                    + " contextUser=" + context.getUserId());
-            dumpAssetPaths(context);
+                    + " contextUser=" + mCurrentUserContext.getUserId());
+            dumpAssetPaths(mCurrentUserContext);
         }
 
         if (notify) {
@@ -163,7 +165,7 @@ public class NavigationModeController implements Dumpable {
 
     public int addListener(ModeChangedListener listener) {
         mListeners.add(listener);
-        return getCurrentInteractionMode(mContext);
+        return getCurrentInteractionMode(mCurrentUserContext);
     }
 
     public void removeListener(ModeChangedListener listener) {
@@ -265,7 +267,7 @@ public class NavigationModeController implements Dumpable {
             defaultOverlays = "failed_to_fetch";
         }
         pw.println("  defaultOverlays=" + defaultOverlays);
-        dumpAssetPaths(getCurrentUserContext());
+        dumpAssetPaths(mCurrentUserContext);
     }
 
     private void dumpAssetPaths(Context context) {

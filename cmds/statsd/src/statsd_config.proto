@@ -330,6 +330,8 @@ message IncidentdDetails {
 
   // Class name of the incident report receiver.
   optional string receiver_cls = 4;
+
+  optional string alert_description = 5;
 }
 
 message PerfettoDetails {
