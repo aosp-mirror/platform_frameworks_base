@@ -480,6 +480,13 @@ struct DestroySemaphoreInfo {
     PFN_vkDestroySemaphore mDestroyFunction;
     VkDevice mDevice;
     VkSemaphore mSemaphore;
+    // We need to make sure we don't delete the VkSemaphore until it is done being used by both Skia
+    // (including by the GPU) and inside the VulkanManager. So we always start with two refs, one
+    // owned by Skia and one owned by the VulkanManager. The refs are decremented each time
+    // destroy_semaphore is called with this object. Skia will call destroy_semaphore once it is
+    // done with the semaphore and the GPU has finished work on the semaphore. The VulkanManager
+    // calls destroy_semaphore after sending the semaphore to Skia and exporting it if need be.
+    int mRefs = 2;
 
     DestroySemaphoreInfo(PFN_vkDestroySemaphore destroyFunction, VkDevice device,
             VkSemaphore semaphore)
@@ -488,8 +495,11 @@ struct DestroySemaphoreInfo {
 
 static void destroy_semaphore(void* context) {
     DestroySemaphoreInfo* info = reinterpret_cast<DestroySemaphoreInfo*>(context);
-    info->mDestroyFunction(info->mDevice, info->mSemaphore, nullptr);
-    delete info;
+    --info->mRefs;
+    if (!info->mRefs) {
+        info->mDestroyFunction(info->mDevice, info->mSemaphore, nullptr);
+        delete info;
+    }
 }
 
 void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect) {
@@ -540,6 +550,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
         ALOGE("VulkanManager::swapBuffers(): Semaphore submission failed");
         mQueueWaitIdle(mGraphicsQueue);
     }
+    destroy_semaphore(destroyInfo);
 
     surface->presentCurrentBuffer(dirtyRect, fenceFd);
 }
@@ -642,13 +653,16 @@ status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence, GrContext* gr
 
     DestroySemaphoreInfo* destroyInfo = new DestroySemaphoreInfo(mDestroySemaphore, mDevice,
                                                                  semaphore);
+    // Even if Skia fails to submit the semaphore, it will still call the destroy_semaphore callback
+    // which will remove its ref to the semaphore. The VulkanManager must still release its ref,
+    // when it is done with the semaphore.
     GrSemaphoresSubmitted submitted =
             grContext->flush(kNone_GrFlushFlags, 1, &backendSemaphore,
                              destroy_semaphore, destroyInfo);
 
     if (submitted == GrSemaphoresSubmitted::kNo) {
         ALOGE("VulkanManager::createReleaseFence: Failed to submit semaphore");
-        mDestroySemaphore(mDevice, semaphore, nullptr);
+        destroy_semaphore(destroyInfo);
         return INVALID_OPERATION;
     }
 
@@ -661,6 +675,7 @@ status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence, GrContext* gr
     int fenceFd = 0;
 
     err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
+    destroy_semaphore(destroyInfo);
     if (VK_SUCCESS != err) {
         ALOGE("VulkanManager::createReleaseFence: Failed to get semaphore Fd");
         return INVALID_OPERATION;

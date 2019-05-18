@@ -454,8 +454,8 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"هرگز"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"فقط اولویت‌دار"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"صدای زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید، مگر اینکه قبل از آن ساعت، این تنظیم را خاموش کنید"</string>
-    <string name="zen_alarm_warning" msgid="6236690803924413088">"صدای زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید، مگر اینکه قبل‌از آن ساعت، این تنظیم را خاموش کنید"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید"</string>
     <string name="alarm_template" msgid="4996153414057676512">"ساعت <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"روز <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"مدت"</string>

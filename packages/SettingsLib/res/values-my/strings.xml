@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ကွန်ယက်များကို စကင်မလုပ်နိုင်ပါ"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"တစ်ခုမျှ မဟုတ်ပါ"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"မရှိ"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"သိမ်းဆည်းပြီး"</string>
     <string name="wifi_disconnected" msgid="8085419869003922556">"ချိတ်ဆက်မထားပါ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ပိတ်ထားသည်"</string>
@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"စက်ကွင်းထဲတွင် မဟုတ်ပါ"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"အလိုအလျောက်ချိတ်ဆက်မည်မဟုတ်ပါ"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"အင်တာနက် ချိတ်ဆက်မှု မရှိပါ"</string>
-    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> မှသိမ်းဆည်းခဲ့သည်"</string>
+    <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> က သိမ်းဆည်းခဲ့သည်"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"ကွန်ရက်အဆင့်သတ်မှတ်ပေးသူ မှတစ်ဆင့် အလိုအလျောက် ချိတ်ဆက်ထားပါသည်"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>

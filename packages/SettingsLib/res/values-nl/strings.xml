@@ -37,7 +37,7 @@
     <string name="wifi_no_internet" msgid="4663834955626848401">"Geen internettoegang"</string>
     <string name="saved_network" msgid="4352716707126620811">"Opgeslagen door \'<xliff:g id="NAME">%1$s</xliff:g>\'"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatisch verbonden via %1$s"</string>
-    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatisch verbonden via provider van netwerkbeoordelingen"</string>
+    <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatisch verbonden via netwerkbeoordelaar"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Verbonden via %1$s"</string>
     <string name="connected_via_app" msgid="5571999941988929520">"Verbonden via <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Beschikbaar via %1$s"</string>

@@ -338,8 +338,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (b != null) {
             sThermalService = IThermalService.Stub.asInterface(b);
             try {
-                sThermalService.registerThermalEventListenerWithType(
-                        new ThermalEventListener(), Temperature.TYPE_SKIN);
+                sThermalService.registerThermalEventListener(
+                        new ThermalEventListener());
                 Slog.i(TAG, "register thermal listener successfully");
             } catch (RemoteException e) {
                 // Should never happen.

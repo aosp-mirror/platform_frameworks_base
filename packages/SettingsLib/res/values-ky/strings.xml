@@ -142,10 +142,10 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Өчүрүлгөн колдонмолор жана колдонуучулар"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"Тутум жаңыртуулары"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB модем"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Ташыма кошулуу чекити"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Wi-Fi байланыш түйүнү"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Жалгаштыруу"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Жалгаштыруу жана ташыма чекит"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Модем режими"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Жумуш профилинин колднмлр"</string>
     <string name="user_guest" msgid="8475274842845401871">"Конок"</string>
     <string name="unknown" msgid="1592123443519355854">"Белгисиз"</string>

@@ -58,8 +58,8 @@
             android:gravity="center_vertical">
             <com.android.systemui.statusbar.AlphaOptimizedImageView
                 android:id="@+id/wifi_signal"
-                android:layout_width="@dimen/status_bar_icon_size"
-                android:layout_height="@dimen/status_bar_icon_size"
+                android:layout_width="@*android:dimen/status_bar_system_icon_size"
+                android:layout_height="@*android:dimen/status_bar_system_icon_size"
                 android:theme="?attr/lightIconTheme"/>
         </FrameLayout>
 
