@@ -44,6 +44,7 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.PrivacyItemControllerKt;
 import com.android.systemui.privacy.PrivacyType;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
@@ -82,7 +83,8 @@ public class PhoneStatusBarPolicy
                 ZenModeController.Callback,
                 DeviceProvisionedListener,
                 KeyguardMonitor.Callback,
-                PrivacyItemController.Callback {
+                PrivacyItemController.Callback,
+                LocationController.LocationChangeCallback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -257,6 +259,7 @@ public class PhoneStatusBarPolicy
         mKeyguardMonitor.addCallback(this);
         mPrivacyItemController.addCallback(this);
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
+        mLocationController.addCallback(this);
 
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
     }
@@ -633,6 +636,20 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotCamera, showCamera);
         mIconController.setIconVisibility(mSlotMicrophone, showMicrophone);
         mIconController.setIconVisibility(mSlotLocation, showLocation);
+    }
+
+    @Override
+    public void onLocationActiveChanged(boolean active) {
+        if (!PrivacyItemControllerKt.isPermissionsHubEnabled()) updateLocation();
+    }
+
+    // Updates the status view based on the current state of location requests.
+    private void updateLocation() {
+        if (mLocationController.isLocationActive()) {
+            mIconController.setIconVisibility(mSlotLocation, true);
+        } else {
+            mIconController.setIconVisibility(mSlotLocation, false);
+        }
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {

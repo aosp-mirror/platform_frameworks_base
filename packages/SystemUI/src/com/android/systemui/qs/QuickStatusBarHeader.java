@@ -34,6 +34,7 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.AlarmClock;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
@@ -54,6 +55,7 @@ import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
@@ -65,6 +67,7 @@ import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.PrivacyDialogBuilder;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
+import com.android.systemui.privacy.PrivacyItemControllerKt;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -141,6 +144,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private OngoingPrivacyChip mPrivacyChip;
     private Space mSpace;
     private BatteryMeterView mBatteryRemainingIcon;
+    private boolean mPermissionsHubEnabled;
 
     private PrivacyItemController mPrivacyItemController;
 
@@ -153,6 +157,20 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     };
     private boolean mHasTopCutout = false;
     private boolean mPrivacyChipLogged = false;
+
+    private final DeviceConfig.OnPropertyChangedListener mPropertyListener =
+            new DeviceConfig.OnPropertyChangedListener() {
+                @Override
+                public void onPropertyChanged(String namespace, String name, String value) {
+                    if (DeviceConfig.NAMESPACE_PRIVACY.equals(namespace)
+                            && SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED.equals(
+                            name)) {
+                        mPermissionsHubEnabled = Boolean.valueOf(value);
+                        StatusIconContainer iconContainer = findViewById(R.id.statusIcons);
+                        iconContainer.setIgnoredSlots(getIgnoredIconSlots());
+                    }
+                }
+            };
 
     private PrivacyItemController.Callback mPICCallback = new PrivacyItemController.Callback() {
         @Override
@@ -236,6 +254,12 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
         mRingerModeTextView.setSelected(true);
         mNextAlarmTextView.setSelected(true);
+
+        mPermissionsHubEnabled = PrivacyItemControllerKt.isPermissionsHubEnabled();
+        // Change the ignored slots when DeviceConfig flag changes
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
+                mContext.getMainExecutor(), mPropertyListener);
+
     }
 
     private List<String> getIgnoredIconSlots() {
@@ -244,8 +268,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 com.android.internal.R.string.status_bar_camera));
         ignored.add(mContext.getResources().getString(
                 com.android.internal.R.string.status_bar_microphone));
-        ignored.add(mContext.getResources().getString(
-                com.android.internal.R.string.status_bar_location));
+        if (mPermissionsHubEnabled) {
+            ignored.add(mContext.getResources().getString(
+                    com.android.internal.R.string.status_bar_location));
+        }
 
         return ignored;
     }
@@ -262,7 +288,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     }
 
     private void setChipVisibility(boolean chipVisible) {
-        if (chipVisible) {
+        if (chipVisible && mPermissionsHubEnabled) {
             mPrivacyChip.setVisibility(View.VISIBLE);
             // Makes sure that the chip is logged as viewed at most once each time QS is opened
             // mListening makes sure that the callback didn't return after the user closed QS

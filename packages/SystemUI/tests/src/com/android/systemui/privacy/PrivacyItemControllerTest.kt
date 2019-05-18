@@ -24,13 +24,14 @@ import android.content.pm.UserInfo
 import android.os.Handler
 import android.os.UserHandle
 import android.os.UserManager
-import androidx.test.filters.SmallTest
+import android.provider.DeviceConfig
+import android.provider.Settings.RESET_MODE_PACKAGE_DEFAULTS
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.filters.SmallTest
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
 import com.android.systemui.Dependency
-import com.android.systemui.Dependency.BG_HANDLER
-import com.android.systemui.Dependency.MAIN_HANDLER
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
@@ -38,6 +39,7 @@ import com.android.systemui.appops.AppOpsController
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThat
 import org.junit.Assert.assertTrue
@@ -106,6 +108,9 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         mContext.addMockSystemService(UserManager::class.java, userManager)
         mContext.getOrCreateTestableResources().addOverride(R.string.device_services,
                 DEVICE_SERVICES_STRING)
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED,
+                "true", false)
 
         doReturn(listOf(object : UserInfo() {
             init {
@@ -116,9 +121,15 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         privacyItemController = PrivacyItemController(mContext)
     }
 
+    @After
+    fun tearDown() {
+        DeviceConfig.resetToDefaults(RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_PRIVACY)
+    }
+
     @Test
     fun testSetListeningTrueByAddingCallback() {
         privacyItemController.addCallback(callback)
+        testableLooper.processAllMessages()
         verify(appOpsController).addCallback(eq(PrivacyItemController.OPS),
                 any(AppOpsController.Callback::class.java))
         testableLooper.processAllMessages()
@@ -126,18 +137,16 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSetListeningTrue() {
-        privacyItemController.setListening(true)
-        verify(appOpsController).addCallback(eq(PrivacyItemController.OPS),
+    fun testSetListeningFalseByRemovingLastCallback() {
+        privacyItemController.addCallback(callback)
+        testableLooper.processAllMessages()
+        verify(appOpsController, never()).removeCallback(any(IntArray::class.java),
                 any(AppOpsController.Callback::class.java))
-    }
-
-    @Test
-    fun testSetListeningFalse() {
-        privacyItemController.setListening(true)
-        privacyItemController.setListening(false)
+        privacyItemController.removeCallback(callback)
+        testableLooper.processAllMessages()
         verify(appOpsController).removeCallback(eq(PrivacyItemController.OPS),
                 any(AppOpsController.Callback::class.java))
+        verify(callback).privacyChanged(emptyList())
     }
 
     @Test
@@ -168,7 +177,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     fun testRegisterReceiver_allUsers() {
         val spiedContext = spy(mContext)
         val itemController = PrivacyItemController(spiedContext)
-        itemController.setListening(true)
+        itemController.addCallback(callback)
+        testableLooper.processAllMessages()
         verify(spiedContext, atLeastOnce()).registerReceiverAsUser(
                 eq(itemController.userSwitcherReceiver), eq(UserHandle.ALL), any(), eq(null),
                 eq(null))
@@ -267,5 +277,17 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         val privacyList = privacyItemController.privacyList
         assertEquals(list, privacyList)
         assertTrue(list !== privacyList)
+    }
+
+    @Test
+    fun testNotListeningWhenIndicatorsDisabled() {
+        privacyItemController.devicePropertyChangedListener.onPropertyChanged(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED,
+                "false")
+        privacyItemController.addCallback(callback)
+        testableLooper.processAllMessages()
+        verify(appOpsController, never()).addCallback(eq(PrivacyItemController.OPS),
+                any(AppOpsController.Callback::class.java))
     }
 }
