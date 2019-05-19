@@ -267,7 +267,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Síťová upozornění"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"K dispozici je síť"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Stav sítě VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administrace zařízení"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Upozornění od vašeho administrátora IT"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornění"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Prodejní ukázka"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Připojení USB"</string>
@@ -571,7 +571,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Umístěte telefon níž."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Přesuňte telefon vlevo."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Přesuňte telefon vpravo."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Dívejte se na obrazovku s otevřenýma očima."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Dívejte se přímo na zařízení."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Obličej není vidět. Podívejte se na telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Zaznamenejte obličej znovu."</string>
@@ -585,7 +585,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Obličej nelze ověřit. Hardware není dostupný."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Limit ověření obličeje vypršel. Zkuste to znovu."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Zopakujte ověření obličeje."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Údaje o novém obličeji nelze uložit. Nejdřív vymažte starý."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Operace snímání obličeje byla zrušena"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Ověření obličejem zrušil uživatel"</string>
@@ -654,6 +654,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Umožňuje držiteli oprávnění navázat se na služby operátora. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"přístup k režimu Nerušit"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikaci číst a zapisovat konfiguraci režimu Nerušit."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"zahájení zobrazení využití oprávnění"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Umožňuje přístup zahájit využití oprávnění jiné aplikace. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Sledovat pokusy o odemknutí obrazovky"</string>
@@ -1966,9 +1968,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Zkontrolovat aktualizace"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Máte nové zprávy"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Zobrazíte je v aplikaci pro SMS"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Funkce mohou být omezeny"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Klepnutím je odemknete"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Uživatelská data jsou uzamčena"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Některé funkce mohou být omezeny"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Pracovní profil je uzamčen"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Klepnutím jej odemknete"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Připojeno k zařízení <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
