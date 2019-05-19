@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ਨੈੱਟਵਰਕ ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਹੈ"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN ਅਵਸਥਾ"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"ਡੀਵਾਈਸ ਪ੍ਰਸ਼ਾਸਨ"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ਪ੍ਰਚੂਨ ਸਟੋਰਾਂ ਲਈ ਡੈਮੋ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ਕਨੈਕਸ਼ਨ"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ਫ਼ੋਨ ਨੂੰ ਥੋੜ੍ਹਾ ਹੇਠਾਂ ਵੱਲ ਕਰੋ।"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ਫ਼ੋਨ ਨੂੰ ਖੱਬੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ਫ਼ੋਨ ਨੂੰ ਸੱਜੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ਧਿਆਨ ਨਾਲ ਸਕ੍ਰੀਨ ਵੱਲ ਦੇਖੋ।"</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਨਹੀਂ ਦਿਸ ਰਿਹਾ। ਫ਼ੋਨ ਵੱਲ ਦੇਖੋ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਹਿਲਜੁਲ। ਫ਼ੋਨ ਨੂੰ ਸਥਿਰ ਰੱਖੋ।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਦਰਜ ਕਰੋ।"</string>
@@ -579,7 +580,8 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"ਚਿਹਰਾ ਪਛਾਣਨ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"ਨਵਾਂ ਚਿਹਰਾ ਡਾਟਾ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ। ਪਹਿਲਾਂ ਪੁਰਾਣਾ ਹਟਾਓ।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਨੂੰ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
@@ -648,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ਹੋਲਡਰ ਨੂੰ ਕੈਰੀਅਰ ਸੇਵਾਵਾਂ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਤੱਕ ਪਹੁੰਚ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ਐਪ ਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਕੌਂਫਿਗਰੇਸ਼ਨ ਨੂੰ ਪੜ੍ਹਨ ਅਤੇ ਲਿਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
@@ -1899,9 +1905,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"ਅੱਪਡੇਟ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ਤੁਹਾਨੂੰ ਨਵੇਂ ਸੁਨੇਹੇ ਪ੍ਰਾਪਤ ਹੋਏ ਹਨ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ਦੇਖਣ ਲਈ SMS ਐਪ ਖੋਲ੍ਹੋ"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸੀਮਿਤ ਹੋ ਸਕਦੀ ਹੈ"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"ਵਰਤੋਂਕਾਰ  ਡਾਟਾ   ਲਾਕ  ਕੀਤਾ ਗਿਆ"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸੀਮਤ ਹੋ ਸਕਦੀ ਹੈ"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਲਾਕ ਕੀਤੀ ਗਈ"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਹੋਈ"</string>

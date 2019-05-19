@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Сүлжээний сануулга"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Сүлжээ боломжтой"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN төлөв"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Төхөөрөмжийн удирдлага"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Таны IT админаас илгээсэн сэрэмжлүүлэг"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сануулга"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Жижиглэнгийн жишээ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB холболт"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Утсаа доошлуулна уу."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Утсаа зүүн тийш болгоно уу."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Утсаа баруун тийш болгоно уу."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Нүдээ нээгээд дэлгэц рүү харна уу."</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Таны царайг харахгүй байна. Утас руу харна уу."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Хэт их хөдөлгөөнтэй байна. Утсаа хөдөлгөөнгүй барина уу."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Нүүрээ дахин бүртгүүлнэ үү."</string>
@@ -579,7 +580,8 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Царайг бататгаж чадсангүй. Техник хангамж боломжгүй байна."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Царай таниулах хугацаа дууслаа. Дахин оролдоно уу."</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Царайн шинэ өгөгдлийг хадгалж чадсангүй. Эхлээд хуучин өгөгдлийг устгана уу."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Царайн үйл ажиллагааг цуцаллаа"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Хэрэглэгч царайн нотолгоог цуцалсан байна"</string>
@@ -648,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Аливаа эзэмшигчийг үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбодог. Энгийн аппд шаардлагагүй."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Бүү саад бол тохируулгад хандалт хийх"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Апп-д Бүү саад бол тохируулгыг уншиж, бичихийг зөвшөөрөх"</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
@@ -1898,9 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Шинэчлэлтийг шалгах"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Танд шинэ зурвасууд байна"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Үзэхийн тулд SMS аппыг нээх"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Зарим үйлдэл хязгаарлалттай байж болно"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Түгжээг тайлахын тулд дар"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Хэрэглэгчийн мэдээлэл түгжигдсэн"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Зарим функцийг хязгаарласан байж болзошгүй"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Ажлын профайлыг түгжсэн"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Ажлын профайлын түгжээг тайлахын тулд дарна уу"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-д холбогдсон"</string>
