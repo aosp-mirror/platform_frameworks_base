@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ජාල ඇඟවීම්"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"ජාලය ලබා ගැනීමට හැකිය"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN තත්ත්වය"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"උපාංග පරිපාලනය"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"ඔබේ තොරතුරු තාක්‍ෂණ පරිපාලක වෙතින් ඇඟවීම්"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ඇඟවීම්"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"සිල්ලර ආදර්ශනය"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB සම්බන්ධතාවය"</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"දුරකථනය පහළට ගෙන යන්න."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"දුරකථනය වමට ගෙන යන්න."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"දුරකථනය දකුණට ගෙන යන්න."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ඔබේ ඇස් ඇරගෙන තිරය වෙත බලන්න."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ඔබේ උපාංගය වෙත තවත් ඍජුව බලන්න."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ඔබේ මුහුණ දැකිය නොහැක. දුරකථනය වෙත බලන්න."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"චලනය ඉතා වැඩියි. දුරකථනය ස්ථිරව අල්ලා සිටින්න."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ඔබේ මුහුණ යළි ලියාපදිංචි කරන්න."</string>
@@ -579,7 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"මුහුණ සත්‍යාපනය කළ නොහැක. දෘඩාංගය නොමැත."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"මුහුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"මුහුණු සත්‍යාපනයට උත්සාහ කරන්න."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"නව මුහුණු දත්ත ගබඩා කළ නොහැක. පළමුව පැරණි එකක් මකන්න."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"මුහුණු මෙහෙයුම අවලංගුයි"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"පරිශීලකයා විසින් මුහුණ සත්‍යාපනය අවලංගු කර ඇත"</string>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"වාහක සේවා වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"බාධා නොකරන්න ප්‍රවේශ වන්න"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1900,9 +1902,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"යාවත්කාලීන සඳහා පරික්ෂා කරන්න"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ඔබට නව පණිවිඩ තිබේ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"බැලීමට විවෘත SMS යෙදුම විවෘත කරන්න"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"ඇතැම් ක්‍රියාකාරිත්ව සීමිත විය හැකිය"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"අගුලු හැරීමට තට්ටු කරන්න"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"පරිශීලක දත්ත අගුලු දමා ඇත"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"ඇතැම් ක්‍රියාකාරිත්ව සීමිත විය හැක"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"කාර්යාල පැතිකඩ අගුලු දමා ඇත"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"කාර්යාල පැතිකඩ අගුලු හැරීමට තට්ටු කරන්න"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> වෙත සම්බන්ධ විය"</string>

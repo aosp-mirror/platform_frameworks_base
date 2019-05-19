@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"网络提醒"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"有可用的网络"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 状态"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"设备管理"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"您的 IT 管理员发来的提醒"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"提醒"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"零售演示模式"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 连接"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"请将手机拿低一点。"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"请将手机向左移动。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"请将手机向右移动。"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"请直视屏幕并张开双眼。"</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不清您的脸部，请直视手机。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"请重新注册您的面孔。"</string>
@@ -579,7 +580,8 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"无法验证人脸。硬件无法使用。"</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"人脸处理操作超时，请重试。"</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"无法存储新的人脸数据。请先删除旧的人脸数据。"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"人脸处理操作已取消"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"用户已取消人脸身份验证"</string>
@@ -648,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允许应用绑定到运营商服务。普通应用绝不需要此权限。"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"“勿扰”模式使用权限"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允许此应用读取和写入“勿扰”模式配置。"</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"监控屏幕解锁尝试次数"</string>
@@ -1631,7 +1637,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"请输入4至8位数的PIN码。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK码应包含8位数字。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN码不匹配"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐号。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>
@@ -1898,9 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"检查更新"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新消息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"打开短信应用查看"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"部分功能可能会受到限制"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"点按即可解锁"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"用户数据已锁定"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"部分功能可能会受到限制"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"工作资料已锁定"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"点按即可解锁工作资料"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"已连接到<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

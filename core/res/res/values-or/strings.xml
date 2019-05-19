@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ନେଟୱର୍କ ଅଲର୍ଟ"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ଅଛି"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN ସ୍ଥିତି"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"ଡିଭାଇସ୍‌ ଆଡମିନିଷ୍ଟ୍ରେସନ୍‍"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"ଆପଣଙ୍କର ଆଇଟି ଆଡ୍‌ମିନ୍‌ଙ୍କ ଠାରୁ ଆଲର୍ଟ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ଆଲର୍ଟ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ରିଟେଲ୍‌ ଡେମୋ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ସଂଯୋଗ"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ଫୋନ୍‌କୁ ତଳକୁ ନିଅନ୍ତୁ।"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ଡାହାଣ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ଆପଣଙ୍କ ଆଖି ଖୋଲା ଥିବା ସମୟରେ ସ୍କ୍ରିନ୍‌କୁ ଦେଖନ୍ତୁ।"</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ଆପଣଙ୍କର ମୁହଁ ଦେଖି ପାରୁନାହିଁ। ଫୋନ୍‌କୁ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
@@ -573,16 +574,14 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"ଅତ୍ୟନ୍ତ ସମପରି, ଦୟାକରି ଆପଣଙ୍କର ପୋଜ୍ ବଦଳାନ୍ତୁ।"</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"ଆପଣଙ୍କର ମୁହଁ ଲୁଚାଉଥିବା ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"ସ୍କ୍ରିନ୍‍ର ଉପର ପ୍ରାନ୍ତରେ ଥିବା ସେନ୍ସର୍‍କୁ ଖାଲି କରନ୍ତୁ।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"ମୁହଁ ଡାଟା ଗ୍ରହଣର ସମୟସୀମା ଶେଷ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"ନୂଆ ମୁହଁ ଡାଟା ଷ୍ଟୋର୍ ହେବ ନାହିଁ। ପ୍ରଥମେ ପୁରୁଣାକୁ ଡିଲିଟ୍ କରନ୍ତୁ।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ମୁହଁ ପ୍ରମାଣିକିକରଣ ପ୍ରକ୍ରିୟା ବାତିଲ୍ ହୋଇଛି"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ଉପଯୋଗକର୍ତ୍ତା ମୁହଁ ପ୍ରମାଣିକିକରଣ ବାତିଲ୍‌ କରିଛନ୍ତି"</string>
@@ -651,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"କେରିଅର୍‌ ସେବାଗୁଡ଼ିକ ସହିତ ଧାରକଙ୍କୁ ଯୋଡ଼ିଥାଏ। ସାମାନ୍ୟ ଆପ୍‍ ପାଇଁ କଦାପି ଆବଶ୍ୟକ ହୁଏନାହିଁ।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" କନଫିଗରେଶନ୍‍ ପଢ଼ିବା ତଥା ଲେଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ପାସ୍‌ୱର୍ଡ ନିୟମାବଳୀ ସେଟ୍ କରନ୍ତୁ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ପାସ୍‌ୱର୍ଡ ଓ PINରେ ଅନୁମୋଦିତ ଦୀର୍ଘତା ଓ ବର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ସ୍କ୍ରୀନ୍-ଅନଲକ୍ କରିବା ଉଦ୍ୟମ ନୀରିକ୍ଷଣ କରନ୍ତୁ"</string>
@@ -1233,7 +1236,7 @@
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"ଡିଫଲ୍ଟ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"କିଛିନୁହେଁ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ରିଙ୍ଗଟୋନ୍‌"</string>
-    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"ଆଲାର୍ମ ଶବ୍ଦ"</string>
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"ଆଲାରାମ୍ ଶବ୍ଦ"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"ବିଜ୍ଞପ୍ତି ଶବ୍ଦ"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"ଅଜଣା"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1901,9 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"ଅପଡେଟ୍‌ ପାଇଁ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ଆପଣଙ୍କ ପାଖରେ ନୂଆ ମେସେଜ୍‍ ରହିଛି"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ଦେଖିବା ପାଇଁ SMS ଆପ୍‍ ଖୋଲନ୍ତୁ"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"କିଛି ବିଶେଷତା କାମ କରିନପାରେ"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"ଅନଲକ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"ୟୁଜର୍‌ଙ୍କ ଡାଟା ଲକ୍‍ ହେଲା"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"ହୁଏତ କିଛି ପ୍ରକାର୍ଯ୍ୟ ସୀମିତ ହୋଇପାରେ"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଲକ୍‍ ଅଛି"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଅନଲକ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ସହ କନେକ୍ଟ କରାଗଲା"</string>

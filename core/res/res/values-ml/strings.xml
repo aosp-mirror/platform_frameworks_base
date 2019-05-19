@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"നെറ്റ്‌വർക്ക് അലേർട്ടുകൾ"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"നെറ്റ്‌വർക്ക് ‌ലഭ്യമല്ല"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN നില"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"ഉപകരണ അഡ്മിനിസ്ട്രേഷൻ"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"നിങ്ങളുടെ ഐടി അഡ്‌മിനിൽ നിന്നുള്ള മുന്നറിയിപ്പുകൾ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"റീട്ടെയിൽ ഡെമോ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB കണക്ഷൻ"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ഫോൺ കൂടുതൽ താഴേക്ക് നീക്കുക."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"തുറന്ന കണ്ണുകളുമായി സ്‌ക്രീനിലേക്ക് നോക്കുക."</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"നിങ്ങളുടെ മുഖം കാണാനാവുന്നില്ല. ഫോണിലേക്ക് നോക്കൂ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
@@ -573,16 +574,14 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"വളരെയധികം സമാനത, നിങ്ങളുടെ പോസ് മാറ്റുക."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"നിങ്ങളുടെ മുഖം മറയ്‌ക്കുന്നത് എല്ലാം നീക്കം ചെയ്യൂ."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"സ്‌ക്രീനിന്റെ മുകളിലെ സെൻസർ വൃത്തിയാക്കുക."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"മുഖത്തിന്റെ സമയപരിധി കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"പുതിയ മുഖ ഡാറ്റ സംഭരിക്കാനാകില്ല. ആദ്യം പഴയത് ഇല്ലാതാക്കുക."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"മുഖം തിരിച്ചറിയൽ പ്രവർത്തനം റദ്ദാക്കി"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ ഉപയോക്താവ് റദ്ദാക്കി"</string>
@@ -651,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"കാരിയർ സേവനങ്ങളെ ബന്ധിപ്പിക്കാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പ്‌സിന് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\'ശല്യപ്പെടുത്തരുത്\' ആക്സസ് ചെയ്യുക"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1902,9 +1905,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"കാണുന്നതിന് SMS ആപ്പ് തുറക്കുക"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"ചില പ്രവർത്തനക്ഷമതകൾ പരിമിതപ്പെടാം"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"അൺലോക്കുചെയ്യാൻ ടാപ്പുചെയ്യുക"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"ഉപയോക്തൃ ഡാറ്റ ലോക്കുചെയ്തു"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"ചില പ്രവർത്തനം പരിമിതപ്പെടാം"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"ഔദ്യോഗിക പ്രൊഫൈൽ ലോക്കുചെയ്തു"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"ഔദ്യോഗിക പ്രൊഫൈൽ അൺലോക്കുചെയ്യാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്തു"</string>

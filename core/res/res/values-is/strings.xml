@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Viðvaranir netkerfis"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Net í boði"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Staða VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Stjórnun tækis"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Tilkynningar frá kerfisstjóra"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Tilkynningar"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Kynningarútgáfa fyrir verslanir"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-tenging"</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Færðu símann neðar."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Færðu símann til vinstri."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Færðu símann til hægri."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Horfðu á skjáinn með opin augu."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Horfðu beint á tækið."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Sé ekki andlit þitt. Horfðu á símann."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Of mikil hreyfing. Haltu símanum stöðugum."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Skráðu nafnið þitt aftur."</string>
@@ -579,7 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Andlit ekki staðfest. Vélbúnaður er ekki tiltækur."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Tímamörk runnu út fyrir andlit. Reyndu aftur."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Prófaðu andlitsgreiningu aftur."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Ekki er hægt að vista ný andlitsgögn. Eyddu gömlu fyrst."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Hætt við andlitsgreiningu"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Notandi hætti við andlitsgreiningu"</string>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Leyfir handhafa að bindast þjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"aðgangur að „Ónáðið ekki“"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Leyfir forriti að lesa og skrifa í grunnstillingu „Ónáðið ekki“."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"heimildanotkun upphafsyfirlits"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Leyfir handhafa að byrja heimildanotkun fyrir forrit. Ætti aldrei að þurfa fyrir venjuleg forrit."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setja reglur um aðgangsorð"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stjórna lengd og fjölda stafa í aðgangsorðum og PIN-númerum skjáláss."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Fylgjast með tilraunum til að taka skjáinn úr lás"</string>
@@ -1899,9 +1901,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Leita að uppfærslu"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Þú ert með ný skilaboð"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Opnaðu SMS-forritið til að skoða"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Sum virkni kann að vera takmörkuð"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Ýttu til að opna"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Notendagögn læst"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Sum virkni kann að vera takmörkuð"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Vinnusnið læst"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Ýttu til að opna vinnusnið"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Tengt við <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
