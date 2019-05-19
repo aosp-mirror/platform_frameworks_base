@@ -286,9 +286,6 @@ public class BubbleStackView extends FrameLayout {
     private BubbleDismissView mDismissContainer;
     private Runnable mAfterMagnet;
 
-    private boolean mSuppressNewDot = false;
-    private boolean mSuppressFlyout = false;
-
     public BubbleStackView(Context context, BubbleData data,
                            @Nullable SurfaceSynchronizer synchronizer) {
         super(context);
@@ -690,9 +687,6 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.addView(bubble.iconView, 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         ViewClippingUtil.setClippingDeactivated(bubble.iconView, true, mClippingParameters);
-        if (bubble.iconView != null) {
-            bubble.iconView.setSuppressDot(mSuppressNewDot, false /* animate */);
-        }
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
@@ -1310,29 +1304,6 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
-    /** Sets whether all bubbles in the stack should not show the 'new' dot. */
-    void setSuppressNewDot(boolean suppressNewDot) {
-        mSuppressNewDot = suppressNewDot;
-
-        for (int i = 0; i < mBubbleContainer.getChildCount(); i++) {
-            BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
-            bv.setSuppressDot(suppressNewDot, true /* animate */);
-        }
-    }
-
-    /**
-     * Sets whether the flyout should not appear, even if the notif otherwise would generate one.
-     */
-    void setSuppressFlyout(boolean suppressFlyout) {
-        mSuppressFlyout = suppressFlyout;
-    }
-
-    /**
-     * Callback to run after the flyout hides. Also called if a new flyout is shown before the
-     * previous one animates out.
-     */
-    private Runnable mAfterFlyoutHides;
-
     /**
      * Animates in the flyout for the given bubble, if available, and then hides it after some time.
      */
@@ -1344,44 +1315,22 @@ public class BubbleStackView extends FrameLayout {
         if (updateMessage != null
                 && !isExpanded()
                 && !mIsExpansionAnimating
-                && !mIsGestureInProgress
-                && !mSuppressFlyout) {
+                && !mIsGestureInProgress) {
             if (bubble.iconView != null) {
-                // Temporarily suppress the dot while the flyout is visible.
-                bubble.iconView.setSuppressDot(
-                        true /* suppressDot */, false /* animate */);
-
+                bubble.iconView.setSuppressDot(true /* suppressDot */, false /* animate */);
                 mFlyoutDragDeltaX = 0f;
                 mFlyout.setAlpha(0f);
-
-                if (mAfterFlyoutHides != null) {
-                    mAfterFlyoutHides.run();
-                }
-
-                mAfterFlyoutHides = () -> {
-                    // If we're going to suppress the dot, make it visible first so it'll
-                    // visibly animate away.
-                    if (mSuppressNewDot) {
-                        bubble.iconView.setSuppressDot(
-                                false /* suppressDot */, false /* animate */);
-                    }
-
-                    // Reset dot suppression. If we're not suppressing due to DND, then
-                    // stop suppressing it with no animation (since the flyout has
-                    // transformed into the dot). If we are suppressing due to DND, animate
-                    // it away.
-                    bubble.iconView.setSuppressDot(
-                            mSuppressNewDot /* suppressDot */,
-                            mSuppressNewDot /* animate */);
-                };
 
                 // Post in case layout isn't complete and getWidth returns 0.
                 post(() -> mFlyout.showFlyout(
                         updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
                         mStackAnimationController.isStackOnLeftSide(),
-                        bubble.iconView.getBadgeColor(), mAfterFlyoutHides));
+                        bubble.iconView.getBadgeColor(),
+                        () -> {
+                            bubble.iconView.setSuppressDot(
+                                    false /* suppressDot */, false /* animate */);
+                        }));
             }
-
             mFlyout.removeCallbacks(mHideFlyout);
             mFlyout.postDelayed(mHideFlyout, FLYOUT_HIDE_AFTER);
             logBubbleEvent(bubble, StatsLog.BUBBLE_UICHANGED__ACTION__FLYOUT);
@@ -1390,10 +1339,6 @@ public class BubbleStackView extends FrameLayout {
 
     /** Hide the flyout immediately and cancel any pending hide runnables. */
     private void hideFlyoutImmediate() {
-        if (mAfterFlyoutHides != null) {
-            mAfterFlyoutHides.run();
-        }
-
         mFlyout.removeCallbacks(mHideFlyout);
         mFlyout.hideFlyout();
     }
@@ -1496,7 +1441,6 @@ public class BubbleStackView extends FrameLayout {
         int bubbsCount = mBubbleContainer.getChildCount();
         for (int i = 0; i < bubbsCount; i++) {
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
-            bv.updateDotVisibility(true /* animate */);
             bv.setZ((BubbleController.MAX_BUBBLES
                     * getResources().getDimensionPixelSize(R.dimen.bubble_elevation)) - i);
 
