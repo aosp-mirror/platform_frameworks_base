@@ -41,7 +41,7 @@
     <string name="serviceRegistered" msgid="6275019082598102493">"पंजीकरण सफल था."</string>
     <string name="serviceErased" msgid="1288584695297200972">"मिटाना सफल था."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"गलत पासवर्ड"</string>
-    <string name="mmiComplete" msgid="8232527495411698359">"MMI पूर्ण."</string>
+    <string name="mmiComplete" msgid="8232527495411698359">"MMI पूरा हुआ."</string>
     <string name="badPin" msgid="9015277645546710014">"  लिखा गया पुराना पिन सही नहीं है."</string>
     <string name="badPuk" msgid="5487257647081132201">"  लिखा गया PUK सही नहीं है."</string>
     <string name="mismatchPin" msgid="609379054496863419">"आपने जो पिन लिखे हैं उसका मिलान नहीं होता."</string>
@@ -116,8 +116,8 @@
     <string name="roamingText6" msgid="2059440825782871513">"रोमिंग - उपलब्‍ध सिस्‍टम"</string>
     <string name="roamingText7" msgid="7112078724097233605">"रोमिंग - गठबंधन सहयोगी"</string>
     <string name="roamingText8" msgid="5989569778604089291">"रोमिंग - प्रीमियम सहयोगी"</string>
-    <string name="roamingText9" msgid="7969296811355152491">"रोमिंग - पूर्ण सेवा कार्यक्षमता"</string>
-    <string name="roamingText10" msgid="3992906999815316417">"रोमिंग - आंशिक सेवा कार्यक्षमता"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"रोमिंग - पूर्ण सेवा काम की क्षमता"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"रोमिंग - आंशिक सेवा काम की क्षमता"</string>
     <string name="roamingText11" msgid="4154476854426920970">"रोमिंग बैनर चालू"</string>
     <string name="roamingText12" msgid="1189071119992726320">"रोमिंग बैनर बंद"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"नेटवर्क खोज रहा है"</string>
@@ -149,7 +149,7 @@
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंड के बाद"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
-    <string name="fcComplete" msgid="3118848230966886575">"सुविधा कोड पूर्ण."</string>
+    <string name="fcComplete" msgid="3118848230966886575">"सुविधा कोड पूरा हुआ."</string>
     <string name="fcError" msgid="3327560126588500777">"कनेक्‍शन समस्‍या या अमान्‍य सुविधा कोड."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ठीक है"</string>
     <string name="httpError" msgid="7956392511146698522">"कोई नेटवर्क गड़बड़ी हुई थी."</string>
@@ -232,7 +232,7 @@
     <string name="bugreport_message" msgid="398447048750350456">"इससे ईमेल भेजने के लिए, आपके डिवाइस की मौजूदा स्थिति से जुड़ी जानकारी इकट्ठा की जाएगी. गड़बड़ी की रिपोर्ट बनना शुरू होने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया इंतज़ार करें."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"सहभागी रिपोर्ट"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ज़्यादातर परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में ज़्यादा विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में ज़्यादा समय लगता है."</string>
-    <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूर्ण रिपोर्ट"</string>
+    <string name="bugreport_option_full_title" msgid="6354382025840076439">"पूरी रिपोर्ट"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"जब आपका डिवाइस ठीक से काम नहीं कर रहा हो या बहुत धीमा हो या जब आपको रिपोर्ट के सभी भागों की ज़रूरत हो, तो सिस्टम से कम से कम रोक-टोक के लिए इस विकल्प का इस्तेमाल करें. यह आपको ज़्यादा जानकारी डालने या अतिरिक्त स्क्रीनशॉट लेने नहीं देता."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">गड़बड़ी की रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्क संबंधी सूचनाएं"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"नेटवर्क उपलब्ध है"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN की स्थिति"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"डिवाइस का व्‍यवस्‍थापन"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"आपके आईटी एडमिन से मिली चेतावनियां"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचनाएं"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"खुदरा डेमो"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB कनेक्शन"</string>
@@ -358,7 +358,7 @@
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"प्रोफ़ाइल और डिवाइस स्‍वामियों को प्रबंधित करें"</string>
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ऐप्‍स को प्रोफ़ाइल स्‍वामी और डिवाइस स्‍वामी सेट करने दें."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"चल रहे ऐप्स फिर से क्रमित करें"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ऐप्स  को कार्यों को अग्रभूमि और पृष्‍ठभूमि पर ले जाने देता है. ऐप्स  आपके इनपुट के बिना यह कर सकता है."</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ऐप्स  को काम को अग्रभूमि और पृष्‍ठभूमि पर ले जाने देता है. ऐप्स  आपके इनपुट के बिना यह कर सकता है."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड चालू करें"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ऐप्स  को कार मोड सक्षम करने देता है."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अन्‍य ऐप्स बंद करें"</string>
@@ -380,7 +380,7 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"सिस्‍टम सेटिंग बदलें"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"ऐप्लिकेशन को सिस्टम सेटिंग डेटा में बदलाव करने देता है. नुकसान पहुंचाने वाले ऐप्लिकेशन आपके सिस्टम के कॉन्फ़िगरेशन को खराब सकते हैं."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"प्रारंभ होने पर चलाएं"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्स  को सिस्टम द्वारा बूटिंग पूर्ण करते ही अपने आप आरंभ करने देता है. इससे टैबलेट को आरंभ होने में ज़्यादा समय लग सकता है और ऐप्स  को निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ऐप्लिकेशन को सिस्टम से बूटिंग पूरी करते ही अपने आप शुरू करने देता है. इससे टैबलेट को शुरू होने में ज़्यादा समय लग सकता है और ऐप्लिकेशन निरंतर चलाकर संपूर्ण टैबलेट को धीमा करने देता है."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे टीवी को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा टैबलेट धीमा हो सकता है."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"सिस्‍टम के चालू होते ही ऐप को अपने आप शुरू होने देती है. इससे फ़ोन को चालू होने में ज़्यादा समय लग सकता है और ऐप के लगातार चलते रहने से पूरा फ़ोन धीमा हो सकता है."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"स्टिकी प्रसारण भेजें"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"फ़ोन को थोड़ा नीचे ले जाएं."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फ़ोन को बाईं ओर घुमाएं."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फ़ोन को दाईं ओर घुमाएं."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"खुली आंखों से स्क्रीन देखें."</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"आपका चेहरा नहीं दिखाई दे रहा. फ़ोन की तरफ़ देखें."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"डिवाइस बहुत ज़्यादा हिल रहा है. फ़ोन को बिना हिलाएं पकड़ें."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया फिर से अपने चेहरे की पहचान कराएं."</string>
@@ -573,13 +574,14 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"चेहरा काफ़ी मिलता-जुलता है, कृपया अपना पोज़ बदलें."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"अपना सिर थोड़ा कम घुमाएं."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"अपना सिर थोड़ा कम घुमाएं."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"अपना सिर थोड़ा कम घुमाएं"</string>
-    <string name="face_acquired_obscured" msgid="5357207702967893283">"आपके चेहरे को छिपाने वाली सभी चीज़ों को हटाएं"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"अपना सिर थोड़ा कम घुमाएं."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"आपके चेहरे को छिपाने वाली सभी चीज़ों को हटाएं."</string>
     <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"स्क्रीन के ऊपरी किनारे पर मौजूद सेंसर को साफ करें."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा नहीं पहचान पा रहे. हार्डवेयर उपलब्ध नहीं है."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"चेहरे की पहचान का समय खत्म हुआ. फिर से कोशिश करें."</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"चेहरे का नया डेटा सेव नहीं हो सकता. कोई पुराना डेटा मिटाएं."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"चेहरा पहचानने की कार्रवाई रद्द की गई"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"उपयोगकर्ता ने \'चेहरे की पहचान\' रद्द कर दी."</string>
@@ -648,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\'परेशान न करें\' को ऐक्सेस करें"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
@@ -1122,8 +1128,8 @@
     <string name="capital_on" msgid="1544682755514494298">"ऑन"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
     <string name="whichApplication" msgid="4533185947064773386">"इसका इस्तेमाल करके कार्रवाई को पूरा करें"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s का उपयोग करके कार्रवाई पूर्ण करें"</string>
-    <string name="whichApplicationLabel" msgid="7425855495383818784">"कार्रवाई पूर्ण करें"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"%1$s का उपयोग करके कार्रवाई पूरी करें"</string>
+    <string name="whichApplicationLabel" msgid="7425855495383818784">"कार्रवाई पूरी करें"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"इसमें खोलें"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s में खोलें"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"खोलें"</string>
@@ -1549,7 +1555,7 @@
     <string name="data_usage_warning_title" msgid="6499834033204801605">"डेटा खर्च की चेतावनी"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"अाप <xliff:g id="APP">%s</xliff:g> डेटा इस्तेमाल कर चुके हैं"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"मोबाइल डेटा की सीमा पार हो गई है"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi डेटा की सीमा पूर्ण हो गई"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi डेटा की सीमा पूरी हो गई"</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"आपकी मौजूदा बिलिंग साइकिल के बाकी दिनों के लिए डेटा का इस्तेमाल राेक दिया गया है"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"माेबाइल डेटा की सीमा से ज़्यादा"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"वाई-फ़ाई की सीमा से ज़्यादा डेटा खर्च"</string>
@@ -1790,8 +1796,8 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष चुनें"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> को हटा दिया गया"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"दफ़्तर का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"दूसरा कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"तीसरा कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"दूसरा काम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"तीसरा काम <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करने से पहले पिन के लिए पूछें"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करने से पहले लॉक खोलने के पैटर्न के लिए पूछें"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करने से पहले पासवर्ड के लिए पूछें"</string>
@@ -1898,9 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"देखें कि अपडेट मौजूद है या नहीं"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"आपके पास नए संदेश हैं"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"देखने के लिए मैसेज (एसएमएस) ऐप खोलें"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"कुछ कार्य क्षमताएं सीमित हो सकती हैं"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"अनलॉक करने के लिए टैप करें"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"उपयोगकर्ता डेटा लॉक किया गया"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"शायद कुछ सुविधाएं काम न करें"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"वर्क प्रोफ़ाइल लॉक है"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलॉक करने के लिए टैप करें"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> से कनेक्ट किया गया"</string>

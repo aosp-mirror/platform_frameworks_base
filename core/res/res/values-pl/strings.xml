@@ -267,7 +267,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alerty dotyczące sieci"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Sieć dostępna"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Stan sieci VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administracja urządzeniem"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Alerty od administratora IT"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerty"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Tryb demo dla sklepów"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Połączenie USB"</string>
@@ -571,7 +571,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Obniż telefon."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Przesuń telefon w lewo."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Przesuń telefon w prawo."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Patrz na ekran, mając otwarte oczy."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Patrz prosto na urządzenie."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nie widzę Twojej twarzy. Spójrz na telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Telefon się porusza. Trzymaj go nieruchomo."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Zarejestruj swoją twarz ponownie."</string>
@@ -585,7 +585,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Minął limit czasu analizy. Spróbuj ponownie."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Spróbuj uwierzytelniania twarzą ponownie."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Analiza twarzy została anulowana"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Użytkownik anulował uwierzytelnianie twarzą"</string>
@@ -654,6 +654,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Umożliwia właścicielowi powiązanie z usługami operatora. Nie powinno być nigdy potrzebne w normalnych aplikacjach."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"dostęp do trybu Nie przeszkadzać"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"rozpocząć wyświetlanie użycia uprawnień"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Umożliwia rozpoczęcie korzystania z uprawnienia dotyczącego danej aplikacji jego posiadaczowi. Zwykłe aplikacje nie powinny potrzebować tego uprawnienia."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorowanie prób odblokowania ekranu"</string>
@@ -1851,7 +1853,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię. "<annotation id="url">"Więcej informacji"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1966,9 +1968,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Sprawdź dostępność aktualizacji"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Masz nowe wiadomości"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Otwórz aplikację do SMS-ów, by wyświetlić wiadomość"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Niektóre funkcje mogą być niedostępne"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Kliknij, by odblokować"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Dane użytkownika zablokowane"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Część funkcji może być niedostępnych"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil służbowy zablokowany"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Kliknij, by odblokować profil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Połączono z: <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
