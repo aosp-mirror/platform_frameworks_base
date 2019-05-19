@@ -338,8 +338,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private static void logEvent(@Nullable VersionedPackage moduleMetadataPackage, int type) {
         Slog.i(TAG, "Watchdog event occurred of type: " + type);
         if (moduleMetadataPackage != null) {
-            StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED, type,
-                    moduleMetadataPackage.getPackageName(), moduleMetadataPackage.getVersionCode());
+            StatsLog.logWatchdogRollbackOccurred(type, moduleMetadataPackage.getPackageName(),
+                    moduleMetadataPackage.getVersionCode());
         }
     }
 
