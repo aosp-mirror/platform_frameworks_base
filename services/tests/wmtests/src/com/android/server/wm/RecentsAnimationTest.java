@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
@@ -55,6 +57,8 @@ import org.junit.Test;
 @MediumTest
 @Presubmit
 public class RecentsAnimationTest extends ActivityTestsBase {
+
+    private static final int TEST_USER_ID = 100;
 
     private final ComponentName mRecentsComponent =
             new ComponentName(mContext.getPackageName(), "RecentsActivity");
@@ -221,6 +225,37 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         verify(mService.mWindowManager, times(0)).cancelRecentsAnimationSynchronously(
                 eq(REORDER_KEEP_IN_PLACE), any());
         verify(mRecentsAnimationController, times(0)).cancelOnNextTransitionStart();
+    }
+
+    @Test
+    public void testMultipleUserHomeActivity_findUserHomeTask() {
+        ActivityDisplay display = mService.mRootActivityContainer.getDefaultDisplay();
+        ActivityStack homeStack = display.getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME);
+        ActivityRecord otherUserHomeActivity = new ActivityBuilder(mService)
+                .setStack(homeStack)
+                .setCreateTask(true)
+                .setComponent(new ComponentName(mContext.getPackageName(), "Home2"))
+                .build();
+        otherUserHomeActivity.getTaskRecord().userId = TEST_USER_ID;
+
+        ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        new ActivityBuilder(mService)
+                .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
+                .setCreateTask(true)
+                .setStack(fullscreenStack)
+                .build();
+
+        doReturn(TEST_USER_ID).when(mService).getCurrentUserId();
+        doCallRealMethod().when(mRootActivityContainer).ensureActivitiesVisible(
+                any() /* starting */, anyInt() /* configChanges */,
+                anyBoolean() /* preserveWindows */);
+
+        startRecentsActivity(otherUserHomeActivity.getTaskRecord().getBaseIntent().getComponent(),
+                true);
+
+        // Ensure we find the task for the right user and it is made visible
+        assertTrue(otherUserHomeActivity.visible);
     }
 
     private void startRecentsActivity() {
