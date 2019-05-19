@@ -34,10 +34,12 @@ import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
@@ -50,6 +52,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -71,6 +74,9 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private final Context mContext;
     private final Handler mHandler;
     private final File mLastStagedRollbackIdFile;
+    // Staged rollback ids that have been committed but their session is not yet ready
+    @GuardedBy("mPendingStagedRollbackIds")
+    private final Set<Integer> mPendingStagedRollbackIds = new ArraySet<>();
     // this field is initialized in the c'tor and then only accessed from mHandler thread, so
     // no need to guard with a lock
     private long mNumberOfNativeCrashPollsRemaining;
@@ -120,6 +126,9 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             if (status == RollbackManager.STATUS_SUCCESS) {
                 if (rollback.isStaged()) {
                     int rollbackId = rollback.getRollbackId();
+                    synchronized (mPendingStagedRollbackIds) {
+                        mPendingStagedRollbackIds.add(rollbackId);
+                    }
                     BroadcastReceiver listener =
                             listenForStagedSessionReady(rollbackManager, rollbackId,
                                     moduleMetadataPackage);
@@ -289,19 +298,30 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                     && (sessionId != PackageInstaller.SessionInfo.INVALID_ID)) {
                 PackageInstaller.SessionInfo sessionInfo =
                         packageInstaller.getSessionInfo(sessionId);
-                if (sessionInfo.isStagedSessionReady()) {
+                if (sessionInfo.isStagedSessionReady() && markStagedSessionHandled(rollbackId)) {
                     mContext.unregisterReceiver(listener);
                     saveLastStagedRollbackId(rollbackId);
                     logEvent(moduleMetadataPackage,
                             StatsLog
                             .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED);
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
-                } else if (sessionInfo.isStagedSessionFailed()) {
+                } else if (sessionInfo.isStagedSessionFailed()
+                        && markStagedSessionHandled(rollbackId)) {
                     logEvent(moduleMetadataPackage,
                             StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE);
                     mContext.unregisterReceiver(listener);
                 }
             }
+        }
+    }
+
+    /**
+     * Returns {@code true} if staged session associated with {@code rollbackId} was marked
+     * as handled, {@code false} if already handled.
+     */
+    private boolean markStagedSessionHandled(int rollbackId) {
+        synchronized (mPendingStagedRollbackIds) {
+            return mPendingStagedRollbackIds.remove(rollbackId);
         }
     }
 
