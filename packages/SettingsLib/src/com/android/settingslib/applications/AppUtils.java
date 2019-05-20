@@ -132,4 +132,12 @@ public class AppUtils {
             .isHiddenModule(packageName);
     }
 
+    /**
+     * Returns a boolean indicating whether a given package is a system module.
+     */
+    public static boolean isSystemModule(Context context, String packageName) {
+        return ApplicationsState.getInstance((Application) context.getApplicationContext())
+                .isSystemModule(packageName);
+    }
+
 }
