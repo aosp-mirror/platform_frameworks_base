@@ -158,11 +158,11 @@ final class TextClassificationSession implements TextClassifier {
                     mStartEvent = event;
                     break;
                 case SelectionEvent.EVENT_SMART_SELECTION_SINGLE:  // fall through
-                case SelectionEvent.EVENT_SMART_SELECTION_MULTI:
+                case SelectionEvent.EVENT_SMART_SELECTION_MULTI:   // fall through
+                case SelectionEvent.EVENT_AUTO_SELECTION:
                     mSmartEvent = event;
                     break;
-                case SelectionEvent.EVENT_SELECTION_MODIFIED:  // fall through
-                case SelectionEvent.EVENT_AUTO_SELECTION:
+                case SelectionEvent.EVENT_SELECTION_MODIFIED:
                     if (mPrevEvent != null
                             && mPrevEvent.getAbsoluteStart() == event.getAbsoluteStart()
                             && mPrevEvent.getAbsoluteEnd() == event.getAbsoluteEnd()) {
@@ -215,7 +215,8 @@ final class TextClassificationSession implements TextClassifier {
                 case SelectionEvent.EVENT_SMART_SELECTION_SINGLE:  // fall through
                 case SelectionEvent.EVENT_SMART_SELECTION_MULTI:  // fall through
                 case SelectionEvent.EVENT_AUTO_SELECTION:
-                    if (isPlatformLocalTextClassifierSmartSelection(event.getResultId())) {
+                    if (SelectionSessionLogger.isPlatformLocalTextClassifierSmartSelection(
+                            event.getResultId())) {
                         if (event.getAbsoluteEnd() - event.getAbsoluteStart() > 1) {
                             event.setEventType(SelectionEvent.EVENT_SMART_SELECTION_MULTI);
                         } else {
@@ -228,11 +229,6 @@ final class TextClassificationSession implements TextClassifier {
                 default:
                     return;
             }
-        }
-
-        private static boolean isPlatformLocalTextClassifierSmartSelection(String signature) {
-            return SelectionSessionLogger.CLASSIFIER_ID.equals(
-                    SelectionSessionLogger.SignatureParser.getClassifierId(signature));
         }
     }
 }
