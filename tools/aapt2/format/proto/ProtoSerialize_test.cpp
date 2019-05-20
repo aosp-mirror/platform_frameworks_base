@@ -80,7 +80,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       test::BuildPrimitive(android::Res_value::TYPE_INT_DEC, 123u), context->GetDiagnostics()));
   ASSERT_TRUE(table->AddResource(
       test::ParseNameOrDie("com.app.a:integer/one"), test::ParseConfigOrDie("land"), "tablet",
-      test::BuildPrimitive(android::Res_value::TYPE_INT_DEC, 321u), context->GetDiagnostics()));
+      test::BuildPrimitive(android::Res_value::TYPE_INT_HEX, 321u), context->GetDiagnostics()));
 
   // Make a reference with both resource name and resource ID.
   // The reference should point to a resource outside of this table to test that both name and id
@@ -133,11 +133,13 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       &new_table, "com.app.a:integer/one", test::ParseConfigOrDie("land"), "");
   ASSERT_THAT(prim, NotNull());
   EXPECT_THAT(prim->value.data, Eq(123u));
+  EXPECT_THAT(prim->value.dataType, Eq(0x10));
 
   prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
       &new_table, "com.app.a:integer/one", test::ParseConfigOrDie("land"), "tablet");
   ASSERT_THAT(prim, NotNull());
   EXPECT_THAT(prim->value.data, Eq(321u));
+  EXPECT_THAT(prim->value.dataType, Eq(0x11));
 
   Reference* actual_ref = test::GetValue<Reference>(&new_table, "com.app.a:layout/abc");
   ASSERT_THAT(actual_ref, NotNull());

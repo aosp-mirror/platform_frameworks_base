@@ -401,7 +401,7 @@ TEST_F(ResourceParserTest, ParseEnumAttr) {
   std::string input = R"(
       <attr name="foo">
         <enum name="bar" value="0"/>
-        <enum name="bat" value="1"/>
+        <enum name="bat" value="0x1"/>
         <enum name="baz" value="2"/>
       </attr>)";
   ASSERT_TRUE(TestParse(input));
@@ -414,14 +414,17 @@ TEST_F(ResourceParserTest, ParseEnumAttr) {
   ASSERT_TRUE(enum_attr->symbols[0].symbol.name);
   EXPECT_THAT(enum_attr->symbols[0].symbol.name.value().entry, Eq("bar"));
   EXPECT_THAT(enum_attr->symbols[0].value, Eq(0u));
+  EXPECT_THAT(enum_attr->symbols[0].type, Eq(Res_value::TYPE_INT_DEC));
 
   ASSERT_TRUE(enum_attr->symbols[1].symbol.name);
   EXPECT_THAT(enum_attr->symbols[1].symbol.name.value().entry, Eq("bat"));
   EXPECT_THAT(enum_attr->symbols[1].value, Eq(1u));
+  EXPECT_THAT(enum_attr->symbols[1].type, Eq(Res_value::TYPE_INT_HEX));
 
   ASSERT_TRUE(enum_attr->symbols[2].symbol.name);
   EXPECT_THAT(enum_attr->symbols[2].symbol.name.value().entry, Eq("baz"));
   EXPECT_THAT(enum_attr->symbols[2].value, Eq(2u));
+  EXPECT_THAT(enum_attr->symbols[2].type, Eq(Res_value::TYPE_INT_DEC));
 }
 
 TEST_F(ResourceParserTest, ParseFlagAttr) {
