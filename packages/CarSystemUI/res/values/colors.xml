@@ -34,7 +34,7 @@
     <drawable name="system_bar_background">@color/status_bar_background_color</drawable>
 
     <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">#99000000</color>
+    <color name="notification_shade_background_color">#DD000000</color>
 
     <!-- The color of the dividing line between grouped notifications. -->
     <color name="notification_divider_color">@*android:color/notification_action_list</color>
