@@ -284,13 +284,13 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;  à envoyer et à afficher des messages texte?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder aux photos, aux contenus multimédias et aux fichiers sur votre appareil"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder aux photos, aux médias et aux fichiers de votre appareil?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux photos, aux médias et aux fichiers de votre appareil?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gt à enregistrer l\'audio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à enregistrer l\'audio?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et filmer des vidéos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à prendre des photos et à filmer des vidéos?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à prendre des photos et à filmer des vidéos?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"lire et écrire le journal des appels téléphoniques"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos journaux d\'appels?"</string>
@@ -493,7 +493,7 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"utiliser le matériel d\'empreinte digitale"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permet à l\'application d\'utiliser du matériel d\'empreinte digitale pour l\'authentification"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez essayer de nouveau."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de traiter les empreintes digitales. Veuillez essayer de nouveau."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et essayer de nouveau."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
@@ -1744,7 +1744,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Soirs de semaine"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semaine"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Événement"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormir"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Sommeil"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> désactive certains sons"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Un problème interne est survenu avec votre appareil. Il se peut qu\'il soit instable jusqu\'à ce que vous le réinitialisiez à sa configuration d\'usine."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Un problème interne est survenu avec votre appareil. Communiquez avec le fabricant pour obtenir plus de détails."</string>
@@ -1820,8 +1820,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"Productivité"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Mémoire de l\'appareil"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Débogage USB"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"heure"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"minute"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"heures"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"minutes"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Définir l\'heure"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Entrez une heure valide"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Entrez l\'heure"</string>

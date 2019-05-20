@@ -161,7 +161,7 @@
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"Pronalaženje traženog fajla nije uspjelo."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Trenutno se obrađuje previše zahtjeva. Pokušajte ponovo kasnije."</string>
     <string name="notification_title" msgid="8967710025036163822">"Greška u prijavi za račun <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
-    <string name="contentServiceSync" msgid="8353523060269335667">"Sinhroniziranje"</string>
+    <string name="contentServiceSync" msgid="8353523060269335667">"Sinhronizacija"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Nije moguće sinhronizirati"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Pokušali ste izbrisati previše sadržaja iz kategorije <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Pohrana tableta je puna. Izbrišite fajlove kako biste oslobodili prostor."</string>
@@ -275,10 +275,10 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Pređite na radni profil"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pristupa vašim kontaktima"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup vašim kontaktima?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa vašim kontaktima?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupa lokaciji ovog uređaja"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup lokaciji ovog uređaja?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi lokaciji ovog uređaja?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupa vašem kalendaru"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi vašem kalendaru?"</string>
@@ -287,19 +287,19 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; slanje i pregled SMS poruka?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pohrana"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupa slikama, medijskim fajlovima i fajlovima na vašem uređaju"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup fotografijama, medijima i fajlovima na vašem uređaju?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa fotografijama, medijima i fajlovima na vašem uređaju?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snima zvuk"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje zvuka?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da snima zvuk?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"slika i snima videozapise"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje slika i videozapisa?"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"snima fotografije i videozapise"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da snima fotografije i videozapise?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zapisnici poziva"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čitanje i pisanje zapisnika telefonskih poziva"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup zapisnicima poziva?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupa zapisnicima poziva?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uspostavljanje poziva i njihovo upravljanje?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da upućuje pozove i upravlja njima?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup senzornim podacima o vašim vitalnim znacima?"</string>
@@ -365,8 +365,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Omogućava aplikaciji da neke svoje dijelove pohrani trajno u memoriji. Ovo može ograničiti veličinu raspoložive memorije za druge aplikacije i tako usporiti tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Dozvoljava aplikaciji da jednim dijelom trajno ostaje u memoriji. Time se ostalim aplikacijama dostupna memorija može ograničiti te usporiti rad TV-a."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Omogućava aplikaciji da neke svoje dijelove pohrani trajno u memoriji. Ovo može ograničiti veličinu raspoložive memorije za druge aplikacije i tako usporiti telefon."</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"pokretanje usluge u prednjem planu"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Dopušta aplikaciji korištenje usluga u prednjem planu."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"pokretanje usluge u prvom planu"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Dopušta aplikaciji korištenje usluga u prvom planu."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"mjerenje prostora kojeg aplikacije zauzimaju u pohrani"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Dozvoljava aplikaciji preuzimanje svog koda, podataka i veličine keš memorije"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"izmjena postavki sistema"</string>
@@ -496,7 +496,7 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"korištenje hardvera za otiske prstiju"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otiske prstiju"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Prst je uklonjen prebrzo. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Prst je uklonjen presporo. Pokušajte ponovo."</string>
@@ -1121,7 +1121,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Uvijek prikaži"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je napravljena za verziju operativnog sistema Android koja nije kompatibilna i može se ponašati neočekivano. Ažurirana verzija aplikacije može biti dostupna."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Uvijek prikaži"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Provjerite ima li ažuriranja"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Provjeri ima li ažuriranja"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je vlastita StrictMode pravila."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je vlastita StrictMode pravila."</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Ažuriranje telefona…"</string>
@@ -1145,7 +1145,7 @@
     <string name="new_app_action" msgid="6694851182870774403">"Otvori aplikaciju <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"Aplikacija <xliff:g id="OLD_APP">%1$s</xliff:g> će se zatvoriti bez pohranjivanja"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> premašuje ograničenje memorije"</string>
-    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Snimak dinamičkog stanja memorije je napravljen. Dodirnite za dijeljenje."</string>
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Snimak dinamičkog dijela memorije je napravljen. Dodirnite za dijeljenje."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Želite li dijeliti snimak dinamičkog dijela memorije?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> je premašio ograničenje procesne memorije od <xliff:g id="SIZE">%2$s</xliff:g>. Snimak dinamičkog dijela memorije vam je dostupan i možete ga dijeliti sa njegovim programerom. Budite oprezni: ovaj snimak dinamičkog dijela memorije može sadržavati vaše lične podatke kojima aplikacija ima pristup."</string>
     <string name="sendText" msgid="5209874571959469142">"Biranje akcije za tekst"</string>
@@ -1188,7 +1188,7 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dodirnite da vidite sve mreže"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Povežite se"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Sve mreže"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi veza će se automatski uključiti"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WiFi će se uključiti automatski"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kada ste u blizini sačuvane mreže visokog kvaliteta"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nemoj ponovo uključiti"</string>
     <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi veza se automatski uključila"</string>
@@ -1227,7 +1227,7 @@
     <string name="decline" msgid="2112225451706137894">"Odbijte"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Pozivnica poslana"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Pozivnica za povezivanje"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Pošiljalac:"</string>
+    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Od:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Prima:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Unesite potrebni PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
@@ -1366,7 +1366,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Želite li dozvoliti taj zahtjev?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Zahtjev za pristup"</string>
     <string name="allow" msgid="7225948811296386551">"Dozvoli"</string>
-    <string name="deny" msgid="2081879885755434506">"Odbijte"</string>
+    <string name="deny" msgid="2081879885755434506">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Upućen zahtjev za odobrenje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Upućen zahtjev za dozvolu\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Aplikaciju koristite van poslovnog profila"</string>
@@ -1391,7 +1391,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Promijenite postavke mreže ili VPN-a"</string>
     <string name="upload_file" msgid="2897957172366730416">"Odabir fajla"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nije izabran nijedan fajl"</string>
-    <string name="reset" msgid="2448168080964209908">"Vraćanje na zadano"</string>
+    <string name="reset" msgid="2448168080964209908">"Vrati na zadano"</string>
     <string name="submit" msgid="1602335572089911941">"Potvrdi"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplikacija za vožnju je pokrenuta"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Dodirnite za izlaz iz aplikacije za vožnju."</string>
@@ -1522,7 +1522,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"Emitiranje"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Poveži na uređaj"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emitiranje ekrana na uređaj"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Traženje uređajā…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Traženje uređaja…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Postavke"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Prekini vezu"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Skeniranje…"</string>

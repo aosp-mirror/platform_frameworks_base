@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"输入一个4至8位数的PIN码。"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"请输入至少8位数字的PUK码。"</string>
     <string name="needPuk" msgid="919668385956251611">"您的 SIM 卡已用 PUK 码锁定。请输入 PUK 码将其解锁。"</string>
-    <string name="needPuk2" msgid="4526033371987193070">"输入PUK2码以解锁SIM卡。"</string>
+    <string name="needPuk2" msgid="4526033371987193070">"输入 PUK2 码以解锁 SIM 卡。"</string>
     <string name="enablePin" msgid="209412020907207950">"失败，请开启 SIM/RUIM 卡锁定设置。"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="other">您还可尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。如果仍不正确，SIM 卡将被锁定。</item>
@@ -240,7 +240,7 @@
     <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"省电模式已关闭"</string>
     <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"省电模式已开启"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"设置"</string>
-    <string name="global_action_assist" msgid="3892832961594295030">"助手应用"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"助理"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"语音助理"</string>
     <string name="global_action_lockdown" msgid="1099326950891078929">"锁定"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
@@ -275,7 +275,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的通讯录吗？"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"获取此设备的位置信息"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"要允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”获取此设备的位置信息吗？"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”获取此设备的位置信息吗？"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的日历吗？"</string>
@@ -762,7 +762,7 @@
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"请参阅《用户指南》或与客服人员联系。"</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡已被锁定。"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁SIM卡..."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"正在解锁 SIM 卡..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次输错密码。\n\n请在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒后重试。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"您已经<xliff:g id="NUMBER_0">%1$d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%2$d</xliff:g>秒后重试。"</string>
@@ -1266,7 +1266,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"分享"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"拒绝"</string>
     <string name="select_input_method" msgid="8547250819326693584">"更改键盘"</string>
-    <string name="show_ime" msgid="2506087537466597099">"开启后，连接到实体键盘时，它会一直显示在屏幕上"</string>
+    <string name="show_ime" msgid="2506087537466597099">"在连接到实体键盘时保持显示"</string>
     <string name="hardware" msgid="194658061510127999">"显示虚拟键盘"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"配置实体键盘"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"点按即可选择语言和布局"</string>
@@ -1530,7 +1530,7 @@
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"请输入4至8位数的PIN码。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK码应包含8位数字。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN码不匹配"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐号。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>

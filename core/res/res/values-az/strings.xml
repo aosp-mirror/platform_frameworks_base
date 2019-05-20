@@ -291,7 +291,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"şəkil çəkin və video yazın"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə şəkil və video çəkmək icazəsi verilsin?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zənd qeydləri"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zəng qeydləri"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"telefonun zəng qeydini oxuyun və yazın"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə telefonun zəng qeydlərinə daxil olmaq icazəsi verilsin?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
@@ -1698,7 +1698,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Admin tərəfindən silindi"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Batareya istifadəsini artırmaq üçün Batareya Qənaəti bəzi cihaz funksiyalarını deaktiv edir və tətbiqləri məhdudlaşdırır. "<annotation id="url">"Ətraflı Məlumat"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Batareya istifadəsini uzatmaq üçün Batareya Qənaəti bəzi cihaz funksiyalarını deaktiv edir və tətbiqləri məhdudlaşdırır."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin çox az hissəsini tez-tez edə bilər. Bu o deməkdir ki, məsələn, üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

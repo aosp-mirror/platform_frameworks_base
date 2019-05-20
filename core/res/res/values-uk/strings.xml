@@ -288,7 +288,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"надсилати та переглядати SMS-повідомлення"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; надсилати та переглядати SMS?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Зберігання"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Пам’ять"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"отримувати доступ до фотографій, мультимедійного вмісту та файлів на вашому пристрої"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до фото, медіа та файлів на пристрої?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Мікрофон"</string>
@@ -590,8 +590,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте планшет або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телевізор або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана. Блокуйте телефон або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінити пароль розблокування екрана"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змінити пароль розблокування екрана."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінити спосіб розблокування екрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змінити спосіб розблокування екрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокувати екран"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролювати, як і коли блокується екран."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>
@@ -1036,13 +1036,13 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Вибрати все"</string>
     <string name="cut" msgid="3092569408438626261">"Виріз."</string>
-    <string name="copy" msgid="2681946229533511987">"Копіюв."</string>
+    <string name="copy" msgid="2681946229533511987">"Копіювати"</string>
     <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Не вдалося скопіювати в буфер обміну"</string>
     <string name="paste" msgid="5629880836805036433">"Вставити"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Вставити як простий текст"</string>
     <string name="replace" msgid="5781686059063148930">"Замінити..."</string>
     <string name="delete" msgid="6098684844021697789">"Видалити"</string>
-    <string name="copyUrl" msgid="2538211579596067402">"Копіюв. URL"</string>
+    <string name="copyUrl" msgid="2538211579596067402">"Копіювати URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"Вибрати текст"</string>
     <string name="undo" msgid="7905788502491742328">"Відмінити"</string>
     <string name="redo" msgid="7759464876566803888">"Повторити"</string>
@@ -1871,7 +1871,7 @@
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Торкніться, щоб переглянути файли"</string>
     <string name="pin_target" msgid="3052256031352291362">"Закріпити"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Відкріпити"</string>
-    <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
+    <string name="app_info" msgid="6856026610594615344">"Про додатки"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Запуск демонстрації…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Скидання налаштувань пристрою…"</string>

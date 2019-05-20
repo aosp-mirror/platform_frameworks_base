@@ -270,7 +270,7 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="8836124313744349203">"Vaihda henkilökohtaiseen profiiliin"</string>
     <string name="managed_profile_label" msgid="8947929265267690522">"Vaihda työprofiiliin"</string>
-    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktit"</string>
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Yhteystiedot"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"käyttää yhteystietoja"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; yhteystietojesi käyttöoikeuden?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Sijainti"</string>

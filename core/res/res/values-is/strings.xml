@@ -604,8 +604,8 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krefjast þess að geymd forritsgögn séu dulkóðuð."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Slökkva á myndavélum"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Koma í veg fyrir notkun allra myndavéla tækisins."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Slökkva á sumum skjáláseiginl."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Komdu í veg fyrir notkun sumra eiginleika skjáláss."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Loka á suma eiginl. skjáláss"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Hindra notkun sumra eiginleika skjáláss."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Heima"</item>
     <item msgid="869923650527136615">"Farsími"</item>

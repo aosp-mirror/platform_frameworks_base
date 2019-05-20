@@ -296,7 +296,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"снимать фото и видео"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; снимать фото и видео?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; снимать фото и видео?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Список вызовов"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"чтение и запись телефонных звонков"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к списку вызовов?"</string>
@@ -1740,9 +1740,9 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Рабочий <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Задача 2: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Задача 3: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-код для отключения"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ"</string>
+    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Установлено администратором"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Удалено администратором"</string>

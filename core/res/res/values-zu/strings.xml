@@ -293,7 +293,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthatha izithombe iphinde irekhode ividiyo?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Amarekhodi wamakholi"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"funda futhi ubhale irekhodi lamakholi efoni"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukufinyelela irekhodi lakho lamakholi wefoni?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukufinyelela kurekhodi lakho lamakholi wefoni?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Ifoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"yenza uphinde uphathe amakholi wefoni"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi yenze iphinde iphathe amakholi efoni?"</string>
@@ -1875,7 +1875,7 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Amakholi nezaziso zizodlidliza"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Amakholi nezaziso zizothuliswa"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Ushintsho lwesistimu"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamasi"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ungaphazamisi"</string>
     <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Ukungaphazamisi kufihle izaziso"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Thepha ukuze ufunde kabanzi futhi ushintshe."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ukungaphazamisi kushintshile"</string>

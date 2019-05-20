@@ -591,7 +591,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Бүх датаг арилгах"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Үйлдвэрийн дата утгыг өгсөнөөр таблетын дата шууд арилгагдана."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Анхааруулга өгөхгүйгээр үйлдвэрээс хийгдсэн тохиргоонд эргэн шилжих байдлаар телевиз-ийн датаг устга."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Үйлдвэрийн дата утгыг өгсөнөөр утасны дата шууд арилгагдана."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Сануулахгүйгээр утасны бүх мэдээллийг устгаж, үйлдвэрийн өгөгдмөл байдалд шилжүүлнэ"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Хэрэглэгчийн мэдээллийг арилгах"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ таблет дээрх мэдээллийг устгах."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Анхааруулга өгөхгүйгээр энэ хэрэглэгчийн энэ телевизор дээрх мэдээллийг устгах."</string>

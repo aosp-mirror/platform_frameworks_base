@@ -911,7 +911,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Poslední měsíc"</string>
     <string name="older" msgid="5211975022815554840">"Starší"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"dne <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"v <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"roku <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"den"</string>

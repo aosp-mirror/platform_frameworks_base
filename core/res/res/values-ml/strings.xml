@@ -296,7 +296,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"നിങ്ങളുടെ ഫോൺ കോൾ ലോഗുകൾ ആക്സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ നിയന്ത്രിക്കാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ മാനേജ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ബോഡി സെൻസറുകൾ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
@@ -493,8 +493,8 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിന് വൃത്തിയില്ല. അത് ശുചിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിൽ ചെളിയുണ്ട്. അത് വൃത്തിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"വിരൽ വളരെ വേഗത്തിൽ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1699,7 +1699,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. "<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"നിങ്ങളുടെ ബാറ്ററി ലൈഫ് ദീർഘിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ, ചില ഉപകരണ ഫീച്ചറുകളെ ഓഫാക്കുകയും ആപ്പുകളെ നിയന്ത്രിക്കുകയും ചെയ്യുന്നു.‌"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1825,7 +1825,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"മിനിറ്റ്"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"സമയം സജ്ജീകരിക്കുക"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"ശരിയായ സമയം ‌നൽകുക"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയപ്രകാരം ടൈപ്പ് ചെയ്യുക"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"സമയം നൽകുക"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"സമയം നൽകുന്നതിന് ടെക്സ്റ്റ് ഇൻപുട്ട് ‌മോ‌ഡിലേക്ക് ‌മാറുക."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"‌സമയം നൽകുന്നതിന് ക്ലോക്ക് മോഡിലേക്ക് ‌മാറുക."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"സ്വയമേവ പൂരിപ്പിക്കൽ ഓപ്ഷനുകൾ"</string>

@@ -190,7 +190,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"ਸਾਈਲੈਂਟ ਮੋਡ"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"ਵਾਇਰਲੈਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"ਵਾਇਰਲੈਸ ਬੰਦ ਕਰੋ"</string>
-    <string name="screen_lock" msgid="799094655496098153">"ਸਕ੍ਰੀਨ  ਲਾਕ"</string>
+    <string name="screen_lock" msgid="799094655496098153">"ਸਕ੍ਰੀਨ ਲਾਕ"</string>
     <string name="power_off" msgid="4266614107412865048">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ਰਿੰਗਰ ਬੰਦ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ਰਿੰਗਰ ਥਰਥਰਾਹਟ"</string>
@@ -214,12 +214,12 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ਟੈਬਲੈੱਟ ਵਿਕਲਪ"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"TV ਚੋਣਾਂ"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ਫ਼ੋਨ ਚੋਣਾਂ"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"ਸਕ੍ਰੀਨ  ਲਾਕ"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"ਪਾਵਰ ਬੰਦ"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"ਸਕ੍ਰੀਨ ਲਾਕ"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"ਸੰਕਟਕਾਲ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="global_action_logout" msgid="935179188218826050">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ਬੱਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
@@ -285,7 +285,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ਸਟੋਰੇਜ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨਾ"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">" ਆਡੀਓ  ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
@@ -294,7 +294,7 @@
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"ਕਾਲ ਲੌਗ"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗ ਨੂੰ ਪੜ੍ਹੋ ਅਤੇ ਲਿਖੋ"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
-    <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫ਼ੋਨ ਕਰੋ"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫ਼ੋਨ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੇਣਾ ਹੈ?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ਸਰੀਰ ਸੰਵੇਦਕ"</string>
@@ -494,7 +494,7 @@
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ਅਧੂਰਾ ਫਿੰਗਰਪ੍ਰਿਟ ਮਿਲਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਕਰ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਵੇਦਕ ਗੰਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਇਸਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਗੰਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਇਸਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ਉਂਗਲ ਨੂੰ ਬਹੁਤ ਤੇਜ਼ ਲੈ ਜਾਇਆ ਗਿਆ. ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ਉਂਗਲ ਕਾਫ਼ੀ ਹੌਲੀ ਮੂਵ ਹੋਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -585,9 +585,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ  ਲਾਕ  ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਬਦਲੋ।"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ।"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ਸਕ੍ਰੀਨ ਲਾਕ ਕਰੋ"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"ਇਸਤੇ ਨਿਯੰਤਰਣ ਪਾਓ ਕਿ ਸਕ੍ਰਿਨ ਕਿਵੇਂ ਅਤੇ ਕਦੋਂ  ਲਾਕ  ਹੁੰਦੀ ਹੈ।"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"ਸਕ੍ਰੀਨ ਦਾ ਕਿਵੇਂ ਅਤੇ ਕਦੋਂ ਲਾਕ ਹੋਣਾ ਕੰਟਰੋਲ ਕਰੋ।"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੀਵੀ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
@@ -605,7 +605,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ਕੈਮਰੇ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ਸਾਰੇ ਡੀਵਾਈਸ ਕੈਮਰਿਆਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ਘਰ"</item>
     <item msgid="869923650527136615">"ਮੋਬਾਈਲ"</item>
@@ -1230,7 +1230,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"ਹੋ ਗਿਆ"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ਕਾਰਡ ਜੋੜਿਆ ਗਿਆ"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਲਈ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"ਰੀਸਟਾਰਟ ਕਰੋ"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"ਮੋਬਾਈਲ ਸੇਵਾ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ਆਪਣੇ ਨਵੇਂ ਸਿਮ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਲਈ ਕੈਰੀਅਰ ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"ਆਪਣੇ ਨਵੇਂ ਸਿਮ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਲਈ <xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
@@ -1497,8 +1497,8 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"ਪ੍ਰਸਾਰਿਤ ਕਰੋ"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ਡੀਵਾਈਸ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ਡੀਵਾਈਸ ਨਾਲ ਸਕ੍ਰੀਨ ਜੋੜੋ"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ਡਿਵਾਈਸਾਂ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ਡੀਵਾਈਸ ਨਾਲ ਸਕ੍ਰੀਨ ਕਾਸਟ ਕਰੋ"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ਡੀਵਾਈਸਾਂ ਦੀ ਖੋਜ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
