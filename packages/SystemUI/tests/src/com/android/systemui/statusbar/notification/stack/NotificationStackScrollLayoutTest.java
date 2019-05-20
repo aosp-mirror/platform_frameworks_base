@@ -153,7 +153,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 true /* allowLongPress */, mNotificationRoundnessManager,
                 new AmbientPulseManager(mContext),
                 mock(DynamicPrivacyController.class),
-                mock(ActivityStarterDelegate.class));
+                mock(ActivityStarterDelegate.class),
+                mock(StatusBarStateController.class));
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);
