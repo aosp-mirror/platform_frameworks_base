@@ -176,6 +176,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPointerDrawable = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, false /* pointUp */));
         mPointerView.setBackground(mPointerDrawable);
+        mPointerView.setVisibility(GONE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
@@ -444,6 +445,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         // Adjust for the pointer size
         x -= (mPointerView.getWidth() / 2f);
         mPointerView.setTranslationX(x);
+        mPointerView.setVisibility(VISIBLE);
     }
 
     /**
