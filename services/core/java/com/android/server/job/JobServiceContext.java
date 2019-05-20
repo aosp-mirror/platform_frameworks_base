@@ -265,7 +265,8 @@ public final class JobServiceContext implements ServiceConnection {
             }
             mJobPackageTracker.noteActive(job);
             try {
-                mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
+                mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid(),
+                        job.getStandbyBucket(), job.getJobId());
             } catch (RemoteException e) {
                 // Whatever.
             }
@@ -774,7 +775,8 @@ public final class JobServiceContext implements ServiceConnection {
         mJobPackageTracker.noteInactive(completedJob, mParams.getStopReason(), reason);
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(),
-                    mRunningJob.getSourceUid(), mParams.getStopReason());
+                    mRunningJob.getSourceUid(), mParams.getStopReason(),
+                    mRunningJob.getStandbyBucket(), mRunningJob.getJobId());
         } catch (RemoteException e) {
             // Whatever.
         }
