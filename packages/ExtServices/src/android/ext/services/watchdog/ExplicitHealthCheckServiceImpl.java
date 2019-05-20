@@ -39,9 +39,9 @@ public final class ExplicitHealthCheckServiceImpl extends ExplicitHealthCheckSer
     // TODO: Add build dependency on NetworkStack stable AIDL so we can stop hard coding class name
     private static final String NETWORK_STACK_CONNECTOR_CLASS =
             "android.net.INetworkStackConnector";
-    private static final String PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS =
+    public static final String PROPERTY_WATCHDOG_REQUEST_TIMEOUT_MILLIS =
             "watchdog_request_timeout_millis";
-    private static final long DEFAULT_REQUEST_TIMEOUT_MILLIS =
+    public static final long DEFAULT_REQUEST_TIMEOUT_MILLIS =
             TimeUnit.HOURS.toMillis(1);
     // Modified only #onCreate, using concurrent collection to ensure thread visibility
     private final Map<String, ExplicitHealthChecker> mSupportedCheckers = new ConcurrentHashMap<>();
