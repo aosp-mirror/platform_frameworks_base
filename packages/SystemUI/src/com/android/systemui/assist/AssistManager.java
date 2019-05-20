@@ -58,6 +58,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
+    private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
@@ -73,6 +74,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
     private final InterestingConfigChanges mInterestingConfigChanges;
+    private final PhoneStateMonitor mPhoneStateMonitor;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -107,6 +109,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
+        mPhoneStateMonitor = new PhoneStateMonitor(context);
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
@@ -186,6 +189,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         if (args == null) {
             args = new Bundle();
         }
+        args.putInt(INVOCATION_PHONE_STATE_KEY, mPhoneStateMonitor.getPhoneState());
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         // Logs assistant start with invocation type.
         MetricsLogger.action(
