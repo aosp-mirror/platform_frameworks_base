@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.utils.RegionUtils.forEachRect;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -1126,14 +1127,13 @@ final class AccessibilityController {
                 // Iterate until we figure out what is touchable for the entire screen.
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
+                    final Region regionInScreen = new Region();
+                    computeWindowRegionInScreen(windowState, regionInScreen);
 
-                    final Rect boundsInScreen = mTempRect;
-                    computeWindowBoundsInScreen(windowState, boundsInScreen);
-
-                    if (windowMattersToAccessibility(windowState, boundsInScreen, unaccountedSpace,
+                    if (windowMattersToAccessibility(windowState, regionInScreen, unaccountedSpace,
                             skipRemainingWindowsForTasks)) {
-                        addPopulatedWindowInfo(windowState, boundsInScreen, windows, addedWindows);
-                        updateUnaccountedSpace(windowState, boundsInScreen, unaccountedSpace,
+                        addPopulatedWindowInfo(windowState, regionInScreen, windows, addedWindows);
+                        updateUnaccountedSpace(windowState, regionInScreen, unaccountedSpace,
                                 skipRemainingWindowsForTasks);
                         focusedWindowAdded |= windowState.isFocused();
                     }
@@ -1171,8 +1171,9 @@ final class AccessibilityController {
             clearAndRecycleWindows(windows);
         }
 
-        private boolean windowMattersToAccessibility(WindowState windowState, Rect boundsInScreen,
-                Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
+        private boolean windowMattersToAccessibility(WindowState windowState,
+                Region regionInScreen, Region unaccountedSpace,
+                HashSet<Integer> skipRemainingWindowsForTasks) {
             if (windowState.isFocused()) {
                 return true;
             }
@@ -1192,7 +1193,7 @@ final class AccessibilityController {
             }
 
             // If the window is completely covered by other windows - ignore.
-            if (unaccountedSpace.quickReject(boundsInScreen)) {
+            if (unaccountedSpace.quickReject(regionInScreen)) {
                 return false;
             }
 
@@ -1204,7 +1205,7 @@ final class AccessibilityController {
             return false;
         }
 
-        private void updateUnaccountedSpace(WindowState windowState, Rect boundsInScreen,
+        private void updateUnaccountedSpace(WindowState windowState, Region regionInScreen,
                 Region unaccountedSpace, HashSet<Integer> skipRemainingWindowsForTasks) {
             if (windowState.mAttrs.type
                     != WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
@@ -1212,59 +1213,71 @@ final class AccessibilityController {
                 // Account for the space this window takes if the window
                 // is not an accessibility overlay which does not change
                 // the reported windows.
-                unaccountedSpace.op(boundsInScreen, unaccountedSpace,
+                unaccountedSpace.op(regionInScreen, unaccountedSpace,
                         Region.Op.REVERSE_DIFFERENCE);
 
                 // If a window is modal it prevents other windows from being touched
                 if ((windowState.mAttrs.flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
-                    // Account for all space in the task, whether the windows in it are
-                    // touchable or not. The modal window blocks all touches from the task's
-                    // area.
-                    unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
-                            Region.Op.REVERSE_DIFFERENCE);
+                    if (!windowState.hasTapExcludeRegion()) {
+                        // Account for all space in the task, whether the windows in it are
+                        // touchable or not. The modal window blocks all touches from the task's
+                        // area.
+                        unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
+                                Region.Op.REVERSE_DIFFERENCE);
+                    } else {
+                        // If a window has tap exclude region, we need to account it.
+                        final Region displayRegion = new Region(windowState.getDisplayFrameLw());
+                        final Region tapExcludeRegion = new Region();
+                        windowState.amendTapExcludeRegion(tapExcludeRegion);
+                        displayRegion.op(tapExcludeRegion, displayRegion,
+                                Region.Op.REVERSE_DIFFERENCE);
+                        unaccountedSpace.op(displayRegion, unaccountedSpace,
+                                Region.Op.REVERSE_DIFFERENCE);
+                    }
 
                     final Task task = windowState.getTask();
                     if (task != null) {
                         // If the window is associated with a particular task, we can skip the
                         // rest of the windows for that task.
                         skipRemainingWindowsForTasks.add(task.mTaskId);
-                    } else {
+                    } else if (!windowState.hasTapExcludeRegion()) {
                         // If the window is not associated with a particular task, then it is
-                        // globally modal. In this case we can skip all remaining windows.
+                        // globally modal. In this case we can skip all remaining windows when
+                        // it doesn't has tap exclude region.
                         unaccountedSpace.setEmpty();
                     }
                 }
             }
         }
 
-        private void computeWindowBoundsInScreen(WindowState windowState, Rect outBounds) {
+        private void computeWindowRegionInScreen(WindowState windowState, Region outRegion) {
             // Get the touchable frame.
             Region touchableRegion = mTempRegion1;
             windowState.getTouchableRegion(touchableRegion);
-            Rect touchableFrame = mTempRect;
-            touchableRegion.getBounds(touchableFrame);
-
-            // Move to origin as all transforms are captured by the matrix.
-            RectF windowFrame = mTempRectF;
-            windowFrame.set(touchableFrame);
-            windowFrame.offset(-windowState.getFrameLw().left, -windowState.getFrameLw().top);
 
             // Map the frame to get what appears on the screen.
             Matrix matrix = mTempMatrix;
             populateTransformationMatrixLocked(windowState, matrix);
-            matrix.mapRect(windowFrame);
 
-            // Got the bounds.
-            outBounds.set((int) windowFrame.left, (int) windowFrame.top,
-                    (int) windowFrame.right, (int) windowFrame.bottom);
+            forEachRect(touchableRegion, rect -> {
+                // Move to origin as all transforms are captured by the matrix.
+                RectF windowFrame = mTempRectF;
+                windowFrame.set(rect);
+                windowFrame.offset(-windowState.getFrameLw().left, -windowState.getFrameLw().top);
+
+                matrix.mapRect(windowFrame);
+
+                // Union all rects.
+                outRegion.union(new Rect((int) windowFrame.left, (int) windowFrame.top,
+                        (int) windowFrame.right, (int) windowFrame.bottom));
+            });
         }
 
-        private static void addPopulatedWindowInfo(
-                WindowState windowState, Rect boundsInScreen,
+        private static void addPopulatedWindowInfo(WindowState windowState, Region regionInScreen,
                 List<WindowInfo> out, Set<IBinder> tokenOut) {
             final WindowInfo window = windowState.getWindowInfo();
-            window.boundsInScreen.set(boundsInScreen);
+            window.regionInScreen.set(regionInScreen);
             window.layer = tokenOut.size();
             out.add(window);
             tokenOut.add(window.token);
@@ -1293,7 +1306,7 @@ final class AccessibilityController {
         private void populateVisibleWindowsOnScreenLocked(SparseArray<WindowState> outWindows) {
             final List<WindowState> tempWindowStatesList = new ArrayList<>();
             final DisplayContent dc = mService.getDefaultDisplayContentLocked();
-            dc.forAllWindows((w) -> {
+            dc.forAllWindows(w -> {
                 if (w.isVisibleLw()) {
                     tempWindowStatesList.add(w);
                 }
@@ -1306,17 +1319,11 @@ final class AccessibilityController {
                     return;
                 }
 
-                // TODO: Use Region instead to get rid of this complicated logic.
-                // Check the tap exclude region of the parent window. If the tap exclude region
-                // is empty, it means there is another can-receive-pointer-event view on top of
-                // the region. Hence, we don't count the window as visible.
                 if (w.isVisibleLw() && parentWindow.getDisplayContent().isDefaultDisplay
-                        && parentWindow.hasTapExcludeRegion()
                         && tempWindowStatesList.contains(parentWindow)) {
-                    tempWindowStatesList.add(
-                            tempWindowStatesList.lastIndexOf(parentWindow) + 1, w);
+                    tempWindowStatesList.add(tempWindowStatesList.lastIndexOf(parentWindow), w);
                 }
-            }, true /* traverseTopToBottom */);
+            }, false /* traverseTopToBottom */);
             for (int i = 0; i < tempWindowStatesList.size(); i++) {
                 outWindows.put(i, tempWindowStatesList.get(i));
             }
