@@ -175,12 +175,10 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.adoptFd(mFd);
-        try {
-            // Don't let writing to a parcel to close our fd - plz
-            parcel.writeParcelable(pfd, flags & ~Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-        } finally {
-            pfd.detachFd();
+        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.fromFd(mFd)) {
+            parcel.writeParcelable(pfd, flags);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
