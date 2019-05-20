@@ -14,7 +14,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -193,26 +192,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 new LogMaker(MetricsEvent.ASSISTANT)
                     .setType(MetricsEvent.TYPE_OPEN).setSubtype(args.getInt(INVOCATION_TYPE_KEY)));
         startAssistInternal(args, assistComponent, isService);
-    }
-
-    /**
-     * Returns a {@code Rect} containing system UI presented on behalf of the assistant that
-     * consumes touches.
-     */
-    @Nullable
-    public Rect getTouchableRegion() {
-        // intentional no-op, vendor's AssistManager implementation should override if needed.
-        return null;
-    }
-
-    /** Registers a listener for changes to system UI presented on behalf of the assistant. */
-    public void setAssistSysUiChangeListener(AssistSysUiChangeListener listener) {
-        // intentional no-op, vendor's AssistManager implementation should override if needed.
-    }
-
-    /** Returns {@code true} if the system UI is showing UI for the assistant. */
-    public boolean hasAssistUi() {
-        return false;
     }
 
     /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */
