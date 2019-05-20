@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Sarearen alertak"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Sare bat erabilgarri dago"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN egoera"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Gailuen administrazioa"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"IKT saileko administratzaileak bidalitako alertak"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertak"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Saltzaileentzako demoa"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB konexioa"</string>
@@ -519,7 +519,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Argazki-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"multimedia-edukien bildumako kokapena irakurri"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Multimedia-edukien bildumako kokapena irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Egiaztatu zeu zarela"</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Egiaztatu zu zarela"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrikoa ez dago erabilgarri"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Utzi da autentifikazioa"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ez da ezagutu"</string>
@@ -537,7 +537,7 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-markaren hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Ezin da gorde hatz-marka digitala. Kendu lehendik gordeta duzunetako bat."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-marka digitalak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-markak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Hatz-markaren eragiketa bertan behera utzi da."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Erabiltzaileak bertan behera utzi du hatz-marka bidezko eragiketa."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Beheratu telefonoa."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mugitu telefonoa ezkerretara."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mugitu telefonoa eskuinetara."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Begiratu pantailari begiak irekita dituzula."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Begiratu zuzenago gailuari."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ez da agertzen aurpegia. Begiratu telefonoari."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Mugimendu gehiegi dago. Eutsi tinko telefonoari."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Erregistratu berriro aurpegia."</string>
@@ -579,7 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ezin da egiaztatu aurpegia. Hardwarea ez dago erabilgarri."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Hautemateko denbora gainditu da. Saiatu berriro."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Saiatu berriro aurpegi bidez autentifikatzen"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Utzi da aurpegi bidezko eragiketa"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Erabiltzaileak utzi du aurpegi bidezko autentifikazioa"</string>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Operadorearen zerbitzuei lotzea baimentzen die titularrei. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"atzitu \"Ez molestatu\" egoera"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\"Ez molestatu\" konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"hasi ikusteko baimena erabiltzen"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ezarri pasahitzen arauak"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolatu pantaila blokeoaren pasahitzen eta PINen luzera eta onartutako karaktereak."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>
@@ -1800,9 +1802,9 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Bateria-aurrezlea desaktibatu egiten da edo murriztu egiten dira atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak bateriak gehiago iraun dezan. "<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Bateria-aurrezlea desaktibatu egiten da edo murriztu egiten dira atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak bateriak gehiago iraun dezan."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Bateria-aurrezlea desaktibatzen da, edo atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak murrizten dira, bateriak gehiago iraun dezan. "<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"Bateria-aurrezlea desaktibatzen da, edo atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak murrizten dira, bateriak gehiago iraun dezan."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1899,9 +1901,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Bilatu eguneratzeak"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Mezu berriak dituzu"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Mezuak ikusteko, ireki SMS mezuen aplikazioa"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Funtzioak mugatuta egon litezke"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Sakatu desblokeatzeko"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Blokeatuta daude datuak"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Baliteke funtzio batzuk mugatuta egotea"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Blokeatuta dago laneko profila"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Sakatu profila desblokeatzeko"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> zerbitzura konektatuta"</string>
@@ -2005,7 +2005,7 @@
     <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"Desaktibatu egin da bateria-aurrezlea. Jada ez dago eginbiderik murriztuta."</string>
     <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"Desaktibatu egin da bateria-aurrezlea. Jada ez dago eginbiderik murriztuta."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"Karpeta"</string>
-    <string name="mime_type_apk" msgid="5518003630972506900">"Android aplikazioa"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android-erako aplikazioa"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Fitxategia"</string>
     <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> fitxategia"</string>
     <string name="mime_type_audio" msgid="6289777657172050926">"Audioa"</string>

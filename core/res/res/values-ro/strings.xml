@@ -264,7 +264,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alerte privind rețeaua"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Rețea disponibilă"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Stare VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administrarea dispozitivului"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Alerte de la administratorul IT"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerte"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demonstrație comercială"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Conexiune USB"</string>
@@ -568,7 +568,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mutați telefonul mai jos."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mutați telefonul spre stânga."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mutați telefonul spre dreapta."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Uitați-vă spre ecran cu ochii deschiși."</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nu vi se vede fața. Uitați-vă la telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Prea multă mișcare. Țineți telefonul nemișcat."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Reînregistrați-vă chipul."</string>
@@ -582,7 +583,8 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nu se poate confirma fața. Hardware-ul nu este disponibil."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Timpul limită pentru recunoașterea facială a trecut. Încercați din nou."</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Nu se pot stoca date faciale noi. Ștergeți întâi unele vechi."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Operațiunea privind fața a fost anulată"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Autentificarea chipului este anulată de utilizator"</string>
@@ -651,6 +653,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite aplicației să se conecteze la serviciile operatorului. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accesează Nu deranja"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Să monitorizeze încercările de deblocare a ecranului"</string>
@@ -1932,9 +1938,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Căutați actualizări"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Aveți mesaje noi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Deschideți aplicația pentru SMS-uri ca să vizualizați"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Unele funcții ar putea fi limitate"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Atingeți pentru a debloca"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Datele utilizatorului: blocate"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Unele funcții ar putea fi limitate"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil de serviciu blocat"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Atingeți ca să deblocați"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectat la <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

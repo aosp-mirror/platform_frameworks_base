@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"網路警示"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"有可用的網路"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN 狀態"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"裝置管理"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"來自 IT 管理員的快訊"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"快訊"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"零售商示範模式"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB 連線"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"請將手機拿低一點。"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移動。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移動。"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"請直視螢幕並張開眼睛。"</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"無法偵測你的臉孔，請直視手機。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"鏡頭過度晃動，請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"請重新註冊你的臉孔。"</string>
@@ -579,7 +580,8 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"相關硬體無法使用，因此無法驗證臉孔。"</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"臉孔已逾時，請再試一次。"</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"無法儲存新的臉孔資料，請先刪除舊的資料。"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"臉孔處理作業已取消"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"使用者已取消臉孔驗證作業"</string>
@@ -648,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允許應用程式繫結至電信業者服務 (一般應用程式並不需要)。"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"存取「零打擾」模式"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允許應用程式讀取及寫入「零打擾」設定。"</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"監控螢幕解鎖嘗試次數"</string>
@@ -1448,7 +1454,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"你目前透過工作設定檔使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"無障礙"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
@@ -1655,17 +1661,17 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"要使用協助工具捷徑嗎？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"啟用捷徑功能後，只要同時按下兩個音量鍵 3 秒，就能啟動協助工具功能。\n\n 目前設定的協助工具功能為：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n 如要變更設定的功能，請依序輕觸 [設定] &gt; [協助工具]。"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"要使用無障礙捷徑嗎？"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"啟用捷徑功能後，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。\n\n 目前設定的無障礙功能為：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n 如要變更設定的功能，請依序輕觸 [設定] &gt; [無障礙工具]。"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"停用捷徑"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"使用捷徑"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"色彩反轉"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"色彩校正"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"協助工具捷徑啟用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"協助工具捷徑停用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"無障礙捷徑啟用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"無障礙捷徑停用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"同時按住調低及調高音量鍵三秒即可使用「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"輕觸 [協助工具] 按鈕後，選擇你想使用的功能："</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"如要變更指派的功能，請按住 [協助工具] 按鈕。"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"輕觸 [無障礙工具] 按鈕後，選擇你想使用的功能："</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"如要變更指派的功能，請按住 [無障礙工具] 按鈕。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"放大"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1801,7 +1807,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"確定"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"節約耗電量模式會關閉或限制背景活動、部分視覺效果，以及其他耗電量高的功能，藉此延長電池續航力。"<annotation id="url">"瞭解詳情"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"節約耗電量模式會關閉或限制背景活動、部分視覺效果，以及其他耗電量高的功能，藉此延長電池續航力。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由你輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1898,9 +1904,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"檢查更新"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"你有新訊息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"開啟簡訊應用程式來查看內容"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"部分功能可能受到鎖定"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"輕觸即可解鎖"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"使用者資料已鎖定"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"部分功能可能遭到鎖定"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"工作資料夾目前處於鎖定狀態"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"輕觸即可將工作資料夾解鎖"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"已連線至 <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
