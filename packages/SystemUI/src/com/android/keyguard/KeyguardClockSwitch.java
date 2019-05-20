@@ -3,6 +3,7 @@ package com.android.keyguard;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -412,15 +413,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mClockTransition.setScale(smallFontSize / bigFontSize);
         mBoldClockTransition.setScale(bigFontSize / smallFontSize);
 
-        TransitionManager.beginDelayedTransition((ViewGroup) mClockView.getParent(), mTransition);
-        mClockView.setVisibility(hasHeader ? View.INVISIBLE : View.VISIBLE);
-        mClockViewBold.setVisibility(hasHeader ? View.VISIBLE : View.INVISIBLE);
-        int paddingBottom = mContext.getResources().getDimensionPixelSize(hasHeader
-                ? R.dimen.widget_vertical_padding_clock : R.dimen.title_clock_padding);
-        mClockView.setPadding(mClockView.getPaddingLeft(), mClockView.getPaddingTop(),
-                mClockView.getPaddingRight(), paddingBottom);
-        mClockViewBold.setPadding(mClockViewBold.getPaddingLeft(), mClockViewBold.getPaddingTop(),
-                mClockViewBold.getPaddingRight(), paddingBottom);
+        // End any current transitions before starting a new transition so that the new transition
+        // starts from a good state instead of a potentially bad intermediate state arrived at
+        // during a transition animation.
+        TransitionManager.endTransitions((ViewGroup) mClockView.getParent());
 
         if (hasHeader) {
             // After the transition, make the default clock GONE so that it doesn't make the
@@ -439,6 +435,16 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 }
             });
         }
+
+        TransitionManager.beginDelayedTransition((ViewGroup) mClockView.getParent(), mTransition);
+        mClockView.setVisibility(hasHeader ? View.INVISIBLE : View.VISIBLE);
+        mClockViewBold.setVisibility(hasHeader ? View.VISIBLE : View.INVISIBLE);
+        int paddingBottom = mContext.getResources().getDimensionPixelSize(hasHeader
+                ? R.dimen.widget_vertical_padding_clock : R.dimen.title_clock_padding);
+        mClockView.setPadding(mClockView.getPaddingLeft(), mClockView.getPaddingTop(),
+                mClockView.getPaddingRight(), paddingBottom);
+        mClockViewBold.setPadding(mClockViewBold.getPaddingLeft(), mClockViewBold.getPaddingTop(),
+                mClockViewBold.getPaddingRight(), paddingBottom);
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
@@ -553,7 +559,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
         private Animator createAnimator(View view, float cutoff, int startVisibility,
                 int endVisibility, float startScale, float endScale) {
             view.setPivotY(view.getHeight() - view.getPaddingBottom());
-            view.setVisibility(startVisibility);
             ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
             animator.addUpdateListener(animation -> {
                 final float fraction = animation.getAnimatedFraction();
@@ -563,6 +568,14 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 final float scale = MathUtils.lerp(startScale, endScale, fraction);
                 view.setScaleX(scale);
                 view.setScaleY(scale);
+            });
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    view.setVisibility(startVisibility);
+                    animation.removeListener(this);
+                }
             });
             addListener(new TransitionListenerAdapter() {
                 @Override
