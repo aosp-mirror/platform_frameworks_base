@@ -55,6 +55,7 @@
             android:layout_marginRight="4dp"
             android:src="@drawable/status_bar_notification_section_header_clear_btn"
             android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
+            android:scaleType="center"
             />
     </LinearLayout>
 
