@@ -1100,7 +1100,10 @@
     <string name="battery_saver_notification_action_text">Turn off Battery Saver</string>
 
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text">While recording or casting, <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> can capture any sensitive information, such as audio that you play and your passwords, payment info, photos, and messages.</string>
+    <string name="media_projection_dialog_text">While recording or casting, <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
+
+    <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_service_text">While recording or casting, the service providing this function can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
 
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_title">Exposing sensitive info during casting/recording </string>
