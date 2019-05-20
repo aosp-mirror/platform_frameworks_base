@@ -45,7 +45,8 @@ public class SystemServerInitThreadPool {
 
     private static SystemServerInitThreadPool sInstance;
 
-    private ExecutorService mService = ConcurrentUtils.newFixedThreadPool(4,
+    private ExecutorService mService = ConcurrentUtils.newFixedThreadPool(
+            Runtime.getRuntime().availableProcessors(),
             "system-server-init-thread", Process.THREAD_PRIORITY_FOREGROUND);
 
     private List<String> mPendingTasks = new ArrayList<>();
