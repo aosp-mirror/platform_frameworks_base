@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/header_text_container"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_header_tooltip_height"
@@ -23,19 +23,12 @@
     android:paddingEnd="@dimen/status_bar_padding_end"
     android:theme="@style/QSHeaderTheme">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start|center_vertical"
-        android:gravity="center_vertical">
-
-        <LinearLayout
+        <com.android.systemui.qs.QSHeaderInfoLayout
             android:id="@+id/status_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start|center_vertical"
+            android:layout_width="match_parent"
             android:layout_weight="1"
-            android:gravity="center_vertical" >
+            android:layout_height="match_parent"
+            android:gravity="start" >
 
             <LinearLayout
                 android:id = "@+id/alarm_container"
@@ -98,21 +91,14 @@
                     android:textAppearance="@style/TextAppearance.QS.Status"
                     android:visibility="gone"/>
             </LinearLayout>
-        </LinearLayout>
-
-        <View
-            android:minWidth="@dimen/qs_status_separator"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
+        </com.android.systemui.qs.QSHeaderInfoLayout>
 
         <include layout="@layout/qs_carrier_group"
                  android:id="@+id/carrier_group"
                  android:layout_width="wrap_content"
                  android:layout_height="match_parent"
+                 android:layout_marginStart="@dimen/qs_status_separator"
                  android:layout_gravity="end|center_vertical"
                  android:focusable="false"/>
-    </LinearLayout>
 
-</FrameLayout>
+</LinearLayout>
