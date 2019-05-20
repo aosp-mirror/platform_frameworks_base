@@ -56,7 +56,7 @@ cc_defaults {
         "libziparchive",
         "libpng",
         "libbase",
-        "libprotobuf-cpp-lite",
+        "libprotobuf-cpp-full",
         "libz",
         "libbuildversion",
     ],
