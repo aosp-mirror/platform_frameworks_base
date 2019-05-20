@@ -116,6 +116,14 @@ public class AttentionManagerService extends SystemService {
     }
 
     @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mContext.registerReceiver(new ScreenStateReceiver(),
+                    new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        }
+    }
+
+    @Override
     public void onStart() {
         publishBinderService(Context.ATTENTION_SERVICE, new BinderService());
         publishLocalService(AttentionManagerInternal.class, new LocalService());
@@ -135,10 +143,6 @@ public class AttentionManagerService extends SystemService {
     private boolean isServiceAvailable() {
         if (mComponentName == null) {
             mComponentName = resolveAttentionService(mContext);
-            if (mComponentName != null) {
-                mContext.registerReceiver(new ScreenStateReceiver(),
-                        new IntentFilter(Intent.ACTION_SCREEN_OFF));
-            }
         }
         return mComponentName != null;
     }
