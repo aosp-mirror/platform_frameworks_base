@@ -26039,6 +26039,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Finish a window move task.
+     * @hide
+     */
+    public void finishMovingTask() {
+        if (ViewDebug.DEBUG_POSITIONING) {
+            Log.d(VIEW_LOG_TAG, "finishMovingTask");
+        }
+        try {
+            mAttachInfo.mSession.finishMovingTask(mAttachInfo.mWindow);
+        } catch (RemoteException e) {
+            Log.e(VIEW_LOG_TAG, "Unable to finish moving", e);
+        }
+    }
+
+    /**
      * Handles drag events sent by the system following a call to
      * {@link android.view.View#startDragAndDrop(ClipData,DragShadowBuilder,Object,int)
      * startDragAndDrop()}.

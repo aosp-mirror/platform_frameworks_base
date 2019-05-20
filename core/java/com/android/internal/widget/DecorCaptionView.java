@@ -188,7 +188,8 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         final int y = (int) e.getY();
         final boolean fromMouse = e.getToolType(e.getActionIndex()) == MotionEvent.TOOL_TYPE_MOUSE;
         final boolean primaryButton = (e.getButtonState() & MotionEvent.BUTTON_PRIMARY) != 0;
-        switch (e.getActionMasked()) {
+        final int actionMasked = e.getActionMasked();
+        switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
                 if (!mShow) {
                     // When there is no caption we should not react to anything.
@@ -220,6 +221,12 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
                     break;
                 }
                 // Abort the ongoing dragging.
+                if (actionMasked == MotionEvent.ACTION_UP) {
+                    // If it receives ACTION_UP event, the dragging is already finished and also
+                    // the system can not end drag on ACTION_UP event. So request to finish
+                    // dragging.
+                    finishMovingTask();
+                }
                 mDragging = false;
                 return !mCheckForDragging;
         }

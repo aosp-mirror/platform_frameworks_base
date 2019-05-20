@@ -185,6 +185,12 @@ class TaskPositioningController {
         return true;
     }
 
+    public void finishTaskPositioning(IWindow window) {
+        if (mTaskPositioner != null && mTaskPositioner.mClientCallback == window.asBinder()) {
+            finishTaskPositioning();
+        }
+    }
+
     void finishTaskPositioning() {
         mHandler.post(() -> {
             if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
