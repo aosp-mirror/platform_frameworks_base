@@ -18,6 +18,17 @@
             ]
         },
         {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
+                },
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
+                }
+            ]
+        },
+        {
             "name": "CtsStatsdHostTestCases",
             "options": [
                 {
