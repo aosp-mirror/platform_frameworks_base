@@ -406,7 +406,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             Intent intent = getSettingsIntent(mEntry.notification.getPackageName(),
                     mEntry.notification.getUid());
             mStackView.collapseStack(() -> {
-                mContext.startActivity(intent);
+                mContext.startActivityAsUser(intent, mEntry.notification.getUser());
                 logBubbleClickEvent(mEntry,
                         StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
             });
