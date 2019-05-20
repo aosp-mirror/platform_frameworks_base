@@ -1488,7 +1488,8 @@ easier.
         <!-- Progress bar attributes -->
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
-        <item name="listDivider">@color/list_divider_color_light</item>
+        <item name="colorListDivider">@color/list_divider_color_light</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_device_default_light</item>
     </style>
 
     <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
