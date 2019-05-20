@@ -99,9 +99,13 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
         List<AppTarget> appTargets = new ArrayList<>();
         for (ResolvedComponentInfo target : targets) {
-            appTargets.add(new AppTarget.Builder(new AppTargetId(target.name.flattenToString()))
-                    .setTarget(target.name.getPackageName(), mUser)
-                    .setClassName(target.name.getClassName()).build());
+            appTargets.add(
+                    new AppTarget.Builder(
+                        new AppTargetId(target.name.flattenToString()),
+                            target.name.getPackageName(),
+                            mUser)
+                    .setClassName(target.name.getClassName())
+                    .build());
         }
         mAppPredictor.sortTargets(appTargets, Executors.newSingleThreadExecutor(),
                 sortedAppTargets -> {
