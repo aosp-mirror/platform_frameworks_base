@@ -31,6 +31,7 @@ import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.UriGrantsManager;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -1143,6 +1144,24 @@ public abstract class ContentResolver implements ContentInterface {
             return false;
         } finally {
             releaseProvider(provider);
+        }
+    }
+
+    /** {@hide} */
+    @Override
+    public int checkUriPermission(@NonNull Uri uri, int uid, @Intent.AccessUriMode int modeFlags) {
+        Preconditions.checkNotNull(uri, "uri");
+
+        try {
+            if (mWrapped != null) return mWrapped.checkUriPermission(uri, uid, modeFlags);
+        } catch (RemoteException e) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+
+        try (ContentProviderClient client = acquireUnstableContentProviderClient(uri)) {
+            return client.checkUriPermission(uri, uid, modeFlags);
+        } catch (RemoteException e) {
+            return PackageManager.PERMISSION_DENIED;
         }
     }
 

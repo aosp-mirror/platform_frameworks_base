@@ -363,6 +363,19 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     reply.writeInt(out ? 0 : -1);
                     return true;
                 }
+
+                case CHECK_URI_PERMISSION_TRANSACTION: {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    String callingPkg = data.readString();
+                    Uri uri = Uri.CREATOR.createFromParcel(data);
+                    int uid = data.readInt();
+                    int modeFlags = data.readInt();
+
+                    int out = checkUriPermission(callingPkg, uri, uid, modeFlags);
+                    reply.writeNoException();
+                    reply.writeInt(out);
+                    return true;
+                }
             }
         } catch (Exception e) {
             DatabaseUtils.writeExceptionToParcel(reply, e);
@@ -794,6 +807,29 @@ final class ContentProviderProxy implements IContentProvider
             DatabaseUtils.readExceptionFromParcel(reply);
             int success = reply.readInt();
             return (success == 0);
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    @Override
+    public int checkUriPermission(String callingPkg, Uri url, int uid, int modeFlags)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            data.writeString(callingPkg);
+            url.writeToParcel(data, 0);
+            data.writeInt(uid);
+            data.writeInt(modeFlags);
+
+            mRemote.transact(IContentProvider.CHECK_URI_PERMISSION_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            return reply.readInt();
         } finally {
             data.recycle();
             reply.recycle();

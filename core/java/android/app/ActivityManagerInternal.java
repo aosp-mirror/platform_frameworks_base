@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.UserInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.TransactionTooLargeException;
@@ -51,6 +52,12 @@ public abstract class ActivityManagerInternal {
      * Verify that calling app has access to the given provider.
      */
     public abstract String checkContentProviderAccess(String authority, int userId);
+
+    /**
+     * Verify that calling UID has access to the given provider.
+     */
+    public abstract int checkContentProviderUriPermission(Uri uri, int userId,
+            int callingUid, int modeFlags);
 
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);

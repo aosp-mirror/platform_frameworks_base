@@ -392,7 +392,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7704,6 +7706,34 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return null;
+    }
+
+    int checkContentProviderUriPermission(Uri uri, int userId, int callingUid, int modeFlags) {
+        final String name = uri.getAuthority();
+        final long ident = Binder.clearCallingIdentity();
+        ContentProviderHolder holder = null;
+        try {
+            holder = getContentProviderExternalUnchecked(name, null, callingUid,
+                    "*checkContentProviderUriPermission*", userId);
+            if (holder != null) {
+                return holder.provider.checkUriPermission(null, uri, callingUid, modeFlags);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Content provider dead retrieving " + uri, e);
+            return PackageManager.PERMISSION_DENIED;
+        } catch (Exception e) {
+            Log.w(TAG, "Exception while determining type of " + uri, e);
+            return PackageManager.PERMISSION_DENIED;
+        } finally {
+            try {
+                if (holder != null) {
+                    removeContentProviderExternalUnchecked(name, null, userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        return PackageManager.PERMISSION_DENIED;
     }
 
     private boolean canClearIdentity(int callingPid, int callingUid, int userId) {
@@ -17823,6 +17853,35 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return ActivityManagerService.this.checkContentProviderAccess(authority, userId);
+        }
+
+        @Override
+        public int checkContentProviderUriPermission(Uri uri, int userId,
+                int callingUid, int modeFlags) {
+            // We can find ourselves needing to check Uri permissions while
+            // already holding the WM lock, which means reaching back here for
+            // the AM lock would cause an inversion. The WM team has requested
+            // that we use the strategy below instead of shifting where Uri
+            // grants are calculated.
+
+            // Since we could also arrive here while holding the AM lock, we
+            // can't always delegate the call through the handler, and we need
+            // to delicately dance between the deadlocks.
+            if (Thread.currentThread().holdsLock(ActivityManagerService.this)) {
+                return ActivityManagerService.this.checkContentProviderUriPermission(uri,
+                        userId, callingUid, modeFlags);
+            } else {
+                final CompletableFuture<Integer> res = new CompletableFuture<>();
+                mHandler.post(() -> {
+                    res.complete(ActivityManagerService.this.checkContentProviderUriPermission(uri,
+                            userId, callingUid, modeFlags));
+                });
+                try {
+                    return res.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         @Override
