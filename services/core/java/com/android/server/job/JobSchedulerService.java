@@ -1057,7 +1057,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     uId, null, jobStatus.getBatteryName(),
                     StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
-                    JobProtoEnums.STOP_REASON_CANCELLED);
+                    JobProtoEnums.STOP_REASON_CANCELLED, jobStatus.getStandbyBucket(),
+                    jobStatus.getJobId());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
