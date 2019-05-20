@@ -100,13 +100,15 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
 
         // If the activity is associated with the recents stack, then try and get that first
+        final int userId = mService.getCurrentUserId();
         mTargetActivityType = intent.getComponent() != null
                 && recentsComponent.equals(intent.getComponent())
                         ? ACTIVITY_TYPE_RECENTS
                         : ACTIVITY_TYPE_HOME;
         ActivityStack targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
-        ActivityRecord targetActivity = getTargetActivity(targetStack, intent.getComponent());
+        ActivityRecord targetActivity = getTargetActivity(targetStack, intent.getComponent(),
+                userId);
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
             final ActivityDisplay display = targetActivity.getDisplay();
@@ -156,13 +158,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setCallingUid(recentsUid)
                         .setCallingPackage(recentsComponent.getPackageName())
                         .setActivityOptions(SafeActivityOptions.fromBundle(options.toBundle()))
-                        .setMayWait(mService.getCurrentUserId())
+                        .setMayWait(userId)
                         .execute();
 
                 // Move the recents activity into place for the animation
-                targetActivity = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
-                        mTargetActivityType).getTopActivity();
-                targetStack = targetActivity.getActivityStack();
+                targetStack = mDefaultDisplay.getStack(WINDOWING_MODE_UNDEFINED,
+                        mTargetActivityType);
+                targetActivity = getTargetActivity(targetStack, intent.getComponent(), userId);
                 mDefaultDisplay.moveStackBehindBottomMostVisibleStack(targetStack);
                 if (DEBUG) {
                     Slog.d(TAG, "Moved stack=" + targetStack + " behind stack="
@@ -171,7 +173,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 mWindowManager.executeAppTransition();
-
 
                 // TODO: Maybe wait for app to draw in this particular case?
 
@@ -406,17 +407,18 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
      * @return the top activity in the {@param targetStack} matching the {@param component}, or just
      * the top activity of the top task if no task matches the component.
      */
-    private ActivityRecord getTargetActivity(ActivityStack targetStack, ComponentName component) {
+    private ActivityRecord getTargetActivity(ActivityStack targetStack, ComponentName component,
+            int userId) {
         if (targetStack == null) {
             return null;
         }
 
         for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
             final TaskRecord task = targetStack.getChildAt(i);
-            if (task.getBaseIntent().getComponent().equals(component)) {
+            if (task.userId == userId && task.getBaseIntent().getComponent().equals(component)) {
                 return task.getTopActivity();
             }
         }
-        return targetStack.getTopActivity();
+        return null;
     }
 }
