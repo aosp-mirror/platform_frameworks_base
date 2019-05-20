@@ -28,6 +28,8 @@ import android.view.View;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -40,18 +42,22 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvider {
     private final NotificationStackScrollLayout mParent;
     private final ActivityStarter mActivityStarter;
+    private final StatusBarStateController mStatusBarStateController;
     private final boolean mUseMultipleSections;
 
     private SectionHeaderView mGentleHeader;
     private boolean mGentleHeaderVisible = false;
+    @Nullable private ExpandableNotificationRow mFirstGentleNotif;
     @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
 
     NotificationSectionsManager(
             NotificationStackScrollLayout parent,
             ActivityStarter activityStarter,
+            StatusBarStateController statusBarStateController,
             boolean useMultipleSections) {
         mParent = parent;
         mActivityStarter = activityStarter;
+        mStatusBarStateController = statusBarStateController;
         mUseMultipleSections = useMultipleSections;
     }
 
@@ -92,7 +98,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
 
     @Override
     public boolean beginsSection(View view) {
-        return view == mGentleHeader;
+        return view == getFirstLowPriorityChild();
     }
 
     /**
@@ -104,6 +110,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
             return;
         }
 
+        mFirstGentleNotif = null;
         int firstGentleNotifIndex = -1;
 
         final int n = mParent.getChildCount();
@@ -114,6 +121,7 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
                 if (!row.getEntry().isHighPriority()) {
                     firstGentleNotifIndex = i;
+                    mFirstGentleNotif = row;
                     break;
                 }
             }
@@ -126,9 +134,12 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
     }
 
     private void adjustGentleHeaderVisibilityAndPosition(int firstGentleNotifIndex) {
+        final boolean showGentleHeader =
+                firstGentleNotifIndex != -1
+                        && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
         final int currentHeaderIndex = mParent.indexOfChild(mGentleHeader);
 
-        if (firstGentleNotifIndex == -1) {
+        if (!showGentleHeader) {
             if (mGentleHeaderVisible) {
                 mGentleHeaderVisible = false;
                 mParent.removeView(mGentleHeader);
@@ -208,7 +219,11 @@ class NotificationSectionsManager implements StackScrollAlgorithm.SectionProvide
 
     @Nullable
     private ActivatableNotificationView getFirstLowPriorityChild() {
-        return mGentleHeaderVisible ? mGentleHeader : null;
+        if (mGentleHeaderVisible) {
+            return mGentleHeader;
+        } else {
+            return mFirstGentleNotif;
+        }
     }
 
     @Nullable
