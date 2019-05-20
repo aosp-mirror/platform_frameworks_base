@@ -451,7 +451,7 @@ public class BubbleStackView extends FrameLayout {
     public void onThemeChanged() {
         for (Bubble b: mBubbleData.getBubbles()) {
             b.iconView.updateViews();
-            b.expandedView.updateTheme();
+            b.expandedView.applyThemeAttrs();
         }
     }
 
