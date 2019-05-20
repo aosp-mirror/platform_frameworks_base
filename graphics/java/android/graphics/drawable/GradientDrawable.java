@@ -1972,11 +1972,11 @@ public class GradientDrawable extends Drawable {
         public float[] mTempPositions; // no need to copy
         @UnsupportedAppUsage
         public float[] mPositions;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
+        @UnsupportedAppUsage(trackingBug = 124050917)
         public int mStrokeWidth = -1; // if >= 0 use stroking.
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
+        @UnsupportedAppUsage(trackingBug = 124050917)
         public float mStrokeDashWidth = 0.0f;
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
+        @UnsupportedAppUsage(trackingBug = 124050917)
         public float mStrokeDashGap = 0.0f;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 124050917)
         public float mRadius = 0.0f; // use this if mRadiusArray is null
