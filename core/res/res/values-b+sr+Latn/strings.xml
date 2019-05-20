@@ -167,7 +167,7 @@
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Memorija tableta je puna! Izbrišite neke datoteke da biste oslobodili prostor."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Memorija sata je puna. Izbrišite neke datoteke da biste oslobodili prostor."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Memorijski prostor na TV-u je popunjen. Izbrišite neke datoteke da biste oslobodili prostor."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"Skladište telefona je puno! Izbrišite neke datoteke kako biste oslobodili prostor."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"Memorija telefona je puna! Izbrišite neke datoteke da biste oslobodili prostor."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="one">Instalirani su autoriteti za izdavanje sertifikata</item>
       <item quantity="few">Instalirani su autoriteti za izdavanje sertifikata</item>
@@ -285,9 +285,9 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"šalje i pregleda SMS poruke"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; šalje i pregleda SMS-ove?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Skladište"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Memorijski prostor"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupa slikama, medijima i datotekama na uređaju"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;pristupa slikama, medijskim datotekama i datotekama na uređaju?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa slikama, medijskim datotekama i datotekama na uređaju?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snima zvuk"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Želite li da omogućite da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snima zvuk?"</string>
@@ -607,7 +607,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zahteva da sačuvani podaci aplikacije budu šifrovani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogućavanje kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Sprečite korišćenje svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogućava neke funk. zaključavanja ekrana"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogućava funkcije zaključavanja ekrana"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Sprečava korišćenje nekih funkcija zaključavanja ekrana."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Kuća"</item>
@@ -826,7 +826,7 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="granularity_label_character" msgid="7336470535385009523">"znak"</string>
     <string name="granularity_label_word" msgid="7075570328374918660">"reč"</string>
-    <string name="granularity_label_link" msgid="5815508880782488267">"veza"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"link"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"red"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Fabričko testiranje nije uspelo"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u direktorijumu /system/app."</string>
@@ -1296,7 +1296,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Prikaz preko drugih aplikacija"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Aplikacija <xliff:g id="NAME">%s</xliff:g> se prikazuje preko drugih aplikacija"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> se prikazuje preko drugih aplik."</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> se prikazuje preko drugih apl."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ako ne želite ovu funkciju za <xliff:g id="NAME">%s</xliff:g>, dodirnite da biste otvorili podešavanja i isključili je."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Isključi"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Proverava se <xliff:g id="NAME">%s</xliff:g>…"</string>

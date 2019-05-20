@@ -219,7 +219,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Urgences"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Fermer la session"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Capture d\'écran"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capture"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Créer un rapport de bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapport interactif"</string>
@@ -272,10 +272,10 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Passer au profil pro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à vos contacts ?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos contacts ?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accéder à la position de l\'appareil"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à la position de cet appareil ?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à la position de cet appareil ?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à votre agenda ?"</string>
@@ -284,19 +284,19 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'envoyer et d\'afficher des SMS ?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder aux photos, contenus multimédias et fichiers sur votre appareil"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux photos, contenus multimédias et fichiers sur votre appareil ?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux photos, contenus multimédias et fichiers sur votre appareil ?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'enregistrer des contenus audio ?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à enregistrer des contenus audio ?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"prendre des photos et enregistrer des vidéos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de prendre des photos et de filmer des vidéos ?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à prendre des photos et enregistrer des vidéos ?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"Lire et écrire les journaux d\'appels du téléphone"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux journaux d\'appels de votre téléphone ?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux journaux d\'appels de votre téléphone ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de passer et gérer des appels téléphoniques ?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à passer et gérer des appels téléphoniques ?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Capteurs corporels"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs relatives à vos signes vitaux"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux données des capteurs relatives à vos signes vitaux ?"</string>
@@ -493,8 +493,8 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Utiliser le matériel d\'empreintes digitales"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autoriser l\'application à utiliser le matériel d\'empreintes digitales pour l\'authentification"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte numérique partiellement détectée. Veuillez réessayer."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte numérique. Veuillez réessayer."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le lecteur d\'empreintes numériques est sale. Veuillez le nettoyer, puis réessayer."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le lecteur d\'empreinte digitale est sale. Veuillez le nettoyer, puis réessayer."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -760,7 +760,7 @@
     <string name="emergency_calls_only" msgid="6733978304386365407">"Urgences seulement"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Réseau verrouillé"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La carte SIM est verrouillée par clé PUK."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Veuillez consulter le guide utilisateur ou contacter le service client."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Veuillez consulter le guide de l\'utilisateur ou contacter le service client."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"La carte SIM est verrouillée."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Déblocage de la carte SIM..."</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%2$d</xliff:g> secondes."</string>
@@ -1206,7 +1206,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"De :"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"À :"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Saisissez le code PIN requis :"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Code PIN :"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Code :"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"La tablette sera déconnectée du réseau Wi-Fi tant qu\'elle sera connectée à l\'appareil \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Le téléviseur se déconnectera temporairement du Wi-Fi lors de sa connexion à l\'appareil <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Le téléphone sera déconnecté du réseau Wi-Fi tant qu\'il sera connecté à l\'appareil <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -1266,7 +1266,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"PARTAGER"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"REFUSER"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Changer de clavier"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Afficher lorsque le clavier physique est activé"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Afficher le clavier virtuel même lorsque le clavier physique est actif"</string>
     <string name="hardware" msgid="194658061510127999">"Afficher le clavier virtuel"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configurer le clavier physique"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Appuyer pour sélectionner la langue et la disposition"</string>
@@ -1780,7 +1780,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Saisissez la langue"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Recommandations"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"Suggestions"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Rechercher"</string>

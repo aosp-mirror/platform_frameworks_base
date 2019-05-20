@@ -151,7 +151,7 @@
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Схема аўтэнтыфікацыі сайта не падтрымліваецца."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Памылка аўтэнтыфікацыі."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Праверка сапраўднасці праз проксі-сервер скончылася няўдала."</string>
-    <string name="httpErrorConnect" msgid="8714273236364640549">"Немагчыма падлучыцца да сервера."</string>
+    <string name="httpErrorConnect" msgid="8714273236364640549">"Немагчыма падключыцца да сервера."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Немагчыма звязацца з серверам. Паўтарыце спробу пазней."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Час чакання злучэння з серверам скончыўся."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Старонка змяшчае зашмат перанакіраванняў сервера."</string>
@@ -451,9 +451,9 @@
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"наладка памеру шпалер"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Дазваляе прыкладанням задаваць падказкі па памеры сістэмных шпалер."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"усталёўваць часавы пояс"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дазваляе прыкладанням змяняць гадзінны пояс планшэта."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Дазваляе праграмам змяняць часавы пояс планшэта."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Дазваляе праграме змяняць часавы пояс тэлевізара."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дазваляе прыкладанню змяняць гадзінны пояс тэлефона."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Дазваляе праграме змяняць часавы пояс тэлефона."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"пошук уліковых запісаў на прыладзе"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Дазваляе прыкладанню атрымлiваць спіс уліковых запісаў, вядомых планшэту. Сярод iх могуць быць улiковыя запiсы, створаныя прыкладаннямi, якiя вы ўсталявалi."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Дазваляе праграме атрымлiваць спіс уліковых запісаў, вядомых тэлевізару. Сярод iх могуць быць любыя ўлiковыя запiсы, створаныя праграмамі, якiя вы ўсталявалi."</string>
@@ -1036,7 +1036,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Вылучыць усё"</string>
     <string name="cut" msgid="3092569408438626261">"Выразаць"</string>
-    <string name="copy" msgid="2681946229533511987">"Капіяваць"</string>
+    <string name="copy" msgid="2681946229533511987">"Капіраваць"</string>
     <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Не атрымалася скапіраваць у буфер абмену"</string>
     <string name="paste" msgid="5629880836805036433">"Уставіць"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Уставіць як звычайны тэкст"</string>
@@ -1236,10 +1236,10 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Немагчыма падключыцца да Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" дрэннае падключэнне да Інтэрнэту."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дазволіць падключэнне?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Праграма %1$s хоча падлучыцца да сеткі Wi-Fi %2$s"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Праграма %1$s хоча падключыцца да сеткі Wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Праграма"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Пачаць работу Wi-Fi Direct. Гэта адключыць кліента або кропку доступу Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Пачаць работу Wi-Fi Direct. Гэта адключыць кліента або хот-спот Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Немагчыма запусціць Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct уключаны"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Дакраніцеся, каб убачыць налады"</string>
@@ -1415,7 +1415,7 @@
     <string name="submit" msgid="1602335572089911941">"Перадаць"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Праграма для ваджэння ўключана"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Націсніце, каб выйсці з праграмы для ваджэння."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-мадэм або кропка доступу Wi-Fi актыўныя"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"USB-мадэм або хот-спот Wi-Fi актыўныя"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Дакраніцеся, каб наладзіць."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Рэжым мадэма адключаны"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"Звярніцеся да адміністратара па падрабязную інфармацыю"</string>
@@ -1541,7 +1541,7 @@
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бесправадны дысплей"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Перадача"</string>
-    <string name="media_route_chooser_title" msgid="1751618554539087622">"Падлучыцца да прылады"</string>
+    <string name="media_route_chooser_title" msgid="1751618554539087622">"Падключыцца да прылады"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Трансліраваць экран на прыладу"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Пошук прылад..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Налады"</string>
@@ -1889,7 +1889,7 @@
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Сховішча на прыладзе"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"Адладка USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"гадз"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"хвіліна"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"хв"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Задаць час"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Увядзіце дапушчальны час"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"Увядзіце час"</string>

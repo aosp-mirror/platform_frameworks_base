@@ -205,7 +205,7 @@
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Uruchamiam ponownie…"</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"Przywracanie danych fabrycznych"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Uruchamiam ponownie…"</string>
-    <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączanie..."</string>
+    <string name="shutdown_progress" msgid="2281079257329981203">"Wyłączam..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet zostanie wyłączony."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Telewizor zostanie wyłączony."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Zegarek zostanie wyłączony."</string>
@@ -288,7 +288,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS‑ów"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na wysyłanie i wyświetlanie SMS-ów?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć wewnętrzna"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na dostęp do zdjęć, multimediów i plików na urządzeniu?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
@@ -499,9 +499,9 @@
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"używanie czytnika linii papilarnych"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Zezwala aplikacji na używanie czytnika linii papilarnych na potrzeby autoryzacji"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Odcisk palca został odczytany tylko częściowo. Spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Czytnik linii papilarnych jest zabrudzony. Wyczyść go i spróbuj ponownie."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Palec został podniesiony zbyt wcześnie. Spróbuj jeszcze raz."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Czytnik linii papilarnych jest zabrudzony. Wyczyść go i spróbuj ponownie."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Palec został podniesiony zbyt wcześnie. Spróbuj jeszcze raz."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Palec został obrócony zbyt wolno. Spróbuj ponownie."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -591,13 +591,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie telewizora albo kasowanie wszystkich danych tego użytkownika, gdy zbyt wiele razy wpisano błędne hasło."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorowanie, ile razy wpisano błędne hasło podczas odblokowywania ekranu, oraz blokowanie telefonu albo kasowanie wszystkich danych tego użytkownika, gdy zbyt wiele razy wpisano błędne hasło."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Zmiana blokady ekranu"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Zmiana blokady ekranu"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Pozwala zmienić blokadę ekranu."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Blokowanie ekranu"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolowanie sposobu i warunków blokowania ekranu"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrolowanie sposobu i warunków blokowania ekranu."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Usuwanie wszystkich danych"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Wymazywanie danych z tabletu bez ostrzeżenia przez przywrócenie danych fabrycznych"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Skasowanie danych w telewizorze bez ostrzeżenia przez przywrócenie danych fabrycznych."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wymazywanie danych z telefonu bez ostrzeżenia przez przywrócenie danych fabrycznych"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wymazywanie danych z telefonu bez ostrzeżenia przez przywrócenie danych fabrycznych."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Kasuj dane użytkownika"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Kasowanie danych tego użytkownika na tym tablecie bez ostrzeżenia."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Kasowanie danych tego użytkownika na tym telewizorze bez ostrzeżenia."</string>
@@ -1748,7 +1748,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Oszczędzanie baterii wyłącza niektóre funkcje urządzenia i wprowadza ograniczenia dla aplikacji, by przedłużyć czas pracy na baterii. "<annotation id="url">"Więcej informacji"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"Oszczędzanie baterii wyłącza niektóre funkcje urządzenia i wprowadza ograniczenia dla aplikacji, by przedłużyć czas pracy na baterii."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

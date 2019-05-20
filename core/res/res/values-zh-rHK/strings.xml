@@ -219,7 +219,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"緊急"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"錯誤報告"</string>
     <string name="global_action_logout" msgid="935179188218826050">"結束工作階段"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"擷取螢幕畫面"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"螢幕截圖"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"取得錯誤報告"</string>
     <string name="bugreport_message" msgid="398447048750350456">"這會收集您目前裝置狀態的相關資訊，並以電郵傳送給您。從開始建立錯誤報告到準備傳送需要一段時間，請耐心等候。"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互動報告"</string>
@@ -390,7 +390,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"允許應用程式修改平板電腦的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"允許應用程式修改電視的通話記錄，包括來電和撥出電話的相關資料。惡意應用程式可能會藉此清除或修改您的通話記錄。"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"允許應用程式修改手機的通話記錄，包括來電和已撥電話相關資料。惡意應用程式可能會藉此刪除或修改您的通話記錄。"</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取身體感應器 (例如心跳監測器)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"存取人體感應器 (例如心跳監測器)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"允許應用程式存取感應器所收集的資料 (這類感應器可監測您的體能狀態，例如您的心率)。"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"讀取日曆活動和詳情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"此應用程式可以讀取所有儲存在您的平板電腦的日曆活動，並分享或儲存您的日曆資料。"</string>
@@ -1046,7 +1046,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"完成操作需使用"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"完成操作需使用 %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"完成操作"</string>
-    <string name="whichViewApplication" msgid="3272778576700572102">"用於開啟的應用程式"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"選擇開啟方式"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"使用 %1$s 開啟"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"開啟"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"使用以下選擇器編輯："</string>
@@ -1362,7 +1362,7 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"已連線至 <xliff:g id="SESSION">%s</xliff:g>，輕按一下即可管理網絡。"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"正在連線至永久連線的 VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"已連線至永久連線的 VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"永遠開啟的 VPN 已中斷連線"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"保持開啟的 VPN 已中斷連線"</string>
     <string name="vpn_lockdown_error" msgid="3133844445659711681">"無法連接永久連線的 VPN"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"變更網絡或 VPN 設定"</string>
     <string name="upload_file" msgid="2897957172366730416">"選擇檔案"</string>
@@ -1496,7 +1496,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"無線螢幕分享"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"投放"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"連接裝置"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"在裝置上放送螢幕"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"螢幕投放到裝置"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"停止連接"</string>
@@ -1820,8 +1820,8 @@
     <string name="app_category_productivity" msgid="3742083261781538852">"生產力應用程式"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB 偵錯"</string>
-    <string name="time_picker_hour_label" msgid="2979075098868106450">"小時"</string>
-    <string name="time_picker_minute_label" msgid="5168864173796598399">"分鐘"</string>
+    <string name="time_picker_hour_label" msgid="2979075098868106450">"時"</string>
+    <string name="time_picker_minute_label" msgid="5168864173796598399">"分"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"設定時間"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"請輸入有效的時間"</string>
     <string name="time_picker_prompt_label" msgid="7588093983899966783">"輸入時間"</string>

@@ -291,7 +291,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tomar fotografías y grabar videos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tome fotos y grabe videos?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registro de llamadas"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Llamadas"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"leer y escribir el registro de llamadas telefónicas"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"¿Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda al registro de las llamadas telefónicas?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Teléfono"</string>
@@ -391,7 +391,7 @@
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite que la aplicación modifique el registro de llamadas de la TV, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite que la aplicación modifique el registro de llamadas del dispositivo, incluidos los datos sobre llamadas entrantes y salientes. Las aplicaciones malintencionadas pueden usar este permiso para borrar o modificar el registro de llamadas."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"acceder a los sensores corporales (como los monitores de frecuencia cardíaca)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la app acceda a datos de sensores que monitorean tu estado físico, como el ritmo cardíaco."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que la app acceda a datos de sensores que monitorean tu estado físico, como la frecuencia cardíaca."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Leer eventos y detalles del calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Esta app puede leer todos los eventos del calendario de tu tablet y compartir o guardar los datos correspondientes."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Esta app puede leer todos los eventos del calendario de tu TV y compartir o guardar los datos correspondientes."</string>
@@ -585,13 +585,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear la televisión, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el teléfono, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla cómo y cuándo se bloquea la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Eliminar los datos de la tablet sin avisar y restablecer la configuración de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Permite borrar los datos de la TV sin previo aviso mediante el restablecimiento de la configuración de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Eliminar los datos del dispositivo sin avisar y restablecer la configuración de fábrica"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borra los datos del dispositivo sin avisar y restablece la configuración de fábrica."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Borrar los datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Permite borrar los datos del usuario en esta tablet sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Permite borrar los datos del usuario en esta televisión sin previo aviso."</string>

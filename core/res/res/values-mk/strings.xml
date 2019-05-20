@@ -293,7 +293,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да фотографира и да снима видео?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Евиденција на повици"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"чита и пишува евиденција на повици во телефонот"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; до евиденцијата на повици на телефонот?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Дали да се дозволи пристап на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; до евиденцијата на повици?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упатува и управува со телефонски повици"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да повикува и да управува со телефонските повици?"</string>
@@ -495,7 +495,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откриен е делумен отпечаток. Обидете се повторно."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензорот за отпечатоци е валкан. Исчистете го и обидете се повторно."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се дрижеше пребрзо. Обидете се повторно."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Прстот се движеше пребрзо. Обидете се повторно."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Прстот се движеше премногу бавно. Обидете се повторно."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1267,7 +1267,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"СПОДЕЛИ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Прикажувај го на екранот додека е активна физичката тастатура"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Прикажувај ја на екранот додека е активна физичката тастатура"</string>
     <string name="hardware" msgid="194658061510127999">"Прикажи виртуелна тастатура"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Конфигурирајте физичка тастатура"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Допрете за избирање јазик и распоред"</string>
@@ -1500,7 +1500,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"Емитувај"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Поврзи се со уред"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Префрли екран на уред"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Пребарување за уреди..."</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"Се бараат уреди..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Поставки"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Исклучи"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"Скенирање..."</string>
@@ -1693,7 +1693,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Втора деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Трета деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за PIN пред откачување"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Побарај PIN пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Побарај шема за откл. пред откачување"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано од администраторот"</string>
@@ -1701,7 +1701,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"За да го продолжи траењето на батеријата, „Штедачот на батерија“ исклучува некои функции на уредот и ограничува апликации. "<annotation id="url">"Дознајте повеќе"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"За да го продолжи траењето на батеријата, „Штедачот на батерија“ исклучува некои функции на уредот и ограничува апликации."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

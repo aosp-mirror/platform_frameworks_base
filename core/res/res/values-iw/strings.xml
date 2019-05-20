@@ -289,14 +289,14 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏שליחה והצגה של הודעות SMS"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה לשלוח הודעות SMS ולהציג אותן?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"אחסון"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"גישה אל תמונות, מדיה וקבצים במכשיר שלך"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"גישה לתמונות, למדיה ולקבצים במכשיר שלך"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה לתמונות, למדיה ולקבצים במכשיר?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"מיקרופון"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"הקלטת אודיו"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה להקליט אודיו?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"צילום תמונות והקלטת וידאו"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה לצלם תמונות וסרטונים?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏לאשר לאפליקציה של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; לצלם תמונות וסרטונים?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"יומני שיחות"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה ליומני השיחות של הטלפון?"</string>
@@ -326,7 +326,7 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"מאפשר לאפליקציה להרחיב או לכווץ את שורת המצב."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"התקן קיצורי דרך"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"מאפשר לאפליקציה להוסיף קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"הסר התקנה של קיצורי דרך"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"להסרת התקנה של קיצורי דרך"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"מאפשר לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ניתוב מחדש של שיחות יוצאות"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"מאפשרת לאפליקציה לראות את המספר המחויג במהלך ביצוע שיחה יוצאת, עם האפשרות להפנות את השיחה למספר אחר או לבטל את השיחה לחלוטין."</string>
@@ -742,7 +742,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"לחץ על \'תפריט\' כדי לבטל את הנעילה."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"שרטט קו לביטול נעילת המסך"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"חירום"</string>
-    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"חזור לשיחה"</string>
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"חזרה לשיחה"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"נכון!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"נסה שוב"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"נסה שוב"</string>
@@ -1258,7 +1258,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"‏שולח הודעות SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt; <xliff:g id="APP_NAME">%1$s</xliff:g> &lt;/ b&gt; שולח מספר רב של הודעות SMS. האם ברצונך לאפשר לאפליקציה זו להמשיך לשלוח הודעות?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"כן, זה בסדר"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"לא, אין מצב"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"עדיף שלא"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; רוצה לשלוח הודעה אל &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"הדבר "<b>"עלול לגרום לחיובים"</b>" בחשבון המכשיר הנייד שלך."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"הדבר יגרום לחיובים בחשבון המכשיר הנייד שלך."</b></string>
@@ -1282,7 +1282,7 @@
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"הקש כדי להגדיר"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"הגדרת שעה"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"הגדרת תאריך"</string>
-    <string name="date_time_set" msgid="5777075614321087758">"הגדר"</string>
+    <string name="date_time_set" msgid="5777075614321087758">"הגדרה"</string>
     <string name="date_time_done" msgid="2507683751759308828">"בוצע"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"חדש: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"מטעם <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1308,7 +1308,7 @@
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"שיתוף דוח על באג…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"מנהל המערכת ביקש דוח על באג כדי לסייע בפתרון בעיות במכשיר זה. ייתכן שאפליקציות ונתונים ישותפו."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"שתף"</string>
-    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"לא, אין מצב"</string>
+    <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"עדיף שלא"</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
     <string name="show_ime" msgid="2506087537466597099">"להשאיר במסך בזמן שהמקלדת הפיזית פעילה"</string>
     <string name="hardware" msgid="194658061510127999">"הצג מקלדת וירטואלית"</string>
@@ -1338,7 +1338,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ייתכן שפונקציונליות מסוימת לא תפעל כראוי. יש להכניס אמצעי אחסון חדש."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"הוצאה של <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"אין להסיר"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"הגדר"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"הגדרה"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"הוצא"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"גלה"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> חסר"</string>
@@ -1386,7 +1386,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"האם ברצונך לאפשר בקשה זו?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"בקשת גישה"</string>
     <string name="allow" msgid="7225948811296386551">"כן, זה בסדר"</string>
-    <string name="deny" msgid="2081879885755434506">"לא, אין מצב"</string>
+    <string name="deny" msgid="2081879885755434506">"עדיף שלא"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"בקשת הרשאה"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"נדרשת הרשאה\nלחשבון <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"אתה משתמש באפליקציה זו מחוץ לפרופיל העבודה שלך"</string>
@@ -1748,7 +1748,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"נמחקה על ידי מנהל המערכת"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"כדי להאריך את חיי הסוללה, מצב החיסכון בסוללה מכבה תכונות מסוימות במכשיר ומגביל אפליקציות. "<annotation id="url">"מידע נוסף"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"כדי להאריך את חיי הסוללה, מצב החיסכון בסוללה מכבה תכונות מסוימות במכשיר ומגביל אפליקציות."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה אתה משתמש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. משמעות הדבר היא, למשל, שתמונות יוצגו רק לאחר שתקיש עליהן."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

@@ -291,9 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om foto\'s te maken en video op te nemen?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Gesprekkenlijsten"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"gesprekkenlijst lezen en schrijven"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je gesprekkenlijsten?"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Gesprekslijsten"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"gesprekslijst lezen en schrijven"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot je gesprekslijsten?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefoon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefoneren en gesprekken beheren"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om telefoongesprekken te starten en te beheren?"</string>
@@ -384,12 +384,12 @@
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tablet, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je tv, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op je telefoon, inclusief de frequentie waarmee je hebt gebeld, gemaild of op andere manieren hebt gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
-    <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekkenlijst lezen"</string>
+    <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekslijst lezen"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Deze app kan je gespreksgeschiedenis lezen."</string>
-    <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekkenlijst schrijven"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app de gesprekkenlijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app de gesprekkenlijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app de gesprekkenlijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekkenlijst wissen of aanpassen."</string>
+    <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekslijst schrijven"</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app de gesprekslijst van je tablet aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Toestaan dat de app de gesprekslijst van je tv aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app de gesprekslijst van je telefoon aanpast, waaronder gegevens over inkomende en uitgaande gesprekken. Schadelijke apps kunnen hiermee je gesprekslijst wissen of aanpassen."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"toegang tot lichaamssensoren (zoals hartslagmeters)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Hiermee kan de app toegang krijgen tot gegevens van sensoren die je lichamelijke conditie controleren, zoals je hartslag."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Agenda-afspraken en -gegevens lezen"</string>
@@ -585,13 +585,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"De schermvergrendeling wijzigen"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Wijzig de schermvergrendeling."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"De schermvergrendeling wijzigen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Het scherm vergrendelen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheer hoe en wanneer het scherm wordt vergrendeld."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheren hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"De gegevens van de tv zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Wis de gegevens van de telefoon zonder waarschuwing door de fabrieksinstellingen te herstellen."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Gebruikersgegevens wissen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"De gegevens van deze gebruiker op deze tablet zonder waarschuwing wissen."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"De gegevens van deze gebruiker op deze tv zonder waarschuwing wissen."</string>
@@ -605,7 +605,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Camera\'s uitschakelen"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Het gebruik van alle apparaatcamera\'s voorkomen."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Bepaalde functies voor schermvergrendeling uitschakelen"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Voorkom het gebruik van bepaalde functies voor schermvergrendeling."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Gebruik van bepaalde functies voor schermvergrendeling voorkomen."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -866,8 +866,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"voicemail toevoegen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Hiermee kan de app berichten toevoegen aan de inbox van je voicemail."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatiemachtigingen voor browser aanpassen"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Hiermee kan de app de geolocatiemachtigingen van de browser aanpassen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatierechten voor browser aanpassen"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Hiermee kan de app de geolocatierechten van de browser aanpassen. Schadelijke apps kunnen dit gebruiken om locatiegegevens te verzenden naar willekeurige websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Wil je dat de browser dit wachtwoord onthoudt?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Niet nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Onthouden"</string>
@@ -1027,7 +1027,7 @@
     <string name="view_calendar" msgid="979609872939597838">"Weergeven"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Geselecteerde tijd weergeven op de kalender"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Plannen"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Evenement plannen voor geselecteerde tijd"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Afspraak plannen voor geselecteerde tijd"</string>
     <string name="view_flight" msgid="7691640491425680214">"Volgen"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Geselecteerde vlucht volgen"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Opslagruimte is bijna vol"</string>
@@ -1125,9 +1125,9 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> heeft geheugenlimiet overschreden"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap dump verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonsgegevens bevatten waartoe de app toegang heeft."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonlijke informatie bevatten waartoe de app toegang heeft."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
-    <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Beltoonvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspelen via Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
@@ -1138,13 +1138,13 @@
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Beltoonvolume"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Belvolume"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Gespreksvolume"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Mediavolume"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Meldingsvolume"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Standaardbeltoon"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Standaard (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Geen"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Beltonen"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringtones"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmgeluiden"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Meldingsgeluiden"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Onbekend"</string>
@@ -1242,7 +1242,7 @@
     <string name="date_time_done" msgid="2507683751759308828">"Gereed"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NIEUW: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Geleverd door <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <string name="no_permissions" msgid="7283357728219338112">"Geen machtigingen vereist"</string>
+    <string name="no_permissions" msgid="7283357728219338112">"Geen rechten nodig"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"hieraan kunnen kosten zijn verbonden"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"Dit apparaat wordt opgeladen via USB"</string>
@@ -1294,7 +1294,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Sommige functies werken mogelijk niet correct. Plaats nieuw opslagapparaat."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> uitwerpen"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Niet verwijderen"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"Configureren"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Instellen"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Uitwerpen"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Verkennen"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ontbreekt"</string>
@@ -1403,7 +1403,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Verwijderingen ongedaan maken"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Nu niets doen."</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Een account selecteren"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Een account toevoegen"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Account toevoegen"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Account toevoegen"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Verhogen"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Verlagen"</string>
@@ -1743,7 +1743,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evenement"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Afspraken"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Slapen"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> dempt sommige geluiden"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Er is een intern probleem met je apparaat. Het apparaat kan instabiel zijn totdat u het apparaat terugzet naar de fabrieksinstellingen."</string>

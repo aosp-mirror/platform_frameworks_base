@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏مشکل در اتصال یا کد MMI نامعتبر."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"عملکرد فقط به شماره‌های شماره‌گیری ثابت محدود است."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"وقتی درحال رومینگ هستید، نمی‌توانید تنظیمات هدایت تماس را از تلفنتان تغییر دهید."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"وقتی درحال فراگردی هستید، نمی‌توانید تنظیمات هدایت تماس را از تلفنتان تغییر دهید."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"سرویس فعال شد."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"سرویس فعال شد برای:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"سرویس غیرفعال شده است."</string>
@@ -107,19 +107,19 @@
     <string name="serviceClassDataSync" msgid="7530000519646054776">"همگام‌سازی"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"بسته"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
-    <string name="roamingText0" msgid="7170335472198694945">"نشانگر رومینگ روشن"</string>
-    <string name="roamingText1" msgid="5314861519752538922">"نشانگر رومینگ خاموش"</string>
-    <string name="roamingText2" msgid="8969929049081268115">"نشانگر چشمک زن رومینگ"</string>
+    <string name="roamingText0" msgid="7170335472198694945">"نشانگر فراگردی روشن"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"نشانگر فراگردی خاموش"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"نشانگر چشمک زن فراگردی"</string>
     <string name="roamingText3" msgid="5148255027043943317">"خارج از محله"</string>
     <string name="roamingText4" msgid="8808456682550796530">"خارج از ساختمان"</string>
-    <string name="roamingText5" msgid="7604063252850354350">"رومینگ - سیستم برگزیده"</string>
-    <string name="roamingText6" msgid="2059440825782871513">"رومینگ - سیستم موجود"</string>
-    <string name="roamingText7" msgid="7112078724097233605">"رومینگ - شریک"</string>
-    <string name="roamingText8" msgid="5989569778604089291">"رومینگ - شریک ویژه"</string>
-    <string name="roamingText9" msgid="7969296811355152491">"رومینگ - عملکرد کامل سرویس"</string>
-    <string name="roamingText10" msgid="3992906999815316417">"رومینگ - عملکرد جزئی سرویس"</string>
-    <string name="roamingText11" msgid="4154476854426920970">"اعلان رومینگ روشن"</string>
-    <string name="roamingText12" msgid="1189071119992726320">"اعلان رومینگ خاموش"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"فراگردی - سیستم برگزیده"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"فراگردی - سیستم موجود"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"فراگردی - شریک"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"فراگردی - شریک ویژه"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"فراگردی - عملکرد کامل سرویس"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"فراگردی - عملکرد جزئی سرویس"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"اعلان فراگردی روشن"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"اعلان فراگردی خاموش"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"جستجوی سرویس"</string>
     <string name="wfcRegErrorTitle" msgid="3855061241207182194">"‏تماس ازطریق Wi‑Fi تنظیم نشد"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
@@ -293,7 +293,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود عکس بگیرد و ویدیو ضبط کند؟"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"گزارش‌های تماس"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"خواندن و نوشتن گزارش تماس تلفنی"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه می‌دهید به گزارش تماس‌های تلفنی شما دسترسی داشته باشد؟"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود به گزارش تماس‌های تلفنی شما دسترسی داشته باشد؟"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"تلفن"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"برقراری و مدیریت تماس‌های تلفنی"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود تماس‌های تلفنی برقرار کند و آن‌ها را مدیریت کند؟"</string>
@@ -862,8 +862,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره‌شده در رایانهٔ لوحی شما را تغییر دهد. این ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف کند یا تغییر دهد. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"به برنامه اجازه می‌دهد تا سابقه یا نشانک‌های ذخیره شده مرورگر در تلویزیون شما را تغییر دهد. شاید به برنامه اجازه دهد تا داده‌های «مرورگر» را پاک کند یا تغییر دهد. توجه: این مجوز شاید توسط مرورگرهای شخص ثالث یا سایر برنامه‌ها با قابلیت‌های مرور وب اجرا شود."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"به برنامه اجازه می‌دهد سابقه مرورگر یا نشانک‌های ذخیره‌شده در تلفن شما را تغییر دهد. این ممکن است به برنامه اجازه دهد داده‌های مرورگر را حذف کند یا تغییر دهد. توجه: این مجوز ممکن است توسط مرورگرهای شخص ثالث یا سایر برنامه‌های دارای قابلیت مرور وب قابل اجرا نباشد."</string>
-    <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم یک هشدار"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا هشداری را در برنامه ساعت زنگدار نصب شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"تنظیم زنگ"</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"‏به برنامه اجازه می‎دهد تا زنگی را در برنامه ساعت زنگدار نصب‌شده تنظیم کند. برخی از برنامه‎های ساعت زنگدار نمی‌‎توانند این ویژگی را اعمال کنند."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"افزودن پست صوتی"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"به برنامه اجازه می‌دهد تا پیام‌ها را به صندوق ورودی پست صوتی شما اضافه کند."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"تغییر مجوزهای مکان جغرافیایی مرورگر"</string>
@@ -873,7 +873,7 @@
     <string name="save_password_remember" msgid="6491879678996749466">"به خاطر سپردن"</string>
     <string name="save_password_never" msgid="8274330296785855105">"هیچ‌وقت"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"شما اجازه بازکردن این صفحه را ندارید."</string>
-    <string name="text_copied" msgid="4985729524670131385">"متن در کلیپ بورد کپی شد."</string>
+    <string name="text_copied" msgid="4985729524670131385">"متن در بریده‌دان کپی شد."</string>
     <string name="more_item_label" msgid="4650918923083320495">"بیشتر"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"منو+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"‎Meta+‎"</string>
@@ -997,7 +997,7 @@
     <string name="selectAll" msgid="6876518925844129331">"انتخاب همه"</string>
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"در کلیپ‌بورد کپی نشد"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"در بریده‌دان کپی نشد"</string>
     <string name="paste" msgid="5629880836805036433">"جای‌گذاری"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"جای‌گذاری به عنوان متن ساده"</string>
     <string name="replace" msgid="5781686059063148930">"جایگزین شود..."</string>
@@ -1133,7 +1133,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"آهنگ زنگ روی بی‌صدا تنظیم شد"</string>
     <string name="volume_call" msgid="3941680041282788711">"صدا حینِ تماس"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"میزان صدای تماس بلوتوث"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای هشدار"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای زنگ"</string>
     <string name="volume_notification" msgid="2422265656744276715">"میزان صدای اعلان"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"میزان صدا"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"میزان صدای بلوتوث"</string>
@@ -1145,7 +1145,7 @@
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"پیش‌فرض (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"هیچ‌کدام"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"آهنگ‌های زنگ"</string>
-    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"صداهای زنگ هشدار"</string>
+    <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"صداهای زنگ"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"صداهای اعلان"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"نامشخص"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1249,7 +1249,7 @@
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"‏درحال شارژ کردن دستگاه متصل‌‌شده ازطریق USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"‏انتقال فایل ازطریق USB روشن شد"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"‏PTP ازطریق USB روشن شد"</string>
-    <string name="usb_tether_notification_title" msgid="3716143122035802501">"‏اتصال به اینترنت با USB تلفن همراه روشن شد"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"‏اشتراک‌گذاری اینترنت با USB روشن شد"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"‏MIDI ازطریق USB روشن شد"</string>
     <string name="usb_accessory_notification_title" msgid="1785694450621427730">"‏وسیله جانبی USB متصل است"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"برای گزینه‌های بیشتر ضربه بزنید."</string>
@@ -1371,9 +1371,9 @@
     <string name="submit" msgid="1602335572089911941">"ارسال"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"برنامه رانندگی درحال اجرا است"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"برای خروج از برنامه رانندگی ضربه بزنید."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"اتصال داده با سیم یا نقطه اتصال فعال"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"اشتراک‌گذاری اینترنت یا نقطه اتصال فعال"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"برای راه‌اندازی ضربه بزنید."</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"اتصال به اینترنت با تلفن همراه غیرفعال شده است"</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"اشتراک‌گذاری اینترنت غیرفعال است"</string>
     <string name="disable_tether_notification_message" msgid="2913366428516852495">"برای جزئیات، با سرپرستتان تماس بگیرید"</string>
     <string name="back_button_label" msgid="2300470004503343439">"برگشت"</string>
     <string name="next_button_label" msgid="1080555104677992408">"بعدی"</string>
@@ -1450,11 +1450,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ویرایش"</string>
     <string name="data_usage_warning_title" msgid="6499834033204801605">"هشدار داده"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"<xliff:g id="APP">%s</xliff:g> از داده را مصرف کرده‌اید"</string>
-    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"مصرف داده به حد مجاز رسیده است"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏به حد مجاز مصرف داده Wi-Fi رسید"</string>
+    <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"بیش‌از حدمجاز داده تلفن همراه است"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"‏بیش‌از حدمجاز داده Wi-Fi است"</string>
     <string name="data_usage_limit_body" msgid="2908179506560812973">"برای بقیه دوره، داده موقتاً‌ متوقف می‌شود"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"بیش از حداکثر مجاز داده تلفن همراه"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‏بیش از حداکثر مجاز داده Wi-Fi"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"بیش‌از حدمجاز داده تلفن همراه"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"‏بیش‌از حدمجاز داده Wi-Fi"</string>
     <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"مصرف داده شما <xliff:g id="SIZE">%s</xliff:g> از حداکثر مجاز بیشتر شده است"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"داده پس‌زمینه محدود شد"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"برای برداشتن محدودیت ضربه بزنید."</string>
@@ -1698,7 +1698,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"برای افزایش عمر باتری،‌ «بهینه‌سازی باتری» بعضی از ویژگی‌های دستگاه را خاموش می‌کند و برنامه‌ها را محدود می‌کند. "<annotation id="url">"بیشتر بدانید"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"برای افزایش ماندگاری شارژ باتری،‌ «بهینه‌سازی باتری» برخی ویژگی‌های دستگاه را خاموش می‌کند و برنامه‌ها را محدود می‌کند."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه از طرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1734,7 +1734,7 @@
       <item quantity="other">‏برای %d ساعت</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="9128205721301330797">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (هشدار بعدی)"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (زنگ بعدی)"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"تا زمانی‌که آن را خاموش کنید"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"تا زمانی که «مزاحم نشوید» را خاموش کنید"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> /‏ <xliff:g id="REST">%2$s</xliff:g>"</string>

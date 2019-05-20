@@ -84,7 +84,7 @@
     <string name="RestrictedStateContent" msgid="6538703255570997248">"L\'operador de telefonia mòbil ho ha desactivat temporalment"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"L\'operador de telefonia mòbil ho ha desactivat temporalment per a la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"No es pot accedir a la xarxa mòbil"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prova de canviar de xarxa preferida. Toca per canviar-la."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prova de canviar de xarxa preferent. Toca per canviar-la."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Les trucades d\'emergència no estan disponibles"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"No es poden fer trucades d\'emergència per Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="3441746047346135073">"Missatges SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
-    <string name="notification_channel_sim" msgid="4052095493875188564">"Estat de la targeta SIM"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Estat de la SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -284,13 +284,13 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; enviï i llegeixi missatges SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Emmagatzematge"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accedir a fotos, contingut multimèdia i fitxers del dispositiu"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a les fotos, al contingut multimèdia i als fitxers del dispositiu?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a fotos, contingut multimèdia i fitxers del dispositiu?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micròfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"gravar àudio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gravi àudio?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i vídeos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci fotos i vídeos?"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i gravar vídeos"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci fotos i gravi vídeos?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registres de trucades"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi als registres de trucades del telèfon?"</string>
@@ -585,7 +585,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el televisor o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fa un seguiment del nombre de contrasenyes incorrectes que s\'han escrit en intentar desbloquejar la pantalla i bloqueja el telèfon o n\'esborra totes les dades de l\'usuari si s\'escriuen massa contrasenyes incorrectes."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Canviar el bloqueig de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canvia el bloqueig de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Canvia el bloqueig de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquejar la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla com i quan es bloqueja la pantalla."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Esborrar totes les dades"</string>
@@ -742,10 +742,10 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Torna-ho a provar"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Desbl. per accedir a totes les funcions i dades"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S\'ha superat el nombre màxim d\'intents de desbloqueig facial"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"No hi ha cap targeta SIM."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hi ha cap targeta SIM a la tauleta."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"No hi ha cap targeta SIM al televisor."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"No hi ha cap targeta SIM al telèfon."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"No hi ha cap SIM"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hi ha cap SIM a la tauleta."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"No hi ha cap SIM al televisor."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"No hi ha cap SIM al telèfon."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insereix una targeta SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Targeta SIM no utilitzable."</string>
@@ -1269,7 +1269,7 @@
     <string name="show_ime" msgid="2506087537466597099">"Mantén-lo en pantalla mentre el teclat físic està actiu"</string>
     <string name="hardware" msgid="194658061510127999">"Mostra el teclat virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configura el teclat físic"</string>
-    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i el disseny"</string>
+    <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toca per seleccionar l\'idioma i la disposició"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Mostra sobre altres aplicacions"</string>
@@ -1496,7 +1496,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla sense fil"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Emet"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Connexió al dispositiu"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emissió de pantalla al dispositiu"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Emet pantalla al dispositiu"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"S\'estan cercant dispositius…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Configuració"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Desconnecta"</string>
@@ -1696,9 +1696,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instal·lat per l\'administrador"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualitzat per l\'administrador"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Suprimit per l\'administrador"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Per augmentar la durada de la bateria, el mode d\'estalvi de bateria desactiva algunes funcions i restringeix aplicacions. "<annotation id="url">"Més informació"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"Per augmentar la durada de la bateria, el mode d\'estalvi de bateria desactiva algunes funcions i restringeix aplicacions."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Per prolongar la durada de la bateria, el mode d\'estalvi de bateria desactiva algunes funcions i restringeix aplicacions. "<annotation id="url">"Més informació"</annotation></string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Per prolongar la durada de la bateria, el mode d\'estalvi de bateria desactiva algunes funcions i restringeix aplicacions."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

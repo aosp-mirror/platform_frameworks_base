@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"تین طرفہ کالنگ"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"غیر مطلوبہ پریشان کن کالز کو مسترد کرنا"</string>
     <string name="CndMmi" msgid="3116446237081575808">"کالنگ نمبر ڈیلیوری"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"پریشان نہ کریں"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"ڈسٹرب نہ کریں"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"‏کالر ID کی ڈیفالٹ ترتیب محدود کردہ ہے۔ اگلی کال: غیر محدود کردہ"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"‏کالر ID کی ڈیفالٹ ترتیب غیر محدود کردہ ہے۔ اگلی کال: محدود کردہ"</string>
@@ -283,7 +283,7 @@
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو SMS پیغامات بھیجنے اور انہیں ملاحظہ کرنے کی اجازت دیں؟"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"اسٹوریج"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"اپنے آلہ پر تصاویر، میڈیا اور فائلوں تک رسائی حاصل کریں"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"آپ کے آلہ پر تصاویر، میڈیا اور فائلوں تک رسائی حاصل کر سکتی ہیں"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو آپ کے آلہ پر تصاویر، میڈیا اور فائلوں تک رسائی کی اجازت دیں؟"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"مائکروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"آڈیو ریکارڈ کریں"</string>
@@ -835,7 +835,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"یہ صفحہ چھوڑیں"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"اس صفحہ پر رہیں"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nکیا آپ واقعی اس صفحہ سے باہر نیویگیٹ کرنا چاہتے ہیں؟"</string>
-    <string name="save_password_label" msgid="6860261758665825069">"توثیق کریں"</string>
+    <string name="save_password_label" msgid="6860261758665825069">"تصدیق کریں"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"تجویز: زوم ان اور آؤٹ کیلئے دو بار تھپتھپائیں۔"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"آٹوفل"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"آٹوفل مقرر کریں"</string>
@@ -1215,7 +1215,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"‏SMS پیغامات بھیج رہا ہے"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بڑی تعداد میں SMS پیغامات بھیج رہی ہے۔ کیا آپ اس ایپ کو پیغامات بھیجتے رہنے کی اجازت دینا چاہتے ہیں؟"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"اجازت دیں"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"رد کریں"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"مسترد کریں"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; کو ایک پیغام بھیجنا چاہے گا۔"</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"اس کی وجہ سے آپ کے موبائل اکاؤنٹ پر "<b>"چارجز لگ سکتے ہیں"</b>"۔"</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"اس کی وجہ سے آپ کے موبائل اکاؤنٹ پر چارجز لگیں گے۔"</b></string>
@@ -1230,7 +1230,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"ہو گیا"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"‏SIM شامل کیا گیا"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"موبائل نیٹ ورک تک رسائی کیلئے اپنا آلہ دوبارہ سٹارٹ کریں۔"</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"دوبارہ شروع کریں"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"ری سٹارٹ"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"موبائل سروس فعال کریں"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"‏اپنا نیا SIM فعال کرنے کیلئے کیریئر ایپ ڈاؤن لوڈ کریں"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"‏اپنا نیا SIM فعال کرنے کیلئے <xliff:g id="APP_NAME">%1$s</xliff:g> ایپ ڈاؤن لوڈ کریں"</string>
@@ -1368,7 +1368,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"‏نیٹ ورک یا VPN کی ترتیبات تبدیل کریں"</string>
     <string name="upload_file" msgid="2897957172366730416">"فائل منتخب کریں"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"کوئی فائل منتخب نہیں کی گئی"</string>
-    <string name="reset" msgid="2448168080964209908">"دوبارہ ترتیب دیں"</string>
+    <string name="reset" msgid="2448168080964209908">"ری سیٹ کریں"</string>
     <string name="submit" msgid="1602335572089911941">"جمع کرائیں"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ڈرائیونگ ایپ چل رہی ہے"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ڈرائیونگ ایپ سے باہر نکلنے کے لئے تھپتھپائيں۔"</string>

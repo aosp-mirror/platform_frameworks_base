@@ -272,10 +272,10 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Alternar para o perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"acesse seus contatos"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seus contatos?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seus contatos?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Local"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"acesse o local do dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse a localização deste dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse o local deste dispositivo?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acesse sua agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse sua agenda?"</string>
@@ -284,19 +284,19 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse e envie mensagens SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Armazenamento"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"acesse fotos, mídia e arquivos do dispositivo"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse fotos, mídia e arquivos no seu dispositivo?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse fotos, mídia e arquivos no seu dispositivo?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"grave áudio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave áudio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave áudio?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Câmera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tire fotos e grave vídeos"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeos?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tire fotos e grave vídeos?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registro de chamadas"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ler e gravar o registro de chamadas telefônicas"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse seu registro de chamadas telefônicas?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"faça e gerencie chamadas telefônicas"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gerencie e faça chamadas telefônicas?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permitir que o app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; gerencie e faça chamadas telefônicas?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acesse dados do sensor sobre seus sinais vitais"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse os dados do sensor sobre seus sinais vitais?"</string>
@@ -591,7 +591,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Apaga dados da TV sem aviso, fazendo uma redefinição para configuração original."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados do telefone sem aviso redefinindo a configuração original."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Limpar dados do usuário"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Limpa os dados do usuário neste tablet sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Limpa os dados do usuário nesta TV sem aviso prévio."</string>
@@ -1026,8 +1026,8 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Adicionar aos contatos"</string>
     <string name="view_calendar" msgid="979609872939597838">"Ver"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Ver horário selecionado na agenda"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Programar"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programar evento para a hora selecionada"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Agendar"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Agendar evento no horário selecionado"</string>
     <string name="view_flight" msgid="7691640491425680214">"Rastrear"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Rastrear voo selecionado"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Pouco espaço de armazenamento"</string>
@@ -1131,14 +1131,14 @@
     <string name="volume_music" msgid="5421651157138628171">"Volume da mídia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Reproduzindo por meio de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Toque silencioso definido"</string>
-    <string name="volume_call" msgid="3941680041282788711">"Volume na chamada"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume de chamada Bluetooth"</string>
+    <string name="volume_call" msgid="3941680041282788711">"Volume das chamadas"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume das chamadas por Bluetooth"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Volume do alarme"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volume da notificação"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Volume de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Volume do toque"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume de chamadas"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volume das chamadas"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volume da mídia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume da notificação"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Toque padrão"</string>
@@ -1156,7 +1156,7 @@
       <item quantity="one">Abrir redes Wi-Fi disponíveis</item>
       <item quantity="other">Abrir redes Wi-Fi disponíveis</item>
     </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Conectar-se a uma rede Wi‑Fi aberta"</string>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Conectar a uma rede Wi‑Fi aberta"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Conectar à rede Wi‑Fi da operadora"</string>
     <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Conectando-se à rede Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Conectado a uma rede Wi‑Fi"</string>
@@ -1266,7 +1266,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECUSAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Manter na tela enquanto o teclado físico estiver ativo"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Mantém o teclado virtual na tela enquanto o teclado físico está ativo"</string>
     <string name="hardware" msgid="194658061510127999">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Configurar teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Toque para selecionar o idioma e o layout"</string>
@@ -1448,7 +1448,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"Drive USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Armazenamento USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
-    <string name="data_usage_warning_title" msgid="6499834033204801605">"Aviso de dados"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Alerta de uso de dados"</string>
     <string name="data_usage_warning_body" msgid="7340198905103751676">"Você usou <xliff:g id="APP">%s</xliff:g> de dados"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Limite de dados móveis atingido"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Limite de dados Wi-Fi atingido"</string>

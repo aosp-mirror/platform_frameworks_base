@@ -1026,7 +1026,7 @@
     <string name="add_contact_desc" msgid="4830217847004590345">"Προσθήκη στις επαφές"</string>
     <string name="view_calendar" msgid="979609872939597838">"Προβολή"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Προβολή επιλεγμένης ώρας στο ημερολόγιο"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"Χρονοδιάγραμμα"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Πρόγραμμα"</string>
     <string name="add_calendar_event_desc" msgid="4326891793260687388">"Προγραμματισμός συμβάντος για επιλεγμένο χρόνο"</string>
     <string name="view_flight" msgid="7691640491425680214">"Κομμάτι"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Παρακολούθηση επιλεγμένης πτήσης"</string>
@@ -1257,7 +1257,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Πατήστε για να απενεργοποιήσετε τον εντοπισμό και τη διόρθωση σφαλμάτων USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Απενεργοποιήστε τον εντοπισμό/διόρθ. σφαλμάτων USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Λήψη αναφοράς σφάλματος…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Κοινή χρήση αναφοράς σφάλματος;"</string>

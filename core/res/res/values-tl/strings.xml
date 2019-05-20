@@ -290,7 +290,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na mag-record ng audio?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at mag-record ng video"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na kumuha ng mga larawan at mag-record ng video?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na kumuha ng larawan at mag-record ng video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Mga log ng tawag"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"binabasa at sinusulat ang log ng tawag sa telepono"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong mga log ng tawag sa telepono?"</string>
@@ -492,11 +492,11 @@
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Pinapayagan ang app na mag-invoke ng mga paraan upang magdagdag at mag-delete ng mga template ng fingerprint na magagamit."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"gamitin ang hardware ng fingerprint"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Pinapayagan ang app na gumamit ng hardware ng fingerprint para sa pagpapatotoo"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukan ulit."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Napakabilis ng paggalaw ng daliri. Pakisubukan ulit."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Hindi nakilala"</string>
@@ -1008,7 +1008,7 @@
     <string name="redo" msgid="7759464876566803888">"Gawing muli"</string>
     <string name="autofill" msgid="3035779615680565188">"I-autofill"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pagpili ng teksto"</string>
-    <string name="addToDictionary" msgid="4352161534510057874">"Idagdag sa diksyonaryo"</string>
+    <string name="addToDictionary" msgid="4352161534510057874">"Idagdag sa diksyunaryo"</string>
     <string name="deleteText" msgid="6979668428458199034">"I-delete"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
@@ -1519,7 +1519,7 @@
       <item quantity="other">Subukang muli sa loob ng <xliff:g id="NUMBER">%d</xliff:g> na segundo.</item>
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Iguhit ang iyong pattern"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ilagay ang SIM PIN"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ilagay ang PIN ng SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ilagay ang PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Ilagay ang Password"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"Hindi na pinagana ang SIM ngayon. Maglagay ng PUK code upang magpatuloy. Makipag-ugnay sa carrier para sa mga detalye."</string>

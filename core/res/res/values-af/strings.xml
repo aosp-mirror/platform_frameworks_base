@@ -282,7 +282,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS-boodskappe te stuur en te bekyk"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Laat &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om SMS\'e te stuur en te bekyk?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Stoor"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Berging"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang te verkry tot foto\'s, media en lêers op jou toestel"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot jou foto\'s, media en lêers op jou toestel?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoon"</string>
@@ -495,7 +495,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Gedeeltelike vingerafdruk is bespeur. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kon nie vingerafdruk verwerk nie. Probeer asseblief weer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Vingerafdruksensor is vuil. Maak dit skoon en probeer weer."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vinger is te vinnig beweer. Probeer weer."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vinger is te vinnig beweeg. Probeer weer."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vinger is te stadig beweer. Probeer asseblief weer."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -671,7 +671,7 @@
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Gepasmaak"</string>
-    <string name="eventTypeBirthday" msgid="2813379844211390740">"Verjaardag"</string>
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Verjaarsdag"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Herdenking"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Ander"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Gepasmaak"</string>

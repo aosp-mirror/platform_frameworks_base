@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"位元組"</string>
+    <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
@@ -820,7 +820,7 @@
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑動區域。"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT 鍵"</string>
     <string name="granularity_label_character" msgid="7336470535385009523">"字元"</string>
     <string name="granularity_label_word" msgid="7075570328374918660">"字詞"</string>
     <string name="granularity_label_link" msgid="5815508880782488267">"連結"</string>
@@ -1206,7 +1206,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"寄件者："</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"收件者："</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"請輸入必要的 PIN："</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN："</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN 碼："</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"平板電腦與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 Wi-Fi 連線"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"電視連上 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 期間將暫時中斷 Wi-Fi 連線"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"手機與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 連線期間將暫時中斷 Wi-Fi 連線"</string>
@@ -1349,7 +1349,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"你目前透過工作設定檔使用這個應用程式"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"無障礙"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"桌布"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"變更桌布"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知接聽器"</string>
@@ -1496,7 +1496,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"無線螢幕分享"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"投放"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"連線至裝置"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"將螢幕投放到裝置上"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"將螢幕畫面投放到裝置上"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"正在搜尋裝置..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"設定"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"中斷連線"</string>
@@ -1554,16 +1554,16 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"要使用協助工具捷徑嗎？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"啟用捷徑功能後，只要同時按下兩個音量鍵 3 秒，就能啟動協助工具功能。\n\n 目前設定的協助工具功能為：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n 如要變更設定的功能，請依序輕觸 [設定] &gt; [協助工具]。"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"要使用無障礙捷徑嗎？"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"啟用捷徑功能後，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。\n\n 目前設定的無障礙功能為：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n 如要變更設定的功能，請依序輕觸 [設定] &gt; [無障礙工具]。"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"停用捷徑"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"使用捷徑"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"色彩反轉"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"色彩校正"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"協助工具捷徑啟用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"協助工具捷徑停用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"輕觸 [協助工具] 按鈕後，選擇你想使用的功能："</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"如要變更指派的功能，請按住 [協助工具] 按鈕。"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"無障礙捷徑啟用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"無障礙捷徑停用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"輕觸 [無障礙工具] 按鈕後，選擇你想使用的功能："</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"如要變更指派的功能，請按住 [無障礙工具] 按鈕。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"放大"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1698,7 +1698,7 @@
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由你的管理員刪除"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"為了延長電池續航力，節約耗電量模式會關閉部分裝置功能並限制應用程式。"<annotation id="url">"瞭解詳情"</annotation></string>
     <string name="battery_saver_description" msgid="769989536172631582">"為了延長電池續航力，節約耗電量模式會關閉部分裝置功能，並限制應用程式。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由你輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，在你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
