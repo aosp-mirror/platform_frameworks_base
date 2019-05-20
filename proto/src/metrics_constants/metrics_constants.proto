@@ -6530,68 +6530,78 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_GESTURE_WAKE_LOCK_SCREEN = 1557;
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // OPEN: Emergency dialer opened
     // CLOSE: Emergency dialer closed
     //  SUBTYPE: The entry type that user opened emergency dialer
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    EMERGENCY_DIALER = 1558;
+    EMERGENCY_DIALER = 1558 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // FIELD: The screen is currently locked
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    FIELD_EMERGENCY_DIALER_IS_SCREEN_LOCKED = 1559;
+    FIELD_EMERGENCY_DIALER_IS_SCREEN_LOCKED = 1559 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // FIELD: Bit flag indicating the actions performed by user
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    FIELD_EMERGENCY_DIALER_USER_ACTIONS = 1560;
+    FIELD_EMERGENCY_DIALER_USER_ACTIONS = 1560 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // FIELD: The duration user stayed at emergency dialer
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    FIELD_EMERGENCY_DIALER_DURATION_MS = 1561;
+    FIELD_EMERGENCY_DIALER_DURATION_MS = 1561 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // ACTION: Making call via emergency dialer
     //  SUBTYPE: The UI that user made phone call
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    EMERGENCY_DIALER_MAKE_CALL = 1562;
+    EMERGENCY_DIALER_MAKE_CALL = 1562 [deprecated=true];
 
     // FIELD: The phone number type of a call user made
-    // CATEGORY: EMERGENCY_DIALER
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2
     // OS: Q
     FIELD_EMERGENCY_DIALER_PHONE_NUMBER_TYPE = 1563;
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // FIELD: There is a shortcut for the phone number
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    FIELD_EMERGENCY_DIALER_PHONE_NUMBER_HAS_SHORTCUT = 1564;
+    FIELD_EMERGENCY_DIALER_PHONE_NUMBER_HAS_SHORTCUT = 1564 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // FIELD: The phone is in pocket while using emergency dialer
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    FIELD_EMERGENCY_DIALER_IN_POCKET = 1565;
+    FIELD_EMERGENCY_DIALER_IN_POCKET = 1565 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // ACTION: The second tap on emergency shortcut to make a phone call
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    EMERGENCY_DIALER_SHORTCUT_CONFIRM_TAP = 1566;
+    EMERGENCY_DIALER_SHORTCUT_CONFIRM_TAP = 1566 [deprecated=true];
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // FIELD: The time in milliseconds of second tap on shortcut since first tap
     // CATEGORY: EMERGENCY_DIALER
     // OS: Q
-    FIELD_EMERGENCY_DIALER_SHORTCUT_TAPS_INTERVAL = 1567;
+    FIELD_EMERGENCY_DIALER_SHORTCUT_TAPS_INTERVAL = 1567 [deprecated=true];
 
     // OPEN: Power menu is opened
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: Q
     POWER_MENU = 1568;
 
+    // DEPRECATED: The metrics for emergency dialer has been revised.
     // ACTION: User tapped emergency dialer icon in the power menu.
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: Q
-    ACTION_EMERGENCY_DIALER_FROM_POWER_MENU = 1569;
+    ACTION_EMERGENCY_DIALER_FROM_POWER_MENU = 1569 [deprecated=true];
 
     // OPEN: Settings > System > Input & Gesture > Wake screen
     // OS: Q
@@ -7297,6 +7307,65 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     GLOBAL_ACTIONS_PANEL_SETTINGS = 1728;
+
+    // ACTION: Making call via emergency dialer (Ver.2)
+    //  SUBTYPE: The UI that user made phone call
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2
+    // OS: Q
+    EMERGENCY_DIALER_MAKE_CALL_V2 = 1729;
+
+    // ACTION: Result of an emergency call
+    //  SUBTYPE: Is the call active, i.e. accepted by the remote
+    // CATEGORY: EMERGENCY_DIALER_CALL_RESULT
+    // OS: Q
+    EMERGENCY_DIALER_CALL_RESULT = 1730;
+
+    // FIELD: The entry point that the user launch emergency dialer from
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_LAUNCH_FROM = 1731;
+
+    // FIELD: The reason why the traditional emergency dialer shows up
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_UI_MODE_ERROR_CODE = 1732;
+
+    // FIELD: The device is currently locked
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_IS_DEVICE_LOCKED = 1733;
+
+    // FIELD: The country ISO code of current network
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2, EMERGENCY_DIALER_CALL_RESULT
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_NETWORK_COUNTRY_ISO = 1734;
+
+    // FIELD: The mobile operator code (MNC) of current network
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2, EMERGENCY_DIALER_CALL_RESULT
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_NETWORK_OPERATOR = 1735;
+
+    // FIELD: Radio version of the device
+    // CATEGORY: EMERGENCY_DIALER_MAKE_CALL_V2
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_RADIO_VERSION = 1736;
+
+    // FIELD: The duration between the start of dialing and the call is active.
+    // CATEGORY: EMERGENCY_DIALER_CALL_RESULT
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_RESPONSE_TIME = 1737;
+
+    // FIELD: The duration between the start of dialing and the call being disconnected.
+    // CATEGORY: EMERGENCY_DIALER_CALL_RESULT
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_DISCONNECT_TIME = 1738;
+
+    // FIELD: The cause of a disconnected call.
+    // CATEGORY: EMERGENCY_DIALER_CALL_RESULT
+    // OS: Q
+    FIELD_EMERGENCY_DIALER_DISCONNECT_CAUSE = 1739;
+
+    // ---- Skipping ahead to avoid conflicts between master and release branches.
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
