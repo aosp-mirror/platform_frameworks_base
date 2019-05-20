@@ -254,6 +254,8 @@ interface IWindowSession {
      */
     boolean startMovingTask(IWindow window, float startX, float startY);
 
+    void finishMovingTask(IWindow window);
+
     void updatePointerIcon(IWindow window);
 
     /**

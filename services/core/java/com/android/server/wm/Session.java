@@ -316,6 +316,18 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void finishMovingTask(IWindow window) {
+        if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishMovingTask");
+
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mService.mTaskPositioningController.finishTaskPositioning(window);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void reportSystemGestureExclusionChanged(IWindow window, List<Rect> exclusionRects) {
         long ident = Binder.clearCallingIdentity();
         try {

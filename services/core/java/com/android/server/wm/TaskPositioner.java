@@ -119,7 +119,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
     private int mCtrlType = CTRL_NONE;
     @VisibleForTesting
     boolean mDragEnded;
-    private IBinder mClientCallback;
+    IBinder mClientCallback;
 
     InputChannel mServerChannel;
     InputChannel mClientChannel;
