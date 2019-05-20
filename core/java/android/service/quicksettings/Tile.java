@@ -65,8 +65,8 @@ public final class Tile implements Parcelable {
     private CharSequence mLabel;
     private CharSequence mSubtitle;
     private CharSequence mContentDescription;
-    // Default to active until clients of the new API can update.
-    private int mState = STATE_ACTIVE;
+    // Default to inactive until clients of the new API can update.
+    private int mState = STATE_INACTIVE;
 
     private IQSService mService;
 
