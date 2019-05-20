@@ -208,8 +208,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
                 || state.bubbleExpanded) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable
-                || state.assistActiveSession) {
+        } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else {
@@ -247,7 +246,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing || state.bubblesShowing || state.assistShowing
+                || state.headsUpShowing || state.bubblesShowing
                 || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
     }
 
@@ -501,32 +500,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     }
 
     /**
-     * Sets whether assist UI is showing on the screen.
-     *
-     * @param assistShowing whether any assist UI is being shown.
-     * @param activeSession whether AssistManager has an active assist session in progress.
-     */
-    public void setAssistState(boolean assistShowing, boolean activeSession) {
-        mCurrentState.assistShowing = assistShowing;
-        mCurrentState.assistActiveSession = activeSession;
-        apply(mCurrentState);
-    }
-
-    /**
-     * The assist UI showing state for the status bar.
-     */
-    public boolean getAssistShowing() {
-        return mCurrentState.assistShowing;
-    }
-
-    /**
-     * The AssistManager is handling an active assist session.
-     */
-    public boolean hasAssistActiveSession() {
-        return mCurrentState.assistActiveSession;
-    }
-
-    /**
      * Sets if there is a bubble being expanded on the screen.
      */
     public void setBubbleExpanded(boolean bubbleExpanded) {
@@ -602,10 +575,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         boolean notTouchable;
         boolean bubblesShowing;
         boolean bubbleExpanded;
-        // Assist manager is rendering any UI.
-        boolean assistShowing;
-        // Assist manager is handling an active assist session.
-        boolean assistActiveSession;
 
         /**
          * The {@link StatusBar} state from the status bar.
