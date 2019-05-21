@@ -56,10 +56,17 @@ class ImageRevealHelper {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (!mIsCanceled) {
-                    mAwake = !mAwake;
+                if (!mIsCanceled && mRevealListener != null) {
+                    mRevealListener.onRevealEnd();
                 }
                 mIsCanceled = false;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                if (mRevealListener != null) {
+                    mRevealListener.onRevealStart();
+                }
             }
         });
     }
@@ -72,10 +79,6 @@ class ImageRevealHelper {
 
     public float getReveal() {
         return mReveal;
-    }
-
-    public boolean isAwake() {
-        return mAwake;
     }
 
     void updateAwake(boolean awake, long duration) {
@@ -93,5 +96,15 @@ class ImageRevealHelper {
          * Called back while reveal status changes.
          */
         void onRevealStateChanged();
+
+        /**
+         * Called back while reveal starts.
+         */
+        void onRevealStart();
+
+        /**
+         * Called back while reveal ends.
+         */
+        void onRevealEnd();
     }
 }
