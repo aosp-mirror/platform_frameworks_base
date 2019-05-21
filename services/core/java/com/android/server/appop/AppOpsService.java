@@ -1311,6 +1311,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (callbackSpecs == null) {
+            notifyOpChangedSync(code, uid, null, mode);
             return;
         }
 
@@ -1331,6 +1332,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                             this, callback, code, uid, reportedPackageName));
                 }
             }
+        }
+
+        notifyOpChangedSync(code, uid, null, mode);
+    }
+
+    private void notifyOpChangedSync(int code, int uid, @NonNull String packageName, int mode) {
+        final StorageManagerInternal storageManagerInternal =
+                LocalServices.getService(StorageManagerInternal.class);
+        if (storageManagerInternal != null) {
+            storageManagerInternal.onAppOpsChanged(code, uid, packageName, mode);
         }
     }
 
@@ -1394,6 +1405,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     AppOpsService::notifyOpChanged,
                     this, repCbs, code, uid, packageName));
         }
+
+        notifyOpChangedSync(code, uid, packageName, mode);
     }
 
     private void notifyOpChanged(ArraySet<ModeCallback> callbacks, int code,
