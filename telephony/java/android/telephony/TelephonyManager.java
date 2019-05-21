@@ -64,6 +64,7 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
+import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.aidl.IImsConfig;
@@ -2276,12 +2277,15 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
+     * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
      * registered operator or the cell nearby, if available.
-     * .
+     * <p>
+     * The ISO-3166 country code is provided in lowercase 2 character format.
      * <p>
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
+     * <p>
+     * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
         return getNetworkCountryIsoForPhone(getPhoneId());
@@ -3140,7 +3144,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO country code equivalent for the SIM provider's country code.
+     * Returns the ISO-3166 country code equivalent for the SIM provider's country code.
+     * <p>
+     * The ISO-3166 country code is provided in lowercase 2 character format.
+     * @return the lowercase 2 character ISO-3166 country code, or empty string is not available.
      */
     public String getSimCountryIso() {
         return getSimCountryIsoForPhone(getPhoneId());
@@ -3274,7 +3281,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets information about currently inserted UICCs and enabled eUICCs.
+     * Gets information about currently inserted UICCs and eUICCs.
      * <p>
      * Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      * <p>
@@ -3776,10 +3783,12 @@ public class TelephonyManager {
     }
 
     /**
-     * Return the set of subscriber IDs that should be considered as "merged
-     * together" for data usage purposes. This is commonly {@code null} to
-     * indicate no merging is required. Any returned subscribers are sorted in a
-     * deterministic order.
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. This is commonly {@code null} to indicate no merging is required. Any returned
+     * subscribers are sorted in a deterministic order.
+     * <p>
+     * The returned set of subscriber IDs will include the subscriber ID corresponding to this
+     * TelephonyManager's subId.
      *
      * @hide
      */
@@ -3788,7 +3797,7 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getMergedSubscriberIds(getOpPackageName());
+                return telephony.getMergedSubscriberIds(getSubId(), getOpPackageName());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -6862,7 +6871,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return the preferred network type.
+     * @return the preferred network type, defined in RILConstants.java.
      * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE))
@@ -9753,6 +9762,23 @@ public class TelephonyManager {
     }
 
     /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    public void carrierActionResetAll(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionResetAll(subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionResetAll", e);
+        }
+    }
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *
@@ -10887,5 +10913,59 @@ public class TelephonyManager {
             Log.e(TAG, "getRadioHalVersion() RemoteException", e);
         }
         return new Pair<Integer, Integer>(-1, -1);
+    }
+
+    /**
+     * Return whether data is enabled for certain APN type. This will tell if framework will accept
+     * corresponding network requests on a subId.
+     *
+     * {@link #isDataEnabled()} is directly associated with users' Mobile data toggle on / off. If
+     * {@link #isDataEnabled()} returns false, it means in general all meter-ed data are disabled.
+     *
+     * This per APN type API gives a better idea whether data is allowed on a specific APN type.
+     * It will return true if:
+     *
+     *  1) User data is turned on, or
+     *  2) APN is un-metered for this subscription, or
+     *  3) APN type is whitelisted. E.g. MMS is whitelisted if
+     *  {@link SubscriptionManager#setAlwaysAllowMmsData} is turned on.
+     *
+     * @return whether data is enabled for a apn type.
+     *
+     * @hide
+     */
+    public boolean isDataEnabledForApn(@ApnSetting.ApnType int apnType) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isDataEnabledForApn(apnType, getSubId(), pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether an APN type is metered or not. It will be evaluated with the subId associated
+     * with the TelephonyManager instance.
+     *
+     * @hide
+     */
+    public boolean isApnMetered(@ApnSetting.ApnType int apnType) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.isApnMetered(apnType, getSubId());
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return true;
     }
 }

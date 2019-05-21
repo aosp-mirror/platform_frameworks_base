@@ -95,6 +95,21 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
         this.mIsUsingCarrierAggregation = isUsingCarrierAggregation;
     }
 
+    /**
+     * Constructor from another data specific registration info
+     *
+     * @param dsri another data specific registration info
+     * @hide
+     */
+    DataSpecificRegistrationInfo(DataSpecificRegistrationInfo dsri) {
+        maxDataCalls = dsri.maxDataCalls;
+        isDcNrRestricted = dsri.isDcNrRestricted;
+        isNrAvailable = dsri.isNrAvailable;
+        isEnDcAvailable = dsri.isEnDcAvailable;
+        mLteVopsSupportInfo = dsri.mLteVopsSupportInfo;
+        mIsUsingCarrierAggregation = dsri.mIsUsingCarrierAggregation;
+    }
+
     private DataSpecificRegistrationInfo(Parcel source) {
         maxDataCalls = source.readInt();
         isDcNrRestricted = source.readBoolean();

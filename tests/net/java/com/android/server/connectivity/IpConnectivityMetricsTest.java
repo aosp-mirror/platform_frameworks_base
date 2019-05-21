@@ -21,11 +21,8 @@ import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -59,16 +56,11 @@ import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -95,48 +87,6 @@ public class IpConnectivityMetricsTest {
         mService = new IpConnectivityMetrics(mCtx, (ctx) -> 2000);
         mNetdListener = new NetdEventListenerService(mCm);
         mService.mNetdListener = mNetdListener;
-    }
-
-    @Test
-    public void testLoggingEvents() throws Exception {
-        IpConnectivityLog logger = new IpConnectivityLog(mMockService);
-
-        assertTrue(logger.log(1, FAKE_EV));
-        assertTrue(logger.log(2, FAKE_EV));
-        assertTrue(logger.log(3, FAKE_EV));
-
-        List<ConnectivityMetricsEvent> got = verifyEvents(3);
-        assertEventsEqual(expectedEvent(1), got.get(0));
-        assertEventsEqual(expectedEvent(2), got.get(1));
-        assertEventsEqual(expectedEvent(3), got.get(2));
-    }
-
-    @Test
-    public void testLoggingEventsWithMultipleCallers() throws Exception {
-        IpConnectivityLog logger = new IpConnectivityLog(mMockService);
-
-        final int nCallers = 10;
-        final int nEvents = 10;
-        for (int n = 0; n < nCallers; n++) {
-            final int i = n;
-            new Thread() {
-                public void run() {
-                    for (int j = 0; j < nEvents; j++) {
-                        assertTrue(logger.log(1 + i * 100 + j, FAKE_EV));
-                    }
-                }
-            }.start();
-        }
-
-        List<ConnectivityMetricsEvent> got = verifyEvents(nCallers * nEvents, 200);
-        Collections.sort(got, EVENT_COMPARATOR);
-        Iterator<ConnectivityMetricsEvent> iter = got.iterator();
-        for (int i = 0; i < nCallers; i++) {
-            for (int j = 0; j < nEvents; j++) {
-                int expectedTimestamp = 1 + i * 100 + j;
-                assertEventsEqual(expectedEvent(expectedTimestamp), iter.next());
-            }
-        }
     }
 
     @Test
@@ -653,16 +603,7 @@ public class IpConnectivityMetricsTest {
         return nai;
     }
 
-    List<ConnectivityMetricsEvent> verifyEvents(int n, int timeoutMs) throws Exception {
-        ArgumentCaptor<ConnectivityMetricsEvent> captor =
-                ArgumentCaptor.forClass(ConnectivityMetricsEvent.class);
-        verify(mMockService, timeout(timeoutMs).times(n)).logEvent(captor.capture());
-        return captor.getAllValues();
-    }
 
-    List<ConnectivityMetricsEvent> verifyEvents(int n) throws Exception {
-        return verifyEvents(n, 10);
-    }
 
     static void verifySerialization(String want, String output) {
         try {
@@ -674,28 +615,4 @@ public class IpConnectivityMetricsTest {
             fail(e.toString());
         }
     }
-
-    static String joinLines(String ... elems) {
-        StringBuilder b = new StringBuilder();
-        for (String s : elems) {
-            b.append(s).append("\n");
-        }
-        return b.toString();
-    }
-
-    static ConnectivityMetricsEvent expectedEvent(int timestamp) {
-        ConnectivityMetricsEvent ev = new ConnectivityMetricsEvent();
-        ev.timestamp = timestamp;
-        ev.data = FAKE_EV;
-        return ev;
-    }
-
-    /** Outer equality for ConnectivityMetricsEvent to avoid overriding equals() and hashCode(). */
-    static void assertEventsEqual(ConnectivityMetricsEvent expected, ConnectivityMetricsEvent got) {
-        assertEquals(expected.timestamp, got.timestamp);
-        assertEquals(expected.data, got.data);
-    }
-
-    static final Comparator<ConnectivityMetricsEvent> EVENT_COMPARATOR =
-        Comparator.comparingLong((ev) -> ev.timestamp);
 }

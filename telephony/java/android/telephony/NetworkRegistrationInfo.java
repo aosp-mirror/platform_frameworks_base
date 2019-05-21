@@ -280,6 +280,39 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
+     * Constructor from another network registration info
+     *
+     * @param nri Another network registration info
+     * @hide
+     */
+    public NetworkRegistrationInfo(NetworkRegistrationInfo nri) {
+        mDomain = nri.mDomain;
+        mTransportType = nri.mTransportType;
+        mRegistrationState = nri.mRegistrationState;
+        mRoamingType = nri.mRoamingType;
+        mAccessNetworkTechnology = nri.mAccessNetworkTechnology;
+        mRejectCause = nri.mRejectCause;
+        mEmergencyOnly = nri.mEmergencyOnly;
+        mAvailableServices = new ArrayList<>(nri.mAvailableServices);
+        if (nri.mCellIdentity != null) {
+            Parcel p = Parcel.obtain();
+            nri.mCellIdentity.writeToParcel(p, 0);
+            p.setDataPosition(0);
+            // TODO: Instead of doing this, we should create a formal way for cloning cell identity.
+            // Cell identity is not an immutable object so we have to deep copy it.
+            mCellIdentity = CellIdentity.CREATOR.createFromParcel(p);
+        }
+
+        if (nri.mVoiceSpecificInfo != null) {
+            mVoiceSpecificInfo = new VoiceSpecificRegistrationInfo(nri.mVoiceSpecificInfo);
+        }
+        if (nri.mDataSpecificInfo != null) {
+            mDataSpecificInfo = new DataSpecificRegistrationInfo(nri.mDataSpecificInfo);
+        }
+        mNrState = nri.mNrState;
+    }
+
+    /**
      * @return The transport type.
      */
     public @TransportType int getTransportType() { return mTransportType; }

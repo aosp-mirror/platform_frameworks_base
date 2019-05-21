@@ -69,8 +69,8 @@ public final class RcsParticipantAliasChangedEvent extends RcsEvent {
      * @hide - not meant for public use.
      */
     @Override
-    public void persist() throws RcsMessageStoreException {
-        RcsControllerCall.call(iRcs -> iRcs.createParticipantAliasChangedEvent(
-                getTimestamp(), getParticipant().getId(), getNewAlias()));
+    void persist(RcsControllerCall rcsControllerCall) throws RcsMessageStoreException {
+        rcsControllerCall.call((iRcs, callingPackage) -> iRcs.createParticipantAliasChangedEvent(
+                getTimestamp(), getParticipant().getId(), getNewAlias(), callingPackage));
     }
 }

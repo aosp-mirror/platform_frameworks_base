@@ -38,7 +38,7 @@ public abstract class RcsEventDescriptor implements Parcelable {
      * descriptor.
      */
     @VisibleForTesting(visibility = PROTECTED)
-    public abstract RcsEvent createRcsEvent();
+    public abstract RcsEvent createRcsEvent(RcsControllerCall rcsControllerCall);
 
     RcsEventDescriptor(Parcel in) {
         mTimestamp = in.readLong();

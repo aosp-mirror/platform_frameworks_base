@@ -65,6 +65,19 @@ public class VoiceSpecificRegistrationInfo implements Parcelable{
         this.defaultRoamingIndicator = defaultRoamingIndicator;
     }
 
+    /**
+     * Constructor from another voice specific registration info
+     *
+     * @param vsri another voice specific registration info
+     * @hide
+     */
+    VoiceSpecificRegistrationInfo(VoiceSpecificRegistrationInfo vsri) {
+        cssSupported = vsri.cssSupported;
+        roamingIndicator = vsri.roamingIndicator;
+        systemIsInPrl = vsri.systemIsInPrl;
+        defaultRoamingIndicator = vsri.defaultRoamingIndicator;
+    }
+
     private VoiceSpecificRegistrationInfo(Parcel source) {
         this.cssSupported = source.readBoolean();
         this.roamingIndicator = source.readInt();

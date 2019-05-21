@@ -6,6 +6,7 @@ java_defaults {
     static_libs: [
         "FrameworksNetCommonTests",
         "frameworks-base-testutils",
+        "frameworks-net-testutils",
         "framework-protos",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
@@ -63,7 +64,7 @@ java_defaults {
 android_test {
     name: "FrameworksNetTests",
     defaults: ["FrameworksNetTests-jni-defaults"],
-    srcs: ["java/**/*.java"],
+    srcs: ["java/**/*.java", "java/**/*.kt"],
     platform_apis: true,
     test_suites: ["device-tests"],
     certificate: "platform",

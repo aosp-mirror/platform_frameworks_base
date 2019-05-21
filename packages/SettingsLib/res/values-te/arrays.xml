@@ -138,12 +138,6 @@
     <item msgid="4681409244565426925">"కనెక్షన్ నాణ్యత కోసం అనుకూలీకరించబడింది"</item>
     <item msgid="364670732877872677">"ఉత్తమ కృషి (అనుకూల బిట్ రేట్)"</item>
   </string-array>
-  <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">", సక్రియంగా ఉంది"</item>
-    <item msgid="8962366465966010158">", (మీడియా) సక్రియంగా ఉంది"</item>
-    <item msgid="4046665544396189228">", (ఫోన్) సక్రియంగా ఉంది"</item>
-  </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ఆఫ్"</item>
     <item msgid="1593289376502312923">"64K"</item>

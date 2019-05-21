@@ -49,8 +49,8 @@ int ifc_disable(const char *ifname);
 namespace android {
 
 constexpr int MAXPACKETSIZE = 8 * 1024;
-// FrameworkListener limits the size of commands to 1024 bytes. TODO: fix this.
-constexpr int MAXCMDSIZE = 1024;
+// FrameworkListener limits the size of commands to 4096 bytes.
+constexpr int MAXCMDSIZE = 4096;
 
 static void throwErrnoException(JNIEnv* env, const char* functionName, int error) {
     ScopedLocalRef<jstring> detailMessage(env, env->NewStringUTF(functionName));

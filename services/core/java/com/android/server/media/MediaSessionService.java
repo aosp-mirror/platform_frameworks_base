@@ -93,8 +93,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.NoSuchElementException;
 
 /**
  * System implementation of MediaSessionManager
@@ -164,7 +164,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
-        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(getContext());
+        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
         mAudioPlayerStateMonitor.registerListener(
                 (config, isRemoved) -> {
                     if (isRemoved || !config.isActive() || config.getPlayerType()
@@ -179,6 +179,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                         }
                     }
                 }, null /* handler */);
+        mAudioPlayerStateMonitor.registerSelfIntoAudioServiceIfNeeded(mAudioService);
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();

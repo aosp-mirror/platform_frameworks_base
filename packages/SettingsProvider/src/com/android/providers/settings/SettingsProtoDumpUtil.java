@@ -647,6 +647,27 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYERS,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_ALL_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_ALL_APPS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_OPT_IN_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_IN_APPS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_OPT_OUT_APPS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_OPT_OUT_APPS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_BLACKLIST,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLIST);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_WHITELIST,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_WHITELIST);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_BLACKLISTS,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_BLACKLISTS);
+        dumpSetting(s, p,
+                Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
+                GlobalSettingsProto.Gpu.GAME_DRIVER_SPHAL_LIBRARIES);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);

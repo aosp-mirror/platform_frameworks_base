@@ -318,7 +318,6 @@ import android.location.LocationManager;
 import android.media.audiofx.AudioEffect;
 import android.metrics.LogMaker;
 import android.net.Proxy;
-import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -2252,21 +2251,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } break;
             case UPDATE_HTTP_PROXY_MSG: {
+                // Update the HTTP proxy for each application thread.
                 synchronized (ActivityManagerService.this) {
                     for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                         ProcessRecord r = mLruProcesses.get(i);
                         // Don't dispatch to isolated processes as they can't access
-                        // ConnectivityManager and don't have network privileges anyway.
-                        if (r.thread != null && !r.isolated) {
+                        // ConnectivityManager and don't have network privileges anyway. Exclude
+                        // system server and update it separately outside the AMS lock, to avoid
+                        // deadlock with Connectivity Service.
+                        if (r.pid != MY_PID && r.thread != null && !r.isolated) {
                             try {
                                 r.thread.updateHttpProxy();
                             } catch (RemoteException ex) {
-                                Slog.w(TAG, "Failed to update http proxy for: " +
-                                        r.info.processName);
+                                Slog.w(TAG, "Failed to update http proxy for: "
+                                        + r.info.processName);
                             }
                         }
                     }
                 }
+                ActivityThread.updateHttpProxy(mContext);
             } break;
             case PROC_START_TIMEOUT_MSG: {
                 ProcessRecord app = (ProcessRecord)msg.obj;
@@ -2607,7 +2610,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             }
         }
-    };
+    }
 
     static final int COLLECT_PSS_BG_MSG = 1;
 

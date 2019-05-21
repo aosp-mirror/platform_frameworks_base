@@ -10336,8 +10336,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0;
 
         /**
@@ -10346,8 +10344,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1;
 
         /**
@@ -10356,8 +10352,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_AVOID = 2;
 
         /**
@@ -10367,8 +10361,6 @@ public final class Settings {
          * The default for this setting is CAPTIVE_PORTAL_MODE_PROMPT.
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
 
         /**
@@ -10397,8 +10389,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
 
         /**
@@ -10407,8 +10397,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
 
         /**
@@ -10417,8 +10405,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
 
         /**
@@ -10427,8 +10413,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS =
                 "captive_portal_other_fallback_urls";
 
@@ -10438,8 +10422,6 @@ public final class Settings {
          * by "@@,@@".
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS =
                 "captive_portal_fallback_probe_specs";
 
@@ -10450,8 +10432,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
 
         /**
@@ -10460,8 +10440,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
 
         /**
@@ -11444,6 +11422,57 @@ public final class Settings {
          * @hide
          */
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
+
+        /**
+         * Game Driver global preference for all Apps.
+         * 0 = Default
+         * 1 = All Apps use Game Driver
+         * 2 = All Apps use system graphics driver
+         * @hide
+         */
+        public static final String GAME_DRIVER_ALL_APPS = "game_driver_all_apps";
+
+        /**
+         * List of Apps selected to use Game Driver.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
+
+        /**
+         * List of Apps selected not to use Game Driver.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
+
+        /**
+         * Apps on the blacklist that are forbidden to use Game Driver.
+         * @hide
+         */
+        public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
+
+        /**
+         * List of blacklists, each blacklist is a blacklist for a specific version of Game Driver.
+         * @hide
+         */
+        public static final String GAME_DRIVER_BLACKLISTS = "game_driver_blacklists";
+
+        /**
+         * Apps on the whitelist that are allowed to use Game Driver.
+         * The string is a list of application package names, seperated by comma.
+         * i.e. <apk1>,<apk2>,...,<apkN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
+
+        /**
+         * List of libraries in sphal accessible by Game Driver
+         * The string is a list of library names, separated by colon.
+         * i.e. <lib1>:<lib2>:...:<libN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_SPHAL_LIBRARIES = "game_driver_sphal_libraries";
 
         /**
          * Ordered GPU debug layer list

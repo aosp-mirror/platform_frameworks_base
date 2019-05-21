@@ -23,6 +23,7 @@ import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_PROBE_SPEC;
 import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.DnsResolver.FLAG_EMPTY;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
@@ -43,8 +44,20 @@ import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_EVALUATION_TYPE
 import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_MIN_EVALUATE_TIME_MS;
 import static android.net.util.DataStallUtils.DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS;
 import static android.net.util.DataStallUtils.DEFAULT_DNS_LOG_SIZE;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_FALLBACK_URL;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_HTTPS_URL;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_HTTP_URL;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_MODE;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_MODE_IGNORE;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_MODE_PROMPT;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USER_AGENT;
+import static android.net.util.NetworkStackUtils.CAPTIVE_PORTAL_USE_HTTPS;
 import static android.net.util.NetworkStackUtils.NAMESPACE_CONNECTIVITY;
 import static android.net.util.NetworkStackUtils.isEmpty;
+
+import static com.android.networkstack.util.DnsUtils.TYPE_ADDRCONFIG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,6 +68,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.DnsResolver;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.LinkProperties;
@@ -65,8 +79,6 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.captiveportal.CaptivePortalProbeSpec;
-import android.net.metrics.DataStallDetectionStats;
-import android.net.metrics.DataStallStatsUtils;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
@@ -100,7 +112,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.RingBufferIndices;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.internal.util.TrafficStatsConstants;
 import com.android.networkstack.R;
+import com.android.networkstack.metrics.DataStallDetectionStats;
+import com.android.networkstack.metrics.DataStallStatsUtils;
+import com.android.networkstack.util.DnsUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -131,8 +147,13 @@ public class NetworkMonitor extends StateMachine {
                                                       + "AppleWebKit/537.36 (KHTML, like Gecko) "
                                                       + "Chrome/60.0.3112.32 Safari/537.36";
 
+    @VisibleForTesting
+    static final String CONFIG_CAPTIVE_PORTAL_DNS_PROBE_TIMEOUT =
+            "captive_portal_dns_probe_timeout";
+
     private static final int SOCKET_TIMEOUT_MS = 10000;
     private static final int PROBE_TIMEOUT_MS  = 3000;
+
     enum EvaluationResult {
         VALIDATED(true),
         CAPTIVE_PORTAL(false);
@@ -261,8 +282,8 @@ public class NetworkMonitor extends StateMachine {
 
     private final Context mContext;
     private final INetworkMonitorCallbacks mCallback;
+    private final Network mCleartextDnsNetwork;
     private final Network mNetwork;
-    private final Network mNonPrivateDnsBypassNetwork;
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
     private final ConnectivityManager mCm;
@@ -352,8 +373,8 @@ public class NetworkMonitor extends StateMachine {
         mCallback = cb;
         mDependencies = deps;
         mDetectionStatsUtils = detectionStatsUtils;
-        mNonPrivateDnsBypassNetwork = network;
-        mNetwork = deps.getPrivateDnsBypassNetwork(network);
+        mNetwork = network;
+        mCleartextDnsNetwork = deps.getPrivateDnsBypassNetwork(network);
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mCm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -478,7 +499,7 @@ public class NetworkMonitor extends StateMachine {
 
     @Override
     protected void log(String s) {
-        if (DBG) Log.d(TAG + "/" + mNetwork.toString(), s);
+        if (DBG) Log.d(TAG + "/" + mCleartextDnsNetwork.toString(), s);
     }
 
     private void validationLog(int probeType, Object url, String msg) {
@@ -499,6 +520,9 @@ public class NetworkMonitor extends StateMachine {
         return NetworkMonitorUtils.isValidationRequired(mNetworkCapabilities);
     }
 
+    private boolean isPrivateDnsValidationRequired() {
+        return NetworkMonitorUtils.isPrivateDnsValidationRequired(mNetworkCapabilities);
+    }
 
     private void notifyNetworkTested(int result, @Nullable String redirectUrl) {
         try {
@@ -586,7 +610,7 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_PRIVATE_DNS_SETTINGS_CHANGED: {
                     final PrivateDnsConfig cfg = (PrivateDnsConfig) message.obj;
-                    if (!isValidationRequired() || cfg == null || !cfg.inStrictMode()) {
+                    if (!isPrivateDnsValidationRequired() || cfg == null || !cfg.inStrictMode()) {
                         // No DNS resolution required.
                         //
                         // We don't force any validation in opportunistic mode
@@ -751,7 +775,7 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
                     final Bundle appExtras = new Bundle();
                     // OneAddressPerFamilyNetwork is not parcelable across processes.
-                    final Network network = new Network(mNetwork);
+                    final Network network = new Network(mCleartextDnsNetwork);
                     appExtras.putParcelable(ConnectivityManager.EXTRA_NETWORK, network);
                     final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
                     appExtras.putString(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
@@ -822,9 +846,20 @@ public class NetworkMonitor extends StateMachine {
                     //    the network so don't bother validating here.  Furthermore sending HTTP
                     //    packets over the network may be undesirable, for example an extremely
                     //    expensive metered network, or unwanted leaking of the User Agent string.
+                    //
+                    // On networks that need to support private DNS in strict mode (e.g., VPNs, but
+                    // not networks that don't provide Internet access), we still need to perform
+                    // private DNS server resolution.
                     if (!isValidationRequired()) {
-                        validationLog("Network would not satisfy default request, not validating");
-                        transitionTo(mValidatedState);
+                        if (isPrivateDnsValidationRequired()) {
+                            validationLog("Network would not satisfy default request, "
+                                    + "resolving private DNS");
+                            transitionTo(mEvaluatingPrivateDnsState);
+                        } else {
+                            validationLog("Network would not satisfy default request, "
+                                    + "not validating");
+                            transitionTo(mValidatedState);
+                        }
                         return HANDLED;
                     }
                     mEvaluateAttempts++;
@@ -863,7 +898,7 @@ public class NetworkMonitor extends StateMachine {
         CustomIntentReceiver(String action, int token, int what) {
             mToken = token;
             mWhat = what;
-            mAction = action + "_" + mNetwork.getNetworkHandle() + "_" + token;
+            mAction = action + "_" + mCleartextDnsNetwork.getNetworkHandle() + "_" + token;
             mContext.registerReceiver(this, new IntentFilter(mAction));
         }
         public PendingIntent getPendingIntent() {
@@ -976,7 +1011,8 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
-                final InetAddress[] ips = mNetwork.getAllByName(mPrivateDnsProviderHostname);
+                final InetAddress[] ips = DnsUtils.getAllByName(mDependencies.getDnsResolver(),
+                        mCleartextDnsNetwork, mPrivateDnsProviderHostname, getDnsProbeTimeout());
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
                 validationLog("Strict mode hostname resolved: " + mPrivateDnsConfig);
             } catch (UnknownHostException uhe) {
@@ -1015,7 +1051,7 @@ public class NetworkMonitor extends StateMachine {
                     + oneTimeHostnameSuffix;
             final Stopwatch watch = new Stopwatch().start();
             try {
-                final InetAddress[] ips = mNonPrivateDnsBypassNetwork.getAllByName(host);
+                final InetAddress[] ips = mNetwork.getAllByName(host);
                 final long time = watch.stop();
                 final String strIps = Arrays.toString(ips);
                 final boolean success = (ips != null && ips.length > 0);
@@ -1163,20 +1199,47 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private boolean getIsCaptivePortalCheckEnabled() {
-        String symbol = Settings.Global.CAPTIVE_PORTAL_MODE;
-        int defaultValue = Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT;
+        String symbol = CAPTIVE_PORTAL_MODE;
+        int defaultValue = CAPTIVE_PORTAL_MODE_PROMPT;
         int mode = mDependencies.getSetting(mContext, symbol, defaultValue);
-        return mode != Settings.Global.CAPTIVE_PORTAL_MODE_IGNORE;
+        return mode != CAPTIVE_PORTAL_MODE_IGNORE;
     }
 
     private boolean getUseHttpsValidation() {
-        return mDependencies.getSetting(mContext, Settings.Global.CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
+        return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                CAPTIVE_PORTAL_USE_HTTPS, 1) == 1;
     }
 
     private String getCaptivePortalServerHttpsUrl() {
         return getSettingFromResource(mContext, R.string.config_captive_portal_https_url,
-                R.string.default_captive_portal_https_url,
-                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL);
+                R.string.default_captive_portal_https_url, CAPTIVE_PORTAL_HTTPS_URL);
+    }
+
+    private int getDnsProbeTimeout() {
+        return getIntSetting(mContext, R.integer.config_captive_portal_dns_probe_timeout,
+                CONFIG_CAPTIVE_PORTAL_DNS_PROBE_TIMEOUT,
+                R.integer.default_captive_portal_dns_probe_timeout);
+    }
+
+    /**
+     * Gets an integer setting from resources or device config
+     *
+     * configResource is used if set, followed by device config if set, followed by defaultResource.
+     * If none of these are set then an exception is thrown.
+     *
+     * TODO: move to a common location such as a ConfigUtils class.
+     * TODO(b/130324939): test that the resources can be overlayed by an RRO package.
+     */
+    @VisibleForTesting
+    int getIntSetting(@NonNull final Context context, @StringRes int configResource,
+            @NonNull String symbol, @StringRes int defaultResource) {
+        final Resources res = context.getResources();
+        try {
+            return res.getInteger(configResource);
+        } catch (Resources.NotFoundException e) {
+            return mDependencies.getDeviceConfigPropertyInt(NAMESPACE_CONNECTIVITY,
+                    symbol, res.getInteger(defaultResource));
+        }
     }
 
     /**
@@ -1188,8 +1251,7 @@ public class NetworkMonitor extends StateMachine {
      */
     public String getCaptivePortalServerHttpUrl() {
         return getSettingFromResource(mContext, R.string.config_captive_portal_http_url,
-                R.string.default_captive_portal_http_url,
-                Settings.Global.CAPTIVE_PORTAL_HTTP_URL);
+                R.string.default_captive_portal_http_url, CAPTIVE_PORTAL_HTTP_URL);
     }
 
     private int getConsecutiveDnsTimeoutThreshold() {
@@ -1218,13 +1280,13 @@ public class NetworkMonitor extends StateMachine {
 
     private URL[] makeCaptivePortalFallbackUrls() {
         try {
-            final String firstUrl = mDependencies.getSetting(mContext,
-                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, null);
+            final String firstUrl = mDependencies.getSetting(mContext, CAPTIVE_PORTAL_FALLBACK_URL,
+                    null);
 
             final URL[] settingProviderUrls;
             if (!TextUtils.isEmpty(firstUrl)) {
-                final String otherUrls = mDependencies.getSetting(mContext,
-                        Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, "");
+                final String otherUrls = mDependencies.getDeviceConfigProperty(
+                        NAMESPACE_CONNECTIVITY, CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, "");
                 // otherUrls may be empty, but .split() ignores trailing empty strings
                 final String separator = ",";
                 final String[] urls = (firstUrl + separator + otherUrls).split(separator);
@@ -1244,8 +1306,9 @@ public class NetworkMonitor extends StateMachine {
 
     private CaptivePortalProbeSpec[] makeCaptivePortalFallbackProbeSpecs() {
         try {
-            final String settingsValue = mDependencies.getSetting(
-                    mContext, Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
+            final String settingsValue = mDependencies.getDeviceConfigProperty(
+                    NAMESPACE_CONNECTIVITY, CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
+
             final CaptivePortalProbeSpec[] emptySpecs = new CaptivePortalProbeSpec[0];
             final CaptivePortalProbeSpec[] providerValue = TextUtils.isEmpty(settingsValue)
                     ? emptySpecs
@@ -1339,8 +1402,8 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private String getCaptivePortalUserAgent() {
-        return mDependencies.getSetting(mContext,
-                Settings.Global.CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
+        return mDependencies.getDeviceConfigProperty(NAMESPACE_CONNECTIVITY,
+                CAPTIVE_PORTAL_USER_AGENT, DEFAULT_USER_AGENT);
     }
 
     private URL nextFallbackUrl() {
@@ -1439,6 +1502,14 @@ public class NetworkMonitor extends StateMachine {
         return sendHttpProbe(url, probeType, null);
     }
 
+    /** Do a DNS lookup for the given server, or throw UnknownHostException after timeoutMs */
+    @VisibleForTesting
+    protected InetAddress[] sendDnsProbeWithTimeout(String host, int timeoutMs)
+                throws UnknownHostException {
+        return DnsUtils.getAllByName(mDependencies.getDnsResolver(), mCleartextDnsNetwork, host,
+                TYPE_ADDRCONFIG, FLAG_EMPTY, timeoutMs);
+    }
+
     /** Do a DNS resolution of the given server. */
     private void sendDnsProbe(String host) {
         if (TextUtils.isEmpty(host)) {
@@ -1450,7 +1521,7 @@ public class NetworkMonitor extends StateMachine {
         int result;
         String connectInfo;
         try {
-            InetAddress[] addresses = mNetwork.getAllByName(host);
+            InetAddress[] addresses = sendDnsProbeWithTimeout(host, getDnsProbeTimeout());
             StringBuffer buffer = new StringBuffer();
             for (InetAddress address : addresses) {
                 buffer.append(',').append(address.getHostAddress());
@@ -1478,9 +1549,10 @@ public class NetworkMonitor extends StateMachine {
         int httpResponseCode = CaptivePortalProbeResult.FAILED_CODE;
         String redirectUrl = null;
         final Stopwatch probeTimer = new Stopwatch().start();
-        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                TrafficStatsConstants.TAG_SYSTEM_PROBE);
         try {
-            urlConnection = (HttpURLConnection) mNetwork.openConnection(url);
+            urlConnection = (HttpURLConnection) mCleartextDnsNetwork.openConnection(url);
             urlConnection.setInstanceFollowRedirects(probeType == ValidationProbeEvent.PROBE_PAC);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
@@ -1729,7 +1801,7 @@ public class NetworkMonitor extends StateMachine {
 
     private void logNetworkEvent(int evtype) {
         int[] transports = mNetworkCapabilities.getTransportTypes();
-        mMetricsLog.log(mNetwork, transports, new NetworkEvent(evtype));
+        mMetricsLog.log(mCleartextDnsNetwork, transports, new NetworkEvent(evtype));
     }
 
     private int networkEventType(ValidationStage s, EvaluationResult r) {
@@ -1751,7 +1823,7 @@ public class NetworkMonitor extends StateMachine {
     private void maybeLogEvaluationResult(int evtype) {
         if (mEvaluationTimer.isRunning()) {
             int[] transports = mNetworkCapabilities.getTransportTypes();
-            mMetricsLog.log(mNetwork, transports,
+            mMetricsLog.log(mCleartextDnsNetwork, transports,
                     new NetworkEvent(evtype, mEvaluationTimer.stop()));
             mEvaluationTimer.reset();
         }
@@ -1765,13 +1837,17 @@ public class NetworkMonitor extends StateMachine {
                 .setReturnCode(probeResult)
                 .setDurationMs(durationMs)
                 .build();
-        mMetricsLog.log(mNetwork, transports, ev);
+        mMetricsLog.log(mCleartextDnsNetwork, transports, ev);
     }
 
     @VisibleForTesting
     static class Dependencies {
         public Network getPrivateDnsBypassNetwork(Network network) {
             return new OneAddressPerFamilyNetwork(network);
+        }
+
+        public DnsResolver getDnsResolver() {
+            return DnsResolver.getInstance();
         }
 
         public Random getRandom() {

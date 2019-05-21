@@ -1094,11 +1094,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     public void unbindBluetoothProfileService(int bluetoothProfile,
             IBluetoothProfileServiceConnection proxy) {
         synchronized (mProfileServices) {
-            ProfileServiceConnections psc = mProfileServices.get(new Integer(bluetoothProfile));
+            Integer profile = new Integer(bluetoothProfile);
+            ProfileServiceConnections psc = mProfileServices.get(profile);
             if (psc == null) {
                 return;
             }
             psc.removeProxy(proxy);
+            if (psc.isEmpty()) {
+                // All prxoies are disconnected, unbind with the service.
+                try {
+                    mContext.unbindService(psc);
+                } catch (IllegalArgumentException e) {
+                    Slog.e(TAG, "Unable to unbind service with intent: " + psc.mIntent, e);
+                }
+                mProfileServices.remove(profile);
+            }
         }
     }
 
@@ -1253,6 +1263,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         private void removeAllProxies() {
             onServiceDisconnected(mClassName);
             mProxies.kill();
+        }
+
+        private boolean isEmpty() {
+            return mProxies.getRegisteredCallbackCount() == 0;
         }
 
         @Override

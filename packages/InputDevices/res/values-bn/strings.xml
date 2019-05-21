@@ -5,15 +5,15 @@
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android কীবোর্ড"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ইংরেজি (UK)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ইংরেজি (US)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ইংরেজি (US), আন্তর্জাতিক স্টাইল"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ইংরেজি (US), কোলেম্যাক স্টাইল"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ইংরেজি (US), ডিভোরাক স্টাইল"</string>
-    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"ইংরেজি (US), ওয়ার্কম্যান স্টাইল"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ইংরেজি (US), আন্তর্জাতিক শৈলী"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ইংরেজি (US), কোলেম্যাক শৈলী"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ইংরেজি (US), ডিভোরাক শৈলী"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"ইংরেজি (US), ওয়ার্কম্যান শৈলী"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"জার্মান"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"ফরাসী"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ফরাসী (কানাডা)"</string>
     <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"রাশিয়ান"</string>
-    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"রাশিয়ান, Mac স্টাইল"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"রাশিয়ান, Mac শৈলী"</string>
     <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"স্প্যানিশ"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"সুইস ফরাসি"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"সুইস জার্মান"</string>
@@ -43,5 +43,4 @@
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"লাটভিও"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"ফার্সী"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"আজারবাইজানি"</string>
-    <string name="keyboard_layout_polish" msgid="1121588624094925325">"পোলিশ"</string>
 </resources>

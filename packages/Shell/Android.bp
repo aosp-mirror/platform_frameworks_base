@@ -1,0 +1,14 @@
+android_app {
+    name: "Shell",
+    srcs: ["src/**/*.java",":dumpstate_aidl"],
+    aidl: {
+        include_dirs: ["frameworks/native/cmds/dumpstate/binder"],
+    },
+    static_libs: ["androidx.legacy_legacy-support-v4"],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    jacoco: {
+        include_filter: ["com.android.shell.*"],
+    },
+}

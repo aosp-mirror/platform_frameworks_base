@@ -294,6 +294,19 @@ public class SubscriptionManager {
     public static final String SUBSCRIPTION_TYPE = "subscription_type";
 
     /**
+     * TelephonyProvider column name white_listed_apn_data.
+     * It's a bitmask of APN types that will be allowed on this subscription even if it's metered
+     * and mobile data is turned off by the user.
+     * <P>Type: INTEGER (int)</P> For example, if TYPE_MMS is is true, Telephony will allow MMS
+     * data connection to setup even if MMS is metered and mobile_data is turned off on that
+     * subscription.
+     *
+     * Default value is 0.
+     */
+    /** @hide */
+    public static final String WHITE_LISTED_APN_DATA = "white_listed_apn_data";
+
+    /**
      * This constant is to designate a subscription as a Local-SIM Subscription.
      * <p> A Local-SIM can be a physical SIM inserted into a sim-slot in the device, or eSIM on the
      * device.
@@ -381,6 +394,12 @@ public class SubscriptionManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final int NAME_SOURCE_USER_INPUT = 2;
+
+    /**
+     * The name_source is carrier (carrier app, carrier config, etc.)
+     * @hide
+     */
+    public static final int NAME_SOURCE_CARRIER = 3;
 
     /**
      * TelephonyProvider column name for the color of a SIM.
@@ -673,6 +692,14 @@ public class SubscriptionManager {
      * @hide
      */
     public static final String GROUP_UUID = "group_uuid";
+
+    /**
+     * TelephonyProvider column name for group owner. It's the package name who created
+     * the subscription group.
+     *
+     * @hide
+     */
+    public static final String GROUP_OWNER = "group_owner";
 
     /**
      * TelephonyProvider column name for whether a subscription is metered or not, that is, whether
@@ -2052,7 +2079,6 @@ public class SubscriptionManager {
         } else {
             logd("putPhoneIdAndSubIdExtra: no valid subs");
             intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-            intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         }
     }
 
@@ -2063,9 +2089,6 @@ public class SubscriptionManager {
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
-        //FIXME this is using phoneId and slotIndex interchangeably
-        //Eventually, this should be removed as it is not the slot id
-        intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
     }
 
     /**
@@ -3085,6 +3108,31 @@ public class SubscriptionManager {
 
         if (VDBG) logd("getEnabledSubscriptionId, subId = " + subId);
         return subId;
+    }
+
+    /**
+     * Set whether a subscription always allows MMS connection. If true, MMS network
+     * request will be accepted by telephony even if user turns "mobile data" off
+     * on this subscription.
+     *
+     * @param subId which subscription it's setting to.
+     * @param alwaysAllow whether Mms data is always allowed.
+     * @return whether operation is successful.
+     *
+     * @hide
+     */
+    public boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow) {
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                return iSub.setAlwaysAllowMmsData(subId, alwaysAllow);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
+        return false;
     }
 
     private interface CallISubMethodHelper {

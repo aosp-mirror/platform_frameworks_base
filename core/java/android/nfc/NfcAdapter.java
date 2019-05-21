@@ -526,6 +526,7 @@ public final class NfcAdapter {
      * @return List<String> containing secure elements on the device which supports
      *                      off host card emulation. eSE for Embedded secure element,
      *                      SIM for UICC and so on.
+     * @hide
      */
     public @NonNull List<String> getSupportedOffHostSecureElements() {
         List<String> offHostSE = new ArrayList<String>();

@@ -40,8 +40,6 @@ import android.util.SparseArray;
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
 
-import static android.Manifest.permission.MODIFY_PHONE_STATE;
-
 /**
  * Main ImsService implementation, which binds via the Telephony ImsResolver. Services that extend
  * ImsService must register the service in their AndroidManifest to be detected by the framework.
@@ -229,8 +227,8 @@ public class ImsService extends Service {
 
     private void setupFeature(ImsFeature f, int slotId, int featureType,
             IImsFeatureStatusCallback c) {
-        f.addImsFeatureStatusCallback(c);
         f.initialize(this, slotId);
+        f.addImsFeatureStatusCallback(c);
         addImsFeature(slotId, featureType, f);
     }
 

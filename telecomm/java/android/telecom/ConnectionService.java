@@ -1279,6 +1279,14 @@ public abstract class ConnectionService extends Service {
                 mAdapter.setCallerDisplayName(id, callerDisplayName, presentation);
             }
         }
+
+        @Override
+        public void onConnectionEvent(Conference c, String event, Bundle extras) {
+            String id = mIdByConference.get(c);
+            if (id != null) {
+                mAdapter.onConnectionEvent(id, event, extras);
+            }
+        }
     };
 
     private final Connection.Listener mConnectionListener = new Connection.Listener() {

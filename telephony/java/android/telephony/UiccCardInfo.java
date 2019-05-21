@@ -101,7 +101,7 @@ public final class UiccCardInfo implements Parcelable {
 
     /**
      * Get the embedded ID (EID) of the eUICC. If the UiccCardInfo is not an eUICC
-     * (see {@link #isEuicc()}), returns null.
+     * (see {@link #isEuicc()}), or the EID is not available, returns null.
      * <p>
      * Note that this field may be omitted if the caller does not have the correct permissions
      * (see {@link TelephonyManager#getUiccCardsInfo()}).
@@ -115,7 +115,7 @@ public final class UiccCardInfo implements Parcelable {
     }
 
     /**
-     * Get the ICCID of the UICC.
+     * Get the ICCID of the UICC. If the ICCID is not availble, returns null.
      * <p>
      * Note that this field may be omitted if the caller does not have the correct permissions
      * (see {@link TelephonyManager#getUiccCardsInfo()}).

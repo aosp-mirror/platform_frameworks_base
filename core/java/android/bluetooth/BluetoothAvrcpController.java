@@ -16,10 +16,7 @@
 
 package android.bluetooth;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -79,93 +76,32 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     public static final String EXTRA_PLAYER_SETTING =
             "android.bluetooth.avrcp-controller.profile.extra.PLAYER_SETTING";
 
-    private Context mContext;
-    private ServiceListener mServiceListener;
-    private volatile IBluetoothAvrcpController mService;
     private BluetoothAdapter mAdapter;
-
-    private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
-            new IBluetoothStateChangeCallback.Stub() {
-                public void onBluetoothStateChange(boolean up) {
-                    if (DBG) Log.d(TAG, "onBluetoothStateChange: up=" + up);
-                    if (!up) {
-                        if (VDBG) Log.d(TAG, "Unbinding service...");
-                        synchronized (mConnection) {
-                            try {
-                                mService = null;
-                                mContext.unbindService(mConnection);
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
-                    } else {
-                        synchronized (mConnection) {
-                            try {
-                                if (mService == null) {
-                                    if (VDBG) Log.d(TAG, "Binding service...");
-                                    doBind();
-                                }
-                            } catch (Exception re) {
-                                Log.e(TAG, "", re);
-                            }
-                        }
-                    }
+    private final BluetoothProfileConnector<IBluetoothAvrcpController> mProfileConnector =
+            new BluetoothProfileConnector(this, BluetoothProfile.AVRCP_CONTROLLER,
+                    "BluetoothAvrcpController", IBluetoothAvrcpController.class.getName()) {
+                @Override
+                public IBluetoothAvrcpController getServiceInterface(IBinder service) {
+                    return IBluetoothAvrcpController.Stub.asInterface(
+                            Binder.allowBlocking(service));
                 }
-            };
+    };
 
     /**
      * Create a BluetoothAvrcpController proxy object for interacting with the local
      * Bluetooth AVRCP service.
      */
-    /*package*/ BluetoothAvrcpController(Context context, ServiceListener l) {
-        mContext = context;
-        mServiceListener = l;
+    /*package*/ BluetoothAvrcpController(Context context, ServiceListener listener) {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.registerStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-        }
-
-        doBind();
-    }
-
-    boolean doBind() {
-        Intent intent = new Intent(IBluetoothAvrcpController.class.getName());
-        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-        intent.setComponent(comp);
-        if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                mContext.getUser())) {
-            Log.e(TAG, "Could not bind to Bluetooth AVRCP Controller Service with " + intent);
-            return false;
-        }
-        return true;
+        mProfileConnector.connect(context, listener);
     }
 
     /*package*/ void close() {
-        mServiceListener = null;
-        IBluetoothManager mgr = mAdapter.getBluetoothManager();
-        if (mgr != null) {
-            try {
-                mgr.unregisterStateChangeCallback(mBluetoothStateChangeCallback);
-            } catch (Exception e) {
-                Log.e(TAG, "", e);
-            }
-        }
+        mProfileConnector.disconnect();
+    }
 
-        synchronized (mConnection) {
-            if (mService != null) {
-                try {
-                    mService = null;
-                    mContext.unbindService(mConnection);
-                } catch (Exception re) {
-                    Log.e(TAG, "", re);
-                }
-            }
-        }
+    private IBluetoothAvrcpController getService() {
+        return mProfileConnector.getService();
     }
 
     @Override
@@ -179,7 +115,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
-        final IBluetoothAvrcpController service = mService;
+        final IBluetoothAvrcpController service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getConnectedDevices();
@@ -198,7 +135,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
-        final IBluetoothAvrcpController service = mService;
+        final IBluetoothAvrcpController service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.getDevicesMatchingConnectionStates(states);
@@ -217,7 +155,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     @Override
     public int getConnectionState(BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
-        final IBluetoothAvrcpController service = mService;
+        final IBluetoothAvrcpController service =
+                getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {
                 return service.getConnectionState(device);
@@ -238,7 +177,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     public BluetoothAvrcpPlayerSettings getPlayerSettings(BluetoothDevice device) {
         if (DBG) Log.d(TAG, "getPlayerSettings");
         BluetoothAvrcpPlayerSettings settings = null;
-        final IBluetoothAvrcpController service = mService;
+        final IBluetoothAvrcpController service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 settings = service.getPlayerSettings(device);
@@ -256,7 +196,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
      */
     public boolean setPlayerApplicationSetting(BluetoothAvrcpPlayerSettings plAppSetting) {
         if (DBG) Log.d(TAG, "setPlayerApplicationSetting");
-        final IBluetoothAvrcpController service = mService;
+        final IBluetoothAvrcpController service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 return service.setPlayerApplicationSetting(plAppSetting);
@@ -276,7 +217,8 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
     public void sendGroupNavigationCmd(BluetoothDevice device, int keyCode, int keyState) {
         Log.d(TAG, "sendGroupNavigationCmd dev = " + device + " key " + keyCode + " State = "
                 + keyState);
-        final IBluetoothAvrcpController service = mService;
+        final IBluetoothAvrcpController service =
+                getService();
         if (service != null && isEnabled()) {
             try {
                 service.sendGroupNavigationCmd(device, keyCode, keyState);
@@ -288,25 +230,6 @@ public final class BluetoothAvrcpController implements BluetoothProfile {
         }
         if (service == null) Log.w(TAG, "Proxy not attached to service");
     }
-
-    private final ServiceConnection mConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            if (DBG) Log.d(TAG, "Proxy object connected");
-            mService = IBluetoothAvrcpController.Stub.asInterface(Binder.allowBlocking(service));
-            if (mServiceListener != null) {
-                mServiceListener.onServiceConnected(BluetoothProfile.AVRCP_CONTROLLER,
-                        BluetoothAvrcpController.this);
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            if (DBG) Log.d(TAG, "Proxy object disconnected");
-            mService = null;
-            if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.AVRCP_CONTROLLER);
-            }
-        }
-    };
 
     private boolean isEnabled() {
         return mAdapter.getState() == BluetoothAdapter.STATE_ON;

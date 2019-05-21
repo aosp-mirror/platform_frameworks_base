@@ -195,6 +195,18 @@ public abstract class DhcpPacket {
     public static final String VENDOR_INFO_ANDROID_METERED = "ANDROID_METERED";
 
     /**
+     * DHCP Optional Type: Option overload option
+     */
+    protected static final byte DHCP_OPTION_OVERLOAD = 52;
+
+    /**
+     * Possible values of the option overload option.
+     */
+    private static final byte OPTION_OVERLOAD_FILE = 1;
+    private static final byte OPTION_OVERLOAD_SNAME = 2;
+    private static final byte OPTION_OVERLOAD_BOTH = 3;
+
+    /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
@@ -307,6 +319,11 @@ public abstract class DhcpPacket {
      * The six-octet MAC of the client.
      */
     protected final byte[] mClientMac;
+
+    /**
+     * The server host name from server.
+     */
+    protected String mServerHostName;
 
     /**
      * Asks the packet object to create a ByteBuffer serialization of
@@ -848,6 +865,8 @@ public abstract class DhcpPacket {
         Inet4Address ipDst = null;
         Inet4Address bcAddr = null;
         Inet4Address requestedIp = null;
+        String serverHostName;
+        byte optionOverload = 0;
 
         // The following are all unsigned integers. Internally we store them as signed integers of
         // the same length because that way we're guaranteed that they can't be out of the range of
@@ -989,9 +1008,9 @@ public abstract class DhcpPacket {
         packet.get(clientMac);
 
         // skip over address padding (16 octets allocated)
-        packet.position(packet.position() + (16 - addrLen)
-                        + 64    // skip server host name (64 chars)
-                        + 128); // skip boot file name (128 chars)
+        packet.position(packet.position() + (16 - addrLen));
+        serverHostName = readAsciiString(packet, 64, false);
+        packet.position(packet.position() + 128);
 
         // Ensure this is a DHCP packet with a magic cookie, and not BOOTP. http://b/31850211
         if (packet.remaining() < 4) {
@@ -1102,6 +1121,11 @@ public abstract class DhcpPacket {
                             // Embedded nulls are safe as this does not get passed to netd.
                             vendorInfo = readAsciiString(packet, optionLen, true);
                             break;
+                        case DHCP_OPTION_OVERLOAD:
+                            expectedLen = 1;
+                            optionOverload = packet.get();
+                            optionOverload &= OPTION_OVERLOAD_BOTH;
+                            break;
                         default:
                             // ignore any other parameters
                             for (int i = 0; i < optionLen; i++) {
@@ -1192,6 +1216,11 @@ public abstract class DhcpPacket {
         newPacket.mT2 = T2;
         newPacket.mVendorId = vendorId;
         newPacket.mVendorInfo = vendorInfo;
+        if ((optionOverload & OPTION_OVERLOAD_SNAME) == 0) {
+            newPacket.mServerHostName = serverHostName;
+        } else {
+            newPacket.mServerHostName = "";
+        }
         return newPacket;
     }
 
@@ -1251,6 +1280,7 @@ public abstract class DhcpPacket {
         results.vendorInfo = mVendorInfo;
         results.leaseDuration = (mLeaseTime != null) ? mLeaseTime : INFINITE_LEASE;
         results.mtu = (mMtu != null && MIN_MTU <= mMtu && mMtu <= MAX_MTU) ? mMtu : 0;
+        results.serverHostName = mServerHostName;
 
         return results;
     }

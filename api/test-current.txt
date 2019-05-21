@@ -730,9 +730,6 @@ package android.net {
     method public static long getLoopbackRxPackets();
     method public static long getLoopbackTxBytes();
     method public static long getLoopbackTxPackets();
-    field public static final int TAG_SYSTEM_DHCP = -192; // 0xffffff40
-    field public static final int TAG_SYSTEM_DHCP_SERVER = -186; // 0xffffff46
-    field public static final int TAG_SYSTEM_PROBE = -190; // 0xffffff42
   }
 
 }
@@ -926,6 +923,7 @@ package android.net.util {
 package android.os {
 
   public static class Build.VERSION {
+    field public static final String[] ACTIVE_CODENAMES;
     field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
   }
@@ -1203,17 +1201,6 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
-    field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
-    field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
-    field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
-    field public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
-    field public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
-    field public static final int CAPTIVE_PORTAL_MODE_AVOID = 2; // 0x2
-    field public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0; // 0x0
-    field public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1; // 0x1
-    field public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS = "captive_portal_other_fallback_urls";
-    field public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
-    field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final String LOW_POWER_MODE = "low_power";
@@ -1439,7 +1426,7 @@ package android.telecom {
   public class TelecomManager {
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCurrentTtyMode();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(android.telecom.PhoneAccountHandle);
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2
     field public static final int TTY_MODE_OFF = 0; // 0x0
@@ -1594,8 +1581,6 @@ package android.telephony.mbms.vendor {
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
-    method public static String getDefaultTransactionName(int);
-    method public String getTransactionName(int);
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method @NonNull public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
@@ -1623,9 +1608,7 @@ package android.telephony.mbms.vendor {
     ctor public MbmsStreamingServiceBase();
     method public android.os.IBinder asBinder();
     method public void dispose(int) throws android.os.RemoteException;
-    method public static String getDefaultTransactionName(int);
     method @Nullable public android.net.Uri getPlaybackUri(int, String) throws android.os.RemoteException;
-    method public String getTransactionName(int);
     method public int initialize(android.telephony.mbms.MbmsStreamingSessionCallback, int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;

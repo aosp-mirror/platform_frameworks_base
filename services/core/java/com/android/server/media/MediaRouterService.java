@@ -16,10 +16,14 @@
 
 package com.android.server.media;
 
+import com.android.internal.util.DumpUtils;
+import com.android.server.Watchdog;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -52,9 +56,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
-
-import com.android.internal.util.DumpUtils;
-import com.android.server.Watchdog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -114,7 +115,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
-        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance(context);
+        mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
         mAudioPlayerStateMonitor.registerListener(
                 new AudioPlayerStateMonitor.OnAudioPlayerActiveStateChangedListener() {
             static final long WAIT_MS = 500;
@@ -165,6 +166,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 }
             }
         }, mHandler);
+        mAudioPlayerStateMonitor.registerSelfIntoAudioServiceIfNeeded(mAudioService);
 
         AudioRoutesInfo audioRoutes = null;
         try {

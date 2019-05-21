@@ -178,7 +178,21 @@ public abstract class NetworkAgent extends Handler {
      */
     public static final int EVENT_SOCKET_KEEPALIVE = BASE + 13;
 
-    // TODO: move the above 2 constants down so they are in order once merge conflicts are resolved
+    /**
+     * Sent by ConnectivityService to inform this network transport of signal strength thresholds
+     * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
+     *
+     *   obj = int[] describing signal strength thresholds.
+     */
+    public static final int CMD_SET_SIGNAL_STRENGTH_THRESHOLDS = BASE + 14;
+
+    /**
+     * Sent by ConnectivityService to the NeworkAgent to inform the agent to avoid
+     * automatically reconnecting to this network (e.g. via autojoin).  Happens
+     * when user selects "No" option on the "Stay connected?" dialog box.
+     */
+    public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 15;
+
     /**
      * Sent by the KeepaliveTracker to NetworkAgent to add a packet filter.
      *
@@ -197,21 +211,6 @@ public abstract class NetworkAgent extends Handler {
      * arg1 = slot number of the keepalive packet filter to remove.
      */
     public static final int CMD_REMOVE_KEEPALIVE_PACKET_FILTER = BASE + 17;
-
-    /**
-     * Sent by ConnectivityService to inform this network transport of signal strength thresholds
-     * that when crossed should trigger a system wakeup and a NetworkCapabilities update.
-     *
-     *   obj = int[] describing signal strength thresholds.
-     */
-    public static final int CMD_SET_SIGNAL_STRENGTH_THRESHOLDS = BASE + 14;
-
-    /**
-     * Sent by ConnectivityService to the NeworkAgent to inform the agent to avoid
-     * automatically reconnecting to this network (e.g. via autojoin).  Happens
-     * when user selects "No" option on the "Stay connected?" dialog box.
-     */
-    public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 15;
 
     // TODO : remove these two constructors. They are a stopgap measure to help sheperding a number
     // of dependent changes that would conflict throughout the automerger graph. Having these
