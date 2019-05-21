@@ -4,7 +4,7 @@
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
     <string name="android_system_label" msgid="2797790869522345065">"مُشغل شبكة الجوال"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"نفدت بيانات الجوّال"</string>
-    <string name="no_data_notification_id" msgid="668400731803969521">"تم إيقاف بيانات الجوال"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"تم إلغاء تنشيط بيانات الجوال"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"‏النقر للانتقال إلى موقع %s الإلكتروني"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"‏يُرجى الاتصال بمقدم الخدمة %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"لا يوجد اتصال بيانات الجوال"</string>
@@ -13,7 +13,7 @@
     <skip />
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"حالة بيانات الجوّال"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"تسجيل الدخول إلى شبكة الجوّال"</string>
-    <string name="ssl_error_warning" msgid="3127935140338254180">"الشبكة التي تحاول الانضمام إليها بها مشاكل أمنية."</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"الشبكة التي تحاول الانضمام إليها بها مشكلات أمنية."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"على سبيل المثال، قد لا تنتمي صفحة تسجيل الدخول إلى المؤسسة المعروضة."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"المتابعة على أي حال عبر المتصفح"</string>
 </resources>

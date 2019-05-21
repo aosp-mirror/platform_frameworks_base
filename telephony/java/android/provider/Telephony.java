@@ -768,7 +768,7 @@ public final class Telephony {
             public static final String DEFAULT_SORT_ORDER = "date DESC";
 
             /**
-             * The first 45 characters of the body of the message.
+             * The first 45 characters of the body of the most recent message.
              * <P>Type: TEXT</P>
              */
             public static final String SNIPPET = "snippet";
@@ -4259,6 +4259,22 @@ public final class Telephony {
          * @hide
          */
         public static final String IS_USING_CARRIER_AGGREGATION = "is_using_carrier_aggregation";
+
+        /**
+         * The current registered raw data network operator name in long alphanumeric format.
+         * <p>
+         * This is the same as {@link ServiceState#getOperatorAlphaLongRaw()}.
+         * @hide
+         */
+        public static final String OPERATOR_ALPHA_LONG_RAW = "operator_alpha_long_raw";
+
+        /**
+         * The current registered raw data network operator name in short alphanumeric format.
+         * <p>
+         * This is the same as {@link ServiceState#getOperatorAlphaShortRaw()}.
+         * @hide
+         */
+        public static final String OPERATOR_ALPHA_SHORT_RAW = "operator_alpha_short_raw";
     }
 
     /**

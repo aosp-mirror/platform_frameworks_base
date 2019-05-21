@@ -79,7 +79,7 @@ public final class TcpKeepalivePacketDataTest {
         assertEquals(testInfo.tos, resultData.ipTos);
         assertEquals(testInfo.ttl, resultData.ipTtl);
 
-        TestUtils.assertParcelingIsLossless(resultData, TcpKeepalivePacketData.CREATOR);
+        TestUtils.assertParcelingIsLossless(resultData);
 
         final byte[] packet = resultData.getPacket();
         // IP version and IHL

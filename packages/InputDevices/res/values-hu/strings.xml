@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Beviteli eszközök"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android-billentyűzet"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"angol (brit)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"angol (Egyesült Királyság)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"angol (USA)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"angol (USA), nemzetközi stílus"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"angol (USA), Colemak-stílus"</string>
@@ -43,5 +43,4 @@
     <string name="keyboard_layout_latvian" msgid="4405417142306250595">"lett"</string>
     <string name="keyboard_layout_persian" msgid="3920643161015888527">"perzsa"</string>
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"azeri"</string>
-    <string name="keyboard_layout_polish" msgid="1121588624094925325">"lengyel"</string>
 </resources>

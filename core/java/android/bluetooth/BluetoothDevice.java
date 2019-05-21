@@ -56,7 +56,8 @@ import java.util.UUID;
  * returned by {@link BluetoothAdapter#getBondedDevices()
  * BluetoothAdapter.getBondedDevices()}. You can then open a
  * {@link BluetoothSocket} for communication with the remote device, using
- * {@link #createRfcommSocketToServiceRecord(UUID)}.
+ * {@link #createRfcommSocketToServiceRecord(UUID)} over Bluetooth BR/EDR or using
+ * {@link #createL2capChannel(int)} over Bluetooth LE.
  *
  * <p class="note"><strong>Note:</strong>
  * Requires the {@link android.Manifest.permission#BLUETOOTH} permission.

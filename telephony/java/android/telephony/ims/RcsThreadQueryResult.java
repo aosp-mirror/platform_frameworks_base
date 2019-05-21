@@ -33,9 +33,12 @@ import java.util.stream.Collectors;
  * @hide
  */
 public final class RcsThreadQueryResult {
+    private final RcsControllerCall mRcsControllerCall;
     private final RcsThreadQueryResultParcelable mRcsThreadQueryResultParcelable;
 
-    RcsThreadQueryResult(RcsThreadQueryResultParcelable rcsThreadQueryResultParcelable) {
+    RcsThreadQueryResult(RcsControllerCall rcsControllerCall,
+            RcsThreadQueryResultParcelable rcsThreadQueryResultParcelable) {
+        mRcsControllerCall = rcsControllerCall;
         mRcsThreadQueryResultParcelable = rcsThreadQueryResultParcelable;
     }
 
@@ -58,8 +61,8 @@ public final class RcsThreadQueryResult {
     public List<RcsThread> getThreads() {
         return mRcsThreadQueryResultParcelable.mRcsThreadIds.stream()
                 .map(typeIdPair -> typeIdPair.getType() == THREAD_TYPE_1_TO_1
-                        ? new Rcs1To1Thread(typeIdPair.getId())
-                        : new RcsGroupThread(typeIdPair.getId()))
+                        ? new Rcs1To1Thread(mRcsControllerCall, typeIdPair.getId())
+                        : new RcsGroupThread(mRcsControllerCall, typeIdPair.getId()))
                 .collect(Collectors.toList());
     }
 }

@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Build;
@@ -173,5 +174,22 @@ public final class PhoneAccountHandle implements Parcelable {
         this(ComponentName.CREATOR.createFromParcel(in),
                 in.readString(),
                 UserHandle.CREATOR.createFromParcel(in));
+    }
+
+    /**
+     * Determines if two {@link PhoneAccountHandle}s are from the same package.
+     *
+     * @param a Phone account handle to check for same {@link ConnectionService} package.
+     * @param b Other phone account handle to check for same {@link ConnectionService} package.
+     * @return {@code true} if the two {@link PhoneAccountHandle}s passed in belong to the same
+     * {@link ConnectionService} / package, {@code false} otherwise.  Note: {@code null} phone
+     * account handles are considered equivalent to other {@code null} phone account handles.
+     * @hide
+     */
+    public static boolean areFromSamePackage(@Nullable PhoneAccountHandle a,
+            @Nullable PhoneAccountHandle b) {
+        String aPackageName = a != null ? a.getComponentName().getPackageName() : null;
+        String bPackageName = b != null ? b.getComponentName().getPackageName() : null;
+        return Objects.equals(aPackageName, bPackageName);
     }
 }

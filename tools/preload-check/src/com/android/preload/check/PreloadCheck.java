@@ -16,7 +16,7 @@
 
 package com.android.preload.check;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
@@ -97,6 +97,14 @@ public class PreloadCheck implements IDeviceTest {
         }
     }
 
+    /**
+     * Test the classes ending in NoPreloadHolder are not initialized.
+     */
+    @Test
+    public void testNoPreloadHolder() throws Exception {
+        run("com.android.preload.check.NotInitializedRegex", ".*NoPreloadHolder$", "true");
+    }
+
     private void run(String cmd, String... args) throws Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("app_process ")
@@ -107,7 +115,7 @@ public class PreloadCheck implements IDeviceTest {
             sb.append(' ').append(escape(arg));
         }
         String res = mTestDevice.executeShellCommand(sb.toString());
-        assertEquals(sb.toString(), "OK", res.trim());
+        assertTrue(sb.toString() + "\n===\n" + res, res.trim().endsWith("OK"));
     }
 
     private static String escape(String input) {

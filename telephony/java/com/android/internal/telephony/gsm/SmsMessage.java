@@ -914,7 +914,7 @@ public class SmsMessage extends SmsMessageBase {
         CharSequence newMsgBody = null;
         Resources r = Resources.getSystem();
         if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsgBody  = Sms7BitEncodingTranslator.translate(msgBody);
+            newMsgBody = Sms7BitEncodingTranslator.translate(msgBody, false);
         }
         if (TextUtils.isEmpty(newMsgBody)) {
             newMsgBody = msgBody;

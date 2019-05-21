@@ -233,8 +233,6 @@ public class Build {
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
-         *
-         * @see #FIRST_SDK_INT
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
@@ -287,6 +285,7 @@ public class Build {
         /**
          * @hide
          */
+        @TestApi
         @UnsupportedAppUsage
         public static final String[] ACTIVE_CODENAMES = "REL".equals(ALL_CODENAMES[0])
                 ? new String[0] : ALL_CODENAMES;

@@ -64,6 +64,8 @@ public final class DhcpResults implements Parcelable {
     @UnsupportedAppUsage
     public int mtu;
 
+    public String serverHostName;
+
     public DhcpResults() {
         super();
     }
@@ -97,6 +99,7 @@ public final class DhcpResults implements Parcelable {
             vendorInfo = source.vendorInfo;
             leaseDuration = source.leaseDuration;
             mtu = source.mtu;
+            serverHostName = source.serverHostName;
         }
     }
 
@@ -129,6 +132,7 @@ public final class DhcpResults implements Parcelable {
         vendorInfo = null;
         leaseDuration = 0;
         mtu = 0;
+        serverHostName = null;
     }
 
     @Override
@@ -139,6 +143,7 @@ public final class DhcpResults implements Parcelable {
         str.append(" Vendor info ").append(vendorInfo);
         str.append(" lease ").append(leaseDuration).append(" seconds");
         if (mtu != 0) str.append(" MTU ").append(mtu);
+        str.append(" Servername ").append(serverHostName);
 
         return str.toString();
     }
@@ -154,6 +159,7 @@ public final class DhcpResults implements Parcelable {
         return toStaticIpConfiguration().equals(target.toStaticIpConfiguration())
                 && Objects.equals(serverAddress, target.serverAddress)
                 && Objects.equals(vendorInfo, target.vendorInfo)
+                && Objects.equals(serverHostName, target.serverHostName)
                 && leaseDuration == target.leaseDuration
                 && mtu == target.mtu;
     }
@@ -179,6 +185,7 @@ public final class DhcpResults implements Parcelable {
         dest.writeInt(mtu);
         InetAddressUtils.parcelInetAddress(dest, serverAddress, flags);
         dest.writeString(vendorInfo);
+        dest.writeString(serverHostName);
     }
 
     @Override
@@ -193,6 +200,7 @@ public final class DhcpResults implements Parcelable {
         dhcpResults.mtu = in.readInt();
         dhcpResults.serverAddress = (Inet4Address) InetAddressUtils.unparcelInetAddress(in);
         dhcpResults.vendorInfo = in.readString();
+        dhcpResults.serverHostName = in.readString();
         return dhcpResults;
     }
 

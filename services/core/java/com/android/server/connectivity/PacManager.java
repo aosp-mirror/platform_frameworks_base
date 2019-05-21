@@ -39,6 +39,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.TrafficStatsConstants;
 import com.android.net.IProxyCallback;
 import com.android.net.IProxyPortListener;
 import com.android.net.IProxyService;
@@ -111,7 +112,8 @@ public class PacManager {
             String file;
             final Uri pacUrl = mPacUrl;
             if (Uri.EMPTY.equals(pacUrl)) return;
-            final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PAC);
+            final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                    TrafficStatsConstants.TAG_SYSTEM_PAC);
             try {
                 file = get(pacUrl);
             } catch (IOException ioe) {

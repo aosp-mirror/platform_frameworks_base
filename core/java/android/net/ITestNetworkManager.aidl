@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.LinkAddress;
+import android.net.LinkProperties;
 import android.net.TestNetworkInterface;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -31,7 +32,8 @@ interface ITestNetworkManager
     TestNetworkInterface createTunInterface(in LinkAddress[] linkAddrs);
     TestNetworkInterface createTapInterface();
 
-    void setupTestNetwork(in String iface, in IBinder binder);
+    void setupTestNetwork(in String iface, in LinkProperties lp, in boolean isMetered,
+            in IBinder binder);
 
     void teardownTestNetwork(int netId);
 }

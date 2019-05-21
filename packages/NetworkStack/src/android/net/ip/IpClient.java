@@ -29,6 +29,7 @@ import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NattKeepalivePacketDataParcelable;
 import android.net.NetworkStackIpMemoryStore;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
@@ -553,9 +554,19 @@ public class IpClient extends StateMachine {
             IpClient.this.addKeepalivePacketFilter(slot, pkt);
         }
         @Override
+        public void addNattKeepalivePacketFilter(int slot, NattKeepalivePacketDataParcelable pkt) {
+            checkNetworkStackCallingPermission();
+            IpClient.this.addNattKeepalivePacketFilter(slot, pkt);
+        }
+        @Override
         public void removeKeepalivePacketFilter(int slot) {
             checkNetworkStackCallingPermission();
             IpClient.this.removeKeepalivePacketFilter(slot);
+        }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
         }
     }
 
@@ -686,11 +697,20 @@ public class IpClient extends StateMachine {
     }
 
     /**
-     * Called by WifiStateMachine to add keepalive packet filter before setting up
+     * Called by WifiStateMachine to add TCP keepalive packet filter before setting up
      * keepalive offload.
      */
     public void addKeepalivePacketFilter(int slot, @NonNull TcpKeepalivePacketDataParcelable pkt) {
         sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF, slot, 0 /* Unused */, pkt);
+    }
+
+    /**
+     *  Called by WifiStateMachine to add NATT keepalive packet filter before setting up
+     *  keepalive offload.
+     */
+    public void addNattKeepalivePacketFilter(int slot,
+            @NonNull NattKeepalivePacketDataParcelable pkt) {
+        sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF, slot, 0 /* Unused */ , pkt);
     }
 
     /**
@@ -1602,9 +1622,15 @@ public class IpClient extends StateMachine {
 
                 case CMD_ADD_KEEPALIVE_PACKET_FILTER_TO_APF: {
                     final int slot = msg.arg1;
+
                     if (mApfFilter != null) {
-                        mApfFilter.addKeepalivePacketFilter(slot,
-                                (TcpKeepalivePacketDataParcelable) msg.obj);
+                        if (msg.obj instanceof NattKeepalivePacketDataParcelable) {
+                            mApfFilter.addNattKeepalivePacketFilter(slot,
+                                    (NattKeepalivePacketDataParcelable) msg.obj);
+                        } else if (msg.obj instanceof TcpKeepalivePacketDataParcelable) {
+                            mApfFilter.addTcpKeepalivePacketFilter(slot,
+                                    (TcpKeepalivePacketDataParcelable) msg.obj);
+                        }
                     }
                     break;
                 }

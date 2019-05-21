@@ -497,6 +497,16 @@ class ActivityMetricsLogger {
         mHandler.obtainMessage(MSG_CHECK_VISIBILITY, args).sendToTarget();
     }
 
+    private boolean hasVisibleNonFinishingActivity(TaskRecord t) {
+        for (int i = t.mActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = t.mActivities.get(i);
+            if (r.visible && !r.finishing) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void checkVisibility(TaskRecord t, ActivityRecord r) {
         synchronized (mSupervisor.mService) {
 
@@ -505,7 +515,7 @@ class ActivityMetricsLogger {
 
             // If we have an active transition that's waiting on a certain activity that will be
             // invisible now, we'll never get onWindowsDrawn, so abort the transition if necessary.
-            if (info != null && !t.isVisible()) {
+            if (info != null && !hasVisibleNonFinishingActivity(t)) {
                 if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible"
                         + " activity=" + r);
                 logAppTransitionCancel(info);

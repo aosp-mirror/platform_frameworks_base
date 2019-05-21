@@ -23,6 +23,8 @@ import android.util.SparseArray;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.List;
 import java.util.function.Predicate;
@@ -33,6 +35,77 @@ import java.util.function.Predicate;
 public class NetworkStackUtils {
     // TODO: Refer to DeviceConfig definition.
     public static final String NAMESPACE_CONNECTIVITY = "connectivity";
+
+    /**
+     * A list of captive portal detection specifications used in addition to the fallback URLs.
+     * Each spec has the format url@@/@@statusCodeRegex@@/@@contentRegex. Specs are separated
+     * by "@@,@@".
+     */
+    public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS =
+            "captive_portal_fallback_probe_specs";
+
+    /**
+     * A comma separated list of URLs used for captive portal detection in addition to the
+     * fallback HTTP url associated with the CAPTIVE_PORTAL_FALLBACK_URL settings.
+     */
+    public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS =
+            "captive_portal_other_fallback_urls";
+
+    /**
+     * Which User-Agent string to use in the header of the captive portal detection probes.
+     * The User-Agent field is unset when this setting has no value (HttpUrlConnection default).
+     */
+    public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
+
+    /**
+     * Whether to use HTTPS for network validation. This is enabled by default and the setting
+     * needs to be set to 0 to disable it. This setting is a misnomer because captive portals
+     * don't actually use HTTPS, but it's consistent with the other settings.
+     */
+    public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
+
+    /**
+     * The URL used for HTTPS captive portal detection upon a new connection.
+     * A 204 response code from the server is used for validation.
+     */
+    public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
+
+    /**
+     * The URL used for HTTP captive portal detection upon a new connection.
+     * A 204 response code from the server is used for validation.
+     */
+    public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
+
+    /**
+     * The URL used for fallback HTTP captive portal detection when previous HTTP
+     * and HTTPS captive portal detection attemps did not return a conclusive answer.
+     */
+    public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
+
+    /**
+     * What to do when connecting a network that presents a captive portal.
+     * Must be one of the CAPTIVE_PORTAL_MODE_* constants above.
+     *
+     * The default for this setting is CAPTIVE_PORTAL_MODE_PROMPT.
+     */
+    public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
+
+    /**
+     * Don't attempt to detect captive portals.
+     */
+    public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0;
+
+    /**
+     * When detecting a captive portal, display a notification that
+     * prompts the user to sign in.
+     */
+    public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1;
+
+    /**
+     * When detecting a captive portal, immediately disconnect from the
+     * network and do not reconnect to that network in the future.
+     */
+    public static final int CAPTIVE_PORTAL_MODE_AVOID = 2;
 
     static {
         System.loadLibrary("networkstackutilsjni");
@@ -156,4 +229,13 @@ public class NetworkStackUtils {
 
     private static native void addArpEntry(byte[] ethAddr, byte[] netAddr, String ifname,
             FileDescriptor fd) throws IOException;
+
+    /**
+     * Return IP address and port in a string format.
+     */
+    public static String addressAndPortToString(InetAddress address, int port) {
+        return String.format(
+                (address instanceof Inet6Address) ? "[%s]:%d" : "%s:%d",
+                        address.getHostAddress(), port);
+    }
 }

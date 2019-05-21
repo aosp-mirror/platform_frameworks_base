@@ -24,4 +24,5 @@ parcelable DhcpResultsParcelable {
     int mtu;
     String serverAddress;
     String vendorInfo;
+    String serverHostName;
 }

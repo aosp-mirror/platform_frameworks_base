@@ -56,6 +56,26 @@ public class TestNetworkManager {
     /**
      * Sets up a capability-limited, testing-only network for a given interface
      *
+     * @param lp The LinkProperties for the TestNetworkService to use for this test network. Note
+     *     that the interface name and link addresses will be overwritten, and the passed-in values
+     *     discarded.
+     * @param isMetered Whether or not the network should be considered metered.
+     * @param binder A binder object guarding the lifecycle of this test network.
+     * @hide
+     */
+    public void setupTestNetwork(
+            @NonNull LinkProperties lp, boolean isMetered, @NonNull IBinder binder) {
+        Preconditions.checkNotNull(lp, "Invalid LinkProperties");
+        try {
+            mService.setupTestNetwork(lp.getInterfaceName(), lp, isMetered, binder);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets up a capability-limited, testing-only network for a given interface
+     *
      * @param iface the name of the interface to be used for the Network LinkProperties.
      * @param binder A binder object guarding the lifecycle of this test network.
      * @hide
@@ -63,7 +83,7 @@ public class TestNetworkManager {
     @TestApi
     public void setupTestNetwork(@NonNull String iface, @NonNull IBinder binder) {
         try {
-            mService.setupTestNetwork(iface, binder);
+            mService.setupTestNetwork(iface, null, true, binder);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

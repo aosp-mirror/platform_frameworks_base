@@ -16,13 +16,16 @@
 
 package com.android.preload.check;
 
+/**
+ * Test that a helper class is first seen as uninitialized, then initialized after forced.
+ */
 public class IntegrityCheck {
     public static void main(String[] args) throws Exception {
         ClassLoader loader = IntegrityCheck.class.getClassLoader();
 
         Util.assertNotInitialized("com.android.preload.check.IntegrityCheck$StatusHelper", loader);
 
-        Class<?> klass = Class.forName("com.android.preload.check.IntegrityCheck$StatusHelper",
+        Class.forName("com.android.preload.check.IntegrityCheck$StatusHelper",
                 /* initialize */ true, loader);
 
         Util.assertInitialized("com.android.preload.check.IntegrityCheck$StatusHelper", loader);
@@ -30,6 +33,7 @@ public class IntegrityCheck {
         System.out.println("OK");
     }
 
+    @SuppressWarnings("unused")
     private static class StatusHelper {
         private final static Object defer = new Object();
     }

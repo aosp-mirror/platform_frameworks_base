@@ -63,9 +63,8 @@
     <string name="always_use_device" msgid="4015357883336738417">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració per USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
-    <string name="usb_debugging_allow" msgid="2272145052073254852">"Permet"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració per USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
@@ -157,8 +156,6 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
-    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Itinerància"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -289,7 +286,6 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Àudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Auriculars"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Entrada"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Audiòfons"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"S\'està activant…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Gira automàticament"</string>
@@ -596,7 +592,7 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activa"</string>
-    <string name="show_silently" msgid="6841966539811264192">"Mostra les notificacions en silenci"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Mostra les notificacions de manera silenciosa"</string>
     <string name="block" msgid="2734508760962682611">"Bloqueja totes les notificacions"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"No silenciïs"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"No silenciïs ni bloquegis"</string>
@@ -656,7 +652,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Esquerra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Dreta"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centre"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulador"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Pestanya"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Espai"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Retorn"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Retrocés"</string>
@@ -706,7 +702,7 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Activat"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Desactivat"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegació"</string>
-    <string name="nav_bar_layout" msgid="3664072994198772020">"Disposició"</string>
+    <string name="nav_bar_layout" msgid="3664072994198772020">"Disseny"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Tipus de botó addicional de l\'esquerra"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Tipus de botó addicional de la dreta"</string>
     <string name="nav_bar_default" msgid="8587114043070993007">"(predeterminat)"</string>

@@ -1051,7 +1051,17 @@ interface ITelephony {
      */
     String getLine1AlphaTagForDisplay(int subId, String callingPackage);
 
-    String[] getMergedSubscriberIds(String callingPackage);
+    /**
+     * Return the set of subscriber IDs that should be considered "merged together" for data usage
+     * purposes. This is commonly {@code null} to indicate no merging is required. Any returned
+     * subscribers are sorted in a deterministic order.
+     * <p>
+     * The returned set of subscriber IDs will include the subscriber ID corresponding to this
+     * TelephonyManager's subId.
+     *
+     * @hide
+     */
+    String[] getMergedSubscriberIds(int subId, String callingPackage);
 
     /**
      * Override the operator branding for the current ICCID.
@@ -1511,6 +1521,14 @@ interface ITelephony {
     void carrierActionReportDefaultNetworkStatus(int subId, boolean report);
 
     /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions.
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    void carrierActionResetAll(int subId);
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *
@@ -1586,7 +1604,7 @@ interface ITelephony {
     int getCardIdForDefaultEuicc(int subId, String callingPackage);
 
     /**
-     * Gets information about currently inserted UICCs and enabled eUICCs.
+     * Gets information about currently inserted UICCs and eUICCs.
      * <p>
      * Requires that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      * <p>
@@ -1958,4 +1976,8 @@ interface ITelephony {
     int getRadioHalVersion();
 
     boolean isModemEnabledForSlot(int slotIndex, String callingPackage);
+
+    boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
+
+    boolean isApnMetered(int apnType, int subId);
 }

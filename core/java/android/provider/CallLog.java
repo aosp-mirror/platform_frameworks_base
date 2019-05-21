@@ -967,6 +967,23 @@ public class CallLog {
                 // spam the call log with its own entries, causing entries from Telephony to be
                 // removed.
                 final Uri result = resolver.insert(uri, values);
+                if (result != null) {
+                    String lastPathSegment = result.getLastPathSegment();
+                    // When inserting into the call log, if ContentProvider#insert detect an appops
+                    // denial a non-null "silent rejection" URI is returned which ends in 0.
+                    // Example: content://call_log/calls/0
+                    // The 0 in the last part of the path indicates a fake call id of 0.
+                    // A denial when logging calls from the platform is bad; there is no other
+                    // logging to indicate that this has happened so we will check for that scenario
+                    // here and log a warning so we have a hint as to what is going on.
+                    if (lastPathSegment != null && lastPathSegment.equals("0")) {
+                        Log.w(LOG_TAG, "Failed to insert into call log due to appops denial;"
+                                + " resultUri=" + result);
+                    }
+                } else {
+                    Log.w(LOG_TAG, "Failed to insert into call log; null result uri.");
+                }
+
                 if (values.containsKey(PHONE_ACCOUNT_ID)
                         && !TextUtils.isEmpty(values.getAsString(PHONE_ACCOUNT_ID))
                         && values.containsKey(PHONE_ACCOUNT_COMPONENT_NAME)

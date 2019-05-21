@@ -51,7 +51,7 @@ android_test {
         "liblzma",
         "libnativehelper",
         "libui",
-        "libunwind",
+        "libunwindstack",
         "libutils",
         "netd_aidl_interface-cpp",
     ],

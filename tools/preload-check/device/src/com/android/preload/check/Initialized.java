@@ -16,6 +16,9 @@
 
 package com.android.preload.check;
 
+/**
+ * Test that the given boot classpath class is initialized.
+ */
 public class Initialized {
     public static void main(String[] args) throws Exception {
         Util.assertInitialized(args[0], null);

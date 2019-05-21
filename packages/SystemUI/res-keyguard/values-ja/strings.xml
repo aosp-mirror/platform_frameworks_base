@@ -28,19 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"タップしてパスワードを入力"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ロックを解除するにはパスワードを入力してください"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ロックを解除するには PIN を入力してください"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"PIN を入力してください"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"パターンを入力してください"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"パスワードを入力してください"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN コードが無効です。"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"無効なカードです。"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"充電が完了しました"</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 急速充電中"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 低速充電中"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"充電しています"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"急速充電しています"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"低速充電しています"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"充電してください。"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"メニューからロックを解除できます。"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"ネットワークがロックされました"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM カードなし"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"SIM カードが挿入されていません"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"タブレットに SIM カードが挿入されていません。"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"スマートフォンに SIM カードが挿入されていません。"</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"SIM カードを挿入してください。"</string>
@@ -51,7 +48,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM カードは PUK でロックされています。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM カードのロックを解除しています…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN エリア"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"デバイスのパスワード"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN エリア"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK エリア"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"次のアラームを <xliff:g id="ALARM">%1$s</xliff:g> に設定しました"</string>
@@ -71,7 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"パターンを入力してください"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM PIN を入力してください。"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"「<xliff:g id="CARRIER">%1$s</xliff:g>」の SIM PIN を入力してください。"</string>
-    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g>モバイル サービスなしでデバイスを使用するには eSIM を無効にしてください。"</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g>モバイル サービスなしで端末を使用するには eSIM を無効にしてください。"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN を入力してください"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"パスワードを入力してください"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM が無効になりました。続行するには PUK コードを入力してください。詳しくは携帯通信会社にお問い合わせください。"</string>
@@ -101,10 +97,10 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"スマートフォンのロック解除に <xliff:g id="NUMBER">%d</xliff:g> 回失敗しました。仕事用プロファイルは削除され、プロファイルのデータはすべて消去されます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、タブレットのロック解除にメール アカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"ロック解除パターンの入力を <xliff:g id="NUMBER_0">%1$d</xliff:g> 回間違えました。あと <xliff:g id="NUMBER_1">%2$d</xliff:g> 回間違えると、スマートフォンのロック解除にメール アカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後にもう一度お試しください。"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM PIN コードが無効です。お使いのデバイスをロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM PIN コードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
       <item quantity="other">SIM PIN コードが無効です。入力できるのはあと <xliff:g id="NUMBER_1">%d</xliff:g> 回です。</item>
-      <item quantity="one">SIM PIN コードが無効です。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えると、お使いのデバイスをロック解除するのに携帯通信会社にお問い合わせいただく必要があります。</item>
+      <item quantity="one">SIM PIN コードが無効です。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えると、お使いの端末をロック解除するのに携帯通信会社にお問い合わせいただく必要があります。</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM は使用できません。携帯通信会社にお問い合わせください。"</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
@@ -117,31 +113,31 @@
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"通信サービスはありません。"</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"入力方法の切り替え"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"機内モード"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"デバイスの再起動後はパターンの入力が必要となります"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"デバイスの再起動後は PIN の入力が必要となります"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"デバイスの再起動後はパスワードの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"端末の再起動後はパターンの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"端末の再起動後は PIN の入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"端末の再起動後はパスワードの入力が必要となります"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"追加の確認のためパターンが必要です"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"追加の確認のため PIN が必要です"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"追加の確認のためパスワードが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"プロファイルを切り替えるにはパターンが必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"プロファイルを切り替えるには PIN が必要です"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"プロファイルを切り替えるにはパスワードが必要です"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"デバイスは管理者によりロックされています"</string>
-    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"デバイスは手動でロックされました"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"端末は管理者によりロックされています"</string>
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"端末は手動でロックされました"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
-      <item quantity="other">デバイスのロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。パターンを確認してください。</item>
-      <item quantity="one">デバイスのロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。パターンを確認してください。</item>
+      <item quantity="other">端末のロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。パターンを確認してください。</item>
+      <item quantity="one">端末のロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。パターンを確認してください。</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
-      <item quantity="other">デバイスのロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。PIN を確認してください。</item>
-      <item quantity="one">デバイスのロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。PIN を確認してください。</item>
+      <item quantity="other">端末のロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。PIN を確認してください。</item>
+      <item quantity="one">端末のロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。PIN を確認してください。</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
-      <item quantity="other">デバイスのロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
-      <item quantity="one">デバイスのロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
+      <item quantity="other">端末のロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
+      <item quantity="one">端末のロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"認識されませんでした"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
       <item quantity="other">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_1">%d</xliff:g> 回です。</item>
       <item quantity="one">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えた場合は、携帯通信会社にお問い合わせください。</item>
     </plurals>

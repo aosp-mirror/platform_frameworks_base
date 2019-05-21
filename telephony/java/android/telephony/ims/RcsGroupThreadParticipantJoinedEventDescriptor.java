@@ -36,12 +36,13 @@ public class RcsGroupThreadParticipantJoinedEventDescriptor extends RcsGroupThre
 
     @Override
     @VisibleForTesting(visibility = PROTECTED)
-    public RcsGroupThreadParticipantJoinedEvent createRcsEvent() {
+    public RcsGroupThreadParticipantJoinedEvent createRcsEvent(
+            RcsControllerCall rcsControllerCall) {
         return new RcsGroupThreadParticipantJoinedEvent(
                 mTimestamp,
-                new RcsGroupThread(mRcsGroupThreadId),
-                new RcsParticipant(mOriginatingParticipantId),
-                new RcsParticipant(mJoinedParticipantId));
+                new RcsGroupThread(rcsControllerCall, mRcsGroupThreadId),
+                new RcsParticipant(rcsControllerCall, mOriginatingParticipantId),
+                new RcsParticipant(rcsControllerCall, mJoinedParticipantId));
     }
 
     public static final @NonNull Creator<RcsGroupThreadParticipantJoinedEventDescriptor> CREATOR =

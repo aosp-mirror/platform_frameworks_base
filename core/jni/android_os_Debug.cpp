@@ -33,8 +33,10 @@
 #include <iomanip>
 #include <string>
 
+#include <android-base/logging.h>
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
+#include <bionic_malloc.h>
 #include <debuggerd/client.h>
 #include <log/log.h>
 #include <utils/misc.h>
@@ -960,9 +962,6 @@ static bool openFile(JNIEnv* env, jobject fileDescriptor, UniqueFile& fp)
     return true;
 }
 
-/* pulled out of bionic */
-extern "C" void write_malloc_leak_info(FILE* fp);
-
 /*
  * Dump the native heap, writing human-readable output to the specified
  * file descriptor.
@@ -978,8 +977,11 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject,
     ALOGD("Native heap dump starting...\n");
     // Formatting of the native heap dump is handled by malloc debug itself.
     // See https://android.googlesource.com/platform/bionic/+/master/libc/malloc_debug/README.md#backtrace-heap-dump-format
-    write_malloc_leak_info(fp.get());
-    ALOGD("Native heap dump complete.\n");
+    if (android_mallopt(M_WRITE_MALLOC_LEAK_INFO_TO_FILE, fp.get(), sizeof(FILE*))) {
+      ALOGD("Native heap dump complete.\n");
+    } else {
+      PLOG(ERROR) << "Failed to write native heap dump to file";
+    }
 }
 
 /*
