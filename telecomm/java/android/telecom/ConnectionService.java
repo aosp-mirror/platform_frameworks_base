@@ -1937,6 +1937,8 @@ public abstract class ConnectionService extends Service {
             return;
         }
 
+        String callingPackage = getOpPackageName();
+
         mAdapter.queryRemoteConnectionServices(new RemoteServiceCallback.Stub() {
             @Override
             public void onResult(
@@ -1965,7 +1967,7 @@ public abstract class ConnectionService extends Service {
                     }
                 }.prepare());
             }
-        });
+        }, callingPackage);
     }
 
     /**
