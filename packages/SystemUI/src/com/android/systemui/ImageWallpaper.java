@@ -16,13 +16,22 @@
 
 package com.android.systemui;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
-import android.opengl.GLSurfaceView;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
+import android.util.Size;
 import android.view.SurfaceHolder;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.glwallpaper.EglHelper;
+import com.android.systemui.glwallpaper.GLWallpaperRenderer;
 import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.DozeParameters;
 
 /**
  * Default built-in wallpaper that simply shows a static image.
@@ -30,112 +39,183 @@ import com.android.systemui.glwallpaper.ImageWallpaperRenderer;
 @SuppressWarnings({"UnusedDeclaration"})
 public class ImageWallpaper extends WallpaperService {
     private static final String TAG = ImageWallpaper.class.getSimpleName();
+    // We delayed destroy render context that subsequent render requests have chance to cancel it.
+    // This is to avoid destroying then recreating render context in a very short time.
+    private static final int DELAY_FINISH_RENDERING = 1000;
 
     @Override
     public Engine onCreateEngine() {
         return new GLEngine(this);
     }
 
-    class GLEngine extends Engine {
-        private GLWallpaperSurfaceView mWallpaperSurfaceView;
+    class GLEngine extends Engine implements GLWallpaperRenderer.SurfaceProxy, StateListener {
+        // Surface is rejected if size below a threshold on some devices (ie. 8px on elfin)
+        // set min to 64 px (CTS covers this), please refer to ag/4867989 for detail.
+        @VisibleForTesting
+        static final int MIN_SURFACE_WIDTH = 64;
+        @VisibleForTesting
+        static final int MIN_SURFACE_HEIGHT = 64;
+
+        private GLWallpaperRenderer mRenderer;
+        private EglHelper mEglHelper;
+        private StatusBarStateController mController;
+        private final Runnable mFinishRenderingTask = this::finishRendering;
+        private final boolean mNeedTransition;
+        private boolean mNeedRedraw;
 
         GLEngine(Context context) {
-            mWallpaperSurfaceView = new GLWallpaperSurfaceView(context);
-            mWallpaperSurfaceView.setRenderer(
-                    new ImageWallpaperRenderer(context, mWallpaperSurfaceView));
-            mWallpaperSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-            setOffsetNotificationsEnabled(true);
+            mNeedTransition = ActivityManager.isHighEndGfx()
+                    && !DozeParameters.getInstance(context).getDisplayNeedsBlanking();
+
+            // We will preserve EGL context when we are in lock screen or aod
+            // to avoid janking in following transition, we need to release when back to home.
+            mController = Dependency.get(StatusBarStateController.class);
+            if (mController != null) {
+                mController.addCallback(this /* StateListener */);
+            }
+            mEglHelper = new EglHelper();
+            mRenderer = new ImageWallpaperRenderer(context, this /* SurfaceProxy */);
+        }
+
+        @Override
+        public void onCreate(SurfaceHolder surfaceHolder) {
+            setFixedSizeAllowed(true);
+            setOffsetNotificationsEnabled(false);
+            updateSurfaceSize();
+        }
+
+        private void updateSurfaceSize() {
+            SurfaceHolder holder = getSurfaceHolder();
+            Size frameSize = mRenderer.reportSurfaceSize();
+            int width = Math.max(MIN_SURFACE_WIDTH, frameSize.getWidth());
+            int height = Math.max(MIN_SURFACE_HEIGHT, frameSize.getHeight());
+            holder.setFixedSize(width, height);
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
-            if (mWallpaperSurfaceView != null) {
-                mWallpaperSurfaceView.notifyAmbientModeChanged(inAmbientMode, animationDuration);
-            }
-        }
-
-        @Override
-        public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
-                float yOffsetStep, int xPixelOffset, int yPixelOffset) {
-            if (mWallpaperSurfaceView != null) {
-                mWallpaperSurfaceView.notifyOffsetsChanged(xOffset, yOffset);
-            }
+            mRenderer.updateAmbientMode(inAmbientMode,
+                    (mNeedTransition || animationDuration != 0) ? animationDuration : 0);
         }
 
         @Override
         public void onDestroy() {
-            if (mWallpaperSurfaceView != null) {
-                mWallpaperSurfaceView.onPause();
+            if (mController != null) {
+                mController.removeCallback(this /* StateListener */);
             }
+            mController = null;
+            mRenderer.finish();
+            mRenderer = null;
+            mEglHelper.finish();
+            mEglHelper = null;
+            getSurfaceHolder().getSurface().hwuiDestroy();
         }
 
-        private class GLWallpaperSurfaceView extends GLSurfaceView implements ImageGLView {
-            private WallpaperStatusListener mWallpaperStatusListener;
+        @Override
+        public void onSurfaceCreated(SurfaceHolder holder) {
+            mEglHelper.init(holder);
+            mRenderer.onSurfaceCreated();
+        }
 
-            GLWallpaperSurfaceView(Context context) {
-                super(context);
-                setEGLContextClientVersion(2);
-            }
+        @Override
+        public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            mRenderer.onSurfaceChanged(width, height);
+            mNeedRedraw = true;
+        }
 
-            @Override
-            public SurfaceHolder getHolder() {
-                return getSurfaceHolder();
-            }
-
-            @Override
-            public void setRenderer(Renderer renderer) {
-                super.setRenderer(renderer);
-                mWallpaperStatusListener = (WallpaperStatusListener) renderer;
-            }
-
-            private void notifyAmbientModeChanged(boolean inAmbient, long duration) {
-                if (mWallpaperStatusListener != null) {
-                    mWallpaperStatusListener.onAmbientModeChanged(inAmbient, duration);
-                }
-            }
-
-            private void notifyOffsetsChanged(float xOffset, float yOffset) {
-                if (mWallpaperStatusListener != null) {
-                    mWallpaperStatusListener.onOffsetsChanged(
-                            xOffset, yOffset, getHolder().getSurfaceFrame());
-                }
-            }
-
-            @Override
-            public void render() {
+        @Override
+        public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
+            if (mNeedRedraw) {
+                preRender();
                 requestRender();
+                postRender();
+                mNeedRedraw = false;
             }
         }
-    }
 
-    /**
-     * A listener to trace status of image wallpaper.
-     */
-    public interface WallpaperStatusListener {
+        @Override
+        public SurfaceHolder getHolder() {
+            return getSurfaceHolder();
+        }
 
-        /**
-         * Called back while ambient mode changes.
-         * @param inAmbientMode true if is in ambient mode, false otherwise.
-         * @param duration the duration of animation.
-         */
-        void onAmbientModeChanged(boolean inAmbientMode, long duration);
+        @Override
+        public void onStatePostChange() {
+            // When back to home, we try to release EGL, which is preserved in lock screen or aod.
+            if (mController.getState() == StatusBarState.SHADE) {
+                scheduleFinishRendering();
+            }
+        }
 
-        /**
-         * Called back while wallpaper offsets.
-         * @param xOffset The offset portion along x.
-         * @param yOffset The offset portion along y.
-         */
-        void onOffsetsChanged(float xOffset, float yOffset, Rect frame);
-    }
+        @Override
+        public void preRender() {
+            boolean contextRecreated = false;
+            Rect frame = getSurfaceHolder().getSurfaceFrame();
+            getMainThreadHandler().removeCallbacks(mFinishRenderingTask);
 
-    /**
-     * An abstraction for view of GLRenderer.
-     */
-    public interface ImageGLView {
+            // Check if we need to recreate egl context.
+            if (!mEglHelper.hasEglContext()) {
+                mEglHelper.destroyEglSurface();
+                if (!mEglHelper.createEglContext()) {
+                    Log.w(TAG, "recreate egl context failed!");
+                } else {
+                    contextRecreated = true;
+                }
+            }
 
-        /**
-         * Ask the view to render.
-         */
-        void render();
+            // Check if we need to recreate egl surface.
+            if (mEglHelper.hasEglContext() && !mEglHelper.hasEglSurface()) {
+                if (!mEglHelper.createEglSurface(getSurfaceHolder())) {
+                    Log.w(TAG, "recreate egl surface failed!");
+                }
+            }
+
+            // If we recreate egl context, notify renderer to setup again.
+            if (mEglHelper.hasEglContext() && mEglHelper.hasEglSurface() && contextRecreated) {
+                mRenderer.onSurfaceCreated();
+                mRenderer.onSurfaceChanged(frame.width(), frame.height());
+            }
+        }
+
+        @Override
+        public void requestRender() {
+            Rect frame = getSurfaceHolder().getSurfaceFrame();
+            boolean readyToRender = mEglHelper.hasEglContext() && mEglHelper.hasEglSurface()
+                    && frame.width() > 0 && frame.height() > 0;
+
+            if (readyToRender) {
+                mRenderer.onDrawFrame();
+                if (!mEglHelper.swapBuffer()) {
+                    Log.e(TAG, "drawFrame failed!");
+                }
+            } else {
+                Log.e(TAG, "requestRender: not ready, has context=" + mEglHelper.hasEglContext()
+                        + ", has surface=" + mEglHelper.hasEglSurface()
+                        + ", frame=" + frame);
+            }
+        }
+
+        @Override
+        public void postRender() {
+            scheduleFinishRendering();
+        }
+
+        private void scheduleFinishRendering() {
+            getMainThreadHandler().removeCallbacks(mFinishRenderingTask);
+            getMainThreadHandler().postDelayed(mFinishRenderingTask, DELAY_FINISH_RENDERING);
+        }
+
+        private void finishRendering() {
+            if (mEglHelper != null) {
+                mEglHelper.destroyEglSurface();
+                if (!needPreserveEglContext()) {
+                    mEglHelper.destroyEglContext();
+                }
+            }
+        }
+
+        private boolean needPreserveEglContext() {
+            return mNeedTransition && mController != null
+                    && mController.getState() == StatusBarState.KEYGUARD;
+        }
     }
 }
