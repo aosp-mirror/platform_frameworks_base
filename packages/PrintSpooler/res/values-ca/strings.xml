@@ -54,7 +54,7 @@
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"S\'ha amagat el quadre de cerca"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Afegeix una impressora"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Selecciona una impressora"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"Oblida la impressora"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Esborra la impressora"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="other">S\'han trobat <xliff:g id="COUNT_1">%1$s</xliff:g> impressores</item>
       <item quantity="one">S\'ha trobat <xliff:g id="COUNT_0">%1$s</xliff:g> impressora</item>

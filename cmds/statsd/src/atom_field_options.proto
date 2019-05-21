@@ -82,4 +82,6 @@ extend google.protobuf.FieldOptions {
     optional bool is_uid = 50001 [default = false];
 
     optional LogMode log_mode = 50002 [default = MODE_AUTOMATIC];
+
+    optional string log_from_module = 50004;
 }

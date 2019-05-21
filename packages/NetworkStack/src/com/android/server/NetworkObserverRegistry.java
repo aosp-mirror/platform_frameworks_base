@@ -181,4 +181,9 @@ public class NetworkObserverRegistry extends INetdUnsolicitedEventListener.Stub 
 
     @Override
     public void onStrictCleartextDetected(int uid, String hex) {}
+
+    @Override
+    public int getInterfaceVersion() {
+        return INetdUnsolicitedEventListener.VERSION;
+    }
 }

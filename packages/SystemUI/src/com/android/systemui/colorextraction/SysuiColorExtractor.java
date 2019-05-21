@@ -55,7 +55,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
 
     @VisibleForTesting
     public SysuiColorExtractor(Context context, ExtractionType type, boolean registerVisibility) {
-        super(context, type);
+        super(context, type, false /* immediately */);
         mWpHiddenColors = new GradientColors();
 
         WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);

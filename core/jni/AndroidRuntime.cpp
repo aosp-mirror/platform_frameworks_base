@@ -120,6 +120,7 @@ extern int register_android_app_admin_SecurityLog(JNIEnv* env);
 extern int register_android_content_AssetManager(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_StatsLog(JNIEnv* env);
+extern int register_android_util_StatsLogInternal(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_MemoryIntArray(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
@@ -213,7 +214,6 @@ extern int register_android_content_res_Configuration(JNIEnv* env);
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
-extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
 extern int register_com_android_internal_os_Zygote(JNIEnv *env);
@@ -665,6 +665,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
     char cpuAbiListBuf[sizeof("--cpu-abilist=") + PROPERTY_VALUE_MAX];
+    char corePlatformApiPolicyBuf[sizeof("-Xcore-platform-api-policy:") + PROPERTY_VALUE_MAX];
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
@@ -1009,6 +1010,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     if (property_get_bool("dalvik.vm.minidebuginfo", 0)) {
         addOption("-Xcompiler-option");
         addOption("--generate-mini-debug-info");
+    }
+
+    // If set, the property below can be used to enable core platform API violation reporting.
+    property_get("persist.debug.dalvik.vm.core_platform_api_policy", propBuf, "");
+    if (propBuf[0] != '\0') {
+      snprintf(corePlatformApiPolicyBuf,
+               sizeof(corePlatformApiPolicyBuf),
+               "-Xcore-platform-api-policy:%s",
+               propBuf);
+      addOption(corePlatformApiPolicyBuf);
     }
 
     /*
@@ -1386,6 +1397,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_MemoryIntArray),
     REG_JNI(register_android_util_PathParser),
     REG_JNI(register_android_util_StatsLog),
+    REG_JNI(register_android_util_StatsLogInternal),
     REG_JNI(register_android_app_admin_SecurityLog),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
@@ -1538,7 +1550,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_animation_PropertyValuesHolder),
     REG_JNI(register_android_security_Scrypt),
     REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
-    REG_JNI(register_com_android_internal_net_NetworkStatsFactory),
     REG_JNI(register_com_android_internal_os_FuseAppLoop),
 };
 

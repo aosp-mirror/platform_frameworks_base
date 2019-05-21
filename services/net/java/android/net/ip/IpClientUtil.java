@@ -175,6 +175,11 @@ public class IpClientUtil {
         public void setNeighborDiscoveryOffload(boolean enable) {
             mCb.setNeighborDiscoveryOffload(enable);
         }
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
     }
 
     /**

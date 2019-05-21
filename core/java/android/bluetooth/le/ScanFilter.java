@@ -16,6 +16,7 @@
 
 package android.bluetooth.le;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -586,7 +587,8 @@ public final class ScanFilter implements Parcelable {
         /**
          * Set filter on service solicitation uuid.
          */
-        public Builder setServiceSolicitationUuid(ParcelUuid serviceSolicitationUuid) {
+        public @NonNull Builder setServiceSolicitationUuid(
+                @Nullable ParcelUuid serviceSolicitationUuid) {
             mServiceSolicitationUuid = serviceSolicitationUuid;
             return this;
         }
@@ -601,8 +603,9 @@ public final class ScanFilter implements Parcelable {
          * @throws IllegalArgumentException If {@code serviceSolicitationUuid} is {@code null} but
          *             {@code serviceSolicitationUuidMask} is not {@code null}.
          */
-        public Builder setServiceSolicitationUuid(ParcelUuid serviceSolicitationUuid,
-                ParcelUuid solicitationUuidMask) {
+        public @NonNull Builder setServiceSolicitationUuid(
+                @Nullable ParcelUuid serviceSolicitationUuid,
+                @Nullable ParcelUuid solicitationUuidMask) {
             if (mServiceSolicitationUuidMask != null && mServiceSolicitationUuid == null) {
                 throw new IllegalArgumentException(
                         "SolicitationUuid is null while SolicitationUuidMask is not null!");

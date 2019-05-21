@@ -40,8 +40,6 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Tilkoblet via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tilgjengelig via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Tilkoblet – ingen Internett-tilgang"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ingen Internett-tilkobling"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Pålogging kreves"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Tilgangspunktet er midlertidig fullt"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Tilkoblet via %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Tilgjengelig via %1$s"</string>
@@ -65,9 +63,6 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Koblet til (ingen telefon), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Koblet til (ingen medier), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Koblet til (ingen telefon eller medier), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonsamtaler"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverføring"</string>
@@ -114,10 +109,6 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Øretelefoner"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Inndata fra ytre utstyrsenheter"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Tilkobler venstre høreapparat …"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Tilkobler høyre høreapparat …"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Venstre – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Høyre – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi er av."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi er frakoblet."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi-signal med én stolpe."</string>
@@ -197,7 +188,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Forbli våken"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skjermen blir aldri svart under lading"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Slå på Bluetooth HCI snoop-logg"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Samle alle Bluetooth HCI-pakker i en fil (slå Bluetooth av/på etter at du har endret denne innstillingen)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Samle alle Bluetooth HCI-pakker i en fil"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-opplåsing"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Tillat at oppstartsinnlasteren låses opp"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Vil du tillate OEM-opplåsing?"</string>
@@ -216,28 +207,26 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Velg Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodek for Bluetooth-lyd"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Utløs kodek for Bluetooth-lyd\nValg"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Velg kodek for Bluetooth-lyd"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Samplefrekvens for Bluetooth-lyd"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Utløs kodek for Bluetooth-lyd\nValg: samplefrekvens"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Velg kodek for Bluetooth-lyd:\nSamplefrekvens"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits per sample for Bluetooth-lyd"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Utløs kodek for Bluetooth-lyd\nValg: bits per sample"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Velg lydkodek for Bluetooth:\nBits Per Sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Kanalmodus for Bluetooth-lyd"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Utløs kodek for Bluetooth-lyd\nValg: kanalmodus"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-kodek for Bluetooth-lyd: avspillingskvalitet"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Utløs LDAK for Bluetooth-lyd\nValg av kodek: avspillingskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Velg lydkodek for Bluetooth:\nKanalmodus"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-kodek for Bluetooth-lyd: Avspillingskvalitet"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Velg LDAC-kodek for Bluetooth-lyd:\nAvspillingskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strømming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Velg Privat DNS-modus"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Av"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatisk"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Vertsnavn for privat DNS-leverandør"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Skriv inn vertsnavnet til DNS-leverandøren"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Angi tilfeldig MAC-adresse når du kobler til Wi-Fi-nettverk"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Med datamåling"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Bufferstørrelser for logg"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Velg loggstørrelse per loggbuffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vil du tømme det varige logglageret?"</string>
@@ -309,15 +298,15 @@
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Slå på GPU-feilsøkingslag"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Animasjonsskala for vindu"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Animasjonsskala for overgang"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala for animasjon"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimasjonsskala"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala animasjon"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulering av sekundærskjermer"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apper"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ikke behold aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Fjern hver aktivitet så fort brukeren forlater den"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Bakgrunnsprosessgrense"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Vis ANR-feil i bakgrunnen"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Vis alle ANR-er"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Vis varselskanaladvarsler"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tving frem tillatelse for ekstern lagring av apper"</string>
@@ -347,7 +336,7 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trykk for å slå av/på."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Hvilemodus:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktive tjenester"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører for øyeblikket"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Angi WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Dette valget er ikke gyldig lenger. Prøv på nytt."</string>
@@ -367,26 +356,40 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Fargekorrigering"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Dette er en eksperimentell funksjon som kan gjøre at telefonen ikke fungerer optimalt."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Overstyres av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår basert på bruken din"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Omtrent <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår basert på bruken din (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>, basert på bruken din (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>, basert på bruken din"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> gjenstår"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> igjen basert på bruken din"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> gjenstår"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Telefonen slås kanskje av snart"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Nettbrettet slås kanskje av snart"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Enheten slås kanskje av snart"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Telefonen slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Nettbrettet slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Enheten slås kanskje av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> til det er fulladet"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> til det er fulladet"</string>
@@ -431,16 +434,14 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrert"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Ikke registrert"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Ikke tilgjengelig"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC velges tilfeldig"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d enheter er tilkoblet</item>
       <item quantity="one">%1$d enhet er tilkoblet</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Mer tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Mindre tid."</string>
-    <string name="cancel" msgid="6859253417269739139">"Avbryt"</string>
-    <string name="okay" msgid="1997666393121016642">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Slå på"</string>
+    <string name="cancel" msgid="6859253417269739139">"Avbryt"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Slå på Ikke forstyrr"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Aldri"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Bare prioritet"</string>
@@ -449,7 +450,4 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Varighet"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Spør hver gang"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Nå nettopp"</string>
 </resources>

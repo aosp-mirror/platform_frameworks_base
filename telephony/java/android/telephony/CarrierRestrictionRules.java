@@ -336,7 +336,6 @@ public final class CarrierRestrictionRules implements Parcelable {
     public static final class Builder {
         private final CarrierRestrictionRules mRules;
 
-        /** {@hide} */
         public Builder() {
             mRules = new CarrierRestrictionRules();
         }

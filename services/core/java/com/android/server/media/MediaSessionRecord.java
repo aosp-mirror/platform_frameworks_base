@@ -669,6 +669,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         PlaybackState state;
         long duration = -1;
         synchronized (mLock) {
+            if (mDestroyed) {
+                return null;
+            }
             state = mPlaybackState;
             if (mMetadata != null && mMetadata.containsKey(MediaMetadata.METADATA_KEY_DURATION)) {
                 duration = mMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);

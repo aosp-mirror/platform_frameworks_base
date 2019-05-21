@@ -28,15 +28,12 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Toca para ingresar contraseña"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Ingresa la contraseña para desbloquearlo"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Ingresa el PIN para desbloquearlo"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Ingresa tu PIN"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Ingresa tu patrón"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Ingresa tu contraseña"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Código PIN incorrecto"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Tarjeta no válida"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Cargada"</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rápidamente"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"Cargando"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Carga rápida"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Carga lenta"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Conecta tu cargador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Presiona Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Bloqueada para la red"</string>
@@ -51,7 +48,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"La tarjeta SIM está bloqueada con el código PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Desbloqueando tarjeta SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Área de PIN"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Contraseña del dispositivo"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Área de PIN de la tarjeta SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Área de PUK de la tarjeta SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Próxima alarma establecida: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -141,9 +137,9 @@
       <item quantity="one">Hace <xliff:g id="NUMBER_0">%d</xliff:g> hora que no se desbloquea el dispositivo. Confirma la contraseña.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"No se reconoció"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
-      <item quantity="other">Ingresa el PIN de la SIM. Quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
-      <item quantity="one">Ingresa el PIN de la SIM. Queda <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que debas comunicarte con tu proveedor para desbloquear el dispositivo.</item>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="other">Ingresa el PIN de la SIM. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos más.</item>
+      <item quantity="one">Ingresa el PIN de la SIM. Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que debas comunicarte con tu proveedor para desbloquear el dispositivo.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Se inhabilitó la SIM. Para continuar, ingresa el código PUK. Te quedan <xliff:g id="_NUMBER_1">%d</xliff:g> intentos más antes de que la SIM quede inutilizable permanentemente. Comunícate con tu proveedor para obtener más detalles.</item>

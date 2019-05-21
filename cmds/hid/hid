@@ -1,14 +1,9 @@
 #!/system/bin/sh
-#
-# Script to start "hid" on the device, which has a very rudimentary
-# shell.
-#
-base=/system
-export CLASSPATH=$base/framework/hid.jar
 
 # Preload the native portion libhidcommand_jni.so to bypass the dependency
 # checks in the Java classloader, which prohibit dependencies that aren't
 # listed in system/core/rootdir/etc/public.libraries.android.txt.
 export LD_PRELOAD=libhidcommand_jni.so
 
-exec app_process $base/bin com.android.commands.hid.Hid "$@"
+export CLASSPATH=/system/framework/hid.jar
+exec app_process /system/bin com.android.commands.hid.Hid "$@"

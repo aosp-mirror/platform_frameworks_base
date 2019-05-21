@@ -78,10 +78,11 @@ public class ApnSetting implements Parcelable {
      */
     public static final int TYPE_NONE = ApnTypes.NONE;
     /**
-     * APN type for all APNs.
+     * APN type for all APNs (except wild-cardable types).
      * @hide
      */
-    public static final int TYPE_ALL = ApnTypes.ALL | ApnTypes.MCX;
+    public static final int TYPE_ALL = ApnTypes.DEFAULT | ApnTypes.HIPRI | ApnTypes.MMS
+            | ApnTypes.SUPL | ApnTypes.DUN | ApnTypes.FOTA | ApnTypes.IMS | ApnTypes.CBS;
     /** APN type for default data traffic. */
     public static final int TYPE_DEFAULT = ApnTypes.DEFAULT | ApnTypes.HIPRI;
     /** APN type for MMS traffic. */
@@ -1269,6 +1270,23 @@ public class ApnSetting implements Parcelable {
         apnValue.put(Telephony.Carriers.SKIP_464XLAT, mSkip464Xlat);
 
         return apnValue;
+    }
+
+    /**
+     * Get supported APN types
+     *
+     * @return list of APN types
+     * @hide
+     */
+    @ApnType
+    public List<Integer> getApnTypes() {
+        List<Integer> types = new ArrayList<>();
+        for (Integer type : APN_TYPE_INT_MAP.keySet()) {
+            if ((mApnTypeBitmask & type) == type) {
+                types.add(type);
+            }
+        }
+        return types;
     }
 
     /**

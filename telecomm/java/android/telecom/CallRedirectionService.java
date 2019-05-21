@@ -119,20 +119,18 @@ public abstract class CallRedirectionService extends Service {
      * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}. The response corresponds to the
      * latest request via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
-     * @param handle the new phone number to dial
+     * @param gatewayUri the gateway uri for call redirection.
      * @param targetPhoneAccount the {@link PhoneAccountHandle} to use when placing the call.
-     *                           If {@code null}, no change will be made to the
-     *                           {@link PhoneAccountHandle} used to place the call.
      * @param confirmFirst Telecom will ask users to confirm the redirection via a yes/no dialog
      *                     if the confirmFirst is true, and if the redirection request of this
      *                     response was sent with a true flag of allowInteractiveResponse via
      *                     {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}
      */
-    public final void redirectCall(@NonNull Uri handle,
+    public final void redirectCall(@NonNull Uri gatewayUri,
                                    @NonNull PhoneAccountHandle targetPhoneAccount,
                                    boolean confirmFirst) {
         try {
-            mCallRedirectionAdapter.redirectCall(handle, targetPhoneAccount, confirmFirst);
+            mCallRedirectionAdapter.redirectCall(gatewayUri, targetPhoneAccount, confirmFirst);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }

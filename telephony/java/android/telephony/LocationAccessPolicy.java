@@ -63,15 +63,18 @@ public final class LocationAccessPolicy {
         public final int callingPid;
         public final int minSdkVersionForCoarse;
         public final int minSdkVersionForFine;
+        public final boolean logAsInfo;
         public final String method;
 
         private LocationPermissionQuery(String callingPackage, int callingUid, int callingPid,
-                int minSdkVersionForCoarse, int minSdkVersionForFine, String method) {
+                int minSdkVersionForCoarse, int minSdkVersionForFine, boolean logAsInfo,
+                String method) {
             this.callingPackage = callingPackage;
             this.callingUid = callingUid;
             this.callingPid = callingPid;
             this.minSdkVersionForCoarse = minSdkVersionForCoarse;
             this.minSdkVersionForFine = minSdkVersionForFine;
+            this.logAsInfo = logAsInfo;
             this.method = method;
         }
 
@@ -81,6 +84,7 @@ public final class LocationAccessPolicy {
             private int mCallingPid;
             private int mMinSdkVersionForCoarse = Integer.MAX_VALUE;
             private int mMinSdkVersionForFine = Integer.MAX_VALUE;
+            private boolean mLogAsInfo = false;
             private String mMethod;
 
             /**
@@ -135,14 +139,27 @@ public final class LocationAccessPolicy {
                 return this;
             }
 
+            /**
+             * If called with {@code true}, log messages will only be printed at the info level.
+             */
+            public Builder setLogAsInfo(boolean logAsInfo) {
+                mLogAsInfo = logAsInfo;
+                return this;
+            }
+
             public LocationPermissionQuery build() {
                 return new LocationPermissionQuery(mCallingPackage, mCallingUid,
-                        mCallingPid, mMinSdkVersionForCoarse, mMinSdkVersionForFine, mMethod);
+                        mCallingPid, mMinSdkVersionForCoarse, mMinSdkVersionForFine,
+                        mLogAsInfo, mMethod);
             }
         }
     }
 
-    private static void logError(Context context, String errorMsg) {
+    private static void logError(Context context, LocationPermissionQuery query, String errorMsg) {
+        if (query.logAsInfo) {
+            Log.i(TAG, errorMsg);
+            return;
+        }
         Log.e(TAG, errorMsg);
         try {
             if (Build.IS_DEBUGGABLE) {
@@ -201,13 +218,13 @@ public final class LocationAccessPolicy {
                     + " because we're not enforcing API " + minSdkVersion + " yet."
                     + " Please fix this app because it will break in the future. Called from "
                     + query.method;
-            logError(context, errorMsg);
+            logError(context, query, errorMsg);
             return null;
         } else if (!isAppAtLeastSdkVersion(context, query.callingPackage, minSdkVersion)) {
             String errorMsg = "Allowing " + query.callingPackage + " " + locationTypeForLog
                     + " because it doesn't target API " + minSdkVersion + " yet."
                     + " Please fix this app. Called from " + query.method;
-            logError(context, errorMsg);
+            logError(context, query, errorMsg);
             return null;
         } else {
             // If we're not allowing it due to the above two conditions, this means that the app

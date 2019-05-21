@@ -48,7 +48,7 @@ public class RcsGroupThreadNameChangedEventTest {
                 .createFromParcel(parcel);
 
         RcsGroupThreadNameChangedEvent nameChangedEvent =
-                nameChangedEventDescriptor.createRcsEvent();
+                nameChangedEventDescriptor.createRcsEvent(null);
 
         assertThat(nameChangedEvent.getNewName()).isEqualTo(newName);
         assertThat(nameChangedEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);

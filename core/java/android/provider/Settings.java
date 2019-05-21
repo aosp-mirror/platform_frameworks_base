@@ -7319,15 +7319,6 @@ public final class Settings {
                 "call_screening_default_component";
 
         /**
-         * Specifies the component name currently configured to be the default application to
-         * perform the user-defined call redirection service with Telecom.
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String CALL_REDIRECTION_DEFAULT_APPLICATION =
-                "call_redirection_default_application";
-
-        /**
          * Specifies the package name currently configured to be the emergency assistance application
          *
          * @see android.telephony.TelephonyManager#ACTION_EMERGENCY_ASSISTANCE
@@ -10345,8 +10336,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_IGNORE = 0;
 
         /**
@@ -10355,8 +10344,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_PROMPT = 1;
 
         /**
@@ -10365,8 +10352,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final int CAPTIVE_PORTAL_MODE_AVOID = 2;
 
         /**
@@ -10376,8 +10361,6 @@ public final class Settings {
          * The default for this setting is CAPTIVE_PORTAL_MODE_PROMPT.
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_MODE = "captive_portal_mode";
 
         /**
@@ -10406,8 +10389,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
 
         /**
@@ -10416,8 +10397,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_HTTP_URL = "captive_portal_http_url";
 
         /**
@@ -10426,8 +10405,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
 
         /**
@@ -10436,8 +10413,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_OTHER_FALLBACK_URLS =
                 "captive_portal_other_fallback_urls";
 
@@ -10447,8 +10422,6 @@ public final class Settings {
          * by "@@,@@".
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS =
                 "captive_portal_fallback_probe_specs";
 
@@ -10459,8 +10432,6 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
 
         /**
@@ -10469,65 +10440,7 @@ public final class Settings {
          *
          * @hide
          */
-        @SystemApi
-        @TestApi
         public static final String CAPTIVE_PORTAL_USER_AGENT = "captive_portal_user_agent";
-
-        /**
-         * The threshold value for the number of consecutive dns timeout events received to be a
-         * signal of data stall. The number of consecutive timeouts needs to be {@code >=} this
-         * threshold to be considered a data stall. Set the value to {@code <= 0} to disable. Note
-         * that the value should be {@code > 0} if the DNS data stall detection is enabled.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD =
-                "data_stall_consecutive_dns_timeout_threshold";
-
-        /**
-         * The minimal time interval in milliseconds for data stall reevaluation.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_MIN_EVALUATE_INTERVAL =
-                "data_stall_min_evaluate_interval";
-
-        /**
-         * DNS timeouts older than this timeout (in milliseconds) are not considered for detecting
-         * a data stall.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD =
-                "data_stall_valid_dns_time_threshold";
-
-        /**
-         * Which data stall detection signal to use. This is a bitmask constructed by bitwise-or-ing
-         * (i.e. {@code |}) the DATA_STALL_EVALUATION_TYPE_* values.
-         *
-         * Type: int
-         * Valid values:
-         *   {@link #DATA_STALL_EVALUATION_TYPE_DNS} : Use dns as a signal.
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
-
-        /**
-         * Use dns timeout counts to detect data stall.
-         *
-         * @hide
-         */
-        @SystemApi
-        @TestApi
-        public static final int DATA_STALL_EVALUATION_TYPE_DNS = 1;
 
         /**
          * Whether to try cellular data recovery when a bad network is reported.
@@ -11509,6 +11422,57 @@ public final class Settings {
          * @hide
          */
         public static final String GPU_DEBUG_APP = "gpu_debug_app";
+
+        /**
+         * Game Driver global preference for all Apps.
+         * 0 = Default
+         * 1 = All Apps use Game Driver
+         * 2 = All Apps use system graphics driver
+         * @hide
+         */
+        public static final String GAME_DRIVER_ALL_APPS = "game_driver_all_apps";
+
+        /**
+         * List of Apps selected to use Game Driver.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_OPT_IN_APPS = "game_driver_opt_in_apps";
+
+        /**
+         * List of Apps selected not to use Game Driver.
+         * i.e. <pkg1>,<pkg2>,...,<pkgN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_OPT_OUT_APPS = "game_driver_opt_out_apps";
+
+        /**
+         * Apps on the blacklist that are forbidden to use Game Driver.
+         * @hide
+         */
+        public static final String GAME_DRIVER_BLACKLIST = "game_driver_blacklist";
+
+        /**
+         * List of blacklists, each blacklist is a blacklist for a specific version of Game Driver.
+         * @hide
+         */
+        public static final String GAME_DRIVER_BLACKLISTS = "game_driver_blacklists";
+
+        /**
+         * Apps on the whitelist that are allowed to use Game Driver.
+         * The string is a list of application package names, seperated by comma.
+         * i.e. <apk1>,<apk2>,...,<apkN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_WHITELIST = "game_driver_whitelist";
+
+        /**
+         * List of libraries in sphal accessible by Game Driver
+         * The string is a list of library names, separated by colon.
+         * i.e. <lib1>:<lib2>:...:<libN>
+         * @hide
+         */
+        public static final String GAME_DRIVER_SPHAL_LIBRARIES = "game_driver_sphal_libraries";
 
         /**
          * Ordered GPU debug layer list

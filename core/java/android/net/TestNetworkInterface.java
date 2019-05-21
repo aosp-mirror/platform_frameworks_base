@@ -27,8 +27,6 @@ import android.os.Parcelable;
  */
 @TestApi
 public final class TestNetworkInterface implements Parcelable {
-    private static final String TAG = "TestNetworkInterface";
-
     private final ParcelFileDescriptor mFileDescriptor;
     private final String mInterfaceName;
 

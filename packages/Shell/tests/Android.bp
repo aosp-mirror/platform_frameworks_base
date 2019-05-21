@@ -1,0 +1,19 @@
+android_test {
+    name: "ShellTests",
+    srcs: ["src/**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "ub-uiautomator",
+        "junit",
+    ],
+    platform_apis: true,
+    test_suites: ["device-tests"],
+    instrumentation_for: "Shell",
+    certificate: "platform",
+}

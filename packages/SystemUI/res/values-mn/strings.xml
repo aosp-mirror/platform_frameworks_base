@@ -30,14 +30,15 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Мэдэгдэл байхгүй"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Гарсан"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Мэдэгдэл"</string>
-    <string name="battery_low_title" msgid="9187898087363540349">"Батaрей удахгүй дуусaж болзошгүй"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Батерей дуусаж байна"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Батерей бага байна. Тэжээл хэмнэгчийг асаана уу"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%s</xliff:g>-н хугацаа үлдсэн"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн байна. Ойролцоогоор <xliff:g id="TIME">%s</xliff:g>-н хугацаа үлдсэн"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Тэжээл хэмнэгч асаалттай байна."</string>
-    <string name="invalid_charger" msgid="2741987096648693172">"USB-р цэнэглэх боломжгүй байна. Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглана уу."</string>
-    <string name="invalid_charger_title" msgid="2836102177577255404">"USB-р цэнэглэх боломжгүй байна"</string>
-    <string name="invalid_charger_text" msgid="6480624964117840005">"Төхөөрөмждөө дагалдаж ирсэн цэнэглэгчийг ашиглах"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB цэнэглэлт дэмжигдэхгүй байна.\nЗөвхөн нийлүүлэгдсэн цэнэглэгчийг ашиглана уу."</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"USB-р цэнэглэх дэмжигддэггүй."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Зөвхөн зориулалтын ирсэн цэнэглэгч ашиглана уу."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Тохиргоо"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Тэжээл хэмнэгчийг асаах уу?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Асаах"</string>
@@ -70,10 +71,11 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Дэлгэцийн агшинг хадгалж байна…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Дэлгэцийн агшинг хадгалж байна…"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Дэлгэцээс дарсан зургийг хадгалж байна"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Дэлгэцээс дарсан зургийг хадгалсан"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Дэлгэцээс дарсан зургийг харах бол товшино уу"</string>
-    <string name="screenshot_failed_title" msgid="7612509838919089748">"Дэлгэцээс дарсан зургийг хадгалж чадсангүй"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Дэлгэцийн зургийг дахин дарж үзнэ үү"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Дэлгэцийн зургийг дарж чадсангүй"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Дэлгэцээс дарсан зургийг хадгалахад алдаа гарлаа"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Сангийн багтаамж бага байгаа тул дэлгэцээс дарсан зургийг хадгалах боломжгүй байна"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB файл шилжүүлэх сонголт"</string>
@@ -93,15 +95,14 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Тайлах"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Хурууны хээг хүлээж байна"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Хурууны хээ ашиглалгүйгээр түгжээг тайлаарай"</string>
-    <string name="accessibility_scanning_face" msgid="769545173211758586">"Скан хийх нүүр царай"</string>
-    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Илгээх"</string>
     <string name="unlock_label" msgid="8779712358041029439">"тайлах"</string>
     <string name="phone_label" msgid="2320074140205331708">"утас нээх"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"дуут туслахыг нээнэ"</string>
     <string name="camera_label" msgid="7261107956054836961">"камер нээх"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Шинэ ажиллах талбарыг сонгоно уу"</string>
     <string name="cancel" msgid="6442560571259935130">"Цуцлах"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Хурууны хээ мэдрэгчид хүрэх"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Хурууны хээний дүрс тэмдэг"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Аппын дүрс тэмдэг"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Туслах зурвасын хэсэг"</string>
@@ -145,32 +146,31 @@
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Унтраах"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Холбогдсон."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Холбож байна."</string>
-    <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
-    <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
-    <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
-    <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
-    <string name="data_connection_roaming" msgid="6037232010953697354">"Роуминг"</string>
-    <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Рүүминг"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM байхгүй."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобайл дата"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобайл дата асаалттай байна"</string>
-    <string name="cell_data_off_content_description" msgid="4356113230238585072">"Мобайл дата унтраалттай байна"</string>
-    <string name="cell_data_off" msgid="1051264981229902873">"Идэвхгүй"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Мобайл дата унтраалттай байна"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth модем болж байна."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Нислэгийн горим"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN асаалттай байна."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM карт байхгүй."</string>
-    <string name="carrier_network_change_mode" msgid="8149202439957837762">"Оператор компанийн сүлжээг өөрчилж байна"</string>
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Дамжуулагч сүлжээг өөрчилж байна."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Тэжээлийн дэлгэрэнгүй мэдээллийг нээх"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батарейг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Тэжээлийг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> хувь."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Системийн тохиргоо."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Мэдэгдэл."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Бүх мэдэгдлийг харах"</string>
@@ -206,9 +206,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Нислэгийн горим идэвхтэй."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Нислэгийн горимыг унтраасан."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Нислэгийн горимыг асаасан."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"бүх дууг хаах"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"зөвхөн сэрүүлэг"</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Бүү саад болно уу.Зөвхөн чухал зүйлст."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Дуугүй байх. Бүү саад бол."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Бүү саад бол, зөвхөн сэрүүлгийг асаа."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Бүү саад бол."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Бүү саад бол."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Идэвхгүй болгох үйлдэлд бүү саад бол."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Идэвхжүүлэх үйлдэлд бүү саад бол."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
@@ -240,8 +242,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Ажлын горимыг асаасан."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Ажлын горимыг унтраасан."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Ажлын горимыг асаасан."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Дата хэмнэгчийг унтраасан."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Дата хэмнэгчийг асаасан."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Өгөгдөл хамгаалагчийг унтраасан."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Өгөгдөл хамгаалагчийг асаасан."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Дэлгэцийн гэрэлтэлт"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Цэнэглэж байна"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дата-г түр зогсоосон байна"</string>
@@ -255,7 +257,6 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Байршлын хүсэлтүүд идэвхтэй"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Бүх мэдэгдлийг цэвэрлэх."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">дотор бусад <xliff:g id="NUMBER_1">%s</xliff:g> мэдэгдэл байна.</item>
       <item quantity="one">дотор бусад <xliff:g id="NUMBER_0">%s</xliff:g> мэдэгдэл байна.</item>
@@ -271,7 +272,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Амттаны хайрцаг"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Дэлгэц амраагч"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Этернет"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Бусад сонголтыг харахын тулд дүрс тэмдгийг удаан дарна уу"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Бүү саад бол"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Зөвхөн чухал зүйлс"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Зөвхөн сэрүүлэг"</string>
@@ -284,7 +286,6 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Аудио"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Чихэвч"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Оролт"</string>
-    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Асааж байна…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Тодрол"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматаар эргэх"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Дэлгэцийг автоматаар эргүүлэх"</string>
@@ -309,7 +310,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi унтарсан"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi асаалттай"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi сүлжээ байхгүй байна"</string>
-    <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Асааж байна…"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Сэрүүлэг"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Дамжуулах"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Дамжуулж байна"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Нэргүй төхөөрөмж"</string>
@@ -326,8 +327,7 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Холбогдож байна..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Модем болгох"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Сүлжээний цэг"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Асааж байна…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Дата хэмнэгчийг асаасан"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Асааж байна…"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d төхөөрөмж</item>
       <item quantity="one">%d төхөөрөмж</item>
@@ -341,12 +341,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ашигласан"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> хязгаар"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> анхааруулга"</string>
-    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Ажлын профайл"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Ажлын профайл"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Мэдэгдэл болон апп унтраалттай байна"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Шөнийн гэрэл"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Нар жаргах үед"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Нар мандах хүртэл"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>-д"</string>
-    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> хүртэл"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> хүртэл"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC-г цуцалсан"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC-г идэвхжүүлсэн"</string>
@@ -359,15 +360,12 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>-г аюулгүй горимд идэвхгүй болгосон."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Бүгдийг арилгах"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Хуваагдсан дэлгэцийг ашиглахын тулд энд чирэх"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Апп сэлгэхийн тулд дээш шударна уу"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Аппуудыг хурдан сэлгэхийн тулд баруун тийш чирнэ үү"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хэвтээ чиглэлд хуваах"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Босоо чиглэлд хуваах"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Хүссэн хэлбэрээр хуваах"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Дэлгэцийг дээд хэсэгт хуваах"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Дэлгэцийг зүүн хэсэгт хуваах"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Дэлгэцийг баруун хэсэгт хуваах"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Тоймыг унтраах/асаах"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Цэнэглэгдсэн"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Цэнэглэж байна"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"дүүргэхэд <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -397,9 +395,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Дуугүй\nболгох"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Зөвхөн\nхамгийн чухлыг"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Зөвхөн\nсэрүүлэг"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Хурдан цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Удаан цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Цэнэглэж байна (дүүргэхэд <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> шаардлагатай)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Хэрэглэгчийг сэлгэх"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Хэрэглэгчийг сэлгэх, одоогийн хэрэглэгч <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Одоогийн хэрэглэгч <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -423,7 +421,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Одоогийн хэрэглэгчийг гаргах"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ХЭРЭГЛЭГЧЭЭС ГАРАХ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Шинэ хэрэглэгч нэмэх үү?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Та шинэ хэрэглэгч нэмбэл, тухайн хүн өөрийн профайлыг тохируулах шаардлагатай.\n\nАль ч хэрэглэгч бүх хэрэглэгчийн апп-уудыг шинэчлэх боломжтой."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Хэрэглэгчийг устгах уу?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Энэ хэрэглэгчийн бүх апп болон мэдээлэл устах болно."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Арилгах"</string>
@@ -433,8 +431,6 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> таны дэлгэц дээр гаргасан бүх зүйлийн зургийг авч эхэлнэ."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Дахиж үл харуулах"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Бүгдийг арилгах"</string>
-    <string name="manage_notifications_text" msgid="8035284146227267681">"Мэдэгдлийг удирдах"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Бүү саад бол горимын түр зогсоосон мэдэгдэл"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Одоо эхлүүлэх"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Мэдэгдэл байхгүй"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профайлыг хянаж байж болзошгүй"</string>
@@ -502,7 +498,6 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Тохируулах"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Одоо унтраах"</string>
-    <string name="accessibility_volume_settings" msgid="4915364006817819212">"Дууны тохиргоо"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Дэлгэх"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Хураах"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Гаралтын төхөөрөмжийг солих"</string>
@@ -520,6 +515,7 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>-ийг нуух уу?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Тохируулгын хэсэгт үүнийг асаахад энэ дахин харагдана."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Нуух"</string>
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Та өөрийн ажлын профайлыг ашиглаж байна"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Залгах"</string>
     <string name="stream_system" msgid="7493299064422163147">"Систем"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Хонх"</string>
@@ -533,18 +529,12 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Хонх дуугаргах"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Чичиргэх"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Хаах"</string>
-    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Утас чичиргээн дээр байна"</string>
-    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Утасны дууг хаасан"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дууг нь нээхийн тулд товшино уу."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Чичиргээнд тохируулахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дууг нь хаахын тулд товшино уу. Хүртээмжийн үйлчилгээний дууг хаасан."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Чичиргээнд тохируулахын тулд товшино уу."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Дууг хаахын тулд товшино уу."</string>
-    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"дууг хаах"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"дууг нээх"</string>
-    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"чичрэх"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s түвшний хяналт"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Дуудлага болон мэдэгдлийн хонх дуугарна (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Медиа гаралт"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Утасны дуудлагын гаралт"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Төхөөрөмж олдсонгүй"</string>
@@ -600,23 +590,12 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Тэжээлийн мэдэгдлийн удирдлагын тусламжтайгаар та апп-н мэдэгдэлд 0-5 хүртэлх ач холбогдлын түвшин тогтоох боломжтой. \n\n"<b>"5-р түвшин"</b>" \n- Мэдэгдлийн жагсаалтын хамгийн дээр харуулна \n- Бүтэн дэлгэцэд саад болно \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"4-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"3-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n\n"<b>"2-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n\n"<b>"1-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n- Түгжигдсэн дэлгэц болон статусын самбараас нууна \n- Мэдэгдлийн жагсаалтын доор харуулна \n\n"<b>"0-р түвшин"</b>" \n- Энэ апп-н бүх мэдэгдлийг блоклоно"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Мэдэгдэл"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Та эдгээр мэдэгдлийг цаашид харахгүй"</string>
-    <string name="notification_channel_minimized" msgid="1664411570378910931">"Энэ мэдэгдлийг багасгана"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Та эдгээр мэдэгдлийг ихэвчлэн хаадаг. \nЭдгээрийг харуулсан хэвээр байх уу?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Эдгээр мэдэгдлийг харуулсан хэвээр байх уу?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Мэдэгдлийг зогсоох"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Харуулсан хэвээр байх"</string>
-    <string name="inline_minimize_button" msgid="966233327974702195">"Багасгах"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Энэ аппаас мэдэгдэл харуулсан хэвээр байх уу?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Эдгээр мэдэгдлийг унтраах боломжгүй"</string>
-    <string name="appops_camera" msgid="8100147441602585776">"Энэ апп камерыг ашиглаж байна."</string>
-    <string name="appops_microphone" msgid="741508267659494555">"Энэ апп микрофоныг ашиглаж байна."</string>
-    <string name="appops_overlay" msgid="6165912637560323464">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байна."</string>
-    <string name="appops_camera_mic" msgid="1576901651150187433">"Энэ апп микрофон болон камерыг ашиглаж байна."</string>
-    <string name="appops_camera_overlay" msgid="8869400080809298814">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд камерыг ашиглаж байна."</string>
-    <string name="appops_mic_overlay" msgid="4835157962857919804">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд микрофоныг ашиглаж байна."</string>
-    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байгаа бөгөөд микрофон болон камерыг ашиглаж байна."</string>
-    <string name="notification_appops_settings" msgid="1028328314935908050">"Тохиргоо"</string>
-    <string name="notification_appops_ok" msgid="1156966426011011434">"ОК"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н мэдэгдлийн хяналтыг нээсэн"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н мэдэгдлийн хяналтыг хаасан"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Энэ сувгийн мэдэгдлийг зөвшөөрөх"</string>
@@ -627,7 +606,6 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"мэдэгдлийн удирдлага"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"мэдэгдэл түр хойшлуулагчийн сонголт"</string>
-    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"Түр хойшлуулах"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"БУЦААХ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>-д түр хойшлуулсан"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -640,7 +618,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Тэжээл ашиглалт"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарей хэмнэгч"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Тэжээл хэмнэгч"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Гүйцэтгэл болон дэвсгэрийн датаг багасгадаг"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> товчлуур"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Нүүр хуудас"</string>
@@ -686,17 +664,16 @@
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Хуанли"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Түвшний хяналттай харуулах"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Бүү саад бол"</string>
-    <string name="volume_dnd_silent" msgid="4363882330723050727">"Дууны түвшний товчлуурын товчлол"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Түвшний товчлуурын товчлол"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Бүү саад бол тохиргооноос гарахын тулд дууны түвшинг нэмэх"</string>
-    <string name="battery" msgid="7498329822413202973">"Батарей"</string>
+    <string name="battery" msgid="7498329822413202973">"Зай"</string>
     <string name="clock" msgid="7416090374234785905">"Цаг"</string>
     <string name="headset" msgid="4534219457597457353">"Чихэвч"</string>
-    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Тохиргоог нээх"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Чихэвч холбогдсон"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Чихэвч холбогдсон"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Дата хэмнэгч"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дата хэмнэгчийг асаасан байна"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дата хэмнэгчийг унтраасан байна"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Өгөгдөл хамгаалагч"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Өгөгдөл хамгаалагчийг асаасан байна"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Өгөгдөл хамгаалагчийг унтраасан байна"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Идэвхтэй"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Идэвхгүй"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Навигацийн самбар"</string>
@@ -726,9 +703,8 @@
     <string name="right_keycode" msgid="708447961000848163">"Баруун түлхүүрийн код"</string>
     <string name="left_icon" msgid="3096287125959387541">"Зүүн дүрс тэмдэг"</string>
     <string name="right_icon" msgid="3952104823293824311">"Баруун дүрс тэмдэг"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"Хавтанд нэмэхийн тулд дараад чирэх"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Дөрвөлж нэмэхийн тулд чирнэ үү"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Устгахын тулд энд зөөнө үү"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Танд хамгийн багадаа 6 хавтан шаардлагатай"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Засах"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Цаг"</string>
   <string-array name="clock_options">
@@ -768,11 +744,11 @@
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Апп хоёрдогч дэлгэцэд ажиллахгүй."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Аппыг хоёрдогч дэлгэцэд эхлүүлэх боломжгүй."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Тохиргоог нээнэ үү."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Шуурхай тохиргоог нээнэ үү."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Хурдан тохиргоог нээнэ үү."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Хурдан тохиргоог хаана уу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Сэрүүлэг тавьсан."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g>-р нэвтэрсэн"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"Интернэт алга"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Интернет байхгүй."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Дэлгэрэнгүй мэдээллийг нээнэ үү."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> тохиргоог нээнэ үү."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Тохиргооны дарааллыг өөрчилнө үү."</string>
@@ -811,17 +787,15 @@
     <string name="tuner_menu" msgid="191640047241552081">"Цэс"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> апп"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сануулга"</string>
-    <string name="notification_channel_battery" msgid="5786118169182888462">"Батарей"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Батерей"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Дэлгэцийн зураг дарах"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Энгийн зурвас"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хадгалах сан"</string>
-    <string name="notification_channel_hints" msgid="7323870212489152689">"Заавар"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Шуурхай апп"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Шуурхай аппыг суулгах шаардлагагүй."</string>
     <string name="app_info" msgid="6856026610594615344">"Апп-н мэдээлэл"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Хөтчид очих"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Мобайл дата"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi унтраалттай байна"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth унтраалттай байна"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Бүү саад бол горим унтраалттай байна"</string>
@@ -833,9 +807,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Солих"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Цаана ажиллаж буй апп"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Мобайл датаг унтраах уу?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Та <xliff:g id="CARRIER">%s</xliff:g>-р дата эсвэл интернэтэд хандах боломжгүй болно. Интернэтэд зөвхөн Wi-Fi-р холбогдох боломжтой болно."</string>
-    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"таны оператор компани"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Мобайл датаг унтраах уу?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Апп нь зөвшөөрлийн хүсэлтийг танихгүй байгаа тул Тохиргооноос таны хариултыг баталгаажуулах боломжгүй байна."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g>-д <xliff:g id="APP_2">%2$s</xliff:g>-н хэсгүүдийг (slices) харуулахыг зөвшөөрөх үү?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Энэ нь <xliff:g id="APP">%1$s</xliff:g>-с мэдээлэл унших боломжтой"</string>
@@ -843,12 +815,4 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g>-д дурын аппаас хэсэг харуулахыг зөвшөөрөх"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Зөвшөөрөх"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Татгалзах"</string>
-    <string name="auto_saver_title" msgid="1217959994732964228">"Тэжээл хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%% болох үед автоматаар асаах"</string>
-    <string name="no_auto_saver_action" msgid="8086002101711328500">"Үгүй, баярлалаа"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Тэжээл хэмнэгч онцлогийн хуваарийг асаасан"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Тэжээл хэмнэгч автоматаар асна."</string>
-    <string name="open_saver_setting_action" msgid="8314624730997322529">"Тохиргоо"</string>
-    <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ойлголоо"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
 </resources>

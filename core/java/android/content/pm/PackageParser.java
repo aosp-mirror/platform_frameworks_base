@@ -80,7 +80,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Base64;
-import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.PackageUtils;
@@ -99,6 +98,7 @@ import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
+import libcore.util.HexEncoding;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -5999,7 +5999,8 @@ public class PackageParser {
             }
 
             // first see if the hash represents a single-signer in our signing history
-            byte[] sha256Bytes = ByteStringUtils.fromHexToByteArray(sha256String);
+            byte[] sha256Bytes = sha256String == null
+                    ? null : HexEncoding.decode(sha256String, false /* allowSingleChar */);
             if (hasSha256Certificate(sha256Bytes, flags)) {
                 return true;
             }

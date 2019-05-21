@@ -138,14 +138,8 @@
     <item msgid="4681409244565426925">"Оптимизировать скорость подключения"</item>
     <item msgid="364670732877872677">"Лучший возможный результат (адаптивный битрейт)"</item>
   </string-array>
-  <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">", активно"</item>
-    <item msgid="8962366465966010158">", активно (A2DP)"</item>
-    <item msgid="4046665544396189228">", активно (HSP/HFP)"</item>
-  </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"Отключено"</item>
+    <item msgid="8665206199209698501">"Выкл."</item>
     <item msgid="1593289376502312923">"64 КБ"</item>
     <item msgid="487545340236145324">"256 КБ"</item>
     <item msgid="2423528675294333831">"1 МБ"</item>
@@ -153,13 +147,13 @@
     <item msgid="2803199102589126938">"16 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"Отключено"</item>
+    <item msgid="6089470720451068364">"Выкл."</item>
     <item msgid="4622460333038586791">"64 КБ"</item>
     <item msgid="2212125625169582330">"256 КБ"</item>
     <item msgid="1704946766699242653">"1 МБ"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"Отключено"</item>
+    <item msgid="6921048829791179331">"Выкл."</item>
     <item msgid="2969458029344750262">"Буфер: макс. 64 КБ"</item>
     <item msgid="1342285115665698168">"Буфер: макс. 256 КБ"</item>
     <item msgid="1314234299552254621">"Буфер: макс. 1 МБ"</item>
@@ -226,17 +220,17 @@
     <item msgid="1340692776955662664">"Список вызовов в glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
-    <item msgid="993742912147090253">"Отключено"</item>
+    <item msgid="993742912147090253">"Откл."</item>
     <item msgid="675719912558941285">"Непрямоугольное усечение синим"</item>
     <item msgid="1064373276095698656">"Тест. команды рисования зеленым"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"Отключено"</item>
+    <item msgid="2193584639058893150">"Отключить"</item>
     <item msgid="2751513398307949636">"На экране в виде полос"</item>
     <item msgid="2355151170975410323">"В <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"Отключено"</item>
+    <item msgid="8190572633763871652">"ВЫКЛ"</item>
     <item msgid="7688197031296835369">"Показывать области наложения"</item>
     <item msgid="2290859360633824369">"Выделять области определенного цвета"</item>
   </string-array>

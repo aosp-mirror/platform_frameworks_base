@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.content.Context;
 import android.net.Uri;
 
 import java.util.List;
@@ -30,6 +31,12 @@ import java.util.List;
  * @hide
  */
 public class RcsMessageStore {
+    RcsControllerCall mRcsControllerCall;
+
+    RcsMessageStore(Context context) {
+        mRcsControllerCall = new RcsControllerCall(context);
+    }
+
     /**
      * Returns the first chunk of existing {@link RcsThread}s in the common storage.
      *
@@ -41,7 +48,10 @@ public class RcsMessageStore {
     @NonNull
     public RcsThreadQueryResult getRcsThreads(@Nullable RcsThreadQueryParams queryParameters)
             throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getRcsThreads(queryParameters));
+        return new RcsThreadQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getRcsThreads(queryParameters,
+                                callingPackage)));
     }
 
     /**
@@ -55,7 +65,10 @@ public class RcsMessageStore {
     @NonNull
     public RcsThreadQueryResult getRcsThreads(@NonNull RcsQueryContinuationToken continuationToken)
             throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getRcsThreadsWithToken(continuationToken));
+        return new RcsThreadQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getRcsThreadsWithToken(continuationToken,
+                                callingPackage)));
     }
 
     /**
@@ -70,7 +83,10 @@ public class RcsMessageStore {
     public RcsParticipantQueryResult getRcsParticipants(
             @Nullable RcsParticipantQueryParams queryParameters)
             throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getParticipants(queryParameters));
+        return new RcsParticipantQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getParticipants(queryParameters,
+                                callingPackage)));
     }
 
     /**
@@ -86,21 +102,26 @@ public class RcsMessageStore {
     public RcsParticipantQueryResult getRcsParticipants(
             @NonNull RcsQueryContinuationToken continuationToken)
             throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getParticipantsWithToken(continuationToken));
+        return new RcsParticipantQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getParticipantsWithToken(continuationToken,
+                                callingPackage)));
     }
 
     /**
      * Returns the first chunk of existing {@link RcsMessage}s in the common storage.
      *
-     * @param queryParameters Parameters to specify to return a subset of all RcsMessages.
-     *                        Passing a value of null will return all messages.
+     * @param queryParams Parameters to specify to return a subset of all RcsMessages.
+     *                    Passing a value of null will return all messages.
      * @throws RcsMessageStoreException if the query could not be completed on the storage
      */
     @WorkerThread
     @NonNull
     public RcsMessageQueryResult getRcsMessages(
-            @Nullable RcsMessageQueryParams queryParameters) throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessages(queryParameters));
+            @Nullable RcsMessageQueryParams queryParams) throws RcsMessageStoreException {
+        return new RcsMessageQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getMessages(queryParams, callingPackage)));
     }
 
     /**
@@ -114,22 +135,26 @@ public class RcsMessageStore {
     @NonNull
     public RcsMessageQueryResult getRcsMessages(
             @NonNull RcsQueryContinuationToken continuationToken) throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getMessagesWithToken(continuationToken));
+        return new RcsMessageQueryResult(mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getMessagesWithToken(continuationToken,
+                                callingPackage)));
     }
 
     /**
      * Returns the first chunk of existing {@link RcsEvent}s in the common storage.
      *
      * @param queryParams Parameters to specify to return a subset of all RcsEvents.
-     *                        Passing a value of null will return all events.
+     *                    Passing a value of null will return all events.
      * @throws RcsMessageStoreException if the query could not be completed on the storage
      */
     @WorkerThread
     @NonNull
     public RcsEventQueryResult getRcsEvents(
             @Nullable RcsEventQueryParams queryParams) throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getEvents(queryParams))
-                .getRcsEventQueryResult();
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getEvents(queryParams, callingPackage))
+                .getRcsEventQueryResult(mRcsControllerCall);
     }
 
     /**
@@ -143,16 +168,17 @@ public class RcsMessageStore {
     @NonNull
     public RcsEventQueryResult getRcsEvents(
             @NonNull RcsQueryContinuationToken continuationToken) throws RcsMessageStoreException {
-        return RcsControllerCall.call(iRcs -> iRcs.getEventsWithToken(continuationToken))
-                .getRcsEventQueryResult();
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getEventsWithToken(continuationToken,
+                        callingPackage))
+                .getRcsEventQueryResult(mRcsControllerCall);
     }
 
     /**
      * Persists an {@link RcsEvent} to common storage.
      *
-     * @param persistableEvent The {@link RcsEvent} to persist into storage.
+     * @param rcsEvent The {@link RcsEvent} to persist into storage.
      * @throws RcsMessageStoreException if the query could not be completed on the storage
-     *
      * @see RcsGroupThreadNameChangedEvent
      * @see RcsGroupThreadIconChangedEvent
      * @see RcsGroupThreadParticipantJoinedEvent
@@ -161,8 +187,8 @@ public class RcsMessageStore {
      */
     @WorkerThread
     @NonNull
-    public void persistRcsEvent(RcsEvent persistableEvent) throws RcsMessageStoreException {
-        persistableEvent.persist();
+    public void persistRcsEvent(RcsEvent rcsEvent) throws RcsMessageStoreException {
+        rcsEvent.persist(mRcsControllerCall);
     }
 
     /**
@@ -177,7 +203,10 @@ public class RcsMessageStore {
     public Rcs1To1Thread createRcs1To1Thread(@NonNull RcsParticipant recipient)
             throws RcsMessageStoreException {
         return new Rcs1To1Thread(
-                RcsControllerCall.call(iRcs -> iRcs.createRcs1To1Thread(recipient.getId())));
+                mRcsControllerCall,
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.createRcs1To1Thread(recipient.getId(),
+                                callingPackage)));
     }
 
     /**
@@ -199,8 +228,12 @@ public class RcsMessageStore {
         }
 
         int[] finalRecipientIds = recipientIds;
-        return new RcsGroupThread(RcsControllerCall.call(
-                iRcs -> iRcs.createGroupThread(finalRecipientIds, groupName, groupIcon)));
+
+        int threadId = mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.createGroupThread(finalRecipientIds, groupName,
+                        groupIcon, callingPackage));
+
+        return new RcsGroupThread(mRcsControllerCall, threadId);
     }
 
     /**
@@ -215,8 +248,9 @@ public class RcsMessageStore {
             return;
         }
 
-        boolean isDeleteSucceeded = RcsControllerCall.call(
-                iRcs -> iRcs.deleteThread(thread.getThreadId(), thread.getThreadType()));
+        boolean isDeleteSucceeded = mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.deleteThread(thread.getThreadId(),
+                        thread.getThreadType(), callingPackage));
 
         if (!isDeleteSucceeded) {
             throw new RcsMessageStoreException("Could not delete RcsThread");
@@ -234,7 +268,8 @@ public class RcsMessageStore {
     @NonNull
     public RcsParticipant createRcsParticipant(String canonicalAddress, @Nullable String alias)
             throws RcsMessageStoreException {
-        return new RcsParticipant(
-                RcsControllerCall.call(iRcs -> iRcs.createRcsParticipant(canonicalAddress, alias)));
+        return new RcsParticipant(mRcsControllerCall, mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.createRcsParticipant(canonicalAddress, alias,
+                        callingPackage)));
     }
 }

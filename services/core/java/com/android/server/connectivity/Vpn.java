@@ -1141,7 +1141,11 @@ public class Vpn {
             }
         } catch (RuntimeException e) {
             IoUtils.closeQuietly(tun);
-            agentDisconnect();
+            // If this is not seamless handover, disconnect partially-established network when error
+            // occurs.
+            if (oldNetworkAgent != mNetworkAgent) {
+                agentDisconnect();
+            }
             // restore old state
             mConfig = oldConfig;
             mConnection = oldConnection;
@@ -1604,12 +1608,7 @@ public class Vpn {
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {
-            for (UidRange uidRange : mBlockedUsers) {
-                if (uidRange.contains(uid)) {
-                    return true;
-                }
-            }
-            return false;
+            return UidRange.containsUid(mBlockedUsers, uid);
         }
     }
 

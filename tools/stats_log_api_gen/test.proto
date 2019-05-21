@@ -196,3 +196,23 @@ message GoodStateAtom3 {
     optional int32 state = 3
             [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
 }
+
+message ModuleOneAtom {
+    optional int32 field = 1;
+}
+
+message ModuleTwoAtom {
+    optional int32 field = 1;
+}
+
+message NoModuleAtom {
+    optional string field = 1;
+}
+
+message ModuleAtoms {
+    oneof event {
+        ModuleOneAtom module_one_atom = 1 [(android.os.statsd.log_from_module) = "module1"];
+        ModuleTwoAtom module_two_atom = 2 [(android.os.statsd.log_from_module) = "module2"];
+        NoModuleAtom no_module_atom = 3;
+    }
+}

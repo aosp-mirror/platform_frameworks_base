@@ -25,6 +25,7 @@ import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
+import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.INTERFACES_ALL;
@@ -129,7 +130,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -900,7 +900,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             VpnInfo[] vpnArray,
             NetworkState[] networkStates,
             String activeIface) {
-        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        checkNetworkStackPermission(mContext);
         assertBandwidthControlEnabled();
 
         final long token = Binder.clearCallingIdentity();

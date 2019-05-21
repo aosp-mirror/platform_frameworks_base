@@ -87,7 +87,7 @@
     <string name="restart" msgid="2472034227037808749">"重新开始"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"未与打印机建立连接"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"未知"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"要使用“<xliff:g id="SERVICE">%1$s</xliff:g>”吗？"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"要使用<xliff:g id="SERVICE">%1$s</xliff:g>吗？"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"您的文档可能会通过一个或多个服务器发送至打印机。"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"黑白"</item>

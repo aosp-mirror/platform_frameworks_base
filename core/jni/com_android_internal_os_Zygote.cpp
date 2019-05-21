@@ -45,6 +45,7 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
+#include <link.h>
 #include <malloc.h>
 #include <mntent.h>
 #include <paths.h>
@@ -53,6 +54,7 @@
 #include <sys/capability.h>
 #include <sys/cdefs.h>
 #include <sys/eventfd.h>
+#include <sys/mman.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
 #include <sys/resource.h>
@@ -68,7 +70,10 @@
 #include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
+#include <android-base/strings.h>
 #include <android-base/unique_fd.h>
+#include <bionic_malloc.h>
+#include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
@@ -472,12 +477,9 @@ static void EnableDebugger() {
   }
 }
 
-// The debug malloc library needs to know whether it's the zygote or a child.
-extern "C" int gMallocLeakZygoteChild;
-
 static void PreApplicationInit() {
   // The child process sets this to indicate it's not the zygote.
-  gMallocLeakZygoteChild = 1;
+  android_mallopt(M_SET_ZYGOTE_CHILD, nullptr, 0);
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
@@ -1486,6 +1488,11 @@ static void com_android_internal_os_Zygote_nativeGetSocketFDs(JNIEnv* env, jclas
   } else {
     ALOGE("Unable to fetch Blastula pool socket file descriptor");
   }
+
+  /*
+   * ashmem initialization to avoid dlopen overhead
+   */
+  ashmem_init();
 }
 
 /**
@@ -1540,6 +1547,26 @@ static jint com_android_internal_os_Zygote_nativeGetBlastulaPoolCount(JNIEnv* en
   return gBlastulaPoolCount;
 }
 
+static int disable_execute_only(struct dl_phdr_info *info, size_t size, void *data) {
+  // Search for any execute-only segments and mark them read+execute.
+  for (int i = 0; i < info->dlpi_phnum; i++) {
+    if ((info->dlpi_phdr[i].p_type == PT_LOAD) && (info->dlpi_phdr[i].p_flags == PF_X)) {
+      mprotect(reinterpret_cast<void*>(info->dlpi_addr + info->dlpi_phdr[i].p_vaddr),
+              info->dlpi_phdr[i].p_memsz, PROT_READ | PROT_EXEC);
+    }
+  }
+  // Return non-zero to exit dl_iterate_phdr.
+  return 0;
+}
+
+/**
+ * @param env  Managed runtime environment
+ * @return  True if disable was successful.
+ */
+static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* env, jclass) {
+  return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -1568,7 +1595,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeGetBlastulaPoolEventFD", "()I",
       (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolEventFD },
     { "nativeGetBlastulaPoolCount", "()I",
-      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount }
+      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount },
+    { "nativeDisableExecuteOnly", "()Z",
+      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

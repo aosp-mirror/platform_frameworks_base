@@ -12,6 +12,6 @@
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status der mobilen Datennutzung"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Bei Mobilfunknetz anmelden"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Im Netzwerk, zu dem du eine Verbindung herstellen möchtest, liegen Sicherheitsprobleme vor."</string>
-    <string name="ssl_error_example" msgid="6188711843183058764">"Beispiel: Die Log-in-Seite gehört eventuell nicht zur angezeigten Organisation."</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"Beispiel: Die Log-in-Seite gehört möglicherweise nicht zur angezeigten Organisation."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"Trotzdem in einem Browser fortfahren"</string>
 </resources>

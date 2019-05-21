@@ -45,12 +45,14 @@ import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
 
 import android.content.Context;
 import android.net.DhcpResults;
+import android.net.InetAddresses;
 import android.net.TrafficStats;
 import android.net.ip.IpClient;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.InterfaceParams;
+import android.net.util.NetworkStackUtils;
 import android.net.util.SocketUtils;
 import android.os.Message;
 import android.os.SystemClock;
@@ -64,7 +66,9 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.internal.util.TrafficStatsConstants;
 import com.android.internal.util.WakeupMessage;
+import com.android.networkstack.R;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -319,7 +323,7 @@ public class DhcpClient extends StateMachine {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
             SocketAddress addr = makePacketSocketAddress((short) ETH_P_IP, mIface.index);
             Os.bind(mPacketSock, addr);
-            SocketUtils.attachDhcpFilter(mPacketSock);
+            NetworkStackUtils.attachDhcpFilter(mPacketSock);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating packet socket", e);
             return false;
@@ -328,7 +332,8 @@ public class DhcpClient extends StateMachine {
     }
 
     private boolean initUdpSocket() {
-        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_DHCP);
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                TrafficStatsConstants.TAG_SYSTEM_DHCP);
         try {
             mUdpSock = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
             SocketUtils.bindSocketToInterface(mUdpSock, mIfaceName);
@@ -497,6 +502,18 @@ public class DhcpClient extends StateMachine {
 
     private void acceptDhcpResults(DhcpResults results, String msg) {
         mDhcpLease = results;
+        if (mDhcpLease.dnsServers.isEmpty()) {
+            // supplement customized dns servers
+            String[] dnsServersList =
+                    mContext.getResources().getStringArray(R.array.config_default_dns_servers);
+            for (final String dnsServer : dnsServersList) {
+                try {
+                    mDhcpLease.dnsServers.add(InetAddresses.parseNumericAddress(dnsServer));
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Invalid default DNS server: " + dnsServer, e);
+                }
+            }
+        }
         mOffer = null;
         Log.d(TAG, msg + " lease: " + mDhcpLease);
         notifySuccess();

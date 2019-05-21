@@ -77,16 +77,15 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"కాలర్ ID డిఫాల్ట్‌గా అపరిమితానికి ఉంటుంది. తర్వాత కాల్: అపరిమితం"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
-    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"మొబైల్ డేటా సేవ లేదు"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"డేటా సేవ లేదు"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"అత్యవసర కాలింగ్ సదుపాయం లేదు"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"వాయిస్ సేవ లేదు"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"వాయిస్ సేవ లేదా అత్యవసర కాలింగ్ లేదు"</string>
-    <string name="RestrictedStateContent" msgid="6538703255570997248">"మీ క్యారియర్ తాత్కాలికంగా ఆఫ్ చేయబడింది"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> కోసం మీ క్యారియర్ తాత్కాలికంగా ఆఫ్ చేసారు"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"మొబైల్ నెట్‌వర్క్ అందుబాటులో లేదు"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ప్రాధాన్య నెట్‌వర్క్‌ను మార్చుకోవడానికి ప్రయత్నించండి. మార్చడానికి నొక్కండి."</string>
-    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Wi-Fiతో అత్యవసర కాల్‌లు చేయలేరు"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"వాయిస్/అత్యవసర సేవ లేదు"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"మీ స్థానంలో మొబైల్ నెట్‌వర్క్ ద్వారా తాత్కాలికంగా అందించబడదు"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"నెట్‌వర్క్‌ను చేరుకోలేరు"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"స్వీకరణను మెరుగుపరచాలంటే, సెట్టింగ్‌లు &gt; నెట్‌వర్క్ &amp; ఇంటర్నెట్ &gt; మొబైల్ నెట్‌వర్క్‌లు &gt; ప్రాధాన్య నెట్‌వర్క్ రకంలో మీరు ఎంచుకున్న రకాన్ని మార్చి ప్రయత్నించండి."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi కాలింగ్ సక్రియంగా ఉంది"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"అత్యవసర కాల్‌లకు మొబైల్ నెట్‌వర్క్ అవసరమవుతుంది."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"హెచ్చరికలు"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"కాల్ ఫార్వార్డింగ్"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"అత్యవసర కాల్‌బ్యాక్ మోడ్"</string>
@@ -121,21 +120,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"రోమింగ్ బ్యానర్ ఆన్‌లో ఉంది"</string>
     <string name="roamingText12" msgid="1189071119992726320">"రోమింగ్ బ్యానర్ ఆఫ్‌లో ఉంది"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"సేవ కోసం శోధిస్తోంది"</string>
-    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Wi‑Fi కాలింగ్‌ని సెటప్ చేయడం సాధ్యపడలేదు"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi కాలింగ్"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Wi-Fiతో కాల్‌లను చేయడానికి మరియు సందేశాలను పంపించడానికి, మొదట ఈ సేవను సెటప్ చేయాల్సిందిగా మీ క్యారియర్‌‌కి చెప్పండి. ఆ తర్వాత సెట్టింగ్‌ల నుండి Wi-Fi కాలింగ్‌ని మళ్లీ ఆన్ చేయండి. (లోపం కోడ్: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7372514042696663278">"మీ క్యారియర్‌తో Wi‑Fi కాలింగ్‌ని నమోదు చేయడంలో సమస్య: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="7472393097168811593">"మీ క్యారియర్‌తో నమోదు చేయండి (ఎర్రర్ కోడ్: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
-    <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi కాలింగ్"</string>
-    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN కాల్"</string>
-    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN కాల్"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
-    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi కాలింగ్ | <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s Wi-Fi కాలింగ్"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ఆఫ్‌లో ఉంది"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fiకి ప్రాధాన్యత"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"మొబైల్‌కి ప్రాధాన్యత ఇవ్వబడింది"</string>
@@ -165,8 +160,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"చాలా ఎక్కువ అభ్యర్థనలు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g>కు సైన్‌ఇన్ ఎర్రర్"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"సమకాలీకరణ"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"సమకాలీకరించడం సాధ్యపడదు"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"చాలా ఎక్కువ <xliff:g id="CONTENT_TYPE">%s</xliff:g> తొలగించడానికి ప్రయత్నించారు."</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"సమకాలీకరణ"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"చాలా ఎక్కువ <xliff:g id="CONTENT_TYPE">%s</xliff:g> తొలగింపులు."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"టాబ్లెట్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"వాచ్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"టీవీ నిల్వ నిండింది. ఖాళీ స్థలం కోసం కొన్ని ఫైల్‌లను తొలగించండి."</string>
@@ -179,13 +174,14 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"మీ కార్యాలయ ప్రొఫైల్ నిర్వాహకుల ద్వారా"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ద్వారా"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"కార్యాలయ ప్రొఫైల్ తొలగించబడింది"</string>
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"నిర్వాహక యాప్ లేనందున కార్యాలయ ప్రొఫైల్ తొలగించబడింది"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"కార్యాలయ ప్రొఫైల్ నిర్వాహక యాప్ లేదు లేదా పాడైంది. తత్ఫలితంగా, మీ కార్యాలయ ప్రొఫైల్ మరియు సంబంధిత డేటా తొలగించబడ్డాయి. సహాయం కోసం మీ నిర్వాహకులను సంప్రదించండి."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ఈ పరికరంలో మీ కార్యాలయ ప్రొఫైల్ ఇప్పుడు అందుబాటులో లేదు"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"చాలా ఎక్కువ పాస్‌వర్డ్ ప్రయత్నాలు చేసారు"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"పరికరం నిర్వహించబడింది"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
-    <string name="factory_reset_message" msgid="9024647691106150160">"నిర్వాహక యాప్‌ ఉపయోగించడం సాధ్యపడదు. మీ పరికరంలోని డేటా ఇప్పుడు తొలగించబడుతుంది.\n\nమీకు ప్రశ్నలు ఉంటే, మీ సంస్థ యొక్క నిర్వాహకులను సంప్రదించండి."</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"నిర్వాహక యాప్‌ ఉపయోగించడం సాధ్యపడదు. మీ డివైజ్‌లోని డేటా ఇప్పుడు తొలగించబడుతుంది.\n\nమీకు సందేహాలుంటే, మీ సంస్థ యొక్క నిర్వాహకులను సంప్రదించండి."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"ముద్రణ <xliff:g id="OWNER_APP">%s</xliff:g> ద్వారా నిలిపివేయబడింది."</string>
     <string name="me" msgid="6545696007631404292">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"టాబ్లెట్ ఎంపికలు"</string>
@@ -240,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ఎయిర్‌ప్లేన్ మోడ్"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ఎయిర్‌ప్లేన్ మోడ్ ఆన్‌లో ఉంది"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ఎయిర్‌ప్లేన్ మోడ్ ఆఫ్‌లో ఉంది"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"బ్యాటరీ సేవర్"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"బ్యాటరీ సేవర్ ఆఫ్‌లో ఉంది"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"సెట్టింగ్‌లు"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"సహాయం"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"వాయిస్ అసిస్టెంట్"</string>
@@ -276,34 +269,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"పరిచయాలు"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"మీ పరిచయాలను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, మీ పరిచయాలను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"స్థానం"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, ఈ పరికరం యొక్క స్థానాన్ని యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"క్యాలెండర్"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"మీ క్యాలెండర్‌ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, మీ క్యాలెండర్‌ను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS సందేశాలను పంపడం మరియు వీక్షించడం"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS సందేశాలు పంపడానికి మరియు వీక్షించడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, SMS సందేశాలను పంపండి మరియు వీక్షించండి"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"నిల్వ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, మీ పరికరంలో ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ఆడియోను రికార్డ్ చేయడానికి"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ఆడియోని రికార్డ్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, ఆడియోని రికార్డ్ చేయండి"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"కెమెరా"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"చిత్రాలు తీయడానికి మరియు వీడియో రికార్డ్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"కాల్ లాగ్‌లు"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ఫోన్ కాల్ లాగ్‌ని చదవండి మరియు రాయండి"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"మీ ఫోన్ కాల్ లాగ్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, చిత్రాలను తీయండి మరియు వీడియోని రికార్డ్ చేయండి"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లు చేయడం మరియు నిర్వహించడం"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ఫోన్ కాల్‌లు చేయడానికి మరియు నిర్వహించడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, ఫోన్ కాల్‌లను చేయండి మరియు నిర్వహించండి"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"శరీర సెన్సార్‌లు"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేస్తుంది"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేయండి"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలిస్తుంది."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>
@@ -315,7 +305,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"సంజ్ఞలను చేయడం"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"వేలిముద్ర సంజ్ఞలు"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"పరికర వేలిముద్ర సెన్సార్‌లో ఉపయోగించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"పరికరాల వేలిముద్ర సెన్సార్‌లో నిర్వహించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"స్థితి బార్‌ను నిలిపివేయడం లేదా సవరించడం"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"స్థితి బార్‌ను నిలిపివేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"స్థితి పట్టీగా ఉండటం"</string>
@@ -366,8 +356,6 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"యాప్‌, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర యాప్‌లకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, టాబ్లెట్ నెమ్మదిగా పని చేస్తుంది."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"యాప్‌ దానిలోని కొన్ని భాగాలను మెమరీలో ఉంచడానికి దాన్ని అనుమతిస్తుంది. ఇది టీవీ నెమ్మదిగా పని చేసేలా చేస్తూ ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని పరిమితం చేయవచ్చు."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"యాప్‌, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర యాప్‌లకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, ఫోన్ నెమ్మదిగా పని చేస్తుంది."</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"సేవని ముందు భాగంలో అమలు చేయడం"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"ముందు భాగంలో సేవలను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"యాప్ నిల్వ స్థలాన్ని అంచనా వేయడం"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"యాప్‌ కోడ్, డేటా మరియు కాష్ పరిమాణాలను తిరిగి పొందడానికి దాన్ని అనుమతిస్తుంది"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"సిస్టమ్ సెట్టింగ్‌లను సవరించడం"</string>
@@ -490,8 +478,6 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
-    <string name="permlab_useBiometric" msgid="8837753668509919318">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"వేలిముద్ర హార్డ్‌వేర్‌ని నిర్వహించడానికి అనుమతి"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"వినియోగం కోసం వేలిముద్ర టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"వేలిముద్ర హార్డ్‌వేర్‌ని ఉపయోగించడానికి అనుమతి"</string>
@@ -504,7 +490,6 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"గుర్తించలేదు"</string>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"వేలిముద్ర ప్రమాణీకరించబడింది"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"వేలిముద్రను నిల్వ చేయడం సాధ్యపడదు. దయచేసి ఇప్పటికే ఉన్న వేలిముద్రను తీసివేయండి."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
@@ -608,7 +593,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"నిల్వ చేయబడిన యాప్ డేటా గుప్తీకరించబడి ఉండటం అవసరం."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"కెమెరాలను నిలిపివేయండి"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"అన్ని పరికర కెమెరాల వినియోగాన్ని నిరోధించండి."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"కొన్ని స్క్రీన్ లాక్ ఫీచర్‌లు నిలిపివేయండి"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"కొన్ని స్క్రీన్ లాక్ లక్షణాలు నిలిపివేయండి"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"కొన్ని స్క్రీన్ లాక్ లక్షణాల వినియోగాన్ని నిరోధిస్తుంది."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ఇల్లు"</item>
@@ -817,8 +802,6 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ఆకృతి అన్‌లాక్."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ముఖంతో అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"పిన్ అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Sim పిన్ అన్‌లాక్."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Sim Puk అన్‌లాక్."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"పాస్‌వర్డ్ అన్‌లాక్."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ఆకృతి ప్రాంతం."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"స్లయిడ్ ప్రాంతం."</string>
@@ -843,7 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"చిట్కా: దగ్గరకు మరియు దూరానికి జూమ్ చేయడానికి రెండు సార్లు నొక్కండి."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"స్వీయ పూరింపు"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"స్వీయ పూరణను సెటప్ చేయండి"</string>
-    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ద్వారా స్వీయ పూరింపు చేయండి"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"స్వీయ పూరింపు"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -880,12 +863,6 @@
     <string name="text_copied" msgid="4985729524670131385">"వచనం క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
     <string name="more_item_label" msgid="4650918923083320495">"ఎక్కువ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"మెను+"</string>
-    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
-    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
-    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
-    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
-    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
-    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"space"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"delete"</string>
@@ -1017,23 +994,14 @@
     <string name="inputMethod" msgid="1653630062304567879">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"వచనానికి సంబంధించిన చర్యలు"</string>
     <string name="email" msgid="4560673117055050403">"ఇమెయిల్"</string>
-    <string name="email_desc" msgid="3638665569546416795">"ఎంచుకున్న చిరునామాకు ఇమెయిల్‌ను పంపుతుంది"</string>
     <string name="dial" msgid="1253998302767701559">"కాల్ చేయండి"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"ఎంచుకున్న ఫోన్ నంబర్‌కు కాల్ చేస్తుంది"</string>
-    <string name="map" msgid="5441053548030107189">"మ్యాప్"</string>
-    <string name="map_desc" msgid="1836995341943772348">"ఎంచుకున్న చిరునామాను గుర్తించు"</string>
+    <string name="map" msgid="6521159124535543457">"గుర్తించండి"</string>
     <string name="browse" msgid="1245903488306147205">"తెరవండి"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"ఎంచుకున్న URLని తెరుస్తుంది"</string>
     <string name="sms" msgid="4560537514610063430">"సందేశం"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"ఎంచుకున్న ఫోన్ నంబర్‌కి సందేశం పంపుతుంది"</string>
     <string name="add_contact" msgid="7867066569670597203">"జోడించండి"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"పరిచయాలకు జోడిస్తుంది"</string>
     <string name="view_calendar" msgid="979609872939597838">"చూడండి"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"ఎంచుకున్న సమయాన్ని క్యాలెండర్‌లో వీక్షించండి"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"షెడ్యూల్"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ఎంచుకున్న సమయానికి ఈవెంట్‌ను షెడ్యూల్ చేస్తుంది"</string>
     <string name="view_flight" msgid="7691640491425680214">"ట్రాక్ చేయండి"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"ఎంచుకున్న విమానాన్ని ట్రాక్ చేస్తుంది"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
@@ -1106,28 +1074,31 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"అప్‌డేట్ కోసం తనిఖీ చేయి"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
     <string name="smv_process" msgid="5120397012047462446">"ప్రక్రియ <xliff:g id="PROCESS">%1$s</xliff:g> అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
-    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"ఫోన్ అప్‌డేట్‌ అవుతోంది…"</string>
-    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"టాబ్లెట్ అప్‌డేట్‌ అవుతోంది…"</string>
-    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"పరికరం అప్‌డేట్‌ అవుతోంది…"</string>
-    <string name="android_start_title" product="default" msgid="4536778526365907780">"ఫోన్ ప్రారంభమవుతోంది…"</string>
-    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"టాబ్లెట్ ప్రారంభమవుతోంది…"</string>
-    <string name="android_start_title" product="device" msgid="7467484093260449437">"పరికరం ప్రారంభమవుతోంది…"</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Android అప్‌గ్రేడ్ అవుతోంది…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android ప్రారంభమవుతోంది…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"నిల్వను అనుకూలపరుస్తోంది."</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"సిస్టమ్ అప్‌డేట్‌ని పూర్తి చేస్తోంది…"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android నవీకరణను ముగిస్తోంది…"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"అప్‌గ్రేడ్ పూర్తయ్యే వరకు కొన్ని అనువర్తనాలు సరిగ్గా పని చేయకపోవచ్చు"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g>ని అప్‌గ్రేడ్ చేస్తోంది…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>లో <xliff:g id="NUMBER_0">%1$d</xliff:g> యాప్‌ను అనుకూలీకరిస్తోంది."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ని సిద్ధం చేస్తోంది."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"అనువర్తనాలను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"బూట్‌ను ముగిస్తోంది."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> అమలవుతోంది"</string>
-    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"గేమ్‌కి తిరిగి రావడానికి నొక్కండి"</string>
-    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"గేమ్‌ను ఎంచుకోండి"</string>
-    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"మెరుగైన పనితీరు పొందడానికి, ఈ గేమ్‌లలో ఒకసారికి ఒక్కటి మాత్రమే తెరవగలరు."</string>
-    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g>కి తిరిగి వెళ్లు"</string>
-    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g>ని తెరువు"</string>
-    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> సేవ్ చేయకుండానే మూసివేయబడుతుంది"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> మెమరీ పరిమితిని మించిపోయింది"</string>
-    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"కుప్పలు తెప్పలుగా సేకరించబడింది. షేర్ చేయడానికి నొక్కండి"</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"కుప్పలు తెప్పలుగా సేకరించబడింది; షేర్ చేయడానికి నొక్కండి"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"హీప్ డంప్‌ను భాగస్వామ్యం చేయాలా?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> ప్రాసెస్ దాని <xliff:g id="SIZE">%2$s</xliff:g> ప్రాసెస్ మెమరీ పరిమితిని మించిపోయింది. మీకు దాని డెవలపర్‌తో షేర్ చేయడానికి హీప్ డంప్ అందుబాటులో ఉంది. జాగ్రత్తగా ఉండండి: ఈ హీప్ డంప్‌లో యాప్‌ యాక్సెస్ కలిగి ఉన్న మీ వ్యక్తిగత సమాచారం ఏదైనా ఉండవచ్చు."</string>
     <string name="sendText" msgid="5209874571959469142">"వచనం కోసం చర్యను ఎంచుకోండి"</string>
@@ -1162,12 +1133,12 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"బహిరంగ Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయండి"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"క్యారియర్ Wi‑Fi నెట్‌వర్క్‌కి కనెక్ట్ చేయండి"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi నెట్‌వర్క్‌కి కనెక్ట్ చేస్తోంది"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"బహిరంగ Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేస్తోంది"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"అన్ని నెట్‌వర్క్‌లు చూడటానికి నొక్కండి"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"కనెక్ట్ చేయి"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"అన్ని నెట్‌వర్క్‌లు"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"అన్ని నెట్‌వర్క్‌లు"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"మీరు అధిక నాణ్యత గల సేవ్ చేసిన నెట్‌వర్క్‌కు సమీపంగా ఉన్నప్పుడు"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"తిరిగి ఆన్ చేయవద్దు"</string>
@@ -1179,9 +1150,6 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fiకి ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ఎంపికల కోసం నొక్కండి"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"మీ హాట్‌స్పాట్ సెట్టింగ్‌లకు మార్పులు"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"మీ హాట్‌స్పాట్ బ్యాండ్ మార్చబడింది."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ఈ పరికరం 5GHz కోసం మాత్రమే మీ ప్రాధాన్యతకు మద్దతు ఇవ్వదు. బదులుగా, ఈ పరికరం అందుబాటులో ఉన్నప్పుడు 5GHz బ్యాండ్‌ను ఉపయోగిస్తుంది."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>కి మార్చబడింది"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"పరికరం <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>కి ఇంటర్నెట్ యాక్సెస్ లేనప్పుడు <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ని ఉపయోగిస్తుంది. ఛార్జీలు వర్తించవచ్చు."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> నుండి <xliff:g id="NEW_NETWORK">%2$s</xliff:g>కి మార్చబడింది"</string>
@@ -1237,7 +1205,6 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"మొబైల్ సేవను సక్రియం చేయండి"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"మీ కొత్త SIMని సక్రియం చేయడానికి క్యారియర్ యాప్‌ను డౌన్‌లోడ్ చేయండి"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"మీ కొత్త SIMని సక్రియం చేయడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> యాప్‌ని డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"యాప్‌ని డౌన్‌లోడ్ చేయి"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"కొత్త SIM చొప్పించారు"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"దీన్ని సెటప్ చేయడానికి నొక్కండి"</string>
@@ -1256,13 +1223,13 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB ద్వారా PTP ఆన్ చేయబడింది"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB టెథెరింగ్ ఆన్ చేయబడింది"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB ద్వారా MIDI ఆన్ చేయబడింది"</string>
-    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"USB ఉపకరణం కనెక్ట్ చేయబడింది"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB ఉపకరణ మోడ్ ఆన్ చేయబడింది"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"కనెక్ట్ చేయబడిన పరికరాన్ని ఛార్జ్ చేస్తోంది. మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"అనలాగ్ ఆడియో ఉపకరణం కనుగొనబడింది"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"జోడించిన పరికరం ఈ ఫోన్‌కు అనుకూలంగా లేదు. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB డీబగ్గింగ్‌ను ఆఫ్ చేయడానికి నొక్కండి"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB డీబగ్గింగ్‌ను నిలిపివేయడానికి నొక్కండి."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"డీబగ్గింగ్‌ని నిలిపివేయడానికి ఎంచుకోండి."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"బగ్ నివేదికను తీస్తోంది…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>
@@ -1281,35 +1248,34 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి నొక్కి, దీన్ని ఆఫ్ చేయండి."</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ఆఫ్ చేయి"</string>
-    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g>ని తనిఖీ చేస్తోంది…"</string>
-    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"ప్రస్తుత కంటెంట్ సమీక్షించబడుతోంది"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"కొత్త <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"సెటప్ చేయడానికి నొక్కండి"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ఆఫ్ చేయి"</string>
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>ని సిద్ధం చేస్తోంది"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"లోపాల కోసం తనిఖీ చేస్తోంది"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"కొత్త <xliff:g id="NAME">%s</xliff:g> గుర్తించబడింది"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ఫోటోలు మరియు మీడియాను బదిలీ చేయడానికి"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g>తో సమస్య ఉంది"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"పరిష్కరించడానికి నొక్కండి"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> పాడైంది"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> పాడైంది. సరిచేయడానికి నొక్కండి."</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> పాడైంది. సరిచేయడానికి ఎంచుకోండి."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>కి మద్దతు లేదు"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ఈ పరికరం ఈ <xliff:g id="NAME">%s</xliff:g>కి మద్దతు ఇవ్వదు. మద్దతు కలిగిన ఆకృతిలో సెటప్ చేయడానికి నొక్కండి."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"ఈ పరికరం ఈ <xliff:g id="NAME">%s</xliff:g>కి మద్దతు ఇవ్వదు. మద్దతు కలిగిన ఆకృతిలో సెటప్ చేయడానికి ఎంచుకోండి."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ఊహించని విధంగా తీసివేయబడింది"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"కంటెంట్‌ని కోల్పోవడాన్ని నివారించాలంటే తీసివేయబోయే ముందు మీడియాని తొలగించండి"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> తీసివేయబడింది"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"కొంత నిర్వాహక ప్రక్రియ సరిగ్గా పని చేయకపోవచ్చు. కొత్త నిల్వని చొప్పించండి."</string>
-    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g>ని తొలగిస్తోంది"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"తీసివేయవద్దు"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"డేటా కోల్పోకుండా ఉండటానికి <xliff:g id="NAME">%s</xliff:g>ని తీసివేయడానికి ముందు అన్‌మౌంట్ చేయండి"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> తీసివేయబడింది"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> తీసివేయబడింది; కొత్తదాన్ని చొప్పించండి"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ఇంకా <xliff:g id="NAME">%s</xliff:g>ని తొలగిస్తూనే ఉంది…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"తీసివేయవద్దు"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"సెటప్ చేయండి"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"తొలగించు"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"విశ్లేషించు"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> కనుగొనబడటం లేదు"</string>
-    <string name="ext_media_missing_message" msgid="4012389235250987930">"పరికరాన్ని మళ్లీ చొప్పించండి"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"ఈ పరికరం తిరిగి చొప్పించండి"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ని తరలిస్తోంది"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"డేటాను తరలిస్తోంది"</string>
-    <string name="ext_media_move_success_title" msgid="7863652232242276066">"కంటెంట్ బదిలీ పూర్తయింది"</string>
-    <string name="ext_media_move_success_message" msgid="8939137931961728009">"కంటెంట్ <xliff:g id="NAME">%s</xliff:g>కి తరలించబడింది"</string>
-    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"కంటెంట్‌ని తరలించడం సాధ్యం కాలేదు"</string>
-    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"కంటెంట్‌ని తరలించడానికి మళ్లీ ప్రయత్నించండి"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"తరలింపు పూర్తయింది"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"డేటా <xliff:g id="NAME">%s</xliff:g>కి తరలించబడింది"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"డేటాను తరలించలేకపోయింది"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"డేటా అసలు స్థానంలో అలాగే ఉంది"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"తీసివేయబడింది"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"తొలగించబడింది"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"తనిఖీ చేస్తోంది..."</string>
@@ -1368,14 +1334,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN కనెక్ట్ చేయబడుతోంది…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN కనెక్ట్ చేయబడింది"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"ఎల్లప్పుడూ ఆన్‌లో ఉండే VPN నుండి డిస్‌కనెక్ట్ చేయబడింది"</string>
-    <string name="vpn_lockdown_error" msgid="3133844445659711681">"ఎల్లప్పుడూ ఆన్‌లో ఉండే VPNకి కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"ఎల్లప్పుడూ-ఆన్‌లో ఉండే VPN ఎర్రర్"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"నెట్‌వర్క్ లేదా VPN సెట్టింగ్‌లను మార్చండి"</string>
     <string name="upload_file" msgid="2897957172366730416">"ఫైల్‌ను ఎంచుకోండి"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ఫైల్ ఎంచుకోబడలేదు"</string>
     <string name="reset" msgid="2448168080964209908">"రీసెట్ చేయి"</string>
     <string name="submit" msgid="1602335572089911941">"సమర్పించు"</string>
-    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"డ్రైవింగ్ యాప్ అమలవుతోంది"</string>
-    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"డ్రైవింగ్ యాప్ నుండి నిష్క్రమించడం కోసం నొక్కండి."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"కారు మోడ్ ప్రారంభించబడింది"</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"కారు మోడ్ నుండి నిష్క్రమించడానికి నొక్కండి."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"టీథర్ చేయబడినది లేదా హాట్‌స్పాట్ సక్రియంగా ఉండేది"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"సెటప్ చేయడానికి నొక్కండి."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"టెథెరింగ్ నిలిపివేయబడింది"</string>
@@ -1453,19 +1419,22 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB డ్రైవ్"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB నిల్వ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"సవరించు"</string>
-    <string name="data_usage_warning_title" msgid="6499834033204801605">"డేటా హెచ్చరిక"</string>
-    <string name="data_usage_warning_body" msgid="7340198905103751676">"మీరు డేటాలో <xliff:g id="APP">%s</xliff:g> ఉపయోగించారు"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"డేటా వినియోగ హెచ్చరిక"</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"వినియోగం,సెట్టింగ్‌ల కోసం నొక్కండి"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G డేటా పరిమితిని చేరుకుంది"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G డేటా పరిమితిని చేరుకుంది"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"మొబైల్ డేటా పరిమితిని చేరుకున్నారు"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi డేటా పరిమితిని చేరుకుంది"</string>
-    <string name="data_usage_limit_body" msgid="2908179506560812973">"మీ సైకిల్‌లోని మిగిలిన భాగంలో డేటా పాజ్ చేయబడింది"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"మీ మొబైల్ డేటా పరిమితిని అధిగమించారు"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"మీ Wi-Fi డేటా పరిమితిని దాటారు"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"మీరు సెట్ చేసిన పరిమితి కంటే <xliff:g id="SIZE">%s</xliff:g> ఎక్కువ ఉపయోగించారు"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"మిగిలిన కార్యా. డేటా పాజ్ చేయబ."</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G డేటా పరిమితి మించిపోయింది"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G డేటా పరిమితి మించిపోయింది"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"మొబైల్ డేటా పరిమితి మించిపోయింది"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi డేటా పరిమితి మించిపోయింది"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"పేర్కొన్న పరిమితి కంటే <xliff:g id="SIZE">%s</xliff:g> మించిపోయింది."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"నేపథ్య డేటా పరిమితం చేయబడింది"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"నియంత్రణ తీసివేయడానికి నొక్కండి."</string>
-    <string name="data_usage_rapid_title" msgid="1809795402975261331">"అధిక మొబైల్ డేటా వినియోగం"</string>
-    <string name="data_usage_rapid_body" msgid="6897825788682442715">"మీ యాప్‌లు సాధారణం కంటే ఎక్కువ డేటాని ఉపయోగించాయి"</string>
-    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> సాధారణం కంటే ఎక్కువ డేటాని ఉపయోగించింది"</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ఎక్కువ డేటా వినియోగం"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"గత కొన్ని రోజులుగా మీ డేటా వినియోగం సాధారణం కంటే ఎక్కువగా ఉంటోంది. వినియోగం మరియు సెట్టింగ్‌లను చూడడానికి నొక్కండి."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"భద్రతా సర్టిఫికెట్"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ఈ సర్టిఫికెట్ చెల్లుబాటు అవుతుంది."</string>
     <string name="issued_to" msgid="454239480274921032">"దీనికి జారీ చేయబడింది:"</string>
@@ -1701,8 +1670,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"మీ బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ కొన్ని పరికర ఫీచర్‌లను ఆఫ్ చేస్తుంది మరియు కొన్ని యాప్‌లను పరిమితం చేస్తుంది. "<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"మీ బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్ కొన్ని పరికర ఫీచర్‌లను ఆఫ్ చేస్తుంది మరియు కొన్ని యాప్‌లను పరిమితం చేస్తుంది."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు అత్యధిక నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర యాప్‌లు మీరు వాటిని తెరిస్తే మినహా అప్‌డేట్ చేయబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని యాప్‌లను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
@@ -1714,9 +1682,9 @@
       <item quantity="other">%1$d నిమి పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
       <item quantity="one">1 నిమి పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="other">%1$d గంటల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
-      <item quantity="one">1 గంట పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
+      <item quantity="one">ఒక గంట పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="other">%1$d గం పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
@@ -1730,9 +1698,9 @@
       <item quantity="other">%d నిమి పాటు</item>
       <item quantity="one">1 నిమి పాటు</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="other">%d గంటల పాటు</item>
-      <item quantity="one">1 గంట పాటు</item>
+      <item quantity="one">ఒక గంట పాటు</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="other">%d గం పాటు</item>
@@ -1740,7 +1708,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (తర్వాత అలారం) వరకు"</string>
-    <string name="zen_mode_forever" msgid="931849471004038757">"మీరు ఆఫ్‌ చేసే వరకు"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"మీరు ఆఫ్‌చేసే వరకు"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
@@ -1750,17 +1718,17 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"నిద్రావస్థ"</string>
-    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD అభ్యర్థన సాధారణ కాల్‌కు మార్చబడింది"</string>
-    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD అభ్యర్థన SS అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"కొత్త USSD అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD అభ్యర్థన వీడియో కాల్‌కు మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS అభ్యర్థన సాధారణ కాల్‌కి మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS అభ్యర్థన వీడియో కాల్‌కి మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS అభ్యర్థన USSD అభ్యర్థనకు మార్చబడింది"</string>
-    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"కొత్త SS అభ్యర్థనకు మార్చబడింది"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD అభ్యర్థన డయల్ అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD అభ్యర్థన SS అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD అభ్యర్థన కొత్త USSD అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD అభ్యర్థన వీడియో డయల్ అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS అభ్యర్థన డయల్ అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS అభ్యర్థన వీడియో డయల్ అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS అభ్యర్థన USSD అభ్యర్థనగా సవరించబడింది."</string>
+    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS అభ్యర్థన కొత్త SS అభ్యర్థనగా సవరించబడింది."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"కార్యాలయ ప్రొఫైల్‌"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"విస్తరింపజేయి"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"కుదించు"</string>
@@ -1789,9 +1757,6 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"వెతుకు"</string>
-    <string name="app_suspended_title" msgid="2075071241147969611">"యాప్ అందుబాటులో లేదు"</string>
-    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ప్రస్తుతం అందుబాటులో లేదు. ఇది <xliff:g id="APP_NAME_1">%2$s</xliff:g> ద్వారా నిర్వహించబడుతుంది."</string>
-    <string name="app_suspended_more_details" msgid="1131804827776778187">"మరింత తెలుసుకోండి"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"కార్యాలయ ప్రొఫైల్‌ని ఆన్ చేయాలా?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"మీ కార్యాలయ యాప్‌లు, నోటిఫికేషన్‌లు, డేటా మరియు ఇతర కార్యాలయ ప్రొఫైల్ ఫీచర్‌లు ఆన్ చేయబడతాయి"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ఆన్ చేయి"</string>
@@ -1861,10 +1826,6 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"వాయిస్ కోసం SIM సదుపాయం లేదు"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"వాయిస్ కోసం SIM అనుమతించబడదు"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"వాయిస్ కోసం ఫోన్ అనుమతించబడదు"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> అనుమతించబడదు"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> సదుపాయం లేదు"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> అనుమతించబడదు"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> అనుమతించబడదు"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"పాప్అప్ విండో"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"యాప్ వెర్షన్ డౌన్‌గ్రేడ్ చేయబడింది లేదా ఈ సత్వరమార్గంతో అనుకూలంగా లేదు"</string>
@@ -1877,18 +1838,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"హానికరమైన యాప్ గుర్తించబడింది"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించాలనుకుంటోంది"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"సవరించు"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"కాల్‌లు మరియు నోటిఫికేషన్‌లు వైబ్రేట్ అవుతాయి"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"కాల్‌లు మరియు నోటిఫికేషన్‌లు మ్యూట్ చేయబడతాయి"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"సిస్టమ్ మార్పులు"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"అంతరాయం కలిగించవద్దు"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"కొత్తది: అంతరాయం కలిగించవద్దు నోటిఫికేషన్‌లను దాస్తోంది"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"మరింత తెలుసుకోవడానికి మరియు మార్చడానికి నొక్కండి."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"అంతరాయం కలిగించవద్దు మార్చబడింది"</string>
-    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
-    <string name="notification_app_name_system" msgid="4205032194610042794">"సిస్టమ్"</string>
-    <string name="notification_app_name_settings" msgid="7751445616365753381">"సెట్టింగ్‌లు"</string>
-    <string name="notification_appops_camera_active" msgid="5050283058419699771">"కెమెరా"</string>
-    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"మైక్రోఫోన్"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
-    <string name="car_loading_profile" msgid="3545132581795684027">"లోడవుతోంది"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"అంతరాయాల కోసం మీ ప్రవర్తన సెట్టింగ్‌లను తనిఖీ చేయడానికి నొక్కండి"</string>
 </resources>

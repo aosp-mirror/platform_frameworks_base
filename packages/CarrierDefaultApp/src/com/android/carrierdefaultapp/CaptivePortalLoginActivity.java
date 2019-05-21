@@ -52,6 +52,7 @@ import android.widget.TextView;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.TrafficStatsConstants;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -196,19 +197,7 @@ public class CaptivePortalLoginActivity extends Activity {
         if (success) {
             // Trigger re-evaluation upon success http response code
             CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_ENABLE_RADIO, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_ENABLE_METERED_APNS, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER, getIntent(),
-                    getApplicationContext());
-            CarrierActionUtils.applyCarrierAction(
-                    CarrierActionUtils.CARRIER_ACTION_DEREGISTER_DEFAULT_NETWORK_AVAIL, getIntent(),
+                    CarrierActionUtils.CARRIER_ACTION_RESET_ALL, getIntent(),
                     getApplicationContext());
         }
         finishAndRemoveTask();
@@ -250,7 +239,8 @@ public class CaptivePortalLoginActivity extends Activity {
                 if (isFinishing() || isDestroyed()) return;
                 HttpURLConnection urlConnection = null;
                 int httpResponseCode = 500;
-                int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_PROBE);
+                int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                        TrafficStatsConstants.TAG_SYSTEM_PROBE);
                 try {
                     urlConnection = (HttpURLConnection) mNetwork.openConnection(
                             new URL(mCm.getCaptivePortalServerUrl()));

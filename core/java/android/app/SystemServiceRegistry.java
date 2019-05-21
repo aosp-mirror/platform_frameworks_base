@@ -324,7 +324,7 @@ final class SystemServiceRegistry {
                             throw new ServiceNotFoundException(Context.TEST_NETWORK_SERVICE);
                         }
                         ITestNetworkManager tnMgr = ITestNetworkManager.Stub.asInterface(tnBinder);
-                        return new TestNetworkManager(context, tnMgr);
+                        return new TestNetworkManager(tnMgr);
                     }
                 });
 
@@ -555,7 +555,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<RcsManager>() {
                     @Override
                     public RcsManager createService(ContextImpl ctx) {
-                        return new RcsManager();
+                        return new RcsManager(ctx.getOuterContext());
                     }
                 });
 

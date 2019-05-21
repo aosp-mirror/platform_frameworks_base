@@ -39,9 +39,9 @@ public class RcsEventQueryResultDescriptor implements Parcelable {
         mEvents = events;
     }
 
-    protected RcsEventQueryResult getRcsEventQueryResult() {
+    protected RcsEventQueryResult getRcsEventQueryResult(RcsControllerCall rcsControllerCall) {
         List<RcsEvent> rcsEvents = mEvents.stream()
-                .map(RcsEventDescriptor::createRcsEvent)
+                .map(rcsEvent -> rcsEvent.createRcsEvent(rcsControllerCall))
                 .collect(Collectors.toList());
 
         return new RcsEventQueryResult(mContinuationToken, rcsEvents);

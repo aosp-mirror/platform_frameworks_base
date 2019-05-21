@@ -17,7 +17,8 @@
 package android.net.shared;
 
 import static android.net.InetAddresses.parseNumericAddress;
-import static android.net.shared.ParcelableTestUtil.assertFieldCountEquals;
+
+import static com.android.internal.util.ParcelableTestUtil.assertFieldCountEquals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;

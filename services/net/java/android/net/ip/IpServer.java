@@ -277,6 +277,11 @@ public class IpServer extends StateMachine {
         }
 
         public abstract void callback(int statusCode);
+
+        @Override
+        public int getInterfaceVersion() {
+            return this.VERSION;
+        }
     }
 
     private class DhcpServerCallbacksImpl extends DhcpServerCallbacks {

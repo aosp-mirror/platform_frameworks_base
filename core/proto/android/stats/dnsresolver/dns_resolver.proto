@@ -1,0 +1,214 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+package android.stats.dnsresolver;
+
+enum EventType {
+    EVENT_UNKNOWN = 0;
+    EVENT_GETADDRINFO = 1;
+    EVENT_GETHOSTBYNAME = 2;
+    EVENT_GETHOSTBYADDR = 3;
+    EVENT_RES_NSEND = 4;
+}
+
+// The return value of the DNS resolver for each DNS lookups.
+// bionic/libc/include/netdb.h
+// system/netd/resolv/include/netd_resolv/resolv.h
+enum ReturnCode {
+    RC_EAI_NO_ERROR = 0;
+    RC_EAI_ADDRFAMILY = 1;
+    RC_EAI_AGAIN = 2;
+    RC_EAI_BADFLAGS = 3;
+    RC_EAI_FAIL = 4;
+    RC_EAI_FAMILY = 5;
+    RC_EAI_MEMORY = 6;
+    RC_EAI_NODATA = 7;
+    RC_EAI_NONAME = 8;
+    RC_EAI_SERVICE = 9;
+    RC_EAI_SOCKTYPE = 10;
+    RC_EAI_SYSTEM = 11;
+    RC_EAI_BADHINTS = 12;
+    RC_EAI_PROTOCOL = 13;
+    RC_EAI_OVERFLOW = 14;
+    RC_RESOLV_TIMEOUT = 255;
+    RC_EAI_MAX = 256;
+}
+
+enum NsRcode {
+    NS_R_NO_ERROR = 0;  // No error occurred.
+    NS_R_FORMERR = 1;   // Format error.
+    NS_R_SERVFAIL = 2;  // Server failure.
+    NS_R_NXDOMAIN = 3;  // Name error.
+    NS_R_NOTIMPL = 4;   // Unimplemented.
+    NS_R_REFUSED = 5;   // Operation refused.
+    // these are for BIND_UPDATE
+    NS_R_YXDOMAIN = 6;  // Name exists
+    NS_R_YXRRSET = 7;   // RRset exists
+    NS_R_NXRRSET = 8;   // RRset does not exist
+    NS_R_NOTAUTH = 9;   // Not authoritative for zone
+    NS_R_NOTZONE = 10;  // Zone of record different from zone section
+    NS_R_MAX = 11;
+    // The following are EDNS extended rcodes
+    NS_R_BADVERS = 16;
+    // The following are TSIG errors
+    // NS_R_BADSIG  = 16,
+    NS_R_BADKEY = 17;
+    NS_R_BADTIME = 18;
+}
+
+// Currently defined type values for resources and queries.
+enum NsType {
+    NS_T_INVALID = 0;      // Cookie.
+    NS_T_A = 1;            // Host address.
+    NS_T_NS = 2;           // Authoritative server.
+    NS_T_MD = 3;           // Mail destination.
+    NS_T_MF = 4;           // Mail forwarder.
+    NS_T_CNAME = 5;        // Canonical name.
+    NS_T_SOA = 6;          // Start of authority zone.
+    NS_T_MB = 7;           // Mailbox domain name.
+    NS_T_MG = 8;           // Mail group member.
+    NS_T_MR = 9;           // Mail rename name.
+    NS_T_NULL = 10;        // Null resource record.
+    NS_T_WKS = 11;         // Well known service.
+    NS_T_PTR = 12;         // Domain name pointer.
+    NS_T_HINFO = 13;       // Host information.
+    NS_T_MINFO = 14;       // Mailbox information.
+    NS_T_MX = 15;          // Mail routing information.
+    NS_T_TXT = 16;         // Text strings.
+    NS_T_RP = 17;          // Responsible person.
+    NS_T_AFSDB = 18;       // AFS cell database.
+    NS_T_X25 = 19;         // X_25 calling address.
+    NS_T_ISDN = 20;        // ISDN calling address.
+    NS_T_RT = 21;          // Router.
+    NS_T_NSAP = 22;        // NSAP address.
+    NS_T_NSAP_PTR = 23;    // Reverse NSAP lookup (deprecated).
+    NS_T_SIG = 24;         // Security signature.
+    NS_T_KEY = 25;         // Security key.
+    NS_T_PX = 26;          // X.400 mail mapping.
+    NS_T_GPOS = 27;        // Geographical position (withdrawn).
+    NS_T_AAAA = 28;        // IPv6 Address.
+    NS_T_LOC = 29;         // Location Information.
+    NS_T_NXT = 30;         // Next domain (security).
+    NS_T_EID = 31;         // Endpoint identifier.
+    NS_T_NIMLOC = 32;      // Nimrod Locator.
+    NS_T_SRV = 33;         // Server Selection.
+    NS_T_ATMA = 34;        // ATM Address
+    NS_T_NAPTR = 35;       // Naming Authority PoinTeR
+    NS_T_KX = 36;          // Key Exchange
+    NS_T_CERT = 37;        // Certification record
+    NS_T_A6 = 38;          // IPv6 address (experimental)
+    NS_T_DNAME = 39;       // Non-terminal DNAME
+    NS_T_SINK = 40;        // Kitchen sink (experimentatl)
+    NS_T_OPT = 41;         // EDNS0 option (meta-RR)
+    NS_T_APL = 42;         // Address prefix list (RFC 3123)
+    NS_T_DS = 43;          // Delegation Signer
+    NS_T_SSHFP = 44;       // SSH Fingerprint
+    NS_T_IPSECKEY = 45;    // IPSEC Key
+    NS_T_RRSIG = 46;       // RRset Signature
+    NS_T_NSEC = 47;        // Negative security
+    NS_T_DNSKEY = 48;      // DNS Key
+    NS_T_DHCID = 49;       // Dynamic host configuratin identifier
+    NS_T_NSEC3 = 50;       // Negative security type 3
+    NS_T_NSEC3PARAM = 51;  // Negative security type 3 parameters
+    NS_T_HIP = 55;         // Host Identity Protocol
+    NS_T_SPF = 99;         // Sender Policy Framework
+    NS_T_TKEY = 249;       // Transaction key
+    NS_T_TSIG = 250;       // Transaction signature.
+    NS_T_IXFR = 251;       // Incremental zone transfer.
+    NS_T_AXFR = 252;       // Transfer zone of authority.
+    NS_T_MAILB = 253;      // Transfer mailbox records.
+    NS_T_MAILA = 254;      // Transfer mail agent records.
+    NS_T_ANY = 255;        // Wildcard match.
+    NS_T_ZXFR = 256;       // BIND-specific, nonstandard.
+    NS_T_DLV = 32769;      // DNSSEC look-aside validatation.
+    NS_T_MAX = 65536;
+}
+
+enum IpVersion {
+    IV_UNKNOWN = 0;
+    IV_IPV4 = 1;
+    IV_IPV6 = 2;
+}
+
+enum TransportType {
+    TT_UNKNOWN = 0;
+    TT_UDP = 1;
+    TT_TCP = 2;
+    TT_DOT = 3;
+}
+
+enum PrivateDnsModes {
+    PDM_UNKNOWN = 0;
+    PDM_OFF = 1;
+    PDM_OPPORTUNISTIC = 2;
+    PDM_STRICT = 3;
+}
+
+enum Transport {
+    // Indicates this network uses a Cellular transport.
+    TRANSPORT_DEFAULT = 0;  // TRANSPORT_CELLULAR
+    // Indicates this network uses a Wi-Fi transport.
+    TRANSPORT_WIFI = 1;
+    // Indicates this network uses a Bluetooth transport.
+    TRANSPORT_BLUETOOTH = 2;
+    // Indicates this network uses an Ethernet transport.
+    TRANSPORT_ETHERNET = 3;
+    // Indicates this network uses a VPN transport.
+    TRANSPORT_VPN = 4;
+    // Indicates this network uses a Wi-Fi Aware transport.
+    TRANSPORT_WIFI_AWARE = 5;
+    // Indicates this network uses a LoWPAN transport.
+    TRANSPORT_LOWPAN = 6;
+}
+
+enum CacheStatus{
+    // the cache can't handle that kind of queries.
+    // or the answer buffer is too small.
+    CS_UNSUPPORTED = 0;
+    // the cache doesn't know about this query.
+    CS_NOTFOUND = 1;
+    // the cache found the answer.
+    CS_FOUND = 2;
+    // Don't do anything on cache.
+    CS_SKIP = 3;
+}
+
+message DnsQueryEvent {
+    optional android.stats.dnsresolver.NsRcode rcode = 1;
+
+    optional android.stats.dnsresolver.NsType type = 2;
+
+    optional android.stats.dnsresolver.CacheStatus cache_hit = 3;
+
+    optional android.stats.dnsresolver.IpVersion ip_version = 4;
+
+    optional android.stats.dnsresolver.TransportType transport = 5;
+
+    // Number of DNS query retry times
+    optional int32 retry_times = 6;
+
+    // Ordinal number of name server.
+    optional int32 dns_server_count = 7;
+
+    // Used only by TCP and DOT. True for new connections.
+    optional bool connected = 8;
+
+    optional int32 latency_micros = 9;
+}
+
+message DnsQueryEvents {
+    repeated DnsQueryEvent dns_query_event = 1;
+}

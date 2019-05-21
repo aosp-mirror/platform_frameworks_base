@@ -19,6 +19,7 @@ package android.os;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.SystemProperties;
@@ -28,6 +29,10 @@ import android.util.Log;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /** @hide */
 public class GraphicsEnvironment {
@@ -44,6 +49,7 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String GAME_DRIVER_WHITELIST_ALL = "*";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -52,9 +58,9 @@ public class GraphicsEnvironment {
     /**
      * Set up GraphicsEnvironment
      */
-    public void setup(Context context) {
+    public void setup(Context context, Bundle coreSettings) {
         setupGpuLayers(context);
-        chooseDriver(context);
+        chooseDriver(context, coreSettings);
     }
 
     /**
@@ -92,15 +98,15 @@ public class GraphicsEnvironment {
 
         if (isDebuggable(context)) {
 
-            int enable = Settings.Global.getInt(context.getContentResolver(),
-                                                Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
+            final int enable = Settings.Global.getInt(context.getContentResolver(),
+                                                      Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
 
             if (enable != 0) {
 
-                String gpuDebugApp = Settings.Global.getString(context.getContentResolver(),
-                                                               Settings.Global.GPU_DEBUG_APP);
+                final String gpuDebugApp = Settings.Global.getString(context.getContentResolver(),
+                                                                     Settings.Global.GPU_DEBUG_APP);
 
-                String packageName = context.getPackageName();
+                final String packageName = context.getPackageName();
 
                 if ((gpuDebugApp != null && packageName != null)
                         && (!gpuDebugApp.isEmpty() && !packageName.isEmpty())
@@ -130,23 +136,29 @@ public class GraphicsEnvironment {
         setLayerPaths(mClassLoader, layerPaths);
     }
 
+    private static List<String> getGlobalSettingsString(Bundle bundle, String globalSetting) {
+        List<String> valueList = null;
+        final String settingsValue = bundle.getString(globalSetting);
+
+        if (settingsValue != null) {
+            valueList = new ArrayList<>(Arrays.asList(settingsValue.split(",")));
+        } else {
+            valueList = new ArrayList<>();
+        }
+
+        return valueList;
+    }
+
     /**
      * Choose whether the current process should use the builtin or an updated driver.
      */
-    private static void chooseDriver(Context context) {
-        String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
+    private static void chooseDriver(Context context, Bundle coreSettings) {
+        final String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
             return;
         }
-        // To minimize risk of driver updates crippling the device beyond user repair, never use an
-        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
-        // were tested thoroughly with the pre-installed driver.
-        ApplicationInfo ai = context.getApplicationInfo();
-        if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
-            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
-            return;
-        }
-        ApplicationInfo driverInfo;
+
+        final ApplicationInfo driverInfo;
         try {
             driverInfo = context.getPackageManager().getApplicationInfo(driverPackageName,
                     PackageManager.MATCH_SYSTEM_ONLY);
@@ -154,7 +166,69 @@ public class GraphicsEnvironment {
             Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
             return;
         }
-        String abi = chooseAbi(driverInfo);
+
+        // O drivers are restricted to the sphal linker namespace, so don't try to use
+        // packages unless they declare they're compatible with that restriction.
+        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+            if (DEBUG) {
+                Log.w(TAG, "updated driver package is not known to be compatible with O");
+            }
+            return;
+        }
+
+        // To minimize risk of driver updates crippling the device beyond user repair, never use an
+        // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
+        // were tested thoroughly with the pre-installed driver.
+        final ApplicationInfo ai = context.getApplicationInfo();
+        if (ai.isPrivilegedApp() || (ai.isSystemApp() && !ai.isUpdatedSystemApp())) {
+            if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
+            return;
+        }
+
+        // GAME_DRIVER_ALL_APPS
+        // 0: Default (Invalid values fallback to default as well)
+        // 1: All apps use Game Driver
+        // 2: All apps use system graphics driver
+        final int gameDriverAllApps = coreSettings.getInt(Settings.Global.GAME_DRIVER_ALL_APPS, 0);
+        if (gameDriverAllApps == 2) {
+            if (DEBUG) {
+                Log.w(TAG, "Game Driver is turned off on this device");
+            }
+            return;
+        }
+
+        if (gameDriverAllApps != 1) {
+            // GAME_DRIVER_OPT_OUT_APPS has higher priority than GAME_DRIVER_OPT_IN_APPS
+            if (getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_OUT_APPS)
+                            .contains(ai.packageName)) {
+                if (DEBUG) {
+                    Log.w(TAG, ai.packageName + " opts out from Game Driver.");
+                }
+                return;
+            }
+            final boolean isOptIn =
+                    getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_OPT_IN_APPS)
+                            .contains(ai.packageName);
+            final List<String> whitelist = getGlobalSettingsString(coreSettings,
+                    Settings.Global.GAME_DRIVER_WHITELIST);
+            if (!isOptIn && whitelist.indexOf(GAME_DRIVER_WHITELIST_ALL) != 0
+                    && !whitelist.contains(ai.packageName)) {
+                if (DEBUG) {
+                    Log.w(TAG, ai.packageName + " is not on the whitelist.");
+                }
+                return;
+            }
+
+            // If the application is not opted-in and check whether it's on the blacklist,
+            // terminate early if it's on the blacklist and fallback to system driver.
+            if (!isOptIn
+                    && getGlobalSettingsString(coreSettings, Settings.Global.GAME_DRIVER_BLACKLIST)
+                            .contains(ai.packageName)) {
+                return;
+            }
+        }
+
+        final String abi = chooseAbi(driverInfo);
         if (abi == null) {
             if (DEBUG) {
                 // This is the normal case for the pre-installed empty driver package, don't spam
@@ -164,23 +238,24 @@ public class GraphicsEnvironment {
             }
             return;
         }
-        if (driverInfo.targetSdkVersion < Build.VERSION_CODES.O) {
-            // O drivers are restricted to the sphal linker namespace, so don't try to use
-            // packages unless they declare they're compatible with that restriction.
-            Log.w(TAG, "updated driver package is not known to be compatible with O");
-            return;
-        }
 
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         sb.append(driverInfo.nativeLibraryDir)
           .append(File.pathSeparator);
         sb.append(driverInfo.sourceDir)
           .append("!/lib/")
           .append(abi);
-        String paths = sb.toString();
+        final String paths = sb.toString();
 
-        if (DEBUG) Log.v(TAG, "gfx driver package libs: " + paths);
-        setDriverPath(paths);
+        final String sphalLibraries =
+                coreSettings.getString(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES);
+
+        if (DEBUG) {
+            Log.v(TAG,
+                    "gfx driver package search path: " + paths
+                            + ", required sphal libraries: " + sphalLibraries);
+        }
+        setDriverPathAndSphalLibraries(paths, sphalLibraries);
     }
 
     /**
@@ -194,7 +269,7 @@ public class GraphicsEnvironment {
      * Should only be called after chooseDriver().
      */
     public static void earlyInitEGL() {
-        Thread eglInitThread = new Thread(
+        final Thread eglInitThread = new Thread(
                 () -> {
                     EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
                 },
@@ -203,7 +278,7 @@ public class GraphicsEnvironment {
     }
 
     private static String chooseAbi(ApplicationInfo ai) {
-        String isa = VMRuntime.getCurrentInstructionSet();
+        final String isa = VMRuntime.getCurrentInstructionSet();
         if (ai.primaryCpuAbi != null &&
                 isa.equals(VMRuntime.getInstructionSet(ai.primaryCpuAbi))) {
             return ai.primaryCpuAbi;
@@ -217,5 +292,5 @@ public class GraphicsEnvironment {
 
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
-    private static native void setDriverPath(String path);
+    private static native void setDriverPathAndSphalLibraries(String path, String sphalLibraries);
 }

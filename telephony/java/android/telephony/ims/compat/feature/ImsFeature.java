@@ -19,7 +19,6 @@ package android.telephony.ims.compat.feature;
 import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.content.Intent;
 import android.os.IInterface;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
@@ -41,32 +40,6 @@ import java.util.WeakHashMap;
 public abstract class ImsFeature {
 
     private static final String LOG_TAG = "ImsFeature";
-
-    /**
-     * Action to broadcast when ImsService is up.
-     * Internal use only.
-     * Only defined here separately compatibility purposes with the old ImsService.
-     * @hide
-     */
-    public static final String ACTION_IMS_SERVICE_UP =
-            "com.android.ims.IMS_SERVICE_UP";
-
-    /**
-     * Action to broadcast when ImsService is down.
-     * Internal use only.
-     * Only defined here separately for compatibility purposes with the old ImsService.
-     * @hide
-     */
-    public static final String ACTION_IMS_SERVICE_DOWN =
-            "com.android.ims.IMS_SERVICE_DOWN";
-
-    /**
-     * Part of the ACTION_IMS_SERVICE_UP or _DOWN intents.
-     * A long value; the phone ID corresponding to the IMS service coming up or down.
-     * Only defined here separately for compatibility purposes with the old ImsService.
-     * @hide
-     */
-    public static final String EXTRA_PHONE_ID = "android:phone_id";
 
     // Invalid feature value
     public static final int INVALID = -1;
@@ -162,30 +135,6 @@ public abstract class ImsFeature {
                 }
             }
         }
-        sendImsServiceIntent(state);
-    }
-
-    /**
-     * Provide backwards compatibility using deprecated service UP/DOWN intents.
-     */
-    private void sendImsServiceIntent(@ImsState int state) {
-        if(mContext == null || mSlotId == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
-            return;
-        }
-        Intent intent;
-        switch (state) {
-            case ImsFeature.STATE_NOT_AVAILABLE:
-            case ImsFeature.STATE_INITIALIZING:
-                intent = new Intent(ACTION_IMS_SERVICE_DOWN);
-                break;
-            case ImsFeature.STATE_READY:
-                intent = new Intent(ACTION_IMS_SERVICE_UP);
-                break;
-            default:
-                intent = new Intent(ACTION_IMS_SERVICE_DOWN);
-        }
-        intent.putExtra(EXTRA_PHONE_ID, mSlotId);
-        mContext.sendBroadcast(intent);
     }
 
     /**

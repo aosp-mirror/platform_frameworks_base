@@ -836,13 +836,6 @@ public class CarrierConfigManager {
             "carrier_metered_roaming_apn_types_strings";
 
     /**
-     * Default APN types that are metered on IWLAN by the carrier
-     * @hide
-     */
-    public static final String KEY_CARRIER_METERED_IWLAN_APN_TYPES_STRINGS =
-            "carrier_metered_iwlan_apn_types_strings";
-
-    /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
      */
@@ -1199,6 +1192,82 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * Override the SPN Display Condition 2 integer bits (lsb). B2, B1 is the last two bits of the
+     * spn display condition coding.
+     *
+     * The default value -1 mean this field is not set.
+     *
+     * B1 = 0: display of registered PLMN name not required when registered PLMN is either HPLMN
+     * or a PLMN in the service provider PLMN list (see EF_SPDI).
+     * B1 = 1: display of registered PLMN name required when registered PLMN is either HPLMN or a
+     * PLMN in the service provider PLMN list(see EF_SPDI).
+     * B2 = 0: display of the service provider name is required when registered PLMN is neither
+     * HPLMN nor a PLMN in the service provider PLMN list(see EF_SPDI).
+     * B2 = 1: display of the service provider name is not required when registered PLMN is neither
+     * HPLMN nor a PLMN in the service provider PLMN list(see EF_SPDI).
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.12 EF_SPN.
+     * @hide
+     */
+    public static final String KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT =
+            "spn_display_condition_override_int";
+
+    /**
+     * Override the SPDI - an array of PLMN(MCC + MNC) strings.
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.66 EF_SPDI.
+     * @hide
+     */
+    public static final String KEY_SPDI_OVERRIDE_STRING_ARRAY = "spdi_override_string_array";
+
+    /**
+     * Override the EHPLMNs - an array of PLMN(MCC + MNC) strings.
+     *
+     * To allow provision for multiple HPLMN codes, PLMN codes that are present within this list
+     * shall replace the HPLMN code derived from the IMSI for PLMN selection purposes.
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.84 EF_EHPLMN
+     * Reference: 3GPP TS 23.122 v15.6.0 Section 1.2 Equivalent HPLMN list
+     * @hide
+     */
+    public static final String KEY_EHPLMN_OVERRIDE_STRING_ARRAY = "ehplmn_override_string_array";
+
+    /**
+     * Override the PNN - a string array of comma-separated alpha long and short names:
+     * "alpha_long1,alpha_short1".
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.58 EF_PNN.
+     * @hide
+     */
+    public static final String KEY_PNN_OVERRIDE_STRING_ARRAY = "pnn_override_string_array";
+
+    /**
+     * A string array of OPL records, each with comma-delimited data fields as follows:
+     * "plmn1,lactac_start,lactac_end,index".
+     *
+     * Reference: 3GPP TS 31.102 v15.2.0 Section 4.2.59 EF_OPL.
+     * @hide
+     */
+    public static final String KEY_OPL_OVERRIDE_STRING_ARRAY = "opl_override_opl_string_array";
+
+    /**
+     * Allow ERI rules to select a carrier name display string when using 3gpp2 access technologies.
+     * If this bit is not set, the carrier name display string will be selected from the carrier
+     * display name resolver which doesn't apply the ERI rules.
+     *
+     * @hide
+     */
+    public static final String KEY_ALLOW_ERI_BOOL = "allow_cdma_eri_bool";
+
+    /**
+     * If true, use the carrier display name(SPN and PLMN) from the carrier display name resolver.
+     *
+     * @hide
+     */
+    public static final String KEY_ENABLE_CARRIER_DISPLAY_NAME_RESOLVER_BOOL =
+            "enable_carrier_display_name_resolver_bool";
+
+    /**
      * String to override sim country iso.
      * Sim country iso is based on sim MCC which is coarse and doesn't work with dual IMSI SIM where
      * a SIM can have multiple MCC from different countries.
@@ -1310,6 +1379,24 @@ public class CarrierConfigManager {
      */
     public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL =
             "hide_lte_plus_data_icon_bool";
+
+    /**
+     * The string is used to filter redundant string from PLMN Network Name that's supplied by
+     * specific carrier.
+     *
+     * @hide
+     */
+    public static final String KEY_OPERATOR_NAME_FILTER_PATTERN_STRING =
+            "operator_name_filter_pattern_string";
+
+    /**
+     * The string is used to compare with operator name. If it matches the pattern then show
+     * specific data icon.
+     *
+     * @hide
+     */
+    public static final String KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING =
+            "show_carrier_data_icon_pattern_string";
 
     /**
      * Boolean to decide whether to show precise call failed cause to user
@@ -2557,6 +2644,68 @@ public class CarrierConfigManager {
     public static final String KEY_5G_ICON_CONFIGURATION_STRING =
             "5g_icon_configuration_string";
 
+    /**
+     * Indicates use 3GPP application to replace 3GPP2 application even if it's a CDMA/CDMA-LTE
+     * phone, becasue some carriers's CSIM application is present but not supported.
+     * @hide
+     */
+    public static final String KEY_USE_USIM_BOOL = "use_usim_bool";
+
+    /**
+     * Passing this value as {@link KEY_SUBSCRIPTION_GROUP_UUID_STRING} will remove the
+     * subscription from a group instead of adding it to a group.
+     *
+     * TODO: Expose in a future release.
+     *
+     * @hide
+     */
+    public static final String REMOVE_GROUP_UUID_STRING = "00000000-0000-0000-0000-000000000000";
+
+    /**
+     * The UUID of a Group of related subscriptions in which to place the current subscription.
+     *
+     * A grouped subscription will behave for billing purposes and other UI purposes as though it
+     * is a transparent extension of other subscriptions in the group.
+     *
+     * <p>If set to {@link #REMOVE_GROUP_UUID_STRING}, then the subscription will be removed from
+     * its current group.
+     *
+     * TODO: unhide this key.
+     *
+     * @hide
+     */
+    public static final String KEY_SUBSCRIPTION_GROUP_UUID_STRING =
+            "subscription_group_uuid_string";
+
+    /**
+    * A boolean property indicating whether this subscription should be managed as an opportunistic
+    * subscription.
+    *
+    * If true, then this subscription will be selected based on available coverage and will not be
+    * available for a user in settings menus for selecting macro network providers. If unset,
+    * defaults to “false”.
+    *
+    * TODO: unhide this key.
+    *
+    * @hide
+    */
+    public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL =
+            "is_opportunistic_subscription_bool";
+
+    /**
+     * A list of 4 GSM RSSI thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -113 and -51, as set in 3GPP TS 27.007
+     * section 8.5.
+     * <p>
+     * See CellSignalStrengthGsm#GSM_RSSI_MAX and CellSignalStrengthGsm#GSM_RSSI_MIN. Any signal
+     * level outside these boundaries is considered invalid.
+     * @hide
+     */
+    public static final String KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY =
+            "gsm_rssi_thresholds_int_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2691,15 +2840,6 @@ public class CarrierConfigManager {
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
-        // By default all APNs should be unmetered if the device is on IWLAN. However, we add
-        // default APN as metered here as a workaround for P because in some cases, a data
-        // connection was brought up on cellular, but later on the device camped on IWLAN. That
-        // data connection was incorrectly treated as unmetered due to the current RAT IWLAN.
-        // Marking it as metered for now can workaround the issue.
-        // Todo: This will be fixed in Q when IWLAN full refactoring is completed.
-        sDefaults.putStringArray(KEY_CARRIER_METERED_IWLAN_APN_TYPES_STRINGS,
-                new String[]{"default"});
-
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[]{
                     4, /* IS95A */
@@ -2745,6 +2885,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putInt(KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT, -1);
+        sDefaults.putStringArray(KEY_SPDI_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_PNN_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_OPL_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_EHPLMN_OVERRIDE_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_ALLOW_ERI_BOOL, false);
+        sDefaults.putBoolean(KEY_ENABLE_CARRIER_DISPLAY_NAME_RESOLVER_BOOL, false);
         sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
@@ -2818,12 +2965,9 @@ public class CarrierConfigManager {
                 //6: CARRIER_ACTION_CANCEL_ALL_NOTIFICATIONS
                 //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
                 });
-        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE,
-                new String[] {
-                        String.valueOf(false) + ": 7",
-                        //7: CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER
-                        String.valueOf(true) + ": 8"
-                        //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
+        sDefaults.putStringArray(KEY_CARRIER_DEFAULT_ACTIONS_ON_DEFAULT_NETWORK_AVAILABLE, new String[] {
+                String.valueOf(false) + ": 7", //7: CARRIER_ACTION_ENABLE_DEFAULT_URL_HANDLER
+                String.valueOf(true) + ": 8"  //8: CARRIER_ACTION_DISABLE_DEFAULT_URL_HANDLER
                 });
         sDefaults.putStringArray(KEY_CARRIER_DEFAULT_REDIRECTION_URL_STRING_ARRAY, null);
 
@@ -2891,6 +3035,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
+        sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
@@ -2945,9 +3091,19 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_WFC_LOCATION_PRIVACY_POLICY_BOOL, true);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:None,connected:5G,not_restricted:None,restricted:None");
+        sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
         sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN,
                 false);
+        sDefaults.putString(KEY_SUBSCRIPTION_GROUP_UUID_STRING, "");
+        sDefaults.putBoolean(KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL, false);
+        sDefaults.putIntArray(KEY_GSM_RSSI_THRESHOLDS_INT_ARRAY,
+                new int[] {
+                        -107, /* SIGNAL_STRENGTH_POOR */
+                        -103, /* SIGNAL_STRENGTH_MODERATE */
+                        -97, /* SIGNAL_STRENGTH_GOOD */
+                        -89,  /* SIGNAL_STRENGTH_GREAT */
+                });
     }
 
     /**
@@ -2984,17 +3140,20 @@ public class CarrierConfigManager {
     /**
      * Overrides the carrier config of the provided subscription ID with the provided values.
      *
-     * Any further queries to carrier config from any process will return
-     * the overriden values after this method returns. The overrides are effective for the lifetime
-     * of the phone process.
+     * Any further queries to carrier config from any process will return the overridden values
+     * after this method returns. The overrides are effective for the lifetime of the phone process
+     * until the user passes in {@code null} for {@code overrideValues}. This removes all previous
+     * overrides and sets the carrier config back to production values.
      *
      * May throw an {@link IllegalArgumentException} if {@code overrideValues} contains invalid
      * values for the specified config keys.
      *
+     * NOTE: This API is meant for testing purposes only.
+     *
      * @param subscriptionId The subscription ID for which the override should be done.
-     * @param overrideValues Key-value pairs of the values that are to be overriden. If null,
-     *                       all previous overrides will be disabled and the config reset back to
-     *                       its initial state.
+     * @param overrideValues Key-value pairs of the values that are to be overridden. If set to
+     *                       {@code null}, this will remove all previous overrides and set the
+     *                       carrier configuration back to production values.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)

@@ -93,6 +93,13 @@ public final class IpReachabilityEvent implements IpConnectivityLog.Event {
         return String.format("IpReachabilityEvent(%s:%02x)", eventName, lo);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(IpReachabilityEvent.class))) return false;
+        final IpReachabilityEvent other = (IpReachabilityEvent) obj;
+        return eventType == other.eventType;
+    }
+
     final static class Decoder {
         static final SparseArray<String> constants =
                 MessageUtils.findMessageNames(new Class[]{IpReachabilityEvent.class},

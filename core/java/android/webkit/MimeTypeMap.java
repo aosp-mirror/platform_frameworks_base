@@ -19,7 +19,7 @@ package android.webkit;
 import android.annotation.Nullable;
 import android.text.TextUtils;
 
-import libcore.net.MimeUtils;
+import libcore.net.MimeMap;
 
 import java.util.regex.Pattern;
 
@@ -79,7 +79,7 @@ public class MimeTypeMap {
      * @return {@code true} if there is a mimeType entry in the map.
      */
     public boolean hasMimeType(String mimeType) {
-        return MimeUtils.hasMimeType(mimeType);
+        return MimeMap.getDefault().hasMimeType(mimeType);
     }
 
     /**
@@ -89,12 +89,12 @@ public class MimeTypeMap {
      */
     @Nullable
     public String getMimeTypeFromExtension(String extension) {
-        return MimeUtils.guessMimeTypeFromExtension(extension);
+        return MimeMap.getDefault().guessMimeTypeFromExtension(extension);
     }
 
     // Static method called by jni.
     private static String mimeTypeFromExtension(String extension) {
-        return MimeUtils.guessMimeTypeFromExtension(extension);
+        return MimeMap.getDefault().guessMimeTypeFromExtension(extension);
     }
 
     /**
@@ -103,7 +103,7 @@ public class MimeTypeMap {
      * @return {@code true} if there is an extension entry in the map.
      */
     public boolean hasExtension(String extension) {
-        return MimeUtils.hasExtension(extension);
+        return MimeMap.getDefault().hasExtension(extension);
     }
 
     /**
@@ -115,7 +115,7 @@ public class MimeTypeMap {
      */
     @Nullable
     public String getExtensionFromMimeType(String mimeType) {
-        return MimeUtils.guessExtensionFromMimeType(mimeType);
+        return MimeMap.getDefault().guessExtensionFromMimeType(mimeType);
     }
 
     /**

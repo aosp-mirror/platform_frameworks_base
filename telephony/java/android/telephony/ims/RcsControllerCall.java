@@ -27,38 +27,38 @@ import android.telephony.ims.aidl.IRcs;
  * @hide - not meant for public use
  */
 class RcsControllerCall {
-    static <R> R call(RcsServiceCall<R> serviceCall) throws RcsMessageStoreException {
+    private final Context mContext;
+
+    RcsControllerCall(Context context) {
+        mContext = context;
+    }
+
+    <R> R call(RcsServiceCall<R> serviceCall) throws RcsMessageStoreException {
         IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_RCS_SERVICE));
         if (iRcs == null) {
             throw new RcsMessageStoreException("Could not connect to RCS storage service");
         }
 
         try {
-            return serviceCall.methodOnIRcs(iRcs);
+            return serviceCall.methodOnIRcs(iRcs, mContext.getOpPackageName());
         } catch (RemoteException exception) {
             throw new RcsMessageStoreException(exception.getMessage());
         }
     }
 
-    static void callWithNoReturn(RcsServiceCallWithNoReturn serviceCall)
+    void callWithNoReturn(RcsServiceCallWithNoReturn serviceCall)
             throws RcsMessageStoreException {
-        IRcs iRcs = IRcs.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_RCS_SERVICE));
-        if (iRcs == null) {
-            throw new RcsMessageStoreException("Could not connect to RCS storage service");
-        }
-
-        try {
-            serviceCall.methodOnIRcs(iRcs);
-        } catch (RemoteException exception) {
-            throw new RcsMessageStoreException(exception.getMessage());
-        }
+        call((iRcs, callingPackage) -> {
+            serviceCall.methodOnIRcs(iRcs, callingPackage);
+            return null;
+        });
     }
 
     interface RcsServiceCall<R> {
-        R methodOnIRcs(IRcs iRcs) throws RemoteException;
+        R methodOnIRcs(IRcs iRcs, String callingPackage) throws RemoteException;
     }
 
     interface RcsServiceCallWithNoReturn {
-        void methodOnIRcs(IRcs iRcs) throws RemoteException;
+        void methodOnIRcs(IRcs iRcs, String callingPackage) throws RemoteException;
     }
 }

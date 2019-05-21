@@ -36,6 +36,7 @@ import android.system.StructTimeval;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.TrafficStatsConstants;
 
 import libcore.io.IoBridge;
 
@@ -586,7 +587,8 @@ public class RouterAdvertisementDaemon {
     private boolean createSocket() {
         final int SEND_TIMEOUT_MS = 300;
 
-        final int oldTag = TrafficStats.getAndSetThreadStatsTag(TrafficStats.TAG_SYSTEM_NEIGHBOR);
+        final int oldTag = TrafficStats.getAndSetThreadStatsTag(
+                TrafficStatsConstants.TAG_SYSTEM_NEIGHBOR);
         try {
             mSocket = Os.socket(AF_INET6, SOCK_RAW, IPPROTO_ICMPV6);
             // Setting SNDTIMEO is purely for defensive purposes.

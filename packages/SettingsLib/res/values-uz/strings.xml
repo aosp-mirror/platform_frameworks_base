@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Tarmoqlarni tekshirib chiqishni iloji bo‘lmadi"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Hech qanday"</string>
+    <string name="wifi_security_none" msgid="7985461072596594400">"Yo‘q"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Saqlandi"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"O‘chiq"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP manzilini sozlab bo‘lmadi"</string>
@@ -40,8 +40,6 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s orqali ulangan"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s orqali ishlaydi"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Ulangan, lekin internet aloqasi yo‘q"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Internet yo‘q"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Hisob bilan kirish zarur"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Internet kirish nuqtasi vaqtinchalik to‘lgan"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s orqali ulangan"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s orqali ishlaydi"</string>
@@ -65,9 +63,6 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (telefondan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (mediadan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (telefon yoki mediadan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Faol, batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Faol"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefon chaqiruvlari"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Fayl uzatish"</string>
@@ -89,7 +84,7 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Ulanish nuqtasiga ulandi"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Fayl uzatish serveriga ulanmagan"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Kiritish qurilmasiga ulanildi"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Boshqa qurilma ulanishidan foydalanilmoqda"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Internet manbai qurilmasiga ulanildi"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Qurilma modem rejimida ishlamoqda"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Internetga kirish uchun foydalanish"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Xaritada foydalanish"</string>
@@ -114,10 +109,6 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Quloqchin"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Kiritish qurilmasi"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Chap eshitish apparati ulanmoqda…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"O‘ng eshitish apparati ulanmoqda…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Chap eshitish apparati – batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"O‘ng eshitish apparati – batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi: bitta ustun"</string>
@@ -197,7 +188,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Ekranning yoniq turishi"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Qurilma quvvat olayotganda ekran doim yoniq turadi"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI amallari translatsiyasi jurnali"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Barcha Bluetooth HCI paketlarini bitta faylga saqlash (Bu parametrni o‘zgartirishdan keyin Bluetooth funksiyasini yoqish/o‘chirish)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Barcha Bluetooth HCI paketlarini bitta faylga saqlash"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Zavod qulfini yechish"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Operatsion tizimni yuklash dasturining qulfini yechishga ruxsat berish"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Zavod qulfini yechishga ruxsat berilsinmi?"</string>
@@ -208,7 +199,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Tarmoqlar"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Simsiz monitor sertifikatlari"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Batafsil Wi-Fi jurnali"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Wi-Fi orqali ulanganda tasodifiy MAC manzillar yaratish"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Ulangan MAC randomizatsiyasi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil internet doim yoniq tursin"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Modem rejimida apparatli tezlashtirish"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth qurilmalarini nomlarisiz ko‘rsatish"</string>
@@ -216,28 +207,26 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP versiyasi"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP versiyasini tanlang"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth audio kodeki"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetooth orqali uzatish uchun audiokodek\nTanlash"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth orqali uzatish uchun audiokodek"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth audio namunasi chastotasi"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetooth orqali uzatish uchun audiokodek\nTanlash: namuna chastotasi"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Bluetooth orqali uzatish uchun audiokodek:\nnamuna chastotasi"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth audio namunasidagi bitlar soni"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetooth orqali uzatish uchun audiokodek\nTanlash: namunadagi bitlar soni"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Bluetooth orqali uzatish uchun audiokodek:\nnamunadagi bitlar soni"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth audio kanali rejimi"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetooth orqali uzatish uchun audiokodek\nTanlash: kanal rejimi"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Bluetooth orqali uzatish uchun audiokodek:\nkanal rejimi"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC audiokodeki bilan ijro etish sifati (Bluetooth orqali)"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Bluetooth uchun LDAC audiokodekini ishga tushirish\nTanlash: ijro etish sifati"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"LDAC audiokodeki:\nijro sifati"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Translatsiya: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Shaxsiy DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Shaxsiy DNS rejimini tanlang"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"O‘chiq"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Avtomatik"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Shaxsiy DNS provayderining host nomi"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS provayderining host nomini kiriting"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ulanmadi"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi-Fi tarmoqlarga ulanishda MAC manzilini tasodifiy tanlash"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Trafik hisoblanadigan tarmoq"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Trafik hisobi yuritilmaydigan tarmoq"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Jurnal buferi hajmi"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Jurnal xotirasi hajmini tanlang"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Jurnalning doimiy xotirasi tozalansinmi?"</string>
@@ -269,7 +258,7 @@
     <string name="debug_app_not_set" msgid="718752499586403499">"Nosozliklarni tuzatish uchun hech qanday ilova ko‘rsatilmagan"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Nosozliklarni tuzatuvchi ilova: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Ilovani tanlang"</string>
-    <string name="no_application" msgid="2813387563129153880">"Hech narsa"</string>
+    <string name="no_application" msgid="2813387563129153880">"Yo‘q"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Tuzatuvchi dasturni kuting"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Ilova nosozliklarni tuzatuvchi dasturga ulanishni kutmoqda"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Matn kiritish"</string>
@@ -316,8 +305,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Faollik ma’lumoti saqlanmasin"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Amal tugagach, uning tarixi tozalansin"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Fondagi jarayonlarni cheklash"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Fondagi barcha ANR"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Ilova javob bermayotgani haqida xabar qilish"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Hamma ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Ilova javob bermayotgani haqida xabar qilish"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Xabarlar kanali ogohlantirishlarini ko‘rsatish"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Yaroqli kanalsiz yuborilgan yangi ilova xabarnomalari haqida ogohlantirishlarni ko‘rsatish"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tashqi xotira qurilmasidagi ilova dasturlariga majburiy ruxsat berish"</string>
@@ -367,26 +356,40 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Rangni tuzatish"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Bu funksiya tajribaviy bo‘lib, u qurilma unumdorligiga ta’sir qilishi mumkin."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> bilan almashtirildi"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"Taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Joriy holatda taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Joriy holatda taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>dan kamroq vaqt qoldi"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g>dan kamroq vaqt qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>dan ko‘proq vaqt qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>dan ko‘proq vaqt qoldi"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Telefon tez orada o‘chib qolishi mumkin"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Planshet tez orada o‘chib qolishi mumkin"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Qurilma tez orada o‘chib qolishi mumkin"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Telefon tez orada o‘chib qolishi mumkin (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Planshet tez orada o‘chib qolishi mumkin (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Qurilma tez orada o‘chib qolishi mumkin (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"To‘lishiga <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> ichida to‘ladi"</string>
@@ -423,7 +426,7 @@
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Keyingisi"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Parolni kiritish zarur"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Faol matn kiritish usullari"</string>
-    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Tizimdagi mavjud tillar"</string>
+    <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Tizimda mavjud tillar"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> sozlamalarini ochmadi"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Ushbu yozish usuli barcha yozgan matnlaringizni to‘plab olishi mumkin, jumladan kredit karta raqamlari va parollar kabi shaxsiy ma‘lumotlarni ham. Usul  <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ilovasi bilan o‘rnatiladi. Ushbu usuldan foydalanilsinmi?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Eslatma: O‘chirib-yoqilgandan so‘ng, bu ilova to telefoningiz qulfdan chiqarilmaguncha ishga tushmaydi"</string>
@@ -431,16 +434,14 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registratsiya qilingan"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Registratsiya qilinmagan"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Mavjud emas"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"Tasodifiy MAC manzil"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d ta qurilma ulangan</item>
       <item quantity="one">%1$d ta qurilma ulangan</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Ko‘proq vaqt."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kamroq vaqt."</string>
-    <string name="cancel" msgid="6859253417269739139">"Bekor qilish"</string>
-    <string name="okay" msgid="1997666393121016642">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Yoqish"</string>
+    <string name="cancel" msgid="6859253417269739139">"Bekor qilish"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Bezovta qilinmasin rejimini yoqing"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Hech qachon"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Faqat muhimlari"</string>
@@ -449,7 +450,4 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Keyingi signal (<xliff:g id="WHEN">%1$s</xliff:g>) chalinmaydi"</string>
     <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Davomiyligi"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Har safar so‘ralsin"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Hozir"</string>
 </resources>
