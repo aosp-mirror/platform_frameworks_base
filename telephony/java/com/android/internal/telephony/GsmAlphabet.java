@@ -868,7 +868,6 @@ public class GsmAlphabet {
                 ted.msgCount = 1;
                 ted.codeUnitsRemaining = SmsConstants.MAX_USER_DATA_SEPTETS - septets;
             }
-            ted.codeUnitSize = SmsConstants.ENCODING_7BIT;
             return ted;
         }
 
