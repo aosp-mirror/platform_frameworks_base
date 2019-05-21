@@ -22,8 +22,8 @@ import android.content.Intent;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.image.DynamicSystemClient;
+import android.os.image.DynamicSystemManager;
 import android.util.FeatureFlagUtils;
-import android.util.Log;
 
 
 /**
@@ -37,21 +37,26 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!featureFlagEnabled()) {
+        String action = intent.getAction();
+
+        if (!Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             return;
         }
 
-        String action = intent.getAction();
+        DynamicSystemManager dynSystem =
+                (DynamicSystemManager) context.getSystemService(Context.DYNAMIC_SYSTEM_SERVICE);
 
-        Log.d(TAG, "Broadcast received: " + action);
+        boolean isInUse = (dynSystem != null) && dynSystem.isInUse();
 
-        if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-            Intent startServiceIntent = new Intent(
-                    context, DynamicSystemInstallationService.class);
-
-            startServiceIntent.setAction(DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE);
-            context.startServiceAsUser(startServiceIntent, UserHandle.SYSTEM);
+        if (!isInUse && !featureFlagEnabled()) {
+            return;
         }
+
+        Intent startServiceIntent = new Intent(
+                context, DynamicSystemInstallationService.class);
+
+        startServiceIntent.setAction(DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE);
+        context.startServiceAsUser(startServiceIntent, UserHandle.SYSTEM);
     }
 
     private boolean featureFlagEnabled() {
