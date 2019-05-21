@@ -89,6 +89,10 @@
         <attr name="backgroundDimEnabled" format="boolean" />
         <!-- Color of background imagery used for popup windows. -->
         <attr name="colorPopupBackground" format="color" />
+        <!-- Color used for list divider. -->
+        <attr name="colorListDivider" format="color" />
+        <!-- Opacity used for list divider. -->
+        <attr name="opacityListDivider" format="color" />
 
         <!-- =========== -->
         <!-- Text styles -->

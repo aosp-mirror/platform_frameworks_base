@@ -53,6 +53,8 @@ please see themes_device_defaults.xml.
         <item name="backgroundDimAmount">0.6</item>
         <item name="colorError">@color/error_color_material_dark</item>
         <item name="colorPopupBackground">?attr/colorBackground</item>
+        <item name="colorListDivider">?attr/colorForeground</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_material</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
@@ -424,6 +426,8 @@ please see themes_device_defaults.xml.
         <item name="backgroundDimAmount">0.6</item>
         <item name="colorError">@color/error_color_material_light</item>
         <item name="colorPopupBackground">?attr/colorBackground</item>
+        <item name="colorListDivider">?attr/colorForeground</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_material</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>

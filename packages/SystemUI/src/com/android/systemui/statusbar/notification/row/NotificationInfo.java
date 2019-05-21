@@ -94,6 +94,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private static final int BUTTON_ANIM_TIME_MS = 200;
 
+    private static final boolean SHOW_BUTTON_SUMMARY = false;
+
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
     private MetricsLogger mMetricsLogger;
@@ -580,25 +582,27 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             transition.setDuration(BUTTON_ANIM_TIME_MS);
             TransitionManager.beginDelayedTransition(this, transition);
         }
-        if (blockState == ACTION_ALERT) {
-            TextView view = findViewById(R.id.alert_summary);
-            view.setVisibility(VISIBLE);
-            findViewById(R.id.silence_summary).setVisibility(GONE);
-            view.setText(R.string.notification_channel_summary_default);
-        } else {
-            TextView view = findViewById(R.id.silence_summary);
-            view.setVisibility(VISIBLE);
-            findViewById(R.id.alert_summary).setVisibility(GONE);
-            if (mShowInStatusBar) {
-                if (mShowOnLockscreen) {
-                    view.setText(R.string.notification_channel_summary_low_status_lock);
-                } else {
-                    view.setText(R.string.notification_channel_summary_low_status);
-                }
-            } else if (mShowOnLockscreen) {
-                view.setText(R.string.notification_channel_summary_low_lock);
+        if (SHOW_BUTTON_SUMMARY) {
+            if (blockState == ACTION_ALERT) {
+                TextView view = findViewById(R.id.alert_summary);
+                view.setVisibility(VISIBLE);
+                findViewById(R.id.silence_summary).setVisibility(GONE);
+                view.setText(R.string.notification_channel_summary_default);
             } else {
-                view.setText(R.string.notification_channel_summary_low);
+                TextView view = findViewById(R.id.silence_summary);
+                view.setVisibility(VISIBLE);
+                findViewById(R.id.alert_summary).setVisibility(GONE);
+                if (mShowInStatusBar) {
+                    if (mShowOnLockscreen) {
+                        view.setText(R.string.notification_channel_summary_low_status_lock);
+                    } else {
+                        view.setText(R.string.notification_channel_summary_low_status);
+                    }
+                } else if (mShowOnLockscreen) {
+                    view.setText(R.string.notification_channel_summary_low_lock);
+                } else {
+                    view.setText(R.string.notification_channel_summary_low);
+                }
             }
         }
     }

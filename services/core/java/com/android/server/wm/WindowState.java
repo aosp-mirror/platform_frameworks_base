@@ -3104,7 +3104,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mWindowFrames.mCompatFrame);
             final MergedConfiguration mergedConfiguration =
-                    new MergedConfiguration(getProcessGlobalConfiguration(),
+                    new MergedConfiguration(mWmService.mRoot.getConfiguration(),
                     getMergedOverrideConfiguration());
 
             setLastReportedMergedConfiguration(mergedConfiguration);

@@ -35,6 +35,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.R;
+import com.android.systemui.util.Utils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -234,6 +235,10 @@ public class CastControllerImpl implements CastController {
 
     private String getAppName(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
+        if (Utils.isHeadlessRemoteDisplayProvider(pm, packageName)) {
+            return "";
+        }
+
         try {
             final ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
             if (appInfo != null) {
