@@ -518,7 +518,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             NotificationRoundnessManager notificationRoundnessManager,
             AmbientPulseManager ambientPulseManager,
             DynamicPrivacyController dynamicPrivacyController,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            StatusBarStateController statusBarStateController) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -534,6 +535,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 new NotificationSectionsManager(
                         this,
                         activityStarter,
+                        statusBarStateController,
                         NotificationUtils.useNewInterruptionModel(context));
         mSectionsManager.inflateViews(context);
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
