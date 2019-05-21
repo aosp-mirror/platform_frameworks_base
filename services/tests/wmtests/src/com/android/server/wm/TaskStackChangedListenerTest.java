@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
@@ -26,18 +28,22 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityTaskManager;
+import android.app.ActivityView;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
+import android.app.Instrumentation;
 import android.app.Instrumentation.ActivityMonitor;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.uiautomator.UiDevice;
 import android.text.TextUtils;
+import android.view.ViewGroup;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
@@ -231,6 +237,40 @@ public class TaskStackChangedListenerTest {
         assertTrue(activity.mOnDetachedFromWindowCalled);
     }
 
+    @Test
+    public void testTaskOnSingleTaskDisplayDrawn() throws Exception {
+        final Instrumentation instrumentation = getInstrumentation();
+
+        final CountDownLatch activityViewReadyLatch = new CountDownLatch(1);
+        final CountDownLatch singleTaskDisplayDrawnLatch = new CountDownLatch(1);
+        registerTaskStackChangedListener(new TaskStackListener() {
+            @Override
+            public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
+                singleTaskDisplayDrawnLatch.countDown();
+            }
+        });
+        final ActivityViewTestActivity activity =
+                (ActivityViewTestActivity) startTestActivity(ActivityViewTestActivity.class);
+        final ActivityView activityView = activity.getActivityView();
+        activityView.setCallback(new ActivityView.StateCallback() {
+            @Override
+            public void onActivityViewReady(ActivityView view) {
+                activityViewReadyLatch.countDown();
+            }
+
+            @Override
+            public void onActivityViewDestroyed(ActivityView view) {
+            }
+        });
+        waitForCallback(activityViewReadyLatch);
+
+        final Context context = instrumentation.getContext();
+        Intent intent = new Intent(context, ActivityInActivityView.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        activityView.startActivity(intent);
+        waitForCallback(singleTaskDisplayDrawnLatch);
+    }
+
     /**
      * Starts the provided activity and returns the started instance.
      */
@@ -369,4 +409,29 @@ public class TaskStackChangedListenerTest {
             mOnDetachedFromWindowCountDownLatch = countDownLatch;
         }
     }
+
+    public static class ActivityViewTestActivity extends TestActivity {
+        private ActivityView mActivityView;
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+
+            mActivityView = new ActivityView(this, null /* attrs */, 0 /* defStyle */,
+                    true /* singleTaskInstance */);
+            setContentView(mActivityView);
+
+            ViewGroup.LayoutParams layoutParams = mActivityView.getLayoutParams();
+            layoutParams.width = MATCH_PARENT;
+            layoutParams.height = MATCH_PARENT;
+            mActivityView.requestLayout();
+        }
+
+        ActivityView getActivityView() {
+            return mActivityView;
+        }
+    }
+
+    // Activity that has {@link android.R.attr#resizeableActivity} attribute set to {@code true}
+    public static class ActivityInActivityView extends TestActivity {}
 }
