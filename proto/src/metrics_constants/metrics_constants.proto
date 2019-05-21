@@ -7365,6 +7365,9 @@ message MetricsEvent {
     // OS: Q
     FIELD_EMERGENCY_DIALER_DISCONNECT_CAUSE = 1739;
 
+    // Custom tag for NotificationItem. Hash of the NAS that made adjustments.
+    FIELD_NOTIFICATION_ASSISTANT_SERVICE_HASH = 1740;
+
     // ---- Skipping ahead to avoid conflicts between master and release branches.
 
     // ---- End Q Constants, all Q constants go above this line ----
