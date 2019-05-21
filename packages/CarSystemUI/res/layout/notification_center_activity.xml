@@ -23,24 +23,27 @@
     android:background="@color/notification_shade_background_color">
 
     <View
-         android:id="@+id/glass_pane"
-         android:layout_width="match_parent"
-         android:layout_height="match_parent"
-         app:layout_constraintTop_toTopOf="parent"
-         app:layout_constraintBottom_toBottomOf="parent"
-         app:layout_constraintStart_toStartOf="parent"
-         app:layout_constraintEnd_toEndOf="parent"
-         android:translationZ="2dp"
-        />
+        android:id="@+id/glass_pane"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:translationZ="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+    />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/notifications"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
+        android:paddingStart="@dimen/notification_shade_list_padding_bottom"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <include layout="@layout/notification_handle_bar"/>
 
 </com.android.car.notification.CarNotificationView>
