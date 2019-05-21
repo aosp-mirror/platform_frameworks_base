@@ -4825,6 +4825,7 @@ public class NotificationManagerService extends SystemService {
         // Does the app want to bubble & is able to bubble
         boolean canBubble = notification.getBubbleMetadata() != null
                 && mPreferencesHelper.areBubblesAllowed(pkg, userId)
+                && mPreferencesHelper.bubblesEnabled(r.sbn.getUser())
                 && r.getChannel().canBubble()
                 && !mActivityManager.isLowRamDevice();
 
