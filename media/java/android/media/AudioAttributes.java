@@ -400,7 +400,7 @@ public final class AudioAttributes implements Parcelable {
     /**
      * Indicates that the audio may be captured by any app.
      *
-     * For privacy, the following usages can not be recorded: VOICE_COMMUNICATION*,
+     * For privacy, the following usages cannot be recorded: VOICE_COMMUNICATION*,
      * USAGE_NOTIFICATION*, USAGE_ASSISTANCE* and USAGE_ASSISTANT.
      *
      * On {@link android.os.Build.VERSION_CODES#Q}, this means only {@link #USAGE_UNKNOWN},
@@ -413,11 +413,11 @@ public final class AudioAttributes implements Parcelable {
     /**
      * Indicates that the audio may only be captured by system apps.
      *
-     * System apps can capture for many purposes like accessibility, user guidance...
+     * System apps can capture for many purposes like accessibility, live captions, user guidance...
      * but abide to the following restrictions:
-     *  - the audio can not leave the device
-     *  - the audio can not be passed to a third party app
-     *  - the audio can not be recorded at a higher quality then 16kHz 16bit mono
+     *  - the audio cannot leave the device
+     *  - the audio cannot be passed to a third party app
+     *  - the audio cannot be recorded at a higher quality than 16kHz 16bit mono
      *
      * See {@link Builder#setAllowedCapturePolicy}.
      */

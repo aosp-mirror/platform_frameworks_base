@@ -6698,7 +6698,10 @@ public class AudioService extends IAudioService.Stub
             boolean isVolumeController, IMediaProjection projection) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
-        if (!isPolicyRegisterAllowed(policyConfig, projection)) {
+        if (!isPolicyRegisterAllowed(policyConfig,
+                                     isFocusPolicy || isTestFocusPolicy || hasFocusListener,
+                                     isVolumeController,
+                                     projection)) {
             Slog.w(TAG, "Permission denied to register audio policy for pid "
                     + Binder.getCallingPid() + " / uid " + Binder.getCallingUid()
                     + ", need MODIFY_AUDIO_ROUTING or MediaProjection that can project audio");
@@ -6739,42 +6742,71 @@ public class AudioService extends IAudioService.Stub
      * as those policy do not modify the audio routing.
      */
     private boolean isPolicyRegisterAllowed(AudioPolicyConfig policyConfig,
-             IMediaProjection projection) {
+                                            boolean hasFocusAccess,
+                                            boolean isVolumeController,
+                                            IMediaProjection projection) {
 
-        boolean isLoopbackRenderPolicy = policyConfig.getMixes().stream().allMatch(
-                mix -> mix.getRouteFlags() == (mix.ROUTE_FLAG_RENDER | mix.ROUTE_FLAG_LOOP_BACK));
+        boolean requireValidProjection = false;
+        boolean requireCaptureAudioOrMediaOutputPerm = false;
+        boolean requireModifyRouting = false;
 
-        if (isLoopbackRenderPolicy) {
-            boolean allowPrivilegedPlaybackCapture = policyConfig.getMixes().stream().anyMatch(
-                    mix -> mix.getRule().allowPrivilegedPlaybackCapture());
-            if (allowPrivilegedPlaybackCapture
-                    && !(hasPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
-                    || hasPermission(android.Manifest.permission.CAPTURE_MEDIA_OUTPUT))) {
-                // Opt-out can not be bypassed without a system permission
-                return false;
+        if (hasFocusAccess || isVolumeController) {
+            requireModifyRouting |= true;
+        } else if (policyConfig.getMixes().isEmpty()) {
+            // An empty policy could be used to lock the focus or add mixes later
+            requireModifyRouting |= true;
+        }
+        for (AudioMix mix : policyConfig.getMixes()) {
+            // If mix is requesting a privileged capture
+            if (mix.getRule().allowPrivilegedPlaybackCapture()) {
+                // then it must have CAPTURE_MEDIA_OUTPUT or CAPTURE_AUDIO_OUTPUT permission
+                requireCaptureAudioOrMediaOutputPerm |= true;
+                // and its format must be low quality enough
+                String error = mix.canBeUsedForPrivilegedCapture(mix.getFormat());
+                if (error != null) {
+                    Log.e(TAG, error);
+                    return false;
+                }
             }
 
-            if (canProjectAudio(projection)) {
-                // Policy that do not modify the audio routing only need an audio projection
-                return true;
+            // If mix is RENDER|LOOPBACK, then an audio MediaProjection is enough
+            // otherwise MODIFY_AUDIO_ROUTING permission is required
+            if (mix.getRouteFlags() == mix.ROUTE_FLAG_LOOP_BACK_RENDER && projection != null) {
+                requireValidProjection |= true;
+            } else {
+                requireModifyRouting |= true;
             }
         }
 
-        boolean hasPermissionModifyAudioRouting =
-                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
-                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
-        if (hasPermissionModifyAudioRouting) {
-            return true;
+        if (requireCaptureAudioOrMediaOutputPerm
+                && !callerHasPermission(android.Manifest.permission.CAPTURE_MEDIA_OUTPUT)
+                && !callerHasPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)) {
+            Log.e(TAG, "Privileged audio capture requires CAPTURE_MEDIA_OUTPUT or "
+                      + "CAPTURE_AUDIO_OUTPUT system permission");
+            return false;
         }
-        return false;
+
+        if (requireValidProjection && !canProjectAudio(projection)) {
+            return false;
+        }
+
+        if (requireModifyRouting
+                && !callerHasPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)) {
+            Log.e(TAG, "Can not capture audio without MODIFY_AUDIO_ROUTING");
+            return false;
+        }
+
+        return true;
     }
-    private boolean hasPermission(String permission) {
-        return PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(permission);
+
+    private boolean callerHasPermission(String permission) {
+        return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
     }
 
     /** @return true if projection is a valid MediaProjection that can project audio. */
     private boolean canProjectAudio(IMediaProjection projection) {
         if (projection == null) {
+            Log.e(TAG, "MediaProjection is null");
             return false;
         }
 
