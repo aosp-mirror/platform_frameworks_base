@@ -2091,7 +2091,7 @@ public class PermissionManagerService {
             return;
         }
 
-        if (bp.isHardOrSoftRestricted()
+        if (bp.isHardRestricted()
                 && (flags & PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) == 0) {
             Log.e(TAG, "Cannot grant restricted non-exempt permission "
                     + permName + " for package " + packageName);
