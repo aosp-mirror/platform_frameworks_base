@@ -138,7 +138,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     };
 
     public VoiceInteractionSessionConnection(Object lock, ComponentName component, int user,
-            Context context, Callback callback, int callingUid, Handler handler) {
+            Context context, Callback callback, int callingUid, Handler handler,
+            boolean allowInstant) {
         mLock = lock;
         mSessionComponentName = component;
         mUser = user;
@@ -159,10 +160,13 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mPermissionOwner = permOwner;
         mBindIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mSessionComponentName);
-        mBound = mContext.bindServiceAsUser(mBindIntent, this,
-                Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
-                        | Context.BIND_ALLOW_OOM_MANAGEMENT
-                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS, new UserHandle(mUser));
+        int flags = Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
+                | Context.BIND_ALLOW_OOM_MANAGEMENT
+                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS;
+        if (allowInstant) {
+            flags |= Context.BIND_ALLOW_INSTANT;
+        }
+        mBound = mContext.bindServiceAsUser(mBindIntent, this, flags, new UserHandle(mUser));
         if (mBound) {
             try {
                 mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY);
