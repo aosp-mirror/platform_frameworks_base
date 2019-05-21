@@ -32,27 +32,6 @@ ifneq ($(ANDROID_BUILD_EMBEDDED),true)
 # ============================================================
 include $(CLEAR_VARS)
 
-aidl_parcelables :=
-define stubs-to-aidl-parcelables
-  gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/$1.aidl
-  aidl_parcelables += $$(gen)
-  $$(gen): $(call java-lib-header-files,$1) $(HOST_OUT_EXECUTABLES)/sdkparcelables
-	@echo Extract SDK parcelables: $$@
-	rm -f $$@
-	$(HOST_OUT_EXECUTABLES)/sdkparcelables $$< $$@
-endef
-
-$(foreach stubs,android_stubs_current android_test_stubs_current android_system_stubs_current,\
-  $(eval $(call stubs-to-aidl-parcelables,$(stubs))))
-
-gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
-.KATI_RESTAT: $(gen)
-$(gen): $(aidl_parcelables)
-	@echo Combining SDK parcelables: $@
-	rm -f $@.tmp
-	cat $^ | sort -u > $@.tmp
-	$(call commit-change-for-toc,$@)
-
 # This is used by ide.mk as the list of source files that are
 # always included.
 INTERNAL_SDK_SOURCE_DIRS := $(addprefix $(LOCAL_PATH)/,$(dirs_to_document))

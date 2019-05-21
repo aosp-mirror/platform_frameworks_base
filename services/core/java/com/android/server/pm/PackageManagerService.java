@@ -10722,7 +10722,7 @@ public class PackageManagerService extends IPackageManager.Stub
             sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
 
         pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                pkg.applicationInfo.targetSandboxVersion, targetSdkVersion);
+                targetSdkVersion);
         pkg.applicationInfo.seInfoUser = SELinuxUtil.assignSeinfoUser(pkgSetting.readUserState(
                 userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId));
 
@@ -23933,6 +23933,21 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             } catch (Exception e) {
             }
             return 0;
+        }
+
+        @Override
+        public int getLocationFlags(String packageName) throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            ApplicationInfo appInfo = getApplicationInfo(packageName,
+                    /*flags*/ 0,
+                    /*userId*/ callingUser);
+            if (appInfo == null) {
+                throw new RemoteException(
+                        "Couldn't get ApplicationInfo for package " + packageName);
+            }
+            return ((appInfo.isSystemApp() ? IPackageManagerNative.LOCATION_SYSTEM : 0)
+                    | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
+                    | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0));
         }
     }
 

@@ -77,16 +77,15 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Naka-default na hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Hindi pinaghihigpitan"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Hindi naprobisyon ang serbisyo."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Hindi mo mababago ang setting ng caller ID."</string>
-    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Walang serbisyo ng data sa mobile"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Hindi available ang pang-emergency na pagtawag"</string>
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Walang serbisyo sa data"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Walang emergency na tawag"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Walang serbisyo para sa boses"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Walang serbisyo para sa boses o emergency na tawag"</string>
-    <string name="RestrictedStateContent" msgid="6538703255570997248">"Pansamantalang na-off ng iyong carrier"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Pansamantalang na-off ng iyong carrier para sa SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Hindi makakonekta sa mobile network"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Subukang baguhin ang gustong network. I-tap para baguhin."</string>
-    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Hindi available ang pang-emergency na pagtawag"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Hindi makapagsagawa ng mga emergency na tawag sa pamamagitan ng Wi‑Fi"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Walang serbisyo para sa voice/emergency"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Pansamantalang hindi inaalok ng mobile network sa iyong lokasyon"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Hindi maabot ang network"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Upang mapahusay ang reception, subukang baguhin ang uring napili sa Mga Setting &gt; Network at internet &gt; Mga mobile network &gt; Gustong uri ng network."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Aktibo ang pagtawag sa pamamagitan ng Wi‑Fi"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Nangangailangan ng mobile network ang mga emergency na tawag."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Mga Alerto"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Pagpasa ng tawag"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Emergency callback mode"</string>
@@ -121,21 +120,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"Naka-on ang Banner ng Roaming"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Naka-off ang Banner ng Roaming"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Naghahanap ng Serbisyo"</string>
-    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Hindi ma-set up ang pagtawag gamit ang Wi‑Fi"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Pagtawag sa pamamagitan ng Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Upang makatawag at makapagpadala ng mga mensahe sa Wi-Fi, hilingin muna sa iyong carrier na i-set up ang serbisyong ito. Pagkatapos ay i-on muli ang pagtawag gamit ang Wi-Fi mula sa Mga Setting. (Error code: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7372514042696663278">"Nagkaroon ng isyu sa pagrehistro ng pagtawag gamit ang Wi‑Fi sa iyong carrier: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="7472393097168811593">"Iparehistro sa iyong carrier (Code ng error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
-    <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Pagtawag Gamit ang Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Pagtawag Gamit ang WLAN"</string>
-    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Pagtawag Gamit ang WLAN ng <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Pagtawag Gamit ang Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ng <xliff:g id="SPN">%s</xliff:g>"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"Pagtawag sa Pamamagitan ng Wi-Fi ng %s"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mas gusto ang mobile"</string>
@@ -165,8 +160,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Pinoproseso ang masyadong maraming kahilingan. Subukang muli sa ibang pagkakataon."</string>
     <string name="notification_title" msgid="8967710025036163822">"Error sa pag-signin para sa <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"I-sync"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Hindi ma-sync"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Sinubukang mag-delete ng masyado maraming <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"I-sync"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Masyadong maraming pagtanggal ng <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Puno na ang storage ng tablet. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Puno na ang storage ng relo. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Puno na ang storage ng TV. Mag-delete ng ilang file upang magbakante ng espasyo."</string>
@@ -179,13 +174,14 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Ng admin ng iyong profile sa trabaho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Ng <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Na-delete na ang profile sa trabaho"</string>
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Na-delete ang profile sa trabaho dahil wala itong admin app"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Nawawala o nasira ang admin app ng profile sa trabaho. Dahil dito, na-delete ang profile mo sa trabaho at nauugnay na data. Makipag-ugnayan sa iyong admin para sa tulong."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Hindi na available sa device na ito ang iyong profile sa trabaho"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Masyadong maraming pagsubok sa password"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Pinamamahalaan ang device"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Pinamamahalaan ng iyong organisasyon ang device na ito, at maaari nitong subaybayan ang trapiko sa network. I-tap para sa mga detalye."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Buburahin ang iyong device"</string>
-    <string name="factory_reset_message" msgid="9024647691106150160">"Hindi magamit ang admin app. Mabubura na ang iyong device.\n\nKung mayroon kang mga tanong, makipag-ugnayan sa admin ng iyong organisasyon."</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"Hindi magagamit ang admin app. Mabubura na ang iyong device.\n\nKung mayroon kang mga tanong, makipag-ugnayan sa admin ng iyong organisasyon."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"Na-disable ng <xliff:g id="OWNER_APP">%s</xliff:g> ang pag-print."</string>
     <string name="me" msgid="6545696007631404292">"Ako"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Mga pagpipilian sa tablet"</string>
@@ -240,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Naka-ON ang airplane mode"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Naka-OFF ang airplane mode"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Pangtipid sa baterya"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"NAKA-OFF ang Pangtipid sa baterya"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"NAKA-ON ang Pangtipid sa baterya"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Mga Setting"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Tulong"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
@@ -276,34 +269,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Lumipat sa profile sa trabaho"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Mga Contact"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"i-access ang iyong mga contact"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong mga contact?"</string>
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong mga contact"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasyon"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"i-access ang lokasyon ng device na ito"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang lokasyon ng device na ito?"</string>
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang lokasyon ng device na ito"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendaryo"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"i-access ang iyong kalendaryo"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong kalendaryo?"</string>
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"magpadala at tumingin ng mga mensaheng SMS"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na magpadala at tumingin ng mga mensaheng SMS?"</string>
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na magpadala at tumingin ng mga mensaheng SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Storage"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"i-access ang mga larawan, media at file sa iyong device"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang mga larawan, media, at file sa iyong device?"</string>
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang mga larawan, media, at file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"mag-record ng audio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na mag-record ng audio?"</string>
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na mag-record ng audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at mag-record ng video"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na kumuha ng mga larawan at mag-record ng video?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Mga log ng tawag"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"binabasa at sinusulat ang log ng tawag sa telepono"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong mga log ng tawag sa telepono?"</string>
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na kumuha ng mga larawan at mag-record ng video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumawag at mamahala ng mga tawag sa telepono"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na tumawag at mamahala ng mga tawag sa telepono?"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na tumawag at mamahala ng mga tawag"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Mga Sensor ng Katawan"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"i-access ang data ng sensor tungkol sa iyong vital signs"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang data ng sensor tungkol sa iyong mga vital sign?"</string>
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang data ng sensor tungkol sa iyong mga vital sign"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Kunin ang content ng window"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Siyasatin ang nilalaman ng isang window kung saan ka nakikipag-ugnayan."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"I-on ang Explore by Touch"</string>
@@ -315,7 +305,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Magsagawa ng mga galaw"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"May kakayahang mag-tap, mag-swipe, mag-pinch at magsagawa ng iba pang mga galaw."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Mga galaw gamit ang fingerprint"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Makukunan ang mga galaw na ginawa sa sensor para sa fingerprint ng device."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Makukunan ang mga galaw na ginawa sa sensor para sa fingerprint ng mga device."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"i-disable o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pinapayagan ang app na i-disable ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"maging status bar"</string>
@@ -366,8 +356,6 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa tablet."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Nagbibigay-daan sa app na iimbak sa memory ang mga bahagi nito. Maaari nitong malimitahan ang memory na available sa iba pang mga app na nagpapabagal sa TV."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Pinapayagan ang app na panatilihin ang ilang bahagi nito sa memory. Maaari nitong limitahan ang memory na available sa iba pang apps na nagpapabagal sa telepono."</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"paganahin ang foreground na serbisyo"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Payagan ang app na gamitin ang mga foreground na serbisyo."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"sukatin ang espasyo ng storage ng app"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Pinapayagan ang app na bawiin ang code, data, at mga laki ng cache nito"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"baguhin ang mga setting ng system"</string>
@@ -396,14 +384,14 @@
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"i-access ang mga sensor sa katawan (tulad ng mga monitor ng bilis ng tibok ng puso)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Pinapayagan ang app na i-access ang data mula sa mga sensor na sumusubaybay sa iyong pisikal na kondisyon, tulad ng iyong heart rate."</string>
-    <string name="permlab_readCalendar" msgid="6716116972752441641">"Magbasa ng mga event sa kalendaryo at detalye"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong TV at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong telepono at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"magdagdag o magbago ng mga event sa kalendaryo at magpadala ng email sa mga bisita nang hindi nalalaman ng mga may-ari"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong tablet. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong TV. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong telepono. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Magbasa ng mga kaganapan sa kalendaryo at detalye"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Mababasa ng app na ito ang lahat ng kaganapan sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Mababasa ng app na ito ang lahat ng kaganapan sa kalendaryo na naka-store sa iyong TV at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Mababasa ng app na ito ang lahat ng kaganapan sa kalendaryo na naka-store sa iyong telepono at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"magdagdag o magbago ng mga kaganapan sa kalendaryo at magpadala ng email sa mga bisita nang hindi nalalaman ng mga may-ari"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga kaganapan sa kalendaryo sa iyong tablet. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga kaganapan nang hindi inaabisuhan ang mga may-ari nito."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga kaganapan sa kalendaryo sa iyong TV. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga kaganapan nang hindi inaabisuhan ang mga may-ari nito."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga kaganapan sa kalendaryo sa iyong telepono. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga kaganapan nang hindi inaabisuhan ang mga may-ari nito."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"i-access ang tumpak na lokasyon (batay sa GPS at network)"</string>
@@ -490,8 +478,6 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pinapayagan ang app na makipag-ugnay sa Near Field Communication (NFC) na mga tag, card, at reader."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"i-disable ang iyong screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pinapayagan ang app na i-disable ang keylock at anumang nauugnay na seguridad sa password. Halimbawa, hindi pinapagana ng telepono ang keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pinapagana ang keylock kapag tapos na ang tawag."</string>
-    <string name="permlab_useBiometric" msgid="8837753668509919318">"gumamit ng biometric hardware"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Pinapayagan ang app na gumamit ng biometric hardware para sa pag-authenticate"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"pamahalaan ang hardware ng fingerprint"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Pinapayagan ang app na mag-invoke ng mga paraan upang magdagdag at mag-delete ng mga template ng fingerprint na magagamit."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"gamitin ang hardware ng fingerprint"</string>
@@ -499,18 +485,17 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Napakabilis ng paggalaw ng daliri. Pakisubukan ulit."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Masyadong mabilis ang paggalaw ng daliri. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Hindi nakilala"</string>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Na-authenticate ang fingerprint"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hindi available ang hardware na ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Hindi maiimbak ang fingerprint. Mangyaring mag-alis ng umiiral nang fingerprint."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Kinansela ng user ang operasyon sa fingerprint."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Napakaraming pagtatangka. Subukan ulit sa ibang pagkakataon."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Masyadong maraming beses sumubok. Subukang muli sa ibang pagkakataon."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Masyadong maraming beses sumubok. Na-disable ang sensor para sa fingerprint."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Subukang muli."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Walang naka-enroll na fingerprint."</string>
@@ -524,7 +509,7 @@
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"I-toggle on at off ang pag-sync"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pinapayagan ang isang app na baguhin ang mga setting ng pag-sync para sa isang account. Halimbawa, magagamit ito upang paganahin ang pag-sync ng app na Mga Tao sa isang account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"basahin ang mga istatistika ng sync"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga event sa pag-sync at kung ilang data ang naka-sync."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga kaganapan sa pag-sync at kung ilang data ang naka-sync."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"basa nilalaman USB storage mo"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"basahin ang mga nilalaman ng iyong SD card"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Pinapayagan ang app na basahin ang mga nilalaman ng iyong USB storage."</string>
@@ -817,8 +802,6 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Pag-unlock ng pattern."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Face unlock."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pag-unlock ng pin."</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Pag-unlock ng Pin ng Sim."</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Pag-unlock ng Puk ng Sim."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Pag-unlock ng password."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Bahagi ng pattern."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Bahagi ng slide."</string>
@@ -843,7 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Mag-double tap upang mag-zoom in at out."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"I-set up ang Autofill."</string>
-    <string name="autofill_window_title" msgid="4107745526909284887">"Mag-autofill gamit ang <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"I-autofill"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -880,12 +863,6 @@
     <string name="text_copied" msgid="4985729524670131385">"Nakopya ang teksto sa clipboard."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Higit pa"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
-    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
-    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
-    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
-    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
-    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
-    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"espasyo"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ipasok"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"i-delete"</string>
@@ -896,9 +873,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"I-clear ang query"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Isumite ang query"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Paghahanap gamit ang boses"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"I-enable ang Explore by Touch?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Nais i-enable ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Explore by Touch. Kapag naka-on ang Explore by Touch, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa tablet."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Nais i-enable ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Explore by Touch. Kapag naka-on ang Explore by Touch, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa telepono."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Paganahin ang Galugad sa pagpindot?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Nais paganahin ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Galugarin sa pamamagitan ng pagpindot. Kapag naka-on ang Galugarin sa pamamagitan ng pagpindot, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa tablet."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Nais paganahin ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Galugarin sa pamamagitan ng pagpindot. Kapag naka-on ang Galugarin sa pamamagitan ng pagpindot, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa telepono."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 buwan ang nakalipas"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Bago ang nakalipas na 1 buwan"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1017,23 +994,14 @@
     <string name="inputMethod" msgid="1653630062304567879">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Pagkilos ng teksto"</string>
     <string name="email" msgid="4560673117055050403">"Mag-email"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Mag-email sa mga piniling address"</string>
     <string name="dial" msgid="1253998302767701559">"Tawagan"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"Tawagan ang piniling numero ng telepono"</string>
-    <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <string name="map_desc" msgid="1836995341943772348">"Hanapin ang piniling address"</string>
+    <string name="map" msgid="6521159124535543457">"Hanapin"</string>
     <string name="browse" msgid="1245903488306147205">"Buksan"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"Buksan ang piniling URL"</string>
     <string name="sms" msgid="4560537514610063430">"Padalhan ng Mensahe"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Padalhan ng mensahe ang piniling numero ng telepono"</string>
     <string name="add_contact" msgid="7867066569670597203">"Magdagdag"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"Idagdag sa mga contact"</string>
     <string name="view_calendar" msgid="979609872939597838">"Tingnan"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"Tingnan ang piniling oras sa kalendaryo"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Mag-iskedyul"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Mag-iskedyul ng event para sa piniling oras"</string>
     <string name="view_flight" msgid="7691640491425680214">"Subaybayan"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"I-track ang piniling flight"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
@@ -1106,28 +1074,31 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Tingnan kung may update"</string>
     <string name="smv_application" msgid="3307209192155442829">"Ang app na <xliff:g id="APPLICATION">%1$s</xliff:g> (prosesong <xliff:g id="PROCESS">%2$s</xliff:g>) ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Ang prosesong <xliff:g id="PROCESS">%1$s</xliff:g> ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
-    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Nag-a-update ang telepono…"</string>
-    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Nag-a-update ang tablet…"</string>
-    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Nag-a-update ang device…"</string>
-    <string name="android_start_title" product="default" msgid="4536778526365907780">"Nagsisimula ang telepono…"</string>
-    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Nagsisimula ang tablet…"</string>
-    <string name="android_start_title" product="device" msgid="7467484093260449437">"Nagsisimula ang device…"</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Nag-a-upgrade ang Android…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Nagsisimula ang Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ino-optimize ang storage."</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"Tinatapos ang pag-update ng system…"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Tinatapos ang pag-update sa Android…"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Maaaring hindi gumana nang maayos ang ilang app hangga\'t hindi pa natatapos ang pag-upgrade"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Nag-a-upgrade ang <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ino-optimize ang app <xliff:g id="NUMBER_0">%1$d</xliff:g> ng <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Ihinahanda ang <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Sinisimulan ang apps."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Pagtatapos ng pag-boot."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Tumatakbo ang <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Mag-tap upang bumalik sa laro"</string>
-    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Pumili ng laro"</string>
-    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"Para sa mas mahusay na performance, isa lang sa mga larong ito ang maaaring buksan sa bawat pagkakataon."</string>
-    <string name="old_app_action" msgid="3044685170829526403">"Bumalik sa <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_action" msgid="6694851182870774403">"Buksan ang <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="5894852887817332322">"Magsasara ang <xliff:g id="OLD_APP">%1$s</xliff:g> nang hindi nagse-save"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"Lumampas ang <xliff:g id="PROC">%1$s</xliff:g> sa limitasyon ng memory"</string>
-    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Nakolekta ang heap dump. I-tap para ibahagi."</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Nakolekta na ang heap dump; i-tap upang ibahagi"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Ibahagi ang heap dump?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Lumampas ang proseso na <xliff:g id="PROC">%1$s</xliff:g> sa limitasyon ng memory ng proseso nito na <xliff:g id="SIZE">%2$s</xliff:g>. Available ang isang heap dump upang iyong ibahagi sa developer nito. Maging maingat: maaaring naglalaman ang heap dump na ito ng anuman sa iyong personal na impormasyon na naa-access ng application."</string>
     <string name="sendText" msgid="5209874571959469142">"Pumili ng pagkilos para sa teksto"</string>
@@ -1162,12 +1133,12 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Kumonekta sa bukas na Wi‑Fi network"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Kumonekta sa Wi‑Fi network ng carrier"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Kumokonekta sa Wi‑Fi network"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Kumokonekta sa bukas na Wi‑Fi network"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Nakakonekta sa Wi‑Fi network"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Hindi makakonekta sa Wi‑Fi network"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"I-tap upang makita ang lahat ng network"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Kumonekta"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Lahat ng network"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Lahat ng Network"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Awtomatikong mag-o-on ang Wi‑Fi"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kapag malapit ka sa naka-save na network na mataas ang kalidad"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Huwag i-on muli"</string>
@@ -1179,9 +1150,6 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Walang access sa internet ang Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"I-tap para sa mga opsyon"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mga pagbabago sa mga setting ng iyong hotspot"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Nagbago ang band ng iyong hotspot."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Hindi sinusuportahan ng device na ito ang kagustuhan mong gumamit lang ng 5GHz. Sa halip, gagamitin ng device na ito ang 5GHz na band kapag available."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lumipat sa <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mula sa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
@@ -1236,7 +1204,6 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"I-restart"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"I-activate ang serbisyo sa mobile"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"I-download ang carrier app upang ma-activate ang iyong bagong SIM"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"I-download ang <xliff:g id="APP_NAME">%1$s</xliff:g> app upang ma-activate ang iyong bagong SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"I-download ang app"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Nakalagay na ang bagong SIM"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"I-tap upang i-set up ito"</string>
@@ -1255,13 +1222,13 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Na-on ang PTP sa pamamagitan ng USB"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Na-on ang pag-tether ng USB"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"Na-on ang MIDI sa pamamagitan ng USB"</string>
-    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"Nakakonekta ang USB accessory"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Na-on ang USB accessory mode"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"I-tap para sa higit pang mga opsyon."</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"China-charge ang nakakonektang device. Mag-tap para sa higit pang opsyon."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"May na-detect na analog na audio accessory"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Hindi tugma sa teleponong ito ang naka-attach na device. I-tap upang matuto pa."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"I-tap para i-off ang pag-debug ng USB"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"I-tap upang i-disable ang pag-debug ng USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Piliin upang i-disable ang debugging ng USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Gusto mo bang ibahagi ang ulat ng bug?"</string>
@@ -1280,35 +1247,34 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Ipinapakita sa itaas ng iba pang app ang <xliff:g id="NAME">%s</xliff:g>."</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Nasa ibabaw ng ibang app ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Kung ayaw mong gamitin ng <xliff:g id="NAME">%s</xliff:g> ang feature na ito, i-tap upang buksan ang mga setting at i-off ito."</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"I-off"</string>
-    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Sinusuri ang <xliff:g id="NAME">%s</xliff:g>…"</string>
-    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Sinusuri ang kasalukuyang content"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Bagong <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Mag-tap para i-set up"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"I-OFF"</string>
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Inihahanda ang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sinusuri para sa mga error"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Na-detect ang bagong <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para sa paglilipat ng mga larawan at media"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Isyu sa <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Mag-tap para ayusin"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Sirang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Sira ang <xliff:g id="NAME">%s</xliff:g>. I-tap upang ayusin."</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Sira ang <xliff:g id="NAME">%s</xliff:g>. Piliin upang ayusin."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Hindi sinusuportahang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. I-tap upang i-set up sa isang sinusuportahang format."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Hindi sinusuportahan ng device na ito ang <xliff:g id="NAME">%s</xliff:g> na ito. Piliin upang i-set up sa isang sinusuportahang format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Hindi inaasahang naalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"I-eject ang media bago tanggalin para maiwasan ang pagkawala ng content"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Inalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Maaaring hindi gumana nang maayos ang ilang functionality. Magkabit ng bagong storage."</string>
-    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"Ine-eject ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Huwag alisin"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"I-unmount ang <xliff:g id="NAME">%s</xliff:g> bago alisin upang maiwasan ang pagkawala ng data"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Inalis ang <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Inalis ang <xliff:g id="NAME">%s</xliff:g>; maglagay ng bago"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Ine-eject pa rin ang <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Huwag alisin"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"I-set up"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"I-eject"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"I-explore"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Nawawala ang <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="4012389235250987930">"Ikabit muli ang device"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Ilagay muli ang device na ito"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Inililipat ang <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Naglilipat ng data"</string>
-    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Tapos na ang paglipat ng content"</string>
-    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Inilipat ang content sa <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Hindi malipat ang content"</string>
-    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Subukang ilipat muli ang content"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Nakumpleto na ang paglilipat"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Inilipat ang data sa <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Hindi mailipat ang data"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Iniwan ang data sa orihinal na lokasyon"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Inalis"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Na-eject"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Sinusuri…"</string>
@@ -1353,7 +1319,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Pagiging Accessible"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Notification listener"</string>
@@ -1367,14 +1333,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Kumukonekta ang Always-on VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Nakakonekta ang Always-on VPN"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Nadiskonekta sa VPN na palaging naka-on"</string>
-    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Hindi makakonekta sa VPN na palaging naka-on"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Error sa Always-on VPN"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Baguhin ang mga setting ng network o VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
     <string name="submit" msgid="1602335572089911941">"Isumite"</string>
-    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Tumatakbo ang driving app"</string>
-    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Mag-tap para lumabas sa app sa pagmamaneho."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Pinagana ang car mode"</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"I-tap upang lumabas sa car mode."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Pagsasama o aktibong hotspot"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"I-tap upang i-set up."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Naka-disable ang pag-tether"</string>
@@ -1452,19 +1418,22 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB drive"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"I-edit"</string>
-    <string name="data_usage_warning_title" msgid="6499834033204801605">"Babala sa paggamit ng data"</string>
-    <string name="data_usage_warning_body" msgid="7340198905103751676">"Nakagamit ka ng <xliff:g id="APP">%s</xliff:g> na data"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Alerto sa paggamit ng data"</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"I-tap tingnan paggamit/setting."</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Naabot na ang limitasyon sa 2G-3G data"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Naabot na ang limitasyon sa 4G data"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Naabot ang limit ng mobile data"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Naabot na ang limitasyon sa data ng Wi-Fi"</string>
-    <string name="data_usage_limit_body" msgid="2908179506560812973">"Naka-pause ang data para sa natitirang bahagi ng iyong cycle"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Lumampas sa mobile data limit mo"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Lumampas sa Wi-Fi data limit mo"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"Lumampas ka nang <xliff:g id="SIZE">%s</xliff:g> sa iyong itinakdang limitasyon"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Naka-pause ang data para sa nalalabing bahagi ng pag-ikot"</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"lumampas sa 2G-3G na limitasyon ng data"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Lumampas sa 4G na limitasyon ng data"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Lumampas sa limitasyon ng data sa mobile"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Lumampas sa limitasyon ng data ng Wi-Fi"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Lampas ng <xliff:g id="SIZE">%s</xliff:g> sa tinukoy na limitasyon."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Pinaghihigpitan ang data ng background"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"I-tap upang alisin paghihigpit."</string>
-    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Malakas na paggamit ng data"</string>
-    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Gumamit ang iyong mga app ng higit pang data kaysa sa karaniwan"</string>
-    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"Gumamit ang <xliff:g id="APP">%s</xliff:g> ng higit pang data kaysa sa karaniwan"</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Malaking paggamit ng data"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Mas malaki kaysa sa karaniwan ang paggamit mo ng data sa nakalipas na ilang araw. I-tap upang matingnan ang paggamit at mga setting."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificate ng seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"May-bisa ang certificate na ito."</string>
     <string name="issued_to" msgid="454239480274921032">"Ibinigay kay:"</string>
@@ -1700,8 +1669,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Na-install ng iyong admin"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Na-delete ng iyong admin"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Para mas tumagal ang iyong baterya, ino-off ng Pangtipid sa Baterya ang ilan sa mga feature ng device at pinaghihigpitan nito ang mga app. "<annotation id="url">"Matuto pa"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"Para mas tumagal ang iyong baterya, ino-off ng Pangtipid sa Baterya ang ilang feature ng device at pinaghihigpitan nito ang mga app."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Upang matulungang mapatagal ang baterya, binabawasan ng Pangtipid sa Baterya ang performance ng iyong device at nililimitahan nito ang pag-vibrate, mga serbisyo ng lokasyon, at halos lahat ng background na data. Hindi maaaring ma-update ang email, messaging, at iba pang app na umaasa sa pag-sync hangga\'t hindi mo binubuksan ang mga ito.\n\nAwtomatikong nag-o-off ang Pangtipid sa Baterya kapag naka-charge ang iyong device."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>
@@ -1713,7 +1681,7 @@
       <item quantity="one">Sa loob ng %1$d min (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Sa loob ng %1$d na min (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
       <item quantity="one">Sa loob ng %1$d oras (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">Sa loob ng %1$d na oras (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
@@ -1729,7 +1697,7 @@
       <item quantity="one">Sa loob ng %d min</item>
       <item quantity="other">Sa loob ng %d na min</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
       <item quantity="one">Sa loob ng %d oras</item>
       <item quantity="other">Sa loob ng %d na oras</item>
     </plurals>
@@ -1747,19 +1715,19 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Walang serbisyo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Event"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Kaganapan"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Pag-sleep"</string>
-    <string name="muted_by" msgid="5942954724562097128">"Minu-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g> ang ilang tunog"</string>
+    <string name="muted_by" msgid="6147073845094180001">"Na-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"May internal na problema sa iyong device, at maaaring hindi ito maging stable hanggang sa i-reset mo ang factory data."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"May internal na problema sa iyong device. Makipag-ugnayan sa iyong manufacturer upang malaman ang mga detalye."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Ginawang regular na tawag ang USSD na kahilingan"</string>
-    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"Ginawang SS na kahilingan ang USSD na kahilingan"</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"Ginawang bagong USSD na kahilingan"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"Ginawang video call ang USSD na kahilingan"</string>
-    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"Ginawang regular na tawag ang SS na kahilingan"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"Ginawang video call ang SS na kahilingan"</string>
-    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Ginawang USSD na kahilingan ang SS na kahilingan"</string>
-    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Ginawang bagong SS na kahilingan"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Ginawang DIAL request ang USSD request."</string>
+    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Ginawang SS request ang USSD request."</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"Ginawang bagong USSD request ang USSD request."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Ginawang kahilingan sa Video DIAL ang kahilingan sa USSD."</string>
+    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Ginawang DIAL request ang SS request."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Ginawang kahilingan sa Video DIAL ang kahilingan sa SS."</string>
+    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Ginawang USSD request ang SS request."</string>
+    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Ginawang bagong SS request ang SS request."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profile sa trabaho"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Palawakin"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"I-collapse"</string>
@@ -1788,9 +1756,6 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Lahat ng wika"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Lahat ng rehiyon"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Maghanap"</string>
-    <string name="app_suspended_title" msgid="2075071241147969611">"Hindi available ang app"</string>
-    <string name="app_suspended_default_message" msgid="123166680425711887">"Hindi available ang <xliff:g id="APP_NAME_0">%1$s</xliff:g> sa ngayon. Pinamamahalaan ito ng <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="1131804827776778187">"Matuto pa"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"I-on ang profile sa trabaho?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"I-on"</string>
@@ -1860,10 +1825,6 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Hindi naka-provision ang SIM para sa boses"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Hindi pinapayagan ang SIM para sa boses"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Hindi pinapayagan ang telepono para sa boses"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"Hindi pinapayagan ang SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"Hindi naka-provision ang SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Hindi pinapayagan ang SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Hindi pinapayagan ang SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Window ng Popup"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Na-downgrade ang bersyon ng app, o hindi ito compatible sa shortcut na ito"</string>
@@ -1876,18 +1837,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"May na-detect na mapaminsalang app"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"I-edit"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Magva-vibrate ang mga tawag at notification"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Mamu-mute ang mga tawag at notification"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Mga pagbabago sa system"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Huwag Istorbohin"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Bago: Itinatago ng Huwag Istorbohin ang mga notification"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"I-tap para matuto pa at baguhin."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Binago ang Huwag Istorbohin"</string>
-    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"I-tap para tingnan kung ano ang naka-block."</string>
-    <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
-    <string name="notification_app_name_settings" msgid="7751445616365753381">"Mga Setting"</string>
-    <string name="notification_appops_camera_active" msgid="5050283058419699771">"Camera"</string>
-    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikropono"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ipinapakita sa ibabaw ng ibang app sa iyong screen"</string>
-    <string name="car_loading_profile" msgid="3545132581795684027">"Naglo-load"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"I-tap upang tingnan ang iyong mga setting ng gawi para sa mga pagkaantala"</string>
 </resources>

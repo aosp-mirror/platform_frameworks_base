@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.Signature;
 
+import libcore.util.HexEncoding;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -125,6 +127,10 @@ public final class PackageUtils {
      * @return The digest or null if an error occurs.
      */
     public static @Nullable String computeSha256Digest(@NonNull byte[] data) {
-        return ByteStringUtils.toHexString(computeSha256DigestBytes(data));
+        byte[] sha256DigestBytes = computeSha256DigestBytes(data);
+        if (sha256DigestBytes == null) {
+            return null;
+        }
+        return HexEncoding.encodeToString(sha256DigestBytes, true /* uppercase */);
     }
 }

@@ -177,11 +177,15 @@ public final class UsbDescriptorParser {
              * Audio Class Specific
              */
             case UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE:
-                descriptor = UsbACInterface.allocDescriptor(this, stream, length, type);
+                if (mDeviceDescriptor.getDevClass() == UsbDescriptor.CLASSID_AUDIO) {
+                    descriptor = UsbACInterface.allocDescriptor(this, stream, length, type);
+                }
                 break;
 
             case UsbDescriptor.DESCRIPTORTYPE_AUDIO_ENDPOINT:
-                descriptor = UsbACEndpoint.allocDescriptor(this, length, type);
+                if (mDeviceDescriptor.getDevClass() == UsbDescriptor.CLASSID_AUDIO) {
+                    descriptor = UsbACEndpoint.allocDescriptor(this, length, type);
+                }
                 break;
 
             default:

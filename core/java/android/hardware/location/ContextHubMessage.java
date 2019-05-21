@@ -20,6 +20,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import libcore.util.HexEncoding;
+
 import java.util.Arrays;
 
 /**
@@ -146,7 +148,7 @@ public class ContextHubMessage implements Parcelable {
             ret += "data = 0x";
         }
         for (int i = 0; i < Math.min(length, DEBUG_LOG_NUM_BYTES); i++) {
-            ret += Byte.toHexString(mData[i], true /* upperCase */);
+            ret += HexEncoding.encodeToString(mData[i], true /* upperCase */);
 
             if ((i + 1) % 4 == 0) {
                 ret += " ";

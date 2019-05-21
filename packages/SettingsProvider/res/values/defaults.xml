@@ -68,19 +68,19 @@
 
     <!-- user interface sound effects -->
     <integer name="def_power_sounds_enabled">1</integer>
-    <string name="def_low_battery_sound" translatable="false">/system/media/audio/ui/LowBattery.ogg</string>
+    <string name="def_low_battery_sound" translatable="false">/product/media/audio/ui/LowBattery.ogg</string>
     <integer name="def_dock_sounds_enabled">0</integer>
     <integer name="def_dock_sounds_enabled_when_accessibility">0</integer>
-    <string name="def_desk_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
-    <string name="def_desk_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
-    <string name="def_car_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
-    <string name="def_car_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
+    <string name="def_desk_dock_sound" translatable="false">/product/media/audio/ui/Dock.ogg</string>
+    <string name="def_desk_undock_sound" translatable="false">/product/media/audio/ui/Undock.ogg</string>
+    <string name="def_car_dock_sound" translatable="false">/product/media/audio/ui/Dock.ogg</string>
+    <string name="def_car_undock_sound" translatable="false">/product/media/audio/ui/Undock.ogg</string>
     <integer name="def_lockscreen_sounds_enabled">1</integer>
-    <string name="def_lock_sound" translatable="false">/system/media/audio/ui/Lock.ogg</string>
-    <string name="def_unlock_sound" translatable="false">/system/media/audio/ui/Unlock.ogg</string>
-    <string name="def_trusted_sound" translatable="false">/system/media/audio/ui/Trusted.ogg</string>
-    <string name="def_wireless_charging_started_sound" translatable="false">/system/media/audio/ui/WirelessChargingStarted.ogg</string>
-    <string name="def_charging_started_sound" translatable="false">/system/media/audio/ui/ChargingStarted.ogg</string>
+    <string name="def_lock_sound" translatable="false">/product/media/audio/ui/Lock.ogg</string>
+    <string name="def_unlock_sound" translatable="false">/product/media/audio/ui/Unlock.ogg</string>
+    <string name="def_trusted_sound" translatable="false">/product/media/audio/ui/Trusted.ogg</string>
+    <string name="def_wireless_charging_started_sound" translatable="false">/product/media/audio/ui/WirelessChargingStarted.ogg</string>
+    <string name="def_charging_started_sound" translatable="false">/product/media/audio/ui/ChargingStarted.ogg</string>
 
     <!-- sound trigger detection service default values -->
     <integer name="def_max_sound_trigger_detection_service_ops_per_day" translatable="false">1000</integer>

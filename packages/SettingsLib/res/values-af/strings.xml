@@ -40,8 +40,6 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Gekoppel via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Beskikbaar via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Gekoppel, geen internet nie"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Geen internet nie"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Aanmelding word vereis"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Toegangspunt is tydelik vol"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Gekoppel via %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Beskikbaar via %1$s"</string>
@@ -65,9 +63,6 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Gekoppel (geen foon nie), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Gekoppel (geen media nie), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Gekoppel (geen foon of media nie), battery <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktief, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterykrag"</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterykrag"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktief"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media-oudio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Foonoproepe"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Lêeroordrag"</string>
@@ -114,10 +109,6 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Oorfoon"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Randinvoertoestel"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Bind tans linkergehoortoestel saam …"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Bind tans regtergehoortoestel saam …"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Links – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterykrag"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Regs – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batterykrag"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi af."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi is ontkoppel."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi een staaf."</string>
@@ -195,9 +186,9 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Kortpad na foutverslag"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Wys \'n knoppie in die kragkieslys om \'n foutverslag te doen"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Bly wakker"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skerm sal nooit slaap terwyl dit laai nie"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skerm sal nooit slaap terwyl laai nie"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktiveer Bluetooth HCI-loerloglêer"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Vang alle Bluetooth HCI-pakkette in \'n lêer vas (Wissel Bluetooth nadat jy hierdie instelling verander het)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Vang alle Bluetooth HCI-pakette in \'n lêer vas"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-ontsluit"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Laat toe dat die selflaaiprogram ontsluit word"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Laat OEM-ontsluit toe?"</string>
@@ -216,28 +207,26 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-weergawe"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Kies Bluetooth AVRCP-weergawe"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth-oudiokodek"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Gebruik Bluetooth-oudiokodek\nKeuse"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Kies Bluetooth-oudiokodek"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth-oudiovoorbeeldkoers"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Gebruik Bluetooth-oudiokodek\nKeuse: monsterkoers"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Kies Bluetooth-oudiokodek:\nVoorbeeldtempo"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth-oudiobisse per voorbeeld"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Gebruik Bluetooth-oudiokodek\nKeuse: bisse per monster"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Kies Bluetooth-oudiokodek:\nBis per voorbeeld"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth-oudiokanaalmodus"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Gebruik Bluetooth-oudiokodek\nKeuse: kanaalmodus"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Kies Bluetooth-oudiokodek:\nKanaalmodus"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-oudio-LDAC-kodek: Speelgehalte"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Gebruik Bluetooth-oudio-LDAC\nKodekkeuse: Speelgehalte"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Kies Bluetooth-oudio-LDAC-kodek:\nSpeelgehalte"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Stroming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Private DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Kies private DNS-modus"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Af"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Outomaties"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Gasheernaam van private DNS-verskaffer"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Voer gasheernaam van DNS-verskaffer in"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Kon nie koppel nie"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Verewekansig MAC-adres wanneer daar aan Wi‑Fi-netwerke gekoppel word"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Beperk"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Onbeperk"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Loggerbuffer se groottes"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Kies loggergroottes per logbuffer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Maak logskrywer se aanhoudende berging skoon?"</string>
@@ -278,7 +267,7 @@
     <string name="media_category" msgid="4388305075496848353">"Media"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitering"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Strengmodus geaktiveer"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Flits skerm as programme lang bewerkings uitvoer op die hoofdraad"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Flits skerm as programme lang handelinge doen op die hoofdraad"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Wyserligging"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Skermlaag wys huidige raakdata"</string>
     <string name="show_touches" msgid="2642976305235070316">"Wys tikke"</string>
@@ -316,13 +305,13 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Moenie aktiwiteite behou nie"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Vernietig elke aktiwiteit sodra die gebruiker dit verlaat"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Agtergrondproses-limiet"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"Wys agtergrond-ANR\'e"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Wys Program Reageer Nie-dialoog vir agtergrondprogramme"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Wys alle ANRe"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Wys Program reageer nie-dialoog vir agtergrond programme"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Wys kennisgewingkanaalwaarskuwings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Wys waarskuwing op skerm wanneer \'n program \'n kennisgewing sonder \'n geldige kanaal plaas"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"Dwing toelating op eksterne berging"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Maak dat enige program na eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Dwing aktiwiteite om verstelbaar te wees"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"Programme verplig ekstern toegelaat"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Maak dat enige program in eksterne berging geskryf kan word, ongeag manifeswaardes"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Verplig verstelbare groottes vir aktiwiteite"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Maak die groottes van alle aktiwiteite verstelbaar vir veelvuldige vensters, ongeag manifeswaardes."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktiveer vormvrye-Windows"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Aktiveer steun vir eksperimentele vormvrye-Windows."</string>
@@ -367,26 +356,40 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Kleurregstelling"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Hierdie kenmerk is eksperimenteel en kan werkverrigting beïnvloed."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Geneutraliseer deur <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor gegrond op jou gebruik"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor gegrond op jou gebruik (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Sal op grond van jou gebruik waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Sal op grond van jou gebruik waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Sal waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Sal waarskynlik hou tot omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Omtrent <xliff:g id="TIME">%1$s</xliff:g> oor"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Ongeveer <xliff:g id="TIME">%1$s</xliff:g> oor gegrond op jou gebruik"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> oor"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Minder as <xliff:g id="THRESHOLD">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Meer as <xliff:g id="TIME_REMAINING">%1$s</xliff:g> oor"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Foon kan binnekort afgaan"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Tablet kan binnekort afgaan"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Toestel kan binnekort afgaan"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Foon kan binnekort afgaan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Tablet kan binnekort afgaan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Toestel kan binnekort afgaan (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> oor tot vol gelaai"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> tot vol gelaai"</string>
@@ -431,16 +434,14 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Geregistreer"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nie geregistreer nie"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Onbeskikbaar"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC word ewekansig gemaak"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d toestelle is gekoppel</item>
       <item quantity="one">%1$d toestel is gekoppel</item>
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Meer tyd."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Minder tyd."</string>
-    <string name="cancel" msgid="6859253417269739139">"Kanselleer"</string>
-    <string name="okay" msgid="1997666393121016642">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Skakel aan"</string>
+    <string name="cancel" msgid="6859253417269739139">"Kanselleer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Skakel Moenie steur nie aan"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Nooit"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Net prioriteit"</string>
@@ -449,7 +450,4 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Jy sal nie jou volgende wekker om <xliff:g id="WHEN">%1$s</xliff:g> hoor nie"</string>
     <string name="alarm_template" msgid="4996153414057676512">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Tydsduur"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Vra elke keer"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Sopas"</string>
 </resources>

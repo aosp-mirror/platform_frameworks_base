@@ -69,9 +69,6 @@ public final class SELinuxMMAC {
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
 
-    // Append v2 to existing seinfo label
-    private static final String SANDBOX_V2_STR = ":v2";
-
     // Append targetSdkVersion=n to existing seinfo label where n is the app's targetSdkVersion
     private static final String TARGETSDKVERSION_STR = ":targetSdkVersion=";
 
@@ -323,14 +320,13 @@ public final class SELinuxMMAC {
      *
      * @param pkg object representing the package to be labeled.
      * @param isPrivileged boolean.
-     * @param targetSandboxVersion int.
      * @param targetSdkVersion int. If this pkg runs as a sharedUser, targetSdkVersion is the
      *        greater of: lowest targetSdk for all pkgs in the sharedUser, or
      *        MINIMUM_TARGETSDKVERSION.
      * @return String representing the resulting seinfo.
      */
     public static String getSeInfo(PackageParser.Package pkg, boolean isPrivileged,
-            int targetSandboxVersion, int targetSdkVersion) {
+            int targetSdkVersion) {
         String seInfo = null;
         synchronized (sPolicies) {
             if (!sPolicyRead) {
@@ -349,10 +345,6 @@ public final class SELinuxMMAC {
 
         if (seInfo == null) {
             seInfo = DEFAULT_SEINFO;
-        }
-
-        if (targetSandboxVersion == 2) {
-            seInfo += SANDBOX_V2_STR;
         }
 
         if (isPrivileged) {

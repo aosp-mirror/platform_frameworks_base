@@ -153,31 +153,31 @@ package com.android.xml.permission.configfile {
 
   public class Permissions {
     ctor public Permissions();
-    method public java.util.List<com.android.xml.permission.configfile.AllowAssociation> getAllowAssociation();
-    method public java.util.List<com.android.xml.permission.configfile.AllowIgnoreLocationSettings> getAllowIgnoreLocationSettings();
-    method public java.util.List<com.android.xml.permission.configfile.AllowImplicitBroadcast> getAllowImplicitBroadcast();
-    method public java.util.List<com.android.xml.permission.configfile.AllowInDataUsageSave> getAllowInDataUsageSave();
-    method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSave> getAllowInPowerSave();
-    method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSaveExceptIdle> getAllowInPowerSaveExceptIdle();
-    method public java.util.List<com.android.xml.permission.configfile.AllowUnthrottledLocation> getAllowUnthrottledLocation();
-    method public java.util.List<com.android.xml.permission.configfile.AppLink> getAppLink();
-    method public java.util.List<com.android.xml.permission.configfile.AssignPermission> getAssignPermission();
-    method public java.util.List<com.android.xml.permission.configfile.BackupTransportWhitelistedService> getBackupTransportWhitelistedService();
-    method public java.util.List<com.android.xml.permission.configfile.BugreportWhitelisted> getBugreportWhitelisted();
-    method public java.util.List<com.android.xml.permission.configfile.DefaultEnabledVrApp> getDefaultEnabledVrApp();
-    method public java.util.List<com.android.xml.permission.configfile.DisabledUntilUsedPreinstalledCarrierApp> getDisabledUntilUsedPreinstalledCarrierApp();
-    method public java.util.List<com.android.xml.permission.configfile.DisabledUntilUsedPreinstalledCarrierAssociatedApp> getDisabledUntilUsedPreinstalledCarrierAssociatedApp();
-    method public java.util.List<com.android.xml.permission.configfile.Feature> getFeature();
-    method public java.util.List<com.android.xml.permission.configfile.Group> getGroup();
-    method public java.util.List<com.android.xml.permission.configfile.HiddenApiWhitelistedApp> getHiddenApiWhitelistedApp();
-    method public java.util.List<com.android.xml.permission.configfile.Library> getLibrary();
-    method public java.util.List<com.android.xml.permission.configfile.OemPermissions> getOemPermissions();
-    method public java.util.List<com.android.xml.permission.configfile.Permission> getPermission();
-    method public java.util.List<com.android.xml.permission.configfile.PrivappPermissions> getPrivappPermissions();
-    method public java.util.List<com.android.xml.permission.configfile.SplitPermission> getSplitPermission();
-    method public java.util.List<com.android.xml.permission.configfile.SystemUserBlacklistedApp> getSystemUserBlacklistedApp();
-    method public java.util.List<com.android.xml.permission.configfile.SystemUserWhitelistedApp> getSystemUserWhitelistedApp();
-    method public java.util.List<com.android.xml.permission.configfile.UnavailableFeature> getUnavailableFeature();
+    method public java.util.List<com.android.xml.permission.configfile.AllowAssociation> getAllowAssociation_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowIgnoreLocationSettings> getAllowIgnoreLocationSettings_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowImplicitBroadcast> getAllowImplicitBroadcast_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowInDataUsageSave> getAllowInDataUsageSave_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSaveExceptIdle> getAllowInPowerSaveExceptIdle_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowInPowerSave> getAllowInPowerSave_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AllowUnthrottledLocation> getAllowUnthrottledLocation_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AppLink> getAppLink_optional();
+    method public java.util.List<com.android.xml.permission.configfile.AssignPermission> getAssignPermission_optional();
+    method public java.util.List<com.android.xml.permission.configfile.BackupTransportWhitelistedService> getBackupTransportWhitelistedService_optional();
+    method public java.util.List<com.android.xml.permission.configfile.BugreportWhitelisted> getBugreportWhitelisted_optional();
+    method public java.util.List<com.android.xml.permission.configfile.DefaultEnabledVrApp> getDefaultEnabledVrApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.DisabledUntilUsedPreinstalledCarrierApp> getDisabledUntilUsedPreinstalledCarrierApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.DisabledUntilUsedPreinstalledCarrierAssociatedApp> getDisabledUntilUsedPreinstalledCarrierAssociatedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Feature> getFeature_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Group> getGroup_optional();
+    method public java.util.List<com.android.xml.permission.configfile.HiddenApiWhitelistedApp> getHiddenApiWhitelistedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Library> getLibrary_optional();
+    method public java.util.List<com.android.xml.permission.configfile.OemPermissions> getOemPermissions_optional();
+    method public java.util.List<com.android.xml.permission.configfile.Permission> getPermission_optional();
+    method public java.util.List<com.android.xml.permission.configfile.PrivappPermissions> getPrivappPermissions_optional();
+    method public java.util.List<com.android.xml.permission.configfile.SplitPermission> getSplitPermission_optional();
+    method public java.util.List<com.android.xml.permission.configfile.SystemUserBlacklistedApp> getSystemUserBlacklistedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.SystemUserWhitelistedApp> getSystemUserWhitelistedApp_optional();
+    method public java.util.List<com.android.xml.permission.configfile.UnavailableFeature> getUnavailableFeature_optional();
   }
 
   public class PrivappPermissions {

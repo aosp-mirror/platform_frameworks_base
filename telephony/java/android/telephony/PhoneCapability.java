@@ -30,6 +30,25 @@ import java.util.Objects;
  * @hide
  */
 public class PhoneCapability implements Parcelable {
+    // Hardcoded default DSDS capability.
+    public static final PhoneCapability DEFAULT_DSDS_CAPABILITY;
+    // Hardcoded default Single SIM single standby capability.
+    public static final PhoneCapability DEFAULT_SSSS_CAPABILITY;
+
+    static {
+        ModemInfo modemInfo1 = new ModemInfo(0, 0, true, true);
+        ModemInfo modemInfo2 = new ModemInfo(1, 0, true, true);
+
+        List<ModemInfo> logicalModemList = new ArrayList<>();
+        logicalModemList.add(modemInfo1);
+        logicalModemList.add(modemInfo2);
+        DEFAULT_DSDS_CAPABILITY = new PhoneCapability(1, 1, 0, logicalModemList, false);
+
+        logicalModemList = new ArrayList<>();
+        logicalModemList.add(modemInfo1);
+        DEFAULT_SSSS_CAPABILITY = new PhoneCapability(1, 1, 0, logicalModemList, false);
+    }
+
     public final int maxActiveVoiceCalls;
     public final int maxActiveData;
     public final int max5G;

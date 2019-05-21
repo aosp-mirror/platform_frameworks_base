@@ -16,6 +16,7 @@
 
 package android.bluetooth.le;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothUuid;
@@ -97,7 +98,7 @@ public final class ScanRecord {
      * Returns a list of service solicitation UUIDs within the advertisement that are used to
      * identify the Bluetooth GATT services.
      */
-    @Nullable
+    @NonNull
     public List<ParcelUuid> getServiceSolicitationUuids() {
         return mServiceSolicitationUuids;
     }
@@ -296,9 +297,6 @@ public final class ScanRecord {
 
             if (serviceUuids.isEmpty()) {
                 serviceUuids = null;
-            }
-            if (serviceSolicitationUuids.isEmpty()) {
-                serviceSolicitationUuids = null;
             }
             return new ScanRecord(serviceUuids, serviceSolicitationUuids, manufacturerData,
                     serviceData, advertiseFlag, txPowerLevel, localName, scanRecord);

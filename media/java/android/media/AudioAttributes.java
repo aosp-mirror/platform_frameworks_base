@@ -1037,7 +1037,7 @@ public final class AudioAttributes implements Parcelable {
             return fromGetVolumeControlStream ?
                     AudioSystem.STREAM_SYSTEM : AudioSystem.STREAM_SYSTEM_ENFORCED;
         }
-        if ((aa.getFlags() & FLAG_SCO) == FLAG_SCO) {
+        if ((aa.getAllFlags() & FLAG_SCO) == FLAG_SCO) {
             return fromGetVolumeControlStream ?
                     AudioSystem.STREAM_VOICE_CALL : AudioSystem.STREAM_BLUETOOTH_SCO;
         }

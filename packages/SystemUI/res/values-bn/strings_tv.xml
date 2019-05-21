@@ -22,5 +22,5 @@
     <string name="notification_channel_tv_pip" msgid="134047986446577723">"ছবির-মধ্যে-ছবি"</string>
     <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(শিরোনামহীন প্রোগ্রাম)"</string>
     <string name="pip_close" msgid="3480680679023423574">"PIP বন্ধ করুন"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"পূর্ণ স্ক্রিন"</string>
+    <string name="pip_fullscreen" msgid="8604643018538487816">"পূর্ণ স্ক্রীন"</string>
 </resources>

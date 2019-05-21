@@ -301,6 +301,7 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
                         break;
                     }
                     // This is not alphabetical, so we fall through to variant
+                    [[fallthrough]];
                 case 5:
                 case 6:
                 case 7:

@@ -77,16 +77,15 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ਆਈ.ਡੀ. ਪੂਰਵ-ਨਿਰਧਾਰਤ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ਤੁਸੀਂ ਕਾਲਰ ਆਈ.ਡੀ. ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
-    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"ਕੋਈ ਮੋਬਾਈਲ ਡਾਟਾ ਸੇਵਾ ਨਹੀਂ"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
+    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ਕੋਈ  ਡਾਟਾ  ਸੇਵਾ ਨਹੀਂ"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"ਸੰਕਟਕਾਲ ਵਿੱਚ ਕੋਈ ਕਾਲ ਨਹੀਂ"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ਕੋਈ ਆਵਾਜ਼ੀ ਸੇਵਾ ਨਹੀਂ"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"ਕੋਈ ਅਵਾਜ਼ੀ ਸੇਵਾ ਜਾਂ ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਨਹੀਂ"</string>
-    <string name="RestrictedStateContent" msgid="6538703255570997248">"ਤੁਹਾਡੇ ਕੈਰੀਅਰ ਵੱਲੋਂ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਹੈ"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"ਸਿਮ <xliff:g id="SIMNUMBER">%d</xliff:g> ਤੁਹਾਡੇ ਕੈਰੀਅਰ ਵੱਲੋਂ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਬੰਦ ਹੈ"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਨੂੰ ਬਦਲ ਕੇ ਦੇਖੋ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"ਵਾਈ-ਫਾਈ ਰਾਹੀਂ ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ ਨਹੀਂ ਕਰ ਸਕਦੇ"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ਕੋਈ ਆਵਾਜ਼ੀ/ਸੰਕਟਕਾਲੀਨ ਸੇਵਾ ਨਹੀਂ"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"ਤੁਹਾਡੇ ਟਿਕਾਣੇ \'ਤੇ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਵੱਲੋਂ ਉਪਲਬਧ ਨਹੀਂ ਕਰਵਾਈ ਗਈ"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"ਸਿਗਨਲ ਪ੍ਰਾਪਤੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਸੈਟਿੰਗਾਂ &gt; ਨੈੱਟਵਰਕ ਅਤੇ ਇੰਟਰਨੈੱਟ &gt; ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ &gt; ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਦੀ ਕਿਸਮ \'ਤੇ ਜਾਓ ਅਤੇ ਚੁਣੀ ਗਈ ਕਿਸਮ ਨੂੰ ਬਦਲਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਕਿਰਿਆਸ਼ੀਲ ਹੈ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ ਲਈ ਕਿਸੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ਸੁਚੇਤਨਾਵਾਂ"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ਕਾਲ ਫਾਰਵਰਡਿੰਗ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਬੈਕ ਮੋਡ"</string>
@@ -121,21 +120,17 @@
     <string name="roamingText11" msgid="4154476854426920970">"ਰੋਮਿੰਗ ਬੈਨਰ ਚਾਲੂ"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ਰੋਮਿੰਗ ਬੈਨਰ ਬੰਦ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ਸੇਵਾ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ"</string>
-    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਨੂੰ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"ਵਾਈ-ਫਾਈ ਤੋਂ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਸੁਨੇਹੇ ਭੇਜਣ ਦੇ ਲਈ, ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਆਪਣੇ ਕੈਰੀਅਰ ਨੂੰ ਇਸ ਸੇਵਾ ਦੀ ਸਥਾਪਨਾ ਕਰਨ ਲਈ ਕਹੋ। ਫਿਰ ਸੈਟਿੰਗਾਂ ਵਿੱਚੋਂ ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਨੂੰ ਦੁਬਾਰਾ ਚਾਲੂ ਕਰੋ। (ਗੜਬੜੀ ਕੋਡ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7372514042696663278">"ਤੁਹਾਡੇ ਕੈਰੀਅਰ ਨਾਲ ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ ਨੂੰ ਰਜਿਸਟਰ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="7472393097168811593">"ਆਪਣੇ ਕੈਰੀਅਰ ਨਾਲ ਪੰਜੀਕਰਨ ਕਰੋ (ਗੜਬੜ ਕੋਡ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
-    <skip />
-    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
-    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN ਕਾਲ"</string>
-    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN ਕਾਲ"</string>
-    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ਵਾਈ-ਫਾਈ"</string>
-    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ | <xliff:g id="SPN">%s</xliff:g>"</string>
-    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+  <string-array name="wfcSpnFormats">
+    <item msgid="6830082633573257149">"%s"</item>
+    <item msgid="4397097370387921767">"%s ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</item>
+  </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ਬੰਦ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ਤਰਜੀਹੀ ਵਾਈ-ਫਾਈ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ਮੋਬਾਈਲ ਨੂੰ ਤਰਜੀਹ ਹੈ"</string>
@@ -165,8 +160,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਬੇਨਤੀਆਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> ਲਈ ਸਾਈਨਇਨ ਅਸ਼ੁੱਧੀ"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"ਸਿੰਕ ਕਰੋ"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"ਸਮਕਾਲੀਕਿਰਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"ਬਹੁਤ ਸਾਰੀਆਂ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਗਈ।"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"ਸਿੰਕ ਕਰੋ"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"ਬਹੁਤ ਜ਼ਿਆਦਾ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ਮਿਟਾਏ।"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ਟੈਬਲੈੱਟ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ਘੜੀ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ਟੀਵੀ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
@@ -179,13 +174,14 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"ਤੁਹਾਡੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ਮੁਤਾਬਕ"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਮਿਟਾਈ ਗਈ"</string>
+    <string name="work_profile_deleted_description" msgid="1100529432509639864">"ਗੁੰਮਸ਼ੁਦਾ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਦੇ ਕਾਰਨ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਜਾਂ ਤਾਂ ਗੁੰਮਸ਼ੁਦਾ ਹੈ ਜਾਂ ਖਰਾਬ ਹੈ। ਨਤੀਜੇ ਵਜੋਂ, ਤੁਹਾਡੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਸਬੰਧਿਤ ਡਾਟਾ ਮਿਟਾਇਆ ਗਿਆ ਹੈ। ਸਹਾਇਤਾ ਲਈ ਆਪਣੇ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"ਤੁਹਾਡਾ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਹੁਣ ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"ਕਈ ਵਾਰ ਗਲਤ ਪਾਸਵਰਡ ਦਾਖਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"ਡੀਵਾਈਸ ਪ੍ਰਬੰਧਨ ਅਧੀਨ ਹੈ"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ਤੁਹਾਡਾ ਸੰਗਠਨ ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਦਾ ਹੈ ਅਤੇ ਨੈੱਟਵਰਕ ਟਰੈਫਿਕ ਦੀ ਨਿਗਰਾਨੀ ਕਰ ਸਕਦਾ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਮਿਟਾਇਆ ਜਾਏਗਾ"</string>
-    <string name="factory_reset_message" msgid="9024647691106150160">"ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।\n\nਜੇਕਰ ਤੁਹਾਡੇ ਕੋਲ ਕੋਈ ਸਵਾਲ ਹਨ, ਤਾਂ ਆਪਣੀ ਸੰਸਥਾ ਦੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
+    <string name="factory_reset_message" msgid="7972496262232832457">"ਪ੍ਰਸ਼ਾਸਕ ਐਪ ਵਰਤੀ ਨਹੀਂ ਜਾ ਸਕਦੀ। ਹੁਣ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਡਾਟਾ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।\n\nਜੇਕਰ ਤੁਹਾਡੇ ਕੋਲ ਕੋਈ ਸਵਾਲ ਹਨ, ਤਾਂ ਆਪਣੀ ਸੰਸਥਾ ਦੇ ਪ੍ਰਸ਼ਾਸਕ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਿੰਟ ਕਰਨਾ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="me" msgid="6545696007631404292">"ਮੈਂ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ਟੈਬਲੈੱਟ ਵਿਕਲਪ"</string>
@@ -195,7 +191,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"ਵਾਇਰਲੈਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"ਵਾਇਰਲੈਸ ਬੰਦ ਕਰੋ"</string>
     <string name="screen_lock" msgid="799094655496098153">"ਸਕ੍ਰੀਨ  ਲਾਕ"</string>
-    <string name="power_off" msgid="4266614107412865048">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
+    <string name="power_off" msgid="4266614107412865048">"ਪਾਵਰ ਬੰਦ"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ਰਿੰਗਰ ਬੰਦ"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ਰਿੰਗਰ ਥਰਥਰਾਹਟ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ਰਿੰਗਰ ਚਾਲੂ"</string>
@@ -224,7 +220,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="global_action_logout" msgid="935179188218826050">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"ਬੱਗ ਰਿਪੋਰਟ ਲਓ"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"ਬਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"ਜ਼ਿਆਦਾਤਰ ਹਾਲਾਤਾਂ ਵਿੱਚ ਇਸ ਦੀ ਵਰਤੋਂ ਕਰੋ। ਇਹ ਤੁਹਾਨੂੰ ਰਿਪੋਰਟ ਦੀ ਪ੍ਰਗਤੀ ਨੂੰ ਟਰੈਕ ਕਰਨ, ਸਮੱਸਿਆ ਬਾਰੇ ਹੋਰ ਵੇਰਵੇ ਦਾਖਲ ਕਰਨ, ਅਤੇ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦਿੰਦਾ ਹੈ। ਇਹ ਉਹਨਾਂ ਘੱਟ-ਵਰਤੇ ਗਏ ਕੁਝ ਭਾਗਾਂ ਨੂੰ ਨਜ਼ਰ-ਅੰਦਾਜ਼ ਕਰ ਸਕਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਦੀ ਰਿਪੋਰਟ ਕਰਨ ਵਿੱਚ ਵੱਧ ਸਮਾਂ ਲੱਗ ਸਕਦਾ ਹੈ।"</string>
@@ -240,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ਏਅਰਪਲੇਨ ਮੋਡ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ਏਅਰਪਲੇਨ ਮੋਡ ਬੰਦ ਹੈ"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"ਬੈਟਰੀ ਸੇਵਰ"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"ਬੈਟਰੀ ਸੇਵਰ ਬੰਦ ਹੈ"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"ਸਹਾਇਤਾ ਕਰੋ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ"</string>
@@ -276,46 +269,43 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ਸੰਪਰਕ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸੰਪਰਕਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ਟਿਕਾਣਾ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਨਿਰਧਾਰਤ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚੋ"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਇਸ ਡੀਵਾਈਸ ਦੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਇਸ ਡੀਵਾਈਸ ਦੇ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ਕੈਲੰਡਰ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨੀ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਕੈਲੰਡਰ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦੇਖੋ"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ ਦੇਣੇ ਹਨ?"</string>
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ ਦਿਓ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ਸਟੋਰੇਜ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨਾ"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ੋਟੋਆਂ, ਮੀਡੀਆ, ਅਤੇ ਫ਼ਾਈਲਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">" ਆਡੀਓ  ਰਿਕਾਰਡ ਕਰਨ"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ  ਆਡੀਓ  ਰਿਕਾਰਡ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਲੈਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤਸਵੀਰਾਂ ਖਿੱਚਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੇਣਾ ਹੈ?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"ਕਾਲ ਲੌਗ"</string>
-    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗ ਨੂੰ ਪੜ੍ਹੋ ਅਤੇ ਲਿਖੋ"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੇ ਕਾਲ ਲੌਗਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤਸਵੀਰਾਂ ਖਿੱਚਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫ਼ੋਨ ਕਰੋ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੇਣਾ ਹੈ?"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦਿਓ"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ਸਰੀਰ ਸੰਵੇਦਕ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"ਕੀ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਲੱਛਣਾਂ ਸੰਬੰਧੀ ਸੈਂਸਰ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ਨੂੰ ਤੁਹਾਡੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਲੱਛਣਾਂ ਸਬੰਧੀ ਸੈਂਸਰ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦਿਓ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨਾ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਅੰਤਰਕਿਰਿਆ ਕਰ ਰਹੇ ਹੋ"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'ਸਪੱਰਸ਼ ਰਾਹੀਂ ਪੜਚੋਲ ਕਰੋ\' ਚਾਲੂ ਕਰਨਾ"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਈ ਟੱਚ ਚਾਲੂ ਕਰਨਾ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"ਟੈਪ ਕੀਤੀਆਂ ਆਈਟਮਾਂ ਨੂੰ ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਬੋਲਿਆ ਜਾਵੇਗਾ ਅਤੇ ਸਕ੍ਰੀਨ ਦੀ ਸੰਕੇਤਾਂ ਦੀ ਵਰਤੋਂ ਨਾਲ ਪੜਚੋਲ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਟਾਈਪ ਕੀਤੀ ਲਿਖਤ ਦਾ ਨਿਰੀਖਣ ਕਰਨਾ"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ਇਸ ਵਿੱਚ ਨਿੱਜੀ ਡਾਟਾ ਸ਼ਾਮਲ ਹੈ ਜਿਵੇਂ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ ਅਤੇ ਪਾਸਵਰਡ।"</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ਇਸ ਵਿੱਚ ਨਿੱਜੀ  ਡਾਟਾ  ਸ਼ਾਮਲ ਹੈ ਜਿਵੇਂ ਕ੍ਰੈਡਿਟ ਕਾਰਡ ਨੰਬਰ ਅਤੇ ਪਾਸਵਰਡ।"</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"ਡਿਸਪਲੇ ਵੱਡਦਰਸ਼ੀਕਰਨ ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ਡਿਸਪਲੇ ਦੇ ਜ਼ੂਮ ਪੱਧਰ ਅਤੇ ਸਥਿਤੀ ਨੂੰ ਕੰਟਰੋਲ ਕਰੋ।"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ਸੰਕੇਤ ਕਰਦੀ ਹੈ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ਟੈਪ ਕਰ ਸਕਦੀ ਹੈ, ਸਵਾਈਪ ਕਰ ਸਕਦੀ ਹੈ, ਚੂੰਢੀ ਭਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਹੋਰ ਸੰਕੇਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਕੇਤ"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ਡੀਵਾਈਸਾਂ ਦੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ \'ਤੇ ਕੀਤੇ ਗਏ ਸੰਕੇਤਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰ ਸਕਦੇ ਹਨ।"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"ਡੀਵਾਈਸਾਂ ਦੇ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ \'ਤੇ ਕੀਤੇ ਗਏ ਸੰਕੇਤਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ਸਥਿਤੀ ਪੱਟੀ ਬੰਦ ਕਰੋ ਜਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਪੱਟੀ ਨੂੰ ਚਾਲੂ ਕਰਨ ਜਾਂ ਸਿਸਟਮ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਜੋੜਨ ਅਤੇ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ਸਥਿਤੀ ਪੱਟੀ ਬਣਨ ਦਿਓ"</string>
@@ -366,8 +356,6 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਟੈਬਲੈੱਟ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਲਈ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ TV ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਸ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ਐਪ ਨੂੰ ਮੈਮਰੀ ਵਿੱਚ ਖੁਦ ਦੇ ਭਾਗਾਂ ਨੂੰ ਸਥਾਈ ਬਣਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਫ਼ੋਨ ਨੂੰ ਹੌਲੀ ਕਰਦੇ ਹੋਏ ਹੋਰਾਂ ਐਪਾਂ ਤੇ ਉਪਲਬਧ ਮੈਮਰੀ ਨੂੰ ਸੀਮਿਤ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <string name="permlab_foregroundService" msgid="3310786367649133115">"ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਚਲਾਓ"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"ਐਪ ਨੂੰ ਫੋਰਗ੍ਰਾਉਂਡ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਦਿਓ।"</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"ਐਪ ਸਟੋਰੇਜ ਜਗ੍ਹਾ ਮਾਪੋ"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"ਐਪ ਨੂੰ ਇਸਦਾ ਕੋਡ, ਡਾਟਾ ਅਤੇ ਕੈਸ਼ੇ ਆਕਾਰ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ  ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
@@ -490,8 +478,6 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
-    <string name="permlab_useBiometric" msgid="8837753668509919318">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ਐਪ ਨੂੰ ਵਰਤੋਂ ਲਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸ਼ਾਮਲ ਕਰਨ ਅਤੇ ਮਿਟਾਉਣ ਦੀਆਂ ਵਿਧੀਆਂ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
@@ -504,7 +490,6 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਮਾਣਿਤ ਹੋਇਆ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਸਕਦਾ। ਕਿਰਪਾ ਕਰਕੇ ਇੱਕ ਮੌਜੂਦਾ ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਟਾਓ।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋ ਗਿਆ ਹੈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -588,11 +573,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਹੋਏ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਟੈਬਲੈੱਟ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਟੈਬਲੈੱਟ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ, ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗ਼ਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ TV ਨੂੰ  ਲਾਕ  ਕਰੋ ਜਾਂ TV ਦਾ ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗ਼ਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ਸਕ੍ਰੀਨ ਨੂੰ ਅਣਲਾਕ ਕਰਦੇ ਸਮੇਂ ਟਾਈਪ ਕੀਤੇ ਗਲਤ ਪਾਸਵਰਡਾਂ ਦੀ ਸੰਖਿਆ ਦਾ ਨਿਰੀਖਣ ਕਰੋ ਅਤੇ ਫ਼ੋਨ ਨੂੰ ਲਾਕ ਕਰੋ ਜਾਂ ਫ਼ੋਨ ਦਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ ਜੇਕਰ ਬਹੁਤ ਜ਼ਿਆਦਾ ਗਲਤ ਪਾਸਵਰਡ ਟਾਈਪ ਕੀਤੇ ਹਨ।"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ ਲਾਕ ਬਦਲੋ"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਬਦਲੋ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਬਦਲੋ।"</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"ਸਕ੍ਰੀਨ ਲਾਕ ਕਰੋ"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਕਰੋ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ਇਸਤੇ ਨਿਯੰਤਰਣ ਪਾਓ ਕਿ ਸਕ੍ਰਿਨ ਕਿਵੇਂ ਅਤੇ ਕਦੋਂ  ਲਾਕ  ਹੁੰਦੀ ਹੈ।"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"ਸਾਰਾ  ਡਾਟਾ  ਮਿਟਾਓ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੈਬਲੈੱਟ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਟੀਵੀ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ਇੱਕ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਕੇ ਚਿਤਾਵਨੀ ਤੋਂ ਬਿਨਾਂ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਮਿਟਾਓ।"</string>
@@ -608,7 +593,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ਲੋੜ ਹੈ ਕਿ ਸਟੋਰ ਕੀਤਾ ਐਪ  ਡਾਟਾ  ਇਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾਏ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ਕੈਮਰੇ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ਸਾਰੇ ਡੀਵਾਈਸ ਕੈਮਰਿਆਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ਸਕ੍ਰੀਨ  ਲਾਕ  ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ਘਰ"</item>
@@ -817,8 +802,6 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"ਪੈਟਰਨ ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"ਚਿਹਰਾ ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"ਪਿੰਨ ਅਣਲਾਕ।"</string>
-    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"ਸਿਮ ਪਿੰਨ ਅਣਲਾਕ।"</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"ਸਿਮ Puk ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ਪਾਸਵਰਡ ਅਣਲਾਕ।"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ਪੈਟਰਨ ਖੇਤਰ।"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ਖੇਤਰ ਸਲਾਈਡ ਕਰੋ।"</string>
@@ -843,7 +826,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"ਨੁਕਤਾ: ਜ਼ੂਮ ਵਧਾਉਣ ਅਤੇ ਘਟਾਉਣ ਲਈ ਡਬਲ ਟੈਪ ਕਰੋ।"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ਆਟੋਫਿਲ"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"ਆਟੋਫਿਲ ਸੈਟ ਅਪ ਕਰੋ"</string>
-    <string name="autofill_window_title" msgid="4107745526909284887">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ਨਾਲ ਆਟੋਫਿਲ ਕਰੋ"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"ਆਟੋਫਿਲ"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -880,12 +863,6 @@
     <string name="text_copied" msgid="4985729524670131385">"ਟੈਕਸਟ ਕਲਿਪਬੋਰਡ ਤੇ ਕਾਪੀ ਕੀਤਾ।"</string>
     <string name="more_item_label" msgid="4650918923083320495">"ਹੋਰ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ਮੀਨੂ+"</string>
-    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
-    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl+"</string>
-    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt+"</string>
-    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Shift+"</string>
-    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym+"</string>
-    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"ਸਪੇਸ"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ਦਾਖਲ ਕਰੋ"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ਮਿਟਾਓ"</string>
@@ -1017,29 +994,20 @@
     <string name="inputMethod" msgid="1653630062304567879">"ਇਨਪੁੱਟ ਵਿਧੀ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ਟੈਕਸਟ ਕਿਰਿਆਵਾਂ"</string>
     <string name="email" msgid="4560673117055050403">"ਈਮੇਲ ਕਰੋ"</string>
-    <string name="email_desc" msgid="3638665569546416795">"ਚੁਣੇ ਹੋਏ ਪਤੇ \'ਤੇ ਈਮੇਲ ਭੇਜੋ"</string>
     <string name="dial" msgid="1253998302767701559">"ਕਾਲ ਕਰੋ"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"ਚੁਣੇ ਗਏ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਕਾਲ ਕਰੋ"</string>
-    <string name="map" msgid="5441053548030107189">"ਨਕਸ਼ਾ ਖੋਲ੍ਹੋ"</string>
-    <string name="map_desc" msgid="1836995341943772348">"ਚੁਣਿਆ ਗਿਆ ਪਤਾ ਨਕਸ਼ੇ \'ਤੇ ਦਿਖਾਓ"</string>
+    <string name="map" msgid="6521159124535543457">"ਟਿਕਾਣਾ ਦੇਖੋ"</string>
     <string name="browse" msgid="1245903488306147205">"ਖੋਲ੍ਹੋ"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"ਚੁਣਿਆ ਗਿਆ URL ਖੋਲ੍ਹੋ"</string>
     <string name="sms" msgid="4560537514610063430">"ਸੁਨੇਹਾ ਭੇਜੋ"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"ਚੁਣੇ ਗਏ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਸੁਨੇਹਾ ਭੇਜੋ"</string>
     <string name="add_contact" msgid="7867066569670597203">"ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"ਸੰਪਰਕਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ਦੇਖੋ"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"ਕੈਲੰਡਰ ਵਿੱਚ ਚੁਣਿਆ ਗਿਆ ਸਮਾਂ ਦੇਖੋ"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"ਸਮਾਂ-ਸੂਚੀ"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ਚੁਣੇ ਗਏ ਸਮੇਂ ਲਈ ਇਵੈਂਟ ਦੀ ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
     <string name="view_flight" msgid="7691640491425680214">"ਟਰੈਕ ਕਰੋ"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"ਚੁਣੀ ਗਈ ਉਡਾਣ ਨੂੰ ਟਰੈਕ ਕਰੋ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ਸਟੋਰੇਜ ਦੀ ਜਗ੍ਹਾ ਖਤਮ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ਕੁਝ ਸਿਸਟਮ ਫੰਕਸ਼ਨ ਕੰਮ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਚੱਲ ਰਿਹਾ ਹੈ"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"ਹੋਰ ਜਾਣਕਾਰੀ ਜਾਂ ਐਪ ਨੂੰ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="ok" msgid="5970060430562524910">"ਠੀਕ ਹੈ"</string>
+    <string name="ok" msgid="5970060430562524910">"ਠੀਕ"</string>
     <string name="cancel" msgid="6442560571259935130">"ਰੱਦ ਕਰੋ"</string>
     <string name="yes" msgid="5362982303337969312">"ਠੀਕ"</string>
     <string name="no" msgid="5141531044935541497">"ਰੱਦ ਕਰੋ"</string>
@@ -1079,7 +1047,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ਵਾਰ-ਵਾਰ ਰੁਕ ਰਹੀ ਹੈ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ਵਾਰ-ਵਾਰ ਰੁਕ ਰਹੀ ਹੈ"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"ਦੁਬਾਰਾ ਐਪ ਖੋਲ੍ਹੋ"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"ਵਿਚਾਰ ਭੇਜੋ"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"ਪ੍ਰਤੀਕਰਮ ਭੇਜੋ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ਬੰਦ ਕਰੋ"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ਡੀਵਾਈਸ ਦੇ ਮੁੜ-ਚਾਲੂ ਹੋਣ ਤੱਕ ਮਿਊਟ ਕਰੋ"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"ਉਡੀਕ ਕਰੋ"</string>
@@ -1106,28 +1074,31 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"ਅੱਪਡੇਟ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="smv_application" msgid="3307209192155442829">"ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> (ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%2$s</xliff:g>) ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
     <string name="smv_process" msgid="5120397012047462446">"ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%1$s</xliff:g> ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
-    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"ਫ਼ੋਨ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
-    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"ਟੈਬਲੈੱਟ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
-    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"ਡੀਵਾਈਸ ਅੱਪਡੇਟ ਹੋ ਰਿਹਾ ਹੈ…"</string>
-    <string name="android_start_title" product="default" msgid="4536778526365907780">"ਫ਼ੋਨ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
-    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"ਟੈਬਲੈੱਟ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
-    <string name="android_start_title" product="device" msgid="7467484093260449437">"ਡੀਵਾਈਸ ਚਾਲੂ ਹੋ ਰਿਹਾ ਹੈ…"</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Android ਅਪਗ੍ਰੇਡ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ਸਟੋਰੇਜ ਅਨੁਕੂਲ ਹੋ ਰਹੀ ਹੈ।"</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"ਸਿਸਟਮ ਅੱਪਡੇਟ ਪੂਰਾ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android ਅੱਪਡੇਟ ਮੁਕੰਮਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੁਝ ਐਪਾਂ ਅੱਪਗ੍ਰੇਡ ਪੂਰਾ ਹੋਣ ਤੱਕ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰਨ"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> ਅੱਪਗ੍ਰੇਡ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> <xliff:g id="NUMBER_1">%2$d</xliff:g> ਦਾ ਐਪ ਅਨੁਕੂਲ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ਐਪਸ ਚਾਲੂ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ਬੂਟ ਪੂਰਾ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ਚੱਲ ਰਿਹਾ ਹੈ"</string>
-    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"ਗੇਮ \'ਤੇ ਵਾਪਸ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"ਗੇਮ ਚੁਣੋ"</string>
-    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"ਬਿਹਤਰ ਪ੍ਰਦਰਸ਼ਨ ਲਈ, ਇੱਕ ਸਮੇਂ \'ਤੇ ਇਹਨਾਂ ਗੇਮਾਂ ਵਿੱਚੋਂ ਸਿਰਫ਼ ਇੱਕ ਹੀ ਖੋਲ੍ਹੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
-    <string name="old_app_action" msgid="3044685170829526403">"<xliff:g id="OLD_APP">%1$s</xliff:g> \'ਤੇ ਵਾਪਸ ਜਾਓ"</string>
-    <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> ਖੋਲ੍ਹੋ"</string>
-    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> ਰੱਖਿਅਤ ਕੀਤੇ ਬਿਨਾਂ ਬੰਦ ਹੋ ਜਾਵੇਗੀ"</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ਦੀ ਮੈਮਰੀ ਸੀਮਾ ਵਧ ਗਈ ਹੈ"</string>
-    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ਹੀਪ ਡੰਪ ਨੂੰ ਇਕੱਤਰ ਕੀਤਾ ਗਿਆ। ਸਾਂਝਾ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"ਹੀਪ ਡੰਪ ਇਕੱਤਰ ਕੀਤਾ ਗਿਆ; ਸਾਂਝਾ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ਕੀ ਹੀਪ ਡੰਪ ਸ਼ੇਅਰ ਕਰਨਾ ਹੈ?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROC">%1$s</xliff:g> ਦੀ ਆਪਣੀ ਪ੍ਰਕਿਰਿਆ ਮੈਮਰੀ ਸੀਮਾ <xliff:g id="SIZE">%2$s</xliff:g> ਵਧ ਗਈ ਹੈ। ਇਸਦੇ ਵਿਕਾਸਕਾਰ ਨਾਲ ਸਾਂਝਾ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਲਈ ਇੱਕ ਹੀਪ ਡੰਪ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਤੁਹਾਡੀ ਕੋਈ ਵੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਹੋ ਸਕਦੀ ਹੈ, ਜਿਸ \'ਤੇ ਐਪਲੀਕੇਸ਼ਨ ਦੀ ਪਹੁੰਚ ਹੈ।"</string>
     <string name="sendText" msgid="5209874571959469142">"ਲਿਖਤ ਲਈ ਕੋਈ ਕਾਰਵਾਈ ਚੁਣੋ"</string>
@@ -1162,12 +1133,12 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"ਖੁੱਲ੍ਹੇ ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੋਵੋ"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"ਕੈਰੀਅਰ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ਖੁੱਲ੍ਹੇ ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ਵਾਈ‑ਫਾਈ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ਸਾਰੇ ਨੈੱਟਵਰਕਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ਸਾਰੇ ਨੈੱਟਵਰਕ"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"ਸਾਰੇ ਨੈੱਟਵਰਕ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ਵਾਈ‑ਫਾਈ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਚੱਲ ਪਵੇਗਾ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਰੱਖਿਅਤ ਕੀਤੇ ਉੱਚ-ਗੁਣਵੱਤਾ ਵਾਲੇ ਨੈੱਟਵਰਕ ਦੇ ਨੇੜੇ ਹੋਵੋ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ਵਾਪਸ ਚਾਲੂ ਨਾ ਕਰੋ"</string>
@@ -1179,9 +1150,6 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ਵਾਈ-ਫਾਈ ਦੀ ਕੋਈ ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"ਤੁਹਾਡੀਆਂ ਹੌਟਸਪੌਟ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲਾਅ"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ਤੁਹਾਡਾ ਹੌਟਸਪੌਟ ਬੈਂਡ ਬਦਲ ਗਿਆ ਹੈ।"</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ਇਹ ਡੀਵਾਈਸ ਸਿਰਫ਼ 5GHz ਦੀ ਤੁਹਾਡੀ ਤਰਜੀਹ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਇਸਦੀ ਬਜਾਏ, ਇਹ ਡੀਵਾਈਸ ਉਪਲਬਧ ਹੋਣ \'ਤੇ 5GHz ਬੈਂਡ ਵਰਤੇਗਾ।"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>
@@ -1237,7 +1205,6 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"ਰੀਸਟਾਰਟ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"ਮੋਬਾਈਲ ਸੇਵਾ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"ਆਪਣੇ ਨਵੇਂ ਸਿਮ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਲਈ ਕੈਰੀਅਰ ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
-    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"ਆਪਣੇ ਨਵੇਂ ਸਿਮ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰਨ ਲਈ <xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"ਨਵੀਂ SIM ਦਾਖਲ ਕੀਤੀ ਗਈ"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ਇਸ ਨੂੰ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -1256,13 +1223,13 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB ਰਾਹੀਂ PTP ਚਾਲੂ ਹੈ"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"USB ਟੈਦਰਿੰਗ ਚਾਲੂ ਹੈ"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"USB ਰਾਹੀਂ MIDI ਚਾਲੂ ਹੈ"</string>
-    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"USB ਐਕਸੈਸਰੀ ਕਨੈਕਟ ਹੋਈ"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"USB ਐਕਸੈਸਰੀ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ। ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ਐਨਾਲੌਗ  ਆਡੀਓ  ਉਪਸਾਧਨ ਦਾ ਪਤਾ ਲੱਗਿਆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"ਨੱਥੀ ਕੀਤਾ ਡੀਵਾਈਸ ਇਸ ਫ਼ੋਨ ਦੇ ਅਨੁਰੂਪ ਨਹੀਂ ਹੈ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB ਡੀਬੱਗਿੰਗ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB ਡੀਬੱਗਿੰਗ ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ਡੀਬੱਗਿੰਗ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਚੁਣੋ।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
@@ -1272,7 +1239,7 @@
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀ-ਬੋਰਡ ਬਦਲੋ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
-    <string name="hardware" msgid="194658061510127999">"ਆਭਾਸੀ ਕੀ-ਬੋਰਡ ਦਿਖਾਓ"</string>
+    <string name="hardware" msgid="194658061510127999">"ਆਭਾਸੀ ਕੀ-ਬੋਰਡ  ਦਿਖਾਓ"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਦੀ ਰੂਪ-ਰੇਖਾ ਬਦਲੋ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ਭਾਸ਼ਾ ਅਤੇ ਖਾਕਾ ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1281,35 +1248,34 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ਐਪ ਹੋਰ ਐਪਾਂ ਦੇ ਉੱਤੇ ਹੈ"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ਐਪ ਹੋਰਾਂ ਐਪਾਂ ਦੇ ਉੱਤੇ ਹੈ।"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"ਜੇਕਰ ਤੁਸੀਂ ਨਹੀਂ ਚਾਹੁੰਦੇ ਕਿ <xliff:g id="NAME">%s</xliff:g> ਐਪ ਇਸ ਵਿਸ਼ੇਸ਼ਤਾ ਦੀ ਵਰਤੋਂ ਕਰੇ, ਤਾਂ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਇਸਨੂੰ ਬੰਦ ਕਰੋ।"</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ਬੰਦ ਕਰੋ"</string>
-    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> ਦੀ ਜਾਂਚ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
-    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"ਵਰਤਮਾਨ ਸਮੱਗਰੀ ਦੀ ਸਮੀਖਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"ਨਵਾਂ <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"ਸੈੱਟਅੱਪ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ਬੰਦ ਕਰੋ"</string>
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ਤਰੁੱਟੀਆਂ ਦੀ ਜਾਂਚ ਕਰ ਰਿਹਾ ਹੈ"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ਨਵੇਂ <xliff:g id="NAME">%s</xliff:g> ਦਾ ਪਤਾ ਲਗਾਇਆ ਗਿਆ"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਮੀਡੀਆ ਨੂੰ ਟ੍ਰਾਂਸਫ਼ਰ ਕਰਨ ਲਈ"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"ਠੀਕ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"ਕਰਪਟਿਡ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> ਗ਼ਲਤ ਹੈ। ਠੀਕ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> ਖਰਾਬ ਹੈ। ਠੀਕ ਕਰਨ ਲਈ ਚੁਣੋ।"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ਅਸਮਰਥਿਤ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ਇਹ ਡੀਵਾਈਸ ਇਸ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਕਿਸੇ ਸਮਰਥਿਤ ਫਾਰਮੈਟ ਵਿੱਚ ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"ਇਹ ਡੀਵਾਈਸ ਇਸ <xliff:g id="NAME">%s</xliff:g> ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਕਿਸੇ ਸਮਰਥਿਤ ਫਾਰਮੈਟ ਵਿੱਚ ਸਥਾਪਤ ਕਰਨ ਲਈ ਚੁਣੋ।"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਅਚਨਚੇਤ ਹਟਾਇਆ ਗਿਆ"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"ਸਮੱਗਰੀ ਗੁਆਉਣ ਤੋਂ ਬਚਣ ਲਈ ਹਟਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਮੀਡੀਆ ਕੱਢੋ"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਹਟਾਇਆ ਗਿਆ"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ਸ਼ਾਇਦ ਕੁਝ ਪ੍ਰਕਾਰਜਾਤਮਕਤਾ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਨਾ ਕਰੇ। ਨਵੀਂ ਸਟੋਰੇਜ ਸ਼ਾਮਲ ਕਰੋ।"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਬਾਹਰ ਕੱਢਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"ਨਾ ਹਟਾਓ"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">" ਡਾਟਾ  ਦੇ ਨੁਕਸਾਨ ਤੋਂ ਬੱਚਣ ਲਈ ਹਟਾਉਣ ਤੋਂ ਪਹਿਲਾਂ <xliff:g id="NAME">%s</xliff:g> ਅਨਮਾਊਂਟ ਕਰੋ"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"ਹਟਾਇਆ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਹਟਾਇਆ ਗਿਆ, ਕੋਈ ਨਵਾਂ ਸੰਮਿਲਿਤ ਕਰੋ"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ਅਜੇ ਵੀ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਕੱਢ ਰਿਹਾ ਹੈ..."</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ਨਾ ਹਟਾਓ"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ਬਾਹਰ ਕੱਢੋ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ਐਕਸਪਲੋਰ ਕਰੋ"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ਲਾਪਤਾ"</string>
-    <string name="ext_media_missing_message" msgid="4012389235250987930">"ਦੁਬਾਰਾ ਡੀਵਾਈਸ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਮੁੜ ਸੰਮਿਲਿਤ ਕਰੋ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ਮੂਵ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">" ਡਾਟਾ  ਮੂਵ ਕਰ ਰਿਹਾ ਹੈ"</string>
-    <string name="ext_media_move_success_title" msgid="7863652232242276066">"ਸਮੱਗਰੀ ਟ੍ਰਾਂਸਫ਼ਰ ਪੂਰਾ ਹੋਇਆ"</string>
-    <string name="ext_media_move_success_message" msgid="8939137931961728009">"ਸਮੱਗਰੀ <xliff:g id="NAME">%s</xliff:g> ਵਿੱਚ ਲਿਜਾਈ ਗਈ"</string>
-    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"ਸਮੱਗਰੀ ਲਿਜਾਈ ਨਹੀਂ ਜਾ ਸਕੀ"</string>
-    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"ਦੁਬਾਰਾ ਸਮੱਗਰੀ ਲਿਜਾ ਕੇ ਦੇਖੋ"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ਮੂਵ ਸੰਪੂਰਣ"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">" ਡਾਟਾ  ਨੂੰ <xliff:g id="NAME">%s</xliff:g> ਵਿੱਚ ਮੂਵ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">" ਡਾਟਾ  ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">" ਡਾਟਾ  ਮੂਲ ਸਥਾਨ \'ਤੇ ਛੱਡਿਆ ਗਿਆ"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"ਹਟਾਏ ਗਏ"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ਹਟਾਇਆ ਗਿਆ"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"ਜਾਂਚ ਕਰ ਰਿਹਾ ਹੈ..."</string>
@@ -1368,14 +1334,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਤੋਂ ਡਿਸਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="vpn_lockdown_error" msgid="3133844445659711681">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਨਾਲ ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
+    <string name="vpn_lockdown_error" msgid="6009249814034708175">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਅਸ਼ੁੱਧੀ"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Change network or VPN settings"</string>
     <string name="upload_file" msgid="2897957172366730416">"ਫਾਈਲ ਚੁਣੋ"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ਕੋਈ ਫਾਈਲ ਨਹੀਂ ਚੁਣੀ ਗਈ"</string>
     <string name="reset" msgid="2448168080964209908">"ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="submit" msgid="1602335572089911941">"ਪ੍ਰਸਤੁਤ ਕਰੋ"</string>
-    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ਗੱਡੀ ਚਲਾਉਣ ਸੰਬੰਧੀ ਐਪ ਚੱਲ ਰਹੀ ਹੈ"</string>
-    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ਗੱਡੀ ਚਲਾਉਣ ਸੰਬੰਧੀ ਐਪ ਤੋਂ ਬਾਹਰ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"ਕਾਰ ਮੋਡ ਸਮਰਥਿਤ"</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"ਕਾਰ ਮੋਡ ਤੋਂ ਬਾਹਰ ਜਾਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ਟੈਦਰਿੰਗ ਜਾਂ ਹੌਟਸਪੌਟ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"ਸਥਾਪਤ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"ਟੈਦਰਿੰਗ ਨੂੰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
@@ -1453,19 +1419,22 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ਡ੍ਰਾਇਵ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ਸਟੋਰੇਜ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ਸੰਪਾਦਨ ਕਰੋ"</string>
-    <string name="data_usage_warning_title" msgid="6499834033204801605">"ਡਾਟਾ ਚਿਤਾਵਨੀ"</string>
-    <string name="data_usage_warning_body" msgid="7340198905103751676">"ਤੁਸੀਂ <xliff:g id="APP">%s</xliff:g> ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕੀਤੀ"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">" ਡਾਟਾ  ਵਰਤੋਂ  ਚਿਤਾਵਨੀ"</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"ਵਰਤੋਂ ਅਤੇ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ਡਾਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
+    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G  ਡਾਟਾ  ਸੀਮਾ ਪੂਰੀ ਹੋਈ"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"ਮੋਬਾਈਲ ਡਾਟਾ ਸੀਮਾ ਸਮਾਪਤ ਹੋਈ"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ਵਾਈ-ਫਾਈ ਡਾਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
-    <string name="data_usage_limit_body" msgid="2908179506560812973">"ਤੁਹਾਡੀ ਬਾਕੀ ਮਿਆਦ ਲਈ ਡਾਟਾ ਰੋਕਿਆ ਗਿਆ"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"ਆਪਣੇ ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਸੀਮਾ ਤੋਂ ਵੱਧ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"ਵਾਈ-ਫਾਈ ਡਾਟੇ ਦੀ ਸੀਮਾ ਤੋਂ ਵੱਧ"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"ਤੁਸੀਂ ਆਪਣੀ ਸੈੱਟ ਕੀਤੀ ਹੋਈ ਸੀਮਾ ਤੋਂ <xliff:g id="SIZE">%s</xliff:g> ਵੱਧ ਵਰਤੀ"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"ਬਾਕੀ ਸਾਇਕਲ ਲਈ  ਡਾਟਾ  ਰੁਕ ਗਿਆ"</string>
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ਡਾਟਾ ਸੀਮਾ ਵਧ ਗਈ"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G  ਡਾਟਾ  ਸੀਮਾ ਵਧੀ"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"ਮੋਬਾਈਲ ਡਾਟਾ ਦੀ ਸੀਮਾ ਵਧ ਗਈ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"ਵਾਈ-ਫਾਈ ਡਾਟਾ ਸੀਮਾ ਵਧ ਗਈ"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ਤੋਂ ਵੱਧ ਨਿਰਦਿਸ਼ਟ ਸੀਮਾ।"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"ਪਿਛੋਕੜ  ਡਾਟਾ  ਪ੍ਰਤਿਬੰਧਿਤ"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"ਪਾਬੰਦੀ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="data_usage_rapid_title" msgid="1809795402975261331">"ਮੋਬਾਈਲ ਡਾਟੇ ਦੀ ਜ਼ਿਆਦਾ ਵਰਤੋਂ"</string>
-    <string name="data_usage_rapid_body" msgid="6897825788682442715">"ਤੁਹਾਡੀਆਂ ਐਪਾਂ ਨੇ ਆਮ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਹੈ"</string>
-    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> ਨੇ ਆਮ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਹੈ"</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ਜ਼ਿਆਦਾ ਡਾਟਾ ਵਰਤੋਂ"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"ਪਿਛਲੇ ਕੁਝ ਦਿਨਾਂ ਤੋਂ ਤੁਹਾਡੇ ਡਾਟੇ ਦੀ ਵਰਤੋਂ ਆਮ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਹੈ। ਵਰਤੋਂ ਅਤੇ ਸੈਟਿੰਗਾਂ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"ਸੁਰੱਖਿਆ ਪ੍ਰਮਾਣ-ਪੱਤਰ"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ਇਹ ਪ੍ਰਮਾਣ-ਪੱਤਰ ਵੈਧ ਹੈ।"</string>
     <string name="issued_to" msgid="454239480274921032">"ਨੂੰ ਜਾਰੀ ਕੀਤਾ ਗਿਆ:"</string>
@@ -1701,8 +1670,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਕੁਝ ਡੀਵਾਈਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਅਤੇ ਐਪਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ। "<annotation id="url">"ਹੋਰ ਜਾਣੋ"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਕੁਝ ਡੀਵਾਈਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਬੰਦ ਕਰਦਾ ਹੈ ਅਤੇ ਐਪਾਂ \'ਤੇ ਪਾਬੰਦੀ ਲਗਾਉਂਦਾ ਹੈ।"</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"ਬੈਟਰੀ ਲਾਈਫ਼ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਵਿੱਚ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਥਰਥਰਾਹਟ, ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਬੈਕਗ੍ਰਾਊਂਡ ਡਾਟੇ ਨੂੰ ਸੀਮਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਸੁਨੇਹਾ ਭੇਜਣ ਅਤੇ ਹੋਰ ਐਪਾਂ, ਜੋ ਸਮਕਾਲੀਕਰਨ \'ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੁੰਦਾ ਹੈ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ਚਾਲੂ ਕਰੋ"</string>
@@ -1714,9 +1682,9 @@
       <item quantity="one">%1$d ਮਿੰਟਾਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
       <item quantity="other">%1$d ਮਿੰਟਾਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
-      <item quantity="one">%1$d ਘੰਟੇ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
-      <item quantity="other">%1$d ਘੰਟਿਆਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
+      <item quantity="other">%1$d ਘੰਟਿਆਂ ਤੱਕ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="one">%1$d ਘੰਟਿਆਂ ਲਈ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ਤੱਕ)</item>
@@ -1730,9 +1698,9 @@
       <item quantity="one">%d ਮਿੰਟਾਂ ਲਈ</item>
       <item quantity="other">%d ਮਿੰਟਾਂ ਲਈ</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
-      <item quantity="one">%d ਘੰਟੇ ਲਈ</item>
-      <item quantity="other">%d ਘੰਟਿਆਂ ਲਈ</item>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">%d ਘੰਟਿਆਂ ਤੱਕ</item>
+      <item quantity="other">%d ਘੰਟਿਆਂ ਤੱਕ</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="one">%d ਘੰਟਿਆਂ ਲਈ</item>
@@ -1750,17 +1718,17 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ਇਵੈਂਟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ਸੌਣ ਵੇਲੇ"</string>
-    <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਕੁਝ ਧੁਨੀਆਂ ਨੂੰ ਮਿਊਟ ਕਰ ਰਹੀ ਹੈ"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਵੱਲੋਂ ਮਿਊਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਹੈ ਅਤੇ ਇਹ ਅਸਥਿਰ ਹੋ ਸਕਦੀ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਸੀ। ਵੇਰਵਿਆਂ ਲਈ ਆਪਣੇ ਨਿਰਮਾਤਾ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD ਬੇਨਤੀ ਨੂੰ ਨਿਯਮਿਤ ਕਾਲ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD ਬੇਨਤੀ ਨੂੰ SS ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"ਨਵੀਂ USSD ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD ਬੇਨਤੀ ਨੂੰ ਵੀਡੀਓ ਕਾਲ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS ਬੇਨਤੀ ਨੂੰ ਨਿਯਮਿਤ ਕਾਲ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS ਬੇਨਤੀ ਨੂੰ ਵੀਡੀਓ ਕਾਲ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS ਬੇਨਤੀ ਨੂੰ USSD ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
-    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"ਨਵੀਂ SS ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
+    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD ਬੇਨਤੀ DIAL ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD ਬੇਨਤੀ SS ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD ਬੇਨਤੀ ਨਵੀਂ USSD ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD ਬੇਨਤੀ ਨੂੰ ਸੋਧ ਕੇ ਵੀਡੀਓ ਡਾਇਲ ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ।"</string>
+    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS ਬੇਨਤੀ DIAL ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS ਬੇਨਤੀ ਨੂੰ ਸੋਧ ਕੇ ਵੀਡੀਓ ਡਾਇਲ ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ।"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ਬੇਨਤੀ USSD ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ਬੇਨਤੀ ਨਵੀਂ SS ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ਸੁੰਗੇੜੋ"</string>
@@ -1789,9 +1757,6 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ਸਾਰੇ ਖੇਤਰ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ਖੋਜੋ"</string>
-    <string name="app_suspended_title" msgid="2075071241147969611">"ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
-    <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ਐਪ ਫਿਲਹਾਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਇਸਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
-    <string name="app_suspended_more_details" msgid="1131804827776778187">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"ਕੀ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਚਾਲੂ ਕਰਨੀ ਹੈ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ਤੁਹਾਡੀਆਂ ਕਾਰਜ-ਸਥਾਨ ਐਪਾਂ, ਸੂਚਨਾਵਾਂ, ਡਾਟਾ ਅਤੇ ਹੋਰ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚਾਲੂ ਕੀਤੀਆਂ ਜਾਣਗੀਆਂ"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ਚਾਲੂ ਕਰੋ"</string>
@@ -1816,7 +1781,7 @@
     <string name="conference_call" msgid="3751093130790472426">"ਕਾਨਫਰੰਸ ਕਾਲ"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"ਟੂਲ-ਟਿੱਪ"</string>
     <string name="app_category_game" msgid="5431836943981492993">"ਗੇਮਾਂ"</string>
-    <string name="app_category_audio" msgid="1659853108734301647">"ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"ਸੰਗੀਤ ਅਤੇ  ਆਡੀਓ"</string>
     <string name="app_category_video" msgid="2728726078629384196">"ਮੂਵੀਆਂ ਅਤੇ ਵੀਡੀਓ"</string>
     <string name="app_category_image" msgid="4867854544519846048">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਚਿੱਤਰ"</string>
     <string name="app_category_social" msgid="5842783057834965912">"ਸਮਾਜਕ ਅਤੇ ਸੰਚਾਰ"</string>
@@ -1861,10 +1826,6 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ਸਿਮ ਰਾਹੀਂ ਅਵਾਜ਼ੀ ਕਾਲ ਕਰਨ ਦੀ ਵਿਵਸਥਾ ਨਹੀਂ ਹੈ"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"ਸਿਮ ਰਾਹੀਂ ਅਵਾਜ਼ੀ ਕਾਲ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"ਫ਼ੋਨ ਰਾਹੀਂ ਅਵਾਜ਼ੀ ਕਾਲ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"ਸਿਮ <xliff:g id="SIMNUMBER">%d</xliff:g> ਨੂੰ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"ਸਿਮ <xliff:g id="SIMNUMBER">%d</xliff:g> ਦੀ ਵਿਵਸਥਾ ਨਹੀਂ ਹੈ"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"ਸਿਮ <xliff:g id="SIMNUMBER">%d</xliff:g> ਨੂੰ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"ਸਿਮ <xliff:g id="SIMNUMBER">%d</xliff:g> ਨੂੰ ਇਜਾਜ਼ਤ ਨਹੀਂ ਹੈ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ਪੌਪਅੱਪ ਵਿੰਡੋ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"ਐਪ ਦਾ ਵਰਜਨ ਡਾਊਨਗ੍ਰੇਡ ਕੀਤਾ ਗਿਆ, ਜਾਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੇ ਅਨੁਕੂਲ ਨਹੀਂ ਹੈ"</string>
@@ -1877,18 +1838,7 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"ਹਾਨੀਕਾਰਕ ਐਪ ਦਾ ਪਤਾ ਲੱਗਿਆ"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ਦੀ <xliff:g id="APP_2">%2$s</xliff:g> ਦੇ ਹਿੱਸੇ ਦਿਖਾਉਣ ਦੀ ਇੱਛਾ ਹੈ"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"ਸੰਪਾਦਨ ਕਰੋ"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"ਕਾਲਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਦੀ ਥਰਥਰਾਹਟ ਹੋਵੇਗੀ"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ਕਾਲਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ ਨੂੰ ਮਿਊਟ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ਸਿਸਟਮ ਬਦਲਾਅ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ਨਵਾਂ: \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਮੋਡ ਸੂਚਨਾਵਾਂ ਨੂੰ ਲੁਕਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ਹੋਰ ਜਾਣਨ ਲਈ ਅਤੇ ਬਦਲਾਅ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵਿਕਲਪ ਬਦਲ ਗਿਆ ਹੈ"</string>
-    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ਟੈਪ ਕਰਕੇ ਦੋਖੋ ਕਿ ਕਿਹੜੀਆਂ ਚੀਜ਼ਾਂ ਬਲਾਕ ਕੀਤੀਆਂ ਗਈਆਂ ਹਨ।"</string>
-    <string name="notification_app_name_system" msgid="4205032194610042794">"ਸਿਸਟਮ"</string>
-    <string name="notification_app_name_settings" msgid="7751445616365753381">"ਸੈਟਿੰਗਾਂ"</string>
-    <string name="notification_appops_camera_active" msgid="5050283058419699771">"ਕੈਮਰਾ"</string>
-    <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="car_loading_profile" msgid="3545132581795684027">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"ਰੁਕਾਵਟਾਂ ਲਈ ਆਪਣੀਆਂ ਵਰਤਾਅ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
 </resources>

@@ -16,14 +16,14 @@
 
 package android.util;
 
+import libcore.util.HexEncoding;
+
 /**
  * A utility class for common byte array to hex string operations and vise versa.
  *
  * @hide
  */
 public final class ByteStringUtils {
-    private static final char[] HEX_LOWERCASE_ARRAY = "0123456789abcdef".toCharArray();
-    private static final char[] HEX_UPPERCASE_ARRAY = "0123456789ABCDEF".toCharArray();
 
     private ByteStringUtils() {
     /* hide constructor */
@@ -39,16 +39,7 @@ public final class ByteStringUtils {
             return null;
         }
 
-        final int byteLength = bytes.length;
-        final int charCount = 2 * byteLength;
-        final char[] chars = new char[charCount];
-
-        for (int i = 0; i < byteLength; i++) {
-            final int byteHex = bytes[i] & 0xFF;
-            chars[i * 2] = HEX_UPPERCASE_ARRAY[byteHex >>> 4];
-            chars[i * 2 + 1] = HEX_UPPERCASE_ARRAY[byteHex & 0x0F];
-        }
-        return new String(chars);
+        return HexEncoding.encodeToString(bytes, true /* upperCase */);
     }
 
     /**
@@ -61,24 +52,6 @@ public final class ByteStringUtils {
             return null;
         }
 
-        final char[] chars = str.toCharArray();
-        final int charLength = chars.length;
-        final byte[] bytes = new byte[charLength / 2];
-
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] =
-                    (byte) (((getIndex(chars[i * 2]) << 4) & 0xF0)
-                            | (getIndex(chars[i * 2 + 1]) & 0x0F));
-        }
-        return bytes;
-    }
-
-    private static int getIndex(char c) {
-        for (int i = 0; i < HEX_UPPERCASE_ARRAY.length; i++) {
-            if (HEX_UPPERCASE_ARRAY[i] == c || HEX_LOWERCASE_ARRAY[i] == c) {
-                return i;
-            }
-        }
-        return -1;
+        return HexEncoding.decode(str, false /* allowSingleChar */);
     }
 }

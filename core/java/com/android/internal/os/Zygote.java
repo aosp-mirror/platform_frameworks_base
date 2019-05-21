@@ -23,6 +23,7 @@ import static com.android.internal.os.ZygoteConnectionConstants.MAX_ZYGOTE_ARGC;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.os.Build;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
@@ -215,7 +216,8 @@ public final class Zygote {
      */
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
-            int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir) {
+            int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
+            int targetSdkVersion) {
         ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
@@ -224,6 +226,7 @@ public final class Zygote {
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
+            Zygote.disableExecuteOnly(targetSdkVersion);
             Trace.setTracingEnabled(true, runtimeFlags);
 
             // Note that this event ends at the end of handleChildProc,
@@ -568,6 +571,8 @@ public final class Zygote {
                            args.mSeInfo, args.mNiceName, args.mStartChildZygote,
                            args.mInstructionSet, args.mAppDataDir);
 
+        disableExecuteOnly(args.mTargetSdkVersion);
+
         if (args.mNiceName != null) {
             Process.setArgV0(args.mNiceName);
         }
@@ -612,6 +617,17 @@ public final class Zygote {
                 + ", effective=0x" + Long.toHexString(args.mEffectiveCapabilities));
         }
     }
+
+    /**
+     * Mark execute-only segments of libraries read+execute for apps with targetSdkVersion<Q.
+     */
+    protected static void disableExecuteOnly(int targetSdkVersion) {
+        if ((targetSdkVersion < Build.VERSION_CODES.Q) && !nativeDisableExecuteOnly()) {
+            Log.e("Zygote", "Failed to set libraries to read+execute.");
+        }
+    }
+
+    private static native boolean nativeDisableExecuteOnly();
 
     /**
      * @return  Raw file descriptors for the read-end of blastula reporting pipes.

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<configuration description="Config for VTS VtsValidateDefaultPermissions.">
+    <option name="config-descriptor:metadata" key="plan" value="vts-treble" />
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.VtsFilePusher">
+        <option name="abort-on-push-failure" value="false"/>
+        <option name="push-group" value="HostDrivenTest.push"/>
+        <option name="push" value="DATA/etc/default-permissions.xsd->/data/local/tmp/default-permissions.xsd"/>
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.VtsMultiDeviceTest">
+        <option name="test-module-name" value="VtsValidateDefaultPermissions"/>
+        <option name="binary-test-source" value="_32bit::DATA/nativetest/vts_defaultPermissions_validate_test/vts_defaultPermissions_validate_test" />
+        <option name="binary-test-source" value="_64bit::DATA/nativetest64/vts_defaultPermissions_validate_test/vts_defaultPermissions_validate_test" />
+        <option name="binary-test-type" value="gtest"/>
+        <option name="test-timeout" value="30s"/>
+    </test>
+</configuration>

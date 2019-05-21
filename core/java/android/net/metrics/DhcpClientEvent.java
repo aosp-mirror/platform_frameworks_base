@@ -22,6 +22,7 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * An event recorded when a DhcpClient state machine transitions to a new state.
@@ -99,6 +100,14 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
     @Override
     public String toString() {
         return String.format("DhcpClientEvent(%s, %dms)", msg, durationMs);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(DhcpClientEvent.class))) return false;
+        final DhcpClientEvent other = (DhcpClientEvent) obj;
+        return TextUtils.equals(msg, other.msg)
+                && durationMs == other.durationMs;
     }
 
     /** @hide */

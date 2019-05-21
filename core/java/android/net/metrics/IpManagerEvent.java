@@ -101,6 +101,14 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
                 Decoder.constants.get(eventType), durationMs);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj.getClass().equals(IpManagerEvent.class))) return false;
+        final IpManagerEvent other = (IpManagerEvent) obj;
+        return eventType == other.eventType
+                && durationMs == other.durationMs;
+    }
+
     final static class Decoder {
         static final SparseArray<String> constants = MessageUtils.findMessageNames(
                 new Class[]{IpManagerEvent.class},

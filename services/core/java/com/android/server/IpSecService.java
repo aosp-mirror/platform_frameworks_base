@@ -30,6 +30,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.IIpSecService;
 import android.net.INetd;
 import android.net.IpSecAlgorithm;
@@ -208,6 +209,7 @@ public class IpSecService extends IIpSecService.Stub {
                     mBinder.linkToDeath(this, 0);
                 } catch (RemoteException e) {
                     binderDied();
+                    e.rethrowFromSystemServer();
                 }
             }
         }

@@ -78,8 +78,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     protected boolean mShouldTranslateContents;
     private boolean mTopAmountRounded;
     private float mDistanceToTopRoundness = -1;
-    private float mExtraWidthForClipping;
-    private int mMinimumHeightForClipping = 0;
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -120,11 +118,13 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (!mCustomOutline) {
             int translation = mShouldTranslateContents && !ignoreTranslation
                     ? (int) getTranslation() : 0;
-            left = Math.max(translation, 0);
+            int halfExtraWidth = (int) (mExtraWidthForClipping / 2.0f);
+            left = Math.max(translation, 0) - halfExtraWidth;
             top = mClipTopAmount + mBackgroundTop;
-            right = getWidth() + Math.min(translation, 0);
+            right = getWidth() + halfExtraWidth + Math.min(translation, 0);
             bottom = Math.max(getActualHeight(), top);
-            int intersectBottom = Math.max(getActualHeight() - mClipBottomAmount, top);
+            int intersectBottom = Math.max(mMinimumHeightForClipping,
+                    Math.max(getActualHeight() - mClipBottomAmount, top));
             if (bottom != intersectBottom) {
                 if (clipRoundedToBottom) {
                     bottom = intersectBottom;
@@ -237,12 +237,16 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return result;
     }
 
+    @Override
     public void setExtraWidthForClipping(float extraWidthForClipping) {
-        mExtraWidthForClipping = extraWidthForClipping;
+        super.setExtraWidthForClipping(extraWidthForClipping);
+        invalidate();
     }
 
+    @Override
     public void setMinimumHeightForClipping(int minimumHeightForClipping) {
-        mMinimumHeightForClipping = minimumHeightForClipping;
+        super.setMinimumHeightForClipping(minimumHeightForClipping);
+        invalidate();
     }
 
     @Override

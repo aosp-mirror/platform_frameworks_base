@@ -16,7 +16,6 @@
 
 package android.net.dhcp;
 
-import static android.net.TrafficStats.TAG_SYSTEM_DHCP_SERVER;
 import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
 import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
 import static android.net.dhcp.DhcpPacket.DHCP_SERVER;
@@ -33,6 +32,7 @@ import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_BROADCAST;
 import static android.system.OsConstants.SO_REUSEADDR;
 
+import static com.android.internal.util.TrafficStatsConstants.TAG_SYSTEM_DHCP_SERVER;
 import static com.android.server.util.NetworkStackConstants.INFINITE_LEASE;
 import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ALL;
 import static com.android.server.util.NetworkStackConstants.IPV4_ADDR_ANY;
@@ -45,6 +45,7 @@ import android.annotation.Nullable;
 import android.net.INetworkStackStatusCallback;
 import android.net.MacAddress;
 import android.net.TrafficStats;
+import android.net.util.NetworkStackUtils;
 import android.net.util.SharedLog;
 import android.net.util.SocketUtils;
 import android.os.Handler;
@@ -207,7 +208,7 @@ public class DhcpServer extends IDhcpServer.Stub {
         @Override
         public void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
                 @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException {
-            SocketUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
+            NetworkStackUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
         }
 
         @Override
@@ -645,5 +646,10 @@ public class DhcpServer extends IDhcpServer.Stub {
                 TrafficStats.setThreadStatsTag(oldTag);
             }
         }
+    }
+
+    @Override
+    public int getInterfaceVersion() {
+        return this.VERSION;
     }
 }

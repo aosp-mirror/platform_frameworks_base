@@ -71,15 +71,22 @@ public final class CellInfoWcdma extends CellInfo implements Parcelable {
         mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
     }
 
+    /**
+     * @return a {@link CellIdentityWcdma} instance.
+     */
     @Override
     public CellIdentityWcdma getCellIdentity() {
         return mCellIdentityWcdma;
     }
+
     /** @hide */
     public void setCellIdentity(CellIdentityWcdma cid) {
         mCellIdentityWcdma = cid;
     }
 
+    /**
+     * @return a {@link CellSignalStrengthWcdma} instance.
+     */
     @Override
     public CellSignalStrengthWcdma getCellSignalStrength() {
         return mCellSignalStrengthWcdma;

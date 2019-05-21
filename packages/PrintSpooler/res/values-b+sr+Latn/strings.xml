@@ -86,7 +86,7 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Greška štampača <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Štampač je blokirao <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancel" msgid="4373674107267141885">"Otkaži"</string>
-    <string name="restart" msgid="2472034227037808749">"Restartuj"</string>
+    <string name="restart" msgid="2472034227037808749">"Ponovo pokreni"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nema veze sa štampačem"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"nepoznato"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"Želite li da koristite <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>

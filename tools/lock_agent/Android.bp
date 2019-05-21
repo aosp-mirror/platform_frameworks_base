@@ -1,0 +1,61 @@
+cc_library {
+    name: "liblockagent",
+    host_supported: false,
+    srcs: ["agent.cpp"],
+    static_libs: [
+        "libbase_ndk",
+        "slicer_ndk_no_rtti",
+    ],
+    shared_libs: [
+        "libz",  // for slicer (using adler32).
+        "liblog",
+    ],
+    sdk_version: "current",
+    stl: "c++_static",
+    include_dirs: [
+        // NDK headers aren't available in platform NDK builds.
+        "libnativehelper/include_jni",
+    ],
+    header_libs: [
+        "libopenjdkjvmti_headers",
+    ],
+    compile_multilib: "both",
+}
+
+cc_binary_host {
+    name: "lockagenttest",
+    srcs: ["agent.cpp"],
+    static_libs: [
+        "libbase",
+        "libz",
+        "slicer",
+    ],
+    include_dirs: [
+        // NDK headers aren't available in platform NDK builds.
+        "libnativehelper/include_jni",
+    ],
+    header_libs: [
+        "libopenjdkjvmti_headers",
+    ],
+}
+
+java_library {
+    name: "lockagent",
+    srcs: ["java/**/*.java"],
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    installable: true,
+}
+
+sh_binary {
+    name: "start_with_lockagent",
+    src: "start_with_lockagent.sh",
+    required: [
+        "liblockagent",
+        "lockagent",
+    ],
+}

@@ -3462,9 +3462,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /**
      * Process state of UID changed; if needed, will trigger
      * {@link #updateRulesForDataUsageRestrictionsUL(int)} and
-     * {@link #updateRulesForPowerRestrictionsUL(int)}
+     * {@link #updateRulesForPowerRestrictionsUL(int)}. Returns true if the state was updated.
      */
-    private void updateUidStateUL(int uid, int uidState) {
+    private boolean updateUidStateUL(int uid, int uidState) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateUidStateUL");
         try {
             final int oldUidState = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
@@ -3483,14 +3483,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     updateRulesForPowerRestrictionsUL(uid);
                 }
-                updateNetworkStats(uid, isUidStateForeground(uidState));
+                return true;
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
         }
+        return false;
     }
 
-    private void removeUidStateUL(int uid) {
+    private boolean removeUidStateUL(int uid) {
         final int index = mUidState.indexOfKey(uid);
         if (index >= 0) {
             final int oldUidState = mUidState.valueAt(index);
@@ -3505,9 +3506,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     updateRuleForRestrictPowerUL(uid);
                 }
                 updateRulesForPowerRestrictionsUL(uid);
-                updateNetworkStats(uid, false);
+                return true;
             }
         }
+        return false;
     }
 
     // adjust stats accounting based on foreground status
@@ -4419,20 +4421,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
             }
         }
-
     };
 
     void handleUidChanged(int uid, int procState, long procStateSeq) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidStateChanged");
         try {
+            boolean updated;
             synchronized (mUidRulesFirstLock) {
                 // We received a uid state change callback, add it to the history so that it
                 // will be useful for debugging.
                 mLogger.uidStateChanged(uid, procState, procStateSeq);
                 // Now update the network policy rules as per the updated uid state.
-                updateUidStateUL(uid, procState);
+                updated = updateUidStateUL(uid, procState);
                 // Updating the network rules is done, so notify AMS about this.
                 mActivityManagerInternal.notifyNetworkPolicyRulesUpdated(uid, procStateSeq);
+            }
+            // Do this without the lock held. handleUidChanged() and handleUidGone() are
+            // called from the handler, so there's no multi-threading issue.
+            if (updated) {
+                updateNetworkStats(uid, isUidStateForeground(procState));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -4442,8 +4449,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     void handleUidGone(int uid) {
         Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "onUidGone");
         try {
+            boolean updated;
             synchronized (mUidRulesFirstLock) {
-                removeUidStateUL(uid);
+                updated = removeUidStateUL(uid);
+            }
+            // Do this without the lock held. handleUidChanged() and handleUidGone() are
+            // called from the handler, so there's no multi-threading issue.
+            if (updated) {
+                updateNetworkStats(uid, false);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);

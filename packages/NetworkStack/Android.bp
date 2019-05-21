@@ -37,8 +37,10 @@ android_library {
         "src/**/*.java",
         ":framework-networkstack-shared-srcs",
         ":services-networkstack-shared-srcs",
+        ":statslog-networkstack-java-gen",
     ],
     static_libs: [
+        "androidx.annotation_annotation",
         "ipmemorystore-client",
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
@@ -49,6 +51,36 @@ android_library {
     manifest: "AndroidManifestBase.xml",
 }
 
+cc_library_shared {
+    name: "libnetworkstackutilsjni",
+    srcs: [
+        "jni/network_stack_utils_jni.cpp"
+    ],
+    sdk_version: "current",
+    shared_libs: [
+        "liblog",
+        "libnativehelper_compat_libc++",
+    ],
+
+    // We cannot use plain "libc++" here to link libc++ dynamically because it results in:
+    //   java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found
+    // even if "libc++" is added into jni_libs below. Adding "libc++_shared" into jni_libs doesn't
+    // build because soong complains of:
+    //   module NetworkStack missing dependencies: libc++_shared
+    //
+    // So, link libc++ statically. This means that we also need to ensure that all the C++ libraries
+    // we depend on do not dynamically link libc++. This is currently the case, because liblog is
+    // C-only and libnativehelper_compat_libc also uses stl: "c++_static".
+    //
+    // TODO: find a better solution for this in R.
+    stl: "c++_static",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+}
+
 java_defaults {
     name: "NetworkStackAppCommon",
     defaults: ["NetworkStackCommon"],
@@ -56,14 +88,16 @@ java_defaults {
     static_libs: [
         "NetworkStackBase",
     ],
+    jni_libs: [
+        "libnativehelper_compat_libc++",
+        "libnetworkstackutilsjni",
+    ],
     // Resources already included in NetworkStackBase
     resource_dirs: [],
     jarjar_rules: "jarjar-rules-shared.txt",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
-    // The permission configuration *must* be included to ensure security of the device
-    required: ["NetworkPermissionConfig"],
 }
 
 // Non-updatable network stack running in the system server process for devices not using the module
@@ -72,6 +106,10 @@ android_app {
     defaults: ["NetworkStackAppCommon"],
     certificate: "platform",
     manifest: "AndroidManifest_InProcess.xml",
+    // InProcessNetworkStack is a replacement for NetworkStack
+    overrides: ["NetworkStack"],
+    // The permission configuration *must* be included to ensure security of the device
+    required: ["PlatformNetworkPermissionConfig"],
 }
 
 // Updatable network stack packaged as an application
@@ -80,4 +118,15 @@ android_app {
     defaults: ["NetworkStackAppCommon"],
     certificate: "networkstack",
     manifest: "AndroidManifest.xml",
+    use_embedded_native_libs: true,
+    // The permission configuration *must* be included to ensure security of the device
+    required: ["NetworkPermissionConfig"],
+}
+
+genrule {
+    name: "statslog-networkstack-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module network_stack" +
+         " --javaPackage com.android.networkstack.metrics --javaClass NetworkStackStatsLog",
+    out: ["com/android/networkstack/metrics/NetworkStackStatsLog.java"],
 }

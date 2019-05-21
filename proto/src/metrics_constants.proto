@@ -6117,6 +6117,11 @@ message MetricsEvent {
     // OS: P
     FIELD_AUTOFILL_SESSION_ID = 1456;
 
+    // FIELD: Device USB overheat alarm trigger.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    POWER_OVERHEAT_ALARM = 1457;
+
     // NOTIFICATION_SINCE_INTERRUPTION_MILLIS added to P
     // NOTIFICATION_INTERRUPTION added to P
 
@@ -6491,6 +6496,11 @@ message MetricsEvent {
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: Q
     ACTION_EMERGENCY_DIALER_FROM_POWER_MENU = 1569;
+
+    // OPEN: Settings > Developer Options > Game Driver Preference
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_GAME_DRIVER_DASHBOARD = 1613;
 
     // ---- End Q Constants, all Q constants go above this line ----
 

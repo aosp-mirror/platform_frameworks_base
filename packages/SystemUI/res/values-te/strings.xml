@@ -32,14 +32,15 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"నోటిఫికేషన్‌లు లేవు"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"కొనసాగుతున్నవి"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"నోటిఫికేషన్‌లు"</string>
-    <string name="battery_low_title" msgid="9187898087363540349">"బ్యాటరీ త్వరలో ఖాళీ అవ్వచ్చు"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"బ్యాటరీ తక్కువగా ఉంది"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"బ్యాటరీ తక్కువగా ఉంది. బ్యాటరీ సేవర్‌ని ఆన్ చేయండి"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> మిగిలి ఉంది"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> మిగిలి ఉంది, మీ ఉపయోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%s</xliff:g> ఉండవచ్చు"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> మిగిలి ఉంది, దాదాపు <xliff:g id="TIME">%s</xliff:g> ఉండవచ్చు"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> మిగిలి ఉంది. బ్యాటరీ సేవర్ ఆన్‌లో ఉంది."</string>
-    <string name="invalid_charger" msgid="2741987096648693172">"USB ద్వారా ఛార్జ్ చేయలేరు. మీ పరికరంతో వచ్చిన ఛార్జర్‌ను ఉపయోగించండి."</string>
-    <string name="invalid_charger_title" msgid="2836102177577255404">"USB ద్వారా ఛార్జ్ చేయలేరు"</string>
-    <string name="invalid_charger_text" msgid="6480624964117840005">"మీ పరికరంతో వచ్చిన ఛార్జర్‌ను ఉపయోగించండి"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB ఛార్జింగ్‌కు మద్దతు లేదు.\nఅందించిన ఛార్జర్‌ను మాత్రమే ఉపయోగించండి."</string>
+    <string name="invalid_charger_title" msgid="3515740382572798460">"USB ఛార్జింగ్‌కి మద్దతు లేదు."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"అందించిన ఛార్జర్‌ను మాత్రమే ఉపయోగించండి."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"సెట్టింగ్‌లు"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"బ్యాటరీ సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ఆన్ చేయి"</string>
@@ -72,10 +73,11 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"స్క్రీన్‌షాట్"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"స్క్రీన్‌షాట్ సేవ్ చేయబడుతోంది"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"స్క్రీన్‌షాట్ సేవ్ చేయబడింది"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"మీ స్క్రీన్‌షాట్‌ను వీక్షించడానికి నొక్కండి"</string>
-    <string name="screenshot_failed_title" msgid="7612509838919089748">"స్క్రీన్‌షాట్‌ని సేవ్ చేయడం సాధ్యం కాలేదు"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"స్క్రీన్‌షాట్ తీయడానికి మళ్లీ ప్రయత్నించండి"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"స్క్రీన్‌షాట్‌ను క్యాప్చర్ చేయడం సాధ్యపడలేదు"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"స్క్రీన్‌షాట్‌ని సేవ్ చేస్తున్నప్పుడు సమస్య ఏర్పడింది"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"నిల్వ స్థలం పరిమితంగా ఉన్న కారణంగా స్క్రీన్‌షాట్‌ను సేవ్ చేయడం సాధ్యపడదు"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"స్క్రీన్‌షాట్‌లు తీయడానికి యాప్ లేదా మీ సంస్థ అనుమతించలేదు"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ఫైల్ బదిలీ ఎంపికలు"</string>
@@ -95,15 +97,14 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"వేలిముద్ర కోసం వేచి ఉంది"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"మీ వేలిముద్రను ఉపయోగించకుండా అన్‌లాక్ చేయండి"</string>
-    <string name="accessibility_scanning_face" msgid="769545173211758586">"ముఖాన్ని స్కాన్ చేస్తోంది"</string>
-    <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"పంపు"</string>
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
     <string name="camera_label" msgid="7261107956054836961">"కెమెరాను తెరువు"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"కొత్త విధి లేఅవుట్‌ను ఎంచుకోండి"</string>
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయి"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"వేలిముద్ర సెన్సార్‌ను తాకండి"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"వేలిముద్ర చిహ్నం"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"అప్లికేషన్ చిహ్నం"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"సహాయ సందేశ ప్రాంతం"</string>
@@ -147,32 +148,31 @@
     <string name="accessibility_desc_off" msgid="6475508157786853157">"ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"కనెక్ట్ చేయబడింది."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"కనెక్ట్ అవుతోంది."</string>
-    <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
-    <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
-    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
-    <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
-    <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
-    <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
-    <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
-    <string name="data_connection_roaming" msgid="6037232010953697354">"రోమింగ్"</string>
-    <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"రోమింగ్"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"ఎడ్జ్"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"సిమ్ లేదు."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"మొబైల్ డేటా"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"మొబైల్ డేటా ఆన్ చేయబడింది"</string>
-    <string name="cell_data_off_content_description" msgid="4356113230238585072">"మొబైల్ డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="cell_data_off" msgid="1051264981229902873">"ఆఫ్ చేయండి"</string>
+    <string name="accessibility_cell_data_off" msgid="443267573897409704">"మొబైల్ డేటా ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"బ్లూటూత్ టెథెరింగ్."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ఎయిర్‌ప్లేన్ మోడ్."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPNలో."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM కార్డ్ లేదు."</string>
-    <string name="carrier_network_change_mode" msgid="8149202439957837762">"క్యారియర్ నెట్‌వర్క్ మారుతోంది"</string>
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"క్యారియర్ నెట్‌వర్క్ మారుస్తుంది."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"బ్యాటరీ వివరాలను తెరుస్తుంది"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> శాతం."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"సిస్టమ్ సెట్టింగ్‌లు."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"నోటిఫికేషన్‌లు."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"అన్ని నోటిఫికేషన్‌లను చూడండి"</string>
@@ -208,9 +208,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"ఎయిర్‌ప్లేన్ మోడ్ ఆన్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ఎయిర్‌ప్లేన్ మోడ్ ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"ఎయిర్‌ప్లేన్ మోడ్ ఆన్ చేయబడింది."</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"మొత్తం నిశ్శబ్దం"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"అలారాలు మాత్రమే"</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, ప్రాధాన్యత మాత్రమే."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, మొత్తం నిశ్శబ్దం."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"అంతరాయం కలిగించవద్దు ఆన్‌లో ఉంది, అలారాలు మాత్రమే."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"అంతరాయం కలిగించవద్దు."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"అంతరాయం కలిగించవద్దు ఆఫ్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"అంతరాయం కలిగించవద్దు ఆన్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"బ్లూటూత్."</string>
@@ -257,7 +259,6 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"స్థాన అభ్యర్థనలు సక్రియంగా ఉన్నాయి"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g>, +<xliff:g id="OVERFLOW">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other">లోపల మరో <xliff:g id="NUMBER_1">%s</xliff:g> నోటిఫికేషన్‌లు ఉన్నాయి.</item>
       <item quantity="one">లోపల మరో <xliff:g id="NUMBER_0">%s</xliff:g> నోటిఫికేషన్ ఉంది.</item>
@@ -273,7 +274,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"డెజర్ట్ కేస్"</string>
     <string name="start_dreams" msgid="5640361424498338327">"స్క్రీన్ సేవర్"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ఈథర్‌నెట్"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"మరిన్ని ఎంపికల కోసం చిహ్నాలను నొక్కి, పట్టుకోండి"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"అంతరాయం కలిగించవద్దు"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ప్రాధాన్యత మాత్రమే"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"అలారాలు మాత్రమే"</string>
@@ -286,7 +288,6 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ఆడియో"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"హెడ్‌సెట్"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"ఇన్‌పుట్"</string>
-    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ఆన్ చేస్తోంది…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ప్రకాశం"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"స్వయంచాలకంగా తిప్పడం"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"స్క్రీన్‌ను స్వయంచాలకంగా తిప్పు"</string>
@@ -311,8 +312,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ఆఫ్‌లో ఉంది"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ఆన్‌లో ఉంది"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi నెట్‌వర్క్‌లు ఏవీ అందుబాటులో లేవు"</string>
-    <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ఆన్ చేస్తోంది…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ప్రసారం"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"అలారం"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ప్రసారం చేయండి"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ప్రసారం చేస్తోంది"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"పేరులేని పరికరం"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ప్రసారం చేయడానికి సిద్ధంగా ఉంది"</string>
@@ -328,8 +329,7 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"కనెక్ట్ అవుతోంది..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"టీథరింగ్"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"హాట్‌స్పాట్"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"ఆన్ చేస్తోంది…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"డేటా సేవర్ ఆన్‌లో ఉంది"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"ఆన్ చేస్తోంది…"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d పరికరాలు</item>
       <item quantity="one">%d పరికరం</item>
@@ -343,12 +343,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> వినియోగించబడింది"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> పరిమితి"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> హెచ్చరిక"</string>
-    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"కార్యాలయ ప్రొఫైల్"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"కార్యాలయ ప్రొఫైల్"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"నోటిఫికేషన్‌లు &amp; యాప్‌లు ఆఫ్ చేయి"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"రాత్రి కాంతి"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>కి"</string>
-    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC నిలిపివేయబడింది"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ప్రారంభించబడింది"</string>
@@ -361,15 +362,12 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> సురక్షిత-మోడ్‌లో నిలిపివేయబడింది."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"అన్నీ తీసివేయి"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"విభజన స్క్రీన్‌ను ఉపయోగించడానికి ఇక్కడ లాగండి"</string>
-    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"యాప్‌లను మార్చడం కోసం ఎగువకు స్వైప్ చేయండి"</string>
-    <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"యాప్‌లను శీఘ్రంగా స్విచ్ చేయడానికి కుడి వైపుకు లాగండి"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"సమతలంగా విభజించు"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"లంబంగా విభజించు"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"అనుకూలంగా విభజించు"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"స్క్రీన్‌ని ఎగువకు విభజించు"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"స్క్రీన్‌ని ఎడమ వైపుకి విభజించు"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"స్క్రీన్‌ని కుడి వైపుకి విభజించు"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"స్థూలదృష్టిని టోగుల్ చేయి"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ఛార్జ్ చేయబడింది"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ఛార్జ్ అవుతోంది"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -399,9 +397,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"మొత్తం\nనిశ్శబ్దం"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ప్రాధాన్యమైనవి\nమాత్రమే"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"అలారాలు\nమాత్రమే"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ఛార్జ్ అవుతోంది (పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"వేగంగా ఛార్జ్ అవుతోంది (నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"నెమ్మదిగా ఛార్జ్ అవుతోంది (నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"వినియోగదారుని మార్చు"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"వినియోగదారుని మార్చు, ప్రస్తుత వినియోగదారు <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ప్రస్తుత వినియోగదారు <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -435,8 +433,6 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> మీ స్క్రీన్‌పై కనిపించే ప్రతిదాన్ని క్యాప్చర్ చేయడం ప్రారంభిస్తుంది."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"మళ్లీ చూపవద్దు"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"అన్నీ క్లియర్ చేయండి"</string>
-    <string name="manage_notifications_text" msgid="8035284146227267681">"నోటిఫికేషన్‌లను నిర్వహించండి"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ఇప్పుడే ప్రారంభించు"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"నోటిఫికేషన్‌లు లేవు"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ప్రొఫైల్‌ని పర్యవేక్షించవచ్చు"</string>
@@ -504,7 +500,6 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"సెటప్ చేయి"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"ఇప్పుడు ఆఫ్ చేయండి"</string>
-    <string name="accessibility_volume_settings" msgid="4915364006817819212">"ధ్వని సెట్టింగ్‌లు"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"విస్తరింపజేయండి"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"కుదించండి"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"పరికరం అవుట్‌పుట్‌ని మార్చండి"</string>
@@ -522,6 +517,7 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ని దాచాలా?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"మీరు సెట్టింగ్‌ల్లో దీన్ని ఆన్ చేసిన తదుపరిసారి ఇది కనిపిస్తుంది."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"దాచు"</string>
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"కాల్"</string>
     <string name="stream_system" msgid="7493299064422163147">"సిస్టమ్"</string>
     <string name="stream_ring" msgid="8213049469184048338">"రింగ్"</string>
@@ -535,18 +531,12 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"రింగ్"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"వైబ్రేట్"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"మ్యూట్"</string>
-    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"ఫోన్ వైబ్రేట్‌ మోడ్‌లో ఉంది"</string>
-    <string name="qs_status_phone_muted" msgid="5437668875879171548">"ఫోన్ మ్యూట్ చేయబడింది"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. అన్‌మ్యూట్ చేయడానికి నొక్కండి."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. వైబ్రేషన్‌కు సెట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. మ్యూట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. వైబ్రేట్ అయ్యేలా సెట్ చేయడం కోసం నొక్కండి."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. మ్యూట్ చేయడానికి నొక్కండి."</string>
-    <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"మ్యూట్ చేయి"</string>
-    <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"అన్‌మ్యూట్ చేయి"</string>
-    <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"వైబ్రేట్"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s వాల్యూమ్ నియంత్రణలు"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"కాల్‌లు మరియు నోటిఫికేషన్‌లు రింగ్ అవుతాయి (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"మీడియా అవుట్‌పుట్"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ఫోన్ కాల్ అవుట్‌పుట్"</string>
     <string name="output_none_found" msgid="5544982839808921091">"పరికరాలు ఏవీ కనుగొనబడలేదు"</string>
@@ -602,23 +592,12 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"పవర్ నోటిఫికేషన్ నియంత్రణలతో, మీరు యాప్ నోటిఫికేషన్‌ల కోసం ప్రాముఖ్యత స్థాయిని 0 నుండి 5 వరకు సెట్ చేయవచ్చు. \n\n"<b>"స్థాయి 5"</b>" \n- నోటిఫికేషన్ జాబితా పైభాగంలో చూపబడతాయి \n- పూర్తి స్క్రీన్ అంతరాయం అనుమతించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 4"</b>\n"- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎల్లప్పుడూ త్వరిత వీక్షణ అందించబడుతుంది \n\n"<b>"స్థాయి 3"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n\n"<b>"స్థాయి 2"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం మరియు వైబ్రేషన్ చేయవు \n\n"<b>"స్థాయి 1"</b>" \n- పూర్తి స్క్రీన్ అంతరాయం నిరోధించబడుతుంది \n- ఎప్పుడూ త్వరిత వీక్షణ అందించబడదు \n- ఎప్పుడూ శబ్దం లేదా వైబ్రేట్ చేయవు \n- లాక్ స్క్రీన్ మరియు స్థితి పట్టీ నుండి దాచబడతాయి \n- నోటిఫికేషన్ జాబితా దిగువ భాగంలో చూపబడతాయి \n\n"<b>"స్థాయి 0"</b>" \n- యాప్ నుండి అన్ని నోటిఫికేషన్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ఇకపై మీకు ఈ నోటిఫికేషన్‌లు కనిపించవు"</string>
-    <string name="notification_channel_minimized" msgid="1664411570378910931">"ఈ నోటిఫికేషన్‌లు కుదించబడ్డాయి"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"మీరు సాధారణంగా ఈ నోటిఫికేషన్‌లను విస్మరిస్తారు. \nవాటి ప్రదర్శనను కొనసాగించాలా?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ఈ నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"నోటిఫికేషన్‌లను ఆపివేయి"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"చూపిస్తూనే ఉండు"</string>
-    <string name="inline_minimize_button" msgid="966233327974702195">"కుదించు"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ఈ నోటిఫికేషన్‌లను ఆఫ్ చేయలేరు"</string>
-    <string name="appops_camera" msgid="8100147441602585776">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
-    <string name="appops_microphone" msgid="741508267659494555">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
-    <string name="appops_overlay" msgid="6165912637560323464">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>
-    <string name="appops_camera_mic" msgid="1576901651150187433">"ఈ యాప్ మైక్రోఫోన్ మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
-    <string name="appops_camera_overlay" msgid="8869400080809298814">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు కెమెరాను ఉపయోగిస్తుంది."</string>
-    <string name="appops_mic_overlay" msgid="4835157962857919804">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
-    <string name="appops_camera_mic_overlay" msgid="6718768197048030993">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తుంది."</string>
-    <string name="notification_appops_settings" msgid="1028328314935908050">"సెట్టింగ్‌లు"</string>
-    <string name="notification_appops_ok" msgid="1156966426011011434">"సరే"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> యొక్క నోటిఫికేషన్ నియంత్రణలు తెరవబడ్డాయి"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> యొక్క నోటిఫికేషన్ నియంత్రణలు మూసివేయబడ్డాయి"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ఈ ఛానెల్ యొక్క నోటిఫికేషన్‌లను అనుమతించండి"</string>
@@ -629,7 +608,6 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"నోటిఫికేషన్ నియంత్రణలు"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"నోటిఫికేషన్ తాత్కాలిక ఆపివేత ఎంపికలు"</string>
-    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"తాత్కాలికంగా ఆపివేయి"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"చర్య రద్దు చేయి"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> వరకు తాత్కాలికంగా ఆపివేయబడింది"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -675,9 +653,9 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"ఇటీవలివి"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"వెనుకకు"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"నోటిఫికేషన్‌లు"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"కీబోర్డ్ సత్వరమార్గాలు"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ఇన్‌పుట్ పద్ధతిని మార్చండి"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"అప్లికేషన్‌లు"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"అనువర్తనాలు"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"సహాయకం"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"బ్రౌజర్"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"పరిచయాలు"</string>
@@ -693,7 +671,6 @@
     <string name="battery" msgid="7498329822413202973">"బ్యాటరీ"</string>
     <string name="clock" msgid="7416090374234785905">"గడియారం"</string>
     <string name="headset" msgid="4534219457597457353">"హెడ్‌సెట్"</string>
-    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"సెట్టింగ్‌లను తెరవండి"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"హెడ్‌ఫోన్‌లు కనెక్ట్ చేయబడ్డాయి"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"హెడ్‌సెట్ కనెక్ట్ చేయబడింది"</string>
     <string name="data_saver" msgid="5037565123367048522">"డేటా సేవర్"</string>
@@ -728,9 +705,8 @@
     <string name="right_keycode" msgid="708447961000848163">"కుడివైపు ఉన్న కీకోడ్"</string>
     <string name="left_icon" msgid="3096287125959387541">"ఎడమ వైపు చిహ్నం"</string>
     <string name="right_icon" msgid="3952104823293824311">"కుడివైపు ఉన్న చిహ్నం"</string>
-    <string name="drag_to_add_tiles" msgid="230586591689084925">"టైల్‌లను జోడించడం కోసం పట్టుకుని, లాగండి"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"టైల్‌లను జోడించడానికి లాగండి"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"తీసివేయడానికి ఇక్కడికి లాగండి"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"మీ వద్ద కనీసం 6 టైల్‌లు ఉండాలి"</string>
     <string name="qs_edit" msgid="2232596095725105230">"సవరించు"</string>
     <string name="tuner_time" msgid="6572217313285536011">"సమయం"</string>
   <string-array name="clock_options">
@@ -774,7 +750,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"శీఘ్ర సెట్టింగ్‌లను మూసివేయండి."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"అలారం సెట్ చేయబడింది."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేసారు"</string>
-    <string name="data_connection_no_internet" msgid="4503302451650972989">"ఇంటర్నెట్ లేదు"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ఇంటర్నెట్ వద్దు."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"వివరాలను తెరవండి."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
@@ -817,13 +793,11 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"స్క్రీన్‌షాట్‌లు"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"సాధారణ సందేశాలు"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"నిల్వ"</string>
-    <string name="notification_channel_hints" msgid="7323870212489152689">"సూచనలు"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"తక్షణ యాప్‌లు"</string>
+    <string name="instant_apps" msgid="6647570248119804907">"తక్షణ అనువర్తనాలు"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"తక్షణ అనువర్తనాలకు ఇన్‌స్టాలేషన్ అవసరం లేదు."</string>
     <string name="app_info" msgid="6856026610594615344">"యాప్ సమాచారం"</string>
     <string name="go_to_web" msgid="2650669128861626071">"బ్రౌజర్‌కు వెళ్లండి"</string>
     <string name="mobile_data" msgid="7094582042819250762">"మొబైల్ డేటా"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ఆఫ్‌లో ఉంది"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"బ్లూటూత్ ఆఫ్‌లో ఉంది"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"అంతరాయం కలిగించవద్దు ఆఫ్‌లో ఉంది"</string>
@@ -835,9 +809,7 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"భర్తీ చేయి"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"నేపథ్యంలో అమలు అవుతున్న ఆప్‌లు"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"బ్యాటరీ మరియు డేటా వినియోగ వివరాల కోసం నొక్కండి"</string>
-    <string name="mobile_data_disable_title" msgid="1068272097382942231">"మొబైల్ డేటాని ఆఫ్ చేయాలా?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"మీకు <xliff:g id="CARRIER">%s</xliff:g> ద్వారా డేటా లేదా ఇంటర్నెట్‌కు యాక్సెస్ ఉండదు. Wi-Fi ద్వారా మాత్రమే ఇంటర్నెట్ అందుబాటులో ఉంటుంది."</string>
-    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"మీ క్యారియర్"</string>
+    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"మొబైల్ డేటాని ఆఫ్ చేయాలా?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"అనుమతి అభ్యర్థనకు ఒక యాప్ అడ్డు తగులుతున్నందున సెట్టింగ్‌లు మీ ప్రతిస్పందనను ధృవీకరించలేకపోయాయి."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించడానికి <xliff:g id="APP_0">%1$s</xliff:g>ని అనుమతించండి?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- ఇది <xliff:g id="APP">%1$s</xliff:g> నుండి సమాచారాన్ని చదువుతుంది"</string>
@@ -845,12 +817,4 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"ఏ యాప్ నుండి అయినా స్లైస్‌లను చూపించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించండి"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"అనుమతించు"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"తిరస్కరించు"</string>
-    <string name="auto_saver_title" msgid="1217959994732964228">"బ్యాటరీ సేవర్‌ని షెడ్యూల్ చేయడానికి నొక్కండి"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"బ్యాటరీ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ఉన్నప్పుడు ఆటోమేటిక్‌గా ఆన్ అవుతుంది"</string>
-    <string name="no_auto_saver_action" msgid="8086002101711328500">"వద్దు, ధన్యవాదాలు"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"బ్యాటరీ సేవర్ షెడ్యూల్ ఆన్ చేయబడింది"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"బ్యాటరీ <xliff:g id="PERCENTAGE">%d</xliff:g>%% కంటే తగ్గినప్పుడు బ్యాటరీ సేవర్ ఆటోమేటిక్‌గా ఆన్ అవుతుంది."</string>
-    <string name="open_saver_setting_action" msgid="8314624730997322529">"సెట్టింగ్‌లు"</string>
-    <string name="auto_saver_okay_action" msgid="2701221740227683650">"అర్థమైంది"</string>
-    <string name="heap_dump_tile_name" msgid="9141031328971226374">"డంప్ SysUI హీప్"</string>
 </resources>

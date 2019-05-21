@@ -120,6 +120,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     // See mConnectAttempted
     private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
+    // Some Hearing Aids (especially the 2nd device) needs more time to do service discovery
+    private static final long MAX_HEARING_AIDS_DELAY_FOR_AUTO_CONNECT = 15000;
     private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
 
     // Active device state
@@ -245,7 +247,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             // various profiles
             // If UUIDs are not available yet, connect will be happen
             // upon arrival of the ACTION_UUID intent.
-            Log.d(TAG, "No profiles. Maybe we will connect later");
+            Log.d(TAG, "No profiles. Maybe we will connect later for device " + mDevice);
             return;
         }
 
@@ -681,10 +683,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         long timeout = MAX_UUID_DELAY_FOR_AUTO_CONNECT;
         if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.Hogp)) {
             timeout = MAX_HOGP_DELAY_FOR_AUTO_CONNECT;
+        } else if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.HearingAid)) {
+            timeout = MAX_HEARING_AIDS_DELAY_FOR_AUTO_CONNECT;
         }
 
         if (DEBUG) {
-            Log.d(TAG, "onUuidChanged: Time since last connect"
+            Log.d(TAG, "onUuidChanged: Time since last connect="
                     + (SystemClock.elapsedRealtime() - mConnectAttempted));
         }
 

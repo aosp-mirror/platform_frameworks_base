@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -76,18 +77,25 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
                 new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
     }
 
+    /**
+     * @return a {@link CellIdentityCdma} instance.
+     */
     @Override
-    public CellIdentityCdma getCellIdentity() {
+    public @NonNull CellIdentityCdma getCellIdentity() {
         return mCellIdentityCdma;
     }
+
     /** @hide */
     @UnsupportedAppUsage
     public void setCellIdentity(CellIdentityCdma cid) {
         mCellIdentityCdma = cid;
     }
 
+    /**
+     * @return a {@link CellSignalStrengthCdma} instance.
+     */
     @Override
-    public CellSignalStrengthCdma getCellSignalStrength() {
+    public @NonNull CellSignalStrengthCdma getCellSignalStrength() {
         return mCellSignalStrengthCdma;
     }
 

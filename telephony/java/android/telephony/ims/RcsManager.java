@@ -25,20 +25,19 @@ import android.content.Context;
  */
 @SystemService(Context.TELEPHONY_RCS_SERVICE)
 public class RcsManager {
+    private final RcsMessageStore mRcsMessageStore;
 
     /**
      * @hide
      */
-    public RcsManager() {
-        // empty constructor
+    public RcsManager(Context context) {
+        mRcsMessageStore = new RcsMessageStore(context);
     }
-
-    private static final RcsMessageStore sRcsMessageStoreInstance = new RcsMessageStore();
 
     /**
      * Returns an instance of {@link RcsMessageStore}
      */
     public RcsMessageStore getRcsMessageStore() {
-        return sRcsMessageStoreInstance;
+        return mRcsMessageStore;
     }
 }

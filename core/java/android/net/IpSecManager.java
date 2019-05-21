@@ -941,7 +941,8 @@ public final class IpSecManager {
             throw new IllegalArgumentException(sse);
         } else if (sse.errorCode == OsConstants.EAGAIN) {
             throw new IllegalStateException(sse);
-        } else if (sse.errorCode == OsConstants.EOPNOTSUPP) {
+        } else if (sse.errorCode == OsConstants.EOPNOTSUPP
+                || sse.errorCode == OsConstants.EPROTONOSUPPORT) {
             throw new UnsupportedOperationException(sse);
         }
     }

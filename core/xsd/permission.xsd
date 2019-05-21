@@ -20,33 +20,33 @@
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:element name="permissions">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element name="group" type="group" maxOccurs="unbounded"/>
-                <xs:element name="permission" type="permission" maxOccurs="unbounded"/>
-                <xs:element name="assign-permission" type="assign-permission" maxOccurs="unbounded"/>
-                <xs:element name="split-permission" type="split-permission" maxOccurs="unbounded"/>
-                <xs:element name="library" type="library" maxOccurs="unbounded"/>
-                <xs:element name="feature" type="feature" maxOccurs="unbounded"/>
-                <xs:element name="unavailable-feature" type="unavailable-feature" maxOccurs="unbounded"/>
-                <xs:element name="allow-in-power-save-except-idle" type="allow-in-power-save-except-idle" maxOccurs="unbounded"/>
-                <xs:element name="allow-in-power-save" type="allow-in-power-save" maxOccurs="unbounded"/>
-                <xs:element name="allow-in-data-usage-save" type="allow-in-data-usage-save" maxOccurs="unbounded"/>
-                <xs:element name="allow-unthrottled-location" type="allow-unthrottled-location" maxOccurs="unbounded"/>
-                <xs:element name="allow-ignore-location-settings" type="allow-ignore-location-settings" maxOccurs="unbounded"/>
-                <xs:element name="allow-implicit-broadcast" type="allow-implicit-broadcast" maxOccurs="unbounded"/>
-                <xs:element name="app-link" type="app-link" maxOccurs="unbounded"/>
-                <xs:element name="system-user-whitelisted-app" type="system-user-whitelisted-app" maxOccurs="unbounded"/>
-                <xs:element name="system-user-blacklisted-app" type="system-user-blacklisted-app" maxOccurs="unbounded"/>
-                <xs:element name="default-enabled-vr-app" type="default-enabled-vr-app" maxOccurs="unbounded"/>
-                <xs:element name="backup-transport-whitelisted-service" type="backup-transport-whitelisted-service" maxOccurs="unbounded"/>
-                <xs:element name="disabled-until-used-preinstalled-carrier-associated-app" type="disabled-until-used-preinstalled-carrier-associated-app" maxOccurs="unbounded"/>
-                <xs:element name="disabled-until-used-preinstalled-carrier-app" type="disabled-until-used-preinstalled-carrier-app" maxOccurs="unbounded"/>
-                <xs:element name="privapp-permissions" type="privapp-permissions" maxOccurs="unbounded"/>
-                <xs:element name="oem-permissions" type="oem-permissions" maxOccurs="unbounded"/>
-                <xs:element name="hidden-api-whitelisted-app" type="hidden-api-whitelisted-app" maxOccurs="unbounded"/>
-                <xs:element name="allow-association" type="allow-association" maxOccurs="unbounded"/>
-                <xs:element name="bugreport-whitelisted" type="bugreport-whitelisted" maxOccurs="unbounded"/>
-            </xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="group" type="group"/>
+                <xs:element name="permission" type="permission"/>
+                <xs:element name="assign-permission" type="assign-permission"/>
+                <xs:element name="split-permission" type="split-permission"/>
+                <xs:element name="library" type="library"/>
+                <xs:element name="feature" type="feature"/>
+                <xs:element name="unavailable-feature" type="unavailable-feature"/>
+                <xs:element name="allow-in-power-save-except-idle" type="allow-in-power-save-except-idle"/>
+                <xs:element name="allow-in-power-save" type="allow-in-power-save"/>
+                <xs:element name="allow-in-data-usage-save" type="allow-in-data-usage-save"/>
+                <xs:element name="allow-unthrottled-location" type="allow-unthrottled-location"/>
+                <xs:element name="allow-ignore-location-settings" type="allow-ignore-location-settings"/>
+                <xs:element name="allow-implicit-broadcast" type="allow-implicit-broadcast"/>
+                <xs:element name="app-link" type="app-link"/>
+                <xs:element name="system-user-whitelisted-app" type="system-user-whitelisted-app"/>
+                <xs:element name="system-user-blacklisted-app" type="system-user-blacklisted-app"/>
+                <xs:element name="default-enabled-vr-app" type="default-enabled-vr-app"/>
+                <xs:element name="backup-transport-whitelisted-service" type="backup-transport-whitelisted-service"/>
+                <xs:element name="disabled-until-used-preinstalled-carrier-associated-app" type="disabled-until-used-preinstalled-carrier-associated-app"/>
+                <xs:element name="disabled-until-used-preinstalled-carrier-app" type="disabled-until-used-preinstalled-carrier-app"/>
+                <xs:element name="privapp-permissions" type="privapp-permissions"/>
+                <xs:element name="oem-permissions" type="oem-permissions"/>
+                <xs:element name="hidden-api-whitelisted-app" type="hidden-api-whitelisted-app"/>
+                <xs:element name="allow-association" type="allow-association"/>
+                <xs:element name="bugreport-whitelisted" type="bugreport-whitelisted"/>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
     <xs:complexType name="group">

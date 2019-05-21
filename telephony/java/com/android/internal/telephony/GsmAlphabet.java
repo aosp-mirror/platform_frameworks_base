@@ -868,7 +868,6 @@ public class GsmAlphabet {
                 ted.msgCount = 1;
                 ted.codeUnitsRemaining = SmsConstants.MAX_USER_DATA_SEPTETS - septets;
             }
-            ted.codeUnitSize = SmsConstants.ENCODING_7BIT;
             return ted;
         }
 
@@ -1516,7 +1515,7 @@ public class GsmAlphabet {
             }
         }
 
-        sCharsToShiftTables = new SparseIntArray[numTables];
+        sCharsToShiftTables = new SparseIntArray[numShiftTables];
         for (int i = 0; i < numShiftTables; i++) {
             String shiftTable = sLanguageShiftTables[i];
 

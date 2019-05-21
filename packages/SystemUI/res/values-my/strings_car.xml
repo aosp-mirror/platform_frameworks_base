@@ -19,9 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_guest" msgid="3738772168718508650">"ဧည့်သည်"</string>
-    <string name="car_add_user" msgid="5245196248349230898">"အသုံးပြုသူ ထည့်ရန်"</string>
-    <string name="car_new_user" msgid="8142927244990323906">"အသုံးပြုသူ အသစ်"</string>
-    <string name="user_add_user_message_setup" msgid="1791011504259527329">"အသုံးပြုသူအသစ် ထည့်သည့်အခါ ထိုသူသည် မိမိ၏ နေရာကို စီစဉ်သတ်မှတ်ရပါမည်။"</string>
-    <string name="user_add_user_message_update" msgid="3383320289232716179">"အသုံးပြုသူအားလုံးအတွက် အက်ပ်များကို မည်သူမဆို အပ်ဒိတ်လုပ်နိုင်သည်။"</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"အမျိုးအမည်မသိ"</string>
+    <string name="start_driving" msgid="864023351402918991">"စတင် မောင်းနှင်ရန်"</string>
 </resources>

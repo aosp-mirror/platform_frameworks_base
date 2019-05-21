@@ -32,6 +32,7 @@ import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
 import android.net.util.SharedLog;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -148,14 +149,18 @@ public class NetworkStackClient {
     private class NetworkStackConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            log("Network stack service connected");
+            logi("Network stack service connected");
             registerNetworkStackService(service);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            // TODO: crash/reboot the system ?
-            logWtf("Lost network stack connector", null);
+            // The system has lost its network stack (probably due to a crash in the
+            // network stack process): better crash rather than stay in a bad state where all
+            // networking is broken.
+            // onServiceDisconnected is not being called on device shutdown, so this method being
+            // called always indicates a bad state for the system server.
+            maybeCrashWithTerribleFailure("Lost network stack");
         }
     };
 
@@ -211,8 +216,7 @@ public class NetworkStackClient {
         }
 
         if (intent == null) {
-            logWtf("Could not resolve the network stack", null);
-            // TODO: crash/reboot system server ?
+            maybeCrashWithTerribleFailure("Could not resolve the network stack");
             return;
         }
 
@@ -220,9 +224,9 @@ public class NetworkStackClient {
         // NetworkStackConnection.onServiceConnected().
         if (!context.bindServiceAsUser(intent, new NetworkStackConnection(),
                 Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
-            logWtf("Could not bind to network stack with " + intent, null);
+            maybeCrashWithTerribleFailure(
+                    "Could not bind to network stack in-process, or in app with " + intent);
             return;
-            // TODO: crash/reboot system server if no network stack after a timeout ?
         }
 
         log("Network stack service start requested");
@@ -270,6 +274,16 @@ public class NetworkStackClient {
         }
     }
 
+    private void maybeCrashWithTerribleFailure(@NonNull String message) {
+        logWtf(message, null);
+        if (Build.IS_DEBUGGABLE) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    /**
+     * Log a message in the local log.
+     */
     private void log(@NonNull String message) {
         synchronized (mLog) {
             mLog.log(message);
@@ -286,6 +300,15 @@ public class NetworkStackClient {
     private void loge(@NonNull String message, @Nullable Throwable e) {
         synchronized (mLog) {
             mLog.e(message, e);
+        }
+    }
+
+    /**
+     * Log a message in the local and system logs.
+     */
+    private void logi(@NonNull String message) {
+        synchronized (mLog) {
+            mLog.i(message);
         }
     }
 

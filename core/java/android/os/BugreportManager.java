@@ -25,12 +25,14 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
@@ -43,6 +45,9 @@ import java.util.concurrent.Executor;
 @SystemApi
 @SystemService(Context.BUGREPORT_SERVICE)
 public final class BugreportManager {
+
+    private static final String TAG = "BugreportManager";
+
     private final Context mContext;
     private final IDumpstate mBinder;
 
@@ -147,16 +152,22 @@ public final class BugreportManager {
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(callback);
 
+            if (screenshotFd == null) {
+                // Binder needs a valid File Descriptor to be passed
+                screenshotFd = ParcelFileDescriptor.open(new File("/dev/null"),
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+            }
             DumpstateListener dsListener = new DumpstateListener(executor, callback);
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
                     bugreportFd.getFileDescriptor(),
-                    (screenshotFd != null
-                            ? screenshotFd.getFileDescriptor() : new FileDescriptor()),
+                    screenshotFd.getFileDescriptor(),
                     params.getMode(), dsListener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (FileNotFoundException e) {
+            Log.wtf(TAG, "Not able to find /dev/null file: ", e);
         } finally {
             // We can close the file descriptors here because binder would have duped them.
             IoUtils.closeQuietly(bugreportFd);

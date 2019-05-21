@@ -1828,9 +1828,12 @@
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLevels" />
-  <java-symbol type="array" name="config_dynamicHysteresisBrightLevels" />
-  <java-symbol type="array" name="config_dynamicHysteresisDarkLevels" />
-  <java-symbol type="array" name="config_dynamicHysteresisLuxLevels" />
+  <java-symbol type="array" name="config_ambientThresholdLevels" />
+  <java-symbol type="array" name="config_ambientBrighteningThresholds" />
+  <java-symbol type="array" name="config_ambientDarkeningThresholds" />
+  <java-symbol type="array" name="config_screenThresholdLevels" />
+  <java-symbol type="array" name="config_screenBrighteningThresholds" />
+  <java-symbol type="array" name="config_screenDarkeningThresholds" />
   <java-symbol type="array" name="config_minimumBrightnessCurveLux" />
   <java-symbol type="array" name="config_minimumBrightnessCurveNits" />
   <java-symbol type="array" name="config_protectedNetworks" />
@@ -1945,13 +1948,16 @@
   <java-symbol type="integer" name="config_networkNotifySwitchType" />
   <java-symbol type="array" name="config_networkNotifySwitches" />
   <java-symbol type="integer" name="config_networkAvoidBadWifi" />
-  <java-symbol type="string" name="config_networkDefaultCaptivePortalServerUrl" />
+  <java-symbol type="string" name="config_networkCaptivePortalServerUrl" />
   <java-symbol type="integer" name="config_networkWakeupPacketMark" />
   <java-symbol type="integer" name="config_networkWakeupPacketMask" />
   <java-symbol type="bool" name="config_apfDrop802_3Frames" />
   <java-symbol type="array" name="config_apfEthTypeBlackList" />
   <java-symbol type="integer" name="config_networkDefaultDailyMultipathQuotaBytes" />
   <java-symbol type="integer" name="config_networkMeteredMultipathPreference" />
+  <java-symbol type="array" name="config_networkSupportedKeepaliveCount" />
+  <java-symbol type="integer" name="config_reservedPrivilegedKeepaliveSlots" />
+  <java-symbol type="integer" name="config_allowedUnprivilegedKeepalivePerUid" />
   <java-symbol type="integer" name="config_notificationsBatteryFullARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOff" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOn" />

@@ -37,12 +37,12 @@ public class RcsGroupThreadParticipantLeftEventDescriptor extends RcsGroupThread
 
     @Override
     @VisibleForTesting(visibility = PROTECTED)
-    public RcsGroupThreadParticipantLeftEvent createRcsEvent() {
+    public RcsGroupThreadParticipantLeftEvent createRcsEvent(RcsControllerCall rcsControllerCall) {
         return new RcsGroupThreadParticipantLeftEvent(
                 mTimestamp,
-                new RcsGroupThread(mRcsGroupThreadId),
-                new RcsParticipant(mOriginatingParticipantId),
-                new RcsParticipant(mLeavingParticipantId));
+                new RcsGroupThread(rcsControllerCall, mRcsGroupThreadId),
+                new RcsParticipant(rcsControllerCall, mOriginatingParticipantId),
+                new RcsParticipant(rcsControllerCall, mLeavingParticipantId));
     }
 
     @NonNull

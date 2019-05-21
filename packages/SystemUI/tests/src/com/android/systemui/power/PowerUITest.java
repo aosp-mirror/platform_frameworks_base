@@ -17,6 +17,7 @@ package com.android.systemui.power;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN;
 import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
 import static android.os.HardwarePropertiesManager.TEMPERATURE_SHUTDOWN;
+import static android.os.HardwarePropertiesManager.TEMPERATURE_THROTTLING;
 import static android.provider.Settings.Global.SHOW_TEMPERATURE_WARNING;
 
 import static junit.framework.Assert.assertFalse;
@@ -48,6 +49,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +72,7 @@ public class PowerUITest extends SysuiTestCase {
     private static final long ABOVE_CHARGE_CYCLE_THRESHOLD = Duration.ofHours(8).toMillis();
     private static final int OLD_BATTERY_LEVEL_NINE = 9;
     private static final int OLD_BATTERY_LEVEL_10 = 10;
+    private static final int DEFAULT_OVERHEAT_ALARM_THRESHOLD = 58;
     private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
@@ -86,7 +90,13 @@ public class PowerUITest extends SysuiTestCase {
         mContext.addMockSystemService(Context.HARDWARE_PROPERTIES_SERVICE, mHardProps);
         mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
+        setUnderThreshold();
         createPowerUi();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mPowerUI = null;
     }
 
     @Test
@@ -153,8 +163,78 @@ public class PowerUITest extends SysuiTestCase {
         verify(mMockWarnings, never()).showHighTemperatureWarning();
 
         setCurrentTemp(56); // Above threshold.
-        mPowerUI.updateTemperatureWarning();
+        mPowerUI.updateTemperature();
         verify(mMockWarnings).showHighTemperatureWarning();
+    }
+
+    @Test
+    public void testNoConfig_noAlarms() {
+        setOverThreshold();
+        final Boolean overheat = false;
+        final Boolean shouldBeepSound = false;
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_showTemperatureWarning, 0);
+        resources.addOverride(R.integer.config_alarmTemperature, 55);
+        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+
+        mPowerUI.start();
+        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+    }
+
+    @Test
+    public void testConfig_noAlarms() {
+        setUnderThreshold();
+        final Boolean overheat = false;
+        final Boolean shouldBeepSound = false;
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
+        resources.addOverride(R.integer.config_alarmTemperature, 58);
+        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+
+        mPowerUI.start();
+        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+    }
+
+    @Test
+    public void testConfig_alarms() {
+        setOverThreshold();
+        final Boolean overheat = true;
+        final Boolean shouldBeepSound = false;
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
+        resources.addOverride(R.integer.config_alarmTemperature, 58);
+        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+
+        mPowerUI.start();
+        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+    }
+
+    @Test
+    public void testHardPropsThrottlingThreshold_alarms() {
+        setThrottlingThreshold(DEFAULT_OVERHEAT_ALARM_THRESHOLD);
+        setOverThreshold();
+        final Boolean overheat = true;
+        final Boolean shouldBeepSound = false;
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
+        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+
+        mPowerUI.start();
+        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+    }
+
+    @Test
+    public void testHardPropsThrottlingThreshold_noAlarms() {
+        setThrottlingThreshold(DEFAULT_OVERHEAT_ALARM_THRESHOLD);
+        setUnderThreshold();
+        final Boolean overheat = false;
+        final Boolean shouldBeepSound = false;
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
+        resources.addOverride(R.bool.config_alarmTemperatureBeepSound, shouldBeepSound);
+
+        mPowerUI.start();
+        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat, shouldBeepSound);
     }
 
     @Test
@@ -495,7 +575,12 @@ public class PowerUITest extends SysuiTestCase {
 
     private void setCurrentTemp(float temp) {
         when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_CURRENT))
-                .thenReturn(new float[] { temp });
+                .thenReturn(new float[] { temp, temp });
+    }
+
+    private void setThrottlingThreshold(float temp) {
+        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_THROTTLING))
+                .thenReturn(new float[] { temp, temp });
     }
 
     private void setOverThreshold() {

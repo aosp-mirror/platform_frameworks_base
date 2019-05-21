@@ -68,6 +68,7 @@ public abstract class Conference extends Conferenceable {
         public void onExtrasRemoved(Conference c, List<String> keys) {}
         public void onConferenceStateChanged(Conference c, boolean isConference) {}
         public void onAddressChanged(Conference c, Uri newAddress, int presentation) {}
+        public void onConnectionEvent(Conference c, String event, Bundle extras) {}
         public void onCallerDisplayNameChanged(
                 Conference c, String callerDisplayName, int presentation) {}
     }
@@ -1023,5 +1024,15 @@ public abstract class Conference extends Conferenceable {
             }
         }
         onExtrasChanged(b);
+    }
+
+    /**
+     * See {@link Connection#sendConnectionEvent(String, Bundle)}
+     * @hide
+     */
+    public void sendConnectionEvent(String event, Bundle extras) {
+        for (Listener l : mListeners) {
+            l.onConnectionEvent(this, event, extras);
+        }
     }
 }
