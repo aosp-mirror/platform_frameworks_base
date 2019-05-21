@@ -365,6 +365,10 @@ public class AudioMixingRule {
         /**
          * Set if the audio of app that opted out of audio playback capture should be captured.
          *
+         * Caller of this method with <code>true</code>, MUST abide to the restriction listed in
+         * {@link ALLOW_CAPTURE_BY_SYSTEM}, including but not limited to the captured audio
+         * can not leave the capturing app, and the quality is limited to 16k mono.
+         *
          * The permission {@link CAPTURE_AUDIO_OUTPUT} or {@link CAPTURE_MEDIA_OUTPUT} is needed
          * to ignore the opt-out.
          *
