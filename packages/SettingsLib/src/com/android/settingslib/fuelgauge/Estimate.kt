@@ -77,5 +77,17 @@ class Estimate(
             Settings.Global.putLong(resolver, Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
                     System.currentTimeMillis())
         }
+
+        /**
+         * Returns when the estimate was last updated as an Instant
+         */
+        @JvmStatic
+        fun getLastCacheUpdateTime(context: Context): Instant {
+            return Instant.ofEpochMilli(
+                    Settings.Global.getLong(
+                            context.contentResolver,
+                            Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
+                            -1))
+        }
     }
 }
