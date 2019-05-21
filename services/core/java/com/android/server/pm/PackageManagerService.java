@@ -20921,6 +20921,12 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.wtf(TAG, "Calling thread " + Thread.currentThread().getName()
                     + " is holding mPackages", new Throwable());
         }
+        if (!mSystemReady) {
+            // We might get called before system is ready because of package changes etc, but
+            // finding preferred activity depends on settings provider, so we ignore the update
+            // before that.
+            return false;
+        }
         final Intent intent = getHomeIntent();
         final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
                 PackageManager.GET_META_DATA, userId);
