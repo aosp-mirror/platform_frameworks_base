@@ -30,11 +30,12 @@
     <com.android.systemui.statusbar.AlphaOptimizedButton
         style="@android:style/Widget.Material.Button.Borderless"
         android:id="@+id/settings_button"
-        android:layout_gravity="end"
+        android:layout_gravity="start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:focusable="true"
         android:text="@string/manage_bubbles_text"
-        android:textColor="?attr/wallpaperTextColor"/>
+        android:textColor="?attr/wallpaperTextColor"
+    />
 
 </com.android.systemui.bubbles.BubbleExpandedView>
