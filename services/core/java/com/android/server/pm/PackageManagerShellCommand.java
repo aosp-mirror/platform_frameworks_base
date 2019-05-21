@@ -2957,7 +2957,10 @@ class PackageManagerShellCommand extends ShellCommand {
         Resources res = mResourceCache.get(pii.packageName);
         if (res != null) return res;
 
-        ApplicationInfo ai = mInterface.getApplicationInfo(pii.packageName, 0, 0);
+        ApplicationInfo ai = mInterface.getApplicationInfo(pii.packageName,
+                PackageManager.MATCH_DISABLED_COMPONENTS
+                        | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS
+                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS, 0);
         AssetManager am = new AssetManager();
         am.addAssetPath(ai.publicSourceDir);
         res = new Resources(am, null, null);
