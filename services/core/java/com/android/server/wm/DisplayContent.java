@@ -804,10 +804,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate
                             = w.mAttrs.preferredRefreshRate;
                 }
+                final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
+                        .getPreferredModeId(w);
                 if (mTmpApplySurfaceChangesTransactionState.preferredModeId == 0
-                        && w.mAttrs.preferredDisplayModeId != 0) {
-                    mTmpApplySurfaceChangesTransactionState.preferredModeId
-                            = w.mAttrs.preferredDisplayModeId;
+                        && preferredModeId != 0) {
+                    mTmpApplySurfaceChangesTransactionState.preferredModeId = preferredModeId;
                 }
             }
         }
