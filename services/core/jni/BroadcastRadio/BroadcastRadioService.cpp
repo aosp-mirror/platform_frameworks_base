@@ -24,7 +24,7 @@
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
-#include <android/hidl/manager/1.0/IServiceManager.h>
+#include <android/hidl/manager/1.2/IServiceManager.h>
 #include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
 #include <hidl/ServiceManagement.h>
@@ -123,13 +123,13 @@ static jobject nativeLoadModules(JNIEnv *env, jobject obj, jlong nativeContext) 
     auto& ctx = getNativeContext(nativeContext);
 
     // Get list of registered HIDL HAL implementations.
-    auto manager = hardware::defaultServiceManager();
+    auto manager = hardware::defaultServiceManager1_2();
     hidl_vec<hidl_string> services;
     if (manager == nullptr) {
         ALOGE("Can't reach service manager, using default service implementation only");
         services = std::vector<hidl_string>({ "default" });
     } else {
-        manager->listByInterface(V1_0::IBroadcastRadioFactory::descriptor,
+        manager->listManifestByInterface(V1_0::IBroadcastRadioFactory::descriptor,
                 [&services](const hidl_vec<hidl_string> &registered) {
             services = registered;
         });
