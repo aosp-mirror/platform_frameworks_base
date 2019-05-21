@@ -44,6 +44,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.util.Utils;
 
 public class MediaProjectionPermissionActivity extends Activity
         implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
@@ -96,44 +97,50 @@ public class MediaProjectionPermissionActivity extends Activity
         TextPaint paint = new TextPaint();
         paint.setTextSize(42);
 
-        String label = aInfo.loadLabel(packageManager).toString();
+        CharSequence dialogText = null;
+        if (Utils.isHeadlessRemoteDisplayProvider(packageManager, mPackageName)) {
+            dialogText = getString(R.string.media_projection_dialog_service_text);
+        } else {
+            String label = aInfo.loadLabel(packageManager).toString();
 
-        // If the label contains new line characters it may push the security
-        // message below the fold of the dialog. Labels shouldn't have new line
-        // characters anyways, so just truncate the message the first time one
-        // is seen.
-        final int labelLength = label.length();
-        int offset = 0;
-        while (offset < labelLength) {
-            final int codePoint = label.codePointAt(offset);
-            final int type = Character.getType(codePoint);
-            if (type == Character.LINE_SEPARATOR
-                    || type == Character.CONTROL
-                    || type == Character.PARAGRAPH_SEPARATOR) {
-                label = label.substring(0, offset) + ELLIPSIS;
-                break;
+            // If the label contains new line characters it may push the security
+            // message below the fold of the dialog. Labels shouldn't have new line
+            // characters anyways, so just truncate the message the first time one
+            // is seen.
+            final int labelLength = label.length();
+            int offset = 0;
+            while (offset < labelLength) {
+                final int codePoint = label.codePointAt(offset);
+                final int type = Character.getType(codePoint);
+                if (type == Character.LINE_SEPARATOR
+                        || type == Character.CONTROL
+                        || type == Character.PARAGRAPH_SEPARATOR) {
+                    label = label.substring(0, offset) + ELLIPSIS;
+                    break;
+                }
+                offset += Character.charCount(codePoint);
             }
-            offset += Character.charCount(codePoint);
+
+            if (label.isEmpty()) {
+                label = mPackageName;
+            }
+
+            String unsanitizedAppName = TextUtils.ellipsize(label,
+                    paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
+            String appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
+
+            String actionText = getString(R.string.media_projection_dialog_text, appName);
+            SpannableString message = new SpannableString(actionText);
+
+            int appNameIndex = actionText.indexOf(appName);
+            if (appNameIndex >= 0) {
+                message.setSpan(new StyleSpan(Typeface.BOLD),
+                        appNameIndex, appNameIndex + appName.length(), 0);
+            }
+            dialogText = message;
         }
 
-        if (label.isEmpty()) {
-            label = mPackageName;
-        }
-
-        String unsanitizedAppName = TextUtils.ellipsize(label,
-                paint, MAX_APP_NAME_SIZE_PX, TextUtils.TruncateAt.END).toString();
-        String appName = BidiFormatter.getInstance().unicodeWrap(unsanitizedAppName);
-
-        String actionText = getString(R.string.media_projection_dialog_text, appName);
-        SpannableString message = new SpannableString(actionText);
-
-        int appNameIndex = actionText.indexOf(appName);
-        if (appNameIndex >= 0) {
-            message.setSpan(new StyleSpan(Typeface.BOLD),
-                    appNameIndex, appNameIndex + appName.length(), 0);
-        }
-
-        String dialogTitle = getString(R.string.media_projection_dialog_title, appName);
+        String dialogTitle = getString(R.string.media_projection_dialog_title);
 
         View dialogTitleView = View.inflate(this, R.layout.media_projection_dialog_title, null);
         TextView titleText = (TextView) dialogTitleView.findViewById(R.id.dialog_title);
@@ -141,7 +148,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
         mDialog = new AlertDialog.Builder(this)
                 .setCustomTitle(dialogTitleView)
-                .setMessage(message)
+                .setMessage(dialogText)
                 .setPositiveButton(R.string.media_projection_action_text, this)
                 .setNegativeButton(android.R.string.cancel, this)
                 .setOnCancelListener(this)

@@ -27,7 +27,6 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTE
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
@@ -560,10 +559,11 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     public void onCleanupUser(int userId) {
         hideEncryptionNotification(new UserHandle(userId));
-        // User is stopped with its CE key evicted. Require strong auth next time to be able to
-        // unlock the user's storage. Use STRONG_AUTH_REQUIRED_AFTER_BOOT since stopping and
-        // restarting a user later is equivalent to rebooting the device.
-        requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_BOOT, userId);
+        // User is stopped with its CE key evicted. Restore strong auth requirement to the default
+        // flags after boot since stopping and restarting a user later is equivalent to rebooting
+        // the device.
+        int strongAuthRequired = LockPatternUtils.StrongAuthTracker.getDefaultFlags(mContext);
+        requireStrongAuth(strongAuthRequired, userId);
     }
 
     public void onStartUser(final int userId) {

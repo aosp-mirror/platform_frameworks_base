@@ -38,6 +38,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Before;
@@ -57,17 +59,24 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
 
     @Mock private NotificationStackScrollLayout mNssl;
     @Mock private ActivityStarterDelegate mActivityStarterDelegate;
+    @Mock private StatusBarStateController mStatusBarStateController;
 
     private NotificationSectionsManager mSectionsManager;
 
     @Before
     public void setUp() {
-        mSectionsManager = new NotificationSectionsManager(mNssl, mActivityStarterDelegate, true);
+        mSectionsManager =
+                new NotificationSectionsManager(
+                        mNssl,
+                        mActivityStarterDelegate,
+                        mStatusBarStateController,
+                        true);
         // Required in order for the header inflation to work properly
         when(mNssl.generateLayoutParams(any(AttributeSet.class)))
                 .thenReturn(new ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
         mSectionsManager.inflateViews(mContext);
         when(mNssl.indexOfChild(any(View.class))).thenReturn(-1);
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
     }
 
     @Test
@@ -183,6 +192,49 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         // NSSL.
         verify(transientParent).removeTransientView(mSectionsManager.getGentleHeaderView());
         verify(mNssl).addView(mSectionsManager.getGentleHeaderView(), 1);
+    }
+
+    @Test
+    public void testHeaderNotShownOnLockscreen() {
+        // GIVEN a stack of HI and LO notifs on the lockscreen
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
+        setStackState(ChildType.HIPRI, ChildType.HIPRI, ChildType.HIPRI, ChildType.LOPRI);
+
+        // WHEN we update the section headers
+        mSectionsManager.updateSectionBoundaries();
+
+        // Then the section header is not added
+        verify(mNssl, never()).addView(eq(mSectionsManager.getGentleHeaderView()), anyInt());
+    }
+
+    @Test
+    public void testHeaderShownWhenEnterLockscreen() {
+        // GIVEN a stack of HI and LO notifs on the lockscreen
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
+        setStackState(ChildType.HIPRI, ChildType.HIPRI, ChildType.HIPRI, ChildType.LOPRI);
+        mSectionsManager.updateSectionBoundaries();
+
+        // WHEN we unlock
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+        mSectionsManager.updateSectionBoundaries();
+
+        // Then the section header is added
+        verify(mNssl).addView(mSectionsManager.getGentleHeaderView(), 3);
+    }
+
+    @Test
+    public void testHeaderHiddenWhenEnterLockscreen() {
+        // GIVEN a stack of HI and LO notifs on the shade
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
+        setStackState(ChildType.HIPRI, ChildType.HIPRI, ChildType.HIPRI, ChildType.LOPRI);
+        mSectionsManager.updateSectionBoundaries();
+
+        // WHEN we go back to the keyguard
+        when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
+        mSectionsManager.updateSectionBoundaries();
+
+        // Then the section header is removed
+        verify(mNssl).removeView(eq(mSectionsManager.getGentleHeaderView()));
     }
 
     private enum ChildType { HEADER, HIPRI, LOPRI }

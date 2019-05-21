@@ -52,6 +52,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.LinearLayout;
 
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.recents.TriangleShape;
@@ -87,6 +88,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private int mBubbleHeight;
     private int mPointerWidth;
     private int mPointerHeight;
+    private ShapeDrawable mPointerDrawable;
 
     private NotificationEntry mEntry;
     private PackageManager mPm;
@@ -170,16 +172,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPointerWidth = res.getDimensionPixelSize(R.dimen.bubble_pointer_width);
         mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
 
-        TypedArray ta = getContext().obtainStyledAttributes(
-                new int[] {android.R.attr.colorBackgroundFloating});
-        int bgColor = ta.getColor(0, Color.WHITE);
-        ta.recycle();
 
-        ShapeDrawable triangleDrawable = new ShapeDrawable(TriangleShape.create(
+        mPointerDrawable = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, false /* pointUp */));
-
-        triangleDrawable.setTint(bgColor);
-        mPointerView.setBackground(triangleDrawable);
+        mPointerView.setBackground(mPointerDrawable);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
@@ -193,6 +189,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         // Make sure pointer is below activity view
         bringChildToFront(mPointerView);
 
+        applyThemeAttrs();
+
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             // Keep track of IME displaying because we should not make any adjustments that might
             // cause a config change while the IME is displayed otherwise it'll loose focus.
@@ -204,6 +202,23 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             }
             return view.onApplyWindowInsets(insets);
         });
+    }
+
+    void applyThemeAttrs() {
+        TypedArray ta = getContext().obtainStyledAttributes(R.styleable.BubbleExpandedView);
+        int bgColor = ta.getColor(
+                R.styleable.BubbleExpandedView_android_colorBackgroundFloating, Color.WHITE);
+        float cornerRadius = ta.getDimension(
+                R.styleable.BubbleExpandedView_android_dialogCornerRadius, 0);
+        ta.recycle();
+
+        // Update triangle color.
+        mPointerDrawable.setTint(bgColor);
+
+        // Update ActivityView cornerRadius
+        if (ScreenDecorationsUtils.supportsRoundedCornersOnWindows(mContext.getResources())) {
+            mActivityView.setCornerRadius(cornerRadius);
+        }
     }
 
     @Override
@@ -266,7 +281,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (mAppIcon == null) {
             mAppIcon = mPm.getDefaultActivityIcon();
         }
-        updateTheme();
+        applyThemeAttrs();
         showSettingsIcon();
         updateExpandedView();
     }
@@ -304,21 +319,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             Log.w(TAG, "Trying to update entry with different key, new entry: "
                     + entry.key + " old entry: " + mEntry.key);
         }
-    }
-
-    void updateTheme() {
-        // Get new colors.
-        TypedArray ta = mContext.obtainStyledAttributes(
-                new int[]{android.R.attr.colorBackgroundFloating, android.R.attr.colorForeground});
-        int backgroundColor = ta.getColor(0, Color.WHITE /* default */);
-        int foregroundColor = ta.getColor(1, Color.BLACK /* default */);
-        ta.recycle();
-
-        // Update triangle color.
-        ShapeDrawable triangleDrawable = new ShapeDrawable(
-                TriangleShape.create(mPointerWidth, mPointerHeight, false /* pointUp */));
-        triangleDrawable.setTint(backgroundColor);
-        mPointerView.setBackground(triangleDrawable);
     }
 
     private void updateExpandedView() {
@@ -406,7 +406,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             Intent intent = getSettingsIntent(mEntry.notification.getPackageName(),
                     mEntry.notification.getUid());
             mStackView.collapseStack(() -> {
-                mContext.startActivity(intent);
+                mContext.startActivityAsUser(intent, mEntry.notification.getUser());
                 logBubbleClickEvent(mEntry,
                         StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
             });

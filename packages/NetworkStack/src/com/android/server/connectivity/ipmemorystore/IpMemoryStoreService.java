@@ -410,6 +410,10 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
         });
     }
 
+    @Override
+    public void factoryReset() {
+    }
+
     /** Get db size threshold. */
     @VisibleForTesting
     protected int getDbSizeThreshold() {

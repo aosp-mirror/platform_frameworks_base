@@ -321,6 +321,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
         mRingerModeIcon.setVisibility(ringerVisible ? View.VISIBLE : View.GONE);
         mRingerModeTextView.setVisibility(ringerVisible ? View.VISIBLE : View.GONE);
+        mRingerContainer.setVisibility(ringerVisible ? View.VISIBLE : View.GONE);
 
         return isOriginalVisible != ringerVisible ||
                 !Objects.equals(originalRingerText, mRingerModeTextView.getText());
@@ -337,6 +338,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
         mNextAlarmIcon.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
         mNextAlarmTextView.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
+        mNextAlarmContainer.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
 
         return isOriginalVisible != alarmVisible ||
                 !Objects.equals(originalAlarmText, mNextAlarmTextView.getText());

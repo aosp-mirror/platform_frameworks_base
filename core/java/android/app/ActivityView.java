@@ -189,6 +189,17 @@ public class ActivityView extends ViewGroup {
     }
 
     /**
+     * Sets the corner radius for the Activity displayed here. The corners will be
+     * cropped from the window painted by the contained Activity.
+     *
+     * @param cornerRadius the radius for the corners, in pixels
+     * @hide
+     */
+    public void setCornerRadius(float cornerRadius) {
+        mSurfaceView.setCornerRadius(cornerRadius);
+    }
+
+    /**
      * Launch a new activity into this container.
      * <p>Activity resolved by the provided {@link Intent} must have
      * {@link android.R.attr#resizeableActivity} attribute set to {@code true} in order to be

@@ -24,8 +24,10 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
 import android.content.res.Configuration;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -127,6 +129,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     final Rect mTmpRect = new Rect();
     final Configuration mConfiguration = new Configuration();
 
+    Paint mRoundedViewportPaint;
+
     int mSubLayer = APPLICATION_MEDIA_SUBLAYER;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -180,6 +184,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     int mWindowSpaceTop = -1;
     int mSurfaceWidth = -1;
     int mSurfaceHeight = -1;
+    float mCornerRadius;
     @UnsupportedAppUsage
     int mFormat = -1;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -395,7 +400,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             // draw() is not called when SKIP_DRAW is set
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) == 0) {
                 // punch a whole in the view-hierarchy below us
-                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                clearSurfaceViewPort(canvas);
             }
         }
         super.draw(canvas);
@@ -407,10 +412,37 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             // draw() is not called when SKIP_DRAW is set
             if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
                 // punch a whole in the view-hierarchy below us
-                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                clearSurfaceViewPort(canvas);
             }
         }
         super.dispatchDraw(canvas);
+    }
+
+    private void clearSurfaceViewPort(Canvas canvas) {
+        if (mCornerRadius > 0f) {
+            canvas.getClipBounds(mTmpRect);
+            canvas.drawRoundRect(mTmpRect.left, mTmpRect.top, mTmpRect.right, mTmpRect.bottom,
+                    mCornerRadius, mCornerRadius, mRoundedViewportPaint);
+        } else {
+            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        }
+    }
+
+    /**
+     * Sets the corner radius for the SurfaceView. This will round both the corners of the
+     * underlying surface, as well as the corners of the hole created to expose the surface.
+     *
+     * @param cornerRadius the new radius of the corners in pixels
+     * @hide
+     */
+    public void setCornerRadius(float cornerRadius) {
+        mCornerRadius = cornerRadius;
+        if (mCornerRadius > 0f && mRoundedViewportPaint == null) {
+            mRoundedViewportPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mRoundedViewportPaint.setBlendMode(BlendMode.CLEAR);
+            mRoundedViewportPaint.setColor(0);
+        }
+        invalidate();
     }
 
     /**
@@ -634,6 +666,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                             // size.
                             mSurfaceControl.setWindowCrop(mSurfaceWidth, mSurfaceHeight);
                         }
+                        mSurfaceControl.setCornerRadius(mCornerRadius);
                         if (sizeChanged && !creating) {
                             mSurfaceControl.setBufferSize(mSurfaceWidth, mSurfaceHeight);
                         }

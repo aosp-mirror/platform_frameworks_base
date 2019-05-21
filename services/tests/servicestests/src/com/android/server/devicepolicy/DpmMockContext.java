@@ -18,6 +18,8 @@ package com.android.server.devicepolicy;
 
 import static org.mockito.Mockito.mock;
 
+import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -324,6 +326,12 @@ public class DpmMockContext extends MockContext {
     }
 
     @Override
+    public void sendBroadcastAsUser(Intent intent,
+            UserHandle user, @Nullable String receiverPermission, @Nullable Bundle options) {
+        spiedContext.sendBroadcastAsUser(intent, user, receiverPermission, options);
+    }
+
+    @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user, String receiverPermission) {
         spiedContext.sendBroadcastAsUser(intent, user, receiverPermission);
     }
@@ -338,17 +346,17 @@ public class DpmMockContext extends MockContext {
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
             int initialCode, String initialData, Bundle initialExtras) {
-        spiedContext.sendOrderedBroadcastAsUser(intent, user, receiverPermission, resultReceiver,
+        sendOrderedBroadcastAsUser(
+                intent, user, receiverPermission, AppOpsManager.OP_NONE, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
-        resultReceiver.onReceive(spiedContext, intent);
     }
 
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
-        spiedContext.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp,
-                resultReceiver,
+        sendOrderedBroadcastAsUser(
+                intent, user, receiverPermission, appOp, null, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
 
@@ -358,6 +366,7 @@ public class DpmMockContext extends MockContext {
             Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
         spiedContext.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, options,
                 resultReceiver, scheduler, initialCode, initialData, initialExtras);
+        resultReceiver.onReceive(spiedContext, intent);
     }
 
     @Override
