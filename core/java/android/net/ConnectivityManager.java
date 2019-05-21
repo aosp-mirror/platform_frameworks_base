@@ -3449,6 +3449,11 @@ public class ConnectivityManager {
             final NetworkCallback callback;
             synchronized (sCallbacks) {
                 callback = sCallbacks.get(request);
+                if (callback == null) {
+                    Log.w(TAG,
+                            "callback not found for " + getCallbackName(message.what) + " message");
+                    return;
+                }
                 if (message.what == CALLBACK_UNAVAIL) {
                     sCallbacks.remove(request);
                     callback.networkRequest = ALREADY_UNREGISTERED;
@@ -3456,10 +3461,6 @@ public class ConnectivityManager {
             }
             if (DBG) {
                 Log.d(TAG, getCallbackName(message.what) + " for network " + network);
-            }
-            if (callback == null) {
-                Log.w(TAG, "callback not found for " + getCallbackName(message.what) + " message");
-                return;
             }
 
             switch (message.what) {
