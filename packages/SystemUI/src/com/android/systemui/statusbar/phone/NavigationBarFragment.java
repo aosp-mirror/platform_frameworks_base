@@ -979,6 +979,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateScreenPinningGestures();
+
+        // Workaround for b/132825155, for secondary users, we currently don't receive configuration
+        // changes on overlay package change since SystemUI runs for the system user. In this case,
+        // trigger a new configuration change to ensure that the nav bar is updated in the same way.
+        int userId = ActivityManagerWrapper.getInstance().getCurrentUserId();
+        if (userId != UserHandle.USER_SYSTEM) {
+            mHandler.post(() -> {
+                FragmentHostManager fragmentHost = FragmentHostManager.get(mNavigationBarView);
+                fragmentHost.reloadFragments();
+            });
+        }
     }
 
     public void disableAnimationsDuringHide(long delay) {
