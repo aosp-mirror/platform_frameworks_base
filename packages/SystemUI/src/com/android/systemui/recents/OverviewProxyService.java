@@ -271,6 +271,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         @Override
+        public void onAssistantGestureCompletion(float velocity) {
+            if (!verifyCaller("onAssistantGestureCompletion")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> notifyAssistantGestureCompletion(velocity));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
         public void startAssistant(Bundle bundle) {
             if (!verifyCaller("startAssistant")) {
                 return;
@@ -684,6 +697,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyAssistantGestureCompletion(float velocity) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onAssistantGestureCompletion(velocity);
+        }
+    }
+
     private void notifyStartAssistant(Bundle bundle) {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).startAssistant(bundle);
@@ -732,6 +751,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onQuickScrubStarted() {}
         default void onBackButtonAlphaChanged(float alpha, boolean animate) {}
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
+        default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
     }
 }

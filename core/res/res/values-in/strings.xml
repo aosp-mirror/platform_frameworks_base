@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Notifikasi jaringan"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Jaringan tersedia"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Status VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administrasi perangkat"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Notifikasi dari admin IT"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikasi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo promo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Sambungan USB"</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Gerakkan ponsel ke bawah."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Gerakkan ponsel ke kiri."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Gerakkan ponsel ke kanan."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Lihat ke layar dengan kedua mata terbuka."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lihat langsung ke perangkat."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Tidak dapat melihat wajah Anda. Lihat ke ponsel."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Daftarkan ulang wajah Anda."</string>
@@ -579,7 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Waktu tunggu wajah habis. Harap coba lagi."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Coba autentikasi wajah lagi."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Tidak dapat menyimpan data wajah. Hapus dahulu data lama."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Pemrosesan wajah dibatalkan"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Autentikasi wajah dibatalkan oleh pengguna"</string>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Memungkinkan pemegang untuk mengikat ke layanan operator. Tidak pernah dibutuhkan untuk aplikasi normal."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Akses status Jangan Ganggu"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"mulai melihat penggunaan izin"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Memungkinkan pemegang memulai penggunaan izin untuk aplikasi. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Pantau upaya pembukaan kunci layar"</string>
@@ -1898,9 +1900,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Periksa apakah ada update"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ada pesan baru"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Buka aplikasi SMS untuk melihat"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Beberapa fungsi mungkin terbatas"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Tap untuk membuka kunci"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Data pengguna dikunci"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Beberapa fungsi mungkin terbatas"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil kerja terkunci"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Tap untuk membuka kunci profil kerja"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Tersambung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
@@ -1926,7 +1926,7 @@
     <string name="time_picker_minute_label" msgid="5168864173796598399">"menit"</string>
     <string name="time_picker_header_text" msgid="143536825321922567">"Setel waktu"</string>
     <string name="time_picker_input_error" msgid="7574999942502513765">"Masukkan waktu yang valid"</string>
-    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Ketik waktu"</string>
+    <string name="time_picker_prompt_label" msgid="7588093983899966783">"Ketikkan waktu"</string>
     <string name="time_picker_text_input_mode_description" msgid="4148166758173708199">"Beralih ke mode masukan teks untuk masukan waktu."</string>
     <string name="time_picker_radial_mode_description" msgid="4953403779779557198">"Beralih ke mode jam untuk masukan waktu."</string>
     <string name="autofill_picker_accessibility_title" msgid="8469043291648711535">"Opsi IsiOtomatis"</string>

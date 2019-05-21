@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Tarmoqqa oid bildirgilar"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Tarmoq mavjud"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN holati"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Qurilma boshqaruvi"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"IT administrator xabarlari"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ogohlantirishlar"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo rejim"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB orqali ulanish"</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Telefonni pastroq tushiring."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefonni chapga suring."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefonni oʻngga suring."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Ekranga koʻzlaringizni ochib qarang."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Qurilmaga tik qarang."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Yuzingiz koʻrinmayapti. Telefonga qarang."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Ortiqcha harakatlanmoqda. Qimirlatmasdan ushlang."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Yuzingizni qaytadan qayd qildiring."</string>
@@ -574,12 +574,12 @@
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Boshingizni asta buring."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Boshingizni asta buring."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Boshingizni asta buring."</string>
-    <string name="face_acquired_obscured" msgid="5357207702967893283">"Yuzingizni berkitayotgan narsalarni olib tahlang."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Yuzingizni berkitayotgan narsalarni olib tashlang."</string>
     <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Ekranning tepasidagi sensorni tozalang."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Yuzni aniqlash vaqti tugadi. Qaytadan urining."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Yana yuz tekshiruvini amalga oshirish."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Yuzga oid axborot saqlanmadi. Avval eskilari tozalansin."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Yuzni aniqlash bekor qilindi"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Yuz tekshiruvi bekor qilindi."</string>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Aloqa operatori xizmatlariga ulanish imkonini beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"“Bezovta qilinmasin” rejimidan foydalanish"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"“Bezovta qilinmasin” rejimi sozlamalarini ko‘rish va o‘zgartirish."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"foydalaniladigan ruxsatlar axborotini ochish"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Ilova foydalanadigan ruxsatlar axborotini ishga tushirishga ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekranni qulfdan chiqarishga urinishlarni nazorat qilish"</string>
@@ -1899,9 +1901,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Yangilanish borligini tekshirish"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Sizga yangi SMS keldi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ko‘rish uchun SMS ilovasini oching"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Ba’zi funksiyalar cheklanishi m-n"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Qulfni ochish uchun bosing"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Foydalanuvchi ma’lumotlari yopiq"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Ayrim funksiyalar cheklanishi mumkin"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Ishchi profil yopiq"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Qulfini ochish uchun bosing"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> qurilmasiga ulandi"</string>

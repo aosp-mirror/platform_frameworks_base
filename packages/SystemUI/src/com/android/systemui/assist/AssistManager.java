@@ -203,6 +203,14 @@ public class AssistManager implements ConfigurationChangedReceiver {
         // intentional no-op, vendor's AssistManager implementation should override if needed.
     }
 
+    /** Called when the user has invoked the assistant with the incoming velocity, in pixels per
+     * millisecond. For invocations without a velocity (e.g. slow drag), the velocity is set to
+     * zero.
+     */
+    public void onAssistantGestureCompletion(float velocity) {
+        // intentional no-op, vendor's AssistManager implementation should override if needed.
+    }
+
     public void hideAssist() {
         mAssistUtils.hideCurrentSession();
     }

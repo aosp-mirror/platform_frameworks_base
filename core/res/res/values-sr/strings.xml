@@ -264,7 +264,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Обавештења у вези са мрежом"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Мрежа је доступна"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Статус VPN-а"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Администрирање уређаја"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Обавештења од ИТ администратора"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Обавештења"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Режим демонстрације за малопродајне објекте"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB веза"</string>
@@ -568,7 +568,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Померите телефон надоле."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Померите телефон улево."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Померите телефон удесно."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Погледајте у екран са отвореним очима."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Гледајте право у уређај."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не види се лице. Гледајте у телефон."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Много се померате. Држите телефон мирно."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Поново региструјте лице."</string>
@@ -582,7 +582,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Провера лица није успела. Хардвер није доступан."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Истекло је време за проверу лица. Пробајте поново."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Пробајте поново потврду идентитета помоћу лица."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Нови подаци о лицу нису сачувани. Прво избришете претходне."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Обрада лица је отказана"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Корисник је отказао потврду идентитета лицем"</string>
@@ -651,6 +651,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Дозвољава власнику да се повеже са услугама оператера. Никада не би требало да буде потребно за обичне апликације."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"приступај подешавању Не узнемиравај"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Дозвољава апликацији да чита и уписује конфигурацију подешавања Не узнемиравај."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"почетак коришћења дозволе за преглед"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Дозвољава власнику да започне коришћење дозволе за апликацију. Никада не би требало да буде потребна за уобичајене апликације."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Подешавање правила за лозинку"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролише дужину и знакове дозвољене у лозинкама и PIN-овима за закључавање екрана."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Надгледајте покушаје откључавања екрана"</string>
@@ -1932,9 +1934,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Потражи ажурирање"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Имате нове поруке"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Отворите апликацију за SMS да бисте прегледали"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Неке функције су можда ограничене"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Додирните да бисте откључали"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Подаци корисника су закључани"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Неке функције су можда ограничене"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Профил за Work је закључан"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Додиром откљ. профил за Work"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Повезано је са производом <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

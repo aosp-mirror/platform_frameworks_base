@@ -166,13 +166,16 @@
     <string name="usb_contaminant_title">USB port disabled</string>
 
     <!-- Message of USB contaminant presence dialog [CHAR LIMIT=NONE] -->
-    <string name="usb_contaminant_message">To protect your device from liquid or debris, the USB port is disabled and won\u2019t detect any accessories.\n\nYou\u2019ll be notified when it\u2019s safe to use the USB port again.</string>
+    <string name="usb_contaminant_message">To protect your device from liquid or debris, the USB port is disabled and won\u2019t detect any accessories.\n\nYou\u2019ll be notified when it\u2019s okay to use the USB port again.</string>
 
     <!-- Toast for enabling ports from USB contaminant dialog [CHAR LIMIT=NONE] -->
     <string name="usb_port_enabled">USB port enabled to detect chargers and accessories</string>
 
     <!-- Button text to disable contaminant detection [CHAR LIMIT=NONE] -->
     <string name="usb_disable_contaminant_detection">Enable USB</string>
+
+    <!-- Button text to disable contaminant detection [CHAR LIMIT=NONE] -->
+    <string name="learn_more">Learn more</string>
 
     <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
          on a phone).  [CHAR LIMIT=25] -->
@@ -1100,7 +1103,10 @@
     <string name="battery_saver_notification_action_text">Turn off Battery Saver</string>
 
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text">While recording or casting, <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> can capture any sensitive information, such as audio that you play and your passwords, payment info, photos, and messages.</string>
+    <string name="media_projection_dialog_text">While recording or casting, <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
+
+    <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_service_text">While recording or casting, the service providing this function can capture any sensitive information that is displayed on your screen or played from your device, including sensitive information such as audio, passwords, payment info, photos and messages.</string>
 
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_title">Exposing sensitive info during casting/recording </string>
@@ -1115,10 +1121,10 @@
     <string name="manage_notifications_text">Manage</string>
 
     <!-- Section title for notifications that do not vibrate or make noise. [CHAR LIMIT=40] -->
-    <string name="notification_section_header_gentle">Gentle notifications</string>
+    <string name="notification_section_header_gentle">Silent notifications</string>
 
     <!-- Content description for accessibility: Tapping this button will dismiss all gentle notifications [CHAR LIMIT=NONE] -->
-    <string name="accessibility_notification_section_header_gentle_clear_all">Clear all gentle notifications</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all">Clear all silent notifications</string>
 
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
     <string name="dnd_suppressing_shade_text">Notifications paused by Do Not Disturb</string>
@@ -1653,13 +1659,13 @@
     <string name="inline_minimize_button">Minimize</string>
 
     <!-- Notification inline controls: button to show notifications silently, without alerting the user [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_silent">Gentle</string>
+    <string name="inline_silent_button_silent">Silent</string>
 
     <!-- Notification inline controls: button to continue showing notifications silently [CHAR_LIMIT=35] -->
     <string name="inline_silent_button_stay_silent">Stay silent</string>
 
     <!-- Notification inline controls: button to make notifications alert the user [CHAR_LIMIT=35] -->
-    <string name="inline_silent_button_alert">Interruptive</string>
+    <string name="inline_silent_button_alert">Alerting</string>
 
     <!-- Notification inline controls: button to continue alerting the user when notifications arrive [CHAR_LIMIT=35] -->
     <string name="inline_silent_button_keep_alerting">Keep alerting</string>
@@ -2372,7 +2378,7 @@
     <string name="auto_saver_title">Tap to schedule Battery Saver</string>
 
     <!-- The content of the notification to suggest enabling automatic battery saver.  [CHAR LIMIT=NONE]-->
-    <string name="auto_saver_text">Turn on automatically when battery is at <xliff:g id="percentage">%d</xliff:g>%%</string>
+    <string name="auto_saver_text">Turn on when battery is likely to run out</string>
 
     <!-- An action on the notification to suggest enabling automatic battery saver: Do not turn on automatic battery saver.  [CHAR LIMIT=NONE]-->
     <string name="no_auto_saver_action">No thanks</string>

@@ -37,6 +37,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.NotificationChannels;
 
 import org.junit.Before;
@@ -57,7 +58,8 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void setUp() throws Exception {
         // Test Instance.
         mContext.addMockSystemService(NotificationManager.class, mMockNotificationManager);
-        mPowerNotificationWarnings = new PowerNotificationWarnings(mContext);
+        ActivityStarter starter = mDependency.injectMockDependency(ActivityStarter.class);
+        mPowerNotificationWarnings = new PowerNotificationWarnings(mContext, starter);
         BatteryStateSnapshot snapshot = new BatteryStateSnapshot(100, false, false, 1,
                 BatteryManager.BATTERY_HEALTH_GOOD, 5, 15);
         mPowerNotificationWarnings.updateSnapshot(snapshot);

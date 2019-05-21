@@ -59,7 +59,8 @@ easier.
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
         <item name="colorBackground">@color/primary_dark_device_default_settings</item>
 
-        <item name="listDivider">@color/list_divider_color_dark</item>
+        <item name="colorListDivider">@color/list_divider_color_dark</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_device_default_dark</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogBase" parent="Theme.Material.BaseDialog">
