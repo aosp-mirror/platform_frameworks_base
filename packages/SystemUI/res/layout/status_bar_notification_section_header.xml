@@ -43,7 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginLeft="@dimen/notification_section_header_padding_left"
+            android:layout_marginStart="@dimen/notification_section_header_padding_left"
             android:text="@string/notification_section_header_gentle"
             android:textSize="12sp"
             android:textColor="@color/notification_section_header_label_color"
@@ -52,7 +52,7 @@
             android:id="@+id/btn_clear_all"
             android:layout_width="@dimen/notification_section_header_height"
             android:layout_height="@dimen/notification_section_header_height"
-            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
             android:src="@drawable/status_bar_notification_section_header_clear_btn"
             android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
             />
