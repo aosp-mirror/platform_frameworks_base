@@ -3133,7 +3133,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             // If the state didn't change, we may still need to update public mode
             mLockscreenUserManager.updatePublicMode();
-            mEntryManager.updateNotifications();
         }
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
