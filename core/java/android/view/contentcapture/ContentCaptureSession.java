@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * Session used to notify the Android system about events associated with views.
+ * Session used when notifying the Android system about events associated with views.
  */
 public abstract class ContentCaptureSession implements AutoCloseable {
 
