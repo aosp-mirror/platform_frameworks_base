@@ -91,6 +91,20 @@ public class AudioMix {
      */
     public static final int ROUTE_FLAG_LOOP_BACK = 0x1 << 1;
 
+    /**
+     * An audio mix behavior where the targeted audio is played unaffected but a copy is
+     * accessible for capture through {@link AudioRecord}.
+     *
+     * Only capture of playback is supported, not capture of capture.
+     * Use concurrent capture instead to capture what is captured by other apps.
+     *
+     * The captured audio is an approximation of the played audio.
+     * Effects and volume are not applied, and track are mixed with different delay then in the HAL.
+     * As a result, this API is not suitable for echo cancelling.
+     * @hide
+     */
+    public static final int ROUTE_FLAG_LOOP_BACK_RENDER = ROUTE_FLAG_LOOP_BACK | ROUTE_FLAG_RENDER;
+
     private static final int ROUTE_FLAG_SUPPORTED = ROUTE_FLAG_RENDER | ROUTE_FLAG_LOOP_BACK;
 
     // MIX_TYPE_* values to keep in sync with frameworks/av/include/media/AudioPolicy.h
@@ -125,6 +139,15 @@ public class AudioMix {
      */
     public static final int MIX_STATE_MIXING = 1;
 
+    /** Maximum sampling rate for privileged playback capture*/
+    private static final int PRIVILEDGED_CAPTURE_MAX_SAMPLE_RATE = 16000;
+
+    /** Maximum channel number for privileged playback capture*/
+    private static final int PRIVILEDGED_CAPTURE_MAX_CHANNEL_NUMBER = 1;
+
+    /** Maximum channel number for privileged playback capture*/
+    private static final int PRIVILEDGED_CAPTURE_MAX_BYTES_PER_SAMPLE = 2;
+
     /**
      * The current mixing state.
      * @return one of {@link #MIX_STATE_DISABLED}, {@link #MIX_STATE_IDLE},
@@ -140,7 +163,8 @@ public class AudioMix {
         return mRouteFlags;
     }
 
-    AudioFormat getFormat() {
+    /** @hide */
+    public AudioFormat getFormat() {
         return mFormat;
     }
 
@@ -180,6 +204,31 @@ public class AudioMix {
             return false;
         }
         return true;
+    }
+
+    /** @return an error string if the format would not allow Privileged playbackCapture
+     *          null otherwise
+     * @hide */
+    public static String canBeUsedForPrivilegedCapture(AudioFormat format) {
+        int sampleRate = format.getSampleRate();
+        if (sampleRate > PRIVILEDGED_CAPTURE_MAX_SAMPLE_RATE || sampleRate <= 0) {
+            return "Privileged audio capture sample rate " + sampleRate
+                   + " can not be over " + PRIVILEDGED_CAPTURE_MAX_SAMPLE_RATE + "kHz";
+        }
+        int channelCount = format.getChannelCount();
+        if (channelCount > PRIVILEDGED_CAPTURE_MAX_CHANNEL_NUMBER || channelCount <= 0) {
+            return "Privileged audio capture channel count " + channelCount + " can not be over "
+                   + PRIVILEDGED_CAPTURE_MAX_CHANNEL_NUMBER;
+        }
+        int encoding = format.getEncoding();
+        if (!format.isPublicEncoding(encoding) || !format.isEncodingLinearPcm(encoding)) {
+            return "Privileged audio capture encoding " + encoding + "is not linear";
+        }
+        if (format.getBytesPerSample(encoding) > PRIVILEDGED_CAPTURE_MAX_BYTES_PER_SAMPLE) {
+            return "Privileged audio capture encoding " + encoding + " can not be over "
+                   + PRIVILEDGED_CAPTURE_MAX_BYTES_PER_SAMPLE + " bytes per sample";
+        }
+        return null;
     }
 
     /** @hide */
@@ -388,6 +437,12 @@ public class AudioMix {
                     } else {
                         throw new IllegalArgumentException("Unknown mixing rule type");
                     }
+                }
+            }
+            if (mRule.allowPrivilegedPlaybackCapture()) {
+                String error = AudioMix.canBeUsedForPrivilegedCapture(mFormat);
+                if (error != null) {
+                    throw new IllegalArgumentException(error);
                 }
             }
             return new AudioMix(mRule, mFormat, mRouteFlags, mCallbackFlags, mDeviceSystemType,
