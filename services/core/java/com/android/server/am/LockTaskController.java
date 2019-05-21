@@ -794,7 +794,7 @@ public class LockTaskController {
         } catch (Settings.SettingNotFoundException e) {
             // Log to SafetyNet for b/127605586
             android.util.EventLog.writeEvent(0x534e4554, "127605586", -1, "");
-            return mLockPatternUtils.isSecure(USER_CURRENT);
+            return getLockPatternUtils().isSecure(USER_CURRENT);
         }
     }
 
