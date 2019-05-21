@@ -2412,7 +2412,21 @@ public class TelephonyManager {
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
     public @NetworkType int getNetworkType() {
-        return getDataNetworkType();
+       try {
+           ITelephony telephony = getITelephony();
+           if (telephony != null) {
+               return telephony.getNetworkType();
+            } else {
+                // This can happen when the ITelephony interface is not up yet.
+                return NETWORK_TYPE_UNKNOWN;
+            }
+        } catch(RemoteException ex) {
+            // This shouldn't happen in the normal case
+            return NETWORK_TYPE_UNKNOWN;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return NETWORK_TYPE_UNKNOWN;
+        }
     }
 
     /**
@@ -2443,9 +2457,23 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public int getNetworkType(int subId) {
-        return getDataNetworkType(subId);
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getNetworkTypeForSubscriber(subId, getOpPackageName());
+            } else {
+                // This can happen when the ITelephony interface is not up yet.
+                return NETWORK_TYPE_UNKNOWN;
+            }
+        } catch (RemoteException ex) {
+            // This shouldn't happen in the normal case
+            return NETWORK_TYPE_UNKNOWN;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return NETWORK_TYPE_UNKNOWN;
+        }
     }
 
     /**
