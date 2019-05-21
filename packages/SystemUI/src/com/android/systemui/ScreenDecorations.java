@@ -105,6 +105,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private float mDensity;
     private WindowManager mWindowManager;
     private int mRotation;
+    private boolean mAssistHintVisible;
     private DisplayCutoutView mCutoutTop;
     private DisplayCutoutView mCutoutBottom;
     private SecureSetting mColorInversionSetting;
@@ -133,6 +134,55 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mHandler = startHandlerThread();
         mHandler.post(this::startOnScreenDecorationsThread);
         setupStatusBarPaddingIfNeeded();
+        putComponent(ScreenDecorations.class, this);
+    }
+
+    private void fade(View view, boolean fadeIn) {
+        if (fadeIn) {
+            view.animate().cancel();
+            view.setAlpha(0f);
+            view.setVisibility(View.VISIBLE);
+            view.animate().alpha(1f);
+        } else {
+            view.animate().cancel();
+            view.animate().alpha(0f).withEndAction(() -> view.setVisibility(View.INVISIBLE));
+        }
+
+    }
+
+    /**
+     * Controls the visibility of the assist gesture handles.
+     *
+     * @param visible whether the handles should be shown
+     */
+    public void setAssistHintVisible(boolean visible) {
+        if (mAssistHintVisible != visible) {
+            mAssistHintVisible = visible;
+
+            View assistHintTopLeft = mOverlay.findViewById(R.id.assist_hint_left);
+            View assistHintTopRight = mOverlay.findViewById(R.id.assist_hint_right);
+            View assistHintBottomLeft = mBottomOverlay.findViewById(R.id.assist_hint_left);
+            View assistHintBottomRight = mBottomOverlay.findViewById(R.id.assist_hint_right);
+
+            switch (mRotation) {
+                case RotationUtils.ROTATION_NONE:
+                    fade(assistHintBottomLeft, mAssistHintVisible);
+                    fade(assistHintBottomRight, mAssistHintVisible);
+                    break;
+                case RotationUtils.ROTATION_LANDSCAPE:
+                    fade(assistHintTopRight, mAssistHintVisible);
+                    fade(assistHintBottomRight, mAssistHintVisible);
+                    break;
+                case RotationUtils.ROTATION_SEASCAPE:
+                    fade(assistHintTopLeft, mAssistHintVisible);
+                    fade(assistHintBottomLeft, mAssistHintVisible);
+                    break;
+                case RotationUtils.ROTATION_UPSIDE_DOWN:
+                    fade(assistHintTopLeft, mAssistHintVisible);
+                    fade(assistHintTopRight, mAssistHintVisible);
+                    break;
+            }
+        }
     }
 
     @VisibleForTesting
@@ -375,10 +425,50 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             updateView(bottomRight, Gravity.TOP | Gravity.LEFT, 0);
         }
 
+        updateAssistantHandleViews();
         mCutoutTop.setRotation(mRotation);
         mCutoutBottom.setRotation(mRotation);
 
         updateWindowVisibilities();
+    }
+
+    private void updateAssistantHandleViews() {
+        View assistHintTopLeft = mOverlay.findViewById(R.id.assist_hint_left);
+        View assistHintTopRight = mOverlay.findViewById(R.id.assist_hint_right);
+        View assistHintBottomLeft = mBottomOverlay.findViewById(R.id.assist_hint_left);
+        View assistHintBottomRight = mBottomOverlay.findViewById(R.id.assist_hint_right);
+
+        final int assistHintVisibility = mAssistHintVisible ? View.VISIBLE : View.INVISIBLE;
+
+        if (mRotation == RotationUtils.ROTATION_NONE) {
+            assistHintTopLeft.setVisibility(View.GONE);
+            assistHintTopRight.setVisibility(View.GONE);
+            assistHintBottomLeft.setVisibility(assistHintVisibility);
+            assistHintBottomRight.setVisibility(assistHintVisibility);
+            updateView(assistHintBottomLeft, Gravity.BOTTOM | Gravity.LEFT, 270);
+            updateView(assistHintBottomRight, Gravity.BOTTOM | Gravity.RIGHT, 180);
+        } else if (mRotation == RotationUtils.ROTATION_LANDSCAPE) {
+            assistHintTopLeft.setVisibility(View.GONE);
+            assistHintTopRight.setVisibility(assistHintVisibility);
+            assistHintBottomLeft.setVisibility(View.GONE);
+            assistHintBottomRight.setVisibility(assistHintVisibility);
+            updateView(assistHintTopRight, Gravity.BOTTOM | Gravity.LEFT, 270);
+            updateView(assistHintBottomRight, Gravity.BOTTOM | Gravity.RIGHT, 180);
+        } else if (mRotation == RotationUtils.ROTATION_UPSIDE_DOWN) {
+            assistHintTopLeft.setVisibility(assistHintVisibility);
+            assistHintTopRight.setVisibility(assistHintVisibility);
+            assistHintBottomLeft.setVisibility(View.GONE);
+            assistHintBottomRight.setVisibility(View.GONE);
+            updateView(assistHintTopLeft, Gravity.BOTTOM | Gravity.LEFT, 270);
+            updateView(assistHintTopRight, Gravity.BOTTOM | Gravity.RIGHT, 180);
+        } else if (mRotation == RotationUtils.ROTATION_SEASCAPE) {
+            assistHintTopLeft.setVisibility(assistHintVisibility);
+            assistHintTopRight.setVisibility(View.GONE);
+            assistHintBottomLeft.setVisibility(assistHintVisibility);
+            assistHintBottomRight.setVisibility(View.GONE);
+            updateView(assistHintTopLeft, Gravity.BOTTOM | Gravity.RIGHT, 180);
+            updateView(assistHintBottomLeft, Gravity.BOTTOM | Gravity.LEFT, 270);
+        }
     }
 
     private void updateView(View v, int gravity, int rotation) {
