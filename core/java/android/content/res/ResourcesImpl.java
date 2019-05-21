@@ -1390,11 +1390,9 @@ public class ResourcesImpl {
                 @StyleableRes int[] attrs,
                 @AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes) {
-            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "obtainStyledAttributes");
-            TypedArray array;
             synchronized (mKey) {
                 final int len = attrs.length;
-                array = TypedArray.obtain(wrapper.getResources(), len);
+                final TypedArray array = TypedArray.obtain(wrapper.getResources(), len);
 
                 // XXX note that for now we only work with compiled XML files.
                 // To support generic XML files we will need to manually parse
@@ -1405,9 +1403,8 @@ public class ResourcesImpl {
                         array.mDataAddress, array.mIndicesAddress);
                 array.mTheme = wrapper;
                 array.mXml = parser;
+                return array;
             }
-            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-            return array;
         }
 
         @NonNull

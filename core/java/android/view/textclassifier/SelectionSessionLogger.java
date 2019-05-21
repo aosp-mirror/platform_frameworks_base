@@ -80,12 +80,16 @@ public final class SelectionSessionLogger {
                 .addTaggedData(INDEX, event.getEventIndex())
                 .addTaggedData(WIDGET_TYPE, event.getWidgetType())
                 .addTaggedData(WIDGET_VERSION, event.getWidgetVersion())
-                .addTaggedData(MODEL_NAME, SignatureParser.getModelName(event.getResultId()))
                 .addTaggedData(ENTITY_TYPE, event.getEntityType())
-                .addTaggedData(SMART_START, event.getSmartStart())
-                .addTaggedData(SMART_END, event.getSmartEnd())
                 .addTaggedData(EVENT_START, event.getStart())
                 .addTaggedData(EVENT_END, event.getEnd());
+        if (isPlatformLocalTextClassifierSmartSelection(event.getResultId())) {
+            // Ensure result id and smart indices are only set for events with smart selection from
+            // the platform's textclassifier.
+            log.addTaggedData(MODEL_NAME, SignatureParser.getModelName(event.getResultId()))
+                    .addTaggedData(SMART_START, event.getSmartStart())
+                    .addTaggedData(SMART_END, event.getSmartEnd());
+        }
         if (event.getSessionId() != null) {
             log.addTaggedData(SESSION_ID, event.getSessionId().flattenToString());
         }
@@ -191,6 +195,11 @@ public final class SelectionSessionLogger {
             default:
                 return UNKNOWN;
         }
+    }
+
+    static boolean isPlatformLocalTextClassifierSmartSelection(String signature) {
+        return SelectionSessionLogger.CLASSIFIER_ID.equals(
+                SelectionSessionLogger.SignatureParser.getClassifierId(signature));
     }
 
     private static void debugLog(LogMaker log) {

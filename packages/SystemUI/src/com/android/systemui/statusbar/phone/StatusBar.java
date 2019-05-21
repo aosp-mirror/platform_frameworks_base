@@ -2243,6 +2243,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    /** Returns whether the top activity is in fullscreen mode. */
+    public boolean inFullscreenMode() {
+        return 0
+                != (mSystemUiVisibility
+                        & (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION));
+    }
+
+    /** Returns whether the top activity is in immersive mode. */
+    public boolean inImmersiveMode() {
+        return 0
+                != (mSystemUiVisibility
+                        & (View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY));
+    }
+
     private boolean areLightsOn() {
         return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
@@ -3272,11 +3286,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             } else {
                 mNotificationPanel.animateCloseQs(false /* animateAway */);
             }
-            return true;
-        }
-        if (mStatusBarWindowController.hasAssistActiveSession()) {
-            // Back pressed during an assist session, cancel it.
-            mAssistManager.hideAssist();
             return true;
         }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {

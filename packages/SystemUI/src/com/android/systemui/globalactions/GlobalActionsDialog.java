@@ -1564,8 +1564,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     }
 
                     // Unlock rotation, so user can choose to rotate to portrait to see the panel.
-                    RotationPolicy.setRotationLockAtAngle(
-                            mContext, false, RotationUtils.ROTATION_NONE);
+                    // This call is posted so that the rotation does not change until post-layout,
+                    // otherwise onConfigurationChanged() may not get invoked.
+                    mGlobalActionsLayout.post(() ->
+                            RotationPolicy.setRotationLockAtAngle(
+                                    mContext, false, RotationUtils.ROTATION_NONE));
                 }
             } else {
                 if (!rotationLocked) {
@@ -1575,8 +1578,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     }
 
                     // Lock to portrait, so the user doesn't accidentally hide the panel.
-                    RotationPolicy.setRotationLockAtAngle(
-                            mContext, true, RotationUtils.ROTATION_NONE);
+                    // This call is posted so that the rotation does not change until post-layout,
+                    // otherwise onConfigurationChanged() may not get invoked.
+                    mGlobalActionsLayout.post(() ->
+                            RotationPolicy.setRotationLockAtAngle(
+                                    mContext, true, RotationUtils.ROTATION_NONE));
                 }
 
                 // Disable rotation suggestions, if enabled

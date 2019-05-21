@@ -467,23 +467,25 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteJobStart(String name, int uid) {
+    /** A scheduled job was started. */
+    public void noteJobStart(String name, int uid, int standbyBucket, int jobid) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteJobStartLocked(name, uid);
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, uid, null,
                     name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
-                    JobProtoEnums.STOP_REASON_UNKNOWN);
+                    JobProtoEnums.STOP_REASON_UNKNOWN, standbyBucket, jobid);
         }
     }
 
-    public void noteJobFinish(String name, int uid, int stopReason) {
+    /** A scheduled job was finished. */
+    public void noteJobFinish(String name, int uid, int stopReason, int standbyBucket, int jobid) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteJobFinishLocked(name, uid, stopReason);
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, uid, null,
                     name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
-                    stopReason);
+                    stopReason, standbyBucket, jobid);
         }
     }
 

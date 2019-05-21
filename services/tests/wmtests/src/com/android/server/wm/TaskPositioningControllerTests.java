@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputChannel;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -41,7 +42,7 @@ import org.junit.Test;
  * Tests for the {@link TaskPositioningController} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskPositioningControllerTests
+ *  atest WmTests:TaskPositioningControllerTests
  */
 @SmallTest
 @Presubmit
@@ -80,6 +81,29 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         }
 
         mTarget.finishTaskPositioning();
+        // Wait until the looper processes finishTaskPositioning.
+        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
+
+        assertFalse(mTarget.isPositioningLocked());
+        assertNull(mTarget.getDragWindowHandleLocked());
+    }
+
+    @FlakyTest(bugId = 129507487)
+    @Test
+    public void testFinishPositioningWhenAppRequested() {
+        synchronized (mWm.mGlobalLock) {
+            assertFalse(mTarget.isPositioningLocked());
+            assertNull(mTarget.getDragWindowHandleLocked());
+        }
+
+        assertTrue(mTarget.startMovingTask(mWindow.mClient, 0, 0));
+
+        synchronized (mWm.mGlobalLock) {
+            assertTrue(mTarget.isPositioningLocked());
+            assertNotNull(mTarget.getDragWindowHandleLocked());
+        }
+
+        mTarget.finishTaskPositioning(mWindow.mClient);
         // Wait until the looper processes finishTaskPositioning.
         assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
 

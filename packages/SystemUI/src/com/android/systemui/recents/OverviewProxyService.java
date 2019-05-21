@@ -44,6 +44,7 @@ import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -450,20 +451,20 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         // Assumes device always starts with back button until launcher tells it that it does not
         mBackButtonAlpha = 1.0f;
 
+        // Listen for nav bar mode changes
         mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
 
-        // Listen for the package update changes.
-        if (mDeviceProvisionedController.getCurrentUser() == UserHandle.USER_SYSTEM) {
-            updateEnabledState();
-            mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
-            IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
-            filter.addDataScheme("package");
-            filter.addDataSchemeSpecificPart(mRecentsComponentName.getPackageName(),
-                    PatternMatcher.PATTERN_LITERAL);
-            filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-            // TODO: Shouldn't this be per-user?
-            mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
-        }
+        // Listen for device provisioned/user setup
+        updateEnabledState();
+        mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
+
+        // Listen for launcher package changes
+        IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+        filter.addDataScheme("package");
+        filter.addDataSchemeSpecificPart(mRecentsComponentName.getPackageName(),
+                PatternMatcher.PATTERN_LITERAL);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
     }
 
     public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,

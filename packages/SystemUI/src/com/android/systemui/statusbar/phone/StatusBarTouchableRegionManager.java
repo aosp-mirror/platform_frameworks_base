@@ -60,9 +60,6 @@ public final class StatusBarTouchableRegionManager implements
 
         initResources();
 
-        mAssistManager.setAssistSysUiChangeListener((isVisible) -> {
-            updateTouchableRegion();
-        });
         mBubbleController.setBubbleStateChangeListener((hasBubbles) -> {
             updateTouchableRegion();
         });
@@ -79,7 +76,6 @@ public final class StatusBarTouchableRegionManager implements
         boolean shouldObserve =
                 mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpManager.isHeadsUpGoingAway()
                         || mBubbleController.hasBubbles()
-                        || mAssistManager.hasAssistUi()
                         || mForceCollapsedUntilLayout
                         || hasCutoutInset;
         if (shouldObserve == mShouldAdjustInsets) {
@@ -142,11 +138,6 @@ public final class StatusBarTouchableRegionManager implements
         Rect bubbleRect = mBubbleController.getTouchableRegion();
         if (bubbleRect != null) {
             info.touchableRegion.union(bubbleRect);
-        }
-
-        Rect assistRect = mAssistManager.getTouchableRegion();
-        if (assistRect != null) {
-            info.touchableRegion.union(assistRect);
         }
     }
 
