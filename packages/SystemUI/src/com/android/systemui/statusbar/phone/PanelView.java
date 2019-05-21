@@ -1169,14 +1169,13 @@ public abstract class PanelView extends FrameLayout {
     }
 
     protected void notifyBarPanelExpansionChanged() {
-        float fraction = mInstantExpanding ? 1 : mExpandedFraction;
         if (mBar != null) {
-            mBar.panelExpansionChanged(fraction, fraction > 0f
+            mBar.panelExpansionChanged(mExpandedFraction, mExpandedFraction > 0f
                     || mPeekAnimator != null || mInstantExpanding
                     || isPanelVisibleBecauseOfHeadsUp() || mTracking || mHeightAnimator != null);
         }
         if (mExpansionListener != null) {
-            mExpansionListener.onPanelExpansionChanged(fraction, mTracking);
+            mExpansionListener.onPanelExpansionChanged(mExpandedFraction, mTracking);
         }
     }
 
