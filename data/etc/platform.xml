@@ -194,14 +194,12 @@
                       targetSdk="16">
         <new-permission name="android.permission.WRITE_CALL_LOG" />
     </split-permission>
-    <!-- STOPSHIP(b/118882117): change targetSdk to Q when SDK version finalised -->
     <split-permission name="android.permission.ACCESS_FINE_LOCATION"
-                      targetSdk="10000">
+                      targetSdk="29">
         <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </split-permission>
-    <!-- STOPSHIP(b/118882117): change targetSdk to Q when SDK version finalised -->
     <split-permission name="android.permission.ACCESS_COARSE_LOCATION"
-                      targetSdk="10000">
+                      targetSdk="29">
         <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </split-permission>
 
