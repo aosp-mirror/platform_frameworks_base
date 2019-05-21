@@ -2405,6 +2405,7 @@ public class AppOpsManager {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public long getRejectTime() {
             return getLastRejectTime(OP_FLAGS_ALL);
         }
