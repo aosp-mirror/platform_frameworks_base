@@ -73,6 +73,12 @@ interface ISystemUiProxy {
     void onAssistantProgress(float progress) = 12;
 
     /**
+    * Proxies the assistant gesture fling velocity (in pixels per millisecond) upon completion.
+    * Velocity is 0 for drag gestures.
+    */
+    void onAssistantGestureCompletion(float velocity) = 18;
+
+    /**
      * Start the assistant.
      */
     void startAssistant(in Bundle bundle) = 13;
