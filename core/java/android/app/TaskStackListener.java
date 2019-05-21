@@ -173,4 +173,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo)
             throws RemoteException {
     }
+
+    @Override
+    public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
+    }
 }

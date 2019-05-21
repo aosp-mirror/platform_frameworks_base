@@ -28,6 +28,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_W
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
@@ -210,6 +211,12 @@ public class AppTransitionController {
 
         mService.mAtmInternal.notifyAppTransitionStarting(mTempTransitionReasons.clone(),
                 SystemClock.uptimeMillis());
+
+        if (transit == TRANSIT_SHOW_SINGLE_TASK_DISPLAY) {
+            mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
+                mService.mAtmInternal.notifySingleTaskDisplayDrawn(mDisplayContent.getDisplayId());
+            });
+        }
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 
