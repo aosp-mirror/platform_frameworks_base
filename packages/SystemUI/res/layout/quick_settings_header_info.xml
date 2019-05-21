@@ -27,14 +27,12 @@
             android:id="@+id/status_container"
             android:layout_width="match_parent"
             android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:gravity="start" >
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:id = "@+id/alarm_container"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:focusable="true"
                 android:clickable="true">
@@ -69,7 +67,6 @@
                 android:id = "@+id/ringer_container"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:focusable="true"
                 android:clickable="true">
