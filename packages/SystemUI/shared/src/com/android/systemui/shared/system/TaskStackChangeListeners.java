@@ -196,9 +196,16 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
-    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
+    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken)
+            throws RemoteException {
         mHandler.obtainMessage(H.ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED, displayId, 0 /* unused */,
                 activityToken).sendToTarget();
+    }
+
+    @Override
+    public void onSingleTaskDisplayDrawn(int displayId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_SINGLE_TASK_DISPLAY_DRAWN, displayId,
+                0 /* unused */).sendToTarget();
     }
 
     private final class H extends Handler {
@@ -220,6 +227,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 16;
         private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
         private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
+        private static final int ON_SINGLE_TASK_DISPLAY_DRAWN = 19;
 
 
         public H(Looper looper) {
@@ -353,6 +361,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onBackPressedOnTaskRoot(
                                     (RunningTaskInfo) msg.obj);
+                        }
+                        break;
+                    }
+                    case ON_SINGLE_TASK_DISPLAY_DRAWN: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onSingleTaskDisplayDrawn(msg.arg1);
                         }
                         break;
                     }

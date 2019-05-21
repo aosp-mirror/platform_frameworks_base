@@ -40,6 +40,7 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
@@ -3194,6 +3195,8 @@ class ActivityStack extends ConfigurationContainer {
                 if (newTask) {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
+                    } else if (getDisplay().isSingleTaskInstance()) {
+                        transit = TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
                         // supporting picture-in-picture while pausing only if the starting activity
