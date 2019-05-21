@@ -1268,6 +1268,22 @@ public final class NotificationRecord {
         }
     }
 
+    // Returns the name of the NAS that made adjustments. By policy, there must only ever be one.
+    // If this is violated, the NAS that first sent an adjustment is returned.
+    private @Nullable String getAdjustmentIssuer() {
+        synchronized (mAdjustments) {
+            for (Adjustment adjustment : mAdjustments) {
+                if (adjustment.getSignals().isEmpty()) {
+                    continue;
+                }
+                if (adjustment.getIssuer() != null) {
+                    return adjustment.getIssuer();
+                }
+            }
+        }
+        return null;
+    }
+
     public LogMaker getLogMaker(long now) {
         LogMaker lm = sbn.getLogMaker()
                 .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE, mImportance)
@@ -1296,6 +1312,14 @@ public final class NotificationRecord {
         if (mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
             lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST,
                         mAssistantImportance);
+        }
+        // Log the issuer of any adjustments that may have affected this notification. We only log
+        // the hash here as NotificationItem events are frequent, and the number of NAS
+        // implementations (and hence the chance of collisions) is low.
+        String adjustmentIssuer = getAdjustmentIssuer();
+        if (adjustmentIssuer != null) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_ASSISTANT_SERVICE_HASH,
+                    adjustmentIssuer.hashCode());
         }
         return lm;
     }
