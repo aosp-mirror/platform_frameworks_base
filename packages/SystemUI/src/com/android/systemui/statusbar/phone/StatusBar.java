@@ -949,6 +949,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             createUserSwitcher();
         }
 
+        mNotificationPanel.setLaunchAffordanceListener(
+                mStatusBarWindow::onShowingLaunchAffordanceChanged);
+
         // Set up the quick settings tile panel
         View container = mStatusBarWindow.findViewById(R.id.qs_frame);
         if (container != null) {
