@@ -386,6 +386,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     PulseExpansionHandler mPulseExpansionHandler;
     @Inject
     NotificationWakeUpCoordinator mWakeUpCoordinator;
+    @Inject
+    KeyguardBypassController mKeyguardBypassController;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1229,7 +1231,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBiometricUnlockController = new BiometricUnlockController(mContext,
                 mDozeScrimController, keyguardViewMediator,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext),
-                new Handler(), mKeyguardUpdateMonitor, Dependency.get(TunerService.class));
+                new Handler(), mKeyguardUpdateMonitor, mKeyguardBypassController);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container));

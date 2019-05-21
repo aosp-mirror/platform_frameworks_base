@@ -39,7 +39,6 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
@@ -102,20 +101,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
      */
     private static final float BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR = 1.1f;
 
-    /**
-     * If face unlock dismisses the lock screen or keeps user on keyguard by default on this device.
-     */
-    private final boolean mFaceDismissesKeyguardByDefault;
-
-    /**
-     * If face unlock dismisses the lock screen or keeps user on keyguard for the current user.
-     */
-    @VisibleForTesting
-    protected boolean mFaceDismissesKeyguard;
-
     private final NotificationMediaManager mMediaManager;
     private final PowerManager mPowerManager;
     private final Handler mHandler;
+    private final KeyguardBypassController mKeyguardBypassController;
     private PowerManager.WakeLock mWakeLock;
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final UnlockMethodCache mUnlockMethodCache;
@@ -133,16 +122,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private boolean mPendingShowBouncer;
     private boolean mHasScreenTurnedOnSinceAuthenticating;
 
-    private final TunerService.Tunable mFaceDismissedKeyguardTunable = new TunerService.Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            int defaultValue = mFaceDismissesKeyguardByDefault ? 1 : 0;
-            mFaceDismissesKeyguard = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD,
-                    defaultValue, KeyguardUpdateMonitor.getCurrentUser()) != 0;
-        }
-    };
-
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     public BiometricUnlockController(Context context,
@@ -152,12 +131,12 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             StatusBar statusBar,
             UnlockMethodCache unlockMethodCache, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            TunerService tunerService) {
+            KeyguardBypassController keyguardBypassController) {
         this(context, dozeScrimController, keyguardViewMediator, scrimController, statusBar,
-                unlockMethodCache, handler, keyguardUpdateMonitor, tunerService,
+                unlockMethodCache, handler, keyguardUpdateMonitor,
                 context.getResources()
                         .getInteger(com.android.internal.R.integer.config_wakeUpDelayDoze),
-                context.getResources().getBoolean(R.bool.config_faceAuthDismissesKeyguard));
+                keyguardBypassController);
     }
 
     @VisibleForTesting
@@ -168,9 +147,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                                      StatusBar statusBar,
                                      UnlockMethodCache unlockMethodCache, Handler handler,
                                      KeyguardUpdateMonitor keyguardUpdateMonitor,
-                                     TunerService tunerService,
                                      int wakeUpDelay,
-                                     boolean faceDismissesKeyguard) {
+                                     KeyguardBypassController keyguardBypassController) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -186,9 +164,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mUnlockMethodCache = unlockMethodCache;
         mHandler = handler;
         mWakeUpDelay = wakeUpDelay;
-        mFaceDismissesKeyguardByDefault = faceDismissesKeyguard;
-        tunerService.addTunable(mFaceDismissedKeyguardTunable,
-                Settings.Secure.FACE_UNLOCK_DISMISSES_KEYGUARD);
+        mKeyguardBypassController = keyguardBypassController;
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -392,7 +368,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithBiometricAllowed();
         boolean deviceDreaming = mUpdateMonitor.isDreaming();
         boolean faceStayingOnKeyguard = biometricSourceType == BiometricSourceType.FACE
-                && !mFaceDismissesKeyguard;
+                && !mKeyguardBypassController.getBypassEnabled();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
