@@ -36,13 +36,16 @@ public class StatsLogCompat {
     /**
      *  StatsLog.write(StatsLog.STYLE_EVENT, action, colorPackageHash,
      *           fontPackageHash, shapePackageHash, clockPackageHash,
-     *           launcherGrid, wallpaperCategoryHash, wallpaperIdHash);
+     *           launcherGrid, wallpaperCategoryHash, wallpaperIdHash,
+     *           colorPreference, locationPreference);
      */
     public static void write(int action, int colorPackageHash,
             int fontPackageHash, int shapePackageHash, int clockPackageHash,
-            int launcherGrid, int wallpaperCategoryHash, int wallpaperIdHash) {
+            int launcherGrid, int wallpaperCategoryHash, int wallpaperIdHash,
+            int colorPreference, int locationPreference) {
         StatsLog.write(179, action, colorPackageHash,
                 fontPackageHash, shapePackageHash, clockPackageHash,
-                launcherGrid, wallpaperCategoryHash, wallpaperIdHash);
+                launcherGrid, wallpaperCategoryHash, wallpaperIdHash,
+                colorPreference, locationPreference);
     }
 }
