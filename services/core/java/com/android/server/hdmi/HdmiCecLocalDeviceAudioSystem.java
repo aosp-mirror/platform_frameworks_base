@@ -1150,10 +1150,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         // Wake up if the current device if ready to route.
         mService.wakeUp();
+        if (getLocalActivePort() == portId) {
+            HdmiLogger.debug("Not switching to the same port " + portId);
+            return;
+        }
         // Switch to HOME if the current active port is not HOME yet
-        if (portId == Constants.CEC_SWITCH_HOME
-            && mService.isPlaybackDevice()
-            && getLocalActivePort() != Constants.CEC_SWITCH_HOME) {
+        if (portId == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             switchToHomeTvInput();
         } else if (portId == Constants.CEC_SWITCH_ARC) {
             switchToTvInput(SystemProperties.get(Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT));
