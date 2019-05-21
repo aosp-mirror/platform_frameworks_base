@@ -1910,8 +1910,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         String permName = pkg.requestedPermissions[permNum];
 
                         PermissionInfo permissionInfo;
+                        int permissionFlags = 0;
                         try {
                             permissionInfo = pm.getPermissionInfo(permName, 0);
+                            permissionFlags =
+                                pm.getPermissionFlags(permName, pkg.packageName, user);
+
                         } catch (PackageManager.NameNotFoundException ignored) {
                             continue;
                         }
@@ -1926,6 +1930,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
                         e.writeString(pkg.packageName);
+                        e.writeInt(permissionFlags);
 
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
                                 & REQUESTED_PERMISSION_GRANTED) != 0);
