@@ -904,9 +904,9 @@
         android:backgroundPermission="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:protectionLevel="dangerous|instant" />
 
-    <!-- Allows an app to access location in the background.  If you
-         are requesting this, you should also request {@link #ACCESS_FINE_LOCATION}.
-         Requesting this by itself is not sufficient to give you
+    <!-- Allows an app to access location in the background. If you're requesting this permission,
+         you must also request either {@link #ACCESS_COARSE_LOCATION} or
+         {@link #ACCESS_FINE_LOCATION}. Requesting this permission by itself doesn't give you
          location access.
          <p>Protection level: dangerous
     -->
