@@ -16,30 +16,33 @@
 
 package com.android.systemui.usb;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.app.AlertActivity;
-import com.android.internal.app.AlertController;
 import com.android.systemui.R;
 
 /**
  * Activity that alerts the user when contaminant is detected on USB port.
  */
-public class UsbContaminantActivity extends AlertActivity
-                                  implements DialogInterface.OnClickListener {
+public class UsbContaminantActivity extends Activity implements View.OnClickListener {
     private static final String TAG = "UsbContaminantActivity";
 
     private UsbPort mUsbPort;
+    private TextView mLearnMore;
+    private TextView mGotIt;
+    private TextView mEnableUsb;
+    private TextView mTitle;
+    private TextView mMessage;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -47,22 +50,30 @@ public class UsbContaminantActivity extends AlertActivity
         window.addSystemFlags(WindowManager.LayoutParams
                 .SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         super.onCreate(icicle);
+        setContentView(R.layout.contaminant_dialog);
 
         Intent intent = getIntent();
         ParcelableUsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
         mUsbPort = port.getUsbPort(getSystemService(UsbManager.class));
 
-        final AlertController.AlertParams ap = mAlertParams;
-        ap.mTitle = getString(R.string.usb_contaminant_title);
-        ap.mMessage = getString(R.string.usb_contaminant_message);
-        ap.mNegativeButtonText = getString(android.R.string.ok);
-        ap.mNeutralButtonText = getString(R.string.usb_disable_contaminant_detection);
-        ap.mNegativeButtonListener = this;
-        ap.mNeutralButtonListener = this;
+        mLearnMore = findViewById(R.id.learnMore);
+        mEnableUsb = findViewById(R.id.enableUsb);
+        mGotIt = findViewById(R.id.gotIt);
+        mTitle = findViewById(R.id.title);
+        mMessage = findViewById(R.id.message);
 
-        setupAlert();
+        mTitle.setText(getString(R.string.usb_contaminant_title));
+        mMessage.setText(getString(R.string.usb_contaminant_message));
+        mEnableUsb.setText(getString(R.string.usb_disable_contaminant_detection));
+        mGotIt.setText(getString(R.string.got_it));
+        mLearnMore.setText(getString(R.string.learn_more));
+
+        mEnableUsb.setOnClickListener(this);
+        mGotIt.setOnClickListener(this);
+        mLearnMore.setOnClickListener(this);
     }
 
     @Override
@@ -71,8 +82,8 @@ public class UsbContaminantActivity extends AlertActivity
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
-        if (which == AlertDialog.BUTTON_NEUTRAL) {
+    public void onClick(View v) {
+        if (v == mEnableUsb) {
             try {
                 mUsbPort.enableContaminantDetection(false);
                 Toast.makeText(this, R.string.usb_port_enabled,
@@ -80,6 +91,13 @@ public class UsbContaminantActivity extends AlertActivity
             } catch (Exception e) {
                 Log.e(TAG, "Unable to notify Usb service", e);
             }
+        } else if (v == mLearnMore) {
+            final Intent intent = new Intent();
+            intent.setClassName("com.android.settings",
+                    "com.android.settings.HelpTrampoline");
+            intent.putExtra(Intent.EXTRA_TEXT,
+                    "help_url_usb_contaminant_detected");
+            startActivity(intent);
         }
         finish();
     }
