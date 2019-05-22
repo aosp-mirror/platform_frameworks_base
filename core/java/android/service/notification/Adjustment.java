@@ -16,7 +16,6 @@
 package android.service.notification;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -49,7 +48,6 @@ public final class Adjustment implements Parcelable {
     private final CharSequence mExplanation;
     private final Bundle mSignals;
     private final int mUser;
-    @Nullable private String mIssuer;
 
     /** @hide */
     @StringDef (prefix = { "KEY_" }, value = {
@@ -185,7 +183,6 @@ public final class Adjustment implements Parcelable {
         }
         mSignals = in.readBundle();
         mUser = in.readInt();
-        mIssuer = in.readString();
     }
 
     public static final @android.annotation.NonNull Creator<Adjustment> CREATOR = new Creator<Adjustment>() {
@@ -254,7 +251,6 @@ public final class Adjustment implements Parcelable {
         }
         dest.writeBundle(mSignals);
         dest.writeInt(mUser);
-        dest.writeString(mIssuer);
     }
 
     @Override
@@ -262,15 +258,5 @@ public final class Adjustment implements Parcelable {
         return "Adjustment{"
                 + "mSignals=" + mSignals
                 + '}';
-    }
-
-    /** @hide */
-    public void setIssuer(@Nullable String issuer) {
-        mIssuer = issuer;
-    }
-
-    /** @hide */
-    public @Nullable String getIssuer() {
-        return mIssuer;
     }
 }
