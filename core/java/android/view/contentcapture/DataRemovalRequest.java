@@ -32,6 +32,9 @@ import java.util.List;
 
 /**
  * Class used by apps to remove content capture data associated with {@link LocusId LocusIds}.
+ *
+ * <p>An app which has tagged data with a LocusId can therefore delete them later. This is intended
+ * to let apps propagate deletions of user data into the operating system.
  */
 public final class DataRemovalRequest implements Parcelable {
 
