@@ -39,6 +39,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
@@ -622,6 +623,8 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         private MotionEvent mLastUp;
         private MotionEvent mPreLastUp;
 
+        private long mLastDetectingDownEventTime;
+
         @VisibleForTesting boolean mShortcutTriggered;
 
         @VisibleForTesting Handler mHandler = new Handler(Looper.getMainLooper(), this);
@@ -662,6 +665,7 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
 
+                    mLastDetectingDownEventTime = event.getDownTime();
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
 
                     if (!mMagnificationController.magnificationRegionContains(
@@ -838,14 +842,25 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
         }
 
         private void sendDelayedMotionEvents() {
-            while (mDelayedEventQueue != null) {
+            if (mDelayedEventQueue == null) {
+                return;
+            }
+
+            // Adjust down time to prevent subsequent modules being misleading, and also limit
+            // the maximum offset to mMultiTapMaxDelay to prevent the down time of 2nd tap is
+            // in the future when multi-tap happens.
+            final long offset = Math.min(
+                    SystemClock.uptimeMillis() - mLastDetectingDownEventTime, mMultiTapMaxDelay);
+
+            do {
                 MotionEventInfo info = mDelayedEventQueue;
                 mDelayedEventQueue = info.mNext;
 
+                info.event.setDownTime(info.event.getDownTime() + offset);
                 handleEventWith(mDelegatingState, info.event, info.rawEvent, info.policyFlags);
 
                 info.recycle();
-            }
+            } while (mDelayedEventQueue != null);
         }
 
         private void clearDelayedMotionEvents() {
