@@ -72,7 +72,7 @@ android_test {
         "libutilscallstack",
         "libziparchive",
         "libz",
-        "netd_aidl_interface-cpp",
+        "netd_aidl_interface-V2-cpp",
     ],
 }
 
@@ -94,7 +94,7 @@ cc_library_shared {
         "liblog",
         "libcutils",
         "libnativehelper",
-        "netd_aidl_interface-cpp",
+        "netd_aidl_interface-V2-cpp",
     ],
     static_libs: [
         "libapf",
