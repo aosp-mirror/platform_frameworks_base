@@ -1678,8 +1678,11 @@ easier.
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
         <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
-        <item name="navigationBarColor">?attr/colorBackgroundFloating</item>
-        <item name="navigationBarDividerColor">@color/chooser_row_divider</item>
+        <item name="navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
+        <item name="windowLightNavigationBar">true</item>
     </style>
 
     <style name="Animation.DeviceDefault.Activity.Resolver" parent="Animation.DeviceDefault.Activity">
@@ -1688,10 +1691,6 @@ easier.
         <!-- Handle close for profile switching -->
         <item name="activityOpenExitAnimation">@anim/resolver_close_anim</item>
         <item name="taskOpenExitAnimation">@anim/resolver_close_anim</item>
-    </style>
-
-    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
-        <item name="windowLightNavigationBar">true</item>
     </style>
 
     <!-- @hide DeviceDefault themes for the autofill FillUi -->
