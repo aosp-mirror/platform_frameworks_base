@@ -15,6 +15,8 @@
  */
 package com.android.internal.util.custom;
 
+import android.app.ActivityThread;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -37,6 +39,17 @@ public class ColorUtils {
         Color.RED, 0xFFFFA500, Color.YELLOW, Color.GREEN, Color.CYAN,
         Color.BLUE, Color.MAGENTA, Color.WHITE, Color.BLACK
     };
+
+    private static float[] COEFFICIENTS = new float[9];
+
+    static {
+        String[] coefficients = ActivityThread.currentApplication().getApplicationContext()
+                .getResources().getStringArray(
+                com.android.internal.R.array.config_nightDisplayColorTemperatureCoefficients);
+        for (int i = 0; i < 9 && i < coefficients.length; i++) {
+            COEFFICIENTS[i] = Float.valueOf(coefficients[i]);
+        }
+    }
 
     /**
      * Drop the alpha component from an RGBA packed int and return
@@ -316,16 +329,17 @@ public class ColorUtils {
      * @param degreesK
      * @return array of floats representing rgb values 0->1
      */
-    public static float[] temperatureToRGB(int degreesK) {
-        int k = MathUtils.constrain(degreesK, 1000, 20000);
-        float a = (k % 100) / 100.0f;
-        int i = ((k - 1000)/ 100) * 3;
 
-        return new float[] { interp(i, a), interp(i+1, a), interp(i+2, a) };
-    }
+     public static float[] temperatureToRGB(int degreesK) {
+        float[] rgb = new float[3];
 
-    private static float interp(int i, float a) {
-        return MathUtils.lerp((float)sColorTable[i], (float)sColorTable[i+3], a);
+        final float square = degreesK * degreesK;
+        for (int i = 0; i < rgb.length; i++) {
+            rgb[i] = square * COEFFICIENTS[i * 3]
+                    + degreesK * COEFFICIENTS[i * 3 + 1] + COEFFICIENTS[i * 3 + 2];
+        }
+
+        return rgb;
     }
 
     /**
