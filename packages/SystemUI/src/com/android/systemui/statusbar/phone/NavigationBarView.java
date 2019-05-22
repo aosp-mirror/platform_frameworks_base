@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 
 import android.animation.LayoutTransition;
@@ -319,6 +322,7 @@ public class NavigationBarView extends FrameLayout implements
 
     public void setComponents(NotificationPanelView panel, AssistManager assistManager) {
         mPanelView = panel;
+        updateSystemUiStateFlags();
     }
 
     @Override
@@ -573,6 +577,7 @@ public class NavigationBarView extends FrameLayout implements
         updateNavButtonIcons();
         updateSlippery();
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
+        updateSystemUiStateFlags();
     }
 
     public void updateNavButtonIcons() {
@@ -700,8 +705,21 @@ public class NavigationBarView extends FrameLayout implements
 
     public void onPanelExpandedChange() {
         updateSlippery();
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
-                mPanelView.isFullyExpanded(), getContext().getDisplayId());
+        updateSystemUiStateFlags();
+    }
+
+    public void updateSystemUiStateFlags() {
+        int displayId = mContext.getDisplayId();
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_SCREEN_PINNING,
+                ActivityManagerWrapper.getInstance().isScreenPinningActive(), displayId);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_OVERVIEW_DISABLED,
+                (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0, displayId);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_HOME_DISABLED,
+                (mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0, displayId);
+        if (mPanelView != null) {
+            mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
+                    mPanelView.isFullyExpanded() && !mPanelView.isInSettings(), displayId);
+        }
     }
 
     public void updateStates() {
