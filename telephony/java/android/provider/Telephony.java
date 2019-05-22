@@ -3158,6 +3158,8 @@ public final class Telephony {
 
         /**
          * The {@code content://} style URL for locked messages in this table.
+         * <P>This {@link Uri} is used to check at most one locked message found in the union of MMS
+         * and SMS messages. Also this will return only _id column in response.</P>
          */
         public static final Uri CONTENT_LOCKED_URI = Uri.parse(
                 "content://mms-sms/locked");
