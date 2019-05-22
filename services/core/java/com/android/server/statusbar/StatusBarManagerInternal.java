@@ -108,4 +108,9 @@ public interface StatusBarManagerInternal {
      * @param displayId display ID
      */
     void onDisplayReady(int displayId);
+
+    /**
+     * Notifies System UI whether the recents animation is running.
+     */
+    void onRecentsAnimationStateChanged(boolean running);
 }
