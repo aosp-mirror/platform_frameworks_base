@@ -141,36 +141,38 @@ TEST(CountMetricE2eTest, TestSlicedState) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
-    EXPECT_EQ(3, reports.reports(0).metrics(0).count_metrics().data_size());
+    StatsLogReport::CountMetricDataWrapper countMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
+    EXPECT_EQ(3, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
-    auto data = reports.reports(0).metrics(0).count_metrics().data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
-    EXPECT_EQ(1, data.bucket_info(0).count());
-    EXPECT_EQ(1, data.bucket_info(1).count());
-
-    data = reports.reports(0).metrics(0).count_metrics().data(1);
+    auto data = countMetrics.data(0);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_UNKNOWN,
               data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(2);
+    data = countMetrics.data(1);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(2, data.bucket_info(1).count());
+
+    data = countMetrics.data(2);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(1, data.bucket_info(0).count());
+    EXPECT_EQ(1, data.bucket_info(1).count());
 }
 
 /**
@@ -191,7 +193,9 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     auto syncStartMatcher = CreateSyncStartAtomMatcher();
     *config.add_atom_matcher() = syncStartMatcher;
 
-    auto state = CreateScreenStateWithOnOffMap();
+    int64_t screenOnId = 4444;
+    int64_t screenOffId = 9876;
+    auto state = CreateScreenStateWithOnOffMap(screenOnId, screenOffId);
     *config.add_state() = state;
 
     // Create count metric that slices by screen state with on/off map.
@@ -321,11 +325,13 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
-    EXPECT_EQ(3, reports.reports(0).metrics(0).count_metrics().data_size());
+    StatsLogReport::CountMetricDataWrapper countMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
+    EXPECT_EQ(3, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
-    auto data = reports.reports(0).metrics(0).count_metrics().data(0);
+    auto data = countMetrics.data(0);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -333,23 +339,23 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     EXPECT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(1);
+    data = countMetrics.data(1);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_OFF"), data.slice_by_state(0).group_id());
-    EXPECT_EQ(2, data.bucket_info_size());
-    EXPECT_EQ(4, data.bucket_info(0).count());
-    EXPECT_EQ(2, data.bucket_info(1).count());
-
-    data = reports.reports(0).metrics(0).count_metrics().data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_ON"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
     EXPECT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(1, data.bucket_info(1).count());
+
+    data = countMetrics.data(2);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
+    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(4, data.bucket_info(0).count());
+    EXPECT_EQ(2, data.bucket_info(1).count());
 }
 
 /**
@@ -499,50 +505,52 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
-    EXPECT_EQ(5, reports.reports(0).metrics(0).count_metrics().data_size());
+    StatsLogReport::CountMetricDataWrapper countMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
+    EXPECT_EQ(5, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
-    auto data = reports.reports(0).metrics(0).count_metrics().data(0);
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(1, data.bucket_info(0).count());
-
-    data = reports.reports(0).metrics(0).count_metrics().data(1);
+    auto data = countMetrics.data(0);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(-1 /* StateTracker::kStateUnknown */, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(2);
-    EXPECT_EQ(1, data.slice_by_state_size());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_value());
-    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(2, data.bucket_info(0).count());
-
-    data = reports.reports(0).metrics(0).count_metrics().data(3);
+    data = countMetrics.data(1);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_TOP, data.slice_by_state(0).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(4);
+    data = countMetrics.data(2);
     EXPECT_EQ(1, data.slice_by_state_size());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_FOREGROUND_SERVICE, data.slice_by_state(0).value());
-    EXPECT_EQ(2, data.bucket_info_size());
+    ASSERT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
     EXPECT_EQ(2, data.bucket_info(1).count());
+
+    data = countMetrics.data(3);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(2, data.bucket_info(0).count());
+
+    data = countMetrics.data(4);
+    EXPECT_EQ(1, data.slice_by_state_size());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(1, data.bucket_info(0).count());
 }
 
 TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
@@ -554,7 +562,9 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
             CreateSimpleAtomMatcher("APP_CRASH_OCCURRED", util::APP_CRASH_OCCURRED);
     *config.add_atom_matcher() = appCrashMatcher;
 
-    auto state1 = CreateScreenStateWithOnOffMap();
+    int64_t screenOnId = 4444;
+    int64_t screenOffId = 9876;
+    auto state1 = CreateScreenStateWithOnOffMap(screenOnId, screenOffId);
     *config.add_state() = state1;
     auto state2 = CreateUidProcessState();
     *config.add_state() = state2;
@@ -725,22 +735,13 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(1, reports.reports_size());
     EXPECT_EQ(1, reports.reports(0).metrics_size());
     EXPECT_TRUE(reports.reports(0).metrics(0).has_count_metrics());
-    EXPECT_EQ(6, reports.reports(0).metrics(0).count_metrics().data_size());
+    StatsLogReport::CountMetricDataWrapper countMetrics;
+    sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
+    EXPECT_EQ(6, countMetrics.data_size());
 
     // For each CountMetricData, check StateValue info is correct and buckets
     // have correct counts.
-    auto data = reports.reports(0).metrics(0).count_metrics().data(0);
-    EXPECT_EQ(2, data.slice_by_state_size());
-    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_OFF"), data.slice_by_state(0).group_id());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
-    EXPECT_TRUE(data.slice_by_state(1).has_value());
-    EXPECT_EQ(android::app::PROCESS_STATE_FOREGROUND_SERVICE, data.slice_by_state(1).value());
-    EXPECT_EQ(1, data.bucket_info_size());
-    EXPECT_EQ(1, data.bucket_info(0).count());
-
-    data = reports.reports(0).metrics(0).count_metrics().data(1);
+    auto data = countMetrics.data(0);
     EXPECT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_value());
@@ -748,53 +749,64 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
     EXPECT_TRUE(data.slice_by_state(1).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(1).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(2);
+    data = countMetrics.data(1);
     EXPECT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_OFF"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
     EXPECT_TRUE(data.slice_by_state(1).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(1).value());
-    EXPECT_EQ(2, data.bucket_info_size());
-    EXPECT_EQ(2, data.bucket_info(0).count());
-    EXPECT_EQ(1, data.bucket_info(1).count());
-
-    data = reports.reports(0).metrics(0).count_metrics().data(3);
-    EXPECT_EQ(2, data.slice_by_state_size());
-    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_ON"), data.slice_by_state(0).group_id());
-    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
-    EXPECT_TRUE(data.slice_by_state(1).has_value());
-    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(1).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(4);
+    data = countMetrics.data(2);
     EXPECT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_ON"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(screenOnId, data.slice_by_state(0).group_id());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
     EXPECT_TRUE(data.slice_by_state(1).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, data.slice_by_state(1).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
 
-    data = reports.reports(0).metrics(0).count_metrics().data(5);
+    data = countMetrics.data(3);
     EXPECT_EQ(2, data.slice_by_state_size());
     EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
     EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-    EXPECT_EQ(StringToId("SCREEN_OFF"), data.slice_by_state(0).group_id());
+    EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
     EXPECT_TRUE(data.slice_by_state(1).has_value());
     EXPECT_EQ(android::app::PROCESS_STATE_TOP, data.slice_by_state(1).value());
-    EXPECT_EQ(1, data.bucket_info_size());
+    ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, data.bucket_info(0).count());
+
+    data = countMetrics.data(4);
+    EXPECT_EQ(2, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
+    EXPECT_TRUE(data.slice_by_state(1).has_value());
+    EXPECT_EQ(android::app::PROCESS_STATE_FOREGROUND_SERVICE, data.slice_by_state(1).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(1, data.bucket_info(0).count());
+
+    data = countMetrics.data(5);
+    EXPECT_EQ(2, data.slice_by_state_size());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOffId, data.slice_by_state(0).group_id());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(1).atom_id());
+    EXPECT_TRUE(data.slice_by_state(1).has_value());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, data.slice_by_state(1).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(2, data.bucket_info(0).count());
+    EXPECT_EQ(1, data.bucket_info(1).count());
 }
 
 }  // namespace statsd

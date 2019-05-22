@@ -3726,7 +3726,8 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
                 return true;
             }));
 
-    const StateMap& stateMap = CreateScreenStateOnOffMap();
+    const StateMap& stateMap =
+            CreateScreenStateOnOffMap(/*screen on id=*/321, /*screen off id=*/123);
     const StateMap_StateGroup screenOnGroup = stateMap.group(0);
     const StateMap_StateGroup screenOffGroup = stateMap.group(1);
 

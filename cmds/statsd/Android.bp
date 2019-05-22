@@ -301,6 +301,8 @@ cc_test {
         "-Wno-unused-parameter",
     ],
 
+    require_root: true,
+
     srcs: [
         // atom_field_options.proto needs field_options.proto, but that is
         // not included in libprotobuf-cpp-lite, so compile it here.
@@ -372,10 +374,6 @@ cc_test {
         type: "lite",
         include_dirs: ["external/protobuf/src"],
     },
-
-    shared_libs: [
-        "libprotobuf-cpp-lite",
-    ],
 
 }
 
