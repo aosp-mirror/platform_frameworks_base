@@ -191,6 +191,7 @@ public:
     virtual int save(SaveFlags::Flags flags) = 0;
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
+    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) = 0;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
                           SaveFlags::Flags flags) = 0;
