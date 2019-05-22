@@ -24767,6 +24767,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public void forEachInstalledPackage(@NonNull Consumer<PackageParser.Package> actionLocked,
+                @UserIdInt int userId) {
+            PackageManagerService.this.forEachInstalledPackage(actionLocked, userId);
+        }
+
+        @Override
         public ArraySet<String> getEnabledComponents(String packageName, int userId) {
             synchronized (mPackages) {
                 PackageSetting setting = mSettings.getPackageLPr(packageName);
@@ -25054,6 +25060,21 @@ public class PackageManagerService extends IPackageManager.Stub
             int numPackages = mPackages.size();
             for (int i = 0; i < numPackages; i++) {
                 actionLocked.accept(mPackages.valueAt(i));
+            }
+        }
+    }
+
+    void forEachInstalledPackage(@NonNull Consumer<PackageParser.Package> actionLocked,
+            @UserIdInt int userId) {
+        synchronized (mPackages) {
+            int numPackages = mPackages.size();
+            for (int i = 0; i < numPackages; i++) {
+                PackageParser.Package pkg = mPackages.valueAt(i);
+                PackageSetting setting = mSettings.getPackageLPr(pkg.packageName);
+                if (setting == null || !setting.getInstalled(userId)) {
+                    continue;
+                }
+                actionLocked.accept(pkg);
             }
         }
     }
