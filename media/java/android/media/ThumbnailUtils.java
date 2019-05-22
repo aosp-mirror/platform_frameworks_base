@@ -265,13 +265,10 @@ public class ThumbnailUtils {
             }
         }
 
-        boolean isHeifFile = false;
-
         if (mimeType.equals("image/heif")
                 || mimeType.equals("image/heif-sequence")
                 || mimeType.equals("image/heic")
                 || mimeType.equals("image/heic-sequence")) {
-            isHeifFile = true;
             try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
                 retriever.setDataSource(file.getAbsolutePath());
                 bitmap = retriever.getThumbnailImageAtIndex(-1,
@@ -298,11 +295,8 @@ public class ThumbnailUtils {
 
         if (bitmap == null) {
             bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(file), resizer);
-            // Use ImageDecoder to do full image decode of heif format file
-            // will have right orientation. Don't rotate the bitmap again.
-            if (isHeifFile) {
-                return bitmap;
-            }
+            // Use ImageDecoder to do full file decoding, we don't need to handle the orientation
+            return bitmap;
         }
 
         // Transform the bitmap if the orientation of the image is not 0.
