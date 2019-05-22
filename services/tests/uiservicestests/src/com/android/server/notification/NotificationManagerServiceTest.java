@@ -412,6 +412,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    private void setUpPrefsForBubbles(boolean globalEnabled, boolean pkgEnabled,
+            boolean channelEnabled) {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mPreferencesHelper.bubblesEnabled(any())).thenReturn(globalEnabled);
+        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(pkgEnabled);
+        when(mPreferencesHelper.getNotificationChannel(
+                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
+                mTestNotificationChannel);
+        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
+                mTestNotificationChannel.getImportance());
+        mTestNotificationChannel.setAllowBubbles(channelEnabled);
+    }
+
     private StatusBarNotification generateSbn(String pkg, int uid, long postTime, int userId) {
         Notification.Builder nb = new Notification.Builder(mContext, "a")
                 .setContentTitle("foo")
@@ -4224,13 +4237,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubble() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -4252,15 +4259,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testFlagBubble_noFlag_appNotAllowed() throws RemoteException {
+        // Bubbles are allowed!
+        setUpPrefsForBubbles(true /* global */, false /* app */, true /* channel */);
+
+        // Notif with bubble metadata but not our other misc requirements
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                null /* tvExtender */, true /* isBubble */);
+
+        // Say we're foreground
+        when(mActivityManager.getPackageImportance(nr.sbn.getPackageName())).thenReturn(
+                IMPORTANCE_FOREGROUND);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifs.length);
+        assertEquals((notifs[0].getNotification().flags & FLAG_BUBBLE), 0);
+        assertFalse(mService.getNotificationRecord(
+                nr.sbn.getKey()).getNotification().isBubbleNotification());
+    }
+
+    @Test
     public void testFlagBubbleNotifs_flag_appForeground() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -4282,13 +4307,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_appNotForeground() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -4310,13 +4329,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_flag_previousForegroundFlag() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel,
@@ -4356,13 +4369,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testFlagBubbleNotifs_noFlag_previousForegroundFlag_afterRemoval()
             throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel,
@@ -4410,13 +4417,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_flag_messaging() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4462,13 +4463,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_flag_phonecall() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4503,13 +4498,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_noForegroundService() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4542,13 +4531,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_noPerson() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4578,13 +4561,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_noCategory() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4618,13 +4595,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_messaging_appNotAllowed() throws RemoteException {
         // Bubbles are NOT allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(false);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(false /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4663,13 +4634,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testFlagBubbleNotifs_noFlag_notBubble() throws RemoteException {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif WITHOUT bubble metadata
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
@@ -4686,17 +4651,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testFlagBubbleNotifs_noFlag_messaging_channelNotAllowed() throws RemoteException {
-        // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
-
-        // But not on this channel!
-        mTestNotificationChannel.setAllowBubbles(false);
+        // Bubbles are allowed except on this channel
+        setUpPrefsForBubbles(true /* global */, true /* app */, false /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4734,14 +4690,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_notAllowed() throws RemoteException {
-        // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(false);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        // Bubbles are not allowed!
+        setUpPrefsForBubbles(false /* global */, true /* app */, true /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4775,17 +4725,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testFlagBubbleNotifs_noFlag_phonecall_channelNotAllowed() throws RemoteException {
-        // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(false);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
-
-        // But not on this channel!
-        mTestNotificationChannel.setAllowBubbles(false);
+        // Bubbles are allowed, but not on channel.
+        setUpPrefsForBubbles(true /* global */, true /* app */, false /* channel */);
 
         // Give it bubble metadata
         Notification.BubbleMetadata data = getBasicBubbleMetadataBuilder().build();
@@ -4990,13 +4931,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbleChanged_false() throws Exception {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif with bubble metadata but not our other misc requirements
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -5034,13 +4969,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbleChanged_true() throws Exception {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Plain notification that has bubble metadata
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -5077,13 +5006,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbleChanged_true_notAllowed() throws Exception {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Notif that is not a bubble
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -5114,13 +5037,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testNotificationBubbles_disabled_lowRamDevice() throws Exception {
         // Bubbles are allowed!
-        mService.setPreferencesHelper(mPreferencesHelper);
-        when(mPreferencesHelper.areBubblesAllowed(anyString(), anyInt())).thenReturn(true);
-        when(mPreferencesHelper.getNotificationChannel(
-                anyString(), anyInt(), anyString(), anyBoolean())).thenReturn(
-                mTestNotificationChannel);
-        when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(
-                mTestNotificationChannel.getImportance());
+        setUpPrefsForBubbles(true /* global */, true /* app */, true /* channel */);
 
         // Plain notification that has bubble metadata
         NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
@@ -5145,6 +5062,5 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
-
     }
 }
