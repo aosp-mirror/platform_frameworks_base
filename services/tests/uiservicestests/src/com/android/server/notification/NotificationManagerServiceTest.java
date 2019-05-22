@@ -304,6 +304,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             void onGranted(ComponentName assistant, int userId, boolean granted);
         }
 
+        @Override
+        protected boolean canLaunchInActivityView(Context context, PendingIntent pendingIntent,
+                String packageName) {
+            // Tests for this not being true are in CTS NotificationManagerTest
+            return true;
+        }
     }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
