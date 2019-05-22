@@ -8852,6 +8852,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @hide
      */
+    @TestApi
     public boolean isAutofilled() {
         return (mPrivateFlags3 & PFLAG3_IS_AUTOFILLED) != 0;
     }
