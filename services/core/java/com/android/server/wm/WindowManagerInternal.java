@@ -492,4 +492,18 @@ public abstract class WindowManagerInternal {
      * @return {@code true} if the display should show IME when an input field become focused on it.
      */
     public abstract boolean shouldShowIme(int displayId);
+
+    /**
+     * Tell window manager about a package that should not be running with high refresh rate
+     * setting until removeNonHighRefreshRatePackage is called for the same package.
+     *
+     * This must not be called again for the same package.
+     */
+    public abstract void addNonHighRefreshRatePackage(@NonNull String packageName);
+
+    /**
+     * Tell window manager to stop constraining refresh rate for the given package.
+     */
+    public abstract void removeNonHighRefreshRatePackage(@NonNull String packageName);
+
 }
