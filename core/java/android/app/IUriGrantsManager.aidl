@@ -31,11 +31,12 @@ interface IUriGrantsManager {
             in Uri uri, int mode, int sourceUserId, int targetUserId);
     /**
      * Gets the URI permissions granted to an arbitrary package (or all packages if null)
-     * NOTE: this is different from getPersistedUriPermissions(), which returns the URIs the package
+     * NOTE: this is different from getUriPermissions(), which returns the URIs the package
      * granted to another packages (instead of those granted to it).
      */
     ParceledListSlice getGrantedUriPermissions(in String packageName, int userId);
     /** Clears the URI permissions granted to an arbitrary package. */
     void clearGrantedUriPermissions(in String packageName, int userId);
-    ParceledListSlice getPersistedUriPermissions(in String packageName, boolean incoming);
+    ParceledListSlice getUriPermissions(in String packageName, boolean incoming,
+            boolean persistedOnly);
 }
