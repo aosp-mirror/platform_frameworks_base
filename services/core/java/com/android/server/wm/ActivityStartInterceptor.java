@@ -46,7 +46,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -304,7 +303,7 @@ class ActivityStartInterceptor {
             return null;
         }
         // TODO(b/28935539): should allow certain activities to bypass work challenge
-        final IntentSender target = createIntentSenderForOriginalIntent(Binder.getCallingUid(),
+        final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
         final KeyguardManager km = (KeyguardManager) mServiceContext
                 .getSystemService(KEYGUARD_SERVICE);

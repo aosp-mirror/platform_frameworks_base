@@ -23,10 +23,10 @@ import android.app.usage.NetworkStats;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.VisibleForTesting;
 
 /**
  * Loader for network data usage history. It returns a list of usage data per billing cycle for the
@@ -44,7 +44,7 @@ public class NetworkCycleDataForUidLoader extends
         super(builder);
         mUids = builder.mUids;
         mRetrieveDetail = builder.mRetrieveDetail;
-        mData = new ArrayList<NetworkCycleDataForUid>();
+        mData = new ArrayList<>();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class NetworkCycleDataForUidLoader extends
             long totalForeground = 0L;
             for (int uid : mUids) {
                 final NetworkStats stats = mNetworkStatsManager.queryDetailsForUid(
-                    mNetworkType, mSubId, start, end, uid);
+                        mNetworkTemplate, start, end, uid);
                 final long usage = getTotalUsage(stats);
                 if (usage > 0L) {
                     totalUsage += usage;
@@ -100,7 +100,7 @@ public class NetworkCycleDataForUidLoader extends
 
     private long getForegroundUsage(long start, long end, int uid) {
         final NetworkStats stats = mNetworkStatsManager.queryDetailsForUidTagState(
-            mNetworkType, mSubId, start, end, uid, TAG_NONE, STATE_FOREGROUND);
+                mNetworkTemplate, start, end, uid, TAG_NONE, STATE_FOREGROUND);
         return getTotalUsage(stats);
     }
 

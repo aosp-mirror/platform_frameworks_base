@@ -231,6 +231,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         @SuppressWarnings("unchecked") // TODO(b/117779333): fix this warning
         final S castService = (S) this;
         mVultureCallback.onServiceDied(castService);
+        handleBindFailure();
     }
 
     // Note: we are dumping without a lock held so this is a bit racy but
@@ -406,7 +407,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             @NonNull BasePendingRequest<S, I> pendingRequest);
 
     /**
-     * Called if {@link Context#bindServiceAsUser} returns {@code false}.
+     * Called if {@link Context#bindServiceAsUser} returns {@code false}, or
+     * if {@link DeathRecipient#binderDied()} is called.
      */
     abstract void handleBindFailure();
 
@@ -431,8 +433,6 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             mBinding = false;
 
             if (!mServiceDied) {
-                // TODO(b/126266412): merge these 2 calls?
-                handleBindFailure();
                 handleBinderDied();
             }
         }

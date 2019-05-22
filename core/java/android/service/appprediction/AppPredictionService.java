@@ -39,6 +39,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.service.appprediction.IPredictionService.Stub;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * TODO(b/111701043): Add java docs
+ * A service used to predict app and shortcut usage.
  *
  * @hide
  */
@@ -58,7 +59,9 @@ public abstract class AppPredictionService extends Service {
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
-     * TODO(b/111701043): Add any docs about permissions the service must hold
+     *
+     * <p>The service must also require the {@link android.permission#MANAGE_APP_PREDICTIONS}
+     * permission.
      *
      * @hide
      */
@@ -145,8 +148,11 @@ public abstract class AppPredictionService extends Service {
     @Override
     @NonNull
     public final IBinder onBind(@NonNull Intent intent) {
-        // TODO(b/111701043): Verify that the action is valid
-        return mInterface.asBinder();
+        if (SERVICE_INTERFACE.equals(intent.getAction())) {
+            return mInterface.asBinder();
+        }
+        Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
+        return null;
     }
 
     /**
@@ -180,7 +186,6 @@ public abstract class AppPredictionService extends Service {
 
     /**
      * Called by the client app to request sorting of targets based on prediction rank.
-     * TODO(b/111701043): Implement CancellationSignal so caller can cancel a long running request
      */
     @MainThread
     public abstract void onSortAppTargets(@NonNull AppPredictionSessionId sessionId,
@@ -254,7 +259,6 @@ public abstract class AppPredictionService extends Service {
     /**
      * Called by the client app to request target predictions. This method is only called if there
      * are one or more prediction callbacks registered.
-     * TODO(b/111701043): Add java docs
      *
      * @see #updatePredictions(AppPredictionSessionId, List)
      */

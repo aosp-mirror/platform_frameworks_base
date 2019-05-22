@@ -297,11 +297,6 @@ VulkanSurface* VulkanSurface::Create(ANativeWindow* window, ColorMode colorMode,
     native_window_get_consumer_usage(window, &consumerUsage);
     windowInfo.windowUsageFlags = consumerUsage | hwbUsage.androidHardwareBufferUsage;
 
-    if (vkManager.isQualcomm()) {
-        windowInfo.windowUsageFlags =
-                windowInfo.windowUsageFlags | AHARDWAREBUFFER_USAGE_VENDOR_0;
-    }
-
     /*
      * Now we attempt to modify the window!
      */

@@ -108,6 +108,8 @@ android_app {
     defaults: ["NetworkStackAppCommon"],
     certificate: "platform",
     manifest: "AndroidManifest_InProcess.xml",
+    // InProcessNetworkStack is a replacement for NetworkStack
+    overrides: ["NetworkStack"],
 }
 
 // Updatable network stack packaged as an application
@@ -116,6 +118,7 @@ android_app {
     defaults: ["NetworkStackAppCommon"],
     certificate: "networkstack",
     manifest: "AndroidManifest.xml",
+    use_embedded_native_libs: true,
 }
 
 genrule {
