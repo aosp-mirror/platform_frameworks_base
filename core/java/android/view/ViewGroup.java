@@ -2580,12 +2580,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onTouchEvent(ev, 1);
         }
 
-        // If the event targets the accessibility focused view and this is it, start
-        // normal event dispatch. Maybe a descendant is what will handle the click.
-        if (ev.isTargetAccessibilityFocus() && isAccessibilityFocusedViewOrHost()) {
-            ev.setTargetAccessibilityFocus(false);
-        }
-
         boolean handled = false;
         if (onFilterTouchEventForSecurity(ev)) {
             final int action = ev.getAction();
@@ -2616,13 +2610,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // so this view group continues to intercept touches.
                 intercepted = true;
             }
-
-            // If intercepted, start normal event dispatch. Also if there is already
-            // a view that is handling the gesture, do normal event dispatch.
-            if (intercepted || mFirstTouchTarget != null) {
-                ev.setTargetAccessibilityFocus(false);
-            }
-
             // Check for cancelation.
             final boolean canceled = resetCancelNextUpFlag(this)
                     || actionMasked == MotionEvent.ACTION_CANCEL;
@@ -2632,15 +2619,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             TouchTarget newTouchTarget = null;
             boolean alreadyDispatchedToNewTouchTarget = false;
             if (!canceled && !intercepted) {
-
-                // If the event is targeting accessibility focus we give it to the
-                // view that has accessibility focus and if it does not handle it
-                // we clear the flag and dispatch the event to all children as usual.
-                // We are looking up the accessibility focused host to avoid keeping
-                // state since these events are very rare.
-                View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()
-                        ? findChildWithAccessibilityFocus() : null;
-
                 if (actionMasked == MotionEvent.ACTION_DOWN
                         || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
                         || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
@@ -2667,22 +2645,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                     childrenCount, i, customOrder);
                             final View child = getAndVerifyPreorderedView(
                                     preorderedList, children, childIndex);
-
-                            // If there is a view that has accessibility focus we want it
-                            // to get the event first and if not handled we will perform a
-                            // normal dispatch. We may do a double iteration but this is
-                            // safer given the timeframe.
-                            if (childWithAccessibilityFocus != null) {
-                                if (childWithAccessibilityFocus != child) {
-                                    continue;
-                                }
-                                childWithAccessibilityFocus = null;
-                                i = childrenCount - 1;
-                            }
-
                             if (!child.canReceivePointerEvents()
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
-                                ev.setTargetAccessibilityFocus(false);
                                 continue;
                             }
 
@@ -2715,10 +2679,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 alreadyDispatchedToNewTouchTarget = true;
                                 break;
                             }
-
-                            // The accessibility focus didn't handle the event, so clear
-                            // the flag and do a normal dispatch to all children.
-                            ev.setTargetAccessibilityFocus(false);
                         }
                         if (preorderedList != null) preorderedList.clear();
                     }
@@ -2800,34 +2760,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public ArrayList<View> buildTouchDispatchChildList() {
         return buildOrderedChildList();
-    }
-
-    /**
-     * Finds the child which has accessibility focus.
-     *
-     * @return The child that has focus.
-     */
-    private View findChildWithAccessibilityFocus() {
-        ViewRootImpl viewRoot = getViewRootImpl();
-        if (viewRoot == null) {
-            return null;
-        }
-
-        View current = viewRoot.getAccessibilityFocusedHost();
-        if (current == null) {
-            return null;
-        }
-
-        ViewParent parent = current.getParent();
-        while (parent instanceof View) {
-            if (parent == this) {
-                return current;
-            }
-            current = (View) parent;
-            parent = current.getParent();
-        }
-
-        return null;
     }
 
     /**
