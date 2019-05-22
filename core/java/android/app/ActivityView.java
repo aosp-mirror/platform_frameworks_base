@@ -120,6 +120,7 @@ public class ActivityView extends ViewGroup {
 
         mActivityTaskManager = ActivityTaskManager.getService();
         mSurfaceView = new SurfaceView(context);
+        mSurfaceView.setAlpha(0f);
         mSurfaceCallback = new SurfaceCallback();
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
         addView(mSurfaceView);
@@ -344,6 +345,16 @@ public class ActivityView extends ViewGroup {
     @Override
     public void onLayout(boolean changed, int l, int t, int r, int b) {
         mSurfaceView.layout(0 /* left */, 0 /* top */, r - l /* right */, b - t /* bottom */);
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        mSurfaceView.setAlpha(alpha);
+    }
+
+    @Override
+    public float getAlpha() {
+        return mSurfaceView.getAlpha();
     }
 
     @Override

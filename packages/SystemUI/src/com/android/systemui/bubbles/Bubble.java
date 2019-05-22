@@ -16,6 +16,8 @@
 package com.android.systemui.bubbles;
 
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
 import android.content.Context;
@@ -129,6 +131,20 @@ class Bubble {
         mInflated = true;
     }
 
+    /**
+     * Set visibility of bubble in the expanded state.
+     *
+     * @param visibility {@code true} if the expanded bubble should be visible on the screen.
+     *
+     * Note that this contents visibility doesn't affect visibility at {@link android.view.View},
+     * and setting {@code false} actually means rendering the expanded view in transparent.
+     */
+    void setContentVisibility(boolean visibility) {
+        if (expandedView != null) {
+            expandedView.setContentVisibility(visibility);
+        }
+    }
+
     void setDismissed() {
         entry.setBubbleDismissed(true);
         // TODO: move this somewhere where it can be guaranteed not to run until safe from flicker
@@ -165,6 +181,13 @@ class Bubble {
      */
     public long getLastAccessTime() {
         return mLastAccessed;
+    }
+
+    /**
+     * @return the display id of the virtual display on which bubble contents is drawn.
+     */
+    int getDisplayId() {
+        return expandedView != null ? expandedView.getVirtualDisplayId() : INVALID_DISPLAY;
     }
 
     /**

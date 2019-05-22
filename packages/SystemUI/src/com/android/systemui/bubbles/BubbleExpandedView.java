@@ -174,8 +174,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
 
         mPointerDrawable = new ShapeDrawable(TriangleShape.create(
-                mPointerWidth, mPointerHeight, false /* pointUp */));
+                mPointerWidth, mPointerHeight, true /* pointUp */));
         mPointerView.setBackground(mPointerDrawable);
+        mPointerView.setVisibility(GONE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
@@ -184,10 +185,18 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
         mActivityView = new ActivityView(mContext, null /* attrs */, 0 /* defStyle */,
                 true /* singleTaskInstance */);
+
+        setContentVisibility(false);
         addView(mActivityView);
 
-        // Make sure pointer is below activity view
-        bringChildToFront(mPointerView);
+        // Expanded stack layout, top to bottom:
+        // Expanded view container
+        // ==> bubble row
+        // ==> expanded view
+        //   ==> activity view
+        //   ==> manage button
+        bringChildToFront(mActivityView);
+        bringChildToFront(mSettingsIcon);
 
         applyThemeAttrs();
 
@@ -228,6 +237,22 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mNeedsNewHeight = false;
         if (mActivityView != null) {
             mActivityView.setForwardedInsets(Insets.of(0, 0, 0, 0));
+        }
+    }
+
+    /**
+     * Set visibility of contents in the expanded state.
+     *
+     * @param visibility {@code true} if the contents should be visible on the screen.
+     *
+     * Note that this contents visibility doesn't affect visibility at {@link android.view.View},
+     * and setting {@code false} actually means rendering the contents in transparent.
+     */
+    void setContentVisibility(boolean visibility) {
+        final float alpha = visibility ? 1f : 0f;
+        mPointerView.setAlpha(alpha);
+        if (mActivityView != null) {
+            mActivityView.setAlpha(alpha);
         }
     }
 
@@ -303,6 +328,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 parent.removeView(mNotifRow);
             }
             addView(mNotifRow, 1 /* index */);
+            mPointerView.setAlpha(1f);
         }
     }
 
@@ -329,12 +355,12 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 removeView(mNotifRow);
                 mNotifRow = null;
             }
+            setContentVisibility(false);
             mActivityView.setVisibility(VISIBLE);
         } else {
             // Hide activity view if we had it previously
             mActivityView.setVisibility(GONE);
             mNotifRow = mEntry.getRow();
-
         }
         updateView();
     }
@@ -433,6 +459,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             mActivityView.onLocationChanged();
         } else if (mNotifRow != null) {
             applyRowState(mNotifRow);
+            mPointerView.setAlpha(1f);
         }
         updateHeight();
     }
@@ -444,6 +471,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         // Adjust for the pointer size
         x -= (mPointerView.getWidth() / 2f);
         mPointerView.setTranslationX(x);
+        mPointerView.setVisibility(VISIBLE);
     }
 
     /**

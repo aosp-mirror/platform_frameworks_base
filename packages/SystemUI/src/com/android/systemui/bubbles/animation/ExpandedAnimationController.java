@@ -301,13 +301,11 @@ public class ExpandedAnimationController
             return 0;
         }
         final WindowInsets insets = mLayout.getRootWindowInsets();
-        int keyboardHeight = insets.getSystemWindowInsetBottom()
-                - insets.getStableInsetBottom();
-        float bottomInset = keyboardHeight > 0
-                ? keyboardHeight
-                : (mPipDismissHeight - insets.getStableInsetBottom());
-        // Stable insets are excluded from display size, so we must subtract it
-        return mDisplaySize.y - mBubbleSizePx - mBubblePaddingPx - bottomInset;
+        return mBubblePaddingPx + Math.max(
+            mStatusBarHeight,
+            insets.getDisplayCutout() != null
+                ? insets.getDisplayCutout().getSafeInsetTop()
+                : 0);
     }
 
     @Override

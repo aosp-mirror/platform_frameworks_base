@@ -96,6 +96,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.DiskInfo;
 import android.os.storage.IObbActionListener;
 import android.os.storage.IStorageEventListener;
@@ -3242,7 +3243,22 @@ class StorageManagerService extends IStorageManager.Stub
         public void opChanged(int op, int uid, String packageName) throws RemoteException {
             if (!ENABLE_ISOLATED_STORAGE) return;
 
-            remountUidExternalStorage(uid, getMountMode(uid, packageName));
+            if (op == OP_REQUEST_INSTALL_PACKAGES) {
+                // Only handling the case when the appop is denied. The other cases will be
+                // handled in the synchronous callback from AppOpsService.
+                if (packageName != null && mIAppOpsService.checkOperation(
+                        OP_REQUEST_INSTALL_PACKAGES, uid, packageName) != MODE_ALLOWED) {
+                    try {
+                        ActivityManager.getService().killUid(
+                                UserHandle.getAppId(uid), UserHandle.getUserId(uid),
+                                "OP_REQUEST_INSTALL_PACKAGES is denied");
+                    } catch (RemoteException e) {
+                        // same process - should not happen
+                    }
+                }
+            } else {
+                remountUidExternalStorage(uid, getMountMode(uid, packageName));
+            }
         }
     };
 
@@ -3579,6 +3595,12 @@ class StorageManagerService extends IStorageManager.Stub
             if (Process.isIsolated(uid)) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
             }
+
+            final String[] packagesForUid = mIPackageManager.getPackagesForUid(uid);
+            if (packageName == null) {
+                packageName = packagesForUid[0];
+            }
+
             if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
             }
@@ -3601,8 +3623,18 @@ class StorageManagerService extends IStorageManager.Stub
             // runtime permission; this is a firm CDD requirement
             final boolean hasInstall = mIPackageManager.checkUidPermission(INSTALL_PACKAGES,
                     uid) == PERMISSION_GRANTED;
-            final boolean hasInstallOp = mIAppOpsService.checkOperation(OP_REQUEST_INSTALL_PACKAGES,
-                    uid, packageName) == MODE_ALLOWED;
+            boolean hasInstallOp = false;
+            // OP_REQUEST_INSTALL_PACKAGES is granted/denied per package but vold can't
+            // update mountpoints of a specific package. So, check the appop for all packages
+            // sharing the uid and allow same level of storage access for all packages even if
+            // one of the packages has the appop granted.
+            for (String uidPackageName : packagesForUid) {
+                if (mIAppOpsService.checkOperation(
+                        OP_REQUEST_INSTALL_PACKAGES, uid, uidPackageName) == MODE_ALLOWED) {
+                    hasInstallOp = true;
+                    break;
+                }
+            }
             if ((hasInstall || hasInstallOp) && hasWrite) {
                 return Zygote.MOUNT_EXTERNAL_WRITE;
             }
@@ -3870,6 +3902,14 @@ class StorageManagerService extends IStorageManager.Stub
             if (ENABLE_ISOLATED_STORAGE) {
                 return getMountMode(uid, packageName);
             }
+            try {
+                if (packageName == null) {
+                    final String[] packagesForUid = mIPackageManager.getPackagesForUid(uid);
+                    packageName = packagesForUid[0];
+                }
+            } catch (RemoteException e) {
+                // Should not happen - same process
+            }
             // No locking - CopyOnWriteArrayList
             int mountMode = Integer.MAX_VALUE;
             for (ExternalStorageMountPolicy policy : mPolicies) {
@@ -3917,6 +3957,24 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             }
             return true;
+        }
+
+        public void onAppOpsChanged(int code, int uid,
+                @Nullable String packageName, int mode) {
+            if (mode == MODE_ALLOWED && (code == OP_READ_EXTERNAL_STORAGE
+                    || code == OP_WRITE_EXTERNAL_STORAGE
+                    || code == OP_REQUEST_INSTALL_PACKAGES)) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    final UserManagerInternal userManagerInternal =
+                            LocalServices.getService(UserManagerInternal.class);
+                    if (userManagerInternal.isUserInitialized(UserHandle.getUserId(uid))) {
+                        onExternalStoragePolicyChanged(uid, packageName);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
         }
     }
 }

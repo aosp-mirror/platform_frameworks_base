@@ -88,7 +88,9 @@ public class BugreportManagerTest {
     @Test
     public void normalFlow_wifi() throws Exception {
         BugreportCallbackImpl callback = new BugreportCallbackImpl();
-        mBrm.startBugreport(mBugreportFd, mScreenshotFd, wifi(), mExecutor, callback);
+        // wifi bugreport does not take screenshot
+        mBrm.startBugreport(mBugreportFd, null /*screenshotFd = null*/, wifi(),
+                mExecutor, callback);
         waitTillDoneOrTimeout(callback);
 
         assertThat(callback.isDone()).isTrue();
@@ -99,13 +101,15 @@ public class BugreportManagerTest {
         // of mBugreportFd.
         assertThat(callback.getErrorCode()).isEqualTo(
                 BugreportCallback.BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT);
-        assertFdsAreClosed(mBugreportFd, mScreenshotFd);
+        assertFdsAreClosed(mBugreportFd);
     }
 
     @Test
     public void normalFlow_interactive() throws Exception {
         BugreportCallbackImpl callback = new BugreportCallbackImpl();
-        mBrm.startBugreport(mBugreportFd, mScreenshotFd, interactive(), mExecutor, callback);
+        // interactive bugreport does not take screenshot
+        mBrm.startBugreport(mBugreportFd, null /*screenshotFd = null*/, interactive(),
+                mExecutor, callback);
 
         waitTillDoneOrTimeout(callback);
         assertThat(callback.isDone()).isTrue();
@@ -113,7 +117,7 @@ public class BugreportManagerTest {
         assertThat(callback.hasReceivedProgress()).isTrue();
         assertThat(callback.getErrorCode()).isEqualTo(
                 BugreportCallback.BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT);
-        assertFdsAreClosed(mBugreportFd, mScreenshotFd);
+        assertFdsAreClosed(mBugreportFd);
     }
 
     @Test

@@ -176,6 +176,7 @@ public class BubbleStackView extends FrameLayout {
     private int mExpandedViewPadding;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
+    private int mPointerHeight;
     private int mStatusBarHeight;
     private int mPipDismissHeight;
     private int mImeOffset;
@@ -303,6 +304,8 @@ public class BubbleStackView extends FrameLayout {
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
         mExpandedAnimateYDistance =
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_y_distance);
+        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
+
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mPipDismissHeight = mContext.getResources().getDimensionPixelSize(
@@ -737,12 +740,16 @@ public class BubbleStackView extends FrameLayout {
         }
         final Bubble previouslySelected = mExpandedBubble;
         mExpandedBubble = bubbleToSelect;
+
         if (mIsExpanded) {
             // Make the container of the expanded view transparent before removing the expanded view
             // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
             // expanded view becomes visible on the screen. See b/126856255
             mExpandedViewContainer.setAlpha(0.0f);
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
+                if (previouslySelected != null) {
+                    previouslySelected.setContentVisibility(false);
+                }
                 updateExpandedBubble();
                 updatePointerPosition();
                 requestUpdate();
@@ -771,6 +778,14 @@ public class BubbleStackView extends FrameLayout {
         }
         if (wasExpanded) {
             // Collapse the stack
+            mExpandedViewContainer.setAlpha(0.0f);
+            // TODO: In order to prevent flicker, code below should be executed after the alpha
+            // value set on the mExpandedViewContainer is reflected on the screen. However, we
+            // cannot just postpone the execution like #setSelectedBubble(), since some of member
+            // variables referred by the code are overridden before the execution.
+            if (mExpandedBubble != null) {
+                mExpandedBubble.setContentVisibility(false);
+            }
             animateExpansion(false /* expand */);
             logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
         } else {
@@ -928,14 +943,10 @@ public class BubbleStackView extends FrameLayout {
             if (shouldExpand) {
                 mExpandedViewContainer.setTranslationX(xStart);
                 mExpandedViewContainer.setTranslationY(yStart);
-                mExpandedViewContainer.setAlpha(0f);
             }
 
             mExpandedViewXAnim.animateToFinalPosition(shouldExpand ? 0f : xStart);
             mExpandedViewYAnim.animateToFinalPosition(shouldExpand ? yDest : yStart);
-            mExpandedViewContainer.animate()
-                    .setDuration(100)
-                    .alpha(shouldExpand ? 1f : 0f);
         }
     }
 
@@ -1282,15 +1293,16 @@ public class BubbleStackView extends FrameLayout {
      */
     int getMaxExpandedHeight() {
         int expandedY = (int) mExpandedAnimationController.getExpandedY();
-        return expandedY - getStatusBarHeight();
+        // PIP dismiss view uses FLAG_LAYOUT_IN_SCREEN so we need to subtract the bottom inset
+        int pipDismissHeight = mPipDismissHeight - getBottomInset();
+        return mDisplaySize.y - expandedY - mBubbleSize - pipDismissHeight;
     }
 
     /**
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getYPositionForExpandedView() {
-        return mExpandedAnimationController.getExpandedY()
-                - mExpandedBubble.expandedView.getExpandedSize() - mBubblePadding;
+        return getStatusBarHeight() + mBubbleSize + mBubblePadding + mPointerHeight;
     }
 
     /**

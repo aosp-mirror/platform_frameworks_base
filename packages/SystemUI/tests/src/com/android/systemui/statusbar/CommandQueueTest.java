@@ -358,4 +358,11 @@ public class CommandQueueTest extends SysuiTestCase {
         waitForIdleSync();
         verify(mCallbacks).onDisplayRemoved(eq(SECONDARY_DISPLAY));
     }
+
+    @Test
+    public void testOnRecentsAnimationStateChanged() {
+        mCommandQueue.onRecentsAnimationStateChanged(true);
+        waitForIdleSync();
+        verify(mCallbacks).onRecentsAnimationStateChanged(eq(true));
+    }
 }
