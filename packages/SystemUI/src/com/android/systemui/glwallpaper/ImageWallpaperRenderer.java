@@ -32,6 +32,9 @@ import android.util.Size;
 
 import com.android.systemui.R;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * A GL renderer for image wallpaper.
  */
@@ -155,5 +158,12 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     @Override
     public void onRevealEnd() {
         mProxy.postRender();
+    }
+
+    @Override
+    public void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
+        out.print(prefix); out.print("mProxy="); out.print(mProxy);
+        out.print(prefix); out.print("mSurfaceSize="); out.print(mSurfaceSize);
+        out.print(prefix); out.print("threshold="); out.print(mImageProcessHelper.getThreshold());
     }
 }

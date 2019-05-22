@@ -52,6 +52,9 @@ import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * A helper class to handle EGL management.
  */
@@ -62,6 +65,8 @@ public class EglHelper {
     private EGLConfig mEglConfig;
     private EGLContext mEglContext;
     private EGLSurface mEglSurface;
+    private final int[] mEglVersion = new int[2];
+    private boolean mEglReady;
 
     /**
      * Initialize EGL and prepare EglSurface.
@@ -75,7 +80,8 @@ public class EglHelper {
             return false;
         }
 
-        if (!eglInitialize(mEglDisplay, null, 0, null, 0)) {
+        if (!eglInitialize(mEglDisplay, mEglVersion, 0 /* majorOffset */,
+                    mEglVersion, 1 /* minorOffset */)) {
             Log.w(TAG, "eglInitialize failed: " + GLUtils.getEGLErrorString(eglGetError()));
             return false;
         }
@@ -96,6 +102,7 @@ public class EglHelper {
             return false;
         }
 
+        mEglReady = true;
         return true;
     }
 
@@ -225,6 +232,30 @@ public class EglHelper {
             destroyEglContext();
         }
         eglTerminate(mEglDisplay);
+        mEglReady = false;
     }
 
+    /**
+     * Called to dump current state.
+     * @param prefix prefix.
+     * @param fd fd.
+     * @param out out.
+     * @param args args.
+     */
+    public void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
+        String eglVersion = mEglVersion[0] + "." + mEglVersion[1];
+        out.print(prefix); out.print("EGL version="); out.print(eglVersion);
+        out.print(", "); out.print("EGL ready="); out.print(mEglReady);
+        out.print(", "); out.print("has EglContext="); out.print(hasEglContext());
+        out.print(", "); out.print("has EglSurface="); out.println(hasEglSurface());
+
+        int[] configs = getConfig();
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (int egl : configs) {
+            sb.append("0x").append(Integer.toHexString(egl)).append(",");
+        }
+        sb.setCharAt(sb.length() - 1, '}');
+        out.print(prefix); out.print("EglConfig="); out.println(sb.toString());
+    }
 }
