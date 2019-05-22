@@ -3612,8 +3612,9 @@ public class ConnectivityManager {
      * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
      *                        the callback must not be shared - it uniquely specifies this request.
      *                        The callback is invoked on the default internal Handler.
-     * @throws IllegalArgumentException if {@code request} specifies any mutable
-     *         {@code NetworkCapabilities}.
+     * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws RuntimeException if request limit per UID is exceeded.
      */
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback) {
@@ -3648,8 +3649,9 @@ public class ConnectivityManager {
      * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
      *                        the callback must not be shared - it uniquely specifies this request.
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
-     * @throws IllegalArgumentException if {@code request} specifies any mutable
-     *         {@code NetworkCapabilities}.
+     * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws RuntimeException if request limit per UID is exceeded.
      */
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
@@ -3685,6 +3687,9 @@ public class ConnectivityManager {
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
      *                  before {@link NetworkCallback#onUnavailable()} is called. The timeout must
      *                  be a positive value (i.e. >0).
+     * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws RuntimeException if request limit per UID is exceeded.
      */
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, int timeoutMs) {
@@ -3719,6 +3724,9 @@ public class ConnectivityManager {
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
      *                  before {@link NetworkCallback#onUnavailable} is called.
+     * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws RuntimeException if request limit per UID is exceeded.
      */
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler, int timeoutMs) {
@@ -3789,9 +3797,9 @@ public class ConnectivityManager {
      * @param operation Action to perform when the network is available (corresponds
      *                  to the {@link NetworkCallback#onAvailable} call.  Typically
      *                  comes from {@link PendingIntent#getBroadcast}. Cannot be null.
-     * @throws IllegalArgumentException if {@code request} contains either
-     *         {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} or
-     *         {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}.
+     * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws RuntimeException if request limit per UID is exceeded.
      */
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull PendingIntent operation) {
