@@ -28,6 +28,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.StringJoiner;
 
 /**
  * Various shared constants between Launcher and SysUI as part of quickstep
@@ -35,7 +36,6 @@ import java.lang.annotation.RetentionPolicy;
 public class QuickStepContract {
 
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
-    public static final String KEY_EXTRA_INPUT_CHANNEL = "extra_input_channel";
     public static final String KEY_EXTRA_INPUT_MONITOR = "extra_input_monitor";
     public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
     public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
@@ -47,12 +47,26 @@ public class QuickStepContract {
     public static final String NAV_BAR_MODE_GESTURAL_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
+    // Overview is disabled, either because the device is in lock task mode, or because the device
+    // policy has disabled the feature
     public static final int SYSUI_STATE_SCREEN_PINNING = 1 << 0;
+    // The navigation bar is hidden due to immersive mode
     public static final int SYSUI_STATE_NAV_BAR_HIDDEN = 1 << 1;
+    // The notification panel is expanded and interactive (either locked or unlocked), and the
+    // quick settings is not expanded
     public static final int SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED = 1 << 2;
+    // The keyguard bouncer is showing
     public static final int SYSUI_STATE_BOUNCER_SHOWING = 1 << 3;
+    // The navigation bar a11y button should be shown
     public static final int SYSUI_STATE_A11Y_BUTTON_CLICKABLE = 1 << 4;
+    // The navigation bar a11y button shortcut is available
     public static final int SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE = 1 << 5;
+    // The keyguard is showing
+    public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING = 1 << 6;
+    // The recents feature is disabled (either by SUW/SysUI/device policy)
+    public static final int SYSUI_STATE_OVERVIEW_DISABLED = 1 << 7;
+    // The home feature is disabled (either by SUW/SysUI/device policy)
+    public static final int SYSUI_STATE_HOME_DISABLED = 1 << 8;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -60,9 +74,26 @@ public class QuickStepContract {
             SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED,
             SYSUI_STATE_BOUNCER_SHOWING,
             SYSUI_STATE_A11Y_BUTTON_CLICKABLE,
-            SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE
+            SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE,
+            SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
+            SYSUI_STATE_OVERVIEW_DISABLED,
+            SYSUI_STATE_HOME_DISABLED
     })
     public @interface SystemUiStateFlags {}
+
+    public static String getSystemUiStateString(int flags) {
+        StringJoiner str = new StringJoiner("|");
+        str.add((flags & SYSUI_STATE_SCREEN_PINNING) != 0 ? "screen_pinned" : "");
+        str.add((flags & SYSUI_STATE_OVERVIEW_DISABLED) != 0 ? "overview_disabled" : "");
+        str.add((flags & SYSUI_STATE_HOME_DISABLED) != 0 ? "home_disabled" : "");
+        str.add((flags & SYSUI_STATE_NAV_BAR_HIDDEN) != 0 ? "navbar_hidden" : "");
+        str.add((flags & SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED) != 0 ? "notif_visible" : "");
+        str.add((flags & SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING) != 0 ? "keygrd_visible" : "");
+        str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
+        str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
+        str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
+        return str.toString();
+    }
 
     /**
      * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
@@ -84,6 +115,37 @@ public class QuickStepContract {
 
     private static int convertDpToPixel(float dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    /**
+     * Returns whether the specified sysui state is such that the assistant gesture should be
+     * disabled.
+     */
+    public static boolean isAssistantGestureDisabled(int sysuiStateFlags) {
+        // Disable when in screen pinning, immersive, the bouncer is showing, or the notifications
+        // are interactive
+        int disableFlags = SYSUI_STATE_SCREEN_PINNING
+                | SYSUI_STATE_NAV_BAR_HIDDEN
+                | SYSUI_STATE_BOUNCER_SHOWING
+                | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+        return (sysuiStateFlags & disableFlags) != 0;
+    }
+
+    /**
+     * Returns whether the specified sysui state is such that the back gesture should be
+     * disabled.
+     */
+    public static boolean isBackGestureDisabled(int sysuiStateFlags) {
+        // Always allow when the bouncer is showing (even on top of the keyguard)
+        if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0) {
+            return false;
+        }
+        // Disable when in screen pinning, immersive, or the notifications are interactive
+        int disableFlags = SYSUI_STATE_SCREEN_PINNING
+                | SYSUI_STATE_NAV_BAR_HIDDEN
+                | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
+                | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        return (sysuiStateFlags & disableFlags) != 0;
     }
 
     /**
