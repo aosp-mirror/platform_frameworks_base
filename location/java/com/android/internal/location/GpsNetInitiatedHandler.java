@@ -360,7 +360,7 @@ public class GpsNetInitiatedHandler {
     /**
      * Posts a notification in the status bar using the contents in {@code notif} object.
      */
-    public synchronized void setNiNotification(GpsNiNotification notif) {
+    private synchronized void setNiNotification(GpsNiNotification notif) {
         NotificationManager notificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
@@ -541,35 +541,26 @@ public class GpsNetInitiatedHandler {
      */
     static private String decodeString(String original, boolean isHex, int coding)
     {
-        if (coding == GPS_ENC_NONE) {
+        if (coding == GPS_ENC_NONE || coding == GPS_ENC_UNKNOWN) {
             return original;
         }
 
-        String decoded = original;
         byte[] input = stringToByteArray(original, isHex);
 
         switch (coding) {
-        case GPS_ENC_SUPL_GSM_DEFAULT:
-            decoded = decodeGSMPackedString(input);
-            break;
+            case GPS_ENC_SUPL_GSM_DEFAULT:
+                return decodeGSMPackedString(input);
 
-        case GPS_ENC_SUPL_UTF8:
-            decoded = decodeUTF8String(input);
-            break;
+            case GPS_ENC_SUPL_UTF8:
+                return decodeUTF8String(input);
 
-        case GPS_ENC_SUPL_UCS2:
-            decoded = decodeUCS2String(input);
-            break;
+            case GPS_ENC_SUPL_UCS2:
+                return decodeUCS2String(input);
 
-        case GPS_ENC_UNKNOWN:
-            decoded = original;
-            break;
-
-        default:
-            Log.e(TAG, "Unknown encoding " + coding + " for NI text " + original);
-            break;
+            default:
+                Log.e(TAG, "Unknown encoding " + coding + " for NI text " + original);
+                return original;
         }
-        return decoded;
     }
 
     // change this to configure notification display
