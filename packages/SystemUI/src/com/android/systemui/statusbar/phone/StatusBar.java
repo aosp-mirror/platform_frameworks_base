@@ -31,6 +31,7 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASL
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_LEFT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
@@ -785,6 +786,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(InitController.class).addPostInitTask(
                 () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
 
+        updateSystemUiStateFlags();
     }
 
     // ================================================================================
@@ -3416,6 +3418,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateDozingState();
         checkBarModes();
         updateScrimController();
+        updateSystemUiStateFlags();
         mPresenter.updateMediaMetaData(false, mState != StatusBarState.KEYGUARD);
         mKeyguardMonitor.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
                 mUnlockMethodCache.isMethodSecure(),
@@ -3582,10 +3585,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mBouncerShowing) {
             updatePanelExpansionForKeyguard();
         }
+        updateSystemUiStateFlags();
+    }
 
-        // Notify overview proxy service of the new states
-        Dependency.get(OverviewProxyService.class).setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING,
-                isBouncerShowing(), mContext.getDisplayId());
+    public void updateSystemUiStateFlags() {
+        OverviewProxyService overviewProxyService = Dependency.get(OverviewProxyService.class);
+        overviewProxyService.setSystemUiStateFlag(SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING,
+                mStatusBarStateController.getState() == StatusBarState.KEYGUARD,
+                mDisplayId);
+        overviewProxyService.setSystemUiStateFlag(SYSUI_STATE_BOUNCER_SHOWING,
+                isBouncerShowing(), mDisplayId);
     }
 
     /**
