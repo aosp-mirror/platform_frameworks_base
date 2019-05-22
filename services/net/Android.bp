@@ -65,10 +65,10 @@ java_library_static {
     name: "services.net",
     srcs: ["java/**/*.java"],
     static_libs: [
-        "dnsresolver_aidl_interface-java",
+        "dnsresolver_aidl_interface-V2-java",
         "ipmemorystore-client",
-        "netd_aidl_interface-java",
-        "networkstack-aidl-interfaces-java",
+        "netd_aidl_interface-V2-java",
+        "networkstack-aidl-interfaces-V3-java",
     ],
 }
 
@@ -81,7 +81,7 @@ java_library_static {
         "java/android/net/ipmemorystore/**/*.java",
     ],
     static_libs: [
-        "ipmemorystore-aidl-interfaces-java",
+        "ipmemorystore-aidl-interfaces-V3-java",
     ],
 }
 
