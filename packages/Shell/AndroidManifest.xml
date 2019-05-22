@@ -201,6 +201,9 @@
 
     <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
     <uses-permission android:name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE" />
+    
+    <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
