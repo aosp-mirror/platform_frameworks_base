@@ -21,9 +21,6 @@
             "name": "CtsAppSecurityHostTestCases",
             "options": [
                 {
-                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
-                },
-                {
                     "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
                 }
             ]
@@ -50,6 +47,16 @@
             "options": [
                 {
                     "include-filter": "android.cts.statsd.atom.UidAtomTests#testDangerousPermissionState"
+                }
+            ]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
                 }
             ]
         }
