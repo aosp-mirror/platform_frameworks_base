@@ -41,6 +41,7 @@ class QSHeaderInfoLayout @JvmOverloads constructor(
     private lateinit var alarmContainer: View
     private lateinit var ringerContainer: View
     private lateinit var statusSeparator: View
+    private val location = Location(0, 0)
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -53,31 +54,21 @@ class QSHeaderInfoLayout @JvmOverloads constructor(
         // At most one view is there
         if (statusSeparator.visibility == View.GONE) super.onLayout(changed, l, t, r, b)
         else {
-            val alarmWidth = alarmContainer.measuredWidth
-            val separatorWidth = statusSeparator.measuredWidth
-            val ringerWidth = ringerContainer.measuredWidth
-            val availableSpace = (r - l) - separatorWidth
-            var left = l
-            if (alarmWidth < availableSpace / 2) {
-                alarmContainer.layout(left, t, left + alarmWidth, b)
-                left += alarmWidth
-                statusSeparator.layout(left, t, left + separatorWidth, b)
-                left += separatorWidth
-                ringerContainer.layout(left, t, left + Math.min(ringerWidth, r - left), b)
-            } else if (ringerWidth < availableSpace / 2) {
-                val alarmAllocation = Math.min(availableSpace - ringerWidth, alarmWidth)
-                alarmContainer.layout(left, t, left + alarmAllocation, b)
-                left += alarmWidth
-                statusSeparator.layout(left, t, left + separatorWidth, b)
-                left += separatorWidth
-                ringerContainer.layout(left, t, left + ringerWidth, b)
-            } else {
-                alarmContainer.layout(left, t, left + availableSpace / 2, b)
-                left += availableSpace / 2
-                statusSeparator.layout(left, t, left + separatorWidth, b)
-                ringerContainer.layout(r - availableSpace / 2, t, r, b)
-            }
+            val layoutRTL = isLayoutRtl
+            val width = r - l
+            val height = b - t
+            var offset = 0
+
+            offset += alarmContainer.layoutView(width, height, offset, layoutRTL)
+            offset += statusSeparator.layoutView(width, height, offset, layoutRTL)
+            ringerContainer.layoutView(width, height, offset, layoutRTL)
         }
+    }
+
+    private fun View.layoutView(pWidth: Int, pHeight: Int, offset: Int, RTL: Boolean): Int {
+        location.setLocationFromOffset(pWidth, offset, this.measuredWidth, RTL)
+        layout(location.left, 0, location.right, pHeight)
+        return this.measuredWidth
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -119,5 +110,22 @@ class QSHeaderInfoLayout @JvmOverloads constructor(
             }
         }
         setMeasuredDimension(width, measuredHeight)
+    }
+
+    private data class Location(var left: Int, var right: Int) {
+        /**
+         * Sets the [left] and [right] with the correct values for laying out the child, respecting
+         * RTL. Only set the variable through here to prevent concurrency issues.
+         * This is done to prevent allocation of [Pair] in [onLayout].
+         */
+        fun setLocationFromOffset(parentWidth: Int, offset: Int, width: Int, RTL: Boolean) {
+            if (RTL) {
+                left = parentWidth - offset - width
+                right = parentWidth - offset
+            } else {
+                left = offset
+                right = offset + width
+            }
+        }
     }
 }
