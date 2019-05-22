@@ -30,7 +30,7 @@ cc_binary {
     ],
 
     static_libs: [
-        "libplatformprotos",
+        "libprotoutil",
     ],
 
     cflags: [
