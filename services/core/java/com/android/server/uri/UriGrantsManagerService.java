@@ -211,9 +211,9 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<android.content.UriPermission> getPersistedUriPermissions(
-            String packageName, boolean incoming) {
-        enforceNotIsolatedCaller("getPersistedUriPermissions");
+    public ParceledListSlice<android.content.UriPermission> getUriPermissions(
+            String packageName, boolean incoming, boolean persistedOnly) {
+        enforceNotIsolatedCaller("getUriPermissions");
         Preconditions.checkNotNull(packageName, "packageName");
 
         final int callingUid = Binder.getCallingUid();
@@ -240,7 +240,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 } else {
                     for (int j = 0; j < perms.size(); j++) {
                         final UriPermission perm = perms.valueAt(j);
-                        if (packageName.equals(perm.targetPkg) && perm.persistedModeFlags != 0) {
+                        if (packageName.equals(perm.targetPkg)
+                                && (!persistedOnly || perm.persistedModeFlags != 0)) {
                             result.add(perm.buildPersistedPublicApiObject());
                         }
                     }
@@ -252,7 +253,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                             mGrantedUriPermissions.valueAt(i);
                     for (int j = 0; j < perms.size(); j++) {
                         final UriPermission perm = perms.valueAt(j);
-                        if (packageName.equals(perm.sourcePkg) && perm.persistedModeFlags != 0) {
+                        if (packageName.equals(perm.sourcePkg)
+                                && (!persistedOnly || perm.persistedModeFlags != 0)) {
                             result.add(perm.buildPersistedPublicApiObject());
                         }
                     }

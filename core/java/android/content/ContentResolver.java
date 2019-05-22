@@ -2482,8 +2482,8 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public @NonNull List<UriPermission> getPersistedUriPermissions() {
         try {
-            return UriGrantsManager.getService()
-                    .getPersistedUriPermissions(mPackageName, true).getList();
+            return UriGrantsManager.getService().getUriPermissions(
+                    mPackageName, true /* incoming */, true /* persistedOnly */).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2498,8 +2498,18 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public @NonNull List<UriPermission> getOutgoingPersistedUriPermissions() {
         try {
-            return UriGrantsManager.getService()
-                    .getPersistedUriPermissions(mPackageName, false).getList();
+            return UriGrantsManager.getService().getUriPermissions(
+                    mPackageName, false /* incoming */, true /* persistedOnly */).getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public @NonNull List<UriPermission> getOutgoingUriPermissions() {
+        try {
+            return UriGrantsManager.getService().getUriPermissions(
+                    mPackageName, false /* incoming */, false /* persistedOnly */).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
