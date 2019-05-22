@@ -32,4 +32,22 @@
         android:tint="#ff000000"
         android:layout_gravity="right|bottom"
         android:src="@drawable/rounded" />
+    <ImageView
+        android:id="@+id/assist_hint_left"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:layout_gravity="left|top"
+        android:src="@drawable/corner_gesture_hint"
+        android:tint="#ffffffff"
+        android:visibility="gone" />
+    <ImageView
+        android:id="@+id/assist_hint_right"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:layout_gravity="right|bottom"
+        android:src="@drawable/corner_gesture_hint"
+        android:tint="#ffffffff"
+        android:visibility="gone" />
 </com.android.systemui.RegionInterceptingFrameLayout>
