@@ -34,7 +34,6 @@
               android:layout_height="wrap_content"
               android:paddingStart="44dp"
               android:paddingEnd="44dp"
-              android:letterSpacing="0.02"
               android:visibility="gone"
               android:textColor="?attr/wallpaperTextColor"
               android:theme="@style/TextAppearance.Keyguard"
