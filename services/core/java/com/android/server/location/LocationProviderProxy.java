@@ -181,10 +181,10 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("  service=" + mServiceWatcher);
+        pw.println("    service=" + mServiceWatcher);
         synchronized (mProviderPackagesLock) {
             if (mProviderPackages.size() > 1) {
-                pw.println("  additional packages=" + mProviderPackages);
+                pw.println("    additional packages=" + mProviderPackages);
             }
         }
     }

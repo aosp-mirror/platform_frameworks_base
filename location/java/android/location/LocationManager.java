@@ -82,6 +82,8 @@ public class LocationManager {
             new ArrayMap<>();
     private final ArrayMap<OnNmeaMessageListener, GnssStatusListenerTransport> mGnssNmeaListeners =
             new ArrayMap<>();
+    private final ArrayMap<GpsStatus.Listener, GnssStatusListenerTransport> mGpsStatusListeners =
+            new ArrayMap<>();
     // volatile + GnssStatus final-fields pattern to avoid a partially published object
     private volatile GnssStatus mGnssStatus;
     private int mTimeToFirstFix;
@@ -1703,6 +1705,33 @@ public class LocationManager {
             mNmeaBuffer = new ArrayList<>();
         }
 
+        GnssStatusListenerTransport(GpsStatus.Listener listener, Handler handler) {
+            mGnssHandler = new GnssHandler(handler);
+            mNmeaBuffer = null;
+            mGnssCallback = listener != null ? new GnssStatus.Callback() {
+                @Override
+                public void onStarted() {
+                    listener.onGpsStatusChanged(GpsStatus.GPS_EVENT_STARTED);
+                }
+
+                @Override
+                public void onStopped() {
+                    listener.onGpsStatusChanged(GpsStatus.GPS_EVENT_STOPPED);
+                }
+
+                @Override
+                public void onFirstFix(int ttff) {
+                    listener.onGpsStatusChanged(GpsStatus.GPS_EVENT_FIRST_FIX);
+                }
+
+                @Override
+                public void onSatelliteStatusChanged(GnssStatus status) {
+                    listener.onGpsStatusChanged(GpsStatus.GPS_EVENT_SATELLITE_STATUS);
+                }
+            } : null;
+            mGnssNmeaListener = null;
+        }
+
         @Override
         public void onGnssStarted() {
             if (mGnssCallback != null) {
@@ -1763,7 +1792,22 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
-        return false;
+        boolean result;
+
+        if (mGpsStatusListeners.get(listener) != null) {
+            return true;
+        }
+        try {
+            GnssStatusListenerTransport transport = new GnssStatusListenerTransport(listener, null);
+            result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
+            if (result) {
+                mGpsStatusListeners.put(listener, transport);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return result;
     }
 
     /**
@@ -1773,7 +1817,16 @@ public class LocationManager {
      * @deprecated use {@link #unregisterGnssStatusCallback(GnssStatus.Callback)} instead.
      */
     @Deprecated
-    public void removeGpsStatusListener(GpsStatus.Listener listener) {}
+    public void removeGpsStatusListener(GpsStatus.Listener listener) {
+        try {
+            GnssStatusListenerTransport transport = mGpsStatusListeners.remove(listener);
+            if (transport != null) {
+                mService.unregisterGnssStatusCallback(transport);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Registers a GNSS status callback.
@@ -1803,19 +1856,20 @@ public class LocationManager {
     public boolean registerGnssStatusCallback(
             @NonNull GnssStatus.Callback callback, @Nullable Handler handler) {
         boolean result;
-        if (mGnssStatusListeners.get(callback) != null) {
-            // listener is already registered
-            return true;
-        }
-        try {
-            GnssStatusListenerTransport transport =
-                    new GnssStatusListenerTransport(callback, handler);
-            result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
-            if (result) {
-                mGnssStatusListeners.put(callback, transport);
+        synchronized (mGnssStatusListeners) {
+            if (mGnssStatusListeners.get(callback) != null) {
+                return true;
             }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            try {
+                GnssStatusListenerTransport transport =
+                        new GnssStatusListenerTransport(callback, handler);
+                result = mService.registerGnssStatusCallback(transport, mContext.getPackageName());
+                if (result) {
+                    mGnssStatusListeners.put(callback, transport);
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         return result;
@@ -1827,13 +1881,15 @@ public class LocationManager {
      * @param callback GNSS status callback object to remove
      */
     public void unregisterGnssStatusCallback(@NonNull GnssStatus.Callback callback) {
-        try {
-            GnssStatusListenerTransport transport = mGnssStatusListeners.remove(callback);
-            if (transport != null) {
-                mService.unregisterGnssStatusCallback(transport);
+        synchronized (mGnssStatusListeners) {
+            try {
+                GnssStatusListenerTransport transport = mGnssStatusListeners.remove(callback);
+                if (transport != null) {
+                    mService.unregisterGnssStatusCallback(transport);
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2106,7 +2162,15 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public @Nullable GpsStatus getGpsStatus(@Nullable GpsStatus status) {
-        return null;
+        if (status == null) {
+            status = new GpsStatus();
+        }
+        // When mGnssStatus is null, that means that this method is called outside
+        // onGpsStatusChanged().  Return an empty status to maintain backwards compatibility.
+        if (mGnssStatus != null) {
+            status.setStatus(mGnssStatus, mTimeToFirstFix);
+        }
+        return status;
     }
 
     /**
