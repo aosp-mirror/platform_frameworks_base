@@ -1204,10 +1204,6 @@ public final class AutofillManager {
         AutofillValue value = null;
 
         synchronized (mLock) {
-            if (mForAugmentedAutofillOnly) {
-                if (sVerbose) Log.v(TAG,  "notifyValueChanged(): ignoring on augmented only mode");
-                return;
-            }
             // If the session is gone some fields might still be highlighted, hence we have to
             // remove the isAutofilled property even if no sessions are active.
             if (mLastAutofilledData == null) {
@@ -1229,6 +1225,13 @@ public final class AutofillManager {
                 }
             }
 
+            if (mForAugmentedAutofillOnly) {
+                if (sVerbose) {
+                    Log.v(TAG,  "notifyValueChanged(): not notifying system server on "
+                            + "augmented-only mode");
+                }
+                return;
+            }
             if (!mEnabled || !isActiveLocked()) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyValueChanged(" + view.getAutofillId()
