@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include <android/util/EncodedBuffer.h>
 
@@ -124,6 +125,7 @@ public:
     sp<ProtoReader> data(); // Get the reader apis of the data.
     bool flush(int fd); // Flush data directly to a file descriptor.
     bool serializeToString(std::string* out); // Serializes the proto to a string.
+    bool serializeToVector(std::vector<uint8_t>* out); // Serializes the proto to a vector<uint8_t>.
 
     /**
      * Clears the ProtoOutputStream so the buffer can be reused instead of deallocation/allocation again.
