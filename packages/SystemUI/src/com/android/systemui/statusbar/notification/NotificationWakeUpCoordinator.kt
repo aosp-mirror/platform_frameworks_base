@@ -22,11 +22,12 @@ import android.util.FloatProperty
 import com.android.systemui.Interpolators
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.AmbientPulseManager
-import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,7 +36,8 @@ import javax.inject.Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
         private val mContext: Context,
         private val mAmbientPulseManager: AmbientPulseManager,
-        private val mStatusBarStateController: StatusBarStateController)
+        private val mStatusBarStateController: StatusBarStateController,
+        private val mBypassController: KeyguardBypassController)
     : AmbientPulseManager.OnAmbientChangedListener, StatusBarStateController.StateListener {
 
     private val mNotificationVisibility
@@ -117,6 +119,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onDozeAmountChanged(linear: Float, eased: Float) {
+        if (updateDozeAmountIfBypass()) {
+            return
+        }
         if (linear != 1.0f && linear != 0.0f
                 && (mLinearDozeAmount == 0.0f || mLinearDozeAmount == 1.0f)) {
             // Let's notify the scroller that an animation started
@@ -131,6 +136,27 @@ class NotificationWakeUpCoordinator @Inject constructor(
             setNotificationsVisibleForExpansion(visible = false, animate = false,
                     increaseSpeed = false)
         }
+    }
+
+    override fun onStateChanged(newState: Int) {
+        updateDozeAmountIfBypass();
+    }
+
+    private fun updateDozeAmountIfBypass(): Boolean {
+        if (mBypassController.bypassEnabled) {
+            if (mStatusBarStateController.state == StatusBarState.SHADE
+                    || mStatusBarStateController.state == StatusBarState.SHADE_LOCKED) {
+                mDozeAmount = 0.0f
+                mLinearDozeAmount = 0.0f
+            } else {
+                mDozeAmount = 1.0f
+                mLinearDozeAmount = 1.0f
+            }
+            updateDarkAmount()
+            mStackScroller.setDozeAmount(mDozeAmount)
+            return true
+        }
+        return false
     }
 
     private fun startVisibilityAnimation(increaseSpeed: Boolean) {

@@ -112,6 +112,12 @@ public class KeyguardClockPositionAlgorithm {
     private float mEmptyDragAmount;
 
     /**
+     * If true the clock should always be positioned like it's dark. Used in the bypass, where
+     * notifications don't expand on the lock screen and should be kept stable
+     */
+    private boolean mPositionLikeDark;
+
+    /**
      * Refreshes the dimension values.
      */
     public void loadDimens(Resources res) {
@@ -132,7 +138,8 @@ public class KeyguardClockPositionAlgorithm {
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
-            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount) {
+            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
+            boolean positionLikeDark) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
@@ -144,6 +151,7 @@ public class KeyguardClockPositionAlgorithm {
         mHasVisibleNotifs = hasVisibleNotifs;
         mDarkAmount = dark;
         mEmptyDragAmount = emptyDragAmount;
+        mPositionLikeDark = positionLikeDark;
     }
 
     public void run(Result result) {
@@ -209,7 +217,8 @@ public class KeyguardClockPositionAlgorithm {
         float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
         clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        return (int) (MathUtils.lerp(clockY, clockYDark, mDarkAmount) + mEmptyDragAmount);
+        float darkAmount = mPositionLikeDark ? 1.0f : mDarkAmount;
+        return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }
 
     /**

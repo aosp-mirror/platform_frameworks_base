@@ -52,7 +52,7 @@ public class AmbientState {
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private int mSpeedBumpIndex = -1;
-    private boolean mDark;
+    private boolean mDozing;
     private boolean mHideSensitive;
     private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private float mStackTranslation;
@@ -181,8 +181,8 @@ public class AmbientState {
     }
 
     /** In dark mode, we draw as little as possible, assuming a black background */
-    public void setDark(boolean dark) {
-        mDark = dark;
+    public void setDozing(boolean dozing) {
+        mDozing = dozing;
     }
 
     /** Dark ratio of the status bar **/
@@ -215,8 +215,8 @@ public class AmbientState {
         return mDimmed;
     }
 
-    public boolean isDark() {
-        return mDark;
+    public boolean isDozing() {
+        return mDozing;
     }
 
     public boolean isHideSensitive() {
@@ -452,7 +452,7 @@ public class AmbientState {
      * @return whether a row is dozing and not pulsing right now
      */
     public boolean isDozingAndNotPulsing(ExpandableNotificationRow row) {
-        return isDark() && !isPulsing(row.getEntry());
+        return isDozing() && !isPulsing(row.getEntry());
     }
 
     public void setExpandAnimationTopChange(int expandAnimationTopChange) {
