@@ -231,6 +231,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
         }, enableRollbackTimedOutFilter, null, getHandler());
 
+        IntentFilter userAddedIntentFilter = new IntentFilter(Intent.ACTION_USER_ADDED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
+                    final int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (newUserId == -1) {
+                        return;
+                    }
+                    registerUserCallbacks(UserHandle.of(newUserId));
+                }
+            }
+        }, userAddedIntentFilter, null, getHandler());
+
         registerTimeChangeReceiver();
     }
 
