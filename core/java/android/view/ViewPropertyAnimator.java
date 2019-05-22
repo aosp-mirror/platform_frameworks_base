@@ -972,7 +972,6 @@ public class ViewPropertyAnimator {
      * @param value The value to set the property to
      */
     private void setValue(int propertyConstant, float value) {
-        final View.TransformationInfo info = mView.mTransformationInfo;
         final RenderNode renderNode = mView.mRenderNode;
         switch (propertyConstant) {
             case TRANSLATION_X:
@@ -1009,7 +1008,7 @@ public class ViewPropertyAnimator {
                 renderNode.setTranslationZ(value - renderNode.getElevation());
                 break;
             case ALPHA:
-                info.mAlpha = value;
+                mView.setAlphaInternal(value);
                 renderNode.setAlpha(value);
                 break;
         }
@@ -1047,7 +1046,7 @@ public class ViewPropertyAnimator {
             case Z:
                 return node.getElevation() + node.getTranslationZ();
             case ALPHA:
-                return mView.mTransformationInfo.mAlpha;
+                return mView.getAlpha();
         }
         return 0;
     }
