@@ -453,8 +453,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             if (mBar != null) {
                 try {
                     mBar.onDisplayReady(displayId);
-                } catch (RemoteException ex) { }
+                } catch (RemoteException ex) {}
             }
+        }
+
+        @Override
+        public void onRecentsAnimationStateChanged(boolean running) {
+            if (mBar != null) {
+                try {
+                    mBar.onRecentsAnimationStateChanged(running);
+                } catch (RemoteException ex) {}
+            }
+
         }
     };
 
