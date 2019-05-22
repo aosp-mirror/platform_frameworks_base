@@ -58,15 +58,15 @@ public final class StaticIpConfiguration implements Parcelable {
     @Nullable
     public LinkAddress ipAddress;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     @Nullable
     public InetAddress gateway;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     @NonNull
     public final ArrayList<InetAddress> dnsServers;
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     @Nullable
     public String domains;
 
