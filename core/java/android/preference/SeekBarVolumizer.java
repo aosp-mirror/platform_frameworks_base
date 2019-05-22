@@ -591,7 +591,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
     private void registerVolumeGroupCb() {
         if (mVolumeGroupId != AudioVolumeGroup.DEFAULT_VOLUME_GROUP) {
             mAudioManager.registerVolumeGroupCallback(Runnable::run, mVolumeGroupCallback);
-            mLastProgress = mAudioManager.getVolumeIndexForAttributes(mAttributes);
+            updateSlider();
         }
     }
 

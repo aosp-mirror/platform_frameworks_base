@@ -301,13 +301,17 @@ public class Assistant extends NotificationAssistantService {
                         sbn, ranking.getChannel(), mSmsHelper);
                 String key = getKey(
                         sbn.getPackageName(), sbn.getUserId(), ranking.getChannel().getId());
-                ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
-                        createChannelImpressionsWithThresholds());
-                if (ranking.getImportance() > IMPORTANCE_MIN && ci.shouldTriggerBlock()) {
+                boolean shouldTriggerBlock;
+                synchronized (mkeyToImpressions) {
+                    ChannelImpressions ci = mkeyToImpressions.getOrDefault(key,
+                            createChannelImpressionsWithThresholds());
+                    mkeyToImpressions.put(key, ci);
+                    shouldTriggerBlock = ci.shouldTriggerBlock();
+                }
+                if (ranking.getImportance() > IMPORTANCE_MIN && shouldTriggerBlock) {
                     adjustNotification(createNegativeAdjustment(
                             sbn.getPackageName(), sbn.getKey(), sbn.getUserId()));
                 }
-                mkeyToImpressions.put(key, ci);
                 mLiveNotifications.put(sbn.getKey(), entry);
                 mAgingHelper.onNotificationPosted(entry);
             }

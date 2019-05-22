@@ -42,6 +42,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,8 +91,10 @@ public class CameraServiceProxy extends SystemService
 
     private ICameraService mCameraServiceRaw;
 
+    // Map of currently active camera IDs
     private final ArrayMap<String, CameraUsageEvent> mActiveCameraUsage = new ArrayMap<>();
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
+
     private final MetricsLogger mLogger = new MetricsLogger();
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
@@ -415,6 +418,24 @@ public class CameraServiceProxy extends SystemService
                     }
                     break;
                 case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
+                    // Check current active camera IDs to see if this package is already talking to
+                    // some camera
+                    boolean alreadyActivePackage = false;
+                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
+                        if (mActiveCameraUsage.valueAt(i).mClientName.equals(clientName)) {
+                            alreadyActivePackage = true;
+                            break;
+                        }
+                    }
+                    // If not already active, notify window manager about this new package using a
+                    // camera
+                    if (!alreadyActivePackage) {
+                        WindowManagerInternal wmi =
+                                LocalServices.getService(WindowManagerInternal.class);
+                        wmi.addNonHighRefreshRatePackage(clientName);
+                    }
+
+                    // Update activity events
                     CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName, apiLevel);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
@@ -426,13 +447,31 @@ public class CameraServiceProxy extends SystemService
                 case ICameraServiceProxy.CAMERA_STATE_IDLE:
                 case ICameraServiceProxy.CAMERA_STATE_CLOSED:
                     CameraUsageEvent doneEvent = mActiveCameraUsage.remove(cameraId);
-                    if (doneEvent != null) {
-                        doneEvent.markCompleted();
-                        mCameraUsageHistory.add(doneEvent);
-                        if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
-                            dumpUsageEvents();
+                    if (doneEvent == null) break;
+
+                    doneEvent.markCompleted();
+                    mCameraUsageHistory.add(doneEvent);
+                    if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
+                        dumpUsageEvents();
+                    }
+
+                    // Check current active camera IDs to see if this package is still talking to
+                    // some camera
+                    boolean stillActivePackage = false;
+                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
+                        if (mActiveCameraUsage.valueAt(i).mClientName.equals(clientName)) {
+                            stillActivePackage = true;
+                            break;
                         }
                     }
+                    // If not longer active, notify window manager about this package being done
+                    // with camera
+                    if (!stillActivePackage) {
+                        WindowManagerInternal wmi =
+                                LocalServices.getService(WindowManagerInternal.class);
+                        wmi.removeNonHighRefreshRatePackage(clientName);
+                    }
+
                     break;
             }
             boolean isEmpty = mActiveCameraUsage.isEmpty();

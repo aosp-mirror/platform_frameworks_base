@@ -2156,6 +2156,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    @Override
+    public void onRecentsAnimationStateChanged(boolean running) {
+        setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, running);
+    }
+
     protected @TransitionMode int computeStatusBarMode(int oldVal, int newVal) {
         return computeBarMode(oldVal, newVal);
     }
@@ -3133,7 +3138,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             // If the state didn't change, we may still need to update public mode
             mLockscreenUserManager.updatePublicMode();
-            mEntryManager.updateNotifications();
         }
         if (mStatusBarStateController.leaveOpenOnKeyguardHide()) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
