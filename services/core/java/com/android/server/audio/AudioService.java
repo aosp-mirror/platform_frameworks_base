@@ -1452,7 +1452,13 @@ public class AudioService extends IAudioService.Stub
                         Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
             }
             if (!TextUtils.isEmpty(assistantName)) {
-                packageName = ComponentName.unflattenFromString(assistantName).getPackageName();
+                ComponentName componentName = ComponentName.unflattenFromString(assistantName);
+                if (componentName == null) {
+                    Slog.w(TAG, "Invalid service name for "
+                            + Settings.Secure.VOICE_INTERACTION_SERVICE + ": " + assistantName);
+                    return;
+                }
+                packageName = componentName.getPackageName();
             }
         }
         if (!TextUtils.isEmpty(packageName)) {

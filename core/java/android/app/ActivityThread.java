@@ -3554,11 +3554,13 @@ public final class ActivityThread extends ClientTransactionHandler {
             @NonNull RemoteCallback callback) {
         final ActivityClientRecord r = mActivities.get(activityToken);
         if (r == null) {
+            Log.w(TAG, "requestDirectActions(): no activity for " + activityToken);
             callback.sendResult(null);
             return;
         }
         final int lifecycleState = r.getLifecycleState();
         if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
+            Log.w(TAG, "requestDirectActions(" + r + "): wrong lifecycle: " + lifecycleState);
             callback.sendResult(null);
             return;
         }
