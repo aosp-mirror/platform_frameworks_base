@@ -21,6 +21,7 @@ import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.StrictMode;
 
 /**
  * When a target is chosen from the SystemUI Chooser activity, unpack its arguments and
@@ -40,7 +41,15 @@ public class ChooserHelper {
         final boolean ignoreTargetSecurity =
                 thisIntent.getBooleanExtra(ActivityTaskManager.EXTRA_IGNORE_TARGET_SECURITY, false);
         final int userId = thisIntent.getIntExtra(Intent.EXTRA_USER_ID, -1);
-        activity.startActivityAsCaller(
-                chosenIntent, options, permissionToken, ignoreTargetSecurity, userId);
+
+        // We're dispatching intents that might be coming from legacy apps, so
+        // (as in com.android.internal.app.ResolverActivity) exempt ourselves from death.
+        StrictMode.disableDeathOnFileUriExposure();
+        try {
+            activity.startActivityAsCaller(
+                    chosenIntent, options, permissionToken, ignoreTargetSecurity, userId);
+        } finally {
+            StrictMode.enableDeathOnFileUriExposure();
+        }
     }
 }
