@@ -32,7 +32,6 @@ import android.app.prediction.AppPredictionManager;
 import android.app.prediction.AppPredictor;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
-import android.app.prediction.AppTargetId;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -125,7 +124,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Chooser Activity handles intent resolution specifically for sharing intents -
@@ -162,6 +163,7 @@ public class ChooserActivity extends ResolverActivity {
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
     private AppPredictor mAppPredictor;
     private AppPredictor.Callback mAppPredictorCallback;
+    private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
 
     /**
      * If set to true, use ShortcutManager to retrieve the matching direct share targets, instead of
@@ -454,6 +456,7 @@ public class ChooserActivity extends ResolverActivity {
 
         AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
         if (appPredictor != null) {
+            mDirectShareAppTargetCache = new HashMap<>();
             mAppPredictorCallback = resultList -> {
                 if (isFinishing() || isDestroyed()) {
                     return;
@@ -480,8 +483,7 @@ public class ChooserActivity extends ResolverActivity {
                             new ComponentName(
                                 appTarget.getPackageName(), appTarget.getClassName())));
                 }
-                sendShareShortcutInfoList(shareShortcutInfos, driList);
-                sendShortcutManagerShareTargetResultCompleted();
+                sendShareShortcutInfoList(shareShortcutInfos, driList, resultList);
             };
             appPredictor
                 .registerPredictionUpdates(this.getMainExecutor(), mAppPredictorCallback);
@@ -1318,13 +1320,14 @@ public class ChooserActivity extends ResolverActivity {
         AsyncTask.execute(() -> {
             ShortcutManager sm = (ShortcutManager) getSystemService(Context.SHORTCUT_SERVICE);
             List<ShortcutManager.ShareShortcutInfo> resultList = sm.getShareTargets(filter);
-            sendShareShortcutInfoList(resultList, driList);
+            sendShareShortcutInfoList(resultList, driList, null);
         });
     }
 
     private void sendShareShortcutInfoList(
                 List<ShortcutManager.ShareShortcutInfo> resultList,
-                List<DisplayResolveInfo> driList) {
+                List<DisplayResolveInfo> driList,
+                @Nullable List<AppTarget> appTargets) {
         // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
         // for direct share targets. After ShareSheet is refactored we should use the
         // ShareShortcutInfos directly.
@@ -1334,7 +1337,13 @@ public class ChooserActivity extends ResolverActivity {
             for (int j = 0; j < resultList.size(); j++) {
                 if (driList.get(i).getResolvedComponentName().equals(
                             resultList.get(j).getTargetComponent())) {
-                    chooserTargets.add(convertToChooserTarget(resultList.get(j)));
+                    ShortcutManager.ShareShortcutInfo shareShortcutInfo = resultList.get(j);
+                    ChooserTarget chooserTarget = convertToChooserTarget(shareShortcutInfo);
+                    chooserTargets.add(chooserTarget);
+                    if (mDirectShareAppTargetCache != null && appTargets != null) {
+                        // Note that appTargets.size() == resultList.size() is always true.
+                        mDirectShareAppTargetCache.put(chooserTarget, appTargets.get(j));
+                    }
                 }
             }
             if (chooserTargets.isEmpty()) {
@@ -1442,33 +1451,25 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private void sendClickToAppPredictor(TargetInfo targetInfo) {
-        AppPredictor appPredictor = getAppPredictorForDirectShareIfEnabled();
-        if (appPredictor == null) {
+        AppPredictor directShareAppPredictor = getAppPredictorForDirectShareIfEnabled();
+        if (directShareAppPredictor == null) {
             return;
         }
         if (!(targetInfo instanceof ChooserTargetInfo)) {
             return;
         }
         ChooserTarget chooserTarget = ((ChooserTargetInfo) targetInfo).getChooserTarget();
-        ComponentName componentName = chooserTarget.getComponentName();
-        Bundle extras = chooserTarget.getIntentExtras();
-        if (extras == null) {
-            return;
+        AppTarget appTarget = null;
+        if (mDirectShareAppTargetCache != null) {
+            appTarget = mDirectShareAppTargetCache.get(chooserTarget);
         }
-        String shortcutId = extras.getString(Intent.EXTRA_SHORTCUT_ID);
-        if (shortcutId == null) {
-            return;
+        // This is a direct share click that was provided by the APS
+        if (appTarget != null) {
+            directShareAppPredictor.notifyAppTargetEvent(
+                    new AppTargetEvent.Builder(appTarget, AppTargetEvent.ACTION_LAUNCH)
+                        .setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
+                        .build());
         }
-        appPredictor.notifyAppTargetEvent(
-                new AppTargetEvent.Builder(
-                    // TODO(b/124404997) Send full shortcut info, not just Id with AppTargetId.
-                    new AppTarget.Builder(new AppTargetId(shortcutId),
-                            componentName.getPackageName(), getUser())
-                        .setClassName(componentName.getClassName())
-                        .build(),
-                    AppTargetEvent.ACTION_LAUNCH)
-                    .setLaunchLocation(LAUNCH_LOCATON_DIRECT_SHARE)
-                    .build());
     }
 
     @Nullable
