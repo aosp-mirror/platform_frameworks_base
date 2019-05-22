@@ -56,7 +56,7 @@ java_defaults {
         "libutilscallstack",
         "libziparchive",
         "libz",
-        "netd_aidl_interface-cpp",
+        "netd_aidl_interface-V2-cpp",
         "libnetworkstatsfactorytestjni",
     ],
 }
