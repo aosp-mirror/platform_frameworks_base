@@ -175,6 +175,9 @@ public class TextClock extends TextView {
             if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
                 final String timeZone = intent.getStringExtra("time-zone");
                 createTime(timeZone);
+            } else if (!mShouldRunTicker && (Intent.ACTION_TIME_TICK.equals(intent.getAction())
+                    || Intent.ACTION_TIME_CHANGED.equals(intent.getAction()))) {
+                return;
             }
             onTimeChanged();
         }
@@ -645,12 +648,9 @@ public class TextClock extends TextView {
      */
     @UnsupportedAppUsage
     private void onTimeChanged() {
-        // mShouldRunTicker always equals the last value passed into onVisibilityAggregated
-        if (mShouldRunTicker) {
-            mTime.setTimeInMillis(System.currentTimeMillis());
-            setText(DateFormat.format(mFormat, mTime));
-            setContentDescription(DateFormat.format(mDescFormat, mTime));
-        }
+        mTime.setTimeInMillis(System.currentTimeMillis());
+        setText(DateFormat.format(mFormat, mTime));
+        setContentDescription(DateFormat.format(mDescFormat, mTime));
     }
 
     /** @hide */

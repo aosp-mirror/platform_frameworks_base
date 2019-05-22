@@ -199,6 +199,9 @@
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
+    <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
+    <uses-permission android:name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE" />
+
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">

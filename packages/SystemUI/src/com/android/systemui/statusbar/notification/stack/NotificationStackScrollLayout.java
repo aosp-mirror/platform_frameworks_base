@@ -518,7 +518,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             NotificationRoundnessManager notificationRoundnessManager,
             AmbientPulseManager ambientPulseManager,
             DynamicPrivacyController dynamicPrivacyController,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter,
+            StatusBarStateController statusBarStateController) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -534,6 +535,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 new NotificationSectionsManager(
                         this,
                         activityStarter,
+                        statusBarStateController,
                         NotificationUtils.useNewInterruptionModel(context));
         mSectionsManager.inflateViews(context);
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
@@ -913,7 +915,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (child.getVisibility() != View.GONE
                     && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if ((row.isPinned() || row.isHeadsUpAnimatingAway()) && row.getTranslation() < 0) {
+                if ((row.isPinned() || row.isHeadsUpAnimatingAway()) && row.getTranslation() < 0
+                        && row.getProvider().shouldShowGutsOnSnapOpen()) {
                     top = Math.min(top, row.getTranslationY());
                     bottom = Math.max(bottom, row.getTranslationY() + row.getActualHeight());
                 }
@@ -4378,6 +4381,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         mAmbientState.setShadeExpanded(isExpanded);
         mStateAnimator.setShadeExpanded(isExpanded);
+        mSwipeHelper.setIsExpanded(isExpanded);
         if (changed) {
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();

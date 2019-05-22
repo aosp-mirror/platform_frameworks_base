@@ -48,6 +48,7 @@ class NotificationSwipeHelper extends SwipeHelper
     private static final long SWIPE_MENU_TIMING = 200;
 
     private NotificationMenuRowPlugin mCurrMenuRow;
+    private boolean mIsExpanded;
 
     public NotificationSwipeHelper(int swipeDirection, NotificationCallback callback,
             Context context, NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
@@ -95,6 +96,10 @@ class NotificationSwipeHelper extends SwipeHelper
     @VisibleForTesting
     protected Runnable getFalsingCheck() {
         return mFalsingCheck;
+    }
+
+    public void setIsExpanded(boolean isExpanded) {
+        mIsExpanded = isExpanded;
     }
 
     @Override
@@ -200,7 +205,9 @@ class NotificationSwipeHelper extends SwipeHelper
         boolean slowSwipedFarEnough = swipedEnoughToShowMenu(menuRow) && isSlowSwipe;
         boolean isFastNonDismissGesture =
                 gestureFastEnough && !gestureTowardsMenu && !isDismissGesture;
-        boolean isMenuRevealingGestureAwayFromMenu = slowSwipedFarEnough || isFastNonDismissGesture;
+        boolean isAbleToShowMenu = menuRow.shouldShowGutsOnSnapOpen() || mIsExpanded;
+        boolean isMenuRevealingGestureAwayFromMenu = slowSwipedFarEnough
+                || (isFastNonDismissGesture && isAbleToShowMenu);
         int menuSnapTarget = menuRow.getMenuSnapTarget();
         boolean isNonFalseMenuRevealingGesture =
                 !isFalseGesture(ev) && isMenuRevealingGestureAwayFromMenu;

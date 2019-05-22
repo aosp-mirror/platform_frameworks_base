@@ -16,6 +16,7 @@
 
 package android.os.storage;
 
+import android.annotation.Nullable;
 import android.os.IVold;
 
 /**
@@ -101,4 +102,11 @@ public abstract class StorageManagerInternal {
      * @param listener The listener that will be notified on reset events.
      */
     public abstract void addResetListener(ResetListener listener);
+
+    /**
+     * Notified when any app op changes so that storage mount points can be updated if the app op
+     * affects them.
+     */
+    public abstract void onAppOpsChanged(int code, int uid,
+            @Nullable String packageName, int mode);
 }
