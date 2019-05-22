@@ -16,11 +16,9 @@
 
 package com.android.systemui.bubbles;
 
-import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
-import static android.util.StatsLogInternal.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING;
-import static android.util.StatsLogInternal.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE;
-import static android.util.StatsLogInternal.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__DOCUMENT_LAUNCH_NOT_ALWAYS;
 import static android.view.Display.INVALID_DISPLAY;
+
+import static com.android.systemui.bubbles.BubbleController.DEBUG_ENABLE_AUTO_BUBBLE;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -30,7 +28,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -337,11 +334,10 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 mNotifRow = null;
             }
             mActivityView.setVisibility(VISIBLE);
-        } else {
+        } else if (DEBUG_ENABLE_AUTO_BUBBLE) {
             // Hide activity view if we had it previously
             mActivityView.setVisibility(GONE);
             mNotifRow = mEntry.getRow();
-
         }
         updateView();
     }
@@ -532,56 +528,11 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     @Nullable
     private PendingIntent getBubbleIntent(NotificationEntry entry) {
         Notification notif = entry.notification.getNotification();
-        String packageName = entry.notification.getPackageName();
         Notification.BubbleMetadata data = notif.getBubbleMetadata();
-        if (data != null && canLaunchInActivityView(data.getIntent(), true /* enableLogging */,
-                packageName)) {
+        if (BubbleController.canLaunchInActivityView(mContext, entry) && data != null) {
             return data.getIntent();
-        } else if (BubbleController.shouldUseContentIntent(mContext)
-                && canLaunchInActivityView(notif.contentIntent, false /* enableLogging */,
-                packageName)) {
-            return notif.contentIntent;
         }
         return null;
-    }
-
-    /**
-     * Whether an intent is properly configured to display in an {@link android.app.ActivityView}.
-     *
-     * @param intent the pending intent of the bubble.
-     * @param enableLogging whether bubble developer error should be logged.
-     * @param packageName the notification package name for this bubble.
-     * @return
-     */
-    private boolean canLaunchInActivityView(PendingIntent intent, boolean enableLogging,
-            String packageName) {
-        if (intent == null) {
-            return false;
-        }
-        ActivityInfo info =
-                intent.getIntent().resolveActivityInfo(mContext.getPackageManager(), 0);
-        if (info == null) {
-            if (enableLogging) {
-                StatsLog.write(StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED, packageName,
-                        BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING);
-            }
-            return false;
-        }
-        if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
-            if (enableLogging) {
-                StatsLog.write(StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED, packageName,
-                        BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE);
-            }
-            return false;
-        }
-        if (info.documentLaunchMode != DOCUMENT_LAUNCH_ALWAYS) {
-            if (enableLogging) {
-                StatsLog.write(StatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED, packageName,
-                        BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__DOCUMENT_LAUNCH_NOT_ALWAYS);
-            }
-            return false;
-        }
-        return (info.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) != 0;
     }
 
     /**
