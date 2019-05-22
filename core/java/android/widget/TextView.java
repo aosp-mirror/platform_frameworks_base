@@ -11244,13 +11244,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Nullable
     final TextServicesManager getTextServicesManagerForUser() {
+        return getServiceManagerForUser("android", TextServicesManager.class);
+    }
+
+    @Nullable
+    final ClipboardManager getClipboardManagerForUser() {
+        return getServiceManagerForUser(getContext().getPackageName(), ClipboardManager.class);
+    }
+
+    @Nullable
+    final <T> T getServiceManagerForUser(String packageName, Class<T> managerClazz) {
         if (mTextOperationUser == null) {
-            return getContext().getSystemService(TextServicesManager.class);
+            return getContext().getSystemService(managerClazz);
         }
         try {
-            return getContext().createPackageContextAsUser(
-                    "android", 0 /* flags */, mTextOperationUser)
-                    .getSystemService(TextServicesManager.class);
+            Context context = getContext().createPackageContextAsUser(
+                    packageName, 0 /* flags */, mTextOperationUser);
+            return context.getSystemService(managerClazz);
         } catch (PackageManager.NameNotFoundException e) {
             return null;
         }
@@ -12540,8 +12550,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 && mEditor != null && mEditor.mKeyListener != null
                 && getSelectionStart() >= 0
                 && getSelectionEnd() >= 0
-                && ((ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE))
-                        .hasPrimaryClip());
+                && getClipboardManagerForUser().hasPrimaryClip());
     }
 
     boolean canPasteAsPlainText() {
@@ -12549,9 +12558,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        final ClipData clipData =
-                ((ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE))
-                        .getPrimaryClip();
+        final ClipData clipData = getClipboardManagerForUser().getPrimaryClip();
         final ClipDescription description = clipData.getDescription();
         final boolean isPlainType = description.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN);
         final CharSequence text = clipData.getItemAt(0).getText();
@@ -12594,8 +12601,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Paste clipboard content between min and max positions.
      */
     private void paste(int min, int max, boolean withFormatting) {
-        ClipboardManager clipboard =
-                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = getClipboardManagerForUser();
         ClipData clip = clipboard.getPrimaryClip();
         if (clip != null) {
             boolean didFirst = false;
@@ -12638,8 +12644,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @CheckResult
     private boolean setPrimaryClip(ClipData clip) {
-        ClipboardManager clipboard =
-                (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipboardManager clipboard = getClipboardManagerForUser();
         try {
             clipboard.setPrimaryClip(clip);
         } catch (Throwable t) {
