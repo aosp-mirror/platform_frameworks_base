@@ -183,6 +183,26 @@ public class HdmiSwitchClient extends HdmiClient {
     }
 
     /**
+     * Get the list of the HDMI input port configuration.
+     *
+     * <p>This returns an empty list when the current device does not have HDMI input.
+     *
+     * @return a list of {@link HdmiPortInfo}
+     *
+     * @hide
+     */
+    @NonNull
+    @SystemApi
+    public List<HdmiPortInfo> getPortInfo() {
+        try {
+            return mService.getPortInfo();
+        } catch (RemoteException e) {
+            Log.e("TAG", "Failed to call getPortInfo():", e);
+            return Collections.<HdmiPortInfo>emptyList();
+        }
+    }
+
+    /**
      * Listener interface used to get the result of {@link #deviceSelect} or {@link #portSelect}.
      *
      * @hide
