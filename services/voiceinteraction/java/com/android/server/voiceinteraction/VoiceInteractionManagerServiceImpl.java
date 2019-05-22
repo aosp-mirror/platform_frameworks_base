@@ -29,7 +29,6 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
-import android.app.IApplicationThread;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -48,7 +47,6 @@ import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
-import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
@@ -82,6 +80,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
+    final boolean mAllowInstant;
     boolean mBound = false;
     IVoiceInteractionService mService;
 
@@ -127,7 +126,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionManagerServiceImpl(Context context, Handler handler,
             VoiceInteractionManagerService.VoiceInteractionManagerServiceStub stub,
-            int userHandle, ComponentName service) {
+            int userHandle, ComponentName service, boolean allowInstant) {
         mContext = context;
         mHandler = handler;
         mServiceStub = stub;
@@ -135,6 +134,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mComponent = service;
         mAm = ActivityManager.getService();
         mAtm = ActivityTaskManager.getService();
+        mAllowInstant = allowInstant;
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -169,7 +169,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mServiceStub,
                     mSessionComponentName, mUser, mContext, this,
-                    mInfo.getServiceInfo().applicationInfo.uid, mHandler);
+                    mInfo.getServiceInfo().applicationInfo.uid, mHandler, mAllowInstant);
         }
         List<IBinder> activityTokens = null;
         if (activityToken != null) {
