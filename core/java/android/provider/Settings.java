@@ -8836,6 +8836,15 @@ public final class Settings {
         public static final String AWARE_ENABLED = "aware_enabled";
 
         private static final Validator AWARE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Controls whether aware_lock is enabled.
+         * @hide
+         */
+        public static final String AWARE_LOCK_ENABLED = "aware_lock_enabled";
+
+        private static final Validator AWARE_LOCK_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * This are the settings to be backed up.
          *
@@ -8970,7 +8979,8 @@ public final class Settings {
             SILENCE_CALL_GESTURE_COUNT,
             SILENCE_TIMER_GESTURE_COUNT,
             DARK_MODE_DIALOG_SEEN,
-            GLOBAL_ACTIONS_PANEL_ENABLED
+            GLOBAL_ACTIONS_PANEL_ENABLED,
+            AWARE_LOCK_ENABLED
         };
 
         /**
@@ -9157,6 +9167,7 @@ public final class Settings {
             VALIDATORS.put(DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
             VALIDATORS.put(UI_NIGHT_MODE, UI_NIGHT_MODE_VALIDATOR);
             VALIDATORS.put(GLOBAL_ACTIONS_PANEL_ENABLED, GLOBAL_ACTIONS_PANEL_ENABLED_VALIDATOR);
+            VALIDATORS.put(AWARE_LOCK_ENABLED, AWARE_LOCK_ENABLED_VALIDATOR);
         }
 
         /**

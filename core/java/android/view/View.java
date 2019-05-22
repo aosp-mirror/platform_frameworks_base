@@ -4123,7 +4123,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * completely transparent and 1 means completely opaque.
          */
         @ViewDebug.ExportedProperty
-        float mAlpha = 1f;
+        private float mAlpha = 1f;
 
         /**
          * The opacity of the view as manipulated by the Fade transition. This is a
@@ -9076,18 +9076,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <pre>
      *   ContentCaptureSession mainSession = rootView.getContentCaptureSession();
      *   mainSession.setContentCaptureContext(ContentCaptureContext.forLocusId(Uri.parse(myUrl));
-     * <pre>
+     * </pre>
      *
      * <p>Then if the page had an {@code IFRAME}, you would create a new session for it:
-     *
-     * <p>For example, if your activity is associated with a web domain, you could create a session
-     * {@code onCreate()} and associate it with the root view of the activity:
      *
      * <pre>
      *   ContentCaptureSession iframeSession = mainSession.createContentCaptureSession(
      *       ContentCaptureContext.forLocusId(Uri.parse(iframeUrl)));
      *   iframeView.setContentCaptureSession(iframeSession);
-     * <pre>
+     * </pre>
      *
      * @param contentCaptureSession a session created by
      * {@link ContentCaptureSession#createContentCaptureSession(
@@ -16190,7 +16187,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
-    private void setAlphaInternal(float alpha) {
+    void setAlphaInternal(float alpha) {
         float oldAlpha = mTransformationInfo.mAlpha;
         mTransformationInfo.mAlpha = alpha;
         // Report visibility changes, which can affect children, to accessibility

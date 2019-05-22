@@ -525,6 +525,7 @@ public class NotificationLockscreenUserManagerImpl implements
             setLockscreenPublicMode(isProfilePublic, userId);
             mUsersWithSeperateWorkChallenge.put(userId, needsSeparateChallenge);
         }
+        getEntryManager().updateNotifications();
     }
 
     @Override

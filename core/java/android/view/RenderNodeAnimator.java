@@ -213,7 +213,7 @@ public class RenderNodeAnimator extends Animator {
         // it with the final value here.
         if (mRenderProperty == RenderNodeAnimator.ALPHA) {
             mViewTarget.ensureTransformationInfo();
-            mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
+            mViewTarget.setAlphaInternal(mFinalValue);
         }
 
         moveToRunningState();

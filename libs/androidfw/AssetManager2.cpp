@@ -778,8 +778,6 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
 }
 
 const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& child_resids) {
-  ATRACE_NAME("AssetManager::GetBag");
-
   auto cached_iter = cached_bags_.find(resid);
   if (cached_iter != cached_bags_.end()) {
     return cached_iter->second.get();
