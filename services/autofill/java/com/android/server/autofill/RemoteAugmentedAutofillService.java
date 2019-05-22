@@ -225,17 +225,7 @@ final class RemoteAugmentedAutofillService
 
                 @Override
                 public void cancel() {
-                    synchronized (mLock) {
-                        final boolean cancelled = isCancelledLocked();
-                        final ICancellationSignal cancellation = mCancellation;
-                        if (!cancelled) {
-                            try {
-                                cancellation.cancel();
-                            } catch (RemoteException e) {
-                                Slog.e(mTag, "Error requesting a cancellation", e);
-                            }
-                        }
-                    }
+                    PendingAutofillRequest.this.cancel();
                 }
             };
         }
@@ -304,7 +294,7 @@ final class RemoteAugmentedAutofillService
                 try {
                     cancellation.cancel();
                 } catch (RemoteException e) {
-                    Slog.e(mTag, "Error cancelling a fill request", e);
+                    Slog.e(mTag, "Error cancelling an augmented fill request", e);
                 }
             }
             return true;
