@@ -2374,6 +2374,12 @@ enum PageId {
     // Settings > Apps and notifications > Notifications > Gentle notifications
     GENTLE_NOTIFICATIONS_SCREEN = 1715;
 
+    // OPEN: Settings > Display > Dark Theme
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Only shows up on first time toggle
+    DIALOG_DARK_UI_INFO = 1740;
+
     // OPEN: Settings > System > Gestures > Global Actions Panel
     // CATEGORY: SETTINGS
     // OS: Q
