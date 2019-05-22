@@ -88,5 +88,4 @@ easier.
     <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
         <item name="windowLightNavigationBar">false</item>
     </style>
-
 </resources>

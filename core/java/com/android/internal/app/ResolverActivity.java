@@ -46,6 +46,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Insets;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -67,12 +68,15 @@ import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.WindowInsets;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -135,6 +139,9 @@ public class ResolverActivity extends Activity {
     private boolean mRegistered;
 
     private ColorMatrixColorFilter mSuspendedMatrixColorFilter;
+
+    protected Insets mSystemWindowInsets = null;
+    private Space mFooterSpacer = null;
 
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
@@ -329,6 +336,11 @@ public class ResolverActivity extends Activity {
             if (isVoiceInteraction()) {
                 rdl.setCollapsed(false);
             }
+
+            rdl.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            rdl.setOnApplyWindowInsetsListener(this::onApplyWindowInsets);
+
             mResolverDrawerLayout = rdl;
         }
 
@@ -364,10 +376,38 @@ public class ResolverActivity extends Activity {
         finish();
     }
 
+    protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+        mSystemWindowInsets = insets.getSystemWindowInsets();
+
+        mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
+                mSystemWindowInsets.right, 0);
+
+        View emptyView = findViewById(R.id.empty);
+        emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                + getResources().getDimensionPixelSize(
+                        R.dimen.chooser_edge_margin_normal) * 2);
+
+        if (mFooterSpacer == null) {
+            mFooterSpacer = new Space(getApplicationContext());
+        } else {
+            ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
+        }
+        mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
+                mSystemWindowInsets.bottom));
+        ((ListView) mAdapterView).addFooterView(mFooterSpacer);
+
+        return insets.consumeSystemWindowInsets();
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mAdapter.handlePackagesChanged();
+
+        if (mSystemWindowInsets != null) {
+            mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
+                    mSystemWindowInsets.right, 0);
+        }
     }
 
     private void initSuspendedColorMatrix() {
@@ -1277,6 +1317,10 @@ public class ResolverActivity extends Activity {
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
         if (buttonLayout != null) {
             buttonLayout.setVisibility(View.VISIBLE);
+            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                    buttonLayout.getPaddingRight(), buttonLayout.getPaddingBottom() + inset);
+
             mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
             mSettingsButton = (Button) buttonLayout.findViewById(R.id.button_app_settings);
             mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
