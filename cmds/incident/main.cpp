@@ -133,11 +133,11 @@ static void section_list(FILE* out) {
 static IncidentSection const*
 find_section(const char* name)
 {
-    size_t low = 0;
-    size_t high = INCIDENT_SECTION_COUNT - 1;
+    ssize_t low = 0;
+    ssize_t high = INCIDENT_SECTION_COUNT - 1;
 
     while (low <= high) {
-        size_t mid = (low + high) >> 1;
+        ssize_t mid = (low + high) / 2;
         IncidentSection const* section = INCIDENT_SECTIONS + mid;
 
         int cmp = strcmp(section->name, name);
@@ -304,6 +304,7 @@ main(int argc, char** argv)
                 } else {
                     IncidentSection const* ic = find_section(arg);
                     if (ic == NULL) {
+                        ALOGD("Invalid section: %s\n", arg);
                         fprintf(stderr, "Invalid section: %s\n", arg);
                         return 1;
                     }
