@@ -1318,7 +1318,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             @ViewStructureType int viewFor, int flags) {
         super.onProvideStructure(structure, viewFor, flags);
 
-        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL) {
+        if (viewFor == VIEW_STRUCTURE_FOR_AUTOFILL
+                || viewFor == VIEW_STRUCTURE_FOR_CONTENT_CAPTURE) {
             final Adapter adapter = getAdapter();
             if (adapter == null) return;
 
