@@ -71,6 +71,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private static final float TOUCH_Y_MULTIPLIER = 0.25f;
     // How much you need to drag the bouncer to trigger an auth retry (in dps.)
     private static final float MIN_DRAG_SIZE = 10;
+    // How much to scale the default slop by, to avoid accidental drags.
+    private static final float SLOP_SCALE = 2f;
 
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
@@ -179,7 +181,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     return false;
                 }
                 int index = event.findPointerIndex(mActivePointerId);
-                int touchSlop = mViewConfiguration.getScaledTouchSlop();
+                float touchSlop = mViewConfiguration.getScaledTouchSlop() * SLOP_SCALE;
                 if (mCurrentSecurityView != null && index != -1
                         && mStartTouchY - event.getY(index) > touchSlop) {
                     mIsDragging = true;
