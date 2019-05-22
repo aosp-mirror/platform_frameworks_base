@@ -20,6 +20,7 @@ import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -769,7 +770,7 @@ class UsbProfileGroupSettingsManager {
         final Intent intent = createDeviceAttachedIntent(device);
 
         // Send broadcast to running activity with registered intent
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
 
         ApplicationInfo appInfo;
         try {
