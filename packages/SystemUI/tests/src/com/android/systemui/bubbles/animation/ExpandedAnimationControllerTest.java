@@ -145,6 +145,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     }
 
     @Test
+    @Ignore("Flaky")
     public void testMagnetToDismiss_dismiss() throws InterruptedException {
         expand();
 
