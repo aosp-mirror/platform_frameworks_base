@@ -228,7 +228,7 @@ public abstract class AugmentedAutofillService extends Service {
         } else {
             // TODO(b/123099468): figure out if it's ok to reuse the proxy; add logging
             if (sDebug) Log.d(TAG, "Reusing proxy for session " + sessionId);
-            proxy.update(focusedId, focusedValue, callback);
+            proxy.update(focusedId, focusedValue, callback, cancellationSignal);
         }
 
         try {
@@ -251,6 +251,15 @@ public abstract class AugmentedAutofillService extends Service {
                     // TODO(b/123100811): this might be fine, in which case we should logv it
                     Log.w(TAG, "No proxy for session " + sessionId);
                     return;
+                }
+                if (proxy.mCallback != null) {
+                    try {
+                        if (!proxy.mCallback.isCompleted()) {
+                            proxy.mCallback.cancel();
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "failed to check current pending request status", e);
+                    }
                 }
                 proxy.destroy();
             }
@@ -442,7 +451,7 @@ public abstract class AugmentedAutofillService extends Service {
         }
 
         private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue,
-                @NonNull IFillCallback callback) {
+                @NonNull IFillCallback callback, @NonNull CancellationSignal cancellationSignal) {
             synchronized (mLock) {
                 mFocusedId = focusedId;
                 mFocusedValue = focusedValue;
@@ -457,6 +466,7 @@ public abstract class AugmentedAutofillService extends Service {
                     Log.d(TAG, "mCallback is updated.");
                 }
                 mCallback = callback;
+                mCancellationSignal = cancellationSignal;
             }
         }
 
