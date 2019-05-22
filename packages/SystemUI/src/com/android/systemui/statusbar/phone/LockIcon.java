@@ -95,6 +95,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mWasPulsingOnThisFrame;
     private boolean mWakeAndUnlockRunning;
     private boolean mKeyguardShowing;
+    private boolean mShowingLaunchAffordance;
 
     private final KeyguardMonitor.Callback mKeyguardMonitorCallback =
             new KeyguardMonitor.Callback() {
@@ -299,7 +300,8 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         }
 
         boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
-        boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning;
+        boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
+                || mShowingLaunchAffordance;
         setVisibility(invisible ? INVISIBLE : VISIBLE);
         updateClickability();
     }
@@ -481,6 +483,14 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         if (wakeAndUnlock) {
             mWakeAndUnlockRunning = true;
         }
+        update();
+    }
+
+    /**
+     * When we're launching an affordance, like double pressing power to open camera.
+     */
+    public void onShowingLaunchAffordanceChanged(boolean showing) {
+        mShowingLaunchAffordance = showing;
         update();
     }
 
