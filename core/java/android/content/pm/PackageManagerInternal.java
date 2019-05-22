@@ -978,4 +978,13 @@ public abstract class PackageManagerInternal {
      * @return true if default permissions
      */
     public abstract boolean wereDefaultPermissionsGrantedSinceBoot(int userId);
+
+    /**
+     * Get fingerprint of build that updated the runtime permissions for a user.
+     *
+     * @param userId The user to update
+     * @param fingerPrint The fingerprint to set
+     */
+    public abstract void setRuntimePermissionsFingerPrint(@NonNull String fingerPrint,
+            @UserIdInt int userId);
 }

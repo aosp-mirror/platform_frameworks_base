@@ -37,13 +37,16 @@ import android.content.pm.PermissionInfo;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManagerInternal;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -60,6 +63,13 @@ import java.util.concurrent.CountDownLatch;
  */
 public final class PermissionPolicyService extends SystemService {
     private static final String LOG_TAG = PermissionPolicyService.class.getSimpleName();
+    private static final boolean DEBUG = false;
+
+    private final Object mLock = new Object();
+
+    /** Whether the user is started but not yet stopped */
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mIsStarted = new SparseBooleanArray();
 
     public PermissionPolicyService(@NonNull Context context) {
         super(context);
@@ -71,17 +81,22 @@ public final class PermissionPolicyService extends SystemService {
     public void onStart() {
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
+        final PermissionManagerInternal permManagerInternal = LocalServices.getService(
+                PermissionManagerInternal.class);
+
         packageManagerInternal.getPackageList(new PackageListObserver() {
             @Override
             public void onPackageAdded(String packageName, int uid) {
-                synchronizePackagePermissionsAndAppOpsForUser(getContext(), packageName,
-                        UserHandle.getUserId(uid));
+                onPackageChanged(packageName, uid);
             }
 
             @Override
             public void onPackageChanged(String packageName, int uid) {
-                synchronizePackagePermissionsAndAppOpsForUser(getContext(), packageName,
-                        UserHandle.getUserId(uid));
+                final int userId = UserHandle.getUserId(uid);
+
+                if (isStarted(userId)) {
+                    synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
+                }
             }
 
             @Override
@@ -89,20 +104,75 @@ public final class PermissionPolicyService extends SystemService {
                 /* do nothing */
             }
         });
+
+        permManagerInternal.addOnRuntimePermissionStateChangedListener(
+                (packageName, changedUserId) -> {
+                    if (isStarted(changedUserId)) {
+                        synchronizePackagePermissionsAndAppOpsForUser(packageName, changedUserId);
+                    }
+                });
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (DEBUG) Slog.i(LOG_TAG, "onBootPhase(" + phase + ")");
+
+        if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+            final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
+
+            // For some users we might not receive a onStartUser, hence force one here
+            for (int userId : um.getUserIds()) {
+                if (um.isUserRunning(userId)) {
+                    onStartUser(userId);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return Whether the user is started but not yet stopped
+     */
+    private boolean isStarted(@UserIdInt int userId) {
+        synchronized (mLock) {
+            return mIsStarted.get(userId);
+        }
     }
 
     @Override
     public void onStartUser(@UserIdInt int userId) {
-        grantOrUpgradeDefaultRuntimePermissionsInNeeded(getContext(), userId);
-        synchronizePermissionsAndAppOpsForUser(getContext(), userId);
-        startWatchingRuntimePermissionChanges(getContext(), userId);
+        if (DEBUG) Slog.i(LOG_TAG, "onStartUser(" + userId + ")");
+
+        if (isStarted(userId)) {
+            return;
+        }
+
+        grantOrUpgradeDefaultRuntimePermissionsIfNeeded(userId);
+
+        synchronized (mLock) {
+            mIsStarted.put(userId, true);
+        }
+
+        // Force synchronization as permissions might have changed
+        synchronizePermissionsAndAppOpsForUser(userId);
     }
 
-    private static void grantOrUpgradeDefaultRuntimePermissionsInNeeded(@NonNull Context context,
-            @UserIdInt int userId) {
+    @Override
+    public void onStopUser(@UserIdInt int userId) {
+        if (DEBUG) Slog.i(LOG_TAG, "onStopUser(" + userId + ")");
+
+        synchronized (mLock) {
+            mIsStarted.delete(userId);
+        }
+    }
+
+    private void grantOrUpgradeDefaultRuntimePermissionsIfNeeded(@UserIdInt int userId) {
+        if (DEBUG) Slog.i(LOG_TAG, "grantOrUpgradeDefaultPermsIfNeeded(" + userId + ")");
+
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         if (packageManagerInternal.wereDefaultPermissionsGrantedSinceBoot(userId)) {
+            if (DEBUG) Slog.i(LOG_TAG, "defaultPermsWereGrantedSinceBoot(" + userId + ")");
+
             // Now call into the permission controller to apply policy around permissions
             final CountDownLatch latch = new CountDownLatch(1);
 
@@ -110,7 +180,8 @@ public final class PermissionPolicyService extends SystemService {
             // there as we are on the main thread and want to block until the work is
             // completed or we time out.
             final PermissionControllerManager permissionControllerManager =
-                    new PermissionControllerManager(getUserContext(context, UserHandle.of(userId)),
+                    new PermissionControllerManager(
+                            getUserContext(getContext(), UserHandle.of(userId)),
                             FgThread.getHandler());
             permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
                     FgThread.getExecutor(),
@@ -130,19 +201,9 @@ public final class PermissionPolicyService extends SystemService {
             } catch (InterruptedException e) {
                 /* ignore */
             }
-        }
-    }
 
-    private static void startWatchingRuntimePermissionChanges(@NonNull Context context,
-            int userId) {
-        final PermissionManagerInternal permissionManagerInternal = LocalServices.getService(
-                PermissionManagerInternal.class);
-        permissionManagerInternal.addOnRuntimePermissionStateChangedListener(
-                (packageName, changedUserId) -> {
-                    if (userId == changedUserId) {
-                        synchronizePackagePermissionsAndAppOpsForUser(context, packageName, userId);
-                    }
-                });
+            packageManagerInternal.setRuntimePermissionsFingerPrint(Build.FINGERPRINT, userId);
+        }
     }
 
     private static @Nullable Context getUserContext(@NonNull Context context,
@@ -162,8 +223,14 @@ public final class PermissionPolicyService extends SystemService {
     /**
      * Synchronize a single package.
      */
-    private static void synchronizePackagePermissionsAndAppOpsForUser(@NonNull Context context,
-            @NonNull String packageName, @UserIdInt int userId) {
+    private void synchronizePackagePermissionsAndAppOpsForUser(@NonNull String packageName,
+            @UserIdInt int userId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG,
+                    "synchronizePackagePermissionsAndAppOpsForUser(" + packageName + ", " + userId
+                            + ")");
+        }
+
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         final PackageInfo pkg = packageManagerInternal.getPackageInfo(packageName, 0,
@@ -172,7 +239,7 @@ public final class PermissionPolicyService extends SystemService {
             return;
         }
         final PermissionToOpSynchroniser synchroniser = new PermissionToOpSynchroniser(
-                getUserContext(context, UserHandle.of(userId)));
+                getUserContext(getContext(), UserHandle.of(userId)));
         synchroniser.addPackage(pkg.packageName);
         final String[] sharedPkgNames = packageManagerInternal.getPackagesForSharedUserId(
                 pkg.sharedUserId, userId);
@@ -191,12 +258,13 @@ public final class PermissionPolicyService extends SystemService {
     /**
      * Synchronize all packages
      */
-    private static void synchronizePermissionsAndAppOpsForUser(@NonNull Context context,
-            @UserIdInt int userId) {
+    private void synchronizePermissionsAndAppOpsForUser(@UserIdInt int userId) {
+        if (DEBUG) Slog.i(LOG_TAG, "synchronizePermissionsAndAppOpsForUser(" + userId + ")");
+
         final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
-                getUserContext(context, UserHandle.of(userId)));
+                getUserContext(getContext(), UserHandle.of(userId)));
         packageManagerInternal.forEachPackage((pkg) -> synchronizer.addPackage(pkg.packageName));
         synchronizer.syncPackages();
     }

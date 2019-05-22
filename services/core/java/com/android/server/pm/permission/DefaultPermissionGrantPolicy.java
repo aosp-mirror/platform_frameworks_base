@@ -218,18 +218,11 @@ public final class DefaultPermissionGrantPolicy {
     private final Object mLock = new Object();
     private final PackageManagerInternal mServiceInternal;
     private final PermissionManagerService mPermissionManager;
-    private final DefaultPermissionGrantedCallback mPermissionGrantedCallback;
 
     @GuardedBy("mLock")
     private SparseIntArray mDefaultPermissionsGrantedUsers = new SparseIntArray();
 
-    public interface DefaultPermissionGrantedCallback {
-        /** Callback when permissions have been granted */
-        void onDefaultRuntimePermissionsGranted(int userId);
-    }
-
     DefaultPermissionGrantPolicy(Context context, Looper looper,
-            @Nullable DefaultPermissionGrantedCallback callback,
             @NonNull PermissionManagerService permissionManager) {
         mContext = context;
         mHandler = new Handler(looper) {
@@ -244,7 +237,6 @@ public final class DefaultPermissionGrantPolicy {
                 }
             }
         };
-        mPermissionGrantedCallback = callback;
         mPermissionManager = permissionManager;
         mServiceInternal = LocalServices.getService(PackageManagerInternal.class);
     }
@@ -755,10 +747,6 @@ public final class DefaultPermissionGrantPolicy {
         if (!TextUtils.isEmpty(systemCaptionsServicePackageName)) {
             grantPermissionsToSystemPackage(systemCaptionsServicePackageName, userId,
                     MICROPHONE_PERMISSIONS);
-        }
-
-        if (mPermissionGrantedCallback != null) {
-            mPermissionGrantedCallback.onDefaultRuntimePermissionsGranted(userId);
         }
     }
 
