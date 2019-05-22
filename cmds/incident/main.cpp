@@ -21,6 +21,7 @@
 #include <android/os/BnIncidentReportStatusListener.h>
 #include <android/os/IIncidentManager.h>
 #include <android/os/IncidentReportArgs.h>
+#include <android/util/ProtoOutputStream.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <utils/Looper.h>
@@ -36,6 +37,9 @@ using namespace android;
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
+using android::util::FIELD_COUNT_SINGLE;
+using android::util::FIELD_TYPE_STRING;
+using android::util::ProtoOutputStream;
 
 // ================================================================================
 class StatusListener : public BnIncidentReportStatusListener {
@@ -208,6 +212,7 @@ usage(FILE* out)
     fprintf(out, "and one of these destinations:\n");
     fprintf(out, "  -b           (default) print the report to stdout (in proto format)\n");
     fprintf(out, "  -d           send the report into dropbox\n");
+    fprintf(out, "  -r REASON    human readable description of why the report is taken.\n");
     fprintf(out, "  -s PKG/CLS   send broadcast to the broadcast receiver.\n");
     fprintf(out, "\n");
     fprintf(out, "  SECTION     the field numbers of the incident report fields to include\n");
@@ -221,11 +226,12 @@ main(int argc, char** argv)
     IncidentReportArgs args;
     enum { DEST_UNSET, DEST_DROPBOX, DEST_STDOUT, DEST_BROADCAST } destination = DEST_UNSET;
     int privacyPolicy = PRIVACY_POLICY_AUTOMATIC;
+    string reason;
     string receiverArg;
 
     // Parse the args
     int opt;
-    while ((opt = getopt(argc, argv, "bhdlp:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "bhdlp:r:s:")) != -1) {
         switch (opt) {
             case 'h':
                 usage(stdout);
@@ -249,6 +255,13 @@ main(int argc, char** argv)
                 break;
             case 'p':
                 privacyPolicy = get_privacy_policy(optarg);
+                break;
+            case 'r':
+                if (reason.size() > 0) {
+                    usage(stderr);
+                    return 1;
+                }
+                reason = optarg;
                 break;
             case 's':
                 if (destination != DEST_UNSET) {
@@ -300,6 +313,14 @@ main(int argc, char** argv)
         }
     }
     args.setPrivacyPolicy(privacyPolicy);
+
+    if (reason.size() > 0) {
+        ProtoOutputStream proto;
+        proto.write(/* reason field id */ 2 | FIELD_TYPE_STRING | FIELD_COUNT_SINGLE, reason);
+        vector<uint8_t> header;
+        proto.serializeToVector(&header);
+        args.addHeader(header);
+    }
 
     // Start the thread pool.
     sp<ProcessState> ps(ProcessState::self());
