@@ -205,8 +205,9 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
 
     <application android:label="@string/app_label"
-                 android:defaultToDeviceProtectedStorage="true"
-                 android:directBootAware="true">
+                android:theme="@android:style/Theme.DeviceDefault.DayNight"
+                android:defaultToDeviceProtectedStorage="true"
+                android:directBootAware="true">
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.shell"
@@ -231,7 +232,6 @@
 
         <activity
             android:name=".BugreportWarningActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />
