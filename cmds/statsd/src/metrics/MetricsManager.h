@@ -141,7 +141,7 @@ public:
     void loadActiveConfig(const ActiveConfig& config, int64_t currentTimeNs);
 
     void writeActiveConfigToProtoOutputStream(
-            int64_t currentTimeNs, ProtoOutputStream* proto);
+            int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
 
 private:
     // For test only.
@@ -290,6 +290,7 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
     FRIEND_TEST(StatsLogProcessorTest,
             TestActivationOnBootMultipleActivationsDifferentActivationTypes);
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
 };
 
 }  // namespace statsd

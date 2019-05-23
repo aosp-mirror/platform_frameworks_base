@@ -98,8 +98,6 @@ java_defaults {
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
-    // The permission configuration *must* be included to ensure security of the device
-    required: ["NetworkPermissionConfig"],
 }
 
 // Non-updatable network stack running in the system server process for devices not using the module
@@ -110,6 +108,8 @@ android_app {
     manifest: "AndroidManifest_InProcess.xml",
     // InProcessNetworkStack is a replacement for NetworkStack
     overrides: ["NetworkStack"],
+    // The permission configuration *must* be included to ensure security of the device
+    required: ["PlatformNetworkPermissionConfig"],
 }
 
 // Updatable network stack packaged as an application
@@ -119,6 +119,8 @@ android_app {
     certificate: "networkstack",
     manifest: "AndroidManifest.xml",
     use_embedded_native_libs: true,
+    // The permission configuration *must* be included to ensure security of the device
+    required: ["NetworkPermissionConfig"],
 }
 
 genrule {

@@ -120,6 +120,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             @Override
             public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
                 switch (vol.type) {
+                    case VolumeInfo.TYPE_PUBLIC:
                     case VolumeInfo.TYPE_PRIVATE:
                     case VolumeInfo.TYPE_EMULATED:
                         if (newState == VolumeInfo.STATE_MOUNTED) {

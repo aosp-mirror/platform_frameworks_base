@@ -235,6 +235,10 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mPasswordSlotManager.cleanup();
     }
 
+    protected void flushHandlerTasks() {
+        mService.mHandler.runWithScissors(() -> { }, 0 /*now*/); // Flush runnables on handler
+    }
+
     protected void assertNotEquals(long expected, long actual) {
         assertTrue(expected != actual);
     }

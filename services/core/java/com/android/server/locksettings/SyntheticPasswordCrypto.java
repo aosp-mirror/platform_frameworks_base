@@ -30,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
@@ -43,6 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class SyntheticPasswordCrypto {
     private static final int PROFILE_KEY_IV_SIZE = 12;
+    private static final int DEFAULT_TAG_LENGTH_BITS = 128;
     private static final int AES_KEY_LENGTH = 32; // 256-bit AES key
     private static final byte[] APPLICATION_ID_PERSONALIZATION = "application-id".getBytes();
     // Time between the user credential is verified with GK and the decryption of synthetic password
@@ -60,13 +62,14 @@ public class SyntheticPasswordCrypto {
         byte[] ciphertext = Arrays.copyOfRange(blob, PROFILE_KEY_IV_SIZE, blob.length);
         Cipher cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
                 + KeyProperties.BLOCK_MODE_GCM + "/" + KeyProperties.ENCRYPTION_PADDING_NONE);
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
+        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(DEFAULT_TAG_LENGTH_BITS, iv));
         return cipher.doFinal(ciphertext);
     }
 
     private static byte[] encrypt(SecretKey key, byte[] blob)
             throws IOException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException,
+            InvalidParameterSpecException {
         if (blob == null) {
             return null;
         }
@@ -78,6 +81,11 @@ public class SyntheticPasswordCrypto {
         byte[] iv = cipher.getIV();
         if (iv.length != PROFILE_KEY_IV_SIZE) {
             throw new RuntimeException("Invalid iv length: " + iv.length);
+        }
+        final GCMParameterSpec spec = cipher.getParameters().getParameterSpec(
+                GCMParameterSpec.class);
+        if (spec.getTLen() != DEFAULT_TAG_LENGTH_BITS) {
+            throw new RuntimeException("Invalid tag length: " + spec.getTLen());
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         outputStream.write(iv);
@@ -92,7 +100,8 @@ public class SyntheticPasswordCrypto {
         try {
             return encrypt(key, message);
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
-                | IllegalBlockSizeException | BadPaddingException | IOException e) {
+                | IllegalBlockSizeException | BadPaddingException | IOException
+                | InvalidParameterSpecException e) {
             e.printStackTrace();
             return null;
         }
@@ -147,7 +156,7 @@ public class SyntheticPasswordCrypto {
     public static byte[] createBlob(String keyAlias, byte[] data, byte[] applicationId, long sid) {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
-            keyGenerator.init(new SecureRandom());
+            keyGenerator.init(AES_KEY_LENGTH * 8, new SecureRandom());
             SecretKey secretKey = keyGenerator.generateKey();
             KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
@@ -169,7 +178,8 @@ public class SyntheticPasswordCrypto {
         } catch (CertificateException | IOException | BadPaddingException
                 | IllegalBlockSizeException
                 | KeyStoreException | NoSuchPaddingException | NoSuchAlgorithmException
-                | InvalidKeyException e) {
+                | InvalidKeyException
+                | InvalidParameterSpecException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to encrypt blob", e);
         }
