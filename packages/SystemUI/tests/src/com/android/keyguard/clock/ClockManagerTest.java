@@ -20,12 +20,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.provider.DeviceConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -50,6 +52,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 // Need to run tests on main looper because LiveData operations such as setData, observe,
@@ -63,7 +67,7 @@ public final class ClockManagerTest extends SysuiTestCase {
     private static final int SECONDARY_USER_ID = 11;
     private static final Uri SETTINGS_URI = null;
 
-    private ClockManager mClockManager;
+    ClockManager mClockManager;
     private ContentObserver mContentObserver;
     private DockManagerFake mFakeDockManager;
     private MutableLiveData<Integer> mCurrentUser;
@@ -137,6 +141,33 @@ public final class ClockManagerTest extends SysuiTestCase {
         mContentObserver.onChange(false, SETTINGS_URI, MAIN_USER_ID);
         // THEN the plugin is the bubble clock face.
         assertThat(mClockManager.getCurrentClock()).isInstanceOf(BUBBLE_CLOCK_CLASS);
+    }
+
+    @Test
+    public void getCurrentClock_inBlackList() {
+        mClockManager = spy(mClockManager);
+        // GIVEN that settings is set to the bubble clock face
+        when(mMockSettingsWrapper.getLockScreenCustomClockFace(anyInt())).thenReturn(BUBBLE_CLOCK);
+        // WHEN settings change event is fired
+        mContentObserver.onChange(false, SETTINGS_URI, MAIN_USER_ID);
+        // GIVEN that bubble clock is in blacklist
+        when(mClockManager.getBlackListFromConfig()).thenReturn(BUBBLE_CLOCK);
+        // WHEN device config change of systemui is fired
+        mClockManager.onDeviceConfigPropertiesChanged(DeviceConfig.NAMESPACE_SYSTEMUI);
+        // THEN the result is null, indicated the current clock should be reset to the default one.
+        assertThat(mClockManager.getCurrentClock()).isNull();
+    }
+
+    @Test
+    public void getClockInfo_inBlackList() {
+        mClockManager = spy(mClockManager);
+        // GIVEN that bubble clock is in blacklist
+        when(mClockManager.getBlackListFromConfig()).thenReturn(BUBBLE_CLOCK);
+        // WHEN device config change of systemui is fired
+        mClockManager.onDeviceConfigPropertiesChanged(DeviceConfig.NAMESPACE_SYSTEMUI);
+        // THEN the ClockInfo should not contain bubble clock
+        List<ClockInfo> clocks = mClockManager.getClockInfos();
+        assertThat(clocks.stream().anyMatch(info -> BUBBLE_CLOCK.equals(info.getId()))).isFalse();
     }
 
     @Test
