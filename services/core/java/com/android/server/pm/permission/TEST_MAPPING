@@ -21,10 +21,24 @@
             "name": "CtsAppSecurityHostTestCases",
             "options": [
                 {
-                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
+                }
+            ]
+        },
+        {
+            "name": "CtsPermission2TestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
                 },
                 {
-                    "include-filter": "android.appsecurity.cts.AppSecurityTests#rebootWithDuplicatePermission"
+                    "include-filter": "android.permission.cts.RestrictedPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PrivappPermissionsTest"
                 }
             ]
         },
@@ -33,6 +47,16 @@
             "options": [
                 {
                     "include-filter": "android.cts.statsd.atom.UidAtomTests#testDangerousPermissionState"
+                }
+            ]
+        }
+    ],
+    "postsubmit": [
+        {
+            "name": "CtsAppSecurityHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
                 }
             ]
         }

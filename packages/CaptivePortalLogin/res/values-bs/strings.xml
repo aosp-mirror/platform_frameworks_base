@@ -18,7 +18,7 @@
     <string name="ssl_error_unknown" msgid="4405203446079465859">"Nepoznata greška potvrde."</string>
     <string name="ssl_security_warning_title" msgid="8768539813847504404">"Sigurnosno upozorenje"</string>
     <string name="ssl_error_view_certificate" msgid="5722652540168339333">"Prikaži potvrdu"</string>
-    <string name="ok" msgid="2817931639040794018">"UREDU"</string>
+    <string name="ok" msgid="2817931639040794018">"Uredu"</string>
     <string name="page_info_address" msgid="1261481517455692363">"Adresa:"</string>
     <string name="page_info" msgid="4416941086705172545">"Informacije o stranici"</string>
 </resources>

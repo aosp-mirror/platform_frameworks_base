@@ -7365,7 +7365,11 @@ message MetricsEvent {
     // OS: Q
     FIELD_EMERGENCY_DIALER_DISCONNECT_CAUSE = 1739;
 
-    // ---- Skipping ahead to avoid conflicts between master and release branches.
+    // OPEN: Settings > Display > Dark Theme
+    // CATEGORY: SETTINGS
+    // OS: Q
+    // Note: Only shows up on first time toggle
+    DIALOG_DARK_UI_INFO = 1740;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

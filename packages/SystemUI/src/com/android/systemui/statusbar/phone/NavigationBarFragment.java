@@ -329,8 +329,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         notifyNavigationBarScreenOn();
 
         mOverviewProxyService.addCallback(mOverviewProxyListener);
-        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NAV_BAR_HIDDEN,
-                !isNavBarWindowVisible(), mDisplayId);
+        updateSystemUiStateFlags(-1);
 
         // Currently there is no accelerometer sensor on non-default display.
         if (mIsOnDefaultDisplay) {
@@ -458,8 +457,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mNavigationBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
 
-            mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NAV_BAR_HIDDEN,
-                    !isNavBarWindowVisible(), mDisplayId);
+            updateSystemUiStateFlags(-1);
             mNavigationBarView.getRotateSuggestionButton()
                     .onNavigationBarWindowVisibilityChange(isNavBarWindowVisible());
         }
@@ -576,7 +574,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 | StatusBarManager.DISABLE_SEARCH);
         if (masked != mDisabledFlags1) {
             mDisabledFlags1 = masked;
-            if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state1);
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setDisabledFlags(state1);
+            }
             updateScreenPinningGestures();
         }
 
@@ -860,18 +860,30 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private void updateAccessibilityServicesState(AccessibilityManager accessibilityManager) {
         boolean[] feedbackEnabled = new boolean[1];
-        int flags = getA11yButtonState(feedbackEnabled);
+        int a11yFlags = getA11yButtonState(feedbackEnabled);
 
         mNavigationBarView.getRotateSuggestionButton()
                 .setAccessibilityFeedbackEnabled(feedbackEnabled[0]);
 
-        boolean clickable = (flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
-        boolean longClickable = (flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
+        boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
+        boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
         mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);
-        mOverviewProxyService.setSystemUiStateFlag(
-                SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable, mDisplayId);
-        mOverviewProxyService.setSystemUiStateFlag(
-                SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable, mDisplayId);
+
+        updateSystemUiStateFlags(a11yFlags);
+    }
+
+    public void updateSystemUiStateFlags(int a11yFlags) {
+        if (a11yFlags < 0) {
+            a11yFlags = getA11yButtonState(null);
+        }
+        boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
+        boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE,
+                clickable, mDisplayId);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE,
+                longClickable, mDisplayId);
+        mOverviewProxyService.setSystemUiStateFlag(SYSUI_STATE_NAV_BAR_HIDDEN,
+                !isNavBarWindowVisible(), mDisplayId);
     }
 
     /**
@@ -979,6 +991,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateScreenPinningGestures();
+
+        // Workaround for b/132825155, for secondary users, we currently don't receive configuration
+        // changes on overlay package change since SystemUI runs for the system user. In this case,
+        // trigger a new configuration change to ensure that the nav bar is updated in the same way.
+        int userId = ActivityManagerWrapper.getInstance().getCurrentUserId();
+        if (userId != UserHandle.USER_SYSTEM) {
+            mHandler.post(() -> {
+                FragmentHostManager fragmentHost = FragmentHostManager.get(mNavigationBarView);
+                fragmentHost.reloadFragments();
+            });
+        }
     }
 
     public void disableAnimationsDuringHide(long delay) {
