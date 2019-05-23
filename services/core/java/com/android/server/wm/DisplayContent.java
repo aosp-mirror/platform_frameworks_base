@@ -2636,16 +2636,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
                 && !mDividerControllerLocked.isImeHideRequested();
-        final boolean dockVisible = isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        final TaskStack dockedStack = getSplitScreenPrimaryStack();
+        final boolean dockVisible = dockedStack != null;
+        final Task topDockedTask = dockVisible ? dockedStack.getTopChild() : null;
         final TaskStack imeTargetStack = mWmService.getImeFocusStackLocked();
         final int imeDockSide = (dockVisible && imeTargetStack != null) ?
                 imeTargetStack.getDockSide() : DOCKED_INVALID;
         final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
         final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
-        final boolean dockMinimized = mDividerControllerLocked.isMinimizedDock();
         final int imeHeight = mDisplayFrames.getInputMethodWindowVisibleHeight();
         final boolean imeHeightChanged = imeVisible &&
                 imeHeight != mDividerControllerLocked.getImeHeightAdjustedFor();
+
+        // This includes a case where the docked stack is unminimizing and IME is visible for the
+        // bottom side stack. The condition prevents adjusting the override task bounds for IME to
+        // the minimized docked stack bounds.
+        final boolean dockMinimized = mDividerControllerLocked.isMinimizedDock()
+                || (topDockedTask != null && imeOnBottom && !dockedStack.isAdjustedForIme()
+                        && dockedStack.getBounds().height() < topDockedTask.getBounds().height());
 
         // The divider could be adjusted for IME position, or be thinner than usual,
         // or both. There are three possible cases:
