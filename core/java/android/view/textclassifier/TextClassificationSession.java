@@ -84,6 +84,7 @@ final class TextClassificationSession implements TextClassifier {
     @Override
     public void onTextClassifierEvent(TextClassifierEvent event) {
         try {
+            event.mHiddenTempSessionId = mSessionId;
             mDelegate.onTextClassifierEvent(event);
         } catch (Exception e) {
             // Avoid crashing for event reporting.
