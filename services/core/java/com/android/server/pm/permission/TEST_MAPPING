@@ -29,6 +29,23 @@
             ]
         },
         {
+            "name": "CtsPermission2TestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.RestrictedPermissionsTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PermissionMaxSdkVersionTest"
+                },
+                {
+                    "include-filter": "android.permission.cts.PrivappPermissionsTest"
+                }
+            ]
+        },
+        {
             "name": "CtsStatsdHostTestCases",
             "options": [
                 {

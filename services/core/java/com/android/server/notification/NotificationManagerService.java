@@ -310,7 +310,6 @@ public class NotificationManagerService extends SystemService {
     static final boolean ENABLE_BLOCKED_TOASTS = true;
 
     static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
-            Adjustment.KEY_IMPORTANCE,
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
             Adjustment.KEY_TEXT_REPLIES};
 
@@ -4826,6 +4825,7 @@ public class NotificationManagerService extends SystemService {
         // Does the app want to bubble & is able to bubble
         boolean canBubble = notification.getBubbleMetadata() != null
                 && mPreferencesHelper.areBubblesAllowed(pkg, userId)
+                && mPreferencesHelper.bubblesEnabled(r.sbn.getUser())
                 && r.getChannel().canBubble()
                 && !mActivityManager.isLowRamDevice();
 
@@ -7344,7 +7344,7 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_USER_SET = "user_set";
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments";
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "q_allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();

@@ -4227,7 +4227,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * completely transparent and 1 means completely opaque.
          */
         @ViewDebug.ExportedProperty
-        float mAlpha = 1f;
+        private float mAlpha = 1f;
 
         /**
          * The opacity of the view as manipulated by the Fade transition. This is a
@@ -13866,15 +13866,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
         // If the event should be handled by accessibility focus first.
-        if (event.isTargetAccessibilityFocus()) {
-            // We don't have focus or no virtual descendant has it, do not handle the event.
-            if (!isAccessibilityFocusedViewOrHost()) {
-                return false;
-            }
-            // We have focus and got the event, then use normal event dispatch.
-            event.setTargetAccessibilityFocus(false);
-        }
-
         boolean result = false;
 
         if (mInputEventConsistencyVerifier != null) {
@@ -16671,7 +16662,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
-    private void setAlphaInternal(float alpha) {
+    void setAlphaInternal(float alpha) {
         float oldAlpha = mTransformationInfo.mAlpha;
         mTransformationInfo.mAlpha = alpha;
         // Report visibility changes, which can affect children, to accessibility

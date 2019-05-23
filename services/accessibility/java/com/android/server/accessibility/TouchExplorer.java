@@ -46,8 +46,7 @@ import java.util.List;
  *   <li>3. Two close fingers moving in the same direction perform a drag.</li>
  *   <li>4. Multi-finger gestures are delivered to view hierarchy.</li>
  *   <li>5. Two fingers moving in different directions are considered a multi-finger gesture.</li>
- *   <li>7. Double tapping clicks on the on the last touch explored location if it was in
- *          a window that does not take focus, otherwise the click is within the accessibility
+ *   <li>6. Double tapping performs a click action on the accessibility
  *          focused rectangle.</li>
  *   <li>7. Tapping and holding for a while performs a long press in a similar fashion
  *          as the click above.</li>
@@ -68,10 +67,6 @@ class TouchExplorer extends BaseEventStreamTransformation
     private static final int STATE_DRAGGING = 0x00000002;
     private static final int STATE_DELEGATING = 0x00000004;
     private static final int STATE_GESTURE_DETECTING = 0x00000005;
-
-    private static final int CLICK_LOCATION_NONE = 0;
-    private static final int CLICK_LOCATION_ACCESSIBILITY_FOCUS = 1;
-    private static final int CLICK_LOCATION_LAST_TOUCH_EXPLORED = 2;
 
     // The maximum of the cosine between the vectors of two moving
     // pointers so they can be considered moving in the same direction.
@@ -156,8 +151,6 @@ class TouchExplorer extends BaseEventStreamTransformation
     // The long pressing pointer Y if coordinate remapping is needed.
     private int mLongPressingPointerDeltaY;
 
-    // The id of the last touch explored window.
-    private int mLastTouchedWindowId;
 
     // Whether touch exploration is in progress.
     private boolean mTouchExplorationInProgress;
@@ -335,23 +328,6 @@ class TouchExplorer extends BaseEventStreamTransformation
             mSendTouchInteractionEndDelayed.cancel();
             sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
         }
-
-        // If a new window opens or the accessibility focus moves we no longer
-        // want to click/long press on the last touch explored location.
-        switch (eventType) {
-            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-            case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
-                if (mInjectedPointerTracker.mLastInjectedHoverEventForClick != null) {
-                    mInjectedPointerTracker.mLastInjectedHoverEventForClick.recycle();
-                    mInjectedPointerTracker.mLastInjectedHoverEventForClick = null;
-                }
-                mLastTouchedWindowId = -1;
-            } break;
-            case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
-            case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT: {
-                mLastTouchedWindowId = event.getWindowId();
-            } break;
-        }
         super.onAccessibilityEvent(event);
     }
 
@@ -366,25 +342,12 @@ class TouchExplorer extends BaseEventStreamTransformation
         if (mReceivedPointerTracker.getLastReceivedEvent().getPointerCount() == 0) {
             return;
         }
-
-        final int pointerIndex = event.getActionIndex();
-        final int pointerId = event.getPointerId(pointerIndex);
-
-        Point clickLocation = mTempPoint;
-        final int result = computeClickLocation(clickLocation);
-
-        if (result == CLICK_LOCATION_NONE) {
-            return;
+        // Try to use the standard accessibility API to long click
+        if (!mAms.performActionOnAccessibilityFocusedItem(
+                AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)) {
+            Slog.e(LOG_TAG, "ACTION_LONG_CLICK failed.");
         }
 
-        mLongPressingPointerId = pointerId;
-        mLongPressingPointerDeltaX = (int) event.getX(pointerIndex) - clickLocation.x;
-        mLongPressingPointerDeltaY = (int) event.getY(pointerIndex) - clickLocation.y;
-
-        sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-
-        mCurrentState = STATE_DELEGATING;
-        sendDownForAllNotInjectedPointers(event, policyFlags);
     }
 
     @Override
@@ -407,38 +370,10 @@ class TouchExplorer extends BaseEventStreamTransformation
         sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
 
         // Try to use the standard accessibility API to click
-        if (mAms.performActionOnAccessibilityFocusedItem(
+        if (!mAms.performActionOnAccessibilityFocusedItem(
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
-            return true;
+            Slog.e(LOG_TAG, "ACTION_CLICK failed.");
         }
-        Slog.e(LOG_TAG, "ACTION_CLICK failed. Dispatching motion events to simulate click.");
-
-        final int pointerIndex = event.getActionIndex();
-        final int pointerId = event.getPointerId(pointerIndex);
-
-        Point clickLocation = mTempPoint;
-        final int result = computeClickLocation(clickLocation);
-        if (result == CLICK_LOCATION_NONE) {
-            // We can't send a click to no location, but the gesture was still
-            // consumed.
-            return true;
-        }
-
-        // Do the click.
-        PointerProperties[] properties = new PointerProperties[1];
-        properties[0] = new PointerProperties();
-        event.getPointerProperties(pointerIndex, properties[0]);
-        PointerCoords[] coords = new PointerCoords[1];
-        coords[0] = new PointerCoords();
-        coords[0].x = clickLocation.x;
-        coords[0].y = clickLocation.y;
-        MotionEvent click_event = MotionEvent.obtain(event.getDownTime(),
-                event.getEventTime(), MotionEvent.ACTION_DOWN, 1, properties,
-                coords, 0, 0, 1.0f, 1.0f, event.getDeviceId(), 0,
-                event.getSource(), event.getDisplayId(), event.getFlags());
-        final boolean targetAccessibilityFocus = (result == CLICK_LOCATION_ACCESSIBILITY_FOCUS);
-        sendActionDownAndUp(click_event, policyFlags, targetAccessibilityFocus);
-        click_event.recycle();
         return true;
     }
 
@@ -924,24 +859,6 @@ class TouchExplorer extends BaseEventStreamTransformation
     }
 
     /**
-     * Sends an up and down events.
-     *
-     * @param prototype The prototype from which to create the injected events.
-     * @param policyFlags The policy flags associated with the event.
-     * @param targetAccessibilityFocus Whether the event targets the accessibility focus.
-     */
-    private void sendActionDownAndUp(MotionEvent prototype, int policyFlags,
-            boolean targetAccessibilityFocus) {
-        // Tap with the pointer that last explored.
-        final int pointerId = prototype.getPointerId(prototype.getActionIndex());
-        final int pointerIdBits = (1 << pointerId);
-        prototype.setTargetAccessibilityFocus(targetAccessibilityFocus);
-        sendMotionEvent(prototype, MotionEvent.ACTION_DOWN, pointerIdBits, policyFlags);
-        prototype.setTargetAccessibilityFocus(targetAccessibilityFocus);
-        sendMotionEvent(prototype, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
-    }
-
-    /**
      * Sends an event.
      *
      * @param prototype The prototype from which to create the injected events.
@@ -1091,27 +1008,6 @@ class TouchExplorer extends BaseEventStreamTransformation
         return GestureUtils.isDraggingGesture(firstPtrDownX, firstPtrDownY, secondPtrDownX,
                 secondPtrDownY, firstPtrX, firstPtrY, secondPtrX, secondPtrY,
                 MAX_DRAGGING_ANGLE_COS);
-    }
-
-    private int computeClickLocation(Point outLocation) {
-        MotionEvent lastExploreEvent = mInjectedPointerTracker.getLastInjectedHoverEventForClick();
-        if (lastExploreEvent != null) {
-            final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
-            outLocation.x = (int) lastExploreEvent.getX(lastExplorePointerIndex);
-            outLocation.y = (int) lastExploreEvent.getY(lastExplorePointerIndex);
-            if (!mAms.accessibilityFocusOnlyInActiveWindow()
-                    || mLastTouchedWindowId == mAms.getActiveWindowId()) {
-                if (mAms.getAccessibilityFocusClickPointInScreen(outLocation)) {
-                    return CLICK_LOCATION_ACCESSIBILITY_FOCUS;
-                } else {
-                    return CLICK_LOCATION_LAST_TOUCH_EXPLORED;
-                }
-            }
-        }
-        if (mAms.getAccessibilityFocusClickPointInScreen(outLocation)) {
-            return CLICK_LOCATION_ACCESSIBILITY_FOCUS;
-        }
-        return CLICK_LOCATION_NONE;
     }
 
     /**
@@ -1341,7 +1237,6 @@ class TouchExplorer extends BaseEventStreamTransformation
                 ", mLongPressingPointerId: " + mLongPressingPointerId +
                 ", mLongPressingPointerDeltaX: " + mLongPressingPointerDeltaX +
                 ", mLongPressingPointerDeltaY: " + mLongPressingPointerDeltaY +
-                ", mLastTouchedWindowId: " + mLastTouchedWindowId +
                 ", mScaledMinPointerDistanceToUseMiddleLocation: "
                 + mScaledMinPointerDistanceToUseMiddleLocation +
                 ", mTempPoint: " + mTempPoint +
@@ -1360,9 +1255,6 @@ class TouchExplorer extends BaseEventStreamTransformation
 
         // The last injected hover event.
         private MotionEvent mLastInjectedHoverEvent;
-
-        // The last injected hover event used for performing clicks.
-        private MotionEvent mLastInjectedHoverEventForClick;
 
         /**
          * Processes an injected {@link MotionEvent} event.
@@ -1395,10 +1287,6 @@ class TouchExplorer extends BaseEventStreamTransformation
                         mLastInjectedHoverEvent.recycle();
                     }
                     mLastInjectedHoverEvent = MotionEvent.obtain(event);
-                    if (mLastInjectedHoverEventForClick != null) {
-                        mLastInjectedHoverEventForClick.recycle();
-                    }
-                    mLastInjectedHoverEventForClick = MotionEvent.obtain(event);
                 } break;
             }
             if (DEBUG) {
@@ -1455,10 +1343,6 @@ class TouchExplorer extends BaseEventStreamTransformation
         /**
          * @return The the last injected hover event.
          */
-        public MotionEvent getLastInjectedHoverEventForClick() {
-            return mLastInjectedHoverEventForClick;
-        }
-
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();

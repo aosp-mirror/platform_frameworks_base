@@ -1022,18 +1022,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Gets a point within the accessibility focused node where we can send down
-     * and up events to perform a click.
-     *
-     * @param outPoint The click point to populate.
-     * @return Whether accessibility a click point was found and set.
-     */
-    // TODO: (multi-display) Make sure this works for multiple displays.
-    boolean getAccessibilityFocusClickPointInScreen(Point outPoint) {
-        return getInteractionBridge().getAccessibilityFocusClickPointInScreenNotLocked(outPoint);
-    }
-
-    /**
      * Perform an accessibility action on the view that currently has accessibility focus.
      * Has no effect if no item has accessibility focus, if the item with accessibility
      * focus does not expose the specified action, or if the action fails.
@@ -1065,12 +1053,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return true;
         }
         return false;
-    }
-
-    boolean accessibilityFocusOnlyInActiveWindow() {
-        synchronized (mLock) {
-            return mWindowsForAccessibilityCallback == null;
-        }
     }
 
     int getActiveWindowId() {
@@ -1870,11 +1852,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = 0; i < boundServiceCount; i++) {
             AccessibilityServiceConnection boundService = boundServices.get(i);
             if (boundService.canRetrieveInteractiveWindowsLocked()) {
-                userState.mAccessibilityFocusOnlyInActiveWindow = false;
                 return;
             }
         }
-        userState.mAccessibilityFocusOnlyInActiveWindow = true;
     }
 
     private void updateWindowsForAccessibilityCallbackLocked(UserState userState) {
@@ -3081,43 +3061,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return focus.performAction(action.getId());
         }
 
-        public boolean getAccessibilityFocusClickPointInScreenNotLocked(Point outPoint) {
-            AccessibilityNodeInfo focus = getAccessibilityFocusNotLocked();
-            if (focus == null) {
-                return false;
-            }
-
-            synchronized (mLock) {
-                Rect boundsInScreen = mTempRect;
-                focus.getBoundsInScreen(boundsInScreen);
-
-                // Apply magnification if needed.
-                MagnificationSpec spec = getCompatibleMagnificationSpecLocked(focus.getWindowId());
-                if (spec != null && !spec.isNop()) {
-                    boundsInScreen.offset((int) -spec.offsetX, (int) -spec.offsetY);
-                    boundsInScreen.scale(1 / spec.scale);
-                }
-
-                // Clip to the window bounds.
-                Rect windowBounds = mTempRect1;
-                getWindowBounds(focus.getWindowId(), windowBounds);
-                if (!boundsInScreen.intersect(windowBounds)) {
-                    return false;
-                }
-
-                // Clip to the screen bounds.
-                Point screenSize = mTempPoint;
-                mDefaultDisplay.getRealSize(screenSize);
-                if (!boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y)) {
-                    return false;
-                }
-
-                outPoint.set(boundsInScreen.centerX(), boundsInScreen.centerY());
-            }
-
-            return true;
-        }
-
         private AccessibilityNodeInfo getAccessibilityFocusNotLocked() {
             final int focusedWindowId;
             synchronized (mLock) {
@@ -3578,8 +3521,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // the active window. Look at updateAccessibilityFocusBehaviorLocked
                 // for details.
                 if (oldActiveWindow != mSecurityPolicy.mActiveWindowId
-                        && mAccessibilityFocusedWindowId == oldActiveWindow
-                        && getCurrentUserStateLocked().mAccessibilityFocusOnlyInActiveWindow) {
+                        && mAccessibilityFocusedWindowId == oldActiveWindow) {
                     mMainHandler.sendMessage(obtainMessage(
                             AccessibilityManagerService::clearAccessibilityFocus,
                             AccessibilityManagerService.this, box(oldActiveWindow)));
@@ -4010,7 +3952,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public boolean mIsAutoclickEnabled;
         public boolean mIsPerformGesturesEnabled;
         public boolean mIsFilterKeyEventsEnabled;
-        public boolean mAccessibilityFocusOnlyInActiveWindow;
         public int mUserNonInteractiveUiTimeout;
         public int mUserInteractiveUiTimeout;
 

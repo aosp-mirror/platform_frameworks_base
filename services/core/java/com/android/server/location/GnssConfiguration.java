@@ -70,7 +70,6 @@ class GnssConfiguration {
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
     public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
-    public static final String CONFIG_ES_NOTIFY_INT = "ES_NOTIFY_INT";
 
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
@@ -197,14 +196,6 @@ class GnssConfiguration {
         }
 
         return proxyApps;
-    }
-
-    /**
-     * Returns the value of config parameter ES_NOTIFY_INT or {@code defaulEsNotify} if no
-     * value is provided or if there is an error parsing the configured value.
-     */
-    int getEsNotify(int defaulEsNotify) {
-        return getIntConfig(CONFIG_ES_NOTIFY_INT, defaulEsNotify);
     }
 
     /**

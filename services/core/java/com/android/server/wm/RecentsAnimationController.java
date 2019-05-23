@@ -56,6 +56,7 @@ import android.view.SurfaceControl.Transaction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
 
@@ -87,6 +88,7 @@ public class RecentsAnimationController implements DeathRecipient {
     public @interface ReorderMode {}
 
     private final WindowManagerService mService;
+    private final StatusBarManagerInternal mStatusBar;
     private IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
@@ -308,6 +310,7 @@ public class RecentsAnimationController implements DeathRecipient {
         mRunner = remoteAnimationRunner;
         mCallbacks = callbacks;
         mDisplayId = displayId;
+        mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
     }
 
     public void initialize(int targetActivityType, SparseBooleanArray recentTaskIds) {
@@ -381,6 +384,9 @@ public class RecentsAnimationController implements DeathRecipient {
                 mMinimizedHomeBounds);
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
+
+        // Notify that the animation has started
+        mStatusBar.onRecentsAnimationStateChanged(true /* running */);
     }
 
     @VisibleForTesting
@@ -594,6 +600,9 @@ public class RecentsAnimationController implements DeathRecipient {
                         .mAppTransition.notifyAppTransitionFinishedLocked(mTargetAppToken.token);
             }
         }
+
+        // Notify that the animation has ended
+        mStatusBar.onRecentsAnimationStateChanged(false /* running */);
     }
 
     void scheduleFailsafe() {

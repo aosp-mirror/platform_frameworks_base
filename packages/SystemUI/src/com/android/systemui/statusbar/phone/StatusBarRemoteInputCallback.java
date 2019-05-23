@@ -111,6 +111,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     }
 
     protected void onWorkChallengeChanged() {
+        mLockscreenUserManager.updatePublicMode();
         if (mPendingWorkRemoteInputView != null
                 && !mLockscreenUserManager.isAnyProfilePublicMode()) {
             // Expand notification panel and the notification row, then click on remote input view
