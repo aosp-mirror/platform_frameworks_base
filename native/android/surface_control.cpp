@@ -384,6 +384,9 @@ void ASurfaceTransaction_setGeometry(ASurfaceTransaction* aSurfaceTransaction,
     transaction->setCrop(surfaceControl, static_cast<const Rect&>(source));
     transaction->setFrame(surfaceControl, static_cast<const Rect&>(destination));
     transaction->setTransform(surfaceControl, transform);
+    bool transformToInverseDisplay = (NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY & transform) ==
+            NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
+    transaction->setTransformToDisplayInverse(surfaceControl, transformToInverseDisplay);
 }
 
 void ASurfaceTransaction_setBufferTransparency(ASurfaceTransaction* aSurfaceTransaction,
