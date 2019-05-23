@@ -14,5 +14,13 @@
         }
       ]
     }
+  ],
+  "imports": [
+    {
+      "path": "cts/tests/rollback"
+    },
+    {
+      "path": "cts/hostsidetests/rollback"
+    }
   ]
 }
