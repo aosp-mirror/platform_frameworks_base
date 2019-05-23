@@ -16,21 +16,17 @@
 
 package com.android.server.telecom;
 
+import android.app.role.RoleManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.database.ContentObserver;
-import android.net.Uri;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.telecom.DefaultDialerManager;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -221,19 +217,10 @@ public class TelecomLoaderService extends SystemService {
     private void registerDefaultAppNotifier() {
         final DefaultPermissionGrantPolicy permissionPolicy = getDefaultPermissionGrantPolicy();
         // Notify the package manager on default app changes
-        final Uri defaultDialerAppUri = Settings.Secure.getUriFor(
-                Settings.Secure.DIALER_DEFAULT_APPLICATION);
-        ContentObserver contentObserver = new ContentObserver(
-                new Handler(Looper.getMainLooper())) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri, int userId) {
-                if (defaultDialerAppUri.equals(uri)) {
-                    updateSimCallManagerPermissions(permissionPolicy, userId);
-                }
-            }
-        };
-        mContext.getContentResolver().registerContentObserver(defaultDialerAppUri,
-                false, contentObserver, UserHandle.USER_ALL);
+        final RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+        roleManager.addOnRoleHoldersChangedListenerAsUser(mContext.getMainExecutor(),
+                (roleName, user) -> updateSimCallManagerPermissions(permissionPolicy,
+                        user.getIdentifier()), UserHandle.ALL);
     }
 
 
