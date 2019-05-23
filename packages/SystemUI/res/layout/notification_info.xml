@@ -228,7 +228,7 @@ asked for it -->
                 android:focusable="true">
                 <ImageView
                     android:id="@+id/alert_icon"
-                    android:src="@drawable/ic_notification_interruptive"
+                    android:src="@drawable/ic_notifications_alert"
                     android:background="@android:color/transparent"
                     android:layout_gravity="center"
                     android:layout_width="wrap_content"
@@ -249,6 +249,7 @@ asked for it -->
                     android:text="@string/notification_alert_title"/>
                 <TextView
                     android:id="@+id/alert_summary"
+                    android:visibility="gone"
                     android:paddingTop="@dimen/notification_importance_button_padding"
                     android:text="@string/notification_channel_summary_default"
                     android:layout_width="match_parent"
@@ -271,7 +272,7 @@ asked for it -->
                 android:focusable="true">
                 <ImageView
                     android:id="@+id/silence_icon"
-                    android:src="@drawable/ic_notification_gentle"
+                    android:src="@drawable/ic_notifications_silence"
                     android:background="@android:color/transparent"
                     android:layout_gravity="center"
                     android:layout_width="wrap_content"
@@ -292,6 +293,7 @@ asked for it -->
                     android:text="@string/notification_silence_title"/>
                 <TextView
                     android:id="@+id/silence_summary"
+                    android:visibility="gone"
                     android:paddingTop="@dimen/notification_importance_button_padding"
                     android:text="@string/notification_channel_summary_default"
                     android:layout_width="match_parent"

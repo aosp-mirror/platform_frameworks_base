@@ -14,6 +14,9 @@
 
 package com.android.systemui.util;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.view.View;
 
 import com.android.systemui.SysUiServiceProvider;
@@ -87,4 +90,24 @@ public class Utils {
             return mDisabled;
         }
     }
+
+
+    /**
+     * Returns {@code true} iff the package {@code packageName} is a headless remote display
+     * provider, i.e, that the package holds the privileged {@code REMOTE_DISPLAY_PROVIDER}
+     * permission and that it doesn't host a launcher icon.
+     */
+    public static boolean isHeadlessRemoteDisplayProvider(PackageManager pm, String packageName) {
+        if (pm.checkPermission(Manifest.permission.REMOTE_DISPLAY_PROVIDER, packageName)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        homeIntent.setPackage(packageName);
+
+        return pm.queryIntentActivities(homeIntent, 0).isEmpty();
+    }
+
 }

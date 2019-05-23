@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"नेटवर्कका अलर्टहरू"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"नेटवर्क उपलब्ध छ"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN को स्थिति"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"यन्त्रको प्रशासन"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"तपाईंको IT प्रशासकबाट प्राप्त सतर्कताहरू"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"अलर्टहरू"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"खुद्रा बिक्री सम्बन्धी डेमो"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB जडान"</string>
@@ -565,7 +565,8 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"फोन अझै तल सार्नुहोस्।"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फोन बायाँतिर सार्नुहोस्।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फोन दायाँतिर सार्नुहोस्।"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"आफ्ना आँखा पूरै खोलेर स्क्रिनमा हेर्नुहोस्।"</string>
+    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
+    <skip />
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"तपाईंको अनुहार देखिएन। फोनमा हेर्नुहोस्।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"अत्यधिक हल्लियो। फोन स्थिर राख्नुहोस्।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
@@ -579,7 +580,8 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"अनुहार चिन्ने समय सकियो। फेरि प्रयास गर्नुहोस्‌।"</string>
+    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"अनुहारसम्बन्धी नयाँ डेटा भण्डारण गर्न सकिएन। पहिले कुनै पुरानो डेटा मेटाउनुहोस्।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"अनुहार पहिचान गर्ने सुविधा रद्द गरियो"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"प्रयोगकर्ताले अनुहार प्रमाणीकरण सेवा रद्द गर्नुभयो"</string>
@@ -648,6 +650,10 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"होल्डरलाई वाहक सेवाहरु बाँध्न अनुमति दिनुहोस्। सामान्य अनुप्रयोगहरूको लागि यो कहिल्यै आवश्यक पर्दैन।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"बाधा नपुर्याउँनुहोस् पहुँच गर्नुहोस्"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
+    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
+    <skip />
+    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
@@ -1904,9 +1910,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"अद्यावधिक उपलब्ध छ वा छैन भनी जाँच गर्नुहोस्"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"तपाईंलाई नयाँ सन्देश आएको छ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"हेर्नका लागि SMS अनुप्रयोग खोल्नुहोस्"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"केही कार्य सीमित हुनसक्छ"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"अनलक गर्न ट्याप गर्नुहोस्"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"प्रयोगकर्ताको डेटा लक गरियो"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"केही सुविधा राम्ररी नचल्न सक्छन्"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"कार्य प्रोफाइल लक भयो"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलक गर्न ट्याप गर्नुहोस्"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> मा जडान गरिएको छ"</string>

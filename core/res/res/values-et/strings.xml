@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Võrguteavitused"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Võrk on saadaval"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-i olek"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Seadme haldamine"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Teie IT-administraatori teatised"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Teatised"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Poedemo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-ühendus"</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Liigutage telefoni allapoole."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Liigutage telefoni vasakule."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Liigutage telefoni paremale."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Vaadake ekraani avatud silmadega."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Vaadake otse oma seadmesse."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Teie nägu ei ole näha. Vaadake telefoni poole."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Liiga palju liikumist. Hoidke telefoni paigal."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registreerige oma nägu uuesti."</string>
@@ -579,7 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Näotuvastuse taimeri ajalõpp. Proovige uuesti."</string>
+    <string name="face_error_timeout" msgid="3202585609451248103">"Proovige uuesti näo autentimist."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Uue näo andmeid ei saa salvestada. Kustutage enne vanad."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Näo autentimise toiming tühistati"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Kasutaja tühistas näo autentimise"</string>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lubab omanikul siduda operaatoriteenustega. Seda ei tohiks tavarakenduste puhul kunagi tarvis minna."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"juurdepääs funktsioonile Mitte segada"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Võimaldab rakendusel lugeda ja kirjutada funktsiooni Mitte segada seadistusi."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"vaatamisloa kasutamise alustamine"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Võimaldab omanikul rakenduse puhul alustada loa kasutamist. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Juhitakse ekraaniluku paroolide ja PIN-koodide pikkusi ning lubatud tähemärkide seadeid."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekraani avamiskatsete jälgimine"</string>
@@ -1898,9 +1900,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Otsi värskendust"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Teile on uusi sõnumeid"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Avage vaatamiseks SMS-rakendus"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Funktsioon võib olla piiratud"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Avamiseks puudutage"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Kasutaja andmed on lukustatud"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Mõned funkts. võivad olla piiratud"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Tööprofiil on lukustatud"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Puudut. tööprofiili avamiseks"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Ühendatud seadmega <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

@@ -1085,22 +1085,6 @@ final class ActivityRecord extends ConfigurationContainer {
         if (root == this) {
             task.setRootProcess(proc);
         }
-        // Override the process configuration to match the display where the first activity in
-        // the process was launched. This can help with compat issues on secondary displays when
-        // apps use Application to obtain configuration or metrics instead of Activity.
-        final ActivityDisplay display = getDisplay();
-        if (display == null || display.mDisplayId == INVALID_DISPLAY) {
-            return;
-        }
-        if (!proc.hasActivities() && display.mDisplayId != DEFAULT_DISPLAY) {
-            proc.registerDisplayConfigurationListenerLocked(display);
-        } else if (display.mDisplayId == DEFAULT_DISPLAY) {
-            // Once an activity is launched on default display - stop listening for other displays
-            // configurations to maintain compatibility with previous platform releases. E.g. when
-            // an activity is launched in a Bubble and then moved to default screen, we should match
-            // the global device config.
-            proc.unregisterDisplayConfigurationListenerLocked();
-        }
     }
 
     boolean hasProcess() {
@@ -3249,7 +3233,7 @@ final class ActivityRecord extends ConfigurationContainer {
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
 
-        setLastReportedConfiguration(getProcessGlobalConfiguration(), newMergedOverrideConfig);
+        setLastReportedConfiguration(mAtmService.getGlobalConfiguration(), newMergedOverrideConfig);
 
         if (mState == INITIALIZING) {
             // No need to relaunch or schedule new config for activity that hasn't been launched
@@ -3356,14 +3340,6 @@ final class ActivityRecord extends ConfigurationContainer {
         stopFreezingScreenLocked(false);
 
         return true;
-    }
-
-    /** Get process configuration, or global config if the process is not set. */
-    private Configuration getProcessGlobalConfiguration() {
-        if (app != null) {
-            return app.getConfiguration();
-        }
-        return mAtmService.getGlobalConfiguration();
     }
 
     /**
@@ -3473,7 +3449,7 @@ final class ActivityRecord extends ConfigurationContainer {
             mStackSupervisor.activityRelaunchingLocked(this);
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
                     pendingNewIntents, configChangeFlags,
-                    new MergedConfiguration(getProcessGlobalConfiguration(),
+                    new MergedConfiguration(mAtmService.getGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
