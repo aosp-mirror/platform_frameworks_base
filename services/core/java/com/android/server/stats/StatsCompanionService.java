@@ -489,7 +489,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 // Add in all the apps for every user/profile.
                 for (UserInfo profile : users) {
                     List<PackageInfo> pi =
-                            pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES,
+                            pm.getInstalledPackagesAsUser(
+                                    PackageManager.MATCH_KNOWN_PACKAGES | PackageManager.MATCH_APEX,
                                     profile.id);
                     for (int j = 0; j < pi.size(); j++) {
                         if (pi.get(j).applicationInfo != null) {
@@ -2507,7 +2508,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         @Override
         public void onBootPhase(int phase) {
             super.onBootPhase(phase);
-            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (phase == PHASE_BOOT_COMPLETED) {
                 mStatsCompanionService.systemReady();
             }
         }
