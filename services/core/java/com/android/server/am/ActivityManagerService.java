@@ -4916,7 +4916,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         AutofillManagerInternal.class);
                 if (afm != null) {
                     autofillOptions = afm.getAutofillOptions(
-                            app.info.packageName, app.info.versionCode, app.userId);
+                            app.info.packageName, app.info.longVersionCode, app.userId);
                 }
             }
             ContentCaptureOptions contentCaptureOptions = null;
@@ -6361,8 +6361,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // to run in multiple processes, because this is actually
                     // part of the framework so doesn't make sense to track as a
                     // separate apk in the process.
-                    app.addPackage(cpi.applicationInfo.packageName, cpi.applicationInfo.versionCode,
-                            mProcessStats);
+                    app.addPackage(cpi.applicationInfo.packageName,
+                            cpi.applicationInfo.longVersionCode, mProcessStats);
                 }
                 notifyPackageUse(cpi.applicationInfo.packageName,
                                  PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER);
@@ -14998,7 +14998,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ApplicationInfo ai = AppGlobals.getPackageManager().
                                     getApplicationInfo(ssp, STOCK_PM_FLAGS, 0);
                             mBatteryStatsService.notePackageInstalled(ssp,
-                                    ai != null ? ai.versionCode : 0);
+                                    ai != null ? ai.longVersionCode : 0);
                         } catch (RemoteException e) {
                         }
                     }

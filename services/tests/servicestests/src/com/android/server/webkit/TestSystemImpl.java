@@ -166,7 +166,7 @@ public class TestSystemImpl implements SystemInterface {
 
         pi = userPackages.get(PRIMARY_USER_ID);
         if (pi != null && pi.applicationInfo.isSystemApp()) {
-            return pi.applicationInfo.versionCode;
+            return pi.applicationInfo.longVersionCode;
         }
         throw new NameNotFoundException();
     }

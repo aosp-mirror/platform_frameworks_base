@@ -1918,7 +1918,7 @@ public final class ProcessList {
                 // come up (we have a pid but not yet its thread), so keep it.
                 if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "App already running: " + app);
                 // If this is a new package in the process, add the package to the list
-                app.addPackage(info.packageName, info.versionCode, mService.mProcessStats);
+                app.addPackage(info.packageName, info.longVersionCode, mService.mProcessStats);
                 checkSlow(startTime, "startProcess: done, added package to proc");
                 return app;
             }
@@ -1946,7 +1946,7 @@ public final class ProcessList {
             checkSlow(startTime, "startProcess: done creating new process record");
         } else {
             // If this is a new package in the process, add the package to the list
-            app.addPackage(info.packageName, info.versionCode, mService.mProcessStats);
+            app.addPackage(info.packageName, info.longVersionCode, mService.mProcessStats);
             checkSlow(startTime, "startProcess: added package to existing proc");
         }
 
