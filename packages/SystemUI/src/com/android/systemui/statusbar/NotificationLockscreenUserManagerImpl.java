@@ -513,14 +513,11 @@ public class NotificationLockscreenUserManagerImpl implements
             boolean isProfilePublic = devicePublic;
             boolean needsSeparateChallenge = mLockPatternUtils.isSeparateProfileChallengeEnabled(
                     userId);
-            if (!devicePublic && userId != getCurrentUserId()) {
-                // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
-                // due to a race condition where this code could be called before
-                // TrustManagerService updates its internal records, resulting in an incorrect
-                // state being cached in mLockscreenPublicMode. (b/35951989)
-                if (needsSeparateChallenge && isSecure(userId)) {
-                    isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
-                }
+            if (!devicePublic && userId != getCurrentUserId()
+                    && needsSeparateChallenge && isSecure(userId)) {
+                // Keyguard.isDeviceLocked is updated asynchronously, assume that all profiles
+                // with separate challenge are locked when keyguard is visible to avoid race.
+                isProfilePublic = showingKeyguard || mKeyguardManager.isDeviceLocked(userId);
             }
             setLockscreenPublicMode(isProfilePublic, userId);
             mUsersWithSeperateWorkChallenge.put(userId, needsSeparateChallenge);
