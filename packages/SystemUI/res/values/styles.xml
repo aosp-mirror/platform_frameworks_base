@@ -312,11 +312,12 @@
         <item name="*android:errorColor">?android:attr/colorError</item>
     </style>
 
-    <style name="qs_theme" parent="@style/Theme.SystemUI">
+    <style name="qs_theme" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
         <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:windowIsFloating">true</item>
+        <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
     </style>
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
