@@ -17071,6 +17071,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         cleanUpAppIdCreation(result);
                     }
                 }
+                // TODO(patb): create a more descriptive reason than unknown in future release
+                // mark all non-failure installs as UNKNOWN so we do not treat them as success
+                for (InstallRequest request : requests) {
+                    if (request.installResult.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                        request.installResult.returnCode = PackageManager.INSTALL_UNKNOWN;
+                    }
+                }
             }
             for (PrepareResult result : prepareResults.values()) {
                 if (result.freezer != null) {
