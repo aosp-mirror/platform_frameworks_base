@@ -460,13 +460,6 @@ interface ITelephony {
     void sendDialerSpecialCode(String callingPackageName, String inputCode);
 
     /**
-     * Returns the network type for data transmission
-     * Legacy call, permission-free
-     */
-    @UnsupportedAppUsage
-    int getNetworkType();
-
-    /**
      * Returns the network type of a subId.
      * @param subId user preferred subId.
      * @param callingPackage package making the call.

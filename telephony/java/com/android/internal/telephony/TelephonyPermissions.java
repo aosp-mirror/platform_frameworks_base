@@ -102,6 +102,16 @@ public final class TelephonyPermissions {
                 callingPackage, message);
     }
 
+    /** Identical to checkCallingOrSelfReadPhoneState but never throws SecurityException */
+    public static boolean checkCallingOrSelfReadPhoneStateNoThrow(
+            Context context, int subId, String callingPackage, String message) {
+        try {
+            return checkCallingOrSelfReadPhoneState(context, subId, callingPackage, message);
+        } catch (SecurityException se) {
+            return false;
+        }
+    }
+
     /**
      * Check whether the app with the given pid/uid can read phone state.
      *
