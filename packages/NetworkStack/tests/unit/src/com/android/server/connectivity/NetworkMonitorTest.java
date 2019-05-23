@@ -297,6 +297,7 @@ public class NetworkMonitorTest {
         setOtherFallbackUrls(TEST_OTHER_FALLBACK_URL);
         setFallbackSpecs(null); // Test with no fallback spec by default
         when(mRandom.nextInt()).thenReturn(0);
+
         // DNS probe timeout should not be defined more than half of HANDLER_TIMEOUT_MS. Otherwise,
         // it will fail the test because of timeout expired for querying AAAA and A sequentially.
         when(mResources.getInteger(eq(R.integer.config_captive_portal_dns_probe_timeout)))
