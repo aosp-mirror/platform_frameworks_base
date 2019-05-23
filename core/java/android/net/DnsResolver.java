@@ -16,16 +16,17 @@
 
 package android.net;
 
+import static android.net.NetworkUtils.getDnsNetId;
 import static android.net.NetworkUtils.resNetworkCancel;
 import static android.net.NetworkUtils.resNetworkQuery;
 import static android.net.NetworkUtils.resNetworkResult;
 import static android.net.NetworkUtils.resNetworkSend;
+import static android.net.util.DnsUtils.haveIpv4;
+import static android.net.util.DnsUtils.haveIpv6;
+import static android.net.util.DnsUtils.rfc6724Sort;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
-import static android.system.OsConstants.AF_INET;
-import static android.system.OsConstants.AF_INET6;
-import static android.system.OsConstants.IPPROTO_UDP;
-import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.ENONET;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -34,18 +35,12 @@ import android.annotation.Nullable;
 import android.os.CancellationSignal;
 import android.os.Looper;
 import android.system.ErrnoException;
-import android.system.Os;
 import android.util.Log;
 
-import libcore.io.IoUtils;
-
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -196,8 +191,8 @@ public final class DnsResolver {
         final Object lock = new Object();
         final FileDescriptor queryfd;
         try {
-            queryfd = resNetworkSend((network != null
-                ? network.getNetIdForResolv() : NETID_UNSET), query, query.length, flags);
+            queryfd = resNetworkSend((network != null)
+                    ? network.getNetIdForResolv() : NETID_UNSET, query, query.length, flags);
         } catch (ErrnoException e) {
             executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
@@ -237,8 +232,8 @@ public final class DnsResolver {
         final Object lock = new Object();
         final FileDescriptor queryfd;
         try {
-            queryfd = resNetworkQuery((network != null
-                    ? network.getNetIdForResolv() : NETID_UNSET), domain, nsClass, nsType, flags);
+            queryfd = resNetworkQuery((network != null)
+                    ? network.getNetIdForResolv() : NETID_UNSET, domain, nsClass, nsType, flags);
         } catch (ErrnoException e) {
             executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
@@ -252,14 +247,16 @@ public final class DnsResolver {
 
     private class InetAddressAnswerAccumulator implements Callback<byte[]> {
         private final List<InetAddress> mAllAnswers;
+        private final Network mNetwork;
         private int mRcode;
         private DnsException mDnsException;
         private final Callback<? super List<InetAddress>> mUserCallback;
         private final int mTargetAnswerCount;
         private int mReceivedAnswerCount = 0;
 
-        InetAddressAnswerAccumulator(int size,
+        InetAddressAnswerAccumulator(@NonNull Network network, int size,
                 @NonNull Callback<? super List<InetAddress>> callback) {
+            mNetwork = network;
             mTargetAnswerCount = size;
             mAllAnswers = new ArrayList<>();
             mUserCallback = callback;
@@ -280,8 +277,7 @@ public final class DnsResolver {
         private void maybeReportAnswer() {
             if (++mReceivedAnswerCount != mTargetAnswerCount) return;
             if (mAllAnswers.isEmpty() && maybeReportError()) return;
-            // TODO: Do RFC6724 sort.
-            mUserCallback.onAnswer(mAllAnswers, mRcode);
+            mUserCallback.onAnswer(rfc6724Sort(mNetwork, mAllAnswers), mRcode);
         }
 
         @Override
@@ -308,7 +304,7 @@ public final class DnsResolver {
 
     /**
      * Send a DNS query with the specified name on a network with both IPv4 and IPv6,
-     * get back a set of InetAddresses asynchronously.
+     * get back a set of InetAddresses with rfc6724 sorting style asynchronously.
      *
      * This method will examine the connection ability on given network, and query IPv4
      * and IPv6 if connection is available.
@@ -335,8 +331,23 @@ public final class DnsResolver {
             return;
         }
         final Object lock = new Object();
-        final boolean queryIpv6 = haveIpv6(network);
-        final boolean queryIpv4 = haveIpv4(network);
+        final Network queryNetwork;
+        try {
+            queryNetwork = (network != null) ? network : new Network(getDnsNetId());
+        } catch (ErrnoException e) {
+            executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
+            return;
+        }
+        final boolean queryIpv6 = haveIpv6(queryNetwork);
+        final boolean queryIpv4 = haveIpv4(queryNetwork);
+
+        // This can only happen if queryIpv4 and queryIpv6 are both false.
+        // This almost certainly means that queryNetwork does not exist or no longer exists.
+        if (!queryIpv6 && !queryIpv4) {
+            executor.execute(() -> callback.onError(
+                    new DnsException(ERROR_SYSTEM, new ErrnoException("resNetworkQuery", ENONET))));
+            return;
+        }
 
         final FileDescriptor v4fd;
         final FileDescriptor v6fd;
@@ -345,9 +356,8 @@ public final class DnsResolver {
 
         if (queryIpv6) {
             try {
-                v6fd = resNetworkQuery((network != null
-                        ? network.getNetIdForResolv() : NETID_UNSET),
-                        domain, CLASS_IN, TYPE_AAAA, flags);
+                v6fd = resNetworkQuery(queryNetwork.getNetIdForResolv(), domain, CLASS_IN,
+                        TYPE_AAAA, flags);
             } catch (ErrnoException e) {
                 executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
                 return;
@@ -355,7 +365,6 @@ public final class DnsResolver {
             queryCount++;
         } else v6fd = null;
 
-        // TODO: Use device flag to control the sleep time.
         // Avoiding gateways drop packets if queries are sent too close together
         try {
             Thread.sleep(SLEEP_TIME_MS);
@@ -365,9 +374,8 @@ public final class DnsResolver {
 
         if (queryIpv4) {
             try {
-                v4fd = resNetworkQuery((network != null
-                        ? network.getNetIdForResolv() : NETID_UNSET),
-                        domain, CLASS_IN, TYPE_A, flags);
+                v4fd = resNetworkQuery(queryNetwork.getNetIdForResolv(), domain, CLASS_IN, TYPE_A,
+                        flags);
             } catch (ErrnoException e) {
                 if (queryIpv6) resNetworkCancel(v6fd);  // Closes fd, marks it invalid.
                 executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
@@ -377,7 +385,7 @@ public final class DnsResolver {
         } else v4fd = null;
 
         final InetAddressAnswerAccumulator accumulator =
-                new InetAddressAnswerAccumulator(queryCount, callback);
+                new InetAddressAnswerAccumulator(queryNetwork, queryCount, callback);
 
         synchronized (lock)  {
             if (queryIpv6) {
@@ -398,7 +406,7 @@ public final class DnsResolver {
 
     /**
      * Send a DNS query with the specified name and query type, get back a set of
-     * InetAddresses asynchronously.
+     * InetAddresses with rfc6724 sorting style asynchronously.
      *
      * The answer will be provided asynchronously through the provided {@link Callback}.
      *
@@ -423,15 +431,17 @@ public final class DnsResolver {
         }
         final Object lock = new Object();
         final FileDescriptor queryfd;
+        final Network queryNetwork;
         try {
-            queryfd = resNetworkQuery((network != null
-                    ? network.getNetIdForResolv() : NETID_UNSET), domain, CLASS_IN, nsType, flags);
+            queryNetwork = (network != null) ? network : new Network(getDnsNetId());
+            queryfd = resNetworkQuery(queryNetwork.getNetIdForResolv(), domain, CLASS_IN, nsType,
+                    flags);
         } catch (ErrnoException e) {
             executor.execute(() -> callback.onError(new DnsException(ERROR_SYSTEM, e)));
             return;
         }
         final InetAddressAnswerAccumulator accumulator =
-                new InetAddressAnswerAccumulator(1, callback);
+                new InetAddressAnswerAccumulator(queryNetwork, 1, callback);
         synchronized (lock)  {
             registerFDListener(executor, queryfd, accumulator, cancellationSignal, lock);
             if (cancellationSignal == null) return;
@@ -498,38 +508,6 @@ public final class DnsResolver {
                 cancelQuery(queryfd);
             }
         });
-    }
-
-    // These two functions match the behaviour of have_ipv4 and have_ipv6 in the native resolver.
-    private boolean haveIpv4(@Nullable Network network) {
-        final SocketAddress addrIpv4 =
-                new InetSocketAddress(InetAddresses.parseNumericAddress("8.8.8.8"), 0);
-        return checkConnectivity(network, AF_INET, addrIpv4);
-    }
-
-    private boolean haveIpv6(@Nullable Network network) {
-        final SocketAddress addrIpv6 =
-                new InetSocketAddress(InetAddresses.parseNumericAddress("2000::"), 0);
-        return checkConnectivity(network, AF_INET6, addrIpv6);
-    }
-
-    private boolean checkConnectivity(@Nullable Network network,
-            int domain, @NonNull SocketAddress addr) {
-        final FileDescriptor socket;
-        try {
-            socket = Os.socket(domain, SOCK_DGRAM, IPPROTO_UDP);
-        } catch (ErrnoException e) {
-            return false;
-        }
-        try {
-            if (network != null) network.bindSocket(socket);
-            Os.connect(socket, addr);
-        } catch (IOException | ErrnoException e) {
-            return false;
-        } finally {
-            IoUtils.closeQuietly(socket);
-        }
-        return true;
     }
 
     private static class DnsAddressAnswer extends DnsPacket {
