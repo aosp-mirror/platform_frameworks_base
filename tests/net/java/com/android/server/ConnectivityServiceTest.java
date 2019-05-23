@@ -3816,11 +3816,20 @@ public class ConnectivityServiceTest {
         networkCallback.assertNoCallback();
     }
 
+    @Test
+    public void testUnfulfillableNetworkRequest() throws Exception {
+        runUnfulfillableNetworkRequest(false);
+    }
+
+    @Test
+    public void testUnfulfillableNetworkRequestAfterUnregister() throws Exception {
+        runUnfulfillableNetworkRequest(true);
+    }
+
     /**
      * Validate the callback flow for a factory releasing a request as unfulfillable.
      */
-    @Test
-    public void testUnfulfillableNetworkRequest() throws Exception {
+    private void runUnfulfillableNetworkRequest(boolean preUnregister) throws Exception {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
@@ -3855,14 +3864,25 @@ public class ConnectivityServiceTest {
             }
         }
 
-        // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
         testFactory.expectRemoveRequests(1);
-        testFactory.triggerUnfulfillable(requests.get(newRequestId));
-        networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
-        testFactory.waitForRequests();
+        if (preUnregister) {
+            mCm.unregisterNetworkCallback(networkCallback);
 
-        // unregister network callback - a no-op, but should not fail
-        mCm.unregisterNetworkCallback(networkCallback);
+            // Simulate the factory releasing the request as unfulfillable: no-op since
+            // the callback has already been unregistered (but a test that no exceptions are
+            // thrown).
+            testFactory.triggerUnfulfillable(requests.get(newRequestId));
+        } else {
+            // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
+            testFactory.triggerUnfulfillable(requests.get(newRequestId));
+
+            networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
+            testFactory.waitForRequests();
+
+            // unregister network callback - a no-op (since already freed by the
+            // on-unavailable), but should not fail or throw exceptions.
+            mCm.unregisterNetworkCallback(networkCallback);
+        }
 
         testFactory.unregister();
         handlerThread.quit();
