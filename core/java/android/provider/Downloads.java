@@ -849,6 +849,8 @@ public final class Downloads {
     public static final String CALL_MEDIASTORE_DOWNLOADS_DELETED = "mediastore_downloads_deleted";
     /** @hide */
     public static final String CALL_CREATE_EXTERNAL_PUBLIC_DIR = "create_external_public_dir";
+    /** @hide */
+    public static final String CALL_REVOKE_MEDIASTORE_URI_PERMS = "revoke_mediastore_uri_perms";
 
     /** @hide */
     public static final String EXTRA_IDS = "ids";

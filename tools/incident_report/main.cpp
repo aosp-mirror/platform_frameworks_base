@@ -292,6 +292,7 @@ usage(FILE* out)
     fprintf(out, "Take an incident report over adb (which must be in the PATH).\n");
     fprintf(out, "  -b          output the incident report raw protobuf format\n");
     fprintf(out, "  -o OUTPUT   the output file. OUTPUT may be '-' or omitted to use stdout\n");
+    fprintf(out, "  -r REASON   human readable description of why the report is taken.\n");
     fprintf(out, "  -s SERIAL   sent to adb to choose which device, instead of $ANDROID_SERIAL\n");
     fprintf(out, "  -t          output the incident report in pretty-printed text format\n");
     fprintf(out, "\n");
@@ -307,13 +308,14 @@ main(int argc, char** argv)
     enum { OUTPUT_TEXT, OUTPUT_PROTO } outputFormat = OUTPUT_TEXT;
     const char* inFilename = NULL;
     const char* outFilename = NULL;
+    const char* reason = NULL;
     const char* adbSerial = NULL;
     pid_t childPid = -1;
     vector<string> sections;
     const char* privacy = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "bhi:o:s:twp:")) != -1) {
+    while ((opt = getopt(argc, argv, "bhi:o:r:s:twp:")) != -1) {
         switch (opt) {
             case 'b':
                 outputFormat = OUTPUT_PROTO;
@@ -323,6 +325,9 @@ main(int argc, char** argv)
                 break;
             case 'o':
                 outFilename = optarg;
+                break;
+            case 'r':
+                reason = optarg;
                 break;
             case 's':
                 adbSerial = optarg;
@@ -376,7 +381,7 @@ main(int argc, char** argv)
             dup2(pfd[1], STDOUT_FILENO);
             close(pfd[0]);
             close(pfd[1]);
-            char const** args = (char const**)malloc(sizeof(char*) * (8 + sections.size()));
+            char const** args = (char const**)malloc(sizeof(char*) * (10 + sections.size()));
             int argpos = 0;
             args[argpos++] = "adb";
             if (adbSerial != NULL) {
@@ -388,6 +393,10 @@ main(int argc, char** argv)
             if (privacy != NULL) {
                 args[argpos++] = "-p";
                 args[argpos++] = privacy;
+            }
+            if (reason != NULL) {
+                args[argpos++] = "-r";
+                args[argpos++] = reason;
             }
             for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
                 args[argpos++] = it->c_str();
