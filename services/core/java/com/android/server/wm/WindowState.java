@@ -2092,6 +2092,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
+        final TaskStack stack = getStack();
+        if (stack != null && stack.shouldIgnoreInput()) {
+            // Ignore when the stack shouldn't receive input event.
+            // (i.e. the minimized stack in split screen mode.)
+            return false;
+        }
+
         final int fl = mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM);
         final int type = mAttrs.type;
 
