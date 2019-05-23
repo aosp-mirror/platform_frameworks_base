@@ -376,7 +376,6 @@ public final class TextClassifierImpl implements TextClassifier {
     /** @inheritDoc */
     @Override
     public void onSelectionEvent(SelectionEvent event) {
-        Preconditions.checkNotNull(event);
         mSessionLogger.writeEvent(event);
     }
 
@@ -386,7 +385,12 @@ public final class TextClassifierImpl implements TextClassifier {
             Log.d(DEFAULT_LOG_TAG, "onTextClassifierEvent() called with: event = [" + event + "]");
         }
         try {
-            mTextClassifierEventTronLogger.writeEvent(event);
+            final SelectionEvent selEvent = event.toSelectionEvent();
+            if (selEvent != null) {
+                mSessionLogger.writeEvent(selEvent);
+            } else {
+                mTextClassifierEventTronLogger.writeEvent(event);
+            }
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error writing event", e);
         }
