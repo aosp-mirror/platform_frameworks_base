@@ -212,7 +212,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
             return;
         }
         mMobileDrawable.setTintList(
-                ColorStateList.valueOf(mDualToneHandler.getFillColor(darkIntensity)));
+                ColorStateList.valueOf(mDualToneHandler.getSingleColor(darkIntensity)));
         ColorStateList color = ColorStateList.valueOf(getTint(area, this, tint));
         mIn.setImageTintList(color);
         mOut.setImageTintList(color);
@@ -238,7 +238,7 @@ public class StatusBarMobileView extends FrameLayout implements DarkReceiver,
         // We want the ability to change the theme from the one set by SignalDrawable in certain
         // surfaces. In this way, we can pass a theme to the view.
         mMobileDrawable.setTintList(
-                ColorStateList.valueOf(mDualToneHandler.getFillColor(intensity)));
+                ColorStateList.valueOf(mDualToneHandler.getSingleColor(intensity)));
         mIn.setImageTintList(list);
         mOut.setImageTintList(list);
         mMobileType.setImageTintList(list);
