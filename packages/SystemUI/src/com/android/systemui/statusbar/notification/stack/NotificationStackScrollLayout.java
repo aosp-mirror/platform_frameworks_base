@@ -804,7 +804,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             }
             canvas.drawText(Integer.toString(getMaxNegativeScrollAmount()), getWidth() - 100,
-                    getIntrinsicPadding() + 30, mDebugPaint);
+                    getTopPadding() + 30, mDebugPaint);
             canvas.drawText(Integer.toString(getMaxPositiveScrollAmount()), getWidth() - 100,
                     getHeight() - 30, mDebugPaint);
         }
@@ -2400,7 +2400,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         mIntrinsicContentHeight = height;
 
-        mContentHeight = height + mTopPadding + mBottomMargin;
+        // The topPadding can be bigger than the regular padding when qs is expanded, in that
+        // state the maxPanelHeight and the contentHeight should be bigger
+        mContentHeight = height + Math.max(mIntrinsicPadding, mTopPadding) + mBottomMargin;
         updateScrollability();
         clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
@@ -2785,12 +2787,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      *
      * @param qsHeight               the top padding imposed by the quick settings panel
      * @param animate                whether to animate the change
-     * @param ignoreIntrinsicPadding if true, {@link #getIntrinsicPadding()} is ignored and
-     *                               {@code qsHeight} is the final top padding
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public void updateTopPadding(float qsHeight, boolean animate,
-            boolean ignoreIntrinsicPadding) {
+    public void updateTopPadding(float qsHeight, boolean animate) {
         int topPadding = (int) qsHeight;
         int minStackHeight = getLayoutMinHeight();
         if (topPadding + minStackHeight > getHeight()) {
@@ -2798,8 +2797,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         } else {
             mTopPaddingOverflow = 0;
         }
-        setTopPadding(ignoreIntrinsicPadding ? topPadding : clampPadding(topPadding),
-                animate);
+        setTopPadding(topPadding, animate);
         setExpandedHeight(mExpandedHeight);
     }
 
