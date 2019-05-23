@@ -68,7 +68,6 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -122,8 +121,6 @@ public class AlarmManagerServiceTest {
     private AlarmManagerService.ClockReceiver mClockReceiver;
     @Mock
     private PowerManager.WakeLock mWakeLock;
-    @Mock
-    private PackageManager mMockPackageManager;
 
     private MockitoSession mMockingSession;
     private Injector mInjector;
@@ -241,11 +238,6 @@ public class AlarmManagerServiceTest {
         PowerManager.WakeLock getAlarmWakeLock() {
             return mWakeLock;
         }
-
-        @Override
-        boolean isAutomotive() {
-            return mIsAutomotiveOverride;
-        }
     }
 
     @Before
@@ -272,7 +264,6 @@ public class AlarmManagerServiceTest {
         when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
         doReturn("min_futurity=0,min_interval=0").when(() ->
                 Settings.Global.getString(mMockResolver, Settings.Global.ALARM_MANAGER_CONSTANTS));
-        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
 
         mInjector = new Injector(mMockContext);
         mService = new AlarmManagerService(mMockContext, mInjector);
@@ -1021,18 +1012,6 @@ public class AlarmManagerServiceTest {
         final int[] typesToSet = {ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME, RTC_WAKEUP, RTC};
         final int[] typesExpected = {ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME,
                 ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME};
-        assertAlarmTypeConversion(typesToSet, typesExpected);
-    }
-
-    /**
-     * Confirm that wakeup alarms are never set for automotive.
-     */
-    @Test
-    public void alarmTypesForAuto() throws Exception {
-        mInjector.mIsAutomotiveOverride = true;
-        final int[] typesToSet = {ELAPSED_REALTIME_WAKEUP, ELAPSED_REALTIME, RTC_WAKEUP, RTC};
-        final int[] typesExpected = {ELAPSED_REALTIME, ELAPSED_REALTIME, ELAPSED_REALTIME,
-                ELAPSED_REALTIME};
         assertAlarmTypeConversion(typesToSet, typesExpected);
     }
 
