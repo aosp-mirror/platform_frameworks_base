@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.app.Notification;
@@ -27,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -62,6 +64,9 @@ class GnssVisibilityControl {
     // Max wait time for synchronous method onGpsEnabledChanged() to run.
     private static final long ON_GPS_ENABLED_CHANGED_TIMEOUT_MILLIS = 3 * 1000;
 
+    // How long to display location icon for each non-framework non-emergency location request.
+    private static final long LOCATION_ICON_DISPLAY_DURATION_MILLIS = 5 * 1000;
+
     // Wakelocks
     private static final String WAKELOCK_KEY = TAG;
     private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
@@ -77,10 +82,19 @@ class GnssVisibilityControl {
 
     private boolean mIsGpsEnabled;
 
+    private static final class ProxyAppState {
+        private boolean mHasLocationPermission;
+        private boolean mIsLocationIconOn;
+
+        private ProxyAppState(boolean hasLocationPermission) {
+            mHasLocationPermission = hasLocationPermission;
+        }
+    }
+
     // Number of non-framework location access proxy apps is expected to be small (< 5).
-    private static final int ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS = 7;
-    private ArrayMap<String, Boolean> mProxyAppToLocationPermissions = new ArrayMap<>(
-            ARRAY_MAP_INITIAL_CAPACITY_PROXY_APP_TO_LOCATION_PERMISSIONS);
+    private static final int ARRAY_MAP_INITIAL_CAPACITY_PROXY_APPS_STATE = 5;
+    private ArrayMap<String, ProxyAppState> mProxyAppsState = new ArrayMap<>(
+            ARRAY_MAP_INITIAL_CAPACITY_PROXY_APPS_STATE);
 
     private PackageManager.OnPermissionsChangedListener mOnPermissionsChangedListener =
             uid -> runOnHandler(() -> handlePermissionsChanged(uid));
@@ -173,18 +187,18 @@ class GnssVisibilityControl {
     }
 
     private void handleProxyAppPackageUpdate(String pkgName, String action) {
-        final Boolean locationPermission = mProxyAppToLocationPermissions.get(pkgName);
-        if (locationPermission == null) {
+        final ProxyAppState proxyAppState = mProxyAppsState.get(pkgName);
+        if (proxyAppState == null) {
             return; // ignore, pkgName is not one of the proxy apps in our list.
         }
 
         if (DEBUG) Log.d(TAG, "Proxy app " + pkgName + " package changed: " + action);
         final boolean updatedLocationPermission = shouldEnableLocationPermissionInGnssHal(pkgName);
-        if (locationPermission != updatedLocationPermission) {
+        if (proxyAppState.mHasLocationPermission != updatedLocationPermission) {
             // Permission changed. So, update the GNSS HAL with the updated list.
             Log.i(TAG, "Proxy app " + pkgName + " location permission changed."
                     + " IsLocationPermissionEnabled: " + updatedLocationPermission);
-            mProxyAppToLocationPermissions.put(pkgName, updatedLocationPermission);
+            proxyAppState.mHasLocationPermission = updatedLocationPermission;
             updateNfwLocationAccessProxyAppsInGnssHal();
         }
     }
@@ -196,35 +210,53 @@ class GnssVisibilityControl {
 
         if (nfwLocationAccessProxyApps.isEmpty()) {
             // Stop listening for app permission changes. Clear the app list in GNSS HAL.
-            if (!mProxyAppToLocationPermissions.isEmpty()) {
+            if (!mProxyAppsState.isEmpty()) {
                 mPackageManager.removeOnPermissionsChangeListener(mOnPermissionsChangedListener);
-                mProxyAppToLocationPermissions.clear();
+                resetProxyAppsState();
                 updateNfwLocationAccessProxyAppsInGnssHal();
             }
             return;
         }
 
-        if (mProxyAppToLocationPermissions.isEmpty()) {
+        if (mProxyAppsState.isEmpty()) {
             mPackageManager.addOnPermissionsChangeListener(mOnPermissionsChangedListener);
         } else {
-            mProxyAppToLocationPermissions.clear();
+            resetProxyAppsState();
         }
 
         for (String proxyAppPkgName : nfwLocationAccessProxyApps) {
-            mProxyAppToLocationPermissions.put(proxyAppPkgName,
-                    shouldEnableLocationPermissionInGnssHal(proxyAppPkgName));
+            ProxyAppState proxyAppState = new ProxyAppState(shouldEnableLocationPermissionInGnssHal(
+                    proxyAppPkgName));
+            mProxyAppsState.put(proxyAppPkgName, proxyAppState);
         }
 
         updateNfwLocationAccessProxyAppsInGnssHal();
     }
 
+    private void resetProxyAppsState() {
+        // Clear location icons displayed.
+        for (Map.Entry<String, ProxyAppState> entry : mProxyAppsState.entrySet()) {
+            ProxyAppState proxyAppState = entry.getValue();
+            if (!proxyAppState.mIsLocationIconOn) {
+                continue;
+            }
+
+            mHandler.removeCallbacksAndMessages(proxyAppState);
+            final ApplicationInfo proxyAppInfo = getProxyAppInfo(entry.getKey());
+            if (proxyAppInfo != null) {
+                clearLocationIcon(proxyAppState, proxyAppInfo.uid, entry.getKey());
+            }
+        }
+        mProxyAppsState.clear();
+    }
+
     private boolean isProxyAppListUpdated(List<String> nfwLocationAccessProxyApps) {
-        if (nfwLocationAccessProxyApps.size() != mProxyAppToLocationPermissions.size()) {
+        if (nfwLocationAccessProxyApps.size() != mProxyAppsState.size()) {
             return true;
         }
 
         for (String nfwLocationAccessProxyApp : nfwLocationAccessProxyApps) {
-            if (!mProxyAppToLocationPermissions.containsKey(nfwLocationAccessProxyApp)) {
+            if (!mProxyAppsState.containsKey(nfwLocationAccessProxyApp)) {
                 return true;
             }
         }
@@ -326,11 +358,11 @@ class GnssVisibilityControl {
     }
 
     private void handlePermissionsChanged(int uid) {
-        if (mProxyAppToLocationPermissions.isEmpty()) {
+        if (mProxyAppsState.isEmpty()) {
             return;
         }
 
-        for (Map.Entry<String, Boolean> entry : mProxyAppToLocationPermissions.entrySet()) {
+        for (Map.Entry<String, ProxyAppState> entry : mProxyAppsState.entrySet()) {
             final String proxyAppPkgName = entry.getKey();
             final ApplicationInfo proxyAppInfo = getProxyAppInfo(proxyAppPkgName);
             if (proxyAppInfo == null || proxyAppInfo.uid != uid) {
@@ -339,10 +371,11 @@ class GnssVisibilityControl {
 
             final boolean isLocationPermissionEnabled = shouldEnableLocationPermissionInGnssHal(
                     proxyAppPkgName);
-            if (isLocationPermissionEnabled != entry.getValue()) {
+            ProxyAppState proxyAppState = entry.getValue();
+            if (isLocationPermissionEnabled != proxyAppState.mHasLocationPermission) {
                 Log.i(TAG, "Proxy app " + proxyAppPkgName + " location permission changed."
                         + " IsLocationPermissionEnabled: " + isLocationPermissionEnabled);
-                entry.setValue(isLocationPermissionEnabled);
+                proxyAppState.mHasLocationPermission = isLocationPermissionEnabled;
                 updateNfwLocationAccessProxyAppsInGnssHal();
             }
             return;
@@ -394,8 +427,8 @@ class GnssVisibilityControl {
     private String[] getLocationPermissionEnabledProxyApps() {
         // Get a count of proxy apps with location permission enabled for array creation size.
         int countLocationPermissionEnabledProxyApps = 0;
-        for (Boolean hasLocationPermissionEnabled : mProxyAppToLocationPermissions.values()) {
-            if (hasLocationPermissionEnabled) {
+        for (ProxyAppState proxyAppState : mProxyAppsState.values()) {
+            if (proxyAppState.mHasLocationPermission) {
                 ++countLocationPermissionEnabledProxyApps;
             }
         }
@@ -403,10 +436,9 @@ class GnssVisibilityControl {
         int i = 0;
         String[] locationPermissionEnabledProxyApps =
                 new String[countLocationPermissionEnabledProxyApps];
-        for (Map.Entry<String, Boolean> entry : mProxyAppToLocationPermissions.entrySet()) {
+        for (Map.Entry<String, ProxyAppState> entry : mProxyAppsState.entrySet()) {
             final String proxyApp = entry.getKey();
-            final boolean hasLocationPermissionEnabled = entry.getValue();
-            if (hasLocationPermissionEnabled) {
+            if (entry.getValue().mHasLocationPermission) {
                 locationPermissionEnabledProxyApps[i++] = proxyApp;
             }
         }
@@ -422,12 +454,11 @@ class GnssVisibilityControl {
         }
 
         final String proxyAppPkgName = nfwNotification.mProxyAppPackageName;
-        final Boolean isLocationPermissionEnabled = mProxyAppToLocationPermissions.get(
-                proxyAppPkgName);
+        final ProxyAppState proxyAppState = mProxyAppsState.get(proxyAppPkgName);
         final boolean isLocationRequestAccepted = nfwNotification.isRequestAccepted();
         final boolean isPermissionMismatched =
-                (isLocationPermissionEnabled == null) ? isLocationRequestAccepted
-                        : (isLocationPermissionEnabled != isLocationRequestAccepted);
+                (proxyAppState == null) ? isLocationRequestAccepted
+                        : (proxyAppState.mHasLocationPermission != isLocationRequestAccepted);
         logEvent(nfwNotification, isPermissionMismatched);
 
         if (!nfwNotification.isRequestAttributedToProxyApp()) {
@@ -442,7 +473,7 @@ class GnssVisibilityControl {
                 if (DEBUG) {
                     Log.d(TAG, "Non-framework location request rejected. ProxyAppPackageName field"
                             + " is not set in the notification: " + nfwNotification + ". Number of"
-                            + " configured proxy apps: " + mProxyAppToLocationPermissions.size());
+                            + " configured proxy apps: " + mProxyAppsState.size());
                 }
                 return;
             }
@@ -452,7 +483,7 @@ class GnssVisibilityControl {
             return;
         }
 
-        if (isLocationPermissionEnabled == null) {
+        if (proxyAppState == null) {
             Log.w(TAG, "Could not find proxy app " + proxyAppPkgName + " in the value specified for"
                     + " config parameter: " + GnssConfiguration.CONFIG_NFW_PROXY_APPS
                     + ". AppOps service not notified for notification: " + nfwNotification);
@@ -467,16 +498,97 @@ class GnssVisibilityControl {
             return;
         }
 
-        mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, proxyAppInfo.uid, proxyAppPkgName);
+        if (nfwNotification.isLocationProvided()) {
+            showLocationIcon(proxyAppState, nfwNotification, proxyAppInfo.uid, proxyAppPkgName);
+            mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, proxyAppInfo.uid,
+                    proxyAppPkgName);
+        }
 
         // Log proxy app permission mismatch between framework and GNSS HAL.
         if (isPermissionMismatched) {
             Log.w(TAG, "Permission mismatch. Framework proxy app " + proxyAppPkgName
-                    + " location permission is set to " + isLocationPermissionEnabled
+                    + " location permission is set to " + proxyAppState.mHasLocationPermission
                     + " but GNSS non-framework location access response type is "
                     + nfwNotification.getResponseTypeAsString() + " for notification: "
                     + nfwNotification);
         }
+    }
+
+    private void showLocationIcon(ProxyAppState proxyAppState, NfwNotification nfwNotification,
+            int uid, String proxyAppPkgName) {
+        // If we receive a new NfwNotification before the location icon is turned off for the
+        // previous notification, update the timer to extend the location icon display duration.
+        final boolean isLocationIconOn = proxyAppState.mIsLocationIconOn;
+        if (!isLocationIconOn) {
+            if (!updateLocationIcon(/* displayLocationIcon = */ true, uid, proxyAppPkgName)) {
+                Log.w(TAG, "Failed to show Location icon for notification: " + nfwNotification);
+                return;
+            }
+            proxyAppState.mIsLocationIconOn = true;
+        } else {
+            // Extend timer by canceling the current one and starting a new one.
+            mHandler.removeCallbacksAndMessages(proxyAppState);
+        }
+
+        // Start timer to turn off location icon. proxyAppState is used as a token to cancel timer.
+        if (DEBUG) {
+            Log.d(TAG, "Location icon on. " + (isLocationIconOn ? "Extending" : "Setting")
+                    + " icon display timer. Uid: " + uid + ", proxyAppPkgName: " + proxyAppPkgName);
+        }
+        if (!mHandler.postDelayed(() -> handleLocationIconTimeout(proxyAppPkgName),
+                /* token = */ proxyAppState, LOCATION_ICON_DISPLAY_DURATION_MILLIS)) {
+            clearLocationIcon(proxyAppState, uid, proxyAppPkgName);
+            Log.w(TAG, "Failed to show location icon for the full duration for notification: "
+                    + nfwNotification);
+        }
+    }
+
+    private void handleLocationIconTimeout(String proxyAppPkgName) {
+        // Get uid again instead of using the one provided in startOp() call as the app could have
+        // been uninstalled and reinstalled during the timeout duration (unlikely in real world).
+        final ApplicationInfo proxyAppInfo = getProxyAppInfo(proxyAppPkgName);
+        if (proxyAppInfo != null) {
+            clearLocationIcon(mProxyAppsState.get(proxyAppPkgName), proxyAppInfo.uid,
+                    proxyAppPkgName);
+        }
+    }
+
+    private void clearLocationIcon(@Nullable ProxyAppState proxyAppState, int uid,
+            String proxyAppPkgName) {
+        updateLocationIcon(/* displayLocationIcon = */ false, uid, proxyAppPkgName);
+        if (proxyAppState != null) proxyAppState.mIsLocationIconOn = false;
+        if (DEBUG) {
+            Log.d(TAG, "Location icon off. Uid: " + uid + ", proxyAppPkgName: " + proxyAppPkgName);
+        }
+    }
+
+    private boolean updateLocationIcon(boolean displayLocationIcon, int uid,
+            String proxyAppPkgName) {
+        if (displayLocationIcon) {
+            // Need two calls to startOp() here with different op code so that the proxy app shows
+            // up in the recent location requests page and also the location icon gets displayed.
+            if (mAppOps.startOpNoThrow(AppOpsManager.OP_MONITOR_LOCATION, uid,
+                    proxyAppPkgName) != AppOpsManager.MODE_ALLOWED) {
+                return false;
+            }
+            if (mAppOps.startOpNoThrow(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, uid,
+                    proxyAppPkgName) != AppOpsManager.MODE_ALLOWED) {
+                mAppOps.finishOp(AppOpsManager.OP_MONITOR_LOCATION, uid, proxyAppPkgName);
+                return false;
+            }
+        } else {
+            mAppOps.finishOp(AppOpsManager.OP_MONITOR_LOCATION, uid, proxyAppPkgName);
+            mAppOps.finishOp(AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION, uid, proxyAppPkgName);
+        }
+        sendHighPowerMonitoringBroadcast();
+        return true;
+    }
+
+    private void sendHighPowerMonitoringBroadcast() {
+        // Send an intent to notify that a high power request has been added/removed so that
+        // the SystemUi checks the state of AppOps and updates the location icon accordingly.
+        Intent intent = new Intent(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void handleEmergencyNfwNotification(NfwNotification nfwNotification) {
