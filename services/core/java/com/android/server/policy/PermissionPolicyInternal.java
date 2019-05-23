@@ -17,6 +17,7 @@
 package com.android.server.policy;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Intent;
 
 /**
@@ -34,5 +35,5 @@ public abstract class PermissionPolicyInternal {
      * @return whether the activity should be started
      */
     public abstract boolean checkStartActivity(@NonNull Intent intent, int callingUid,
-            @NonNull String callingPackage);
+            @Nullable String callingPackage);
 }
