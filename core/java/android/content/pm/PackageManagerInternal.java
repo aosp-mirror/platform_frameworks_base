@@ -844,6 +844,13 @@ public abstract class PackageManagerInternal {
      */
     public abstract void forEachPackage(Consumer<PackageParser.Package> actionLocked);
 
+    /**
+     * Perform the given action for each installed package for a user.
+     * Note that packages lock will be held while performin the actions.
+     */
+    public abstract void forEachInstalledPackage(
+            @NonNull Consumer<PackageParser.Package> actionLocked, @UserIdInt int userId);
+
     /** Returns the list of enabled components */
     public abstract ArraySet<String> getEnabledComponents(String packageName, int userId);
 
