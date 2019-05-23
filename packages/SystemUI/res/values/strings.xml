@@ -1677,25 +1677,16 @@
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance title -->
-    <string name="notification_silence_title">Gentle</string>
+    <string name="notification_silence_title">Silent</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance title -->
-    <string name="notification_alert_title">Prioritized</string>
+    <string name="notification_alert_title">Alerting</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
-    <string name="notification_channel_summary_low">Helps you focus with notifications only in the pull-down shade. Always silent.</string>
-
-    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
-    <string name="notification_channel_summary_low_status">Displays below priority notifications. Always silent.</string>
-
-    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
-    <string name="notification_channel_summary_low_lock">Displays below priority notifications. Always silent.</string>
-
-    <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
-    <string name="notification_channel_summary_low_status_lock">Displays below priority notifications. Always silent.</string>
+    <string name="notification_channel_summary_low">Helps you focus without sound or vibration.</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: normal importance level summary -->
-    <string name="notification_channel_summary_default">Gets your attention with sound &amp; a status bar icon. Shows on lock screen.</string>
+    <string name="notification_channel_summary_default">Gets your attention with sound or vibration.</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
