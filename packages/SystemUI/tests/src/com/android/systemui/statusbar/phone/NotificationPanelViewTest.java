@@ -21,9 +21,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.StatusBarManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -36,6 +38,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.PulseExpansionHandler;
@@ -54,6 +57,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -90,6 +95,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private HeadsUpTouchHelper.Callback mHeadsUpCallback;
     @Mock
     private PanelBar mPanelBar;
+    @Mock
+    private KeyguardAffordanceHelper mAffordanceHelper;
     private NotificationPanelView mNotificationPanelView;
 
     @Before
@@ -112,6 +119,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelView.setBar(mPanelBar);
+
+        when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
+        when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
     }
 
     @Test
@@ -126,6 +136,19 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     public void testSetExpandedHeight() {
         mNotificationPanelView.setExpandedHeight(200);
         assertThat((int) mNotificationPanelView.getExpandedHeight()).isEqualTo(200);
+    }
+
+    @Test
+    public void testAffordanceLaunchingListener() {
+        Consumer<Boolean> listener = spy((showing) -> { });
+        mNotificationPanelView.setExpandedFraction(1f);
+        mNotificationPanelView.setLaunchAffordanceListener(listener);
+        mNotificationPanelView.launchCamera(false /* animate */,
+                StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP);
+        verify(listener).accept(eq(true));
+
+        mNotificationPanelView.onAffordanceLaunchEnded();
+        verify(listener).accept(eq(false));
     }
 
     @Test
@@ -166,6 +189,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
             mKeyguardBottomArea = NotificationPanelViewTest.this.mKeyguardBottomArea;
             mBigClockContainer = NotificationPanelViewTest.this.mBigClockContainer;
             mQsFrame = NotificationPanelViewTest.this.mQsFrame;
+            mAffordanceHelper = NotificationPanelViewTest.this.mAffordanceHelper;
             initDependencies(NotificationPanelViewTest.this.mStatusBar,
                     NotificationPanelViewTest.this.mGroupManager,
                     NotificationPanelViewTest.this.mNotificationShelf,

@@ -510,6 +510,15 @@ public class StatusBarWindowView extends FrameLayout {
         }
     }
 
+    /**
+     * When we're launching an affordance, like double pressing power to open camera.
+     */
+    public void onShowingLaunchAffordanceChanged(boolean showing) {
+        if (mLockIcon != null) {
+            mLockIcon.onShowingLaunchAffordanceChanged(showing);
+        }
+    }
+
     public class LayoutParams extends FrameLayout.LayoutParams {
 
         public boolean ignoreRightInset;
