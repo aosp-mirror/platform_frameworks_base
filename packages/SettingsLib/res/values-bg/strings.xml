@@ -242,7 +242,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Изкл."</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматично"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Име на хоста на доставчика на частния DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Въведете името на хоста на DNS доставчика"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Въведете име на хоста на DNS доставчика"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не можа да се установи връзка"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>

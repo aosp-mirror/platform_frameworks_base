@@ -22,6 +22,7 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIB
 import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -119,7 +120,6 @@ import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
-import android.service.notification.NotifyingApp;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenPolicy;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -165,10 +165,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 @SmallTest
@@ -5012,6 +5010,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
         waitForIdle();
 
+        // Reset as this is called when the notif is first sent
+        reset(mListeners);
+
         // First we were a bubble
         StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsBefore.length);
@@ -5021,10 +5022,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
         waitForIdle();
 
-        // Now we are not a bubble
-        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
-        assertEquals(1, notifsAfter.length);
-        assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+        // Make sure we are not a bubble / reported as such to listeners
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
+
+        assertEquals((captor.getValue().getNotification().flags & FLAG_BUBBLE), 0);
+        assertTrue((captor.getValue().getNotification().flags & FLAG_ONLY_ALERT_ONCE) != 0);
     }
 
     @Test
@@ -5054,14 +5058,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mActivityManager.getPackageImportance(nr.sbn.getPackageName())).thenReturn(
                 IMPORTANCE_FOREGROUND);
 
+        // Reset as this is called when the notif is first sent
+        reset(mListeners);
+
         // Notify we are now a bubble
         mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
         waitForIdle();
 
-        // Make sure we are a bubble
-        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
-        assertEquals(1, notifsAfter.length);
-        assertTrue((notifsAfter[0].getNotification().flags & FLAG_BUBBLE) != 0);
+        // Make sure we are a bubble / reported as such to listeners
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
+
+        assertTrue((captor.getValue().getNotification().flags & FLAG_BUBBLE) != 0);
+        assertTrue((captor.getValue().getNotification().flags & FLAG_ONLY_ALERT_ONCE) != 0);
     }
 
     @Test
@@ -5082,6 +5092,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
         waitForIdle();
 
+        // Reset as this is called when the notif is first sent
+        reset(mListeners);
+
         // Would be a normal notification because wouldn't have met requirements to bubble
         StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsBefore.length);
@@ -5095,6 +5108,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+        verify(mListeners, times(0)).notifyPostedLocked(any(), any());
     }
 
     @Test

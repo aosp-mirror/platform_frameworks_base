@@ -185,30 +185,30 @@
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animation aus"</item>
-    <item msgid="6624864048416710414">"Animationsmaßstab: 0,5x"</item>
-    <item msgid="2219332261255416635">"Animationsmaßstab: 1x"</item>
-    <item msgid="3544428804137048509">"Animationsmaßstab: 1,5x"</item>
-    <item msgid="3110710404225974514">"Animationsmaßstab: 2x"</item>
-    <item msgid="4402738611528318731">"Animationsmaßstab: 5x"</item>
-    <item msgid="6189539267968330656">"Animationsmaßstab: 10x"</item>
+    <item msgid="6624864048416710414">"Animationsfaktor: 0,5x"</item>
+    <item msgid="2219332261255416635">"Animationsfaktor: 1x"</item>
+    <item msgid="3544428804137048509">"Animationsfaktor: 1,5x"</item>
+    <item msgid="3110710404225974514">"Animationsfaktor: 2x"</item>
+    <item msgid="4402738611528318731">"Animationsfaktor: 5x"</item>
+    <item msgid="6189539267968330656">"Animationsfaktor: 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
     <item msgid="8464255836173039442">"Animation aus"</item>
-    <item msgid="3375781541913316411">"Animationsmaßstab: 0,5x"</item>
-    <item msgid="1991041427801869945">"Animationsmaßstab: 1x"</item>
-    <item msgid="4012689927622382874">"Animationsmaßstab: 1,5x"</item>
-    <item msgid="3289156759925947169">"Animationsmaßstab: 2x"</item>
-    <item msgid="7705857441213621835">"Animationsmaßstab: 5x"</item>
-    <item msgid="6660750935954853365">"Animationsmaßstab: 10x"</item>
+    <item msgid="3375781541913316411">"Animationsfaktor: 0,5x"</item>
+    <item msgid="1991041427801869945">"Animationsfaktor: 1x"</item>
+    <item msgid="4012689927622382874">"Animationsfaktor: 1,5x"</item>
+    <item msgid="3289156759925947169">"Animationsfaktor: 2x"</item>
+    <item msgid="7705857441213621835">"Animationsfaktor: 5x"</item>
+    <item msgid="6660750935954853365">"Animationsfaktor: 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"Animation aus"</item>
-    <item msgid="1138649021950863198">"Animationsmaßstab: 0,5x"</item>
-    <item msgid="4394388961370833040">"Animationsmaßstab: 1x"</item>
-    <item msgid="8125427921655194973">"Animationsmaßstab: 1,5x"</item>
-    <item msgid="3334024790739189573">"Animationsmaßstab: 2x"</item>
-    <item msgid="3170120558236848008">"Animationsmaßstab: 5x"</item>
-    <item msgid="1069584980746680398">"Animationsmaßstab: 10x"</item>
+    <item msgid="1138649021950863198">"Animationsfaktor: 0,5x"</item>
+    <item msgid="4394388961370833040">"Animationsfaktor: 1x"</item>
+    <item msgid="8125427921655194973">"Animationsfaktor: 1,5x"</item>
+    <item msgid="3334024790739189573">"Animationsfaktor: 2x"</item>
+    <item msgid="3170120558236848008">"Animationsfaktor: 5x"</item>
+    <item msgid="1069584980746680398">"Animationsfaktor: 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"Keine"</item>

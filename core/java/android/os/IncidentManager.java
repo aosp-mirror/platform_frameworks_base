@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +35,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Class to take an incident report.
@@ -248,6 +250,24 @@ public class IncidentManager {
         public @NonNull String toString() {
             return "PendingReport(" + getUri().toString() + ")";
         }
+
+        /**
+         * @inheritDoc
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof PendingReport)) {
+                return false;
+            }
+            final PendingReport that = (PendingReport) obj;
+            return this.mUri.equals(that.mUri)
+                    && this.mFlags == that.mFlags
+                    && this.mRequestingPackage.equals(that.mRequestingPackage)
+                    && this.mTimestamp == that.mTimestamp;
+        }
     }
 
     /**
@@ -355,21 +375,35 @@ public class IncidentManager {
     }
 
     /**
-     * Listener for the status of an incident report being authroized or denied.
+     * Listener for the status of an incident report being authorized or denied.
      *
      * @see #requestAuthorization
      * @see #cancelAuthorization
      */
     public static class AuthListener {
+        Executor mExecutor;
+
         IIncidentAuthListener.Stub mBinder = new IIncidentAuthListener.Stub() {
             @Override
             public void onReportApproved() {
-                AuthListener.this.onReportApproved();
+                if (mExecutor != null) {
+                    mExecutor.execute(() -> {
+                        AuthListener.this.onReportApproved();
+                    });
+                } else {
+                    AuthListener.this.onReportApproved();
+                }
             }
 
             @Override
             public void onReportDenied() {
-                AuthListener.this.onReportDenied();
+                if (mExecutor != null) {
+                    mExecutor.execute(() -> {
+                        AuthListener.this.onReportDenied();
+                    });
+                } else {
+                    AuthListener.this.onReportDenied();
+                }
             }
         };
 
@@ -410,7 +444,23 @@ public class IncidentManager {
     @RequiresPermission(android.Manifest.permission.REQUEST_INCIDENT_REPORT_APPROVAL)
     public void requestAuthorization(int callingUid, String callingPackage, int flags,
             AuthListener listener) {
+        requestAuthorization(callingUid, callingPackage, flags,
+                mContext.getMainExecutor(), listener);
+    }
+
+    /**
+     * Request authorization of an incident report.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.REQUEST_INCIDENT_REPORT_APPROVAL)
+    public void requestAuthorization(int callingUid, @NonNull String callingPackage, int flags,
+             @NonNull @CallbackExecutor Executor executor, @NonNull AuthListener listener) {
         try {
+            if (listener.mExecutor != null) {
+                throw new RuntimeException("Do not reuse AuthListener objects when calling"
+                        + " requestAuthorization");
+            }
+            listener.mExecutor = executor;
             getCompanionServiceLocked().authorizeReport(callingUid, callingPackage, null, null,
                     flags, listener.mBinder);
         } catch (RemoteException ex) {

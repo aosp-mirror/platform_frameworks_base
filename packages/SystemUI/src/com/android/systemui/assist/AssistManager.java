@@ -14,7 +14,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -59,6 +58,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
     private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
+    private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
@@ -74,6 +74,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
     private final InterestingConfigChanges mInterestingConfigChanges;
+    private final PhoneStateMonitor mPhoneStateMonitor;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -108,6 +109,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
+        mPhoneStateMonitor = new PhoneStateMonitor(context);
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
@@ -187,32 +189,13 @@ public class AssistManager implements ConfigurationChangedReceiver {
         if (args == null) {
             args = new Bundle();
         }
+        args.putInt(INVOCATION_PHONE_STATE_KEY, mPhoneStateMonitor.getPhoneState());
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         // Logs assistant start with invocation type.
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
                     .setType(MetricsEvent.TYPE_OPEN).setSubtype(args.getInt(INVOCATION_TYPE_KEY)));
         startAssistInternal(args, assistComponent, isService);
-    }
-
-    /**
-     * Returns a {@code Rect} containing system UI presented on behalf of the assistant that
-     * consumes touches.
-     */
-    @Nullable
-    public Rect getTouchableRegion() {
-        // intentional no-op, vendor's AssistManager implementation should override if needed.
-        return null;
-    }
-
-    /** Registers a listener for changes to system UI presented on behalf of the assistant. */
-    public void setAssistSysUiChangeListener(AssistSysUiChangeListener listener) {
-        // intentional no-op, vendor's AssistManager implementation should override if needed.
-    }
-
-    /** Returns {@code true} if the system UI is showing UI for the assistant. */
-    public boolean hasAssistUi() {
-        return false;
     }
 
     /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */

@@ -736,7 +736,8 @@ public class PreferencesHelper implements RankingConfig {
             }
             updatedChannel.setImportanceLockedByCriticalDeviceFunction(
                     r.defaultAppLockedImportance);
-            if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()) {
+            if (updatedChannel.isImportanceLockedByCriticalDeviceFunction()
+                    && updatedChannel.getImportance() == IMPORTANCE_NONE) {
                 updatedChannel.setImportance(channel.getImportance());
             }
 

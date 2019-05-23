@@ -39,7 +39,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
@@ -6892,15 +6891,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
-                            FLAG_ACTIVITY_TASK_ON_HOME);
-                    ActivityOptions activityOptions = options != null
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    final ActivityOptions activityOptions = options != null
                             ? new ActivityOptions(options) : ActivityOptions.makeBasic();
-                    final ActivityRecord homeActivity =
-                            mRootActivityContainer.getDefaultDisplayHomeActivity();
-                    if (homeActivity != null) {
-                        activityOptions.setLaunchTaskId(homeActivity.getTaskRecord().taskId);
-                    }
                     mContext.startActivityAsUser(intent, activityOptions.toBundle(),
                             UserHandle.CURRENT);
                 } finally {

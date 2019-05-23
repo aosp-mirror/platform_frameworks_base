@@ -86,7 +86,10 @@ public class StackAnimationController extends
      * we need to keep track of it separately from the first bubble's translation in case there are
      * no bubbles, or the first bubble was just added and being animated to its new position.
      */
-    private PointF mStackPosition = new PointF();
+    private PointF mStackPosition = new PointF(-1, -1);
+
+    /** Whether or not the stack's start position has been set. */
+    private boolean mStackMovedToStartPosition = false;
 
     /** The most recent position in which the stack was resting on the edge of the screen. */
     private PointF mRestingStackPosition;
@@ -193,9 +196,10 @@ public class StackAnimationController extends
 
     /** Whether the stack is on the left side of the screen. */
     public boolean isStackOnLeftSide() {
-        if (mLayout == null) {
+        if (mLayout == null || !isStackPositionSet()) {
             return false;
         }
+
         float stackCenter = mStackPosition.x + mIndividualBubbleSize / 2;
         float screenCenter = mLayout.getWidth() / 2;
         return stackCenter < screenCenter;
@@ -630,10 +634,9 @@ public class StackAnimationController extends
     @Override
     void onChildAdded(View child, int index) {
         if (mLayout.getChildCount() == 1) {
-            // If this is the first child added, position the stack in its starting position before
-            // animating in.
-            moveStackToStartPosition(() -> animateInBubble(child));
-        } else if (mLayout.indexOfChild(child) == 0) {
+            // If this is the first child added, position the stack in its starting position.
+            moveStackToStartPosition();
+        } else if (isStackPositionSet() && mLayout.indexOfChild(child) == 0) {
             // Otherwise, animate the bubble in if it's the newest bubble. If we're adding a bubble
             // to the back of the stack, it'll be largely invisible so don't bother animating it in.
             animateInBubble(child);
@@ -657,16 +660,21 @@ public class StackAnimationController extends
     }
 
     /** Moves the stack, without any animation, to the starting position. */
-    private void moveStackToStartPosition(Runnable after) {
+    private void moveStackToStartPosition() {
         // Post to ensure that the layout's width and height have been calculated.
         mLayout.setVisibility(View.INVISIBLE);
         mLayout.post(() -> {
+            mStackMovedToStartPosition = true;
             setStackPosition(
                     mRestingStackPosition == null
                             ? getDefaultStartPosition()
                             : mRestingStackPosition);
             mLayout.setVisibility(View.VISIBLE);
-            after.run();
+
+            // Animate in the top bubble now that we're visible.
+            if (mLayout.getChildCount() > 0) {
+                animateInBubble(mLayout.getChildAt(0));
+            }
         });
     }
 
@@ -716,6 +724,10 @@ public class StackAnimationController extends
         return new PointF(
                 getAllowableStackPositionRegion().right,
                 getAllowableStackPositionRegion().top + mStackStartingVerticalOffset);
+    }
+
+    private boolean isStackPositionSet() {
+        return mStackMovedToStartPosition;
     }
 
     /** Animates in the given bubble. */

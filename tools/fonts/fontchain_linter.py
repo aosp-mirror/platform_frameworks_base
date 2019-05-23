@@ -490,11 +490,6 @@ def remove_emoji_exclude(source, items):
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
 
-UNSUPPORTED_FLAGS = frozenset({
-    flag_sequence('BL'), flag_sequence('BQ'), flag_sequence('MQ'),
-    flag_sequence('RE'), flag_sequence('TF'),
-})
-
 EQUIVALENT_FLAGS = {
     flag_sequence('BV'): flag_sequence('NO'),
     flag_sequence('CP'): flag_sequence('FR'),
@@ -599,9 +594,6 @@ def compute_expected_emoji():
 
     for first, second in SAME_FLAG_MAPPINGS:
         equivalent_emoji[first] = second
-
-    # Remove unsupported flags
-    all_sequences.difference_update(UNSUPPORTED_FLAGS)
 
     # Add all tag characters used in flags
     sequence_pieces.update(range(0xE0030, 0xE0039 + 1))

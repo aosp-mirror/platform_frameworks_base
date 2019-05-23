@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Ngoài vùng phủ sóng"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Sẽ không tự động kết nối"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"Không có quyền truy cập Internet"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Được lưu bởi <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Do <xliff:g id="NAME">%1$s</xliff:g> lưu"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Tự động được kết nối qua %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Tự động được kết nối qua nhà cung cấp dịch vụ xếp hạng mạng"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Được kết nối qua %1$s"</string>
@@ -88,7 +88,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Sử dụng để chia sẻ liên hệ"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Chia sẻ kết nối internet"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Tin nhắn văn bản"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Quyền truy cập SIM"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Truy cập SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Âm thanh HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Âm thanh HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Thiết bị trợ thính"</string>

@@ -636,6 +636,11 @@ public class SecurityLog {
         public int hashCode() {
             return Objects.hash(mEvent, mId);
         }
+
+        /** @hide */
+        public boolean eventEquals(SecurityEvent other) {
+            return other != null && mEvent.equals(other.mEvent);
+        }
     }
     /**
      * Retrieve all security logs and return immediately.

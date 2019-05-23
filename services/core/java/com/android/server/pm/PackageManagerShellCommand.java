@@ -1162,7 +1162,7 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runInstallExisting() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
-        int installFlags = 0;
+        int installFlags = PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
         String opt;
         boolean waitTillComplete = false;
         while ((opt = getNextOption()) != null) {
@@ -1181,6 +1181,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--wait":
                     waitTillComplete = true;
+                    break;
+                case "--restrict-permissions":
+                    installFlags &= ~PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
@@ -1201,7 +1204,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 final IPackageInstaller installer = mInterface.getPackageInstaller();
                 pw.println("Installing package " + packageName + " for user: " + userId);
                 installer.installExistingPackage(packageName, installFlags, installReason,
-                        receiver.getIntentSender(), userId);
+                        receiver.getIntentSender(), userId, null);
                 final Intent result = receiver.getResult();
                 final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                         PackageInstaller.STATUS_FAILURE);
@@ -1210,7 +1213,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
 
             final int res = mInterface.installExistingPackageAsUser(packageName, userId,
-                    installFlags, installReason);
+                    installFlags, installReason, null);
             if (res == PackageManager.INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }
@@ -2370,7 +2373,11 @@ class PackageManagerShellCommand extends ShellCommand {
     private InstallParams makeInstallParams() {
         final SessionParams sessionParams = new SessionParams(SessionParams.MODE_FULL_INSTALL);
         final InstallParams params = new InstallParams();
+
         params.sessionParams = sessionParams;
+        // Whitelist all permissions by default
+        sessionParams.installFlags |= PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS;
+
         String opt;
         boolean replaceExisting = true;
         while ((opt = getNextOption()) != null) {

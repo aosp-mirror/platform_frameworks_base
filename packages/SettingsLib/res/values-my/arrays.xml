@@ -211,7 +211,7 @@
     <item msgid="1069584980746680398">"လှုပ်ရှားသက်ဝင်ပုံရိပ် စကေး ၁၀ဆ"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"တစ်ခုမျှ မဟုတ်ပါ"</item>
+    <item msgid="1606809880904982133">"မရှိ"</item>
     <item msgid="9033194758688161545">"480p"</item>
     <item msgid="1025306206556583600">"480p (secure)"</item>
     <item msgid="1853913333042744661">"720p"</item>
@@ -225,7 +225,7 @@
     <item msgid="1311305077526792901">"720p, 1080p (dual screen)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="3191973083884253830">"တစ်ခုမျှ မဟုတ်ပါ"</item>
+    <item msgid="3191973083884253830">"မရှိ"</item>
     <item msgid="9089630089455370183">"လော့ဂ်ကက်"</item>
     <item msgid="5397807424362304288">"စနစ်ခြေရာခံခြင်း (ရုပ်ပုံများ)"</item>
     <item msgid="1340692776955662664">"glGetError အမှားတက်လျှင်ခေါ်သောလုပ်ငန်းစဉ်"</item>

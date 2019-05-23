@@ -28,7 +28,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -162,29 +161,34 @@ public class ModuleInfoProvider {
         }
     }
 
-    List<ModuleInfo> getInstalledModules(int flags) {
+    /**
+     * By default, returns installed module info, including installed apex modules.
+     *
+     * @param flags Use {@link PackageManager#MATCH_ALL} flag to get all modules.
+     */
+    List<ModuleInfo> getInstalledModules(@PackageManager.ModuleInfoFlags int flags) {
         if (!mMetadataLoaded) {
             throw new IllegalStateException("Call to getInstalledModules before metadata loaded");
         }
 
-        ArrayList<ModuleInfo> allModules = new ArrayList<>(mModuleInfo.values());
         if ((flags & PackageManager.MATCH_ALL) != 0) {
-            return allModules;
+            return new ArrayList<>(mModuleInfo.values());
         }
 
-        ArraySet<String> allPackages;
+        List<PackageInfo> allPackages;
         try {
-            allPackages = new ArraySet<>(mPackageManager.getAllPackages());
+            allPackages = mPackageManager.getInstalledPackages(
+                    flags | PackageManager.MATCH_APEX, UserHandle.USER_SYSTEM).getList();
         } catch (RemoteException e) {
             Slog.w(TAG, "Unable to retrieve all package names", e);
             return Collections.emptyList();
         }
 
         ArrayList<ModuleInfo> installedModules = new ArrayList<>(allPackages.size());
-        for (int i = allModules.size() - 1; i >= 0; --i) {
-            ModuleInfo mi = allModules.get(i);
-            if (allPackages.contains(mi.getPackageName())) {
-                installedModules.add(mi);
+        for (PackageInfo p : allPackages) {
+            ModuleInfo m = mModuleInfo.get(p.packageName);
+            if (m != null) {
+                installedModules.add(m);
             }
         }
         return installedModules;
