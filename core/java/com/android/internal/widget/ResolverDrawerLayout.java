@@ -854,12 +854,11 @@ public class ResolverDrawerLayout extends ViewGroup {
 
         final int widthSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
         final int heightSpec = MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY);
-        final int widthPadding = getPaddingLeft() + getPaddingRight();
 
         // Currently we allot more height than is really needed so that the entirety of the
         // sheet may be pulled up.
         // TODO: Restrict the height here to be the right value.
-        int heightUsed = getPaddingTop() + getPaddingBottom();
+        int heightUsed = 0;
 
         // Measure always-show children first.
         final int childCount = getChildCount();
@@ -869,11 +868,11 @@ public class ResolverDrawerLayout extends ViewGroup {
             if (lp.alwaysShow && child.getVisibility() != GONE) {
                 if (lp.maxHeight != -1) {
                     final int remainingHeight = heightSize - heightUsed;
-                    measureChildWithMargins(child, widthSpec, widthPadding,
+                    measureChildWithMargins(child, widthSpec, 0,
                             MeasureSpec.makeMeasureSpec(lp.maxHeight, MeasureSpec.AT_MOST),
                             lp.maxHeight > remainingHeight ? lp.maxHeight - remainingHeight : 0);
                 } else {
-                    measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
+                    measureChildWithMargins(child, widthSpec, 0, heightSpec, heightUsed);
                 }
                 heightUsed += child.getMeasuredHeight();
             }
@@ -889,11 +888,11 @@ public class ResolverDrawerLayout extends ViewGroup {
             if (!lp.alwaysShow && child.getVisibility() != GONE) {
                 if (lp.maxHeight != -1) {
                     final int remainingHeight = heightSize - heightUsed;
-                    measureChildWithMargins(child, widthSpec, widthPadding,
+                    measureChildWithMargins(child, widthSpec, 0,
                             MeasureSpec.makeMeasureSpec(lp.maxHeight, MeasureSpec.AT_MOST),
                             lp.maxHeight > remainingHeight ? lp.maxHeight - remainingHeight : 0);
                 } else {
-                    measureChildWithMargins(child, widthSpec, widthPadding, heightSpec, heightUsed);
+                    measureChildWithMargins(child, widthSpec, 0, heightSpec, heightUsed);
                 }
                 heightUsed += child.getMeasuredHeight();
             }
