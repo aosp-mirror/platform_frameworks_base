@@ -299,7 +299,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Get the dialing number of the emergency number.
      *
      * The character in the number string is only the dial pad
-     * character('0'-'9', '*', or '#'). For example: 911.
+     * character('0'-'9', '*', '+', or '#'). For example: 911.
      *
      * @return the dialing number.
      */
