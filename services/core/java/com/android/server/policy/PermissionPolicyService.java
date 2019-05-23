@@ -480,8 +480,9 @@ public final class PermissionPolicyService extends SystemService {
 
         @Override
         public boolean checkStartActivity(@NonNull Intent intent, int callingUid,
-                @NonNull String callingPackage) {
-            if (isActionRemovedForCallingPackage(intent.getAction(), callingPackage)) {
+                @Nullable String callingPackage) {
+            if (callingPackage != null && isActionRemovedForCallingPackage(intent.getAction(),
+                    callingPackage)) {
                 Slog.w(LOG_TAG, "Action Removed: starting " + intent.toString() + " from "
                         + callingPackage + " (uid=" + callingUid + ")");
                 return false;
