@@ -109,7 +109,9 @@ android_app {
     // InProcessNetworkStack is a replacement for NetworkStack
     overrides: ["NetworkStack"],
     // The permission configuration *must* be included to ensure security of the device
-    required: ["PlatformNetworkPermissionConfig"],
+    // The InProcessNetworkStack goes together with the PlatformCaptivePortalLogin, which replaces
+    // the default CaptivePortalLogin.
+    required: ["PlatformNetworkPermissionConfig", "PlatformCaptivePortalLogin"],
 }
 
 // Updatable network stack packaged as an application

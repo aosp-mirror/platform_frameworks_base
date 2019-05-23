@@ -234,6 +234,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     }
 
     @Test
+    @Ignore("Flaky")
     public void testMagnetToDismiss_dismiss() throws InterruptedException {
         final Runnable after = Mockito.mock(Runnable.class);
 

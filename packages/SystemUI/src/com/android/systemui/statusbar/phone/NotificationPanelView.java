@@ -151,7 +151,8 @@ public class NotificationPanelView extends PanelView implements
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final PulseExpansionHandler mPulseExpansionHandler;
 
-    private KeyguardAffordanceHelper mAffordanceHelper;
+    @VisibleForTesting
+    protected KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     @VisibleForTesting
     protected KeyguardStatusBarView mKeyguardStatusBar;
@@ -340,6 +341,7 @@ public class NotificationPanelView extends PanelView implements
      */
     private int mThemeResId;
     private KeyguardIndicationController mKeyguardIndicationController;
+    private Consumer<Boolean> mAffordanceLaunchListener;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -445,6 +447,14 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.keyguard_indication_bottom_padding);
         mQsNotificationTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.qs_notification_padding);
+    }
+
+    /**
+     * @see #launchCamera(boolean, int)
+     * @see #setLaunchingAffordance(boolean)
+     */
+    public void setLaunchAffordanceListener(Consumer<Boolean> listener) {
+        mAffordanceLaunchListener = listener;
     }
 
     public void updateResources() {
@@ -2743,6 +2753,9 @@ public class NotificationPanelView extends PanelView implements
     private void setLaunchingAffordance(boolean launchingAffordance) {
         getLeftIcon().setLaunchingAffordance(launchingAffordance);
         getRightIcon().setLaunchingAffordance(launchingAffordance);
+        if (mAffordanceLaunchListener != null) {
+            mAffordanceLaunchListener.accept(launchingAffordance);
+        }
     }
 
     /**
@@ -2853,9 +2866,6 @@ public class NotificationPanelView extends PanelView implements
         if (dozing == mDozing) return;
         mDozing = dozing;
         mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
-        if (mDozing) {
-            mNotificationStackScroller.showDarkShelf();
-        }
         mKeyguardBottomArea.setDozing(mDozing, animate);
 
         if (mBarState == StatusBarState.KEYGUARD
