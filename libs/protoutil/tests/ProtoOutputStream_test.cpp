@@ -132,6 +132,53 @@ TEST(ProtoOutputStreamTest, SerializeToStringPrimitives) {
     EXPECT_EQ(primitives.val_enum(), PrimitiveProto_Count_TWO);
 }
 
+TEST(ProtoOutputStreamTest, SerializeToVectorPrimitives) {
+    std::string s = "hello";
+    const char b[5] = { 'a', 'p', 'p', 'l', 'e' };
+
+    ProtoOutputStream proto;
+    EXPECT_TRUE(proto.write(FIELD_TYPE_INT32 | PrimitiveProto::kValInt32FieldNumber, 123));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_INT64 | PrimitiveProto::kValInt64FieldNumber, -1LL));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_FLOAT | PrimitiveProto::kValFloatFieldNumber, -23.5f));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_DOUBLE | PrimitiveProto::kValDoubleFieldNumber, 324.5));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_UINT32 | PrimitiveProto::kValUint32FieldNumber, 3424));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_UINT64 | PrimitiveProto::kValUint64FieldNumber, 57LL));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_FIXED32 | PrimitiveProto::kValFixed32FieldNumber, -20));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_FIXED64 | PrimitiveProto::kValFixed64FieldNumber, -37LL));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_BOOL | PrimitiveProto::kValBoolFieldNumber, true));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_STRING | PrimitiveProto::kValStringFieldNumber, s));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_BYTES | PrimitiveProto::kValBytesFieldNumber, b, 5));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_SFIXED32 | PrimitiveProto::kValSfixed32FieldNumber, 63));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_SFIXED64 | PrimitiveProto::kValSfixed64FieldNumber, -54));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_SINT32 | PrimitiveProto::kValSint32FieldNumber, -533));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_SINT64 | PrimitiveProto::kValSint64FieldNumber, -61224762453LL));
+    EXPECT_TRUE(proto.write(FIELD_TYPE_ENUM | PrimitiveProto::kValEnumFieldNumber, 2));
+
+    PrimitiveProto primitives;
+    std::vector<uint8_t> vec;
+    ASSERT_TRUE(proto.serializeToVector(&vec));
+
+    std::string serialized(vec.data(), vec.data() + vec.size());
+    ASSERT_TRUE(primitives.ParseFromString(serialized));
+
+    EXPECT_EQ(primitives.val_int32(), 123);
+    EXPECT_EQ(primitives.val_int64(), -1);
+    EXPECT_EQ(primitives.val_float(), -23.5f);
+    EXPECT_EQ(primitives.val_double(), 324.5f);
+    EXPECT_EQ(primitives.val_uint32(), 3424);
+    EXPECT_EQ(primitives.val_uint64(), 57);
+    EXPECT_EQ(primitives.val_fixed32(), -20);
+    EXPECT_EQ(primitives.val_fixed64(), -37);
+    EXPECT_EQ(primitives.val_bool(), true);
+    EXPECT_THAT(primitives.val_string(), StrEq(s.c_str()));
+    EXPECT_THAT(primitives.val_bytes(), StrEq("apple"));
+    EXPECT_EQ(primitives.val_sfixed32(), 63);
+    EXPECT_EQ(primitives.val_sfixed64(), -54);
+    EXPECT_EQ(primitives.val_sint32(), -533);
+    EXPECT_EQ(primitives.val_sint64(), -61224762453LL);
+    EXPECT_EQ(primitives.val_enum(), PrimitiveProto_Count_TWO);
+}
+
 TEST(ProtoOutputStreamTest, Complex) {
     std::string name1 = "cat";
     std::string name2 = "dog";

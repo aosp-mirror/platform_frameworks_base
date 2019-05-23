@@ -378,8 +378,18 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         public int visibleState = STATE_ICON;
         public boolean justAdded = true;
 
+        // How far we are from the end of the view actually is the most relevant for animation
+        float distanceToViewEnd = -1;
+
         @Override
         public void applyToView(View view) {
+            float parentWidth = 0;
+            if (view.getParent() instanceof View) {
+                parentWidth = ((View) view.getParent()).getWidth();
+            }
+
+            float currentDistanceToEnd = parentWidth - xTranslation;
+
             if (!(view instanceof StatusIconDisplayable)) {
                 return;
             }
@@ -403,7 +413,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
                     // all other transitions (to/from dot, etc)
                     animationProperties = ANIMATE_ALL_PROPERTIES;
                 }
-            } else if (visibleState != STATE_HIDDEN && xTranslation != view.getTranslationX()) {
+            } else if (visibleState != STATE_HIDDEN && distanceToViewEnd != currentDistanceToEnd) {
                 // Visibility isn't changing, just animate position
                 animationProperties = X_ANIMATION_PROPERTIES;
             }
@@ -416,6 +426,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             }
 
             justAdded = false;
+            distanceToViewEnd = currentDistanceToEnd;
+
         }
     }
 
