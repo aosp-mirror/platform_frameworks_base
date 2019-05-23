@@ -16,18 +16,18 @@
 
 package com.android.internal.telephony.cdma;
 
-import android.os.Parcel;
+import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.Rlog;
 import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
 import android.telephony.cdma.CdmaSmsCbProgramData;
-import android.telephony.Rlog;
-import android.util.Log;
 import android.text.TextUtils;
-import android.content.res.Resources;
+import android.util.Log;
 
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsAddress;
 import com.android.internal.telephony.SmsConstants;
 import com.android.internal.telephony.SmsHeader;
@@ -41,7 +41,6 @@ import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.HexDump;
-import com.android.internal.telephony.Sms7BitEncodingTranslator;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -418,7 +417,7 @@ public class SmsMessage extends SmsMessageBase {
         CharSequence newMsgBody = null;
         Resources r = Resources.getSystem();
         if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsgBody  = Sms7BitEncodingTranslator.translate(messageBody);
+            newMsgBody = Sms7BitEncodingTranslator.translate(messageBody, true);
         }
         if (TextUtils.isEmpty(newMsgBody)) {
             newMsgBody = messageBody;
