@@ -219,6 +219,12 @@ interface IStatsManager {
          in int options, in int state, in long[] experimentId);
 
     /**
+     * Logs an event for watchdog rollbacks.
+     */
+     oneway void sendWatchdogRollbackOccurredAtom(in int rollbackType, in String packageName,
+         in long packageVersionCode);
+
+    /**
      * Returns the most recently registered experiment IDs.
      */
     long[] getRegisteredExperimentIds();
