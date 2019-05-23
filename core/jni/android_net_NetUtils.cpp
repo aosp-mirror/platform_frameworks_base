@@ -18,26 +18,27 @@
 
 #include <vector>
 
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
-#include "NetdClient.h"
-#include <utils/misc.h>
-#include <android_runtime/AndroidRuntime.h>
-#include <utils/Log.h>
 #include <arpa/inet.h>
-#include <net/if.h>
 #include <linux/filter.h>
 #include <linux/if_arp.h>
 #include <linux/tcp.h>
+#include <net/if.h>
 #include <netinet/ether.h>
 #include <netinet/icmp6.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include <netinet/udp.h>
-#include <cutils/properties.h>
 
+#include <android_runtime/AndroidRuntime.h>
+#include <cutils/properties.h>
+#include <utils/misc.h>
+#include <utils/Log.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
+
+#include "NetdClient.h"
 #include "core_jni_helpers.h"
+#include "jni.h"
 
 extern "C" {
 int ifc_enable(const char *ifname);
@@ -303,6 +304,15 @@ static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobjec
     jniSetFileDescriptorOfFD(env, javaFd, -1);
 }
 
+static jint android_net_utils_getDnsNetId(JNIEnv *env, jobject thiz) {
+    int dnsNetId = getNetworkForDns();
+    if (dnsNetId < 0) {
+        throwErrnoException(env, "getDnsNetId", -dnsNetId);
+    }
+
+    return dnsNetId;
+}
+
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
     if (javaFd == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -359,6 +369,7 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
+    { "getDnsNetId", "()I", (void*) android_net_utils_getDnsNetId },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
