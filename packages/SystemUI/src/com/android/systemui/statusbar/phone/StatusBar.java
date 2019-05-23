@@ -3639,6 +3639,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
+            updateNotificationPanelTouchState();
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
         }
@@ -3671,7 +3672,10 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Keyguard.
      */
     private void updateNotificationPanelTouchState() {
-        mNotificationPanel.setTouchAndAnimationDisabled(!mDeviceInteractive && !mPulsing);
+        boolean goingToSleepWithoutAnimation = isGoingToSleep()
+                && !DozeParameters.getInstance(mContext).shouldControlScreenOff();
+        mNotificationPanel.setTouchAndAnimationDisabled((!mDeviceInteractive && !mPulsing)
+                || goingToSleepWithoutAnimation);
     }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
