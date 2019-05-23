@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -67,6 +68,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 public class DynamicSystemClient {
     /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
@@ -283,6 +285,7 @@ public class DynamicSystemClient {
      * @hide
      */
     @SystemApi
+    @TestApi
     public DynamicSystemClient(@NonNull Context context) {
         mContext = context;
         mConnection = new DynSystemServiceConnection();
@@ -314,8 +317,11 @@ public class DynamicSystemClient {
      * Bind to {@code DynamicSystem} installation service. Binding to the installation service
      * allows it to send status updates to {@link #OnStatusChangedListener}. It is recommanded
      * to bind before calling {@link #start} and get status updates.
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
+    @SystemApi
+    @TestApi
     public void bind() {
         if (!featureFlagEnabled()) {
             Slog.w(TAG, FeatureFlagUtils.DYNAMIC_SYSTEM + " not enabled; bind() aborted.");
@@ -334,8 +340,11 @@ public class DynamicSystemClient {
     /**
      * Unbind from {@code DynamicSystem} installation service. Unbinding from the installation
      * service stops it from sending following status updates.
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
+    @SystemApi
+    @TestApi
     public void unbind() {
         if (!mBound) {
             return;
@@ -367,8 +376,11 @@ public class DynamicSystemClient {
      *
      * @param systemUrl a network Uri, a file Uri or a content Uri pointing to a system image file.
      * @param systemSize size of system image.
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.INSTALL_DYNAMIC_SYSTEM)
+    @SystemApi
+    @TestApi
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
         start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
     }

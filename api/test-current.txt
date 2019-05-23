@@ -1917,6 +1917,10 @@ package android.os {
     method public boolean hasSingleFileDescriptor();
   }
 
+  public final class Parcel {
+    method public int readExceptionCode();
+  }
+
   public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
     method public static java.io.File getFile(java.io.FileDescriptor) throws java.io.IOException;
   }
@@ -1986,6 +1990,7 @@ package android.os {
   public class SystemProperties {
     method @NonNull public static String get(@NonNull String);
     method @NonNull public static String get(@NonNull String, @Nullable String);
+    method public static boolean getBoolean(@NonNull String, boolean);
   }
 
   public final class UserHandle implements android.os.Parcelable {
@@ -2136,6 +2141,36 @@ package android.os.health {
     method public void addTimer(int, int, long);
     method public void addTimers(int, String, android.os.health.TimerStat);
     method public void flattenToParcel(android.os.Parcel);
+  }
+
+}
+
+package android.os.image {
+
+  public class DynamicSystemClient {
+    ctor public DynamicSystemClient(@NonNull android.content.Context);
+    method @RequiresPermission("android.permission.INSTALL_DYNAMIC_SYSTEM") public void bind();
+    method public void setOnStatusChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
+    method public void setOnStatusChangedListener(@NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
+    method @RequiresPermission("android.permission.INSTALL_DYNAMIC_SYSTEM") public void start(@NonNull android.net.Uri, long);
+    method @RequiresPermission("android.permission.INSTALL_DYNAMIC_SYSTEM") public void start(@NonNull android.net.Uri, long, long);
+    method @RequiresPermission("android.permission.INSTALL_DYNAMIC_SYSTEM") public void unbind();
+    field public static final int CAUSE_ERROR_EXCEPTION = 6; // 0x6
+    field public static final int CAUSE_ERROR_INVALID_URL = 4; // 0x4
+    field public static final int CAUSE_ERROR_IO = 3; // 0x3
+    field public static final int CAUSE_ERROR_IPC = 5; // 0x5
+    field public static final int CAUSE_INSTALL_CANCELLED = 2; // 0x2
+    field public static final int CAUSE_INSTALL_COMPLETED = 1; // 0x1
+    field public static final int CAUSE_NOT_SPECIFIED = 0; // 0x0
+    field public static final int STATUS_IN_PROGRESS = 2; // 0x2
+    field public static final int STATUS_IN_USE = 4; // 0x4
+    field public static final int STATUS_NOT_STARTED = 1; // 0x1
+    field public static final int STATUS_READY = 3; // 0x3
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  public static interface DynamicSystemClient.OnStatusChangedListener {
+    method public void onStatusChanged(int, int, long, @Nullable Throwable);
   }
 
 }
@@ -2929,6 +2964,20 @@ package android.util {
 
   public final class ArraySet<E> implements java.util.Collection<E> java.util.Set<E> {
     method public E valueAtUnchecked(int);
+  }
+
+  public class FeatureFlagUtils {
+    ctor public FeatureFlagUtils();
+    method public static java.util.Map<java.lang.String,java.lang.String> getAllFeatureFlags();
+    method public static boolean isEnabled(android.content.Context, String);
+    method public static void setEnabled(android.content.Context, String, boolean);
+    field public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
+    field public static final String FFLAG_OVERRIDE_PREFIX = "sys.fflag.override.";
+    field public static final String FFLAG_PREFIX = "sys.fflag.";
+    field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
+    field public static final String PERSIST_PREFIX = "persist.sys.fflag.override.";
+    field public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
+    field public static final String SEAMLESS_TRANSFER = "settings_seamless_transfer";
   }
 
   public class TimeUtils {

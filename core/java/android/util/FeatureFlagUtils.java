@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -29,6 +30,7 @@ import java.util.Map;
  *
  * @hide
  */
+@TestApi
 public class FeatureFlagUtils {
 
     public static final String FFLAG_PREFIX = "sys.fflag.";
