@@ -13532,7 +13532,7 @@ HSPLcom/android/server/uri/UriGrantsManagerService;->checkHoldingPermissionsInte
 HSPLcom/android/server/uri/UriGrantsManagerService;->checkUriPermission(Lcom/android/server/uri/GrantUri;II)Z
 HSPLcom/android/server/uri/UriGrantsManagerService;->enforceNotIsolatedCaller(Ljava/lang/String;)V
 HSPLcom/android/server/uri/UriGrantsManagerService;->findOrCreateUriPermission(Ljava/lang/String;Ljava/lang/String;ILcom/android/server/uri/GrantUri;)Lcom/android/server/uri/UriPermission;
-PLcom/android/server/uri/UriGrantsManagerService;->getPersistedUriPermissions(Ljava/lang/String;Z)Landroid/content/pm/ParceledListSlice;
+PLcom/android/server/uri/UriGrantsManagerService;->getPersistedUriPermissions(Ljava/lang/String;ZZ)Landroid/content/pm/ParceledListSlice;
 HSPLcom/android/server/uri/UriGrantsManagerService;->getProviderInfo(Ljava/lang/String;II)Landroid/content/pm/ProviderInfo;
 HSPLcom/android/server/uri/UriGrantsManagerService;->grantUriPermission(ILjava/lang/String;Lcom/android/server/uri/GrantUri;ILcom/android/server/uri/UriPermissionOwner;I)V
 HSPLcom/android/server/uri/UriGrantsManagerService;->grantUriPermissionFromIntent(ILjava/lang/String;Landroid/content/Intent;Lcom/android/server/uri/UriPermissionOwner;I)V

@@ -2794,14 +2794,6 @@ public class CarrierConfigManager {
          */
         public static final String KEY_NFW_PROXY_APPS_STRING = KEY_PREFIX + "nfw_proxy_apps";
 
-        /**
-         * Specify whether to post a notification on the status bar whenever device location is
-         * provided for non-framework location requests in user-initiated emergency use cases.
-         * 0 - Do not post notification. This is default.
-         * 1 - Post notification for all request types.
-         */
-        public static final String KEY_ES_NOTIFY_INT = KEY_PREFIX + "es_notify_int";
-
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
@@ -2816,7 +2808,6 @@ public class CarrierConfigManager {
             defaults.putString(KEY_GPS_LOCK_STRING, "3");
             defaults.putString(KEY_ES_EXTENSION_SEC_STRING, "0");
             defaults.putString(KEY_NFW_PROXY_APPS_STRING, "");
-            defaults.putInt(KEY_ES_NOTIFY_INT, 0);
             return defaults;
         }
     }

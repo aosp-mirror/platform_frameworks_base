@@ -237,7 +237,6 @@ public class ChooserActivity extends ResolverActivity {
 
     private boolean mListViewDataChanged = false;
 
-
     @Retention(SOURCE)
     @IntDef({CONTENT_PREVIEW_FILE, CONTENT_PREVIEW_IMAGE, CONTENT_PREVIEW_TEXT})
     private @interface ContentPreviewType {
@@ -2036,7 +2035,8 @@ public class ChooserActivity extends ResolverActivity {
             return;
         }
 
-        if (mChooserRowAdapter.calculateChooserTargetWidth(right - left)
+        int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
+        if (mChooserRowAdapter.calculateChooserTargetWidth(availableWidth)
                 || mAdapterView.getAdapter() == null) {
             mAdapterView.setAdapter(mChooserRowAdapter);
 
@@ -2045,7 +2045,9 @@ public class ChooserActivity extends ResolverActivity {
                     return;
                 }
 
-                int offset = 0;
+                final int bottomInset = mSystemWindowInsets != null
+                                            ? mSystemWindowInsets.bottom : 0;
+                int offset = bottomInset;
                 int rowsToShow = mChooserRowAdapter.getContentPreviewRowCount()
                         + mChooserRowAdapter.getProfileRowCount()
                         + mChooserRowAdapter.getServiceTargetRowCount()
@@ -2060,7 +2062,7 @@ public class ChooserActivity extends ResolverActivity {
                 // still zero? then use a default height and leave, which
                 // can happen when there are no targets to show
                 if (rowsToShow == 0) {
-                    offset = getResources().getDimensionPixelSize(
+                    offset += getResources().getDimensionPixelSize(
                             R.dimen.chooser_max_collapsed_height);
                     mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
                     return;
@@ -2085,8 +2087,9 @@ public class ChooserActivity extends ResolverActivity {
                     // make sure to leave room for direct share 4->8 expansion
                     int requiredExpansionHeight =
                             (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
+                    int topInset = mSystemWindowInsets != null ? mSystemWindowInsets.top : 0;
                     int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
-                                        - requiredExpansionHeight;
+                                        - requiredExpansionHeight - topInset - bottomInset;
 
                     offset = Math.min(offset, minHeight);
                 }
@@ -2656,7 +2659,7 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public boolean isEnabled(int position) {
             int viewType = getItemViewType(position);
-            if (viewType == VIEW_TYPE_CONTENT_PREVIEW) {
+            if (viewType == VIEW_TYPE_CONTENT_PREVIEW || viewType == VIEW_TYPE_AZ_LABEL) {
                 return false;
             }
             return true;

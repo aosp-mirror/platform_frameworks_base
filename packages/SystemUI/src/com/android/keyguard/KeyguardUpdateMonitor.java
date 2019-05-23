@@ -1197,7 +1197,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
             String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-            int slotId = intent.getIntExtra(PhoneConstants.SLOT_KEY, 0);
+            int slotId = intent.getIntExtra(PhoneConstants.PHONE_KEY, 0);
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
             if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
