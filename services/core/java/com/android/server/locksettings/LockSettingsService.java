@@ -601,21 +601,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // Hide notification first, as tie managed profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
-                // Now we have unlocked the parent user we should show notifications
-                // about any profiles that exist.
-                List<UserInfo> profiles = mUserManager.getProfiles(userId);
-                for (int i = 0; i < profiles.size(); i++) {
-                    UserInfo profile = profiles.get(i);
-                    final boolean isSecure = isUserSecure(profile.id);
-                    if (isSecure && profile.isManagedProfile()) {
-                        UserHandle userHandle = profile.getUserHandle();
-                        if (!mUserManager.isUserUnlockingOrUnlocked(userHandle) &&
-                                !mUserManager.isQuietModeEnabled(userHandle)) {
-                            showEncryptionNotificationForProfile(userHandle);
-                        }
-                    }
-                }
-
                 if (mUserManager.getUserInfo(userId).isManagedProfile()) {
                     tieManagedProfileLockIfNecessary(userId, null);
                 }
@@ -1205,6 +1190,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     private void unlockUser(int userId, byte[] token, byte[] secret) {
         // TODO: make this method fully async so we can update UI with progress strings
+        final boolean alreadyUnlocked = mUserManager.isUserUnlockingOrUnlocked(userId);
         final CountDownLatch latch = new CountDownLatch(1);
         final IProgressListener listener = new IProgressListener.Stub() {
             @Override
@@ -1235,18 +1221,31 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        try {
-            if (!mUserManager.getUserInfo(userId).isManagedProfile()) {
-                final List<UserInfo> profiles = mUserManager.getProfiles(userId);
-                for (UserInfo pi : profiles) {
-                    // Unlock managed profile with unified lock
-                    if (tiedManagedProfileReadyToUnlock(pi)) {
-                        unlockChildProfile(pi.id, false /* ignoreUserNotAuthenticated */);
-                    }
+
+        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+            return;
+        }
+
+        for (UserInfo profile : mUserManager.getProfiles(userId)) {
+            // Unlock managed profile with unified lock
+            if (tiedManagedProfileReadyToUnlock(profile)) {
+                try {
+                    unlockChildProfile(profile.id, false /* ignoreUserNotAuthenticated */);
+                } catch (RemoteException e) {
+                    Log.d(TAG, "Failed to unlock child profile", e);
                 }
             }
-        } catch (RemoteException e) {
-            Log.d(TAG, "Failed to unlock child profile", e);
+            // Now we have unlocked the parent user and attempted to unlock the profile we should
+            // show notifications if the profile is still locked.
+            if (!alreadyUnlocked) {
+                long ident = clearCallingIdentity();
+                try {
+                    maybeShowEncryptionNotificationForUser(profile.id);
+                } finally {
+                    restoreCallingIdentity(ident);
+                }
+            }
+
         }
     }
 
