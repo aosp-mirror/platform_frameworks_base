@@ -1281,7 +1281,6 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 mHandler.scheduleOnPackageChanged(removingPackage, changeUserId, pkgList, uidList);
-                handleSavePolicyFile();
             }
         }
     };
@@ -6264,12 +6263,15 @@ public class NotificationManagerService extends SystemService {
 
     private void handleOnPackageChanged(boolean removingPackage, int changeUserId,
             String[] pkgList, int[] uidList) {
+        boolean preferencesChanged = removingPackage;
         mListeners.onPackagesChanged(removingPackage, pkgList, uidList);
         mAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
         mConditionProviders.onPackagesChanged(removingPackage, pkgList, uidList);
-        mPreferencesHelper.onPackagesChanged(
+        preferencesChanged |= mPreferencesHelper.onPackagesChanged(
                 removingPackage, changeUserId, pkgList, uidList);
-        handleSavePolicyFile();
+        if (preferencesChanged) {
+            handleSavePolicyFile();
+        }
     }
 
     protected class WorkerHandler extends Handler
