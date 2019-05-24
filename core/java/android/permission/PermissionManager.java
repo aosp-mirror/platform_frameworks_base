@@ -68,7 +68,8 @@ public final class PermissionManager {
     /**
      * Gets the version of the runtime permission database.
      *
-     * @return The database version.
+     * @return The database version, -1 when this is an upgrade from pre-Q, 0 when this is a fresh
+     * install.
      *
      * @hide
      */
