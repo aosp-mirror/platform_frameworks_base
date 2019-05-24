@@ -1264,7 +1264,7 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     // This method only sends data, it does not receive it.
     pid_t pid = IPCThreadState::self()->getCallingPid();
     uid_t uid = IPCThreadState::self()->getCallingUid();
-        // Root, system, and shell always have access
+    // Root, system, and shell always have access
     if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
         // Caller must be granted these permissions
         if (!checkCallingPermission(String16(kPermissionDump))) {
@@ -1348,6 +1348,64 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     mProcessor->OnLogEvent(&event);
     return Status::ok();
 }
+
+Status StatsService::sendWatchdogRollbackOccurredAtom(const int32_t rollbackTypeIn,
+                                                      const android::String16& packageNameIn,
+                                                      const int64_t packageVersionCodeIn) {
+    // Note: We skip the usage stats op check here since we do not have a package name.
+    // This is ok since we are overloading the usage_stats permission.
+    // This method only sends data, it does not receive it.
+    pid_t pid = IPCThreadState::self()->getCallingPid();
+    uid_t uid = IPCThreadState::self()->getCallingUid();
+    // Root, system, and shell always have access
+    if (uid != AID_ROOT && uid != AID_SYSTEM && uid != AID_SHELL) {
+        // Caller must be granted these permissions
+        if (!checkCallingPermission(String16(kPermissionDump))) {
+            return exception(binder::Status::EX_SECURITY,
+                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
+                                          kPermissionDump));
+        }
+        if (!checkCallingPermission(String16(kPermissionUsage))) {
+            return exception(binder::Status::EX_SECURITY,
+                             StringPrintf("UID %d / PID %d lacks permission %s", uid, pid,
+                                          kPermissionUsage));
+        }
+    }
+
+    android::util::stats_write(android::util::WATCHDOG_ROLLBACK_OCCURRED,
+            rollbackTypeIn, String8(packageNameIn).string(), packageVersionCodeIn);
+
+    // Fast return to save disk read.
+    if (rollbackTypeIn != android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS
+            && rollbackTypeIn !=
+                    android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE) {
+        return Status::ok();
+    }
+
+    bool readTrainInfoSuccess = false;
+    InstallTrainInfo trainInfoOnDisk;
+    readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfoOnDisk);
+
+    if (!readTrainInfoSuccess) {
+        return Status::ok();
+    }
+    std::vector<int64_t> experimentIds = trainInfoOnDisk.experimentIds;
+    if (experimentIds.empty()) {
+        return Status::ok();
+    }
+    switch (rollbackTypeIn) {
+        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
+            experimentIds.push_back(experimentIds[0] + 4);
+            break;
+        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
+            experimentIds.push_back(experimentIds[0] + 5);
+            break;
+    }
+    StorageManager::writeTrainInfo(trainInfoOnDisk.trainVersionCode, trainInfoOnDisk.trainName,
+            trainInfoOnDisk.status, experimentIds);
+    return Status::ok();
+}
+
 
 Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experimentIdsOut) {
     uid_t uid = IPCThreadState::self()->getCallingUid();
