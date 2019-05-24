@@ -1027,7 +1027,7 @@ public class SyncStorageEngine {
      * Called when the set of account has changed, given the new array of
      * active accounts.
      */
-    public void removeStaleAccounts(@Nullable Account[] accounts, int userId) {
+    public void removeStaleAccounts(@Nullable Account[] currentAccounts, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Slog.v(TAG, "Updating for new accounts...");
@@ -1036,9 +1036,11 @@ public class SyncStorageEngine {
             Iterator<AccountInfo> accIt = mAccounts.values().iterator();
             while (accIt.hasNext()) {
                 AccountInfo acc = accIt.next();
-                if ((accounts == null) || (
-                        (acc.accountAndUser.userId == userId)
-                        && !ArrayUtils.contains(accounts, acc.accountAndUser.account))) {
+                if (acc.accountAndUser.userId != userId) {
+                    continue; // Irrelevant user.
+                }
+                if ((currentAccounts == null)
+                        || !ArrayUtils.contains(currentAccounts, acc.accountAndUser.account)) {
                     // This account no longer exists...
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Slog.v(TAG, "Account removed: " + acc.accountAndUser);
