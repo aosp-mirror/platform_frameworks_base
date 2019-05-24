@@ -2021,10 +2021,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private void updateChildrenVisibility() {
         boolean hideContentWhileLaunching = mExpandAnimationRunning && mGuts != null
                 && mGuts.isExposed();
-        mPrivateLayout.setVisibility(!shouldShowPublic() && !mIsSummaryWithChildren
+        mPrivateLayout.setVisibility(!mShowingPublic && !mIsSummaryWithChildren
                 && !hideContentWhileLaunching ? VISIBLE : INVISIBLE);
         if (mChildrenContainer != null) {
-            mChildrenContainer.setVisibility(!shouldShowPublic() && mIsSummaryWithChildren
+            mChildrenContainer.setVisibility(!mShowingPublic && mIsSummaryWithChildren
                     && !hideContentWhileLaunching ? VISIBLE
                     : INVISIBLE);
         }
