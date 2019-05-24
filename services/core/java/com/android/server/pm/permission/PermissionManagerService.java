@@ -95,7 +95,6 @@ import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
 
@@ -220,7 +219,6 @@ public class PermissionManagerService {
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
 
     PermissionManagerService(Context context,
-            @Nullable DefaultPermissionGrantedCallback defaultGrantCallback,
             @NonNull Object externalLock) {
         mContext = context;
         mLock = externalLock;
@@ -235,7 +233,7 @@ public class PermissionManagerService {
         Watchdog.getInstance().addThread(mHandler);
 
         mDefaultPermissionGrantPolicy = new DefaultPermissionGrantPolicy(
-                context, mHandlerThread.getLooper(), defaultGrantCallback, this);
+                context, mHandlerThread.getLooper(), this);
         SystemConfig systemConfig = SystemConfig.getInstance();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
@@ -273,14 +271,13 @@ public class PermissionManagerService {
      * lock created by the permission manager itself.
      */
     public static PermissionManagerServiceInternal create(Context context,
-            @Nullable DefaultPermissionGrantedCallback defaultGrantCallback,
             @NonNull Object externalLock) {
         final PermissionManagerServiceInternal permMgrInt =
                 LocalServices.getService(PermissionManagerServiceInternal.class);
         if (permMgrInt != null) {
             return permMgrInt;
         }
-        new PermissionManagerService(context, defaultGrantCallback, externalLock);
+        new PermissionManagerService(context, externalLock);
         return LocalServices.getService(PermissionManagerServiceInternal.class);
     }
 
