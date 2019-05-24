@@ -112,7 +112,7 @@ jlong StrictJarFile_nativeStartIteration(JNIEnv* env, jobject, jlong nativeHandl
 
 jobject StrictJarFile_nativeNextEntry(JNIEnv* env, jobject, jlong iterationHandle) {
   ZipEntry data;
-  ZipString entryName;
+  std::string entryName;
 
   IterationHandle* handle = reinterpret_cast<IterationHandle*>(iterationHandle);
   const int32_t error = Next(*handle->CookieAddress(), &data, &entryName);
@@ -121,10 +121,7 @@ jobject StrictJarFile_nativeNextEntry(JNIEnv* env, jobject, jlong iterationHandl
     return NULL;
   }
 
-  std::unique_ptr<char[]> entryNameCString(new char[entryName.name_length + 1]);
-  memcpy(entryNameCString.get(), entryName.name, entryName.name_length);
-  entryNameCString[entryName.name_length] = '\0';
-  ScopedLocalRef<jstring> entryNameString(env, env->NewStringUTF(entryNameCString.get()));
+  ScopedLocalRef<jstring> entryNameString(env, env->NewStringUTF(entryName.c_str()));
 
   return newZipEntry(env, data, entryNameString.get());
 }
