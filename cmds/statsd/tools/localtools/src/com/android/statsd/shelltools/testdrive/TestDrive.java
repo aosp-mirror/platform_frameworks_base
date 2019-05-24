@@ -43,7 +43,10 @@ public class TestDrive {
 
     private static final int METRIC_ID_BASE = 1111;
     private static final long ATOM_MATCHER_ID_BASE = 1234567;
+    private static final long APP_BREADCRUMB_MATCHER_ID = 1111111;
     private static final int PULL_ATOM_START = 10000;
+    private static final int MAX_PLATFORM_ATOM_TAG = 100000;
+    private static final int VENDOR_PULLED_ATOM_START_TAG = 150000;
     private static final long CONFIG_ID = 54321;
     private static final String[] ALLOWED_LOG_SOURCES = {
         "AID_GRAPHICS",
@@ -110,9 +113,10 @@ public class TestDrive {
                                 + "be dumped after 1 min ...");
                 Thread.sleep(60_000);
             } else {
-                // wait for 2 min
-                LOGGER.info("Now wait for 2 minutes ...");
-                Thread.sleep(120_000);
+                LOGGER.info("Now wait for 1.5 minutes ...");
+                Thread.sleep(15_000);
+                Utils.logAppBreadcrumb(0, 0, LOGGER);
+                Thread.sleep(75_000);
             }
             testDrive.dumpMetrics();
         } catch (Exception e) {
@@ -156,6 +160,12 @@ public class TestDrive {
             .addAllAllowedLogSource(allowedSources)
             .setHashStringsInMetricReport(false);
 
+        if (hasPulledAtom(atomIds)) {
+            builder.addAtomMatcher(
+                    createAtomMatcher(
+                            Atom.APP_BREADCRUMB_REPORTED_FIELD_NUMBER, APP_BREADCRUMB_MATCHER_ID));
+        }
+
         for (int atomId : atomIds) {
             if (isPulledAtom(atomId)) {
                 builder.addAtomMatcher(createAtomMatcher(atomId, atomMatcherId));
@@ -163,8 +173,11 @@ public class TestDrive {
                 gaugeMetricBuilder
                     .setId(metricId)
                     .setWhat(atomMatcherId)
+                    .setTriggerEvent(APP_BREADCRUMB_MATCHER_ID)
                     .setGaugeFieldsFilter(FieldFilter.newBuilder().setIncludeAll(true).build())
-                    .setBucket(TimeUnit.ONE_MINUTE);
+                    .setBucket(TimeUnit.ONE_MINUTE)
+                    .setSamplingType(GaugeMetric.SamplingType.FIRST_N_SAMPLES)
+                    .setMaxNumGaugeAtomsPerBucket(100);
                 builder.addGaugeMetric(gaugeMetricBuilder.build());
             } else {
                 EventMetric.Builder eventMetricBuilder = EventMetric.newBuilder();
@@ -210,7 +223,8 @@ public class TestDrive {
     }
 
     private static boolean isPulledAtom(int atomId) {
-        return atomId >= PULL_ATOM_START;
+        return atomId >= PULL_ATOM_START && atomId <= MAX_PLATFORM_ATOM_TAG
+                || atomId >= VENDOR_PULLED_ATOM_START_TAG;
     }
 
     private static boolean hasPulledAtom(Set<Integer> atoms) {
