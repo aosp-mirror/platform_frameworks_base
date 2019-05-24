@@ -317,7 +317,6 @@ import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.dex.ViewCompiler;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
 import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
@@ -2415,15 +2414,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     LocalServices.getService(PackageManagerInternal.class),
                     mPackages);
             mPermissionManager = PermissionManagerService.create(context,
-                    new DefaultPermissionGrantedCallback() {
-                        @Override
-                        public void onDefaultRuntimePermissionsGranted(int userId) {
-                            synchronized(mPackages) {
-                                mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
-                                mDefaultPermissionsGrantedUsers.put(userId, userId);
-                            }
-                        }
-                    }, mPackages /*externalLock*/);
+                    mPackages /*externalLock*/);
             mDefaultPermissionPolicy = mPermissionManager.getDefaultPermissionGrantPolicy();
             mSettings = new Settings(Environment.getDataDirectory(),
                     mPermissionManager.getPermissionSettings(), mPackages);
@@ -24925,6 +24916,14 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean wereDefaultPermissionsGrantedSinceBoot(int userId) {
             synchronized (mPackages) {
                 return mDefaultPermissionPolicy.wereDefaultPermissionsGrantedSinceBoot(userId);
+            }
+        }
+
+        @Override
+        public void setRuntimePermissionsFingerPrint(@NonNull String fingerPrint,
+                @UserIdInt int userId) {
+            synchronized (mPackages) {
+                mSettings.setRuntimePermissionsFingerPrintLPr(fingerPrint, userId);
             }
         }
     }
