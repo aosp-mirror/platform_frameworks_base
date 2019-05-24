@@ -140,6 +140,9 @@
     <!-- Used to style charging animation AVD animation -->
     <attr name="chargingAnimColor" format="color" />
 
+    <!-- Size of shadows/elevations on keyguard -->
+    <attr name="shadowRadius" format="float" />
+
     <!-- Used display CarrierText in Keyguard or QS Footer -->
     <declare-styleable name="CarrierText">
         <attr name="allCaps" format="boolean" />
