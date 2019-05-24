@@ -1876,6 +1876,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     void onGutsOpened() {
+        resetTranslation();
         updateContentAccessibilityImportanceForGuts(false /* isEnabled */);
     }
 
