@@ -121,6 +121,24 @@ public class Installer extends SystemService {
         }
     }
 
+    @Override
+    public void onUnlockUser(int userId) {
+        if (userId == 0) {
+            if (!checkBeforeRemote()) return;
+
+            if (mInstalld == null) {
+                Slog.wtf(TAG, "Call to onUnlockUser prior to onStart.");
+                return;
+            }
+
+            try {
+                mInstalld.migrateLegacyObbData();
+            } catch (RemoteException re) {
+                Slog.wtf(TAG, "Error migrating legacy OBB data.", re);
+            }
+        }
+    }
+
     private void connect() {
         IBinder binder = ServiceManager.getService("installd");
         if (binder != null) {
