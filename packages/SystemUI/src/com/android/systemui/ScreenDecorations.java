@@ -156,6 +156,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
      * @param visible whether the handles should be shown
      */
     public void setAssistHintVisible(boolean visible) {
+        if (!mHandler.getLooper().isCurrentThread()) {
+            mHandler.post(() -> setAssistHintVisible(visible));
+            return;
+        }
+
         if (mAssistHintVisible != visible) {
             mAssistHintVisible = visible;
 

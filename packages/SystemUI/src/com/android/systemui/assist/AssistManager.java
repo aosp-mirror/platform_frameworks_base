@@ -75,6 +75,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private final AssistDisclosure mAssistDisclosure;
     private final InterestingConfigChanges mInterestingConfigChanges;
     private final PhoneStateMonitor mPhoneStateMonitor;
+    private final AssistHandleBehaviorController mHandleController;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -110,6 +111,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = new PhoneStateMonitor(context);
+        mHandleController = new AssistHandleBehaviorController(context, new Handler());
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
@@ -350,6 +352,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
             }
         }
         v.setImageDrawable(null);
+    }
+
+    protected AssistHandleBehaviorController getHandleBehaviorController() {
+        return mHandleController;
     }
 
     @Nullable
