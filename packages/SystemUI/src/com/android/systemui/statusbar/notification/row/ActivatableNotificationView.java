@@ -1045,6 +1045,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return calculateBgColor(false /* withTint */, false /* withOverride */);
     }
 
+    public int getCurrentBackgroundTint() {
+        return mCurrentBackgroundTint;
+    }
+
     public boolean isPinned() {
         return false;
     }
