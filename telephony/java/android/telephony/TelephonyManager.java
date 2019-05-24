@@ -2246,7 +2246,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public String getNetworkOperatorForPhone(int phoneId) {
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
-     }
+    }
 
 
     /**
@@ -2449,21 +2449,7 @@ public class TelephonyManager {
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
     public @NetworkType int getNetworkType() {
-       try {
-           ITelephony telephony = getITelephony();
-           if (telephony != null) {
-               return telephony.getNetworkType();
-            } else {
-                // This can happen when the ITelephony interface is not up yet.
-                return NETWORK_TYPE_UNKNOWN;
-            }
-        } catch(RemoteException ex) {
-            // This shouldn't happen in the normal case
-            return NETWORK_TYPE_UNKNOWN;
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
-            return NETWORK_TYPE_UNKNOWN;
-        }
+        return getNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
     }
 
     /**
@@ -2494,7 +2480,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getNetworkType(int subId) {
         try {
             ITelephony telephony = getITelephony();
