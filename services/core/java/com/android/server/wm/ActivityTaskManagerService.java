@@ -311,6 +311,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final int KEY_DISPATCHING_TIMEOUT_MS = 5 * 1000;
     // How long we wait until we timeout on key dispatching during instrumentation.
     static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS = 60 * 1000;
+    // How long we permit background activity starts after an activity in the process
+    // started or finished.
+    static final long ACTIVITY_BG_START_GRACE_PERIOD_MS = 10 * 1000;
 
     /** Used to indicate that an app transition should be animated. */
     static final boolean ANIMATE = true;
@@ -1575,6 +1578,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 }
             }
+
+            // note down that the process has finished an activity and is in background activity
+            // starts grace period
+            if (r.app != null) {
+                r.app.setLastActivityFinishTimeIfNeeded(SystemClock.uptimeMillis());
+            }
+
             final long origId = Binder.clearCallingIdentity();
             try {
                 boolean res;
