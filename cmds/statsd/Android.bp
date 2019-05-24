@@ -52,6 +52,7 @@ cc_defaults {
         ":statsd_aidl",
         "src/active_config_list.proto",
         "src/statsd_config.proto",
+        "src/uid_data.proto",
         "src/FieldValue.cpp",
         "src/hash.cpp",
         "src/stats_log_util.cpp",
