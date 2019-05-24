@@ -137,9 +137,8 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
         }
 
         public Builder(@NonNull MediaRoute2ProviderInfo descriptor) {
-            if (descriptor == null) {
-                throw new IllegalArgumentException("descriptor must not be null");
-            }
+            Objects.requireNonNull(descriptor, "descriptor must not be null");
+
             mRoutes = new ArrayMap<>(descriptor.mRoutes);
         }
 
