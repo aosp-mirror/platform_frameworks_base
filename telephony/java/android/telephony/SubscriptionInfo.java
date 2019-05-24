@@ -731,19 +731,19 @@ public class SubscriptionInfo implements Parcelable {
     public String toString() {
         String iccIdToPrint = givePrintableIccid(mIccId);
         String cardStringToPrint = givePrintableIccid(mCardString);
-        return "{id=" + mId + ", iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
+        return "{id=" + mId + " iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
                 + " carrierId=" + mCarrierId + " displayName=" + mDisplayName
                 + " carrierName=" + mCarrierName + " nameSource=" + mNameSource
                 + " iconTint=" + mIconTint + " mNumber=" + Rlog.pii(Build.IS_DEBUGGABLE, mNumber)
-                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
-                + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
-                + " accessRules " + Arrays.toString(mAccessRules)
+                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc=" + mMcc
+                + " mnc=" + mMnc + " mCountryIso=" + mCountryIso + " isEmbedded=" + mIsEmbedded
+                + " accessRules=" + Arrays.toString(mAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
-                + " isOpportunistic " + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
+                + " isOpportunistic=" + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
                 + " mIsGroupDisabled=" + mIsGroupDisabled
                 + " profileClass=" + mProfileClass
-                + " ehplmns = " + Arrays.toString(mEhplmns)
-                + " hplmns = " + Arrays.toString(mHplmns)
+                + " ehplmns=" + Arrays.toString(mEhplmns)
+                + " hplmns=" + Arrays.toString(mHplmns)
                 + " subscriptionType=" + mSubscriptionType
                 + " mGroupOwner=" + mGroupOwner + "}";
     }
