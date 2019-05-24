@@ -1319,7 +1319,8 @@ public class ResolverActivity extends Activity {
             buttonLayout.setVisibility(View.VISIBLE);
             int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
             buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                    buttonLayout.getPaddingRight(), buttonLayout.getPaddingBottom() + inset);
+                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                        R.dimen.resolver_button_bar_spacing) + inset);
 
             mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
             mSettingsButton = (Button) buttonLayout.findViewById(R.id.button_app_settings);
