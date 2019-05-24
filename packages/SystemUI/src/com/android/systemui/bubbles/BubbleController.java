@@ -16,6 +16,9 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
@@ -51,6 +54,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
 import android.util.Log;
 import android.view.Display;
 import android.view.IPinnedStackController;
@@ -78,6 +82,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -143,6 +148,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;
+    private final ZenModeController mZenModeController;
     private StatusBarStateListener mStatusBarStateListener;
 
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
@@ -204,17 +210,31 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Inject
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
             BubbleData data, ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider) {
+            NotificationInterruptionStateProvider interruptionStateProvider,
+            ZenModeController zenModeController) {
         this(context, statusBarWindowController, data, null /* synchronizer */,
-                configurationController, interruptionStateProvider);
+                configurationController, interruptionStateProvider, zenModeController);
     }
 
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
             BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider) {
+            NotificationInterruptionStateProvider interruptionStateProvider,
+            ZenModeController zenModeController) {
         mContext = context;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
+        mZenModeController = zenModeController;
+        mZenModeController.addCallback(new ZenModeController.Callback() {
+            @Override
+            public void onZenChanged(int zen) {
+                updateStackViewForZenConfig();
+            }
+
+            @Override
+            public void onConfigChanged(ZenModeConfig config) {
+                updateStackViewForZenConfig();
+            }
+        });
 
         configurationController.addCallback(this /* configurationListener */);
 
@@ -260,6 +280,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
             }
+
+            updateStackViewForZenConfig();
         }
     }
 
@@ -566,6 +588,35 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     };
 
     /**
+     * Updates the stack view's suppression flags from the latest config from the zen (do not
+     * disturb) controller.
+     */
+    private void updateStackViewForZenConfig() {
+        final ZenModeConfig zenModeConfig = mZenModeController.getConfig();
+
+        if (zenModeConfig == null || mStackView == null) {
+            return;
+        }
+
+        final int suppressedEffects = zenModeConfig.suppressedVisualEffects;
+        final boolean hideNotificationDotsSelected =
+                (suppressedEffects & SUPPRESSED_EFFECT_BADGE) != 0;
+        final boolean dontPopNotifsOnScreenSelected =
+                (suppressedEffects & SUPPRESSED_EFFECT_PEEK) != 0;
+        final boolean hideFromPullDownShadeSelected =
+                (suppressedEffects & SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
+
+        final boolean dndEnabled = mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF;
+
+        mStackView.setSuppressNewDot(
+                dndEnabled && hideNotificationDotsSelected);
+        mStackView.setSuppressFlyout(
+                dndEnabled && (dontPopNotifsOnScreenSelected
+                        || hideFromPullDownShadeSelected));
+    }
+
+    /**
+     * Lets any listeners know if bubble state has changed.
      * Updates the visibility of the bubbles based on current state.
      * Does not un-bubble, just hides or un-hides. Notifies any
      * {@link BubbleStateChangeListener}s of visibility changes.
