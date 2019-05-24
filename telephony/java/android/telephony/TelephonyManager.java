@@ -8245,9 +8245,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null)
                 retVal = telephony.isUserDataEnabled(subId);
-        } catch (RemoteException e) {
+        } catch (RemoteException | NullPointerException e) {
             Log.e(TAG, "Error calling ITelephony#isUserDataEnabled", e);
-        } catch (NullPointerException e) {
         }
         return retVal;
     }
