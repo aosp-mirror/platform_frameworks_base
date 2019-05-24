@@ -1354,6 +1354,7 @@ public class PermissionManagerService {
                     updatedUserIds);
             updatedUserIds = setInitialGrantForNewImplicitPermissionsLocked(origPermissions,
                     permissionsState, pkg, newImplicitPermissions, updatedUserIds);
+            updatedUserIds = checkIfLegacyStorageOpsNeedToBeUpdated(pkg, replace, updatedUserIds);
         }
 
         // Persist the runtime permissions state for users with changes. If permissions
@@ -1477,6 +1478,28 @@ public class PermissionManagerService {
 
         // Add permission flags
         ps.updatePermissionFlags(mSettings.getPermission(newPerm), userId, flags, flags);
+    }
+
+    /**
+     * When the app has requested legacy storage we might need to update
+     * {@link android.app.AppOpsManager#OP_LEGACY_STORAGE}. Hence force an update in
+     * {@link com.android.server.policy.PermissionPolicyService#synchronizePackagePermissionsAndAppOpsForUser(Context, String, int)}
+     *
+     * @param pkg The package for which the permissions are updated
+     * @param replace If the app is being replaced
+     * @param updatedUserIds The ids of the users that already changed.
+     *
+     * @return The ids of the users that are changed
+     */
+    private @NonNull int[] checkIfLegacyStorageOpsNeedToBeUpdated(
+            @NonNull PackageParser.Package pkg, boolean replace, @NonNull int[] updatedUserIds) {
+        if (replace && pkg.applicationInfo.hasRequestedLegacyExternalStorage() && (
+                pkg.requestedPermissions.contains(READ_EXTERNAL_STORAGE)
+                        || pkg.requestedPermissions.contains(WRITE_EXTERNAL_STORAGE))) {
+            return UserManagerService.getInstance().getUserIds();
+        }
+
+        return updatedUserIds;
     }
 
     /**
