@@ -321,7 +321,6 @@ public class NotificationManagerService extends SystemService {
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
-            RoleManager.ROLE_SMS,
             RoleManager.ROLE_EMERGENCY
     };
 
