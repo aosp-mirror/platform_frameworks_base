@@ -16,19 +16,12 @@
 
 package com.android.systemui.bubbles;
 
-import static com.android.systemui.bubbles.BubbleController.DISMISS_AGED;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
@@ -38,6 +31,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
@@ -51,11 +45,20 @@ import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
+/**
+ * Tests operations and the resulting state managed by BubbleData.
+ * <p>
+ * After each operation to verify, {@link #verifyUpdateReceived()} ensures the listener was called
+ * and captures the Update object received there.
+ * <p>
+ * Other methods beginning with 'assert' access the captured update object and assert on specific
+ * aspects of it.
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -89,6 +92,9 @@ public class BubbleDataTest extends SysuiTestCase {
     private PendingIntent mDeleteIntent;
 
     private NotificationTestHelper mNotificationTestHelper;
+
+    @Captor
+    private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
 
     @Before
     public void setUp() throws Exception {
@@ -132,9 +138,9 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryA1, 1000);
 
         // Verify
-        verify(mListener).onBubbleAdded(eq(mBubbleA1));
-        verify(mListener).onSelectionChanged(eq(mBubbleA1));
-        verify(mListener).apply();
+        verifyUpdateReceived();
+        assertBubbleAdded(mBubbleA1);
+        assertSelectionChangedTo(mBubbleA1);
     }
 
     @Test
@@ -149,8 +155,8 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
 
         // Verify
-        verify(mListener).onBubbleRemoved(eq(mBubbleA1), eq(BubbleController.DISMISS_USER_GESTURE));
-        verify(mListener).apply();
+        verifyUpdateReceived();
+        assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_USER_GESTURE);
     }
 
     // COLLAPSED / ADD
@@ -171,7 +177,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryC1, 6000);
-        verify(mListener).onBubbleRemoved(eq(mBubbleA1), eq(DISMISS_AGED));
+        verifyUpdateReceived();
+        assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_AGED);
     }
 
     /**
@@ -190,19 +197,20 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryA1, 1000);
-        verify(mListener, never()).onOrderChanged(anyList());
+        verifyUpdateReceived();
+        assertOrderNotChanged();
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB1, mBubbleA1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB2, mBubbleB1, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryA2, 4000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA2, mBubbleA1, mBubbleB2, mBubbleB1);
     }
 
     /**
@@ -223,19 +231,20 @@ public class BubbleDataTest extends SysuiTestCase {
         // Test
         setOngoing(mEntryA1, true);
         sendUpdatedEntryAtTime(mEntryA1, 1000);
-        verify(mListener, never()).onOrderChanged(anyList());
+        verifyUpdateReceived();
+        assertOrderNotChanged();
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
-        verify(mListener, never()).onOrderChanged(eq(listOf(mBubbleA1, mBubbleB1)));
+        verifyUpdateReceived();
+        assertOrderNotChanged();
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleB2, mBubbleB1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA1, mBubbleB2, mBubbleB1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryA2, 4000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleA2, mBubbleB2, mBubbleB1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleB2, mBubbleB1);
     }
 
     /**
@@ -252,20 +261,22 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryA1, 1000);
-        verify(mListener).onSelectionChanged(eq(mBubbleA1));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryB1, 2000);
-        verify(mListener).onSelectionChanged(eq(mBubbleB1));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleB1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryB2, 3000);
-        verify(mListener).onSelectionChanged(eq(mBubbleB2));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleB2);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryA2, 4000);
-        verify(mListener).onSelectionChanged(eq(mBubbleA2));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA2);
     }
+
     /**
      * Verifies that while collapsed, the selection will not change if the selected bubble is
      * ongoing. It remains the top bubble and as such remains selected.
@@ -282,9 +293,17 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryB1, 2000);
+        verifyUpdateReceived();
+        assertSelectionNotChanged();
+
         sendUpdatedEntryAtTime(mEntryB2, 3000);
+        verifyUpdateReceived();
+        assertSelectionNotChanged();
+
         sendUpdatedEntryAtTime(mEntryA2, 4000);
-        verify(mListener, never()).onSelectionChanged(any(Bubble.class));
+        verifyUpdateReceived();
+        assertSelectionNotChanged();
+
         assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA1); // selection unchanged
     }
 
@@ -305,7 +324,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB2, mBubbleB1, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA1);
     }
 
 
@@ -324,7 +344,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryB1, BubbleController.DISMISS_USER_GESTURE);
-        verify(mListener, never()).onOrderChanged(anyList());
+        verifyUpdateReceived();
+        assertOrderNotChanged();
     }
 
     /**
@@ -343,7 +364,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_NOTIF_CANCEL);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB2, mBubbleB1, mBubbleA2)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB2, mBubbleB1, mBubbleA2);
     }
 
     /**
@@ -361,7 +383,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_NOTIF_CANCEL);
-        verify(mListener).onSelectionChanged(eq(mBubbleB2));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleB2);
     }
 
     // COLLAPSED / UPDATE
@@ -381,11 +404,12 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryB1, 5000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryA1, 6000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleA2, mBubbleB1, mBubbleB2)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleB1, mBubbleB2);
     }
 
     /**
@@ -402,11 +426,12 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryB1, 5000);
-        verify(mListener).onSelectionChanged(eq(mBubbleB1));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleB1);
 
-        reset(mListener);
         sendUpdatedEntryAtTime(mEntryA1, 6000);
-        verify(mListener).onSelectionChanged(eq(mBubbleA1));
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
     }
 
     /**
@@ -425,7 +450,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryB2, 5000); // [A1*, A2, B2, B1]
-        verify(mListener, never()).onSelectionChanged(any(Bubble.class));
+        verifyUpdateReceived();
+        assertSelectionNotChanged();
     }
 
     /**
@@ -434,10 +460,10 @@ public class BubbleDataTest extends SysuiTestCase {
     @Test
     public void test_collapsed_expansion_whenEmpty_doesNothing() {
         assertThat(mBubbleData.hasBubbles()).isFalse();
-        changeExpandedStateAtTime(true, 2000L);
+        mBubbleData.setListener(mListener);
 
-        verify(mListener, never()).onExpandedChanged(anyBoolean());
-        verify(mListener, never()).apply();
+        changeExpandedStateAtTime(true, 2000L);
+        verifyZeroInteractions(mListener);
     }
 
     @Test
@@ -450,7 +476,8 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
 
         // Verify the selection was cleared.
-        verify(mListener).onSelectionChanged(isNull());
+        verifyUpdateReceived();
+        assertSelectionCleared();
     }
 
     // EXPANDED / ADD
@@ -476,7 +503,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryC1, 4000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleC1, mBubbleB1, mBubbleA2, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleC1, mBubbleB1, mBubbleA2, mBubbleA1);
     }
 
     /**
@@ -498,7 +526,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryC1, 4000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA1, mBubbleA2, mBubbleC1, mBubbleB1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA1, mBubbleA2, mBubbleC1, mBubbleB1);
     }
 
     /**
@@ -519,7 +548,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryA3, 4000);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleA3, mBubbleA2, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB1, mBubbleA3, mBubbleA2, mBubbleA1);
     }
 
     // EXPANDED / UPDATE
@@ -543,7 +573,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryA1, 4000);
-        verify(mListener, never()).onOrderChanged(anyList());
+        verifyUpdateReceived();
+        assertOrderNotChanged();
     }
 
     /**
@@ -564,9 +595,16 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         sendUpdatedEntryAtTime(mEntryA1, 6000);
+        verifyUpdateReceived();
+        assertOrderNotChanged();
+
         sendUpdatedEntryAtTime(mEntryA2, 7000);
+        verifyUpdateReceived();
+        assertOrderNotChanged();
+
         sendUpdatedEntryAtTime(mEntryB1, 8000);
-        verify(mListener, never()).onSelectionChanged(any(Bubble.class));
+        verifyUpdateReceived();
+        assertOrderNotChanged();
     }
 
     // EXPANDED / REMOVE
@@ -590,7 +628,8 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryB2, BubbleController.DISMISS_USER_GESTURE);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleA2, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB1, mBubbleA2, mBubbleA1);
     }
 
     /**
@@ -614,11 +653,12 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryA2, BubbleController.DISMISS_USER_GESTURE);
-        verify(mListener).onSelectionChanged(mBubbleA1);
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleA1);
 
-        reset(mListener);
         mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
-        verify(mListener).onSelectionChanged(mBubbleB1);
+        verifyUpdateReceived();
+        assertSelectionChangedTo(mBubbleB1);
     }
 
     @Test
@@ -629,11 +669,12 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         changeExpandedStateAtTime(true, 3000L);
-        verify(mListener).onExpandedChanged(eq(true));
+        verifyUpdateReceived();
+        assertExpandedChangedTo(true);
 
-        reset(mListener);
         changeExpandedStateAtTime(false, 4000L);
-        verify(mListener).onExpandedChanged(eq(false));
+        verifyUpdateReceived();
+        assertExpandedChangedTo(false);
     }
 
     /**
@@ -663,7 +704,7 @@ public class BubbleDataTest extends SysuiTestCase {
         mBubbleData.setSelectedBubble(mBubbleA2);
         mBubbleData.setListener(mListener);
         assertThat(mBubbleData.getBubbles()).isEqualTo(
-                listOf(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
+                ImmutableList.of(mBubbleB2, mBubbleB1, mBubbleA2, mBubbleA1));
 
         // Test
 
@@ -678,12 +719,13 @@ public class BubbleDataTest extends SysuiTestCase {
         //
         // collapse -> selected bubble (A2) moves first.
         changeExpandedStateAtTime(false, 8000L);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2);
 
         // expand -> "original" order/grouping restored
-        reset(mListener);
         changeExpandedStateAtTime(true, 10000L);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleB1, mBubbleB2, mBubbleA2, mBubbleA1);
     }
 
     /**
@@ -717,15 +759,17 @@ public class BubbleDataTest extends SysuiTestCase {
         //
         // collapse -> selected bubble (A2) moves first.
         changeExpandedStateAtTime(false, 8000L);
-        verify(mListener).onOrderChanged(eq(listOf(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2)));
+        verifyUpdateReceived();
+        assertOrderChangedTo(mBubbleA2, mBubbleA1, mBubbleB1, mBubbleB2);
 
         // An update occurs, which causes sorting, and this invalidates the previously saved order.
         sendUpdatedEntryAtTime(mEntryA2, 9000);
+        verifyUpdateReceived();
 
         // No order changes when expanding because the new sorted order remains.
-        reset(mListener);
         changeExpandedStateAtTime(true, 10000L);
-        verify(mListener, never()).onOrderChanged(anyList());
+        verifyUpdateReceived();
+        assertOrderNotChanged();
     }
 
     @Test
@@ -737,8 +781,60 @@ public class BubbleDataTest extends SysuiTestCase {
 
         // Test
         mBubbleData.notificationEntryRemoved(mEntryA1, BubbleController.DISMISS_USER_GESTURE);
-        verify(mListener).onExpandedChanged(eq(false));
+        verifyUpdateReceived();
+        assertExpandedChangedTo(false);
     }
+
+    private void verifyUpdateReceived() {
+        verify(mListener).applyUpdate(mUpdateCaptor.capture());
+        reset(mListener);
+    }
+
+    private void assertBubbleAdded(Bubble expected) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.addedBubble).named("addedBubble").isEqualTo(expected);
+    }
+
+    private void assertBubbleRemoved(Bubble expected, @BubbleController.DismissReason int reason) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.removedBubbles).named("removedBubbles")
+                .isEqualTo(ImmutableList.of(Pair.create(expected, reason)));
+    }
+
+    private void assertOrderNotChanged() {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.orderChanged).named("orderChanged").isFalse();
+    }
+
+    private void assertOrderChangedTo(Bubble... order) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.orderChanged).named("orderChanged").isTrue();
+        assertThat(update.bubbles).named("bubble order").isEqualTo(ImmutableList.copyOf(order));
+    }
+
+    private void assertSelectionNotChanged() {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.selectionChanged).named("selectionChanged").isFalse();
+    }
+
+    private void assertSelectionChangedTo(Bubble bubble) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.selectionChanged).named("selectionChanged").isTrue();
+        assertThat(update.selectedBubble).named("selectedBubble").isEqualTo(bubble);
+    }
+
+    private void assertSelectionCleared() {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.selectionChanged).named("selectionChanged").isTrue();
+        assertThat(update.selectedBubble).named("selectedBubble").isNull();
+    }
+
+    private void assertExpandedChangedTo(boolean expected) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.expandedChanged).named("expandedChanged").isTrue();
+        assertThat(update.expanded).named("expanded").isEqualTo(expected);
+    }
+
 
     private NotificationEntry createBubbleEntry(int userId, String notifKey, String packageName) {
         return createBubbleEntry(userId, notifKey, packageName, 1000);
@@ -797,10 +893,5 @@ public class BubbleDataTest extends SysuiTestCase {
     private void changeExpandedStateAtTime(boolean shouldBeExpanded, long time) {
         setCurrentTime(time);
         mBubbleData.setExpanded(shouldBeExpanded);
-    }
-
-    /** Syntactic sugar to keep assertions more readable */
-    private static <T> List<T> listOf(T... a) {
-        return ImmutableList.copyOf(a);
     }
 }
