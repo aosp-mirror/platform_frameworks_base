@@ -27,21 +27,19 @@ import android.net.NetworkCapabilities;
 import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
 import android.net.metrics.INetdEventListener;
-import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkMetrics;
 import android.net.metrics.WakeupEvent;
 import android.net.metrics.WakeupStats;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.TokenBucket;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
@@ -305,6 +303,11 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             getMetricsForNetwork(timestamp, netId)
                     .addTcpStatsResult(sent, lost, rttUs, sentAckDiffMs);
         }
+    }
+
+    @Override
+    public int getInterfaceVersion() throws RemoteException {
+        return this.VERSION;
     }
 
     private void addWakeupEvent(WakeupEvent event) {
