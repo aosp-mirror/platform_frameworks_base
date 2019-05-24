@@ -119,22 +119,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
         InOrder inOrder = inOrder(mNotificationStackScrollLayout, mStatusBarStateController);
         inOrder.verify(mNotificationStackScrollLayout).setDark(eq(true), eq(true), eq(null));
-        inOrder.verify(mNotificationStackScrollLayout).showDarkShelf();
         inOrder.verify(mStatusBarStateController).setDozeAmount(eq(1f), eq(true));
-    }
-
-    @Test
-    public void testSetDozing_showsDarkShelfWithDefaultClock() {
-        when(mKeyguardStatusView.hasCustomClock()).thenReturn(false);
-        mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
-        verify(mNotificationStackScrollLayout).showDarkShelf();
-    }
-
-    @Test
-    public void testSetDozing_showsDarkShelfWhenCustomClock() {
-        when(mKeyguardStatusView.hasCustomClock()).thenReturn(true);
-        mNotificationPanelView.setDozing(true /* dozing */, true /* animate */, null /* touch */);
-        verify(mNotificationStackScrollLayout).showDarkShelf();
     }
 
     @Test

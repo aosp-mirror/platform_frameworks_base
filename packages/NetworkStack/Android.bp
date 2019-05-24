@@ -42,8 +42,8 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "ipmemorystore-client",
-        "netd_aidl_interface-java",
-        "networkstack-aidl-interfaces-java",
+        "netd_aidl_interface-V2-java",
+        "networkstack-aidl-interfaces-V3-java",
         "datastallprotosnano",
         "networkstackprotosnano",
         "captiveportal-lib",
@@ -109,7 +109,9 @@ android_app {
     // InProcessNetworkStack is a replacement for NetworkStack
     overrides: ["NetworkStack"],
     // The permission configuration *must* be included to ensure security of the device
-    required: ["PlatformNetworkPermissionConfig"],
+    // The InProcessNetworkStack goes together with the PlatformCaptivePortalLogin, which replaces
+    // the default CaptivePortalLogin.
+    required: ["PlatformNetworkPermissionConfig", "PlatformCaptivePortalLogin"],
 }
 
 // Updatable network stack packaged as an application
