@@ -2643,18 +2643,25 @@ public class NotificationManagerService extends SystemService {
                 ParceledListSlice channelsList) {
             List<NotificationChannel> channels = channelsList.getList();
             final int channelsSize = channels.size();
+            boolean needsPolicyFileChange = false;
             for (int i = 0; i < channelsSize; i++) {
                 final NotificationChannel channel = channels.get(i);
                 Preconditions.checkNotNull(channel, "channel in list is null");
-                mPreferencesHelper.createNotificationChannel(pkg, uid, channel,
-                        true /* fromTargetApp */, mConditionProviders.isPackageOrComponentAllowed(
+                needsPolicyFileChange = mPreferencesHelper.createNotificationChannel(pkg, uid,
+                        channel, true /* fromTargetApp */,
+                        mConditionProviders.isPackageOrComponentAllowed(
                                 pkg, UserHandle.getUserId(uid)));
-                mListeners.notifyNotificationChannelChanged(pkg,
-                        UserHandle.getUserHandleForUid(uid),
-                        mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), false),
-                        NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
+                if (needsPolicyFileChange) {
+                    mListeners.notifyNotificationChannelChanged(pkg,
+                            UserHandle.getUserHandleForUid(uid),
+                            mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(),
+                                    false),
+                            NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
+                }
             }
-            handleSavePolicyFile();
+            if (needsPolicyFileChange) {
+                handleSavePolicyFile();
+            }
         }
 
         @Override

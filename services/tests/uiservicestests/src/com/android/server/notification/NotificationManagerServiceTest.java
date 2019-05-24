@@ -1660,11 +1660,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(channel2.getId()), anyBoolean()))
                 .thenReturn(channel2);
+        when(mPreferencesHelper.createNotificationChannel(eq(PKG), anyInt(),
+                eq(channel2), anyBoolean(), anyBoolean()))
+                .thenReturn(true);
 
         reset(mListeners);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(mTestNotificationChannel, channel2)));
-        verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
         verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
