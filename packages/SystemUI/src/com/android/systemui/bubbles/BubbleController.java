@@ -56,6 +56,7 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Display;
 import android.view.IPinnedStackController;
 import android.view.IPinnedStackListener;
@@ -514,62 +515,66 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final BubbleData.Listener mBubbleDataListener = new BubbleData.Listener() {
 
         @Override
-        public void onBubbleAdded(Bubble bubble) {
-            ensureStackViewCreated();
-            mStackView.addBubble(bubble);
-        }
-
-        @Override
-        public void onBubbleRemoved(Bubble bubble, @DismissReason int reason) {
-            if (mStackView != null) {
-                mStackView.removeBubble(bubble);
+        public void applyUpdate(BubbleData.Update update) {
+            if (mStackView == null && update.addedBubble != null) {
+                // Lazy init stack view when the first bubble is added.
+                ensureStackViewCreated();
             }
-            if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
-                    && !bubble.entry.showInShadeWhenBubble()) {
-                // The bubble is gone & the notification is gone, time to actually remove it
-                mNotificationEntryManager.performRemoveNotification(bubble.entry.notification,
-                        UNDEFINED_DISMISS_REASON);
-            } else {
-                // The notification is still in the shade but we've removed the bubble so
-                // lets make sure NoMan knows it's not a bubble anymore
-                try {
-                    mBarService.onNotificationBubbleChanged(bubble.getKey(), false /* isBubble */);
-                } catch (RemoteException e) {
-                    // Bad things have happened
+
+            // If not yet initialized, ignore all other changes.
+            if (mStackView == null) {
+                return;
+            }
+
+            if (update.addedBubble != null) {
+                mStackView.addBubble(update.addedBubble);
+            }
+
+            // Collapsing? Do this first before remaining steps.
+            if (update.expandedChanged && !update.expanded) {
+                mStackView.setExpanded(false);
+            }
+
+            // Do removals, if any.
+            for (Pair<Bubble, Integer> removed : update.removedBubbles) {
+                final Bubble bubble = removed.first;
+                @DismissReason final int reason = removed.second;
+                mStackView.removeBubble(bubble);
+
+                if (!mBubbleData.hasBubbleWithKey(bubble.getKey())
+                        && !bubble.entry.showInShadeWhenBubble()) {
+                    // The bubble is gone & the notification is gone, time to actually remove it
+                    mNotificationEntryManager.performRemoveNotification(bubble.entry.notification,
+                            UNDEFINED_DISMISS_REASON);
+                } else {
+                    // The notification is still in the shade but we've removed the bubble so
+                    // lets make sure NoMan knows it's not a bubble anymore
+                    try {
+                        mBarService.onNotificationBubbleChanged(bubble.getKey(),
+                                false /* isBubble */);
+                    } catch (RemoteException e) {
+                        // Bad things have happened
+                    }
                 }
             }
-        }
 
-        public void onBubbleUpdated(Bubble bubble) {
-            if (mStackView != null) {
-                mStackView.updateBubble(bubble);
+            if (update.updatedBubble != null) {
+                mStackView.updateBubble(update.updatedBubble);
             }
-        }
 
-        @Override
-        public void onOrderChanged(List<Bubble> bubbles) {
-            if (mStackView != null) {
-                mStackView.updateBubbleOrder(bubbles);
+            if (update.orderChanged) {
+                mStackView.updateBubbleOrder(update.bubbles);
             }
-        }
 
-        @Override
-        public void onSelectionChanged(@Nullable Bubble selectedBubble) {
-            if (mStackView != null) {
-                mStackView.setSelectedBubble(selectedBubble);
+            if (update.selectionChanged) {
+                mStackView.setSelectedBubble(update.selectedBubble);
             }
-        }
 
-        @Override
-        public void onExpandedChanged(boolean expanded) {
-            if (mStackView != null) {
-                mStackView.setExpanded(expanded);
+            // Expanding? Apply this last.
+            if (update.expandedChanged && update.expanded) {
+                mStackView.setExpanded(true);
             }
-        }
 
-        // Runs on state change.
-        @Override
-        public void apply() {
             mNotificationEntryManager.updateNotifications();
             updateStack();
 
