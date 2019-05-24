@@ -477,10 +477,15 @@ public class PreferencesHelper implements RankingConfig {
      * @param allowed whether bubbles are allowed.
      */
     public void setBubblesAllowed(String pkg, int uid, boolean allowed) {
+        boolean changed = false;
         synchronized (mPackagePreferences) {
             PackagePreferences p = getOrCreatePackagePreferencesLocked(pkg, uid);
+            changed = p.allowBubble != allowed;
             p.allowBubble = allowed;
             p.lockedAppFields = p.lockedAppFields | LockableAppFields.USER_LOCKED_BUBBLE;
+        }
+        if (changed) {
+            updateConfig();
         }
     }
 
