@@ -721,20 +721,17 @@ public final class SmsManager {
     }
 
     /**
-     * Divide a message text into several fragments, none bigger than
-     * the maximum SMS message size.
+     * Divide a message text into several fragments, none bigger than the maximum SMS message size.
      *
-     * @param text the original message.  Must not be null.
-     * @return an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
-     *
-     * @throws IllegalArgumentException if text is null
+     * @param text the original message. Must not be null.
+     * @return an <code>ArrayList</code> of strings that, in order, comprise the original message.
+     * @throws IllegalArgumentException if text is null.
      */
     public ArrayList<String> divideMessage(String text) {
         if (null == text) {
             throw new IllegalArgumentException("text is null");
         }
-        return SmsMessage.fragmentText(text);
+        return SmsMessage.fragmentText(text, getSubscriptionId());
     }
 
     /**
@@ -1965,16 +1962,22 @@ public final class SmsManager {
     }
 
     /**
-     * Get default sms subscription id
+     * Get default sms subscription id.
      *
-     * @return the user-defined default SMS subscription id or
-     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if no default is set.
+     * <p class="note"><strong>Note:</strong>This returns a value different from
+     * {@link SubscriptionManager#getDefaultSmsSubscriptionId} if the user has not chosen a default.
+     * In this case it returns the active subscription id if there's only one active subscription
+     * available.
+     *
+     * @return the user-defined default SMS subscription id, or the active subscription id if
+     * there's only one active subscription available, otherwise
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
      */
     public static int getDefaultSmsSubscriptionId() {
         try {
-            return SubscriptionManager.getDefaultSmsSubscriptionId();
-        } catch (NullPointerException ex) {
-            return -1;
+            return getISmsServiceOrThrow().getPreferredSmsSubscription();
+        } catch (RemoteException e) {
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
     }
 
