@@ -25,8 +25,8 @@ import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
@@ -2603,21 +2603,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
                     if (nai == null) break;
 
-                    final boolean partialConnectivity =
-                            (msg.arg1 == NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY)
-                                    || (nai.networkMisc.acceptPartialConnectivity
-                                            && nai.partialConnectivity);
-                    // Once a network is determined to have partial connectivity, it cannot
-                    // go back to full connectivity without a disconnect. This is because
-                    // NetworkMonitor can only communicate either PARTIAL_CONNECTIVITY or VALID,
-                    // but not both.
-                    // TODO: Provide multi-testResult to improve the communication between
-                    // ConnectivityService and NetworkMonitor, so that ConnectivityService could
-                    // know the real status of network.
+                    final boolean wasPartial = nai.partialConnectivity;
+                    nai.partialConnectivity = ((msg.arg1 & NETWORK_VALIDATION_RESULT_PARTIAL) != 0);
                     final boolean partialConnectivityChanged =
-                            (partialConnectivity && !nai.partialConnectivity);
+                            (wasPartial != nai.partialConnectivity);
 
-                    final boolean valid = (msg.arg1 == NETWORK_TEST_RESULT_VALID);
+                    final boolean valid = ((msg.arg1 & NETWORK_VALIDATION_RESULT_VALID) != 0);
                     final boolean wasValidated = nai.lastValidated;
                     final boolean wasDefault = isDefaultNetwork(nai);
                     if (nai.everCaptivePortalDetected && !nai.captivePortalLoginNotified
@@ -2647,21 +2638,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
                         if (valid) {
                             handleFreshlyValidatedNetwork(nai);
-                            // Clear NO_INTERNET and LOST_INTERNET notifications if network becomes
-                            // valid.
+                            // Clear NO_INTERNET, PARTIAL_CONNECTIVITY and LOST_INTERNET
+                            // notifications if network becomes valid.
                             mNotifier.clearNotification(nai.network.netId,
                                     NotificationType.NO_INTERNET);
                             mNotifier.clearNotification(nai.network.netId,
                                     NotificationType.LOST_INTERNET);
+                            mNotifier.clearNotification(nai.network.netId,
+                                    NotificationType.PARTIAL_CONNECTIVITY);
                         }
                     } else if (partialConnectivityChanged) {
-                        nai.partialConnectivity = partialConnectivity;
                         updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
                     }
                     updateInetCondition(nai);
                     // Let the NetworkAgent know the state of its network
                     Bundle redirectUrlBundle = new Bundle();
                     redirectUrlBundle.putString(NetworkAgent.REDIRECT_URL_KEY, redirectUrl);
+                    // TODO: Evaluate to update partial connectivity to status to NetworkAgent.
                     nai.asyncChannel.sendMessage(
                             NetworkAgent.CMD_REPORT_NETWORK_STATUS,
                             (valid ? NetworkAgent.VALID_NETWORK : NetworkAgent.INVALID_NETWORK),
@@ -3441,6 +3434,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Inform NetworkMonitor that partial connectivity is acceptable. This will likely
             // result in a partial connectivity result which will be processed by
             // maybeHandleNetworkMonitorMessage.
+            //
+            // TODO: NetworkMonitor does not refer to the "never ask again" bit. The bit is stored
+            // per network. Therefore, NetworkMonitor may still do https probe.
             try {
                 nai.networkMonitor().setAcceptPartialConnectivity();
             } catch (RemoteException e) {
