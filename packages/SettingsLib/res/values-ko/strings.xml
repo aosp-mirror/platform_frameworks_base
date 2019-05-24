@@ -156,7 +156,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"TTS 출력"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"텍스트를 읽어주는 속도"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"피치"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"음조"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"합성 음성의 어조에 영향을 미침"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"언어"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"시스템 언어 사용"</string>
@@ -200,7 +200,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"이 사용자는 개발자 옵션을 사용할 수 없습니다."</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"이 사용자는 VPN 설정을 수정할 수 없습니다."</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"이 사용자는 테더링 설정을 수정할 수 없습니다."</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"이 사용자는 액세스포인트 네임(APN) 설정을 수정할 수 없습니다."</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"이 사용자는 액세스 포인트 이름(APN) 설정을 수정할 수 없습니다."</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB 디버깅"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB가 연결된 경우 디버그 모드 사용"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB 디버깅 권한 승인 취소"</string>

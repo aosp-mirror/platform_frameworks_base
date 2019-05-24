@@ -148,7 +148,7 @@
     <string name="tether_settings_title_all" msgid="8356136101061143841">"တဆင့်ချိတ်ဆက်ခြင်း၊ ဟော့စပေါ့"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"အလုပ်သုံးအက်ပ်များအားလုံး"</string>
     <string name="user_guest" msgid="8475274842845401871">"ဧည့်သည်"</string>
-    <string name="unknown" msgid="1592123443519355854">"မသိပါ"</string>
+    <string name="unknown" msgid="1592123443519355854">"မသိ"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ပုံမှန်သတ်မှတ်ထားခြင်းမရှိ"</string>
@@ -402,7 +402,7 @@
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုပါသည်"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> − အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> ကျန်သည်"</string>
-    <string name="battery_info_status_unknown" msgid="196130600938058547">"မသိပါ"</string>
+    <string name="battery_info_status_unknown" msgid="196130600938058547">"မသိ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"အားသွင်းနေပါသည်"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"အားသွင်းနေပါသည်"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"အားသွင်းမနေပါ"</string>
