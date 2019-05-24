@@ -1196,7 +1196,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             intent, 0, null, UserHandle.CURRENT);
 
                     Notification notification =
-                            new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
+                            new Notification.Builder(mContext,
+                                    SystemNotificationChannels.DEVELOPER_IMPORTANT)
                                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                                     .setWhen(0)
                                     .setOngoing(true)

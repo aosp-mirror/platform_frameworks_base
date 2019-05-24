@@ -3419,6 +3419,7 @@
   <java-symbol type="string" name="notification_channel_car_mode" />
   <java-symbol type="string" name="notification_channel_account" />
   <java-symbol type="string" name="notification_channel_developer" />
+  <java-symbol type="string" name="notification_channel_developer_important" />
   <java-symbol type="string" name="notification_channel_updates" />
   <java-symbol type="string" name="notification_channel_network_status" />
   <java-symbol type="string" name="notification_channel_network_alerts" />

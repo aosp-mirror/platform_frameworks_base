@@ -621,6 +621,9 @@
     <!-- Text shown when viewing channel settings for notifications related to developers -->
     <string name="notification_channel_developer">Developer messages</string>
 
+    <!-- Text shown when viewing channel settings for high importance notifications related to developers [CHAR LIMIT=60]-->
+    <string name="notification_channel_developer_important">Important developer messages</string>
+
     <!-- Text shown when viewing channel settings for notifications related to system updates -->
     <string name="notification_channel_updates">Updates</string>
 
