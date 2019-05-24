@@ -625,7 +625,7 @@ public final class Magnifier {
         resolvedTop = Math.min(resolvedTop, mContentCopySurface.mHeight - mSourceHeight);
         if (resolvedLeft < 0 || resolvedTop < 0) {
             Log.e(TAG, "Magnifier's content is copied from a surface smaller than"
-                    + "the content requested size. This will probably lead to distorted content.");
+                    + "the content requested size. The magnifier will be dismissed.");
         }
         resolvedRight = Math.max(resolvedRight, resolvedLeft + mSourceWidth);
         resolvedBottom = Math.max(resolvedBottom, resolvedTop + mSourceHeight);
@@ -664,6 +664,7 @@ public final class Magnifier {
     private void performPixelCopy(final int startXInSurface, final int startYInSurface,
             final boolean updateWindowPosition) {
         if (mContentCopySurface.mSurface == null || !mContentCopySurface.mSurface.isValid()) {
+            onPixelCopyFailed();
             return;
         }
 
@@ -681,6 +682,10 @@ public final class Magnifier {
                 Bitmap.createBitmap(mSourceWidth, mSourceHeight, Bitmap.Config.ARGB_8888);
         PixelCopy.request(mContentCopySurface.mSurface, mPixelCopyRequestRect, bitmap,
                 result -> {
+                    if (result != PixelCopy.SUCCESS) {
+                        onPixelCopyFailed();
+                        return;
+                    }
                     synchronized (mLock) {
                         if (mWindow != currentWindowInstance) {
                             // The magnifier was dismissed (and maybe shown again) in the meantime.
@@ -697,6 +702,17 @@ public final class Magnifier {
         mPrevStartCoordsInSurface.x = startXInSurface;
         mPrevStartCoordsInSurface.y = startYInSurface;
         mDirtyState = false;
+    }
+
+    private void onPixelCopyFailed() {
+        Log.e(TAG, "Magnifier failed to copy content from the view Surface. It will be dismissed.");
+        // Post to make sure #dismiss is done on the main thread.
+        Handler.getMain().postAtFrontOfQueue(() -> {
+            dismiss();
+            if (mCallback != null) {
+                mCallback.onOperationComplete();
+            }
+        });
     }
 
     /**
