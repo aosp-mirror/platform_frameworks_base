@@ -169,15 +169,6 @@ static int gUsapPoolEventFD = -1;
  */
 static constexpr int USAP_POOL_SIZE_MAX_LIMIT = 100;
 
-/** The numeric value for the maximum priority a process may possess. */
-static constexpr int PROCESS_PRIORITY_MAX = -20;
-
-/** The numeric value for the minimum priority a process may possess. */
-static constexpr int PROCESS_PRIORITY_MIN = 19;
-
-/** The numeric value for the normal priority a process should have. */
-static constexpr int PROCESS_PRIORITY_DEFAULT = 0;
-
 /**
  * A helper class containing accounting information for USAPs.
  */
@@ -902,8 +893,7 @@ static void ClearUsapTable() {
 // Utility routine to fork a process from the zygote.
 static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
                         const std::vector<int>& fds_to_close,
-                        const std::vector<int>& fds_to_ignore,
-                        bool is_priority_fork) {
+                        const std::vector<int>& fds_to_ignore) {
   SetSignalHandlers();
 
   // Curry a failure function.
@@ -936,12 +926,6 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
   pid_t pid = fork();
 
   if (pid == 0) {
-    if (is_priority_fork) {
-      setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MAX);
-    } else {
-      setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MIN);
-    }
-
     // The child process.
     PreApplicationInit();
 
@@ -1138,9 +1122,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 
   env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
                             is_system_server, is_child_zygote, managed_instruction_set);
-
-  // Reset the process priority to the default value.
-  setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_DEFAULT);
 
   if (env->ExceptionCheck()) {
     fail_fn("Error calling post fork hooks.");
@@ -1379,7 +1360,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       fds_to_ignore.push_back(gUsapPoolEventFD);
     }
 
-    pid_t pid = ForkCommon(env, false, fds_to_close, fds_to_ignore, true);
+    pid_t pid = ForkCommon(env, false, fds_to_close, fds_to_ignore);
 
     if (pid == 0) {
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
@@ -1406,8 +1387,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
 
   pid_t pid = ForkCommon(env, true,
                          fds_to_close,
-                         fds_to_ignore,
-                         true);
+                         fds_to_ignore);
   if (pid == 0) {
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        permitted_capabilities, effective_capabilities,
@@ -1449,15 +1429,13 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
  * zygote in managed code.
  * @param managed_session_socket_fds  A list of anonymous session sockets that must be ignored by
  * the FD hygiene code and automatically "closed" in the new USAP.
- * @param is_priority_fork  Controls the nice level assigned to the newly created process
  * @return
  */
 static jint com_android_internal_os_Zygote_nativeForkUsap(JNIEnv* env,
                                                           jclass,
                                                           jint read_pipe_fd,
                                                           jint write_pipe_fd,
-                                                          jintArray managed_session_socket_fds,
-                                                          jboolean is_priority_fork) {
+                                                          jintArray managed_session_socket_fds) {
   std::vector<int> fds_to_close(MakeUsapPipeReadFDVector()),
                    fds_to_ignore(fds_to_close);
 
@@ -1479,8 +1457,7 @@ static jint com_android_internal_os_Zygote_nativeForkUsap(JNIEnv* env,
   fds_to_ignore.push_back(write_pipe_fd);
   fds_to_ignore.insert(fds_to_ignore.end(), session_socket_fds.begin(), session_socket_fds.end());
 
-  pid_t usap_pid = ForkCommon(env, /* is_system_server= */ false, fds_to_close, fds_to_ignore,
-                              is_priority_fork == JNI_TRUE);
+  pid_t usap_pid = ForkCommon(env, /* is_system_server= */ false, fds_to_close, fds_to_ignore);
 
   if (usap_pid != 0) {
     ++gUsapPoolCount;
@@ -1701,10 +1678,6 @@ static jboolean com_android_internal_os_Zygote_nativeDisableExecuteOnly(JNIEnv* 
   return dl_iterate_phdr(disable_execute_only, nullptr) == 0;
 }
 
-static void com_android_internal_os_Zygote_nativeBoostUsapPriority(JNIEnv* env, jclass) {
-  setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MAX);
-}
-
 static const JNINativeMethod gMethods[] = {
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;)I",
@@ -1717,7 +1690,7 @@ static const JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_Zygote_nativePreApplicationInit },
     { "nativeInstallSeccompUidGidFilter", "(II)V",
       (void *) com_android_internal_os_Zygote_nativeInstallSeccompUidGidFilter },
-    { "nativeForkUsap", "(II[IZ)I",
+    { "nativeForkUsap", "(II[I)I",
       (void *) com_android_internal_os_Zygote_nativeForkUsap },
     { "nativeSpecializeAppProcess",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V",
@@ -1735,9 +1708,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeEmptyUsapPool", "()V",
       (void *) com_android_internal_os_Zygote_nativeEmptyUsapPool },
     { "nativeDisableExecuteOnly", "()Z",
-      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly },
-    { "nativeBoostUsapPriority", "()V",
-      (void* ) com_android_internal_os_Zygote_nativeBoostUsapPriority }
+      (void *) com_android_internal_os_Zygote_nativeDisableExecuteOnly }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
