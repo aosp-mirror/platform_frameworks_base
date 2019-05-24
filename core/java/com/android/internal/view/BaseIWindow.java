@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.os.Bundle;
@@ -52,6 +53,10 @@ public class BaseIWindow extends IWindow.Stub {
             } catch (RemoteException e) {
             }
         }
+    }
+
+    @Override
+    public void locationInParentDisplayChanged(Point offset) {
     }
 
     @Override

@@ -167,6 +167,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -315,6 +316,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mObscured;
 
     int mLayoutSeq = -1;
+
+    /** @see #addEmbeddedDisplayContent(DisplayContent dc) */
+    private final ArraySet<DisplayContent> mEmbeddedDisplayContents = new ArraySet<>();
 
     /**
      * Used to store last reported to client configuration and check if we have newer available.
@@ -534,6 +538,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private final Rect mTmpRect = new Rect();
     private final Point mTmpPoint = new Point();
+
+    /**
+     * If a window is on a display which has been re-parented to a view in another window,
+     * use this offset to indicate the correct location.
+     */
+    private final Point mLastReportedDisplayOffset = new Point();
 
     /**
      * Whether the window was resized by us while it was gone for layout.
@@ -1777,11 +1787,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             startMoveAnimation(left, top);
         }
 
-        //TODO (multidisplay): Accessibility supported only for the default display.
-        if (mWmService.mAccessibilityController != null
-                && getDisplayContent().getDisplayId() == DEFAULT_DISPLAY) {
+        // TODO (multidisplay): Accessibility supported only for the default display and
+        // embedded displays
+        if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
+                || getDisplayContent().getParentWindow() != null)) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
         }
+        updateLocationInParentDisplayIfNeeded();
 
         try {
             mClient.moved(left, top);
@@ -3143,11 +3155,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         displayCutout);
             }
 
-            //TODO (multidisplay): Accessibility supported only for the default display.
+            // TODO (multidisplay): Accessibility supported only for the default display and
+            // embedded displays
             if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
                     || getDisplayContent().getParentWindow() != null)) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
             }
+            updateLocationInParentDisplayIfNeeded();
 
             mWindowFrames.resetInsetsChanged();
             mWinAnimator.mSurfaceResized = false;
@@ -3163,6 +3177,36 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWmService.mWindowPlacerLocked.requestTraversal();
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    void updateLocationInParentDisplayIfNeeded() {
+        final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
+        // If there is any embedded display which is re-parented to this window, we need to
+        // notify all windows in the embedded display about the location change.
+        if (embeddedDisplayContentsSize != 0) {
+            for (int i = embeddedDisplayContentsSize - 1; i >= 0; i--) {
+                final DisplayContent edc = mEmbeddedDisplayContents.valueAt(i);
+                edc.notifyLocationInParentDisplayChanged();
+            }
+        }
+        // If this window is in a embedded display which is re-parented to another window,
+        // we may need to update its correct on-screen location.
+        final DisplayContent dc = getDisplayContent();
+        if (dc.getParentWindow() == null) {
+            return;
+        }
+
+        final Point offset = dc.getLocationInParentDisplay();
+        if (mLastReportedDisplayOffset.equals(offset)) {
+            return;
+        }
+
+        mLastReportedDisplayOffset.set(offset.x, offset.y);
+        try {
+            mClient.locationInParentDisplayChanged(mLastReportedDisplayOffset);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to update offset from DisplayContent", e);
+        }
     }
 
     /**
@@ -3584,6 +3628,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
+        pw.println(prefix + "mEmbeddedDisplayContents=" + mEmbeddedDisplayContents);
     }
 
     @Override
@@ -4209,7 +4254,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        //TODO (multidisplay): Accessibility is supported only for the default display.
+        // TODO (multidisplay): Accessibility supported only for the default display and
+        // embedded displays
         if (mWmService.mAccessibilityController != null && (getDisplayId() == DEFAULT_DISPLAY
                 || getDisplayContent().getParentWindow() != null)) {
             mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
@@ -4578,6 +4624,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isLaidOut() {
         return mLayoutSeq != -1;
+    }
+
+    /**
+     * Add the DisplayContent of the embedded display which is re-parented to this window to
+     * the list of embedded displays.
+     *
+     * @param dc DisplayContent of the re-parented embedded display.
+     * @return {@code true} if the giving DisplayContent is added, {@code false} otherwise.
+     */
+    boolean addEmbeddedDisplayContent(DisplayContent dc) {
+        return mEmbeddedDisplayContents.add(dc);
+    }
+
+    /**
+     * Remove the DisplayContent of the embedded display which is re-parented to this window from
+     * the list of embedded displays.
+     *
+     * @param dc DisplayContent of the re-parented embedded display.
+     * @return {@code true} if the giving DisplayContent is removed, {@code false} otherwise.
+     */
+    boolean removeEmbeddedDisplayContent(DisplayContent dc) {
+        return mEmbeddedDisplayContents.remove(dc);
     }
 
     /**
@@ -5000,6 +5068,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         tempRegion.translate(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top);
         region.op(tempRegion, Region.Op.UNION);
         tempRegion.recycle();
+    }
+
+    boolean hasTapExcludeRegion() {
+        return mTapExcludeRegionHolder != null && !mTapExcludeRegionHolder.isEmpty();
     }
 
     @Override
