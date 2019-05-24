@@ -1444,6 +1444,8 @@ public class NotificationContentView extends FrameLayout {
             smartReplyView.resetSmartSuggestions(smartReplyContainer);
             smartReplyView.addPreInflatedButtons(
                     inflatedSmartReplyView.getSmartSuggestionButtons());
+            // Ensure the colors of the smart suggestion buttons are up-to-date.
+            smartReplyView.setBackgroundTintColor(entry.getRow().getCurrentBackgroundTint());
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;
