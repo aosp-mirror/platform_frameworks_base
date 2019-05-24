@@ -1962,16 +1962,22 @@ public final class SmsManager {
     }
 
     /**
-     * Get default sms subscription id
+     * Get default sms subscription id.
      *
-     * @return the user-defined default SMS subscription id or
-     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if no default is set.
+     * <p class="note"><strong>Note:</strong>This returns a value different from
+     * {@link SubscriptionManager#getDefaultSmsSubscriptionId} if the user has not chosen a default.
+     * In this case it returns the active subscription id if there's only one active subscription
+     * available.
+     *
+     * @return the user-defined default SMS subscription id, or the active subscription id if
+     * there's only one active subscription available, otherwise
+     * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
      */
     public static int getDefaultSmsSubscriptionId() {
         try {
-            return SubscriptionManager.getDefaultSmsSubscriptionId();
-        } catch (NullPointerException ex) {
-            return -1;
+            return getISmsServiceOrThrow().getPreferredSmsSubscription();
+        } catch (RemoteException e) {
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
     }
 
