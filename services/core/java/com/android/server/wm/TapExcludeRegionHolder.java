@@ -52,4 +52,11 @@ class TapExcludeRegionHolder {
             region.op(r, Region.Op.UNION);
         }
     }
+
+    /**
+     * Return true if tap exclude region is empty.
+     */
+    boolean isEmpty() {
+        return mTapExcludeRegions.size() == 0;
+    }
 }
