@@ -40,7 +40,7 @@ android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType) {
         case kARGB_4444_SkColorType:
             return PIXEL_FORMAT_RGBA_4444;
         default:
-            ALOGW("Unsupported colorType: %d, return RGBA_8888 by default", (int)colorType);
+            ALOGV("Unsupported colorType: %d, return RGBA_8888 by default", (int)colorType);
             return PIXEL_FORMAT_RGBA_8888;
     }
 }
@@ -54,7 +54,7 @@ SkColorType PixelFormatToColorType(android::PixelFormat format) {
         case PIXEL_FORMAT_RGBA_1010102: return kRGBA_1010102_SkColorType;
         case PIXEL_FORMAT_RGBA_4444:    return kARGB_4444_SkColorType;
         default:
-            ALOGW("Unsupported PixelFormat: %d, return kUnknown_SkColorType by default", format);
+            ALOGV("Unsupported PixelFormat: %d, return kUnknown_SkColorType by default", format);
             return kUnknown_SkColorType;
     }
 }
@@ -88,7 +88,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         case HAL_DATASPACE_STANDARD_BT470M:
         case HAL_DATASPACE_STANDARD_FILM:
         default:
-            ALOGW("Unsupported Gamut: %d", dataspace);
+            ALOGV("Unsupported Gamut: %d", dataspace);
             return nullptr;
     }
 
@@ -109,7 +109,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         case HAL_DATASPACE_TRANSFER_ST2084:
         case HAL_DATASPACE_TRANSFER_HLG:
         default:
-            ALOGW("Unsupported Gamma: %d", dataspace);
+            ALOGV("Unsupported Gamma: %d", dataspace);
             return nullptr;
     }
 }

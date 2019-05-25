@@ -155,8 +155,6 @@ public class RoleObserverTest extends UiServiceTestCase {
         dialer0.add("dialer");
         List<String> emer0 = new ArrayList<>();
         emer0.add("emergency");
-        List<String> sms10 = new ArrayList<>();
-        sms10.add("sms");
 
         ArraySet<Pair<String, Integer>> dialer0Pair = new ArraySet<>();
         dialer0Pair.add(new Pair("dialer", 30));
@@ -166,9 +164,6 @@ public class RoleObserverTest extends UiServiceTestCase {
         emer0Pair.add(new Pair("emergency", 40));
         when(mPm.getPackageUid("emergency", MATCH_ALL, 0)).thenReturn(40);
 
-        ArraySet<Pair<String, Integer>> sms10Pair = new ArraySet<>();
-        sms10Pair.add(new Pair("sms", 50));
-        when(mPm.getPackageUid("sms", MATCH_ALL, 10)).thenReturn(50);
 
         when(mRoleManager.getRoleHoldersAsUser(
                 ROLE_DIALER,
@@ -178,10 +173,6 @@ public class RoleObserverTest extends UiServiceTestCase {
                 ROLE_EMERGENCY,
                 mUsers.get(0).getUserHandle())).
                 thenReturn(emer0);
-        when(mRoleManager.getRoleHoldersAsUser(
-                ROLE_SMS,
-                mUsers.get(1).getUserHandle())).
-                thenReturn(sms10);
 
         mRoleObserver.init();
 
@@ -190,20 +181,11 @@ public class RoleObserverTest extends UiServiceTestCase {
                 ROLE_DIALER, dialer0.get(0), mUsers.get(0).id));
         assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
                 ROLE_DIALER, dialer0.get(0), mUsers.get(1).id));
-        assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_SMS, dialer0.get(0), mUsers.get(1).id));
 
         assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(
                 ROLE_EMERGENCY, emer0.get(0), mUsers.get(0).id));
         assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
                 ROLE_EMERGENCY, emer0.get(0), mUsers.get(1).id));
-
-        assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_SMS, sms10.get(0), mUsers.get(0).id));
-        assertFalse(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_DIALER, sms10.get(0), mUsers.get(0).id));
-        assertTrue(mRoleObserver.isApprovedPackageForRoleForUser(
-                ROLE_SMS, sms10.get(0), mUsers.get(1).id));
 
         // make sure we're listening to updates
         verify(mRoleManager, times(1)).addOnRoleHoldersChangedListenerAsUser(
@@ -212,7 +194,6 @@ public class RoleObserverTest extends UiServiceTestCase {
         // make sure we told pref helper about the state of the world
         verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, dialer0Pair);
         verify(mPreferencesHelper, times(1)).updateDefaultApps(0, null, emer0Pair);
-        verify(mPreferencesHelper, times(1)).updateDefaultApps(10, null, sms10Pair);
     }
 
     @Test

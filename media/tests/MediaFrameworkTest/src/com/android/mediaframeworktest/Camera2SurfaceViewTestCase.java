@@ -16,15 +16,17 @@
 
 package com.android.mediaframeworktest;
 
-import com.android.ex.camera2.blocking.BlockingSessionCallback;
-import com.android.ex.camera2.blocking.BlockingStateCallback;
-import com.android.ex.camera2.exceptions.TimeoutRuntimeException;
-import com.android.mediaframeworktest.helpers.CameraErrorCollector;
-import com.android.mediaframeworktest.helpers.CameraTestResultPrinter;
-import com.android.mediaframeworktest.helpers.CameraTestUtils;
-import com.android.mediaframeworktest.helpers.CameraTestUtils.SimpleCaptureCallback;
-import com.android.mediaframeworktest.helpers.StaticMetadata;
-import com.android.mediaframeworktest.helpers.StaticMetadata.CheckLevel;
+import static com.android.ex.camera2.blocking.BlockingStateCallback.STATE_CLOSED;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.CAMERA_CLOSE_TIMEOUT_MS;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.MAX_READER_IMAGES;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.PREVIEW_SIZE_BOUND;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.configureCameraSession;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getPreviewSizeBound;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSortedSizesForFormat;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedPreviewSizes;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedStillSizes;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedVideoSizes;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.makeImageReader;
 
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -39,14 +41,11 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
-import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.InstrumentationTestRunner;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
@@ -54,23 +53,23 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
+import androidx.test.InstrumentationRegistry;
+
+import com.android.ex.camera2.blocking.BlockingSessionCallback;
+import com.android.ex.camera2.blocking.BlockingStateCallback;
+import com.android.ex.camera2.exceptions.TimeoutRuntimeException;
+import com.android.mediaframeworktest.helpers.CameraErrorCollector;
+import com.android.mediaframeworktest.helpers.CameraTestResultPrinter;
+import com.android.mediaframeworktest.helpers.CameraTestUtils;
+import com.android.mediaframeworktest.helpers.CameraTestUtils.SimpleCaptureCallback;
+import com.android.mediaframeworktest.helpers.StaticMetadata;
+import com.android.mediaframeworktest.helpers.StaticMetadata.CheckLevel;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.android.ex.camera2.blocking.BlockingStateCallback.STATE_CLOSED;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.CAMERA_CLOSE_TIMEOUT_MS;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.MAX_READER_IMAGES;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.PREVIEW_SIZE_BOUND;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.configureCameraSession;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.getPreviewSizeBound;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedPreviewSizes;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedStillSizes;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedVideoSizes;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSortedSizesForFormat;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.makeImageReader;
 
 /**
  * Camera2 Preview test case base class by using SurfaceView as rendering target.
@@ -98,8 +97,9 @@ public class Camera2SurfaceViewTestCase extends
     protected static final String ARG_KEY_RESULT_TO_FILE = "resultToFile";
 
     // TODO: Use internal storage for this to make sure the file is only visible to test.
-    protected static final String DEBUG_FILE_NAME_BASE =
-            Environment.getExternalStorageDirectory().getPath();
+    protected static final String DEBUG_FILE_NAME_BASE = InstrumentationRegistry
+            .getInstrumentation().getTargetContext()
+            .getExternalFilesDir(null).getPath();
     protected static final int WAIT_FOR_RESULT_TIMEOUT_MS = 3000;
     protected static final float FRAME_DURATION_ERROR_MARGIN = 0.005f; // 0.5 percent error margin.
     protected static final int NUM_RESULTS_WAIT_TIMEOUT = 100;
@@ -779,7 +779,7 @@ public class Camera2SurfaceViewTestCase extends
     //--------------------------------------------------------------------------------
 
     protected Bundle getArguments() {
-        return ((InstrumentationTestRunner)getInstrumentation()).getArguments();
+        return InstrumentationRegistry.getArguments();
     }
 
     protected <E extends Number> Number getArgumentsAsNumber(String key, E defaultValue) {

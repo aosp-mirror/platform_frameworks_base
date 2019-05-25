@@ -350,14 +350,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         return true;
     }
 
-    /**
-     * @return total height that the expanded view occupies.
-     */
-    int getExpandedSize() {
-        return mBubbleHeight + mPointerView.getHeight() + mPointerMargin
-                + mSettingsIconHeight;
-    }
-
     void updateHeight() {
         if (usingActivityView()) {
             Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
@@ -379,8 +371,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 }
                 desiredHeight = desiredPx > 0 ? desiredPx : mMinHeight;
             }
-            int max = mStackView.getMaxExpandedHeight() - mSettingsIconHeight
-                    - mPointerView.getHeight() - mPointerMargin;
+            int max = mStackView.getMaxExpandedHeight() - mSettingsIconHeight - mPointerHeight
+                    - mPointerMargin;
             float height = Math.min(desiredHeight, max);
             height = Math.max(height, mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
@@ -444,9 +436,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * Set the x position that the tip of the triangle should point to.
      */
     public void setPointerPosition(float x) {
-        // Adjust for the pointer size
-        x -= (mPointerView.getWidth() / 2f);
-        mPointerView.setTranslationX(x);
+        float halfPointerWidth = mPointerWidth / 2f;
+        float pointerLeft = x - halfPointerWidth;
+        mPointerView.setTranslationX(pointerLeft);
         mPointerView.setVisibility(VISIBLE);
     }
 

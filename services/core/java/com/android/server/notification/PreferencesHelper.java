@@ -334,33 +334,35 @@ public class PreferencesHelper implements RankingConfig {
         return true;
     }
 
-    private void deleteDefaultChannelIfNeededLocked(PackagePreferences r) throws
+    private boolean deleteDefaultChannelIfNeededLocked(PackagePreferences r) throws
             PackageManager.NameNotFoundException {
         if (!r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
             // Not present
-            return;
+            return false;
         }
 
         if (shouldHaveDefaultChannel(r)) {
             // Keep the default channel until upgraded.
-            return;
+            return false;
         }
 
         // Remove Default Channel.
         r.channels.remove(NotificationChannel.DEFAULT_CHANNEL_ID);
+
+        return true;
     }
 
-    private void createDefaultChannelIfNeededLocked(PackagePreferences r) throws
+    private boolean createDefaultChannelIfNeededLocked(PackagePreferences r) throws
             PackageManager.NameNotFoundException {
         if (r.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
             r.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID).setName(mContext.getString(
                     com.android.internal.R.string.default_notification_channel_label));
-            return;
+            return false;
         }
 
         if (!shouldHaveDefaultChannel(r)) {
             // Keep the default channel until upgraded.
-            return;
+            return false;
         }
 
         // Create Default Channel
@@ -381,6 +383,8 @@ public class PreferencesHelper implements RankingConfig {
             channel.lockFields(NotificationChannel.USER_LOCKED_VISIBILITY);
         }
         r.channels.put(channel.getId(), channel);
+
+        return true;
     }
 
     public void writeXml(XmlSerializer out, boolean forBackup, int userId) throws IOException {
@@ -1687,10 +1691,10 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
+    public boolean onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
             int[] uidList) {
         if (pkgList == null || pkgList.length == 0) {
-            return; // nothing to do
+            return false; // nothing to do
         }
         boolean updated = false;
         if (removingPackage) {
@@ -1727,8 +1731,8 @@ public class PreferencesHelper implements RankingConfig {
                         PackagePreferences fullPackagePreferences = getPackagePreferencesLocked(pkg,
                                 mPm.getPackageUidAsUser(pkg, changeUserId));
                         if (fullPackagePreferences != null) {
-                            createDefaultChannelIfNeededLocked(fullPackagePreferences);
-                            deleteDefaultChannelIfNeededLocked(fullPackagePreferences);
+                            updated |= createDefaultChannelIfNeededLocked(fullPackagePreferences);
+                            updated |= deleteDefaultChannelIfNeededLocked(fullPackagePreferences);
                         }
                     }
                 } catch (PackageManager.NameNotFoundException e) {
@@ -1739,6 +1743,7 @@ public class PreferencesHelper implements RankingConfig {
         if (updated) {
             updateConfig();
         }
+        return updated;
     }
 
     public void clearData(String pkg, int uid) {

@@ -132,10 +132,24 @@ public class Build {
      * <a href="/training/articles/security-key-attestation.html">key attestation</a> to obtain
      * proof of the device's original identifiers.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
-     * device or profile owner and have the READ_PHONE_STATE permission. Profile owner access is
-     * deprecated and will be removed in a future release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}). The profile
+     * owner is an app that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
+     * <p>If the calling app does not meet one of these requirements then this method will behave
+     * as follows:
+     *
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app has the
+     *     READ_PHONE_STATE permission then {@link Build#UNKNOWN} is returned.</li>
+     *     <li>If the calling app's target SDK is API level 28 or lower and the app does not have
+     *     the READ_PHONE_STATE permission, or if the calling app is targeting API level 29 or
+     *     higher, then a SecurityException is thrown.</li>
+     * </ul>
+     * *
      * @return The serial number if specified.
      */
     @SuppressAutoDoc // No support for device / profile owner.

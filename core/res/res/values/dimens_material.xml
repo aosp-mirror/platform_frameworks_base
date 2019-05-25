@@ -149,7 +149,7 @@
     <dimen name="timepicker_am_top_padding">4dp</dimen>
     <dimen name="timepicker_pm_top_padding">4dp</dimen>
     <dimen name="timepicker_separator_padding">2dp</dimen>
-    <dimen name="timepicker_header_height">96dp</dimen>
+    <dimen name="timepicker_header_height">100dp</dimen>
     <dimen name="timepicker_radial_picker_dimen">296dp</dimen>
     <dimen name="timepicker_radial_picker_top_margin">16dp</dimen>
     <dimen name="timepicker_radial_picker_horizontal_margin">16dp</dimen>

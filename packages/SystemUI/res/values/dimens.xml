@@ -181,6 +181,9 @@
     <!-- The padding on the bottom of the notifications on the keyguard -->
     <dimen name="keyguard_indication_bottom_padding">12sp</dimen>
 
+    <!-- Shadows under the clock, date and other keyguard text fields -->
+    <dimen name="keyguard_shadow_radius">5</dimen>
+
     <!-- Minimum layouted height of a notification in the statusbar-->
     <dimen name="min_notification_layout_height">48dp</dimen>
 
