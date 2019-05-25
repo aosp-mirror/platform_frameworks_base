@@ -17,9 +17,13 @@
 package com.android.server.connectivity;
 
 import static android.net.CaptivePortal.APP_RETURN_DISMISSED;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_FALLBACK;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTP;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTPS;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD;
 import static android.net.util.DataStallUtils.CONFIG_DATA_STALL_EVALUATION_TYPE;
@@ -98,6 +102,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.verification.VerificationWithTimeout;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -148,6 +153,19 @@ public class NetworkMonitorTest {
     private static final String TEST_FALLBACK_URL = "http://fallback.google.com/gen_204";
     private static final String TEST_OTHER_FALLBACK_URL = "http://otherfallback.google.com/gen_204";
     private static final String TEST_MCCMNC = "123456";
+
+    private static final int VALIDATION_RESULT_INVALID = 0;
+    private static final int VALIDATION_RESULT_PORTAL = 0;
+    private static final String TEST_REDIRECT_URL = "android.com";
+    private static final int VALIDATION_RESULT_PARTIAL = NETWORK_VALIDATION_PROBE_DNS
+            | NETWORK_VALIDATION_PROBE_HTTP
+            | NETWORK_VALIDATION_RESULT_PARTIAL;
+    private static final int VALIDATION_RESULT_FALLBACK_PARTIAL = NETWORK_VALIDATION_PROBE_DNS
+            | NETWORK_VALIDATION_PROBE_FALLBACK
+            | NETWORK_VALIDATION_RESULT_PARTIAL;
+    private static final int VALIDATION_RESULT_VALID = NETWORK_VALIDATION_PROBE_DNS
+            | NETWORK_VALIDATION_PROBE_HTTPS
+            | NETWORK_VALIDATION_RESULT_VALID;
 
     private static final int RETURN_CODE_DNS_SUCCESS = 0;
     private static final int RETURN_CODE_DNS_TIMEOUT = 255;
@@ -472,8 +490,7 @@ public class NetworkMonitorTest {
     public void testIsCaptivePortal_HttpProbeIsPortal() throws IOException {
         setSslException(mHttpsConnection);
         setPortal302(mHttpConnection);
-
-        runPortalNetworkTest();
+        runPortalNetworkTest(VALIDATION_RESULT_PORTAL);
     }
 
     @Test
@@ -489,8 +506,7 @@ public class NetworkMonitorTest {
         setSslException(mHttpsConnection);
         setStatus(mHttpConnection, 500);
         setPortal302(mFallbackConnection);
-
-        runPortalNetworkTest();
+        runPortalNetworkTest(VALIDATION_RESULT_INVALID);
     }
 
     @Test
@@ -518,7 +534,7 @@ public class NetworkMonitorTest {
         when(mRandom.nextInt()).thenReturn(2);
 
         // First check always uses the first fallback URL: inconclusive
-        final NetworkMonitor monitor = runNetworkTest(NETWORK_TEST_RESULT_INVALID);
+        final NetworkMonitor monitor = runNetworkTest(VALIDATION_RESULT_INVALID);
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
         verify(mFallbackConnection, times(1)).getResponseCode();
         verify(mOtherFallbackConnection, never()).getResponseCode();
@@ -548,8 +564,7 @@ public class NetworkMonitorTest {
         setSslException(mHttpsConnection);
         setStatus(mHttpConnection, 500);
         setPortal302(mOtherFallbackConnection);
-
-        runPortalNetworkTest();
+        runPortalNetworkTest(VALIDATION_RESULT_INVALID);
         verify(mOtherFallbackConnection, times(1)).getResponseCode();
         verify(mFallbackConnection, never()).getResponseCode();
     }
@@ -572,7 +587,7 @@ public class NetworkMonitorTest {
         set302(mOtherFallbackConnection, "https://www.google.com/test?q=3");
 
         // HTTPS failed, fallback spec went through -> partial connectivity
-        runPartialConnectivityNetworkTest();
+        runPartialConnectivityNetworkTest(VALIDATION_RESULT_FALLBACK_PARTIAL);
         verify(mOtherFallbackConnection, times(1)).getResponseCode();
         verify(mFallbackConnection, never()).getResponseCode();
     }
@@ -581,8 +596,7 @@ public class NetworkMonitorTest {
     public void testIsCaptivePortal_FallbackSpecIsPortal() throws IOException {
         setupFallbackSpec();
         set302(mOtherFallbackConnection, "http://login.portal.example.com");
-
-        runPortalNetworkTest();
+        runPortalNetworkTest(VALIDATION_RESULT_INVALID);
     }
 
     @Test
@@ -591,7 +605,7 @@ public class NetworkMonitorTest {
         setSslException(mHttpsConnection);
         setPortal302(mHttpConnection);
 
-        runNotPortalNetworkTest();
+        runNoValidationNetworkTest();
     }
 
     @Test
@@ -677,7 +691,8 @@ public class NetworkMonitorTest {
 
     @Test
     public void testNoInternetCapabilityValidated() throws Exception {
-        runNetworkTest(NO_INTERNET_CAPABILITIES, NETWORK_TEST_RESULT_VALID);
+        runNetworkTest(NO_INTERNET_CAPABILITIES, NETWORK_VALIDATION_RESULT_VALID,
+                getGeneralVerification());
         verify(mCleartextDnsNetwork, never()).openConnection(any());
     }
 
@@ -713,10 +728,11 @@ public class NetworkMonitorTest {
         setStatus(mHttpsConnection, 204);
         setStatus(mHttpConnection, 204);
 
+        reset(mCallbacks);
         nm.notifyCaptivePortalAppFinished(APP_RETURN_DISMISSED);
-        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(NETWORK_TEST_RESULT_VALID, null);
-
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).atLeastOnce())
+                .notifyNetworkTested(eq(NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTP
+                        | NETWORK_VALIDATION_RESULT_VALID), any());
         assertEquals(0, mRegisteredReceivers.size());
     }
 
@@ -730,7 +746,8 @@ public class NetworkMonitorTest {
         wnm.notifyPrivateDnsSettingsChanged(new PrivateDnsConfig("dns.google", new InetAddress[0]));
         wnm.notifyNetworkConnected(TEST_LINK_PROPERTIES, NOT_METERED_CAPABILITIES);
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_VALID), eq(null));
+                .notifyNetworkTested(eq(VALIDATION_RESULT_VALID | NETWORK_VALIDATION_PROBE_PRIVDNS),
+                        eq(null));
     }
 
     @Test
@@ -743,38 +760,47 @@ public class NetworkMonitorTest {
         WrappedNetworkMonitor wnm = makeNotMeteredNetworkMonitor();
         wnm.notifyPrivateDnsSettingsChanged(new PrivateDnsConfig("dns.google", new InetAddress[0]));
         wnm.notifyNetworkConnected(TEST_LINK_PROPERTIES, NOT_METERED_CAPABILITIES);
-        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_INVALID), eq(null));
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).atLeastOnce())
+                .notifyNetworkTested(
+                        eq(NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS),
+                        eq(null));
 
         // Fix DNS and retry, expect validation to succeed.
         reset(mCallbacks);
         mFakeDns.setAnswer("dns.google", new String[]{"2001:db8::1"});
 
         wnm.forceReevaluation(Process.myUid());
-        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_VALID), eq(null));
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).atLeastOnce())
+                .notifyNetworkTested(eq(VALIDATION_RESULT_VALID | NETWORK_VALIDATION_PROBE_PRIVDNS),
+                        eq(null));
 
         // Change configuration to an invalid DNS name, expect validation to fail.
         reset(mCallbacks);
         mFakeDns.setAnswer("dns.bad", new String[0]);
         wnm.notifyPrivateDnsSettingsChanged(new PrivateDnsConfig("dns.bad", new InetAddress[0]));
+        // Strict mode hostname resolve fail. Expect only notification for evaluation fail. No probe
+        // notification.
         verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_INVALID), eq(null));
+                .notifyNetworkTested(eq(VALIDATION_RESULT_VALID), eq(null));
 
         // Change configuration back to working again, but make private DNS not work.
         // Expect validation to fail.
         reset(mCallbacks);
         mFakeDns.setNonBypassPrivateDnsWorking(false);
-        wnm.notifyPrivateDnsSettingsChanged(new PrivateDnsConfig("dns.google", new InetAddress[0]));
-        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_INVALID), eq(null));
+        wnm.notifyPrivateDnsSettingsChanged(new PrivateDnsConfig("dns.google",
+                new InetAddress[0]));
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).atLeastOnce())
+                .notifyNetworkTested(
+                        eq(NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS),
+                        eq(null));
 
         // Make private DNS work again. Expect validation to succeed.
         reset(mCallbacks);
         mFakeDns.setNonBypassPrivateDnsWorking(true);
         wnm.forceReevaluation(Process.myUid());
-        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_VALID), eq(null));
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).atLeastOnce())
+                .notifyNetworkTested(
+                        eq(VALIDATION_RESULT_VALID | NETWORK_VALIDATION_PROBE_PRIVDNS), eq(null));
     }
 
     @Test
@@ -834,12 +860,14 @@ public class NetworkMonitorTest {
     public void testIgnoreHttpsProbe() throws Exception {
         setSslException(mHttpsConnection);
         setStatus(mHttpConnection, 204);
+        // Expect to send HTTP, HTTPS, FALLBACK probe and evaluation result notifications to CS.
+        final NetworkMonitor nm = runNetworkTest(VALIDATION_RESULT_PARTIAL);
 
-        final NetworkMonitor nm = runNetworkTest(NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY);
-
+        reset(mCallbacks);
         nm.setAcceptPartialConnectivity();
-        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
-                .notifyNetworkTested(eq(NETWORK_TEST_RESULT_VALID), any());
+        // Expect to update evaluation result notifications to CS.
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1)).notifyNetworkTested(
+                eq(VALIDATION_RESULT_PARTIAL | NETWORK_VALIDATION_RESULT_VALID), eq(null));
     }
 
     @Test
@@ -847,12 +875,13 @@ public class NetworkMonitorTest {
         setStatus(mHttpsConnection, 500);
         setStatus(mHttpConnection, 204);
         setStatus(mFallbackConnection, 500);
-        runPartialConnectivityNetworkTest();
+        runPartialConnectivityNetworkTest(VALIDATION_RESULT_PARTIAL);
 
+        reset(mCallbacks);
         setStatus(mHttpsConnection, 500);
         setStatus(mHttpConnection, 500);
         setStatus(mFallbackConnection, 204);
-        runPartialConnectivityNetworkTest();
+        runPartialConnectivityNetworkTest(VALIDATION_RESULT_FALLBACK_PARTIAL);
     }
 
     private void assertIpAddressArrayEquals(String[] expected, InetAddress[] actual) {
@@ -894,6 +923,82 @@ public class NetworkMonitorTest {
             fail("DNS query timed out, expected UnknownHostException");
         } catch (UnknownHostException e) {
         }
+    }
+
+    @Test
+    public void testNotifyNetwork_WithforceReevaluation() throws Exception {
+        final NetworkMonitor nm = runValidatedNetworkTest();
+        // Verify forceReevalution will not reset the validation result but only probe result until
+        // getting the validation result.
+        reset(mCallbacks);
+        setSslException(mHttpsConnection);
+        setStatus(mHttpConnection, 500);
+        setStatus(mFallbackConnection, 204);
+        nm.forceReevaluation(Process.myUid());
+        final ArgumentCaptor<Integer> intCaptor = ArgumentCaptor.forClass(Integer.class);
+        // Expect to send HTTP, HTTPs, FALLBACK and evaluation results.
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(4))
+            .notifyNetworkTested(intCaptor.capture(), any());
+        List<Integer> intArgs = intCaptor.getAllValues();
+
+        assertEquals(Integer.valueOf(NETWORK_VALIDATION_PROBE_DNS
+                | NETWORK_VALIDATION_PROBE_FALLBACK | NETWORK_VALIDATION_RESULT_VALID),
+                intArgs.get(0));
+        assertTrue((intArgs.get(1) & NETWORK_VALIDATION_RESULT_VALID) != 0);
+        assertTrue((intArgs.get(2) & NETWORK_VALIDATION_RESULT_VALID) != 0);
+        assertTrue((intArgs.get(3) & NETWORK_VALIDATION_RESULT_PARTIAL) != 0);
+        assertTrue((intArgs.get(3) & NETWORK_VALIDATION_RESULT_VALID) == 0);
+    }
+
+    @Test
+    public void testEvaluationState_clearProbeResults() throws Exception {
+        final NetworkMonitor nm = runValidatedNetworkTest();
+        nm.getEvaluationState().clearProbeResults();
+        // Verify probe results are all reset and only evaluation result left.
+        assertEquals(NETWORK_VALIDATION_RESULT_VALID,
+                nm.getEvaluationState().getNetworkTestResult());
+    }
+
+    @Test
+    public void testEvaluationState_reportProbeResult() throws Exception {
+        final NetworkMonitor nm = runValidatedNetworkTest();
+
+        reset(mCallbacks);
+
+        nm.reportHttpProbeResult(NETWORK_VALIDATION_PROBE_HTTP, CaptivePortalProbeResult.SUCCESS);
+        // Verify result should be appended and notifyNetworkTested callback is triggered once.
+        assertEquals(nm.getEvaluationState().getNetworkTestResult(),
+                VALIDATION_RESULT_VALID | NETWORK_VALIDATION_PROBE_HTTP);
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1)).notifyNetworkTested(
+                eq(VALIDATION_RESULT_VALID | NETWORK_VALIDATION_PROBE_HTTP), any());
+
+        nm.reportHttpProbeResult(NETWORK_VALIDATION_PROBE_HTTP, CaptivePortalProbeResult.FAILED);
+        // Verify DNS probe result should not be cleared.
+        assertTrue((nm.getEvaluationState().getNetworkTestResult() & NETWORK_VALIDATION_PROBE_DNS)
+                == NETWORK_VALIDATION_PROBE_DNS);
+    }
+
+    @Test
+    public void testEvaluationState_reportEvaluationResult() throws Exception {
+        final NetworkMonitor nm = runValidatedNetworkTest();
+
+        nm.getEvaluationState().reportEvaluationResult(NETWORK_VALIDATION_RESULT_PARTIAL,
+                null /* redirectUrl */);
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1)).notifyNetworkTested(
+                eq(NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                | NETWORK_VALIDATION_RESULT_PARTIAL), eq(null));
+
+        nm.getEvaluationState().reportEvaluationResult(
+                NETWORK_VALIDATION_RESULT_VALID | NETWORK_VALIDATION_RESULT_PARTIAL,
+                null /* redirectUrl */);
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1)).notifyNetworkTested(
+                eq(VALIDATION_RESULT_VALID | NETWORK_VALIDATION_RESULT_PARTIAL), eq(null));
+
+        nm.getEvaluationState().reportEvaluationResult(VALIDATION_RESULT_INVALID,
+                TEST_REDIRECT_URL);
+        verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1)).notifyNetworkTested(
+                eq(NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS),
+                eq(TEST_REDIRECT_URL));
     }
 
     private void makeDnsTimeoutEvent(WrappedNetworkMonitor wrappedMonitor, int count) {
@@ -954,39 +1059,64 @@ public class NetworkMonitorTest {
                 eq(Settings.Global.CAPTIVE_PORTAL_MODE), anyInt())).thenReturn(mode);
     }
 
-    private void runPortalNetworkTest() {
-        runNetworkTest(NETWORK_TEST_RESULT_INVALID);
+    private void runPortalNetworkTest(int result) {
+        // The network test event will be triggered twice with the same result. Expect to capture
+        // the second one with direct url.
+        runPortalNetworkTest(result,
+                (VerificationWithTimeout) timeout(HANDLER_TIMEOUT_MS).times(2));
+    }
+
+    private void runPortalNetworkTest(int result, VerificationWithTimeout mode) {
+        runNetworkTest(result, mode);
         assertEquals(1, mRegisteredReceivers.size());
         assertNotNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
     private void runNotPortalNetworkTest() {
-        runNetworkTest(NETWORK_TEST_RESULT_VALID);
+        runNetworkTest(VALIDATION_RESULT_VALID);
+        assertEquals(0, mRegisteredReceivers.size());
+        assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
+    }
+
+    private void runNoValidationNetworkTest() {
+        runNetworkTest(NETWORK_VALIDATION_RESULT_VALID);
         assertEquals(0, mRegisteredReceivers.size());
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
     private void runFailedNetworkTest() {
-        runNetworkTest(NETWORK_TEST_RESULT_INVALID);
+        runNetworkTest(VALIDATION_RESULT_INVALID);
         assertEquals(0, mRegisteredReceivers.size());
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
     }
 
-    private void runPartialConnectivityNetworkTest() {
-        runNetworkTest(NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY);
+    private void runPartialConnectivityNetworkTest(int result) {
+        runNetworkTest(result);
         assertEquals(0, mRegisteredReceivers.size());
         assertNull(mNetworkTestedRedirectUrlCaptor.getValue());
+    }
+
+    private NetworkMonitor runValidatedNetworkTest() throws Exception {
+        setStatus(mHttpsConnection, 204);
+        setStatus(mHttpConnection, 204);
+        // Expect to send HTTPs and evaluation results.
+        return runNetworkTest(VALIDATION_RESULT_VALID);
     }
 
     private NetworkMonitor runNetworkTest(int testResult) {
-        return runNetworkTest(METERED_CAPABILITIES, testResult);
+        return runNetworkTest(METERED_CAPABILITIES, testResult, getGeneralVerification());
     }
 
-    private NetworkMonitor runNetworkTest(NetworkCapabilities nc, int testResult) {
+    private NetworkMonitor runNetworkTest(int testResult, VerificationWithTimeout mode) {
+        return runNetworkTest(METERED_CAPABILITIES, testResult, mode);
+    }
+
+    private NetworkMonitor runNetworkTest(NetworkCapabilities nc, int testResult,
+            VerificationWithTimeout mode) {
         final NetworkMonitor monitor = makeMonitor(nc);
         monitor.notifyNetworkConnected(TEST_LINK_PROPERTIES, nc);
         try {
-            verify(mCallbacks, timeout(HANDLER_TIMEOUT_MS).times(1))
+            verify(mCallbacks, mode)
                     .notifyNetworkTested(eq(testResult), mNetworkTestedRedirectUrlCaptor.capture());
         } catch (RemoteException e) {
             fail("Unexpected exception: " + e);
@@ -1018,5 +1148,10 @@ public class NetworkMonitorTest {
             stats.addDnsEvent(RETURN_CODE_DNS_TIMEOUT, 123456789 /* timeMs */);
         }
     }
+
+    private VerificationWithTimeout getGeneralVerification() {
+        return (VerificationWithTimeout) timeout(HANDLER_TIMEOUT_MS).atLeastOnce();
+    }
+
 }
 
