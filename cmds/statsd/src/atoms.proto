@@ -6139,6 +6139,9 @@ message DangerousPermissionState {
 
     // If the permission is granted to the uid
     optional bool is_granted = 4;
+
+    // Permission flags as per android.content.pm.PermissionFlags
+    optional int32 permission_flags = 5;
 }
 
 /**
