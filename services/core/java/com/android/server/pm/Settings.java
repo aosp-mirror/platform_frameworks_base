@@ -1306,9 +1306,8 @@ public final class Settings {
                 .areDefaultRuntimePermissionsGrantedLPr(userId);
     }
 
-    void onDefaultRuntimePermissionsGrantedLPr(int userId) {
-        mRuntimePermissionsPersistence
-                .onDefaultRuntimePermissionsGrantedLPr(userId);
+    void setRuntimePermissionsFingerPrintLPr(@NonNull String fingerPrint, @UserIdInt int userId) {
+        mRuntimePermissionsPersistence.setRuntimePermissionsFingerPrintLPr(fingerPrint, userId);
     }
 
     int getDefaultRuntimePermissionsVersionLPr(int userId) {
@@ -5149,8 +5148,9 @@ public final class Settings {
         }
 
         @GuardedBy("Settings.this.mLock")
-        public void onDefaultRuntimePermissionsGrantedLPr(int userId) {
-            mFingerprints.put(userId, Build.FINGERPRINT);
+        public void setRuntimePermissionsFingerPrintLPr(@NonNull String fingerPrint,
+                @UserIdInt int userId) {
+            mFingerprints.put(userId, fingerPrint);
             writePermissionsForUserAsyncLPr(userId);
         }
 
