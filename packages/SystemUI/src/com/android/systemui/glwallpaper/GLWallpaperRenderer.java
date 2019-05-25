@@ -19,6 +19,9 @@ package com.android.systemui.glwallpaper;
 import android.util.Size;
 import android.view.SurfaceHolder;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * A renderer which is responsible for making OpenGL calls to render a frame.
  */
@@ -57,6 +60,15 @@ public interface GLWallpaperRenderer {
      * Called when no need to render any more.
      */
     void finish();
+
+    /**
+     * Called to dump current state.
+     * @param prefix prefix.
+     * @param fd fd.
+     * @param out out.
+     * @param args args.
+     */
+    void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args);
 
     /**
      * A proxy which owns surface holder.
