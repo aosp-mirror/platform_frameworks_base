@@ -66,7 +66,7 @@
         <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
         <item name="android:ellipsize">none</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">@dimen/keyguard_shadow_radius</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
     <style name="widget_title_bold">
         <item name="android:textStyle">bold</item>
@@ -75,7 +75,7 @@
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:ellipsize">none</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">@dimen/keyguard_shadow_radius</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
     <style name="widget_small_bold">
         <item name="android:textStyle">bold</item>
@@ -84,7 +84,7 @@
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:ellipsize">none</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">@dimen/keyguard_shadow_radius</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
     <style name="BouncerSecurityContainer">
@@ -115,7 +115,7 @@
         <item name="android:maxLines">2</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">@dimen/keyguard_shadow_radius</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
     <style name="TextAppearance.Keyguard.Secondary">
@@ -130,7 +130,7 @@
         <item name="android:maxLines">1</item>
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
-        <item name="android:shadowRadius">@dimen/keyguard_shadow_radius</item>
+        <item name="android:shadowRadius">?attr/shadowRadius</item>
     </style>
 
 </resources>
