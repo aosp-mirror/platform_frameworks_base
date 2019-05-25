@@ -40,6 +40,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.OffsettableClock;
@@ -131,6 +132,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 133372977)
     public void testTimeout() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mAppToken,
