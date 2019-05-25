@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB డీబగ్గింగ్‌కి అనుమతి లేదు"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ఈ పరికరానికి ప్రస్తుతం సైన్ ఇన్ చేసిన వినియోగదారు USB డీబగ్గింగ్ ఆన్ చేయలేరు. ఈ ఫీచర్ ఉపయోగించడానికి, ప్రాథమిక వినియోగదారుకి మారాలి."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB పోర్ట్‌ నిలిపివేయబడింది"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"మీ పరికరాన్ని ద్రవ లేదా వ్యర్థ పదార్థాల నుండి కాపాడే తరుణంలో USB పోర్ట్‌ని నిలిపివేయడంతో పాటు ఎలాంటి యాక్సెసరీస్‌ను గుర్తించలేదు.\n\n కనుక USB పోర్ట్‌ని ఉపయోగించడం సురక్షితం అయ్యాక, మళ్లీ మీకో నోటిఫికేషన్‌ రూపంలో తెలియజేస్తాం."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"ఛార్జర్‌లు, యాక్సెసరీలను గుర్తించే విధంగా USB పోర్ట్ ప్రారంభించబడింది"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USBని ప్రారంభించు"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"స్క్రీన్‌కు నింపేలా జూమ్ చేయండి"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"స్క్రీన్‌కు నింపేలా విస్తరించండి"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"స్క్రీన్‌షాట్"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయి"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"మళ్లీ ప్రయత్నించు"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ఖాళీ ప్రదేశం, ప్రామాణీకరణను రద్దు చేయడానికి నొక్కండి"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"దయచేసి మళ్ళీ ప్రయత్నించండి"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"మీ ముఖాన్ని క్యాప్చర్ చేస్తోంది"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ముఖం ప్రామాణీకరించబడింది"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"నిర్ధారించబడింది"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"వేలిముద్ర సెన్సార్‌ను తాకండి"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"వేలిముద్ర చిహ్నం"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"మీ కోసం చూస్తోంది…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>కి"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ముదురు రంగు థీమ్"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ముదురు రంగు థీమ్\nబ్యాటరీ సేవర్"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC నిలిపివేయబడింది"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ప్రారంభించబడింది"</string>
@@ -445,14 +452,15 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"బ్యాటరీ సేవర్‌ను ఆఫ్ చేయండి"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"రికార్డ్ చేేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ఏదైనా గోప్యమైన సమాచారాన్ని, అంటే మీరు ప్లే చేసే ఆడియో, మీ పాస్‌వర్డ్‌లు, చెల్లింపు సమాచారం, ఫోటోలు, సందేశాలు లాంటివి క్యాప్చర్ చేయగలుగుతుంది."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఆడియో, పాస్‌వర్డ్‌లు, చెల్లింపు సమాచారం, ఫోటోలు మరియు సందేశాలతో సహా గోప్యమైన సమాచారాన్ని <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> క్యాప్చర్ చేయగలుగుతుంది."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన ఆడియో, పాస్‌వర్డ్‌లు, చెల్లింపు సమాచారం, ఫోటోలు మరియు సందేశాలతో సహా గోప్యమైన సమాచారాన్ని ఈ ఫంక్షన్‌ను అందిస్తున్న సేవా ప్రదాత క్యాప్చర్ చేయగలుగుతుంది."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"ప్రసారం/రికార్డ్ అయ్యే సమయాలలో గోప్యమైన సమాచారాన్ని బహిర్గతపరచడం"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"మళ్లీ చూపవద్దు"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"అన్నీ క్లియర్ చేయండి"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"నిర్వహించండి"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
     <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
     <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ఇప్పుడే ప్రారంభించు"</string>
@@ -637,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"బ్లాక్ చేయి"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"చూపిస్తూనే ఉండు"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"కుదించు"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"సున్నితం"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"నిశబ్దంగా తెలియజేయి"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"అంతరాయం"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ఎప్పటికప్పుడు హెచ్చరించు"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"నోటిఫికేషన్‌లను ఆఫ్ చేయి"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
@@ -653,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"అన్ని <xliff:g id="APP_NAME">%1$s</xliff:g> నోటిఫికేషన్‌లు"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"మరిన్ని చూడండి"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ఈ యాప్ ఈ కెమెరాను ఉపయోగిస్తోంది."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ఈ యాప్ మైక్రోఫోన్‌ను ఉపయోగిస్తుంది."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది."</string>
@@ -900,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"అనుమతించు"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"తిరస్కరించు"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"బ్యాటరీ సేవర్‌ని షెడ్యూల్ చేయడానికి నొక్కండి"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"బ్యాటరీ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ఉన్నప్పుడు ఆటోమేటిక్‌గా ఆన్ అవుతుంది"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"వద్దు, ధన్యవాదాలు"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"బ్యాటరీ సేవర్ షెడ్యూల్ ఆన్ చేయబడింది"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"బ్యాటరీ <xliff:g id="PERCENTAGE">%d</xliff:g>%% కంటే తగ్గినప్పుడు బ్యాటరీ సేవర్ ఆటోమేటిక్‌గా ఆన్ అవుతుంది."</string>
@@ -932,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"ఎగువ కుడివైపునకు జరుపు"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"దిగువ ఎడమవైపునకు తరలించు"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"దిగవు కుడివైపునకు జరుపు"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"విస్మరించు"</string>
 </resources>

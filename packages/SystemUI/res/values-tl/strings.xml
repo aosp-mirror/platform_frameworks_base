@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Hindi pinapayagan ang pagde-debug sa pamamagitan ng USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Hindi mao-on ng user na kasalukuyang naka-sign in sa device na ito ang pag-debug ng USB. Upang magamit ang feature na ito, lumipat sa pangunahing user."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Na-disable ang USB port"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Para protektahan ang iyong device sa liquid o debris, na-disable ang USB port at hindi ito makaka-detect ng anumang accessory.\n\nMaaabisuhan ka kapag ligtas na gamitin muli ang USB port."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"Na-enable ang USB port para ma-detect ang mga charger at accessory"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"I-enable ang USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"I-zoom upang punan screen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"I-stretch upang mapuno screen"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Kumpirmahin"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Subukang muli"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Walang laman na rehiyon, mag-tap para kanselahin ang pag-authenticate"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Pakisubukan ulit"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Hinahanap ang iyong mukha"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Na-authenticate ang mukha"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Nakumpirma"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Pindutin ang fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icon ng fingerprint"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Hinahanap ka…"</string>
@@ -238,7 +246,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Naka-on ang pag-uulat ng lokasyon."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Na-off ang pag-uulat ng lokasyon."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Na-on ang pag-uulat ng lokasyon."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarm set para sa <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Nakatakda ang alarm nang <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Isara ang panel."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Higit pang oras."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Mas kaunting oras."</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Mao-on sa ganap na <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Hanggang <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Madilim na Tema"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Madilim na Tema\nPangtipid sa Baterya"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Naka-disable ang NFC"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Naka-enable ang NFC"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Naka-on ang Pangtipid sa Baterya"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Binabawasan ang performance at data sa background"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"I-off ang Pangtipid sa Baterya"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Habang nagre-record o nagka-cast, makukuha ng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ang anumang sensitibong impormasyon, gaya ng audio na pine-play mo at iyong mga password, impormasyon sa pagbabayad, mga larawan, at mga mensahe."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Habang nagre-record o nagka-cast, puwedeng kunin ng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ang anumang sensitibong impormasyong ipinapakita sa iyong screen o pine-play mula sa device mo, kasama ang sensitibong impormasyon gaya ng audio, mga password, impormasyon sa pagbabayad, mga larawan, at mga mensahe."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Habang nagre-record o nagka-cast, puwedeng kunin ng serbisyong nagbibigay ng function na ito ang anumang sensitibong impormasyong ipinapakita sa iyong screen o pine-play mula sa device mo, kasama ang sensitibong impormasyon gaya ng audio, mga password, impormasyon sa pagbabayad, mga larawan, at mga mensahe."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Maglalantad ng sensitibong impormasyon habang nagka-cast/nagre-record"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Huwag ipakitang muli"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"I-clear lahat"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Pamahalaan"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Mga banayad na notification"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"I-clear ang lahat ng banayad na notification"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Mga notification na na-pause ng Huwag Istorbohin"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Magsimula ngayon"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Walang mga notification"</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"I-block"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Patuloy na ipakita"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"I-minimize"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Malumanay"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Manatiling naka-silent"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Nakakaabala"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Patuloy na mag-alerto"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"I-off ang mga notification"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Patuloy na ipakita ang mga notification mula sa app na ito?"</string>
@@ -651,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Hindi puwedeng baguhin ang mga notification na ito."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Hindi mako-configure dito ang pangkat na ito ng mga notification"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Na-proxy na notification"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Lahat ng notification ng <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Tumingin pa"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ginagamit ng app na ito ang camera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ginagamit ng app na ito ang mikropono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ipinapakita ang app na ito sa ibabaw ng iba pang app sa iyong screen."</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Payagan"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Tanggihan"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"I-tap para iiskedyul ang Pangtipid sa Baterya"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Awtomatikong i-on kapag <xliff:g id="PERCENTAGE">%d</xliff:g>%% na ang baterya"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Hindi, salamat na lang"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Na-on ang iskedyul ng Pangtipid sa Baterya"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Awtomatikong mao-on ang Pangtipid sa Baterya kapag mas mababa na sa <xliff:g id="PERCENTAGE">%d</xliff:g>%% ang baterya."</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Ilipat sa kanan sa itaas"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Ilipat sa kaliwa sa ibaba"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Ilipat sa kanan sa ibaba"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"I-dismiss"</string>
 </resources>
