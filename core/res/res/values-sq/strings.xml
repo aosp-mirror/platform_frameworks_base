@@ -979,7 +979,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Muajin e fundit"</string>
     <string name="older" msgid="5211975022815554840">"Më të vjetra"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"në <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"më <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"në <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"në <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"ditë"</string>
@@ -1358,7 +1358,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lëngje ose papastërti në portën e USB-së"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Porta e USB-së është çaktivizuar automatikisht. Trokit për të mësuar më shumë."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Nuk ka rrezik të përdoret porta e USB-së"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefoni nuk i dallon më lëngjet apo papastërtitë."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>

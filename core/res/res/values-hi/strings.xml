@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"फ़ोन को थोड़ा नीचे ले जाएं."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फ़ोन को बाईं ओर घुमाएं."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फ़ोन को दाईं ओर घुमाएं."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"कृपया अपने डिवाइस की तरफ़ सीधे देखें."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"आपका चेहरा नहीं दिखाई दे रहा. फ़ोन की तरफ़ देखें."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"डिवाइस बहुत ज़्यादा हिल रहा है. फ़ोन को बिना हिलाएं पकड़ें."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया फिर से अपने चेहरे की पहचान कराएं."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा नहीं पहचान पा रहे. हार्डवेयर उपलब्ध नहीं है."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"चेहरे की पुष्टि के लिए फिर से कोशिश करें."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"चेहरे का नया डेटा सेव नहीं हो सकता. कोई पुराना डेटा मिटाएं."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"चेहरा पहचानने की कार्रवाई रद्द की गई"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"उपयोगकर्ता ने \'चेहरे की पहचान\' रद्द कर दी."</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\'परेशान न करें\' को ऐक्सेस करें"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"देखने की अनुमतियां चालू करें"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"इस्तेमाल करने वाले को किसी ऐप्लिकेशन के लिए अनुमतियों का इस्तेमाल शुरू करने देता है. सामान्य ऐप्लिकेशन के लिए इसकी ज़रूरत कभी नहीं पड़ती."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करना"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्‍क्रीन लॉक पासवर्ड और पिन की लंबाई और उनमें स्वीकृत वर्णों को नियंत्रित करना."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्‍क्रीन अनलॉक करने के की कोशिशों पर नज़र रखना"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"टेस्ट हार्नेस मोड बंद करने के लिए फ़ैक्ट्री रीसेट करें."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"यूएसबी पोर्ट में तरल चीज़ या कचरा है"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"यूएसबी पोर्ट अपने आप बंद हो गया है. ज़्यादा जानने के लिए टैप करें."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"यूएसबी पोर्ट का इस्तेमाल करना सुरक्षित है"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"फ़ोन अब तरल चीज़ों या कचरे की पहचान नहीं करता."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"गड़बड़ी की रिपोर्ट ली जा रही है…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"गड़बड़ी की रिपोर्ट शेयर करें?"</string>
@@ -1906,7 +1903,7 @@
     <string name="new_sms_notification_content" msgid="7002938807812083463">"देखने के लिए मैसेज (एसएमएस) ऐप खोलें"</string>
     <string name="profile_encrypted_title" msgid="4260432497586829134">"शायद कुछ सुविधाएं काम न करें"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"वर्क प्रोफ़ाइल लॉक है"</string>
-    <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलॉक करने के लिए टैप करें"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"वर्क प्रोफाइल अनलॉक करने के लिए टैप करें"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> से कनेक्ट किया गया"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"फ़ाइलें देखने के लिए टैप करें"</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप्लिकेशन की जानकारी"</string>

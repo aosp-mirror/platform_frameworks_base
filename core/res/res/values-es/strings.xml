@@ -1357,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Restablece los ajustes de fábrica para inhabilitar el modo de agente de prueba."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Se ha detectado líquido o suciedad en el puerto USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"El puerto USB se ha inhabilitado automáticamente. Toca para obtener más información."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Ya puedes usar el puerto USB"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"El teléfono ya no detecta líquidos ni suciedad."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Creando informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
@@ -1905,7 +1906,7 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Toca para desbloquear"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toca para ver archivos"</string>
-    <string name="app_info" msgid="6856026610594615344">"Información de la aplicación"</string>
+    <string name="app_info" msgid="6856026610594615344">"Acerca de la aplicación"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Iniciando demostración…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Restableciendo dispositivo…"</string>

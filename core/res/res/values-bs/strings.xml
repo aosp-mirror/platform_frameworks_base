@@ -155,7 +155,7 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"Uredu"</string>
     <string name="httpError" msgid="7956392511146698522">"Došlo je do greške na mreži."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Pronalaženje URL-a nije uspjelo."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Shema za autentifikaciju stranice nije podržana."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Šema za autentifikaciju stranice nije podržana."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Došlo je do greške prilikom autentifikacije."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Došlo je do greške prilikom autentifikacije preko proksi servera."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Povezivanje sa serverom nije uspjelo."</string>
@@ -1381,7 +1381,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Izvršite vraćanje na fabričke postavke da onemogućite način rada okvira za testiranje."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Tečnost ili nečistoće u USB priključku"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB priključak je automatski onemogućen. Dodirnite da saznate više."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB priključak je sada sigurno koristiti"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon više ne detektira tečnost ili nečistoće."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Prijem izvještaja o grešci..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Podijeliti izvještaj o grešci?"</string>

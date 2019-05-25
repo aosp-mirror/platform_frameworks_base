@@ -633,11 +633,11 @@
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'ha de necessitar mai per a aplicacions normals."</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"canviar el calibratge del dispositiu d\'entrada"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accedir als certificats de DRM"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats DRM. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats DRM. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"rebre l\'estat de la transferència d\'Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permet que aquesta aplicació rebi informació sobre les transferències d\'Android Beam actuals."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"suprimir els certificats DRM"</string>
@@ -1357,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Hi ha líquid o pols al port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"El port USB es desactiva automàticament. Toca per obtenir més informació."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"És segur utilitzar el port USB"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"El telèfon ja no detecta líquids ni pols."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"S\'està creant l\'informe d\'errors…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vols compartir l\'informe d\'errors?"</string>
@@ -2026,6 +2027,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i <xliff:g id="COUNT_3">%d</xliff:g> fitxers més</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> i <xliff:g id="COUNT_1">%d</xliff:g> fitxer més</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"No es pot compartir directament"</string>
+    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"La compartició directa no està disponible"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Llista d\'aplicacions"</string>
 </resources>
