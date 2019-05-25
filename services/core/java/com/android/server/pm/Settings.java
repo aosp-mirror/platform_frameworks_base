@@ -1306,9 +1306,8 @@ public final class Settings {
                 .areDefaultRuntimePermissionsGrantedLPr(userId);
     }
 
-    void onDefaultRuntimePermissionsGrantedLPr(int userId) {
-        mRuntimePermissionsPersistence
-                .onDefaultRuntimePermissionsGrantedLPr(userId);
+    void setRuntimePermissionsFingerPrintLPr(@NonNull String fingerPrint, @UserIdInt int userId) {
+        mRuntimePermissionsPersistence.setRuntimePermissionsFingerPrintLPr(fingerPrint, userId);
     }
 
     int getDefaultRuntimePermissionsVersionLPr(int userId) {
@@ -5103,6 +5102,7 @@ public final class Settings {
         private static final long WRITE_PERMISSIONS_DELAY_MILLIS = 200;
         private static final long MAX_WRITE_PERMISSIONS_DELAY_MILLIS = 2000;
 
+        private static final int UPGRADE_VERSION = -1;
         private static final int INITIAL_VERSION = 0;
 
         private final Handler mHandler = new MyHandler();
@@ -5134,7 +5134,7 @@ public final class Settings {
 
         @GuardedBy("Settings.this.mLock")
         int getVersionLPr(int userId) {
-            return mVersions.get(userId);
+            return mVersions.get(userId, INITIAL_VERSION);
         }
 
         @GuardedBy("Settings.this.mLock")
@@ -5149,8 +5149,9 @@ public final class Settings {
         }
 
         @GuardedBy("Settings.this.mLock")
-        public void onDefaultRuntimePermissionsGrantedLPr(int userId) {
-            mFingerprints.put(userId, Build.FINGERPRINT);
+        public void setRuntimePermissionsFingerPrintLPr(@NonNull String fingerPrint,
+                @UserIdInt int userId) {
+            mFingerprints.put(userId, fingerPrint);
             writePermissionsForUserAsyncLPr(userId);
         }
 
@@ -5365,8 +5366,10 @@ public final class Settings {
 
                 switch (parser.getName()) {
                     case TAG_RUNTIME_PERMISSIONS: {
+                        // If the permisions settings file exists but the version is not set this is
+                        // an upgrade from P->Q. Hence mark it with the special UPGRADE_VERSION
                         int version = XmlUtils.readIntAttribute(parser, ATTR_VERSION,
-                                INITIAL_VERSION);
+                                UPGRADE_VERSION);
                         mVersions.put(userId, version);
                         String fingerprint = parser.getAttributeValue(null, ATTR_FINGERPRINT);
                         mFingerprints.put(userId, fingerprint);

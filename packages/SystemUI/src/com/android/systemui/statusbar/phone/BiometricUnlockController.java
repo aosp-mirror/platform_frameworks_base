@@ -433,7 +433,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     public void onBiometricError(int msgId, String errString,
             BiometricSourceType biometricSourceType) {
         mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
-                .setType(MetricsEvent.TYPE_ERROR).setSubtype(toSubtype(biometricSourceType)));
+                .setType(MetricsEvent.TYPE_ERROR).setSubtype(toSubtype(biometricSourceType))
+                .addTaggedData(MetricsEvent.FIELD_BIOMETRIC_AUTH_ERROR, msgId));
         cleanup();
     }
 

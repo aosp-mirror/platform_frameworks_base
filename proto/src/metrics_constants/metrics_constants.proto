@@ -7371,6 +7371,11 @@ message MetricsEvent {
     // Note: Only shows up on first time toggle
     DIALOG_DARK_UI_INFO = 1740;
 
+    // FIELD - Detailed reason in biometric authentication error.
+    // One of the constant value in BiometricConstants.java file.
+    // OS: Q
+    FIELD_BIOMETRIC_AUTH_ERROR = 1741;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

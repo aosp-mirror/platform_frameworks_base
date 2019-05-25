@@ -512,7 +512,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
             tracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
-                    serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.versionCode,
+                    serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.longVersionCode,
                     serviceInfo.processName, serviceInfo.name);
             tracker.applyNewOwner(this);
         }
@@ -530,7 +530,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (restartTracker == null) {
             if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
                 restartTracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
-                        serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.versionCode,
+                        serviceInfo.applicationInfo.uid,
+                        serviceInfo.applicationInfo.longVersionCode,
                         serviceInfo.processName, serviceInfo.name);
             }
             if (restartTracker == null) {
@@ -551,12 +552,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             .removeAllowBackgroundActivityStartsToken(this);
                     ams.mHandler.removeCallbacks(mStartedWhitelistingBgActivityStartsCleanUp);
                 }
-                mAppForStartedWhitelistingBgActivityStarts = null;
             }
-            if (mHasStartedWhitelistingBgActivityStarts) {
-                // Make sure the cleanup callback knows about the new process.
-                mAppForStartedWhitelistingBgActivityStarts = _proc;
-            }
+            // Make sure the cleanup callback knows about the new process.
+            mAppForStartedWhitelistingBgActivityStarts = mHasStartedWhitelistingBgActivityStarts
+                    ? _proc : null;
             if (mHasStartedWhitelistingBgActivityStarts
                     || mHasBindingWhitelistingBgActivityStarts) {
                 _proc.addAllowBackgroundActivityStartsToken(this);
@@ -656,6 +655,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
      */
     void whitelistBgActivityStartsOnServiceStart() {
         setHasStartedWhitelistingBgActivityStarts(true);
+        if (app != null) {
+            mAppForStartedWhitelistingBgActivityStarts = app;
+        }
 
         // This callback is stateless, so we create it once when we first need it.
         if (mStartedWhitelistingBgActivityStartsCleanUp == null) {

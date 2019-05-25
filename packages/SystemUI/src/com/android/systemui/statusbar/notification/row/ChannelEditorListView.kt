@@ -117,7 +117,6 @@ class AppControlView(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
 class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
 
     lateinit var controller: ChannelEditorDialogController
-    private lateinit var iconView: ImageView
     private lateinit var channelName: TextView
     private lateinit var channelDescription: TextView
     private lateinit var switch: Switch
@@ -131,7 +130,6 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
         }
 
     override fun onFinishInflate() {
-        iconView = findViewById(R.id.icon)
         channelName = findViewById(R.id.channel_name)
         channelDescription = findViewById(R.id.channel_description)
         switch = findViewById(R.id.toggle)
@@ -144,11 +142,6 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
 
     private fun updateViews() {
         val nc = channel ?: return
-
-        iconView.setImageDrawable(
-                if (gentle)
-                    context.getDrawable(R.drawable.ic_notification_gentle)
-                else context.getDrawable(R.drawable.ic_notification_interruptive))
 
         channelName.text = nc.name ?: "(missing)"
 

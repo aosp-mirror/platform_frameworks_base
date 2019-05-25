@@ -51,8 +51,6 @@ import android.os.Parcel;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
-import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -106,7 +104,6 @@ public class VoiceInteractionManagerService extends SystemService {
     final ArraySet<Integer> mLoadedKeyphraseIds = new ArraySet<>();
     ShortcutServiceInternal mShortcutServiceInternal;
     SoundTriggerInternal mSoundTriggerInternal;
-    private boolean mAllowInstantService;
 
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
@@ -173,14 +170,6 @@ public class VoiceInteractionManagerService extends SystemService {
         mServiceStub.switchUser(userHandle);
     }
 
-    // Called by Shell cmd
-    void setAllowInstantService(boolean allowed) {
-        Log.i(TAG, "setAllowInstantService(): " + allowed);
-        mContext.enforceCallingPermission(Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
-                "setAllowInstantService");
-        mAllowInstantService = allowed;
-    }
-
     class LocalService extends VoiceInteractionManagerInternal {
         @Override
         public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
@@ -234,7 +223,6 @@ public class VoiceInteractionManagerService extends SystemService {
                         new IVoiceInteractionSessionShowCallback.Stub() {
                             @Override
                             public void onFailed() {
-                                Slog.w(TAG, "startLocalVoiceInteraction() failed");
                             }
 
                             @Override
@@ -283,10 +271,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         public void initForUser(int userHandle) {
-            if (DEBUG) {
-                Slog.d(TAG, "**************** initForUser user=" + userHandle
-                        + ", allowInstantService=" + mAllowInstantService);
-            }
+            if (DEBUG) Slog.d(TAG, "**************** initForUser user=" + userHandle);
             String curInteractorStr = Settings.Secure.getStringForUser(
                     mContext.getContentResolver(),
                     Settings.Secure.VOICE_INTERACTION_SERVICE, userHandle);
@@ -445,7 +430,6 @@ public class VoiceInteractionManagerService extends SystemService {
             if (!mSafeMode) {
                 String curService = Settings.Secure.getStringForUser(
                         mResolver, Settings.Secure.VOICE_INTERACTION_SERVICE, mCurUser);
-                if (DEBUG) Log.d(TAG, "Service for user " + mCurUser + ": " + curService);
                 ComponentName serviceComponent = null;
                 ServiceInfo serviceInfo = null;
                 if (curService != null && !curService.isEmpty()) {
@@ -482,8 +466,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                     if (hasComponent) {
                         setImplLocked(new VoiceInteractionManagerServiceImpl(mContext,
-                                UiThread.getHandler(), this, mCurUser, serviceComponent,
-                                mAllowInstantService));
+                                UiThread.getHandler(), this, mCurUser, serviceComponent));
                         mImpl.startLocked();
                     } else {
                         setImplLocked(null);
@@ -1244,23 +1227,13 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 pw.println("VOICE INTERACTION MANAGER (dumpsys voiceinteraction)");
                 pw.println("  mEnableService: " + mEnableService);
-                pw.println("  mAllowInstantService: " + mAllowInstantService);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
                     return;
                 }
                 mImpl.dumpLocked(fd, pw, args);
             }
-
             mSoundTriggerInternal.dump(fd, pw, args);
-        }
-
-        @Override
-        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                String[] args, ShellCallback callback, ResultReceiver resultReceiver)
-                throws RemoteException {
-            new VoiceInteractionManagerServiceShellCommand(VoiceInteractionManagerService.this)
-                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
