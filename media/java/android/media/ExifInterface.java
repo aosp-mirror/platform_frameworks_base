@@ -1395,6 +1395,9 @@ public class ExifInterface {
         }
         mAssetInputStream = null;
         mFilename = null;
+        // When FileDescriptor is duplicated and set to FileInputStream, ownership needs to be
+        // clarified in order for garbage collection to take place.
+        boolean isFdOwner = false;
         if (isSeekableFD(fileDescriptor)) {
             mSeekableFileDescriptor = fileDescriptor;
             // Keep the original file descriptor in order to save attributes when it's seekable.
@@ -1402,6 +1405,7 @@ public class ExifInterface {
             // feature won't be working.
             try {
                 fileDescriptor = Os.dup(fileDescriptor);
+                isFdOwner = true;
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
             }
@@ -1411,7 +1415,7 @@ public class ExifInterface {
         mIsInputStream = false;
         FileInputStream in = null;
         try {
-            in = new FileInputStream(fileDescriptor);
+            in = new FileInputStream(fileDescriptor, isFdOwner);
             loadAttributes(in);
         } finally {
             IoUtils.closeQuietly(in);
@@ -1966,7 +1970,7 @@ public class ExifInterface {
             } else if (mSeekableFileDescriptor != null) {
                 FileDescriptor fileDescriptor = Os.dup(mSeekableFileDescriptor);
                 Os.lseek(fileDescriptor, 0, OsConstants.SEEK_SET);
-                in = new FileInputStream(fileDescriptor);
+                in = new FileInputStream(fileDescriptor, true);
             }
             if (in == null) {
                 // Should not be reached this.
