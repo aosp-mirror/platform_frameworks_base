@@ -33,9 +33,10 @@ import java.util.logging.Logger;
  */
 public class Utils {
 
-    public static final String CMD_UPDATE_CONFIG = "cmd stats config update";
     public static final String CMD_DUMP_REPORT = "cmd stats dump-report";
+    public static final String CMD_LOG_APP_BREADCRUMB = "cmd stats log-app-breadcrumb";
     public static final String CMD_REMOVE_CONFIG = "cmd stats config remove";
+    public static final String CMD_UPDATE_CONFIG = "cmd stats config update";
 
     public static final String SHELL_UID = "2000"; // Use shell, even if rooted.
 
@@ -107,6 +108,26 @@ public class Utils {
         }
     }
 
+    /**
+     * Logs an AppBreadcrumbReported atom.
+     * @param label which label to log for the app breadcrumb atom.
+     * @param state which state to log for the app breadcrumb atom.
+     * @param logger Logger to log error messages
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static void logAppBreadcrumb(int label, int state, Logger logger)
+            throws IOException, InterruptedException {
+        runCommand(
+                null,
+                logger,
+                "adb",
+                "shell",
+                CMD_LOG_APP_BREADCRUMB,
+                String.valueOf(label),
+                String.valueOf(state));
+    }
     public static void setUpLogger(Logger logger, boolean debug) {
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new LocalToolsFormatter());
