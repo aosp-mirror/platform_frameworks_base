@@ -290,7 +290,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"göndərin və SMS mesajlarına baxın"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə SMS mesajları göndərmək və onlara baxmaq icazəsi verilsin?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Depo"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Yaddaş"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"cihazınızda foto, media və fayllara daxil olun"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə cihazdakı foto, media və fayllara daxil olmaq icazəsi verilsin?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
@@ -1357,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Test Rejimini deaktiv etmək üçün fabrika ayarlarına sıfırlayın."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB portuna maye sızıb və ya qırılıb"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB portu avtomatik deaktiv edildi. Ətraflı məlumat üçün klikləyin."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB portundan istifadə təhlükəsizdir"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon artıq maye və ya nasazlığı aşkarlamayacaq."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Baq hesabatı verilir..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Baq hesabatı paylaşılsın?"</string>

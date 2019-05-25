@@ -1357,7 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Yenza ukusetha kabusha kwasekuqaleni ukuze ukhubaze imodi yokuqina yokuhlola."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Uketshezi noma ama-debris kumbobo ye-USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Imbobo ye-USB inqanyulwa ngokuzenzakalela. Thepha ukuze ufunde kabanzi."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Kuphephile ukusebenzisa imbobo ye-USB"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"KULUNGILE ukusebenzisa imbobo ye-USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Ifoni ayisatholi uketshezi noma ama-debris."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Ithatha umbiko wesiphazamisi..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Yabelana ngombiko wesiphazamisi?"</string>

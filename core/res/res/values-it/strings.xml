@@ -1357,7 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Ripristina le impostazioni di fabbrica per disattivare la modalità test harness."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Liquidi o detriti nella porta USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"La porta USB viene disattivata automaticamente. Tocca per avere ulteriori informazioni."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Puoi usare la porta USB in sicurezza"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Utilizzo porta USB consentito"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Il telefono non rileva più liquidi o detriti."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Recupero della segnalazione di bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Condividere la segnalazione di bug?"</string>
@@ -2026,6 +2026,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> file</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Condivisione diretta non attiva"</string>
+    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Condivisione diretta non disponibile"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Elenco di app"</string>
 </resources>

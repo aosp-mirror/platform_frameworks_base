@@ -1357,7 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Voer \'n fabriekterugstelling uit om Toetsraamwerkmodus te deaktiveer."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Vloeistof of vuilgoed in USB-poort"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-poort is outomaties gedeaktiveer. Tik om meer te wete te kom."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Veilig om USB-poort te gebruik"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"OK om USB-poort te gebruik"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Foon bespeur nie meer vloeistowwe of vuilgoed nie."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Neem tans foutverslag …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Deel foutverslag?"</string>

@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Telefonu aşağı indirin."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefonu sola hareket ettirin."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefonu sağa hareket ettirin."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lütfen cihazınıza daha doğrudan bakın."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Yüzünüz görülmüyor. Telefona bakın."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Çok fazla hareket ediyorsunuz. Telefonu sabit tutun."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Lütfen yüzünüzü yeniden kaydedin."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Yüzle kimlik doğrulamayı tekrar deneyin."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Yeni yüz verisi depolanamıyor. Önce eski bir tanesini silin."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Yüz işlemi iptal edildi"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Yüz kimlik doğrulama işlemini kullanıcı iptal etti"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"İzin sahibinin, operatör hizmetlerine bağlanmasına olanak tanır. Normal uygulamalarda hiçbir zaman gerekmez."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Rahatsız Etmeyin özelliğine erişme"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Uygulamaya, Rahatsız Etmeyin yapılandırmasını okuma ve yazma izni verir."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"izin kullanımı görüntülemeye başlama"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"İzin sahibinin bir uygulama için izin kullanımı başlatmasına olanak tanır. Normal uygulamalar için hiçbir zaman kullanılmamalıdır."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekran kilidini açma denemelerini izle"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Test Bandı Modu\'nu devre dışı bırakmak için cihazı fabrika ayarlarına sıfırlayın."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB bağlantı noktasında sıvı veya toz var"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB bağlantı noktası otomatik olarak devre dışı bırakıldı. Daha fazla bilgi için dokunun."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB bağlantı noktası güvenli bir şekilde kullanılabilir"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon artık sıvıları veya tozları algılamıyor."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Hata raporu alınıyor…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Hata raporu paylaşılsın mı?"</string>

@@ -101,7 +101,7 @@
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Mode TTY demandé par l\'interlocuteur : DÉSACTIVÉ"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voix"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Données"</string>
-    <string name="serviceClassFAX" msgid="5566624998840486475">"Télécopie"</string>
+    <string name="serviceClassFAX" msgid="5566624998840486475">"Fax"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Asynchrones"</string>
     <string name="serviceClassDataSync" msgid="7530000519646054776">"Synchrones"</string>
@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Baissez le téléphone."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Déplacez le téléphone vers la gauche."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Déplacez le téléphone vers la droite."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Veuillez regarder plus directement l\'appareil."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Visage non détecté. Regardez le téléphone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Trop de mouvement. Ne bougez pas le téléphone."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Veuillez enregistrer à nouveau votre visage."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. valider visage. Matériel non disponible."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Réessayez d\'activer l\'authentification faciale."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Impossible stocker nouv. visages. Veuillez en supprimer un."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Opération de reconnaissance faciale annulée"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Authentification faciale annulée par l\'utilisateur"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permet à l\'application autorisée de s\'associer aux services d\'un opérateur. Ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accéder au mode Ne pas déranger"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"activer l\'utilisation de l\'autorisation d\'affichage"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Permet à l\'application autorisée d\'activer l\'utilisation de l\'autorisation pour une application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les codes d\'accès de verrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -689,8 +685,8 @@
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
     <item msgid="7897544654242874543">"Bureau"</item>
-    <item msgid="1103601433382158155">"Télécopie bureau"</item>
-    <item msgid="1735177144948329370">"Télécopie domicile"</item>
+    <item msgid="1103601433382158155">"Fax travail"</item>
+    <item msgid="1735177144948329370">"Fax domicile"</item>
     <item msgid="603878674477207394">"Bipeur"</item>
     <item msgid="1650824275177931637">"Autre"</item>
     <item msgid="9192514806975898961">"Personnalisé"</item>
@@ -732,8 +728,8 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Domicile"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobile"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Bureau"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Télécopie bureau"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Télécopie domicile"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax travail"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax domicile"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Bipeur"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Autre"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Rappel"</string>
@@ -741,7 +737,7 @@
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Entreprise (principal)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"RNIS"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
-    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Autre télécopie"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Autre fax"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Télex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TTD"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Rétablissez la configuration d\'usine pour désactiver le mode Atelier de test."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Présence de liquide ou de saletés dans le port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Le port USB est désactivé automatiquement. Appuyez sur cette notification pour en savoir plus."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Possibilité d\'utiliser le port USB en toute sécurité"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Le téléphone ne détecte plus les liquides ni les saletés."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création du rapport de bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>
@@ -1670,8 +1667,8 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Le raccourci d\'accessibilité a activé <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Le raccourci d\'accessibilité a désactivé <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Appuyez de manière prolongée sur les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Choisissez une fonctionnalité à utiliser lorsque vous appuyez sur le bouton d\'accessibilité :"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Pour changer des fonctionnalités, appuyez de manière prolongée sur le bouton d\'accessibilité."</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Choisissez une fonctionnalité à utiliser lorsque vous appuyez sur le bouton Accessibilité :"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Pour changer de fonctionnalités, appuyez de manière prolongée sur le bouton Accessibilité."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Agrandissement"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Chargement du profil de <xliff:g id="NAME">%1$s</xliff:g>..."</string>
@@ -1798,7 +1795,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installé par votre administrateur"</string>

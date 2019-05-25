@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ফ’নটো তললৈ নিয়ক"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ফ’নটো বাওঁফালে নিয়ক।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ফ’নটো সোঁফালে নিয়ক।"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"আপোনাৰ ডিভাইচটোলৈ অধিক পোনে পোনে চাওক।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"আপোনাৰ মুখমণ্ডল দেখা নাই। ফ’নটোলৈ চাওক।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"বেছি লৰচৰ কৰি আছে। ফ’নটো স্থিৰকৈ ধৰক।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক।"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। হাৰ্ডৱেৰ নাই।"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"আকৌ মুখমণ্ডল সত্যাপন কৰিবলৈ চেষ্টা কৰক।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"নতুন মুখমণ্ডলৰ ডেটা জমা কৰিব পৰা নাই। প্ৰথমে পুৰণি এখন মচক।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"মুখমণ্ডলৰ প্ৰক্ৰিয়া বাতিল কৰা হ’ল"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ব্যৱহাৰকাৰীয়ে মুখমণ্ডল প্ৰমাণীকৰণ বাতিল কৰিছে"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"বাহক সেৱাৰ সৈতে সংযুক্ত হ\'বলৈ ধাৰকক অনুমতি দিয়ে। সাধাৰণ এপসমূহৰ বাবে সাধাৰণতে প্ৰয়োজন হ\'ব নালাগে।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"অসুবিধা নিদিব চাব পাৰে"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"অসুবিধা নিদিবৰ কনফিগাৰেশ্বনক পঢ়িবলৈ আৰু সালসলনি কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"চোৱাৰ অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰক"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ধাৰকক কোনো এপৰ বাবে অনুমতিৰ ব্যৱহাৰ আৰম্ভ কৰিবলৈ দিয়ে। সাধাৰণ এপ্‌সমূহৰ বাবে কেতিয়াও প্ৰয়োজন হ’ব নালাগে।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"পাছৱর্ডৰ নিয়ম ছেট কৰক"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"স্ক্ৰীণ লক পাছৱৰ্ড আৰু পিনৰ দৈর্ঘ্য আৰু কি কি আখৰ ব্যৱহাৰ কৰিব পাৰে তাক নিয়ন্ত্ৰণ কৰক।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"স্ক্ৰীণ আনলক কৰা প্ৰয়াসবোৰ পৰ্যবেক্ষণ কৰিব পাৰে"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"টেষ্ট হাৰনেছ ম’ড অক্ষম কৰিবলৈ ফেক্টৰী ৰিছেট কৰক।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"ইউএছবি প’ৰ্টত তৰল বা ধূলি-মাকতি আছে"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"ইউএছবি প’ৰ্ট স্বয়ংক্ৰিয়ভাৱে অক্ষম কৰা হয়। অধিক জানিবৰ বাবে টিপক।"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"ইউএছবি প’ৰ্ট ব্যৱহাৰ কৰিব পৰাকৈ নিৰাপদ"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ফ’নটোৱে তৰল বা ধূলি-মাকতি আৰু চিনাক্ত নকৰে।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"বাগ সম্পর্কীয় অভিযোগ গ্ৰহণ কৰি থকা হৈছে…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"বাগ সম্পর্কীয় অভিযোগ শ্বেয়াৰ কৰিবনে?"</string>

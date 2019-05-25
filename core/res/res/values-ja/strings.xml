@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"スマートフォンをもっと低い位置に下げてください。"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"スマートフォンを左に動かしてください。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"スマートフォンを右に動かしてください。"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"もっとまっすぐデバイスに顔を向けてください。"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"顔を確認できません。スマートフォンを見てください。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"あまり動かさないでください。安定させてください。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"顔を登録し直してください。"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"顔を確認できません。ハードウェアを利用できません。"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"顔認証をもう一度お試しください。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"新しい顔データを保存できません。古いデータを削除してください。"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"顔の操作をキャンセルしました"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"顔の認証がユーザーによりキャンセルされました"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"サイレント モードへのアクセス"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"表示権限の使用の開始"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"画面ロック解除試行の監視"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ポート内の液体やゴミ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ポートが自動的に無効になりました。タップして詳細をご確認ください。"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ポートを安全に使用できます"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"液体やゴミは検出されなくなりました。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"バグレポートを取得しています…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"バグレポートを共有しますか？"</string>
@@ -1670,8 +1667,8 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は ON になっています"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は OFF になっています"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"[ユーザー補助] ボタンをタップした場合に使用する機能を選択してください。"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"機能を変更するには、[ユーザー補助] ボタンを押し続けてください。"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ユーザー補助機能ボタンをタップした場合に使用する機能を選択してください。"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"機能を変更するには、ユーザー補助機能ボタンを長押ししてください。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"拡大"</string>
     <string name="user_switched" msgid="3768006783166984410">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
