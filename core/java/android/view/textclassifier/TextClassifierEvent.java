@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -149,6 +150,14 @@ public abstract class TextClassifierEvent implements Parcelable {
     @Nullable
     private final ULocale mLocale;
     private final Bundle mExtras;
+
+    /**
+     * Session id holder to help with converting this event to the legacy SelectionEvent.
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @Nullable
+    public TextClassificationSessionId mHiddenTempSessionId;
 
     private TextClassifierEvent(Builder builder) {
         mEventCategory = builder.mEventCategory;
@@ -357,6 +366,120 @@ public abstract class TextClassifierEvent implements Parcelable {
         out.append(", mActionIndices=").append(Arrays.toString(mActionIndices));
         out.append("}");
         return out.toString();
+    }
+
+    /**
+     * Returns a {@link SelectionEvent} equivalent of this event; or {@code null} if it can not be
+     * converted to a {@link SelectionEvent}.
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @Nullable
+    public final SelectionEvent toSelectionEvent() {
+        final int invocationMethod;
+        switch (getEventCategory()) {
+            case TextClassifierEvent.CATEGORY_SELECTION:
+                invocationMethod = SelectionEvent.INVOCATION_MANUAL;
+                break;
+            case TextClassifierEvent.CATEGORY_LINKIFY:
+                invocationMethod = SelectionEvent.INVOCATION_LINK;
+                break;
+            default:
+                // Cannot be converted to a SelectionEvent.
+                return null;
+        }
+
+        final String entityType = getEntityTypes().length > 0
+                ? getEntityTypes()[0] : TextClassifier.TYPE_UNKNOWN;
+        final SelectionEvent out = new SelectionEvent(
+                /* absoluteStart= */ 0,
+                /* absoluteEnd= */ 0,
+                /* eventType= */0,
+                entityType,
+                SelectionEvent.INVOCATION_UNKNOWN,
+                SelectionEvent.NO_SIGNATURE);
+        out.setInvocationMethod(invocationMethod);
+
+        final TextClassificationContext eventContext = getEventContext();
+        if (eventContext != null) {
+            out.setTextClassificationSessionContext(getEventContext());
+        }
+        out.setSessionId(mHiddenTempSessionId);
+        final String resultId = getResultId();
+        out.setResultId(resultId == null ? SelectionEvent.NO_SIGNATURE : resultId);
+        out.setEventIndex(getEventIndex());
+
+
+        final int eventType;
+        switch (getEventType()) {
+            case TextClassifierEvent.TYPE_SELECTION_STARTED:
+                eventType = SelectionEvent.EVENT_SELECTION_STARTED;
+                break;
+            case TextClassifierEvent.TYPE_SELECTION_MODIFIED:
+                eventType = SelectionEvent.EVENT_SELECTION_MODIFIED;
+                break;
+            case TextClassifierEvent.TYPE_SMART_SELECTION_SINGLE:
+                eventType = SelectionEvent.EVENT_SMART_SELECTION_SINGLE;
+                break;
+            case TextClassifierEvent.TYPE_SMART_SELECTION_MULTI:
+                eventType = SelectionEvent.EVENT_SMART_SELECTION_MULTI;
+                break;
+            case TextClassifierEvent.TYPE_AUTO_SELECTION:
+                eventType = SelectionEvent.EVENT_AUTO_SELECTION;
+                break;
+            case TextClassifierEvent.TYPE_OVERTYPE:
+                eventType = SelectionEvent.ACTION_OVERTYPE;
+                break;
+            case TextClassifierEvent.TYPE_COPY_ACTION:
+                eventType = SelectionEvent.ACTION_COPY;
+                break;
+            case TextClassifierEvent.TYPE_PASTE_ACTION:
+                eventType = SelectionEvent.ACTION_PASTE;
+                break;
+            case TextClassifierEvent.TYPE_CUT_ACTION:
+                eventType = SelectionEvent.ACTION_CUT;
+                break;
+            case TextClassifierEvent.TYPE_SHARE_ACTION:
+                eventType = SelectionEvent.ACTION_SHARE;
+                break;
+            case TextClassifierEvent.TYPE_SMART_ACTION:
+                eventType = SelectionEvent.ACTION_SMART_SHARE;
+                break;
+            case TextClassifierEvent.TYPE_SELECTION_DRAG:
+                eventType = SelectionEvent.ACTION_DRAG;
+                break;
+            case TextClassifierEvent.TYPE_SELECTION_DESTROYED:
+                eventType = SelectionEvent.ACTION_ABANDON;
+                break;
+            case TextClassifierEvent.TYPE_OTHER_ACTION:
+                eventType = SelectionEvent.ACTION_OTHER;
+                break;
+            case TextClassifierEvent.TYPE_SELECT_ALL:
+                eventType = SelectionEvent.ACTION_SELECT_ALL;
+                break;
+            case TextClassifierEvent.TYPE_SELECTION_RESET:
+                eventType = SelectionEvent.ACTION_RESET;
+                break;
+            default:
+                eventType = 0;
+                break;
+        }
+        out.setEventType(eventType);
+
+        if (this instanceof TextClassifierEvent.TextSelectionEvent) {
+            final TextClassifierEvent.TextSelectionEvent selEvent =
+                    (TextClassifierEvent.TextSelectionEvent) this;
+            // TODO: Ideally, we should have these fields in events of type
+            // TextClassifierEvent.TextLinkifyEvent events too but we're now past the API deadline
+            // and will have to do with these fields being set only in TextSelectionEvent events.
+            // Fix this at the next API bump.
+            out.setStart(selEvent.getRelativeWordStartIndex());
+            out.setEnd(selEvent.getRelativeWordEndIndex());
+            out.setSmartStart(selEvent.getRelativeSuggestedWordStartIndex());
+            out.setSmartEnd(selEvent.getRelativeSuggestedWordEndIndex());
+        }
+
+        return out;
     }
 
     /**
