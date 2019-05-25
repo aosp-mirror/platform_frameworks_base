@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package android.media;
+package com.android.systemui.assist;
 
-/**
- * {@hide}
- */
-oneway interface IMediaRouterClient {
-    void onStateChanged();
-    void onRestoreRoute();
-    void onSelectedRouteChanged(String routeId);
+/** Callback for controlling Assistant handle behavior. */
+public interface AssistHandleCallbacks {
+
+    /** Hide the Assistant handles. */
+    void hide();
+
+    /**
+     * Show the Assistant handles for the configured duration and then hide them.
+     *
+     * Won't show if the handles have been shown within the configured timeout.
+     */
+    void showAndGo();
+
+    /** Show the Assistant handles. */
+    void showAndStay();
 }

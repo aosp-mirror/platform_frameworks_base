@@ -1824,6 +1824,13 @@ public class TelecomManager {
      * Self-managed {@link ConnectionService}s require permission
      * {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
      *
+     * <p class="note"><strong>Note:</strong> If this method is used to place an emergency call, it
+     * is not guaranteed that the call will be placed on the {@link PhoneAccount} provided in
+     * the {@link #EXTRA_PHONE_ACCOUNT_HANDLE} extra (if specified) and may be placed on another
+     * {@link PhoneAccount} with the {@link PhoneAccount#CAPABILITY_PLACE_EMERGENCY_CALLS}
+     * capability, depending on external factors, such as network conditions and Modem/SIM status.
+     * </p>
+     *
      * @param address The address to make the call to.
      * @param extras Bundle of extras to use with the call.
      */

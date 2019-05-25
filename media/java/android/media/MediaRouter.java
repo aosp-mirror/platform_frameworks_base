@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
@@ -343,6 +344,16 @@ public class MediaRouter {
             updatePresentationDisplays(displayId);
         }
 
+        public void setRouterGroupId(String groupId) {
+            if (mClient != null) {
+                try {
+                    mMediaRouterService.registerClientGroupId(mClient, groupId);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to register group ID of the client.", ex);
+                }
+            }
+        }
+
         public Display[] getAllPresentationDisplays() {
             return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
         }
@@ -355,6 +366,21 @@ public class MediaRouter {
                         && route.mPresentationDisplay.getDisplayId() == changedDisplayId)) {
                     dispatchRoutePresentationDisplayChanged(route);
                 }
+            }
+        }
+
+        void updateSelectedRouteForId(String routeId) {
+            RouteInfo selectedRoute = isBluetoothA2dpOn()
+                    ? mBluetoothA2dpRoute : mDefaultAudioVideo;
+            final int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                final RouteInfo route = mRoutes.get(i);
+                if (TextUtils.equals(route.mGlobalRouteId, routeId)) {
+                    selectedRoute = route;
+                }
+            }
+            if (selectedRoute != mSelectedRoute) {
+                selectRouteStatic(selectedRoute.mSupportedTypes, selectedRoute, false);
             }
         }
 
@@ -619,6 +645,15 @@ public class MediaRouter {
                     }
                 });
             }
+
+            @Override
+            public void onSelectedRouteChanged(String routeId) {
+                mHandler.post(() -> {
+                    if (Client.this == mClient) {
+                        updateSelectedRouteForId(routeId);
+                    }
+                });
+            }
         }
     }
 
@@ -727,6 +762,13 @@ public class MediaRouter {
      * @hide Future API ported from support library.  Revisit this later.
      */
     public static final int AVAILABILITY_FLAG_IGNORE_DEFAULT_ROUTE = 1 << 0;
+
+    /**
+     * The route group id used for sharing the selected mirroring device.
+     * System UI and Settings use this to synchronize their mirroring status.
+     * @hide
+     */
+    public static final String MIRRORING_GROUP_ID = "android.media.mirroring_group";
 
     // Maps application contexts
     static final HashMap<Context, MediaRouter> sRouters = new HashMap<Context, MediaRouter>();
@@ -845,6 +887,25 @@ public class MediaRouter {
 
         // It doesn't look like we can find a matching route right now.
         return false;
+    }
+
+    /**
+     * Sets the group ID of the router.
+     * Media routers with the same ID acts as if they were a single media router.
+     * For example, if a media router selects a route, the selected route of routers
+     * with the same group ID will be changed automatically.
+     *
+     * Two routers in a group are supposed to use the same route types.
+     *
+     * System UI and Settings use this to synchronize their mirroring status.
+     * Do not set the router group id unless it's necessary.
+     *
+     * {@link android.Manifest.permission#CONFIGURE_WIFI_DISPLAY} permission is required to
+     * call this method.
+     * @hide
+     */
+    public void setRouterGroupId(@Nullable String groupId) {
+        sStatic.setRouterGroupId(groupId);
     }
 
     /**

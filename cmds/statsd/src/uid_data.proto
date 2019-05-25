@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package android.media;
+syntax = "proto2";
 
-/**
- * {@hide}
- */
-oneway interface IMediaRouterClient {
-    void onStateChanged();
-    void onRestoreRoute();
-    void onSelectedRouteChanged(String routeId);
+package android.os.statsd;
+
+option java_package = "com.android.internal.os";
+option java_outer_classname = "UidDataProto";
+
+message ApplicationInfo {
+  optional int32 uid = 1;
+  optional int64 version = 2;
+  optional string version_string = 3;
+  optional string package_name = 4;
+  optional string installer = 5;
+}
+
+// StatsServiceCompanion uses the proto to supply statsd with uid-package
+// mapping updates.
+message UidData {
+  repeated ApplicationInfo app_info = 1;
 }

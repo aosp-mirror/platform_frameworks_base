@@ -66,6 +66,7 @@
 namespace android {
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
+static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimation-dark.zip";
 static const char PRODUCT_BOOTANIMATION_FILE[] = "/product/media/bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char PRODUCT_ENCRYPTED_BOOTANIMATION_FILE[] = "/product/media/bootanimation-encrypted.zip";
@@ -140,7 +141,6 @@ void BootAnimation::onFirstRef() {
 sp<SurfaceComposerClient> BootAnimation::session() const {
     return mSession;
 }
-
 
 void BootAnimation::binderDied(const wp<IBinder>&)
 {
@@ -355,8 +355,11 @@ void BootAnimation::findBootAnimationFile() {
             }
         }
     }
+
+    const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
     static const char* bootFiles[] =
-        {PRODUCT_BOOTANIMATION_FILE, OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE};
+        {playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,
+         OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE};
     static const char* shutdownFiles[] =
         {PRODUCT_SHUTDOWNANIMATION_FILE, OEM_SHUTDOWNANIMATION_FILE, SYSTEM_SHUTDOWNANIMATION_FILE};
 

@@ -879,6 +879,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class DumpHeapData {
+        // Whether to dump the native or managed heap.
         public boolean managed;
         public boolean mallocInfo;
         public boolean runGc;
@@ -1137,7 +1138,14 @@ public final class ActivityThread extends ClientTransactionHandler {
             dhd.mallocInfo = mallocInfo;
             dhd.runGc = runGc;
             dhd.path = path;
-            dhd.fd = fd;
+            try {
+                // Since we're going to dump the heap asynchronously, dup the file descriptor before
+                // it's closed on returning from the IPC call.
+                dhd.fd = fd.dup();
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to duplicate heap dump file descriptor", e);
+                return;
+            }
             dhd.finishCallback = finishCallback;
             sendMessage(H.DUMP_HEAP, dhd, 0, 0, true /*async*/);
         }
@@ -3106,9 +3114,10 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void sendMessage(int what, Object obj, int arg1, int arg2, boolean async) {
-        if (DEBUG_MESSAGES) Slog.v(
-            TAG, "SCHEDULE " + what + " " + mH.codeToString(what)
-            + ": " + arg1 + " / " + obj);
+        if (DEBUG_MESSAGES) {
+            Slog.v(TAG,
+                    "SCHEDULE " + what + " " + mH.codeToString(what) + ": " + arg1 + " / " + obj);
+        }
         Message msg = Message.obtain();
         msg.what = what;
         msg.obj = obj;
@@ -5827,23 +5836,24 @@ public final class ActivityThread extends ClientTransactionHandler {
             System.runFinalization();
             System.gc();
         }
-        if (dhd.managed) {
-            try {
-                Debug.dumpHprofData(dhd.path, dhd.fd.getFileDescriptor());
-            } catch (IOException e) {
-                Slog.w(TAG, "Managed heap dump failed on path " + dhd.path
-                        + " -- can the process access this path?");
-            } finally {
-                try {
-                    dhd.fd.close();
-                } catch (IOException e) {
-                    Slog.w(TAG, "Failure closing profile fd", e);
-                }
+        try (ParcelFileDescriptor fd = dhd.fd) {
+            if (dhd.managed) {
+                Debug.dumpHprofData(dhd.path, fd.getFileDescriptor());
+            } else if (dhd.mallocInfo) {
+                Debug.dumpNativeMallocInfo(fd.getFileDescriptor());
+            } else {
+                Debug.dumpNativeHeap(fd.getFileDescriptor());
             }
-        } else if (dhd.mallocInfo) {
-            Debug.dumpNativeMallocInfo(dhd.fd.getFileDescriptor());
-        } else {
-            Debug.dumpNativeHeap(dhd.fd.getFileDescriptor());
+        } catch (IOException e) {
+            if (dhd.managed) {
+                Slog.w(TAG, "Managed heap dump failed on path " + dhd.path
+                        + " -- can the process access this path?", e);
+            } else {
+                Slog.w(TAG, "Failed to dump heap", e);
+            }
+        } catch (RuntimeException e) {
+            // This should no longer happening now that we're copying the file descriptor.
+            Slog.wtf(TAG, "Heap dumper threw a runtime exception", e);
         }
         try {
             ActivityManager.getService().dumpHeapFinished(dhd.path);

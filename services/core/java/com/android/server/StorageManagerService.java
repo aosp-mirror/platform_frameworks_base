@@ -3243,22 +3243,7 @@ class StorageManagerService extends IStorageManager.Stub
         public void opChanged(int op, int uid, String packageName) throws RemoteException {
             if (!ENABLE_ISOLATED_STORAGE) return;
 
-            if (op == OP_REQUEST_INSTALL_PACKAGES) {
-                // Only handling the case when the appop is denied. The other cases will be
-                // handled in the synchronous callback from AppOpsService.
-                if (packageName != null && mIAppOpsService.checkOperation(
-                        OP_REQUEST_INSTALL_PACKAGES, uid, packageName) != MODE_ALLOWED) {
-                    try {
-                        ActivityManager.getService().killUid(
-                                UserHandle.getAppId(uid), UserHandle.getUserId(uid),
-                                "OP_REQUEST_INSTALL_PACKAGES is denied");
-                    } catch (RemoteException e) {
-                        // same process - should not happen
-                    }
-                }
-            } else {
-                remountUidExternalStorage(uid, getMountMode(uid, packageName));
-            }
+            remountUidExternalStorage(uid, getMountMode(uid, packageName));
         }
     };
 
