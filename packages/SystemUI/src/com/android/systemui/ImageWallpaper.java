@@ -33,6 +33,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController.StateList
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * Default built-in wallpaper that simply shows a static image.
  */
@@ -216,6 +219,34 @@ public class ImageWallpaper extends WallpaperService {
         private boolean needPreserveEglContext() {
             return mNeedTransition && mController != null
                     && mController.getState() == StatusBarState.KEYGUARD;
+        }
+
+        @Override
+        protected void dump(String prefix, FileDescriptor fd, PrintWriter out, String[] args) {
+            super.dump(prefix, fd, out, args);
+            out.print(prefix); out.print("Engine="); out.println(this);
+
+            boolean isHighEndGfx = ActivityManager.isHighEndGfx();
+            out.print(prefix); out.print("isHighEndGfx="); out.println(isHighEndGfx);
+
+            DozeParameters dozeParameters = DozeParameters.getInstance(getApplicationContext());
+            out.print(prefix); out.print("displayNeedsBlanking=");
+            out.println(dozeParameters != null ? dozeParameters.getDisplayNeedsBlanking() : "null");
+
+            out.print(prefix); out.print("mNeedTransition="); out.println(mNeedTransition);
+            out.print(prefix); out.print("StatusBarState=");
+            out.println(mController != null ? mController.getState() : "null");
+
+            out.print(prefix); out.print("valid surface=");
+            out.println(getSurfaceHolder() != null && getSurfaceHolder().getSurface() != null
+                    ? getSurfaceHolder().getSurface().isValid()
+                    : "null");
+
+            out.print(prefix); out.print("surface frame=");
+            out.println(getSurfaceHolder() != null ? getSurfaceHolder().getSurfaceFrame() : "null");
+
+            mEglHelper.dump(prefix, fd, out, args);
+            mRenderer.dump(prefix, fd, out, args);
         }
     }
 }
