@@ -322,7 +322,7 @@ public class InstantAppNotifier extends SystemUI
                             .putExtra(
                                     Intent.EXTRA_VERSION_CODE,
                                     (int) (appInfo.versionCode & 0x7fffffff))
-                            .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.versionCode)
+                            .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.longVersionCode)
                             .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
             PendingIntent webPendingIntent =
