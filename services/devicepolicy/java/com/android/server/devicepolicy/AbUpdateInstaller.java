@@ -85,6 +85,10 @@ class AbUpdateInstaller extends UpdateInstaller {
         map.put(
                 UpdateEngine.ErrorCodeConstants.PAYLOAD_HASH_MISMATCH_ERROR,
                 InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
+        // TODO(b/133396459): replace with a constant.
+        map.put(
+                26 /* kDownloadMetadataSignatureMismatch */,
+                InstallSystemUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID);
 
         // Error constants corresponding to errors related to devices bad state.
         map.put(

@@ -37,37 +37,37 @@ public class AndroidTestBaseUpdaterTest extends PackageSharedLibraryUpdaterTest 
     private static final String OTHER_LIBRARY = "other.library";
 
     @Test
-    public void targeted_at_P() {
+    public void targeted_at_Q() {
         PackageBuilder before = builder()
-                .targetSdkVersion(Build.VERSION_CODES.P);
+                .targetSdkVersion(Build.VERSION_CODES.Q);
 
         // Should add org.apache.http.legacy.
         PackageBuilder after = builder()
-                .targetSdkVersion(Build.VERSION_CODES.P)
+                .targetSdkVersion(Build.VERSION_CODES.Q)
                 .requiredLibraries(ANDROID_TEST_BASE);
 
         checkBackwardsCompatibility(before, after);
     }
 
     @Test
-    public void targeted_at_P_not_empty_usesLibraries() {
+    public void targeted_at_Q_not_empty_usesLibraries() {
         PackageBuilder before = builder()
-                .targetSdkVersion(Build.VERSION_CODES.P)
+                .targetSdkVersion(Build.VERSION_CODES.Q)
                 .requiredLibraries(OTHER_LIBRARY);
 
         // The org.apache.http.legacy jar should be added at the start of the list because it
-        // is not on the bootclasspath and the package targets pre-P.
+        // is not on the bootclasspath and the package targets pre-Q.
         PackageBuilder after = builder()
-                .targetSdkVersion(Build.VERSION_CODES.P)
+                .targetSdkVersion(Build.VERSION_CODES.Q)
                 .requiredLibraries(ANDROID_TEST_BASE, OTHER_LIBRARY);
 
         checkBackwardsCompatibility(before, after);
     }
 
     @Test
-    public void targeted_at_P_in_usesLibraries() {
+    public void targeted_at_Q_in_usesLibraries() {
         PackageBuilder before = builder()
-                .targetSdkVersion(Build.VERSION_CODES.P)
+                .targetSdkVersion(Build.VERSION_CODES.Q)
                 .requiredLibraries(ANDROID_TEST_BASE);
 
         // No change is required because although org.apache.http.legacy has been removed from
@@ -76,9 +76,9 @@ public class AndroidTestBaseUpdaterTest extends PackageSharedLibraryUpdaterTest 
     }
 
     @Test
-    public void targeted_at_P_in_usesOptionalLibraries() {
+    public void targeted_at_Q_in_usesOptionalLibraries() {
         PackageBuilder before = builder()
-                .targetSdkVersion(Build.VERSION_CODES.P)
+                .targetSdkVersion(Build.VERSION_CODES.Q)
                 .optionalLibraries(ANDROID_TEST_BASE);
 
         // No change is required because although org.apache.http.legacy has been removed from

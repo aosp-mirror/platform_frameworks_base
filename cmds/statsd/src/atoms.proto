@@ -994,6 +994,19 @@ message WakeupAlarmOccurred {
 
     // Name of source package (for historical reasons, since BatteryStats tracked it).
     optional string package_name = 3;
+
+    // These enum values match the STANDBY_BUCKET_XXX constants defined in UsageStatsManager.java.
+    enum Bucket {
+        UNKNOWN = 0;
+        EXEMPTED = 5;
+        ACTIVE = 10;
+        WORKING_SET = 20;
+        FREQUENT = 30;
+        RARE = 40;
+        NEVER = 50;
+    }
+    // The App Standby bucket of the app that scheduled the alarm at the time the alarm fired.
+    optional Bucket app_standby_bucket = 4;
 }
 
 /**

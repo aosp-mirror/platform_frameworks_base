@@ -5645,9 +5645,11 @@ public class PackageManagerService extends IPackageManager.Stub
     private int checkUidPermissionImpl(String permName, int uid) {
         synchronized (mPackages) {
             final String[] packageNames = getPackagesForUid(uid);
-            final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
-                    ? mPackages.get(packageNames[0])
-                    : null;
+            PackageParser.Package pkg = null;
+            final int N = packageNames == null ? 0 : packageNames.length;
+            for (int i = 0; pkg == null && i < N; i++) {
+                pkg = mPackages.get(packageNames[i]);
+            }
             // Additional logs for b/111075456; ignore system UIDs
             if (pkg == null && UserHandle.getAppId(uid) >= Process.FIRST_APPLICATION_UID) {
                 if (packageNames == null || packageNames.length < 2) {
@@ -6384,6 +6386,16 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    /**
+     * <em>IMPORTANT:</em> Not all packages returned by this method may be known
+     * to the system. There are two conditions in which this may occur:
+     * <ol>
+     *   <li>The package is on adoptable storage and the device has been removed</li>
+     *   <li>The package is being removed and the internal structures are partially updated</li>
+     * </ol>
+     * The second is an artifact of the current data structures and should be fixed. See
+     * b/111075456 for one such instance.
+     */
     @Override
     public String[] getPackagesForUid(int uid) {
         return getPackagesForUid_debug(uid, false);
@@ -24079,6 +24091,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     | (appInfo.isVendor() ? IPackageManagerNative.LOCATION_VENDOR : 0)
                     | (appInfo.isProduct() ? IPackageManagerNative.LOCATION_PRODUCT : 0));
         }
+
+        @Override
+        public String getModuleMetadataPackageName() throws RemoteException {
+            return PackageManagerService.this.mModuleInfoProvider.getPackageName();
+        }
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {
@@ -24772,6 +24789,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public void forEachInstalledPackage(@NonNull Consumer<PackageParser.Package> actionLocked,
+                @UserIdInt int userId) {
+            PackageManagerService.this.forEachInstalledPackage(actionLocked, userId);
+        }
+
+        @Override
         public ArraySet<String> getEnabledComponents(String packageName, int userId) {
             synchronized (mPackages) {
                 PackageSetting setting = mSettings.getPackageLPr(packageName);
@@ -25059,6 +25082,21 @@ public class PackageManagerService extends IPackageManager.Stub
             int numPackages = mPackages.size();
             for (int i = 0; i < numPackages; i++) {
                 actionLocked.accept(mPackages.valueAt(i));
+            }
+        }
+    }
+
+    void forEachInstalledPackage(@NonNull Consumer<PackageParser.Package> actionLocked,
+            @UserIdInt int userId) {
+        synchronized (mPackages) {
+            int numPackages = mPackages.size();
+            for (int i = 0; i < numPackages; i++) {
+                PackageParser.Package pkg = mPackages.valueAt(i);
+                PackageSetting setting = mSettings.getPackageLPr(pkg.packageName);
+                if (setting == null || !setting.getInstalled(userId)) {
+                    continue;
+                }
+                actionLocked.accept(pkg);
             }
         }
     }

@@ -1631,8 +1631,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private int getGlobalActionsLayoutId(Context context) {
-            boolean useGridLayout = isForceGridEnabled(context) || shouldUsePanel();
-            if (RotationUtils.getRotation(context) == RotationUtils.ROTATION_SEASCAPE) {
+            int rotation = RotationUtils.getRotation(context);
+            boolean useGridLayout = isForceGridEnabled(context)
+                    || (shouldUsePanel() && rotation == RotationUtils.ROTATION_NONE);
+            if (rotation == RotationUtils.ROTATION_SEASCAPE) {
                 if (useGridLayout) {
                     return com.android.systemui.R.layout.global_actions_grid_seascape;
                 } else {

@@ -319,11 +319,6 @@ public class KeyguardStatusView extends GridLayout implements
         refreshFormat();
     }
 
-    @Override
-    public boolean hasOverlappingRendering() {
-        return false;
-    }
-
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mOwnerInfo: " + (mOwnerInfo == null

@@ -55,6 +55,9 @@
 
     <color name="keyguard_affordance">#ffffffff</color>
 
+    <!-- Shadows under the clock, date and other keyguard text fields -->
+    <color name="keyguard_shadow_color">#B2000000</color>
+
     <!-- The color of the legacy notification background -->
     <color name="notification_legacy_background_color">#ff1a1a1a</color>
 

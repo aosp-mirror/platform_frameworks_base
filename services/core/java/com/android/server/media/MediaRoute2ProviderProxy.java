@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.IMediaRoute2Provider;
 import android.media.IMediaRoute2ProviderClient;
+import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
 import android.media.MediaRoute2ProviderService;
 import android.os.Handler;
@@ -86,6 +87,13 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
     public void setSelectedRoute(int uid, String routeId) {
         if (mConnectionReady) {
             mActiveConnection.selectRoute(uid, routeId);
+            updateBinding();
+        }
+    }
+
+    public void sendControlRequest(MediaRoute2Info route, Intent request) {
+        if (mConnectionReady) {
+            mActiveConnection.sendControlRequest(route.getId(), request);
             updateBinding();
         }
     }
@@ -303,10 +311,24 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
 
         public void selectRoute(int uid, String id) {
+            if (mClient == null) {
+                return;
+            }
             try {
-                mProvider.selectRoute(uid, id);
+                mProvider.selectRoute(mClient, uid, id);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to set discovery mode.", ex);
+            }
+        }
+
+        public void sendControlRequest(String id, Intent request) {
+            if (mClient == null) {
+                return;
+            }
+            try {
+                mProvider.notifyControlRequestSent(mClient, id, request);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to send control request.", ex);
             }
         }
 

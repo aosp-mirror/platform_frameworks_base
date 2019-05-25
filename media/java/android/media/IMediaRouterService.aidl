@@ -16,25 +16,34 @@
 
 package android.media;
 
-import android.media.IMediaRouterClient;
+import android.content.Intent;
+import android.media.IMediaRouter2Client;
 import android.media.IMediaRouter2Manager;
+import android.media.IMediaRouterClient;
+import android.media.MediaRoute2Info;
 import android.media.MediaRouterClientState;
 
 /**
  * {@hide}
  */
 interface IMediaRouterService {
+    //TODO: Merge or remove methods when media router 2 is done.
     void registerClientAsUser(IMediaRouterClient client, String packageName, int userId);
     void unregisterClient(IMediaRouterClient client);
 
     MediaRouterClientState getState(IMediaRouterClient client);
     boolean isPlaybackActive(IMediaRouterClient client);
 
-    void setControlCategories(IMediaRouterClient client, in List<String> categories);
     void setDiscoveryRequest(IMediaRouterClient client, int routeTypes, boolean activeScan);
     void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit);
     void requestSetVolume(IMediaRouterClient client, String routeId, int volume);
     void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction);
+
+    // Methods for media router 2
+    void registerClient2AsUser(IMediaRouter2Client client, String packageName, int userId);
+    void unregisterClient2(IMediaRouter2Client client);
+    void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);
+    void setControlCategories(IMediaRouter2Client client, in List<String> categories);
 
     void registerManagerAsUser(IMediaRouter2Manager manager,
             String packageName, int userId);

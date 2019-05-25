@@ -41,6 +41,7 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.Downloads;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -1308,6 +1309,11 @@ public class DownloadManager {
             throw new IllegalStateException(
                     "Failed to rename file from " + before + " to " + after);
         }
+
+        // TODO: DownloadProvider.update() should take care of updating corresponding
+        // MediaProvider entries.
+        MediaStore.scanFile(context, before);
+        MediaStore.scanFile(context, after);
 
         final ContentValues values = new ContentValues();
         values.put(Downloads.Impl.COLUMN_TITLE, displayName);

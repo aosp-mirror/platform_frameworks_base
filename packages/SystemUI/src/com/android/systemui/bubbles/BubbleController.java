@@ -35,7 +35,6 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
@@ -61,6 +60,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
@@ -139,7 +139,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
 
     private BubbleData mBubbleData;
-    private BubbleStackView mStackView;
+    @Nullable private BubbleStackView mStackView;
 
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;

@@ -17,12 +17,15 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.content.Intent.ACTION_OVERLAY_CHANGED;
+import static android.content.Intent.ACTION_PREFERRED_ACTIVITY_CHANGED;
 import static android.os.UserHandle.USER_CURRENT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -56,7 +59,7 @@ import javax.inject.Singleton;
 public class NavigationModeController implements Dumpable {
 
     private static final String TAG = NavigationModeController.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     public interface ModeChangedListener {
         void onNavigationModeChanged(int mode);
@@ -76,11 +79,19 @@ public class NavigationModeController implements Dumpable {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ACTION_OVERLAY_CHANGED)) {
-                if (DEBUG) {
-                    Log.d(TAG, "ACTION_OVERLAY_CHANGED");
-                }
-                updateCurrentInteractionMode(true /* notify */);
+            switch (intent.getAction()) {
+                case ACTION_OVERLAY_CHANGED:
+                    if (DEBUG) {
+                        Log.d(TAG, "ACTION_OVERLAY_CHANGED");
+                    }
+                    updateCurrentInteractionMode(true /* notify */);
+                    break;
+                case ACTION_PREFERRED_ACTIVITY_CHANGED:
+                    if (DEBUG) {
+                        Log.d(TAG, "ACTION_PREFERRED_ACTIVITY_CHANGED");
+                    }
+                    switchFromGestureNavModeIfNotSupportedByDefaultLauncher();
+                    break;
             }
         }
     };
@@ -116,6 +127,7 @@ public class NavigationModeController implements Dumpable {
 
                     // Update the nav mode for the current user
                     updateCurrentInteractionMode(true /* notify */);
+                    switchFromGestureNavModeIfNotSupportedByDefaultLauncher();
 
                     // When switching users, defer enabling the gestural nav overlay until the user
                     // is all set up
@@ -140,7 +152,12 @@ public class NavigationModeController implements Dumpable {
         overlayFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, overlayFilter, null, null);
 
+        IntentFilter preferredActivityFilter = new IntentFilter(ACTION_PREFERRED_ACTIVITY_CHANGED);
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, preferredActivityFilter, null,
+                null);
+
         updateCurrentInteractionMode(false /* notify */);
+        switchFromGestureNavModeIfNotSupportedByDefaultLauncher();
 
         // Check if we need to defer enabling gestural nav
         deferGesturalNavOverlayIfNecessary();
@@ -175,6 +192,10 @@ public class NavigationModeController implements Dumpable {
     private int getCurrentInteractionMode(Context context) {
         int mode = context.getResources().getInteger(
                 com.android.internal.R.integer.config_navBarInteractionMode);
+        if (DEBUG) {
+            Log.d(TAG, "getCurrentInteractionMode: mode=" + mMode
+                    + " contextUser=" + context.getUserId());
+        }
         return mode;
     }
 
@@ -250,6 +271,10 @@ public class NavigationModeController implements Dumpable {
         mUiOffloadThread.submit(() -> {
             try {
                 mOverlayManager.setEnabledExclusiveInCategory(overlayPkg, userId);
+                if (DEBUG) {
+                    Log.d(TAG, "setModeOverlay: overlayPackage=" + overlayPkg
+                            + " userId=" + userId);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to enable overlay " + overlayPkg + " for user " + userId);
             }
@@ -276,5 +301,28 @@ public class NavigationModeController implements Dumpable {
         for (ApkAssets a : assets) {
             Log.d(TAG, "    " + a.getAssetPath());
         }
+    }
+
+    private void switchFromGestureNavModeIfNotSupportedByDefaultLauncher() {
+        if (getCurrentInteractionMode(mCurrentUserContext) == NAV_BAR_MODE_GESTURAL
+                && !isGestureNavSupportedByDefaultLauncher(mCurrentUserContext)) {
+            setModeOverlay(NAV_BAR_MODE_3BUTTON_OVERLAY, USER_CURRENT);
+        }
+    }
+
+    private boolean isGestureNavSupportedByDefaultLauncher(Context context) {
+        final ComponentName cn = context.getPackageManager().getHomeActivities(new ArrayList<>());
+        if (cn == null) {
+            // There is no default home app set for the current user, don't make any changes yet.
+            return true;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "isGestureNavSupportedByDefaultLauncher: launcher=" + cn.getPackageName()
+                    + " contextUser=" + context.getUserId());
+        }
+
+        ComponentName recentsComponentName = ComponentName.unflattenFromString(context.getString(
+                com.android.internal.R.string.config_recentsComponentName));
+        return recentsComponentName.getPackageName().equals(cn.getPackageName());
     }
 }

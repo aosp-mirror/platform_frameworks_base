@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -62,14 +63,11 @@ public class MediaRouter2Manager {
     private List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
 
     /**
-     * Gets an instance of media router manager that controls media route of other apps.
-     * @param context
-     * @return
+     * Gets an instance of media router manager that controls media route of other applications.
+     * @return The media router manager instance for the context.
      */
     public static MediaRouter2Manager getInstance(@NonNull Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("context must not be null");
-        }
+        Objects.requireNonNull(context, "context must not be null");
         synchronized (sLock) {
             if (sInstance == null) {
                 sInstance = new MediaRouter2Manager(context);

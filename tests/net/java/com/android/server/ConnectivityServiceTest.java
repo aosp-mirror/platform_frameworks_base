@@ -3864,6 +3864,7 @@ public class ConnectivityServiceTest {
             }
         }
 
+        testFactory.expectRemoveRequests(1);
         if (preUnregister) {
             mCm.unregisterNetworkCallback(networkCallback);
 
@@ -3873,7 +3874,6 @@ public class ConnectivityServiceTest {
             testFactory.triggerUnfulfillable(requests.get(newRequestId));
         } else {
             // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
-            testFactory.expectRemoveRequests(1);
             testFactory.triggerUnfulfillable(requests.get(newRequestId));
 
             networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);

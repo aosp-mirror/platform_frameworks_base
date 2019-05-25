@@ -80,7 +80,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
-    final boolean mAllowInstant;
     boolean mBound = false;
     IVoiceInteractionService mService;
 
@@ -126,7 +125,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     VoiceInteractionManagerServiceImpl(Context context, Handler handler,
             VoiceInteractionManagerService.VoiceInteractionManagerServiceStub stub,
-            int userHandle, ComponentName service, boolean allowInstant) {
+            int userHandle, ComponentName service) {
         mContext = context;
         mHandler = handler;
         mServiceStub = stub;
@@ -134,7 +133,6 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mComponent = service;
         mAm = ActivityManager.getService();
         mAtm = ActivityTaskManager.getService();
-        mAllowInstant = allowInstant;
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -169,7 +167,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mServiceStub,
                     mSessionComponentName, mUser, mContext, this,
-                    mInfo.getServiceInfo().applicationInfo.uid, mHandler, mAllowInstant);
+                    mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
         List<IBinder> activityTokens = null;
         if (activityToken != null) {

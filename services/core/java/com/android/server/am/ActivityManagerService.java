@@ -8442,18 +8442,43 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (DEBUG_POWER) {
-            Slog.w(TAG, "noteWakupAlarm[ sourcePkg=" + sourcePkg + ", sourceUid=" + sourceUid
-                    + ", workSource=" + workSource + ", tag=" + tag + "]");
-        }
+        int standbyBucket = 0;
 
         mBatteryStatsService.noteWakupAlarm(sourcePkg, sourceUid, workSource, tag);
         if (workSource != null) {
-            StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, workSource, tag, sourcePkg);
+            String workSourcePackage = workSource.getName(0);
+            int workSourceUid = workSource.getAttributionUid();
+            if (workSourcePackage == null) {
+                workSourcePackage = sourcePkg;
+                workSourceUid = sourceUid;
+            }
+
+            if (mUsageStatsService != null) {
+                standbyBucket = mUsageStatsService.getAppStandbyBucket(workSourcePackage,
+                        UserHandle.getUserId(workSourceUid), SystemClock.elapsedRealtime());
+            }
+
+            StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, workSource, tag, sourcePkg,
+                    standbyBucket);
+            if (DEBUG_POWER) {
+                Slog.w(TAG, "noteWakeupAlarm[ sourcePkg=" + sourcePkg + ", sourceUid=" + sourceUid
+                        + ", workSource=" + workSource + ", tag=" + tag + ", standbyBucket="
+                        + standbyBucket + " wsName=" + workSourcePackage + ")]");
+            }
         } else {
+            if (mUsageStatsService != null) {
+                standbyBucket = mUsageStatsService.getAppStandbyBucket(sourcePkg,
+                        UserHandle.getUserId(sourceUid), SystemClock.elapsedRealtime());
+            }
             StatsLog.write_non_chained(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid, null, tag,
-                    sourcePkg);
+                    sourcePkg, standbyBucket);
+            if (DEBUG_POWER) {
+                Slog.w(TAG, "noteWakeupAlarm[ sourcePkg=" + sourcePkg + ", sourceUid=" + sourceUid
+                        + ", workSource=" + workSource + ", tag=" + tag + ", standbyBucket="
+                        + standbyBucket + "]");
+            }
         }
+
     }
 
     @Override

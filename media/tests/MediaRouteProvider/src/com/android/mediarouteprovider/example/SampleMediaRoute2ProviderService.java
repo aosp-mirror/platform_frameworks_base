@@ -28,16 +28,23 @@ import java.util.Map;
 public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService {
     private static final String TAG = "SampleMediaRoute2Serv";
 
-    public static final String ROUTE_ID1 = "route_id";
-    public static final String ROUTE_NAME1 = "route_name";
+    public static final String ROUTE_ID1 = "route_id1";
+    public static final String ROUTE_NAME1 = "Sample Route 1";
+    public static final String ROUTE_ID2 = "route_id2";
+    public static final String ROUTE_NAME2 = "Sample Route 2";
+    public static final String ACTION_REMOVE_ROUTE =
+            "com.android.mediarouteprovider.action_remove_route";
 
     Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
                 .build();
+        MediaRoute2Info route2 = new MediaRoute2Info.Builder(ROUTE_ID2, ROUTE_NAME2)
+                .build();
 
         mRoutes.put(route1.getId(), route1);
+        mRoutes.put(route2.getId(), route2);
     }
 
     @Override
@@ -55,6 +62,18 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
     public void onSelect(int uid, String routeId) {
         updateProvider(uid, routeId);
         publishRoutes();
+    }
+
+    @Override
+    public void onControlRequest(String routeId, Intent request) {
+        if (ACTION_REMOVE_ROUTE.equals(request.getAction())) {
+            MediaRoute2Info route = mRoutes.get(routeId);
+            if (route != null) {
+                mRoutes.remove(routeId);
+                publishRoutes();
+                mRoutes.put(routeId, route);
+            }
+        }
     }
 
     void publishRoutes() {
