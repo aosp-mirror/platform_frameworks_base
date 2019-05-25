@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2019 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,14 +15,12 @@
   ~ limitations under the License
   -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="39dp"
-    android:height="40dp"
-    android:viewportHeight="40.0"
-    android:viewportWidth="39.0">
+    android:viewportWidth="44"
+    android:viewportHeight="44"
+    android:width="44dp"
+    android:height="44dp">
     <path
-        android:fillColor="@color/car_nav_icon_fill_color"
-        android:fillType="evenOdd"
-        android:pathData="M33.4,22.74L33.4,37.74C33.4,38.84 32.51,39.74 31.4,39.74L24.4,39.74L24.4,24.74L14.4,24.74L14.4,39.74L7.4,39.74C6.3,39.74 5.4,38.84 5.4,37.74L5.4,22.74L0.5,22.74C0.22,22.74 0,22.51 0,22.24C0,22.12 0.04,22 0.12,21.91L19.03,0.17C19.21,-0.04 19.52,-0.06 19.73,0.12C19.75,0.14 19.76,0.15 19.78,0.17L38.68,21.91C38.86,22.12 38.84,22.43 38.63,22.62C38.54,22.69 38.43,22.74 38.31,22.74L33.4,22.74Z"
+        android:pathData="M36.92857 22.39286A14.53571 14.53571 0 0 1 7.857143 22.39286A14.53571 14.53571 0 0 1 36.92857 22.39286Z"
         android:strokeColor="@color/car_nav_icon_fill_color"
-        android:strokeWidth="1"/>
+        android:strokeWidth="4" />
 </vector>
