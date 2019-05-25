@@ -149,6 +149,7 @@ constructor(context: Context,
         }
         isExpanding = false
         isWakingToShadeLocked = true
+        mWakeUpCoordinator.willWakeUp = true
         mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
                 "com.android.systemui:PULSEDRAG")
         mShadeController!!.goToLockedShade(mStartingChild)

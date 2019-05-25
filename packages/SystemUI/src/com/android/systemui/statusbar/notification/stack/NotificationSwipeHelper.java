@@ -49,6 +49,7 @@ class NotificationSwipeHelper extends SwipeHelper
 
     private NotificationMenuRowPlugin mCurrMenuRow;
     private boolean mIsExpanded;
+    private boolean mPulsing;
 
     public NotificationSwipeHelper(int swipeDirection, NotificationCallback callback,
             Context context, NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
@@ -205,7 +206,8 @@ class NotificationSwipeHelper extends SwipeHelper
         boolean slowSwipedFarEnough = swipedEnoughToShowMenu(menuRow) && isSlowSwipe;
         boolean isFastNonDismissGesture =
                 gestureFastEnough && !gestureTowardsMenu && !isDismissGesture;
-        boolean isAbleToShowMenu = menuRow.shouldShowGutsOnSnapOpen() || mIsExpanded;
+        boolean isAbleToShowMenu = menuRow.shouldShowGutsOnSnapOpen()
+                || mIsExpanded && !mPulsing;
         boolean isMenuRevealingGestureAwayFromMenu = slowSwipedFarEnough
                 || (isFastNonDismissGesture && isAbleToShowMenu);
         int menuSnapTarget = menuRow.getMenuSnapTarget();
@@ -434,6 +436,10 @@ class NotificationSwipeHelper extends SwipeHelper
         Rect rect = new Rect(x, y, x + view.getWidth(), y + height);
         boolean ret = rect.contains(rx, ry);
         return ret;
+    }
+
+    public void setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
     }
 
     public interface NotificationCallback extends SwipeHelper.Callback{
