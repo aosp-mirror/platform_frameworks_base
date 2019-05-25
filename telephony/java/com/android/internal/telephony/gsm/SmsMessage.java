@@ -16,33 +16,32 @@
 
 package com.android.internal.telephony.gsm;
 
-import android.telephony.PhoneNumberUtils;
-import android.text.format.Time;
-import android.telephony.Rlog;
+import static com.android.internal.telephony.SmsConstants.ENCODING_16BIT;
+import static com.android.internal.telephony.SmsConstants.ENCODING_7BIT;
+import static com.android.internal.telephony.SmsConstants.ENCODING_8BIT;
+import static com.android.internal.telephony.SmsConstants.ENCODING_KSC5601;
+import static com.android.internal.telephony.SmsConstants.ENCODING_UNKNOWN;
+import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES;
+import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_SEPTETS;
+import static com.android.internal.telephony.SmsConstants.MessageClass;
+
 import android.content.res.Resources;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.Rlog;
 import android.text.TextUtils;
+import android.text.format.Time;
 
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
-import com.android.internal.telephony.uicc.IccUtils;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
-import com.android.internal.telephony.Sms7BitEncodingTranslator;
+import com.android.internal.telephony.uicc.IccUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-
-import static com.android.internal.telephony.SmsConstants.MessageClass;
-import static com.android.internal.telephony.SmsConstants.ENCODING_UNKNOWN;
-import static com.android.internal.telephony.SmsConstants.ENCODING_7BIT;
-import static com.android.internal.telephony.SmsConstants.ENCODING_8BIT;
-import static com.android.internal.telephony.SmsConstants.ENCODING_16BIT;
-import static com.android.internal.telephony.SmsConstants.ENCODING_KSC5601;
-import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_SEPTETS;
-import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES;
-import static com.android.internal.telephony.SmsConstants.MAX_USER_DATA_BYTES_WITH_HEADER;
 
 /**
  * A Short Message Service message.
@@ -914,7 +913,7 @@ public class SmsMessage extends SmsMessageBase {
         CharSequence newMsgBody = null;
         Resources r = Resources.getSystem();
         if (r.getBoolean(com.android.internal.R.bool.config_sms_force_7bit_encoding)) {
-            newMsgBody  = Sms7BitEncodingTranslator.translate(msgBody);
+            newMsgBody = Sms7BitEncodingTranslator.translate(msgBody, false);
         }
         if (TextUtils.isEmpty(newMsgBody)) {
             newMsgBody = msgBody;

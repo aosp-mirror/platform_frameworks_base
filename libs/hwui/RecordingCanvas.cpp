@@ -20,6 +20,7 @@
 
 #include "SkAndroidFrameworkUtils.h"
 #include "SkCanvas.h"
+#include "SkCanvasPriv.h"
 #include "SkData.h"
 #include "SkDrawShadowInfo.h"
 #include "SkImage.h"
@@ -186,6 +187,12 @@ struct DrawPaint final : Op {
     DrawPaint(const SkPaint& paint) : paint(paint) {}
     SkPaint paint;
     void draw(SkCanvas* c, const SkMatrix&) const { c->drawPaint(paint); }
+};
+struct DrawBehind final : Op {
+    static const auto kType = Type::DrawBehind;
+    DrawBehind(const SkPaint& paint) : paint(paint) {}
+    SkPaint paint;
+    void draw(SkCanvas* c, const SkMatrix&) const { SkCanvasPriv::DrawBehind(c, paint); }
 };
 struct DrawPath final : Op {
     static const auto kType = Type::DrawPath;
@@ -565,6 +572,9 @@ void DisplayListData::clipRegion(const SkRegion& region, SkClipOp op) {
 void DisplayListData::drawPaint(const SkPaint& paint) {
     this->push<DrawPaint>(0, paint);
 }
+void DisplayListData::drawBehind(const SkPaint& paint) {
+    this->push<DrawBehind>(0, paint);
+}
 void DisplayListData::drawPath(const SkPath& path, const SkPaint& paint) {
     this->push<DrawPath>(0, path, paint);
 }
@@ -833,6 +843,9 @@ void RecordingCanvas::onClipRegion(const SkRegion& region, SkClipOp op) {
 
 void RecordingCanvas::onDrawPaint(const SkPaint& paint) {
     fDL->drawPaint(paint);
+}
+void RecordingCanvas::onDrawBehind(const SkPaint& paint) {
+    fDL->drawBehind(paint);
 }
 void RecordingCanvas::onDrawPath(const SkPath& path, const SkPaint& paint) {
     fDL->drawPath(path, paint);

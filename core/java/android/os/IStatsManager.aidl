@@ -17,6 +17,7 @@
 package android.os;
 
 import android.os.IStatsPullerCallback;
+import android.os.ParcelFileDescriptor;
 
 /**
   * Binder interface to communicate with the statistics management service.
@@ -61,11 +62,12 @@ interface IStatsManager {
     void informDeviceShutdown();
 
     /**
-     * Inform statsd what the version and package are for each uid. Note that each array should
-     * have the same number of elements, and version[i] and package[i] correspond to uid[i].
+     * Inform statsd about a file descriptor for a pipe through which we will pipe version
+     * and package information for each uid.
+     * Versions and package information are supplied via UidData proto where info for each app
+     * is captured in its own element of a repeated ApplicationInfo message.
      */
-    oneway void informAllUidData(in int[] uid, in long[] version, in String[] version_string,
-        in String[] app, in String[] installer);
+    oneway void informAllUidData(in ParcelFileDescriptor fd);
 
     /**
      * Inform statsd what the uid, version, version_string, and installer are for one app that was
@@ -217,6 +219,12 @@ interface IStatsManager {
      */
      oneway void sendBinaryPushStateChangedAtom(in String trainName, in long trainVersionCode,
          in int options, in int state, in long[] experimentId);
+
+    /**
+     * Logs an event for watchdog rollbacks.
+     */
+     oneway void sendWatchdogRollbackOccurredAtom(in int rollbackType, in String packageName,
+         in long packageVersionCode);
 
     /**
      * Returns the most recently registered experiment IDs.

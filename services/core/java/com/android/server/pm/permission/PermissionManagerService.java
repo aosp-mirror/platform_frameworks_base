@@ -95,7 +95,6 @@ import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
 import com.android.server.pm.permission.PermissionManagerServiceInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
 
@@ -220,7 +219,6 @@ public class PermissionManagerService {
             mRuntimePermissionStateChangedListeners = new ArrayList<>();
 
     PermissionManagerService(Context context,
-            @Nullable DefaultPermissionGrantedCallback defaultGrantCallback,
             @NonNull Object externalLock) {
         mContext = context;
         mLock = externalLock;
@@ -235,7 +233,7 @@ public class PermissionManagerService {
         Watchdog.getInstance().addThread(mHandler);
 
         mDefaultPermissionGrantPolicy = new DefaultPermissionGrantPolicy(
-                context, mHandlerThread.getLooper(), defaultGrantCallback, this);
+                context, mHandlerThread.getLooper(), this);
         SystemConfig systemConfig = SystemConfig.getInstance();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mGlobalGids = systemConfig.getGlobalGids();
@@ -273,14 +271,13 @@ public class PermissionManagerService {
      * lock created by the permission manager itself.
      */
     public static PermissionManagerServiceInternal create(Context context,
-            @Nullable DefaultPermissionGrantedCallback defaultGrantCallback,
             @NonNull Object externalLock) {
         final PermissionManagerServiceInternal permMgrInt =
                 LocalServices.getService(PermissionManagerServiceInternal.class);
         if (permMgrInt != null) {
             return permMgrInt;
         }
-        new PermissionManagerService(context, defaultGrantCallback, externalLock);
+        new PermissionManagerService(context, externalLock);
         return LocalServices.getService(PermissionManagerServiceInternal.class);
     }
 
@@ -1347,6 +1344,7 @@ public class PermissionManagerService {
                     updatedUserIds);
             updatedUserIds = setInitialGrantForNewImplicitPermissionsLocked(origPermissions,
                     permissionsState, pkg, newImplicitPermissions, updatedUserIds);
+            updatedUserIds = checkIfLegacyStorageOpsNeedToBeUpdated(pkg, replace, updatedUserIds);
         }
 
         // Persist the runtime permissions state for users with changes. If permissions
@@ -1470,6 +1468,28 @@ public class PermissionManagerService {
 
         // Add permission flags
         ps.updatePermissionFlags(mSettings.getPermission(newPerm), userId, flags, flags);
+    }
+
+    /**
+     * When the app has requested legacy storage we might need to update
+     * {@link android.app.AppOpsManager#OP_LEGACY_STORAGE}. Hence force an update in
+     * {@link com.android.server.policy.PermissionPolicyService#synchronizePackagePermissionsAndAppOpsForUser(Context, String, int)}
+     *
+     * @param pkg The package for which the permissions are updated
+     * @param replace If the app is being replaced
+     * @param updatedUserIds The ids of the users that already changed.
+     *
+     * @return The ids of the users that are changed
+     */
+    private @NonNull int[] checkIfLegacyStorageOpsNeedToBeUpdated(
+            @NonNull PackageParser.Package pkg, boolean replace, @NonNull int[] updatedUserIds) {
+        if (replace && pkg.applicationInfo.hasRequestedLegacyExternalStorage() && (
+                pkg.requestedPermissions.contains(READ_EXTERNAL_STORAGE)
+                        || pkg.requestedPermissions.contains(WRITE_EXTERNAL_STORAGE))) {
+            return UserManagerService.getInstance().getUserIds();
+        }
+
+        return updatedUserIds;
     }
 
     /**

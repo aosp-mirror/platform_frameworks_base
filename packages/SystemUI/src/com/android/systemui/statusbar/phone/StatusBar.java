@@ -951,6 +951,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             createUserSwitcher();
         }
 
+        mNotificationPanel.setLaunchAffordanceListener(
+                mStatusBarWindow::onShowingLaunchAffordanceChanged);
+
         // Set up the quick settings tile panel
         View container = mStatusBarWindow.findViewById(R.id.qs_frame);
         if (container != null) {
@@ -3636,6 +3639,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onStartedGoingToSleep() {
+            updateNotificationPanelTouchState();
             notifyHeadsUpGoingToSleep();
             dismissVolumeDialog();
         }
@@ -3668,7 +3672,10 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Keyguard.
      */
     private void updateNotificationPanelTouchState() {
-        mNotificationPanel.setTouchAndAnimationDisabled(!mDeviceInteractive && !mPulsing);
+        boolean goingToSleepWithoutAnimation = isGoingToSleep()
+                && !DozeParameters.getInstance(mContext).shouldControlScreenOff();
+        mNotificationPanel.setTouchAndAnimationDisabled((!mDeviceInteractive && !mPulsing)
+                || goingToSleepWithoutAnimation);
     }
 
     final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
@@ -3883,6 +3890,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean mAnimateWakeup;
         private boolean mAnimateScreenOff;
         private boolean mIgnoreTouchWhilePulsing;
+        private boolean mWakeLockScreenPerformsAuth = SystemProperties.getBoolean(
+                "persist.sysui.wake_performs_auth", false);
 
         @Override
         public String toString() {
@@ -3938,7 +3947,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarWindow.suppressWakeUpGesture(true);
             }
 
-            boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION;
+            boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_NOTIFICATION || (
+                    reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
+                            && mWakeLockScreenPerformsAuth);
             // Set the state to pulsing, so ScrimController will know what to do once we ask it to
             // execute the transition. The pulse callback will then be invoked when the scrims
             // are black, indicating that StatusBar is ready to present the rest of the UI.

@@ -4543,8 +4543,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     AccessibilityController accessibilityController = null;
 
                     synchronized (mGlobalLock) {
-                        // TODO(multidisplay): Accessibility supported only of default desiplay.
-                        if (mAccessibilityController != null && displayContent.isDefaultDisplay) {
+                        // TODO(multidisplay): Accessibility supported only of default display and
+                        // embedded displays.
+                        if (mAccessibilityController != null
+                                && (displayContent.isDefaultDisplay
+                                || displayContent.getParentWindow() != null)) {
                             accessibilityController = mAccessibilityController;
                         }
 

@@ -176,7 +176,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
             // position
             Matrix4 windowTransform;
             damageAccumulator.computeCurrentTransform(&windowTransform);
-            node->getSkiaLayer()->inverseTransformInWindow = windowTransform;
+            node->getSkiaLayer()->inverseTransformInWindow.loadInverse(windowTransform);
         } else {
             String8 cachesOutput;
             mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,

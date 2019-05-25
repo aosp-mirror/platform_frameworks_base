@@ -1170,7 +1170,7 @@ public class SyncManager {
     }
 
     private void removeSyncsForAuthority(EndPoint info, String why) {
-        mLogger.log("removeSyncsForAuthority: ", info);
+        mLogger.log("removeSyncsForAuthority: ", info, why);
         verifyJobScheduler();
         List<SyncOperation> ops = getAllPendingSyncs();
         for (SyncOperation op: ops) {

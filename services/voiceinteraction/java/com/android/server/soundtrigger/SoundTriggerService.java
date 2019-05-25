@@ -558,18 +558,15 @@ public class SoundTriggerService extends SystemService {
                     return ret;
                 }
                 switch (soundModel.type) {
-                    case SoundModel.TYPE_KEYPHRASE:
-                        ret = mSoundTriggerHelper.getKeyphraseModelState(soundModel.uuid);
-                        break;
                     case SoundModel.TYPE_GENERIC_SOUND:
                         ret = mSoundTriggerHelper.getGenericModelState(soundModel.uuid);
                         break;
                     default:
-                        Slog.e(TAG, "Unknown model type");
-
+                        // SoundModel.TYPE_KEYPHRASE is not supported to increase privacy.
+                        Slog.e(TAG, "Unsupported model type, " + soundModel.type);
                         sEventLogger.log(new SoundTriggerLogger.StringEvent(
-                                "getModelState(): Unknown model type"));
-
+                                "getModelState(): Unsupported model type, "
+                                + soundModel.type));
                         break;
                 }
 

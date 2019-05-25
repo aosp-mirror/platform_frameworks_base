@@ -72,6 +72,9 @@ public class MetricsLoggerWrapper {
      */
     private static int getUid(Context context, ComponentName componentName, int userId) {
         int uid = -1;
+        if (componentName == null) {
+            return uid;
+        }
         try {
             uid = context.getPackageManager().getApplicationInfoAsUser(
                     componentName.getPackageName(), 0, userId).uid;
