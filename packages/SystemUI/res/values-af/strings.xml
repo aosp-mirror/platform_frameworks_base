@@ -62,9 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-ontfouting word nie toegelaat nie"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Die gebruiker wat tans by hierdie toestel aangemeld is, kan nie USB-ontfouting aanskakel nie. Skakel na die primêre gebruiker toe oor om hierdie kenmerk te gebruik."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB-poort is gedeaktiveer"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Die USB-poort is gedeaktiveer om jou toestel teen vloeistowwe en vuilgoed te beskerm en dit sal nie enige bykomstighede bespeur nie.\n\nJy sal ingelig word wanneer dit veilig is om weer die USB-poort te gebruik."</string>
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Die USB-poort is gedeaktiveer om jou toestel teen vloeistowwe en vuilgoed te beskerm en dit sal nie enige bykomstighede bespeur nie.\n\nJy sal ingelig word wanneer die USB-poort weer gebruik kan word."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB-poort is geaktiveer om laaiers en bykomstighede te bespeur"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Aktiveer USB"</string>
+    <string name="learn_more" msgid="5000517160980853569">"Kom meer te wete"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoem om skerm te vul"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strek om skerm te vul"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Skermkiekie"</string>
@@ -118,6 +119,11 @@
     <string name="cancel" msgid="6442560571259935130">"Kanselleer"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bevestig"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Probeer weer"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Leë gebied; tik om stawing te kanselleer"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Probeer asseblief weer"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Soek tans jou gesig"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Gesig is gestaaf"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bevestig"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Raak die vingerafdruksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Vingerafdrukikoon"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Soek tans vir jou …"</string>
@@ -369,8 +375,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aan om <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Tot <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Donker-tema"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Donker-tema\nBatterybespaarder"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC is gedeaktiveer"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC is geaktiveer"</string>
@@ -445,13 +450,14 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Batterybespaarder is aan"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Verminder werkverrigting en agtergronddata"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Skakel Batterybespaarder af"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Terwyl dit opneem of uitsaai, kan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> enige sensitiewe inligting, soos oudio wat jy speel en jou wagwoorde, betaalinligting, foto\'s en boodskappe, vasvang."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Terwyl dit opneem of uitsaai, kan <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> enige sensitiewe inligting vasvang wat op jou skerm gewys word of op jou toestel gespeel word, insluitend sensitiewe inligting soos oudio, wagwoorde, betaalinligting, foto\'s en boodskappe."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Terwyl dit opneem of uitsaai, kan die diens wat hierdie taak uitvoer enige sensitiewe inligting vasvang wat op jou skerm gewys word of op jou toestel gespeel word, insluitend sensitiewe inligting soos oudio, wagwoorde, betaalinligting, foto\'s en boodskappe."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Maak sensitiewe inligting tydens uitsending/opname openbaar"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Moenie weer wys nie"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Vee alles uit"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Bestuur"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Ligte kennigewings"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Vee alle ligte kennisgewings uit"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Stil kennisgewings"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Vee alle stil kennisgewings uit"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Kennisgewings onderbreek deur Moenie Steur Nie"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Begin nou"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Geen kennisgewings nie"</string>
@@ -635,9 +641,9 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blokkeer"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Hou aan wys"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimeer"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Saggies"</string>
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Stil"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Bly stil"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Steurend"</string>
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Waarskuwings"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Hou aan waarsku"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Skakel kennisgewings af"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Hou aan om kennisgewings van hierdie program af te wys?"</string>
@@ -651,10 +657,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Hierdie kennisgewings kan nie gewysig word nie."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Hierdie groep kennisgewings kan nie hier opgestel word nie"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Instaanbediener-kennisgewing"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Alle <xliff:g id="APP_NAME">%1$s</xliff:g>-kennisgewings"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Sien meer"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Hierdie program gebruik tans die kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Hierdie program gebruik tans die mikrofoon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Hierdie program wys tans bo-oor ander programme op jou skerm."</string>
@@ -898,7 +902,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Laat toe"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Weier"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tik om Batterybespaarder te skeduleer"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Skakel outomaties aan wanneer battery by <xliff:g id="PERCENTAGE">%d</xliff:g>%% is"</string>
+    <string name="auto_saver_text" msgid="2563289953551438248">"Skakel aan wanneer battery waarskynlik sal leegloop"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Nee, dankie"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Batterybespaarder-skedule is aangeskakel"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Batterybespaarder sal outomaties aanskakel wanneer battery onder <xliff:g id="PERCENTAGE">%d</xliff:g>%% is."</string>
@@ -930,6 +934,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Beweeg na regs bo"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Beweeg na links onder"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Beweeg na regs onder"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Maak toe"</string>
 </resources>
