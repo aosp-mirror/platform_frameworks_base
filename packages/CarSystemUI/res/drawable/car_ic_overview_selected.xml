@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2019 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,7 +14,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/car_ic_selection_bg" android:gravity="center"/>
-    <item android:drawable="@drawable/car_ic_overview_black" android:gravity="center"/>
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:viewportWidth="44"
+        android:viewportHeight="44"
+        android:width="44dp"
+        android:height="44dp">
+    <path
+        android:pathData="M36.92857 22.39286A14.53571 14.53571 0 0 1 7.857143 22.39286A14.53571 14.53571 0 0 1 36.92857 22.39286Z"
+        android:strokeColor="@color/car_nav_icon_fill_color_selected"
+        android:strokeWidth="4" />
+</vector>
