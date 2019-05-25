@@ -512,7 +512,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
             tracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
-                    serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.versionCode,
+                    serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.longVersionCode,
                     serviceInfo.processName, serviceInfo.name);
             tracker.applyNewOwner(this);
         }
@@ -530,7 +530,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (restartTracker == null) {
             if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
                 restartTracker = ams.mProcessStats.getServiceStateLocked(serviceInfo.packageName,
-                        serviceInfo.applicationInfo.uid, serviceInfo.applicationInfo.versionCode,
+                        serviceInfo.applicationInfo.uid,
+                        serviceInfo.applicationInfo.longVersionCode,
                         serviceInfo.processName, serviceInfo.name);
             }
             if (restartTracker == null) {

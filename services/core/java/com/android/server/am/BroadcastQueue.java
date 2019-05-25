@@ -1605,7 +1605,7 @@ public final class BroadcastQueue {
         if (app != null && app.thread != null && !app.killed) {
             try {
                 app.addPackage(info.activityInfo.packageName,
-                        info.activityInfo.applicationInfo.versionCode, mService.mProcessStats);
+                        info.activityInfo.applicationInfo.longVersionCode, mService.mProcessStats);
                 maybeAddAllowBackgroundActivityStartsToken(app, r);
                 processCurBroadcastLocked(r, app, skipOomAdj);
                 return;
