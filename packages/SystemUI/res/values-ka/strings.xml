@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ხარვეზების გამართვა ნებადართული არაა"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ამ მოწყობილობაზე ამჟამად შესულ მომხმარებელს არ შეუძლია USB ხარვეზების გამართვის ფუნქციის ჩართვა. ამ ფუნქციის გამოსაყენებლად, მიუერთდით მთავარ მომხმარებელს."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB პორტი გათიშულია"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"USB პორტი გათიშულია თქვენი ტელეფონის დასაცავად სითხის ან ჭუჭყის მოხვედრისგან. აქსესუარების აღმოჩენა ვერ მოხერხდება.\n\nთქვენ მიიღებთ შეტყობინებას, როცა USB პორტის გამოყენება კვლავ უსაფრთხო იქნება."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB პორტი ჩართულია დამტენებისა და აქსესუარების აღმოსაჩენად"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB-ის ჩართვა"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"მასშტაბი შეცვალეთ ეკრანის შესავსებად."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"გაწიეთ ეკრანის შესავსებად."</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ეკრანის ანაბეჭდი"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"გაუქმება"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"დადასტურება"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ხელახლა ცდა"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"დაფიქსირდა ცარიელი უბანი, შეეხეთ ამოცნობის გასაუქმებლად"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"გთხოვთ, ცადოთ ხელახლა"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"მიმდინარეობს თქვენი სახის ძებნა"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"სახის ამოცნობილია"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"დადასტურებული"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"შეეხეთ თითის ანაბეჭდის სენსორს"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"თითის ანაბეჭდის ხატულა"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"მიმდინარეობს თქვენი ძიება…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"ჩაირთოს <xliff:g id="TIME">%s</xliff:g>-ზე"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g>-მდე"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"მუქი თემა"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"მუქი თემა\nბატარეის დამზოგი"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC გათიშულია"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ჩართულია"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ბატარეის დამზოგი ჩართულია"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ამცირებს წარმადობას და უკანა ფონის მონაცემებს"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ბატარეის დამზოგის გამორთვა"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"ჩაწერის ან ტრანსლირების განმავლობაში <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ს შეუძლია აღბეჭდოს ნებისმიერი სენსიტიური ინფორმაცია, როგორიც არის აუდიო, რომელსაც უკრავთ და თქვენი პაროლები, გადახდის ინფორმაცია, ფოტოები და შეტყობინებები."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"ჩაწერის ან ტრანსლირების განმავლობაში, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ს შეუძლია აღბეჭდოს ნებისმიერი სენსიტიური ინფორმაცია, რომელიც თქვენს ეკრანზეა ნაჩვენები ან თქვენი მოწყობილობიდან იკვრება, მათ შორის ისეთი, როგორიც არის აუდიო, პაროლები, გადახდის ინფორმაცია, ფოტოები და შეტყობინებები."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"ჩაწერის ან ტრანსლირების განმავლობაში, ამ ფუნქციის მომწოდებელ სერვისს შეუძლია აღბეჭდოს ნებისმიერი სენსიტიური ინფორმაცია, რომელიც თქვენს ეკრანზეა ნაჩვენები ან თქვენი მოწყობილობიდან იკვრება, მათ შორის ისეთი, როგორიც არის აუდიო, პაროლები, გადახდის ინფორმაცია, ფოტოები და შეტყობინებები."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"ტრანსლირების/ჩაწერის განმავლობაში მჟღავნდება სენსიტიური ინფორმაცია"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"აღარ მაჩვენო"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ყველას გასუფთავება"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"მართვა"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"მსუბუქი შეტყობინებები"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"ყველა მსუბუქი შეტყობინების გასუფთავება"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"შეტყობინებები დაპაუზდა „არ შემაწუხოთ“ რეჟიმის მეშვეობით"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"დაწყება ახლავე"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"შეტყობინებები არ არის."</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"დაბლოკვა"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ჩვენების გაგრძელება"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ჩაკეცვა"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"წყნარი"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"კვლავ ჩუმად ჩვენება"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"წყვეტის გამომწვევი"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"გაფრთხილების გაგრძელება"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"შეტყობინებების გამორთვა"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"გაგრძელდეს შეტყობინებათა ჩვენება ამ აპიდან?"</string>
@@ -651,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ამ შეტყობინებების შეცვლა შეუძლებელია."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"შეტყობინებების ამ ჯგუფის კონფიგურირება აქ შეუძლებელია"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"პროქსირებული შეტყობინება"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის ყველა შეტყობინება"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"მეტის ნახვა"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ეს აპი იყენებს კამერას."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ეს აპი იყენებს მიკროფონს."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ეს აპი თქვენს ეკრანზე ფარავს სხვა აპებს."</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"დაშვება"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"უარყოფა"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"შეეხეთ ბატარეის დამზოგის დასაგეგმად"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"ავტომატურად ჩაირთოს, როცა ბატარეა <xliff:g id="PERCENTAGE">%d</xliff:g>%%-ზეა"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"არა, გმადლობთ"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ბატარეის დამზოგის განრიგი ჩართულია"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ბატარეის დამზოგი ავტომატურად ჩაირთვება, როცა ბატარეა ჩამოსცდება <xliff:g id="PERCENTAGE">%d</xliff:g>%%-ს."</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"გადაანაცვლეთ ზევით და მარჯვნივ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ქვევით და მარცხნივ გადატანა"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"გადაანაცვ. ქვემოთ და მარჯვნივ"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"დახურვა"</string>
 </resources>

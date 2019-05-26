@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Non se permite a depuración por USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"O usuario coa sesión iniciada actualmente neste dispositivo non pode activar a depuración por USB. Para utilizar esta función, cambia ao usuario principal."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"O porto USB está desactivado"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Para protexer o dispositivo de líquidos ou residuos, desactivouse o porto USB e non detectará ningún accesorio.\n\nRecibirás unha notificación cando o poidas usar de novo."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"Activouse o porto USB para detectar cargadores e accesorios"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Activar USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar ata ocupar todo"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. pantalla"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Confirmar"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Tentar de novo"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"A rexión está baleira; tócaa para cancelar a autenticación"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Téntao de novo"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Buscando a túa cara"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Autenticouse a cara"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmada"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca o sensor de impresión dixital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona de impresión dixital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Buscándote…"</string>
@@ -307,7 +315,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Activando…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillo"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Xirar automaticamente"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Xirar a pantalla automaticamente"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Xirar pantalla automaticamente"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"Modo <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotación bloqueada"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertical"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Desde: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Ata: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema escuro"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tema escuro\nAforro de batería"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"A opción NFC está desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"A opción NFC está activada"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"A función Aforro de batería está activada"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactivar a función Aforro de batería"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Mentres graves ou emitas contido, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pode captar información confidencial, como o audio que reproduzas, os contrasinais, a información de pago, as fotos e as mensaxes."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Mentres graves ou emitas contido, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pode captar información confidencial que se mostre na pantalla ou se reproduza no dispositivo, como o audio que reproduzas, os contrasinais, a información de pago, as fotos e as mensaxes."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Mentres graves ou emitas contido, o servizo que ofrece esta función pode captar información confidencial que se mostre na pantalla ou se reproduza no dispositivo, como o audio que reproduzas, os contrasinais, a información de pago, as fotos e as mensaxes."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Revelar información confidencial durante a emisión ou a gravación"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Non mostrar outra vez"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Xestionar"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Notificacións discretas"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Borra todas as notificacións discretas"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"O modo Non molestar puxo en pausa as notificacións"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Non hai notificacións"</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Bloquear"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continuar mostrando notificacións"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizar"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"En silencio"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Notificacións silenciosas"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Emerxente"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continuar recibindo notificacións"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Desactivar notificacións"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Queres seguir mostrando as notificacións desta aplicación?"</string>
@@ -647,14 +659,12 @@
     <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
     <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
     <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Mostra as notificacións con prioridade baixa. Sempre en silencio."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Chama a túa atención cun son e cunha icona na barra de estado Móstrase na pantalla de bloqueo."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Chama a túa atención cun son e cunha icona na barra de estado. Móstrase na pantalla de bloqueo."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Estas notificacións non se poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquí non se pode configurar este grupo de notificacións"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notificación mediante proxy"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"As <xliff:g id="APP_NAME">%1$s</xliff:g> notificacións"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Ver máis"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Esta aplicación está utilizando a cámara."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Esta aplicación está utilizando o micrófono."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Esta aplicación móstrase sobre outras aplicacións da pantalla."</string>
@@ -730,7 +740,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Música"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendario"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Mostrar cos controis de volume"</string>
     <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"Non molestar"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Atallo dos botóns de volume"</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permitir"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Denegar"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tocar para programar a función Aforro de batería"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Actívase automaticamente cando a batería está ao <xliff:g id="PERCENTAGE">%d</xliff:g> %%"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Non, grazas"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Activouse o programa da función Aforro de batería"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Activarase automaticamente a función Aforro de batería en canto o nivel de carga sexa inferior ao <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Mover á parte superior dereita"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Mover á parte infer. esquerda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Mover á parte inferior dereita"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Ignorar"</string>
 </resources>

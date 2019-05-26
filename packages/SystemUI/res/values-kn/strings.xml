@@ -62,9 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಈ ಸಾಧನಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, ಪ್ರಾಥಮಿಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB ಪೋರ್ಟ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿಂದ ನಿಮ್ಮ ಸಾಧನವನ್ನು ರಕ್ಷಿಸಲು, USB ಪೋರ್ಟ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು ಯಾವುದೇ ಪರಿಕರಗಳನ್ನು ಪತ್ತೆ ಮಾಡುವುದಿಲ್ಲ. \n\n USB ಪೋರ್ಟ್ ಅನ್ನು ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದ್ದಾಗ ಮತ್ತೆ ನಿಮಗೆ ಸೂಚಿಸಲಾಗುವುದು."</string>
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿಂದ ನಿಮ್ಮ ಸಾಧನವನ್ನು ರಕ್ಷಿಸಲು, USB ಪೋರ್ಟ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಹಾಗಾಗಿ ಅದು ಯಾವುದೇ ಪರಿಕರಗಳನ್ನು ಪತ್ತೆ ಮಾಡುವುದಿಲ್ಲ. \n\n USB ಪೋರ್ಟ್ ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದ್ದಾಗ ಮತ್ತೆ ನಿಮಗೆ ಸೂಚಿಸಲಾಗುವುದು."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"ಚಾರ್ಜರ್‌ಗಳು ಮತ್ತು ಪರಿಕರಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು USB ಪೋರ್ಟ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="learn_more" msgid="5000517160980853569">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
@@ -118,6 +119,11 @@
     <string name="cancel" msgid="6442560571259935130">"ರದ್ದುಮಾಡಿ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ಖಾಲಿ ಪ್ರದೇಶ, ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ನಿಮ್ಮ ಮುಖದ ದೃಢೀಕರಣಕ್ಕಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -369,8 +375,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ಸಮಯದಲ್ಲಿ"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ಡಾರ್ಕ್ ಥೀಮ್"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ಡಾರ್ಕ್ ಥೀಮ್\nಬ್ಯಾಟರಿ ಸೇವರ್‌"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
@@ -445,13 +450,14 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಆಫ್ ಮಾಡಿ"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟಿಂಗ್ ಮಾಡುವಾಗ, ನೀವು ಪ್ಲೇ ಮಾಡುವ ಆಡಿಯೊ ಮತ್ತು ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು ಮತ್ತು ಸಂದೇಶಗಳಂತಹ ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟಿಂಗ್ ಮಾಡುವಾಗ, ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯಂತಹ ಆಡಿಯೋ, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಮಾಡಿದ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಿಂದ ಪ್ಲೇ ಮಾಡಿದ ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟಿಂಗ್ ಮಾಡುವಾಗ, ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯಂತಹ ಆಡಿಯೋ, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಮಾಡಿದ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಿಂದ ಪ್ಲೇ ಮಾಡಿದ ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಸೇವೆ ಒದಗಿಸುವ ಈ ಫಂಕ್ಷನ್ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"ಕ್ಯಾಸ್ಟಿಂಗ್/ರೆಕಾರ್ಡಿಂಗ್ ಸಮಯದಲ್ಲಿ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು ಬಹಿರಂಗಪಡಿಸುವುದು"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ನಿರ್ವಹಿಸಿ"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"ಸಾಮಾನ್ಯ ಅಧಿಸೂಚನೆಗಳು"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"ಎಲ್ಲಾ ಸಾಮಾನ್ಯ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"ನಿಶ್ಶಬ್ಧ ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"ಎಲ್ಲಾ ನಿಶ್ಶಬ್ಧ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಎನ್ನುವ ಮೂಲಕ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
@@ -635,9 +641,9 @@
     <string name="inline_block_button" msgid="8735843688021655065">"ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ತೋರಿಸುತ್ತಲಿರಿ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ಕಿರಿದುಗೊಳಿಸಿ"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"ಹಿತವಾಗಿ"</string>
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"ನಿಶ್ಶಬ್ದಗೊಳಿಸಿ"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"ಮೌನವಾಗಿರಿ"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"ಅಡಚಣೆ"</string>
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"ಎಚ್ಚರಿಕೆ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ಎಚ್ಚರಿಸುತ್ತಿರಿ"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
@@ -651,10 +657,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ಈ ಗುಂಪಿನ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇಲ್ಲಿ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲಾಗಿರುವುದಿಲ್ಲ"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ಪ್ರಾಕ್ಸಿ ಮಾಡಿದ ಅಧಿಸೂಚನೆಗಳು"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳು"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"ಇನ್ನಷ್ಟು ನೋಡಿ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೇಲಿಂದ ಪ್ರದರ್ಶಿಸುತ್ತಿದೆ."</string>
@@ -898,7 +902,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"ಅನುಮತಿಸಿ"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ನಿರಾಕರಿಸಿ"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಅನ್ನು ನಿಗದಿಗೊಳಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ರಷ್ಟು ಇರುವಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ"</string>
+    <string name="auto_saver_text" msgid="2563289953551438248">"ಬ್ಯಾಟರಿ ಖಾಲಿಯಾಗುವ ಸಾಧ್ಯತೆ ಇದ್ದಾಗ ಆನ್ ಮಾಡಿ"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ಬ್ಯಾಟರಿ ಸೇವರ್ ನಿಗದಿಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ಗಿಂತ ಕಡಿಮೆ ಆದಾಗ ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ."</string>
@@ -930,6 +934,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"ಬಲ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ಸ್ಕ್ರೀನ್‌ನ ಎಡ ಕೆಳಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ಕೆಳಗಿನ ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"ವಜಾಗೊಳಿಸಿ"</string>
 </resources>
