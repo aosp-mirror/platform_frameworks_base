@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Vingerafdruk-pictogram"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"hardware voor gezichtsherkenning beheren"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Hiermee kan de app methoden aanroepen om gezichtstemplates toe te voegen en te verwijderen voor gebruik."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"hardware voor gezichtsherkenning gebruiken"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Hiermee kan de app hardware voor gezichtsherkenning gebruiken voor verificatie"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Gezichtsherkenning"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Je gezicht opnieuw registreren"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Registreer je gezicht opnieuw om de herkenning te verbeteren"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Geen accurate gegevens. Probeer het nog eens."</string>
@@ -579,15 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Kan gezicht niet verifiëren. Hardware niet beschikbaar."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Probeer de gezichtsverificatie opnieuw."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Kan nieuwe gezichten niet opslaan. Verwijder eerst een oude."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Gezichtsbewerking geannuleerd"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Gezichtsverificatie geannuleerd door gebruiker"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Bewerking voor gezichtsherkenning geannuleerd."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Te veel pogingen. Probeer het later opnieuw."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Te veel pogingen. Gezichtsherkenning uitgeschakeld."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Kan gezicht niet verifiëren. Probeer het nog eens."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Je hebt gezichtsverificatie niet ingesteld"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Gezichtsverificatie wordt niet ondersteund op dit apparaat"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Gezicht <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1214,17 +1223,17 @@
     <string name="dump_heap_system_text" msgid="3236094872980706024">"Het proces <xliff:g id="PROC">%1$s</xliff:g> overschrijdt de geheugenlimiet van <xliff:g id="SIZE">%2$s</xliff:g>. Er is een heap dump beschikbaar die je kunt delen. Let op: Deze heap dump kan gevoelige persoonlijke informatie bevatten waartoe het proces toegang heeft. Dit omvat mogelijk wat je hebt getypt."</string>
     <string name="dump_heap_ready_text" msgid="1778041771455343067">"Er is een heap dump beschikbaar van het proces van <xliff:g id="PROC">%1$s</xliff:g>. Deze kun je delen. Let op: Deze heap dump bevat mogelijk gevoelige persoonlijke informatie waartoe het proces toegang heeft. Dit omvat mogelijk wat je hebt getypt."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
-    <string name="volume_ringtone" msgid="6885421406845734650">"Beltoonvolume"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Ringtonevolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspelen via Bluetooth"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille ringtone ingesteld"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume inkomend gesprek"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in Bluetooth-modus"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Wekkervolume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Meldingsvolume"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>
-    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Beltoonvolume"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Ringtonevolume"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Gespreksvolume"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Mediavolume"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Meldingsvolume"</string>
@@ -1357,7 +1366,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Reset de fabrieksinstellingen om de test harness-modus uit te schakelen."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Vloeistof of vuil in USB-poort"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-poort is automatisch uitgeschakeld. Tik voor meer informatie."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Veilig om USB-poort te gebruiken"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"De telefoon detecteert geen vloeistof of vuil meer."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Bugrapport genereren…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bugrapport delen?"</string>

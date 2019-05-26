@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"不允許 USB 偵錯"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"目前登入此裝置的使用者無法啟用 USB 偵錯功能。如要使用此功能，請切換至主要使用者。"</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"已停用 USB 連接埠"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"為了保護您的裝置免受液體或碎片損害，USB 連接埠已停用，因此不會偵測到任何配件。\n\nUSB 連接埠可安全使用時，您會收到通知。"</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"已啟用 USB 連接埠以偵測充電器和配件"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"啟用 USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"螢幕截圖"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"確認"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"請再試一次"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"空白區域，輕按即可取消驗證"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"請再試一次"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"正在尋找您的臉孔"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"臉孔已經驗證"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"已確認"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"請輕觸指紋感應器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋圖示"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在搜尋您的臉孔…"</string>
@@ -369,6 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> 開啟"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"直到<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"深色主題背景"</string>
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"深色主題背景\n省電模式"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 已啟用"</string>
@@ -443,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"省電模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"關閉省電模式"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"錄製或投放期間，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可以擷取任何敏感資料，例如您播放的音效檔案、您的密碼、付款資料、相片和訊息。"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"錄製或投放期間，「<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>」可以擷取螢幕顯示或裝置播放的任何敏感資料，包括音效、密碼、付款資料、相片和訊息等敏感資料。"</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"錄製或投放期間，此功能的服務供應商可以擷取螢幕顯示或裝置播放的任何敏感資料，包括音效、密碼、付款資料、相片和訊息等敏感資料。"</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"在投放/錄製期間披露敏感資訊"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"低重要性通知"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"清除所有低重要性通知"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"「請勿騷擾」模式已將通知暫停"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
@@ -633,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"封鎖"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"溫柔"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"保持靜音"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"打擾"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"繼續提示"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"關閉通知"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示此應用程式的通知嗎？"</string>
@@ -649,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"無法修改這些通知。"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"無法在此設定這組通知"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"代理通知"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"所有「<xliff:g id="APP_NAME">%1$s</xliff:g>」通知"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"查看更多"</string>
     <string name="appops_camera" msgid="8100147441602585776">"此應用程式目前使用相機。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"此應用程式目前使用麥克風。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"此應用程式目前透過其他應用程式在畫面上顯示內容。"</string>
@@ -774,7 +786,8 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"按住並拖曳即可新增圖塊"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"按住並拖曳即可重新排列圖塊"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖曳這裡即可移除"</string>
-    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"您必須至少有 6 個圖塊"</string>
+    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"編輯"</string>
     <string name="tuner_time" msgid="6572217313285536011">"時間"</string>
   <string-array name="clock_options">
@@ -896,7 +909,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"允許"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"拒絕"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"輕按即可預定省電模式自動開啟時間"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"在電量為 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"不用了，謝謝"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"已預定省電模式開啟時間"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"省電模式將會在電量低於 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟。"</string>
@@ -928,6 +942,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"移去右上角"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"移去左下角"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"移去右下角"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"關閉"</string>
 </resources>

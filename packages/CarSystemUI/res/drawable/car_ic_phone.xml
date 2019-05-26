@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2018 The Android Open Source Project
+  ~ Copyright (C) 2019 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,14 +15,11 @@
   ~ limitations under the License
   -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="40dp"
-    android:height="40dp"
-    android:viewportHeight="40.0"
-    android:viewportWidth="40.0">
+    android:viewportWidth="44"
+    android:viewportHeight="44"
+    android:width="44dp"
+    android:height="44dp">
     <path
-        android:fillColor="@color/car_nav_icon_fill_color"
-        android:fillType="nonZero"
-        android:pathData="M21.31,35.75L21.3,35.76L3.46,17.92L0.03,6.25C-0.16,5.32 0.53,3.88 1.41,3.51C6.36,1.25 8.88,0.1 8.95,0.08C10.02,-0.23 11.39,0.39 11.7,1.45L13.76,10.37C13.97,11.1 13.62,11.91 13.07,12.43L8.24,17.25L22.31,31.32L27.13,26.49C27.65,25.94 28.47,25.6 29.19,25.81L38.11,27.87C39.18,28.17 39.79,29.55 39.49,30.61C39.46,30.69 38.32,33.2 36.05,38.16C35.68,39.04 34.25,39.73 33.31,39.53L21.65,36.1C21.51,35.96 21.4,35.84 21.31,35.75Z"
-        android:strokeColor="@color/car_nav_icon_fill_color"
-        android:strokeWidth="1"/>
+        android:pathData="M12.1366667 19.7816667C14.7766667 24.97 19.03 29.205 24.2183333 31.8633333L28.2516667 27.83C28.7466667 27.335 29.48 27.17 30.1216667 27.39C32.175 28.0683333 34.3933333 28.435 36.6666667 28.435C37.675 28.435 38.5 29.26 38.5 30.2683333L38.5 36.6666667C38.5 37.675 37.675 38.5 36.6666667 38.5C19.4516667 38.5 5.5 24.5483333 5.5 7.33333333C5.5 6.325 6.325 5.5 7.33333333 5.5L13.75 5.5C14.7583333 5.5 15.5833333 6.325 15.5833333 7.33333333C15.5833333 9.625 15.95 11.825 16.6283333 13.8783333C16.83 14.52 16.6833333 15.235 16.17 15.7483333L12.1366667 19.7816667Z"
+        android:fillColor="@color/car_nav_icon_fill_color" />
 </vector>
