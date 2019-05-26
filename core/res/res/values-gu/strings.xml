@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ફિંગરપ્રિન્ટ આયકન"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ચહેરા પ્રમાણીકરણના હાર્ડવેરને મેનેજ કરો"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ઍપને ઉપયોગ માટે ચહેરાના નમૂના ઉમેરવા અને ડિલીટ કરવાની પદ્ધતિને રદ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ચહેરા પ્રમાણીકરણના હાર્ડવેરનો ઉપયોગ કરો"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ઍપને પ્રમાણીકરણ માટે ચહેરા પ્રમાણીકરણના હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ચહેરાનું પ્રમાણીકરણ"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ઓળખવાની પ્રક્રિયાને બહેતર બનાવવા માટે કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ચહેરાનો સચોટ ડેટા કૅપ્ચર ન થયો. ફરી પ્રયાસ કરો."</string>
@@ -565,8 +569,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ફોનને થોડો નીચે ખસેડો."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ફોનને ડાબી બાજુ ખસેડો."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ફોનને જમણી બાજુ ખસેડો."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"કૃપા કરીને તમારા ડિવાઇસ તરફ સીધું જુઓ."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"તમારો ચહેરો દેખાતો નથી. ફોનની સામે જુઓ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ડિવાઇસ અસ્થિર છે. ફોનને સ્થિર રાખો."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો."</string>
@@ -580,16 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ચહેરો ચકાસી શકાતો નથી. હાર્ડવેર ઉપલબ્ધ નથી."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
     <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"ચહેરાનો નવો ડેટા સ્ટોર કરી શકતાં નથી. પહેલા જૂનો ડિલીટ કરો."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ચહેરા સંબંધિત પ્રક્રિયા રદ કરવામાં આવી છે"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"વપરાશકર્તાએ ચહેરાનું પ્રમાણીકરણ રદ કર્યુ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ચહેરા સંબંધિત કાર્યવાહી રદ કરવામાં આવી છે."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"ઘણા બધા પ્રયત્નો. થોડા સમય પછી ફરી પ્રયાસ કરો."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ઘણા બધા પ્રયાસો. ચહેરાનું પ્રમાણીકરણ બંધ કરવામાં આવ્યું છે."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ચહેરો ચકાસી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"તમે ચહેરાના પ્રમાણીકરણનું સેટઅપ કર્યું નથી"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"આ ડિવાઇસ પર ચહેરાનું પ્રમાણીકરણ કરવાની સુવિધા નથી"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"ચહેરાનું <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -650,10 +657,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ધારકને કેરીઅર સેવાઓ સાથે પ્રતિબદ્ધ થવાની મંજૂરી આપે છે. સામાન્ય ઍપ્લિકેશનો માટે ક્યારેય જરૂરી હોતું નથી."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ખલેલ પાડશો નહીં ઍક્સેસ કરો"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>
@@ -1362,7 +1367,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ટેસ્ટ હાર્નેસ મોડ બંધ કરવા માટે ફૅક્ટરી રીસેટ કરો."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB પોર્ટમાં પ્રવાહી કે ધૂળ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB પોર્ટ ઑટોમૅટિક રીતે બંધ કરવામાં આવ્યો છે. વધુ જાણવા માટે ટૅપ કરો."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB પોર્ટનો ઉપયોગ કરવો સુરક્ષિત છે"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ફોનને હવે કોઈ પ્રવાહી કે ધૂળ હોવાનું જણાયું નથી."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"બગ રિપોર્ટ લઈ રહ્યાં છે…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"બગ રિપોર્ટ શેર કરીએ?"</string>
