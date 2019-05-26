@@ -44,7 +44,7 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"স্বতঃ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"বিজ্ঞপ্তি"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ব্লুটুথ টিথার করা হয়েছে"</string>
-    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ইনপুট পদ্ধতিগুলি সেট আপ করুন"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ইনপুট পদ্ধতিগুলি সেট-আপ করুন"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ফিজিক্যাল কীবোর্ড"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> কে <xliff:g id="USB_DEVICE">%2$s</xliff:g> অ্যাক্সেস করতে দেবেন?"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> কে <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> অ্যাক্সেস করতে দেবেন?"</string>
@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ডিবাগিং অনুমোদিত নয়"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ব্যবহারকারী এখন এই ডিভাইসে সাইন-ইন করেছেন তাই USB ডিবাগিং চালু করা যাবে না। এই বৈশিষ্ট্যটি ব্যবহার করতে, প্রাথমিক ব্যবহারকারীতে পাল্টে নিন।"</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"ইউএসবি পোর্ট বন্ধ করা হয়েছে"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"কোনও তরল পদার্থ এবং ধুলো কণা থেকে আপনার ডিভাইসকে সুরক্ষিত করতে, ইউএসবি পোর্ট বন্ধ করা হবে এবং কোনও অ্যাক্সেসরির শনাক্ত করবে না।\n\nযখন ইউএসবি পোর্ট ব্যবহার করা নিরাপদ হবে তখন আপনাকে জানানো হবে।"</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"চার্জার ও আনুষঙ্গিক আইটেম শনাক্ত করার জন্য ইউএসবি চালু করা হয়েছে"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"ইউএসবি চালু করুন"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ফুল স্ক্রিন করুন"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"স্ক্রিনশট নিন"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"কনফার্ম করুন"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"আবার চেষ্টা করুন"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"জায়গাটি খালি, যাচাইকরণ বাতিল করতে এখানে ট্যাপ করুন"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"আবার চেষ্টা করুন"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"আপনার ফেস খোঁজা হচ্ছে"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ফেস যাচাই করা হয়েছে"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"কনফার্ম করা হয়েছে"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"আঙ্গুলের ছাপের আইকন"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"আপনার জন্য খোঁজা হচ্ছে…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> এ চালু হবে"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> পর্যন্ত"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"গাঢ় থিম"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"গাঢ় থিম\nব্যাটারি সেভার"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC অক্ষম করা আছে"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC সক্ষম করা আছে"</string>
@@ -433,7 +440,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"বর্তমান ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ব্যবহারকারীকে লগ-আউট করুন"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"নতুন ব্যবহারকারীকে যোগ করবেন?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"আপনি একজন নতুন ব্যবহারকারী যোগ করলে তাকে তার জায়গা সেট-আপ করে নিতে হবে৷\n\nযেকোনো ব্যবহারকারী অন্য সব ব্যবহারকারীর জন্য অ্যাপ্লিকেশান আপডেট করতে পারবেন৷"</string>
     <string name="user_limit_reached_title" msgid="7374910700117359177">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
       <item quantity="one">আপনি <xliff:g id="COUNT">%d</xliff:g> জন পর্যন্ত ব্যবহারকারীর প্রোফাইল যোগ করতে পারেন।</item>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ব্যাটারি সেভার চালু আছে"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"কার্য-সম্পাদনা ও পশ্চাদপট ডেটাকে কমিয়ে দেয়"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ব্যাটারি সেভার বন্ধ করুন"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"রেকর্ড বা কাস্ট করার সময় আপনি চালাচ্ছেন এমন অডিও, আপনার পাসওয়ার্ড, পেমেন্টের তথ্য, ফটো ও মেসেজের মতো ব্যক্তিগত তথ্য <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ক্যাপচার করতে পারে।"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"রেকর্ডিং বা কাস্টিংয়ের সময়, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> আপনার স্ক্রিনে প্রদর্শিত বা ডিভাইস থেকে অডিও, পাসওয়ার্ড, পেমেন্টের তথ্য, ফটো এবং মেসেজের মতো যেকোনও সংবেদনশীল তথ্য ক্যাপচার করতে পারে।"</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"রেকর্ডিং বা কাস্টিংয়ের সময়, এই ফাংশন সরবরাহকারী পরিষেবা আপনার স্ক্রিনে প্রদর্শিত বা ডিভাইস থেকে অডিও, পাসওয়ার্ড, পেমেন্টের তথ্য, ফটো এবং মেসেজের মতো যেকোনও সংবেদনশীল তথ্য ক্যাপচার করতে পারে।"</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"কাস্ট/রেকর্ড করার সময় সংবেদনশীল তথ্য প্রকাশ করে"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"আর দেখাবেন না"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সবকিছু সাফ করুন"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"পরিচালনা করুন"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"সাইলেন্ট মোডের বিজ্ঞপ্তি"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"সাইলেন্ট মোডের বিজ্ঞপ্তি মুছুন"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'বিরক্ত করবেন না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এখন শুরু করুন"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো বিজ্ঞপ্তি নেই"</string>
@@ -503,7 +513,7 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"বিশ্বস্ত শংসাপত্রগুলি খুলুন"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"আপনার প্রশাসক নেটওয়ার্ক লগিং চালু করেছেন, যা আপনার ডিভাইসের ট্রাফিক নিরীক্ষণ করে।\n\nআরও তথ্যের জন্য আপনার প্রশাসকের সাথে যোগাযোগ করুন।"</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"আপনি VPN সংযোগ সেট আপ করার জন্য একটি অ্যাপ্লিকেশানকে অনুমতি দিন৷\n\nএই অ্যাপ্লিকেশানটি ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার ডিভাইস এবং নেটওয়ার্কের অ্যাক্টিভিটি নিরীক্ষণ করতে পারে।"</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"আপনি VPN সংযোগ সেট-আপ করার জন্য একটি অ্যাপ্লিকেশানকে অনুমতি দিন৷\n\nএই অ্যাপ্লিকেশানটি ইমেল, অ্যাপ্লিকেশান ও ওয়েবসাইটগুলি সহ আপনার ডিভাইস এবং নেটওয়ার্কের অ্যাক্টিভিটি নিরীক্ষণ করতে পারে।"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"আপনার কর্মস্থলের প্রোফাইলটি <xliff:g id="ORGANIZATION">%1$s</xliff:g> দ্বারা পরিচালিত হয়।\n\nআপনার প্রশাসক আপনার ইমেল, অ্যাপ্স ও ওয়েবসাইট সহ কর্মস্থলের নেটওয়ার্ক অ্যাক্টিভিটি নিরীক্ষণ করতে পারেন।\n\nআরও তথ্যের জন্য আপনার প্রশাসকের সঙ্গে যোগাযোগ করুন।\n\nএছাড়া আপনি একটি VPN এর সাথেও সংযুক্ত যা আপনার নেটওয়ার্ক অ্যাক্টিভিটি নিরীক্ষণ করতে পারে।"</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"আপনি <xliff:g id="APPLICATION">%1$s</xliff:g> এর সাথে সংযুক্ত রয়েছেন, যেটি ইমেল, অ্যাপ, এবং ওয়েবসাইট সহ আপনার নেটওয়ার্ক কার্যকলাপে নজর রাখতে পারে৷"</string>
@@ -516,7 +526,7 @@
     <string name="hidden_notifications_title" msgid="7139628534207443290">"বিজ্ঞপ্তিগুলি আরও দ্রুত পান"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"আপনি আনলক করার আগে ওগুলো দেখুন"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"না থাক"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"সেট আপ"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"সেট-আপ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"এখনই বন্ধ করুন"</string>
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"সাউন্ড সেটিংস"</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"ব্লক করুন"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখতে থাকুন"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ছোট করে দিন"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"সাইলেন্ট মোডে"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"বিজ্ঞপ্তি মিউট করুন"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"বিরক্তিকর"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"বিজ্ঞপ্তি পান"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"বিজ্ঞপ্তি বন্ধ করুন"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই অ্যাপের বিজ্ঞপ্তি পরেও দেখে যেতে চান?"</string>
@@ -651,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই সমস্ত বিজ্ঞপ্তিকে এখানে কনফিগার করা যাবে না"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"প্রক্সি করা বিজ্ঞপ্তি"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"<xliff:g id="APP_NAME">%1$s</xliff:g> সংক্রান্ত সমস্ত বিজ্ঞপ্তি"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"আরও দেখুন"</string>
     <string name="appops_camera" msgid="8100147441602585776">"এই অ্যাপটি ক্যামেরা ব্যবহার করছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই অ্যাপটি মাইক্রোফোন ব্যবহার করছে।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"এই অ্যাপটি স্ক্রিনে অন্যান্য অ্যাপের উপরে দেখানো হচ্ছে।"</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"অনুমতি দিন"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"খারিজ করুন"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"ব্যাটারি সেভার চালু হওয়ার সময় সেট করতে ট্যাপ করুন"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"চার্জ <xliff:g id="PERCENTAGE">%d</xliff:g>%% হয়ে গেলে নিজে থেকে চালু হতে দিন"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"না থাক"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"আগে সেট করা সময় অনুযায়ী ব্যাটারি সেভার চালু হয়েছে"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"চার্জ <xliff:g id="PERCENTAGE">%d</xliff:g>%%-এর নিচে চলে গেলে ব্যাটারি সেভার নিজে থেকেই চালু হয়ে যাবে।"</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"উপরে ডানদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"নিচে ডান দিকে সরান"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"খারিজ করুন"</string>
 </resources>
