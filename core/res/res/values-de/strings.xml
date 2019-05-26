@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Beweg das Smartphone nach unten."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Beweg das Smartphone nach links."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Beweg das Smartphone nach rechts."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Bitte sieh direkt auf dein Gerät."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Gesicht wurde nicht erkannt. Blicke aufs Telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Bitte registriere dein Gesicht noch einmal."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Gesichtserkennung noch einmal versuchen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Kein Speicherplatz frei. Bitte erst ein Gesicht löschen."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Gesichtserkennung abgebrochen"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Gesichtserkennung vom Nutzer abgebrochen"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Bitte nicht stören\" zugreifen"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Bitte nicht stören\"-Konfiguration"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"Mit der Verwendung der Anzeigeberechtigung beginnen"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Ermöglicht dem Inhaber, die Berechtigungsnutzung für eine App zu beginnen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Setz das Gerät auf die Werkseinstellungen zurück, um den Test-Harnischmodus zu deaktivieren."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Flüssigkeiten oder Fremdkörper im USB-Port"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Der USB-Port wird automatisch deaktiviert. Für weitere Informationen tippen."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB-Port kann wieder sicher verwendet werden"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Das Smartphone erkennt keine Flüssigkeiten oder Fremdkörper mehr."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Fehlerbericht wird abgerufen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Fehlerbericht teilen?"</string>

@@ -1357,7 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Lakukan reset ke setelan pabrik untuk menonaktifkan Mode Tes Otomatis."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Cairan atau kotoran di port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Port USB otomatis dinonaktifkan. Tap untuk mempelajari lebih lanjut."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Port USB aman digunakan"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Boleh menggunakan port USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Ponsel tidak lagi mendeteksi adanya cairan atau kotoran."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Mengambil laporan bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bagikan laporan bug?"</string>

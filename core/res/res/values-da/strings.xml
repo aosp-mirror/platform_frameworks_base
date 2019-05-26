@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"b"</string>
     <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Mb"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Tb"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Pb"</string>
@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Sænk telefonen."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Flyt telefonen til venstre."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Flyt telefonen til højre."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Kig mere direkte på din enhed."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Dit ansigt kan ikke registreres. Kig på telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Der er for meget bevægelse. Hold telefonen stille."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrer dit ansigt igen."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ansigt ikke bekræftet. Hardware ikke tilgængelig."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Prøv ansigtsgodkendelse igen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Der kan ikke gemmes flere nye ansigter. Slet et gammelt."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Ansigtshandlingen blev annulleret"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Ansigtsgodkendelsen blev annulleret af brugeren"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Tillader, at brugeren knytter sig til tjenester fra mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"have adgang til Forstyr ikke"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og redigere konfigurationen af Forstyr ikke."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"start brugen at tilladelsesvisning"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Tillader, at brugeren kan bruge en tilladelse for en app. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Gendan fabriksindstillingerne for at deaktivere tilstanden Testsele."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Væske eller snavs i USB-porten"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-porten deaktiveres automatisk. Tryk for at få flere oplysninger."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Det er sikkert at bruge USB-porten"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonen registrerer ikke længere væske og snavs."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Opretter fejlrapport…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vil du dele fejlrapporten?"</string>
@@ -1671,7 +1668,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Genvejen til hjælpefunktioner deaktiverede <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Hold begge lydstyrkeknapper nede i tre sekunder for at bruge <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Vælg, hvilken funktion du vil bruge, når du trykker på knappen Hjælpefunktioner:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Tryk på knappen Hjælpefunktioner, og hold fingeren nede for at skifte funktioner."</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Tryk på knappen Hjælpefunktioner, og hold fingeren nede for at skifte funktion."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Forstørrelse"</string>
     <string name="user_switched" msgid="3768006783166984410">"Nuværende bruger <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Skifter til <xliff:g id="NAME">%1$s</xliff:g>…"</string>

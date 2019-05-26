@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-vianetsintää ei sallita"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Laitteelle tällä hetkellä kirjautunut käyttäjä ei voi ottaa USB-vianetsintää käyttöön. Vaihda käyttäjäksi ensisijainen käyttäjä, jotta voit käyttää tätä ominaisuutta."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB-portti poistettu käytöstä"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Laitteen suojaamiseksi nesteiltä ja lialta USB-portti on poistettu käytöstä, eikä se havaitse lisävarusteita.\n\nSaat ilmoituksen, kun USB-porttia voi taas käyttää."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB-portti on käytössä ja voi havaita latureita sekä lisävarusteita"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Ota USB käyttöön"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomaa koko näyttöön"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Venytä koko näyttöön"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Kuvakaappaus"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Peruuta"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Vahvista"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Yritä uudelleen"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Tyhjä alue, napauta sitä peruuttaaksesi tunnistuksen"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Yritä uudelleen"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Kasvojasi katsotaan"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Kasvot tunnistettu"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Vahvistettu"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Kosketa sormenjälkitunnistinta"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Sormenjälkikuvake"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Etsitään kasvoja…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Käyttöön klo <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> saakka"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tumma teema"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tumma teema\nVirransäästö"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC on poistettu käytöstä"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC on käytössä"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Virransäästö on käytössä"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Rajoittaa suorituskykyä ja taustatiedonsiirtoa"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Poista virransäästö käytöstä"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Tallennuksen tai suoratoiston aikana <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> voi tallentaa mitä tahansa arkaluontoisia tietoja, kuten toistettavaa ääntä, salasanoja, maksutietoja, kuvia ja viestejä."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Tallennuksen tai striimauksen aikana <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa, kuten ääniä, salasanoja, maksutietoja, kuvia ja viestejä."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Tallennuksen tai striimauksen aikana ominaisuuden tarjoava palvelu voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa, kuten ääniä, salasanoja, maksutietoja, kuvia ja viestejä."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Arkaluontoiset tiedot saatavilla suoratoiston tai tallennuksen aikana"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Älä näytä uudelleen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Poista kaikki"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Muuta asetuksia"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Varovaiset ilmoitukset"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Tyhjennä kaikki varovaiset ilmoitukset"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Älä häiritse ‑tila keskeytti ilmoitukset"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Aloita nyt"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ei ilmoituksia"</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Estä"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Jatka näyttämistä"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Pienennä"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Hiljainen"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Jatka äänettömyyttä"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Huomattava"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Jatka ilmoituksista hälyttämistä"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Poista ilmoitukset käytöstä"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Jatketaanko ilmoitusten näyttämistä tästä sovelluksesta?"</string>
@@ -651,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Välitetty ilmoitus"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Kaikki <xliff:g id="APP_NAME">%1$s</xliff:g> ‑ilmoitukset"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Lisää"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Tämä sovellus käyttää kameraa."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Tämä sovellus käyttää mikrofonia."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Tämä sovellus näkyy näytöllä muiden sovellusten päällä."</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Salli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Estä"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Ajoita virransäästö napauttamalla"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Käynnistä automaattisesti, kun akun lataustaso on <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ei kiitos"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Virransäästön ajoitus otettu käyttöön"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Virransäästö käynnistyy automaattisesti, kun akun lataustaso on alle <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Siirrä oikeaan yläreunaan"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Siirrä vasempaan alareunaan"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Siirrä oikeaan alareunaan"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Ohita"</string>
 </resources>

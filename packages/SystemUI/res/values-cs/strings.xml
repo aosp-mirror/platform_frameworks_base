@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladění přes USB není povoleno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění přes USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Port USB je deaktivován"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Kvůli ochraně vašeho zařízení před tekutinami a nečistotami je port USB zakázán a nerozpozná žádné příslušenství.\n\nAž bude opět bezpečné port USB použít, budeme vás informovat."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"Port USB může zjišťovat nabíječky a příslušenství"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Aktivovat USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celou obrazovku"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snímek obrazovky"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Zrušit"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Potvrdit"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Zkusit znovu"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Prázdná oblast, klepnutím ověření zrušíte"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Zkuste to prosím znovu"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Vyhledávání obličeje"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Obličej byl ověřen"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Potvrzeno"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Dotkněte se snímače otisků prstů"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona otisku prstu"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Hledáme vás…"</string>
@@ -373,8 +381,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Zapnout v <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tmavé téma"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tmavý motiv\nSpořič baterie"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je vypnuto"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je zapnuto"</string>
@@ -451,13 +458,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Spořič baterie je zapnutý"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Omezuje výkon a data na pozadí"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Vypnout spořič baterie"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Při nahrávání nebo odesílání může <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> zachytit citlivé údaje, např. přehrávanou hudbu, zadávaná hesla a platební údaje, fotky nebo zprávy."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Při nahrávání nebo odesílání může aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> zachytit citlivé údaje zobrazené na obrazovce nebo přehrávané ze zařízení, např. zvuky, hesla, platební údaje, fotky a zprávy."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Při nahrávání nebo odesílání může služba poskytující tuto funkci zachytit citlivé údaje zobrazené na obrazovce nebo přehrávané ze zařízení, např. zvuky, hesla, platební údaje, fotky a zprávy."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Zobrazení citlivých údajů při nahrávání/odesílání"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tuto zprávu příště nezobrazovat"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Smazat vše"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Spravovat"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Vlídná oznámení"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Vymazat všechna vlídná oznámení"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Oznámení jsou pozastavena režimem Nerušit"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Spustit"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Žádná oznámení"</string>
@@ -641,9 +651,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Blokovat"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Nadále zobrazovat"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimalizovat"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Nenápadná"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Nadále bez zvuku"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Rušivá"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Dál upozorňovat"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Vypnout oznámení"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
@@ -657,10 +669,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Tato oznámení nelze upravit."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tuto skupinu oznámení tady nelze nakonfigurovat"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Zprostředkované oznámení"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Všechna oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Zobrazit další"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Tato aplikace využívá fotoaparát."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Tato aplikace využívá mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Tato aplikace se zobrazuje přes ostatní aplikace na obrazovce."</string>
@@ -908,7 +918,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Povolit"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Zamítnout"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Klepnutím naplánujete aktivování spořiče baterie"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Aktivovat automaticky, když baterie klesne pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ne, díky"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Plánované aktivování spořiče baterie je zapnuté"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Spořič baterie se automaticky aktivuje, jakmile baterie klesne pod <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
@@ -940,6 +951,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Přesunout vpravo nahoru"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Přesunout vlevo dolů"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Přesunout vpravo dolů"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Zavřít"</string>
 </resources>

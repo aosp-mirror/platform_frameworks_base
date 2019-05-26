@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Իջեցրեք հեռախոսը։"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Տեղափոխեք հեռախոսը ձախ:"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Տեղափոխեք հեռախոսը աջ:"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Նայեք ուղիղ էկրանին։"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ձեր դեմքը չի երևում։ Նայեք հեռախոսին։"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Նորից փորձեք։"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Չհաջողվեց հաստատել դեմքը։ Սարքն անհասանելի է:"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Նորից փորձեք դեմքի ճանաչումը։"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Չհաջողվեց պահել նոր դեմքը։ Ջնջեք հին տարբերակը։"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Դեմքի ճանաչումը չեղարկվել է"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Դեմքի ճանաչումը չեղարկվել է օգտատիրոջ կողմից"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Թույլ է տալիս սեփականատիրոջը կապվել օպերատորի ծառայություններին: Սովորական հավելվածների դեպքում չի պահանջվում:"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"հասանելիություն «Չանհանգստացնել» գործառույթին"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Թույլ է տալիս հավելվածին փոփոխել «Չանհանգստացնել» գործառույթի կազմաձևումը:"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"թույլտվությունների մասին տվյալների հասանելիություն"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Հավելվածին հասանելի կդառնան թույլտվությունների մասին տվյալները։ Այս թույլտվությունն անհրաժեշտ չէ սովորական հավելվածներին։"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1141,7 +1137,7 @@
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Փոփոխել"</string>
     <string name="whichSendApplication" msgid="5803792421724377602">"Կիսվել"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Կիսվել %1$s-ի միջոցով"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Տրամադրել"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Կիսվել"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ուղարկել այս հավելվածով"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Ուղարկել %1$s հավելվածով"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Ուղարկել"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Թեստային ռեժիմն անջատելու համար զրոյացրեք կարգավորումները։"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB միացքում ջուր կամ աղտ է հայտնաբերվել"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB միացքն ավտոմատ անջատվել է: Հպեք՝ ավելին իմանալու համար:"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB միացքը կարող է օգտագործվել"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Հեռախոսում ջուր կամ աղտ չի հայտնաբերվել:"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Վրիպակի զեկույցի ստեղծում…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Տրամադրե՞լ վրիպակի զեկույցը:"</string>
@@ -1956,7 +1953,7 @@
     <string name="autofill_save_type_address" msgid="4936707762193009542">"հասցե"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"վարկային քարտ"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"օգտանուն"</string>
-    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"էլփոստի հասցե"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"էլ․ հասցե"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Պահպանեք հանգստությունը և մոտակայքում ապաստարան փնտրեք:"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ափամերձ և գետափնյա տարածքներից անմիջապես էվակուացվեք դեպի ավելի ապահով վայրեր (օրինակ՝ բարձրադիր գոտիներ):"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Պահպանեք հանգստությունը և մոտակայքում ապաստարան փնտրեք:"</string>

@@ -292,7 +292,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS సందేశాలు పంపడానికి మరియు వీక్షించడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"నిల్వ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ఆడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ఆడియోని రికార్డ్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ఫోన్‌ను కిందికి దించండి."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"మీ ముఖం కనిపించడం లేదు. ఫోన్ వైపు చూడండి."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"ముఖ ప్రామాణీకరణను మళ్ళీ ప్రయత్నించండి."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"కొత్త ముఖం డేటాను నిల్వ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ముఖ కార్యకలాపం రద్దయింది"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"వినియోగదారు ద్వారా ముఖ ప్రామాణీకరణ రద్దు చేయబడింది"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"క్యారియర్ సేవలకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"అంతరాయం కలిగించవద్దును యాక్సెస్ చేయడం"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
@@ -1141,7 +1137,7 @@
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"సవరించు"</string>
     <string name="whichSendApplication" msgid="5803792421724377602">"షేర్ చేయి"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sతో భాగస్వామ్యం చేయి"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"భాగస్వామ్యం చేయి"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"షేర్ చేయి"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"దీన్ని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$sని ఉపయోగించి పంపండి"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"పంపు"</string>
@@ -1362,13 +1358,14 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB పోర్ట్‌లో ద్రవ లేదా వ్యర్థ పదార్థాలు ఉన్నాయి"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB పోర్ట్ ఆటోమేటిక్‌గా నిలిపివేయబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"ఇప్పుడు సురక్షితంగా USB పోర్ట్‌ని ఉపయోగించుకోవచ్చు"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ఫోన్ ఇకపై ద్రవ లేదా వ్యర్థ పదార్థాలను గుర్తించదు."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"బగ్ నివేదికను తీస్తోంది…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"బగ్ నివేదికను భాగస్వామ్యం చేస్తోంది..."</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"మీ నిర్వాహకులు ఈ పరికరం సమస్యకు పరిష్కారాన్ని కనుగొనడంలో సహాయం కోసం బగ్ నివేదికను అభ్యర్థించారు. అనువర్తనాలు మరియు డేటా భాగస్వామ్యం చేయబడవచ్చు."</string>
-    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"భాగస్వామ్యం చేయి"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"షేర్ చేయి"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="4653387336791222978">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
     <string name="show_ime" msgid="2506087537466597099">"దీన్ని భౌతిక కీబోర్డ్ సక్రియంగా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>

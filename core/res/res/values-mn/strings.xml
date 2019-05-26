@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Утсаа доошлуулна уу."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Утсаа зүүн тийш болгоно уу."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Утсаа баруун тийш болгоно уу."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Төхөөрөмж рүүгээ аль болох эгц харна уу."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Таны царайг харахгүй байна. Утас руу харна уу."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Хэт их хөдөлгөөнтэй байна. Утсаа хөдөлгөөнгүй барина уу."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Нүүрээ дахин бүртгүүлнэ үү."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Царайг бататгаж чадсангүй. Техник хангамж боломжгүй байна."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Царайн нотолгоог дахин оролдоно уу."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Царайн шинэ өгөгдлийг хадгалж чадсангүй. Эхлээд хуучин өгөгдлийг устгана уу."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Царайн үйл ажиллагааг цуцаллаа"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Хэрэглэгч царайн нотолгоог цуцалсан байна"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Аливаа эзэмшигчийг үүрэн холбооны үйлчилгээ үзүүлэгчтэй холбодог. Энгийн аппд шаардлагагүй."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Бүү саад бол тохируулгад хандалт хийх"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Апп-д Бүү саад бол тохируулгыг уншиж, бичихийг зөвшөөрөх"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"зөвшөөрлийн ашиглалтыг харж эхлэх"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Эзэмшигчид аппын зөвшөөрлөө ашиглаж эхлэхийг зөвшөөрдөг. Энгийн аппуудад шаардлагагүй."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Туршилтын цогц горимыг идэвхгүй болгохын тулд үйлдвэрийн төлөвт шинэчилнэ үү."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB порт дээрх шингэн зүйл эсвэл бохирдол"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB портыг автоматаар идэвхгүй болгосон байна. Дэлгэрэнгүй мэдээлэл авахын тулд товшино уу."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB портыг ашиглахад аюулгүй байна"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Утас шингэн зүйл эсвэл бохирдлыг илрүүлсэнгүй."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Алдааны тайланг авч байна..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Алдааны тайланг хуваалцах уу?"</string>

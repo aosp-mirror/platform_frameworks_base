@@ -987,7 +987,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Pretekli mesec"</string>
     <string name="older" msgid="5211975022815554840">"Starejše"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"vsak <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"ob <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"leta <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"dan"</string>
@@ -1401,7 +1401,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Če želite onemogočiti način preizkusnega ogrodja, ponastavite napravo na tovarniške nastavitve."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"V vratih USB je tekočina ali umazanija"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Vrata USB so samodejno onemogočena. Dotaknite se, če želite izvedeti več."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Vrata USB so varna za uporabo"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon ne zaznava več tekočine ali umazanije."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Zajemanje poročila o napakah …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite poslati poročilo o napakah?"</string>

@@ -1357,7 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Εκτελέστε επαναφορά εργοστασιακών ρυθμίσεων για να απενεργοποιήσετε τη λειτουργία περιβάλλοντος δοκιμών."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Υγρασία ή ακαθαρσίες στη θύρα USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Η θύρα USB απενεργοποιείται αυτόματα. Πατήστε για να μάθετε περισσότερα."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Μπορείτε να χρησιμοποιήσετε με ασφάλεια τη θύρα USB"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Αποδεκτή η χρήση της θύρας USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Το τηλέφωνο δεν εντοπίζει πλέον υγρασία ή ακαθαρσίες."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Λήψη αναφοράς σφάλματος…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Κοινή χρήση αναφοράς σφάλματος;"</string>

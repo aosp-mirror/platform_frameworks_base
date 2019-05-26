@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"फोन अझै तल सार्नुहोस्।"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फोन बायाँतिर सार्नुहोस्।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फोन दायाँतिर सार्नुहोस्।"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"कृपया अझ सीधा गरी आफ्नो स्क्रिनमा हेर्नुहोस्।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"तपाईंको अनुहार देखिएन। फोनमा हेर्नुहोस्।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"अत्यधिक हल्लियो। फोन स्थिर राख्नुहोस्।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"अनुहार पुष्टि गर्न सकिएन। हार्डवेयर उपलब्ध छैन।"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"फेरि अनुहारको प्रमाणीकरण गरी हेर्नुहोस्।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"अनुहारसम्बन्धी नयाँ डेटा भण्डारण गर्न सकिएन। पहिले कुनै पुरानो डेटा मेटाउनुहोस्।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"अनुहार पहिचान गर्ने सुविधा रद्द गरियो"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"प्रयोगकर्ताले अनुहार प्रमाणीकरण सेवा रद्द गर्नुभयो"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"होल्डरलाई वाहक सेवाहरु बाँध्न अनुमति दिनुहोस्। सामान्य अनुप्रयोगहरूको लागि यो कहिल्यै आवश्यक पर्दैन।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"बाधा नपुर्याउँनुहोस् पहुँच गर्नुहोस्"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"वाहकलाई कुनै अनुप्रयोगसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
@@ -1084,7 +1080,7 @@
     <string name="delete" msgid="6098684844021697789">"मेट्नुहोस्"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL को प्रतिलिप गर्नुहोस्"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"पाठ चयन गर्नुहोस्"</string>
-    <string name="undo" msgid="7905788502491742328">"अनडू गर्नुहोस्"</string>
+    <string name="undo" msgid="7905788502491742328">"अन्डू गर्नुहोस्"</string>
     <string name="redo" msgid="7759464876566803888">"रिडू गर्नुहोस्"</string>
     <string name="autofill" msgid="3035779615680565188">"स्वतः भरण"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"पाठ चयनता"</string>
@@ -1367,7 +1363,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"परीक्षण प्याकेज मोड असक्षम पार्न फ्याक्ट्री रिसेट गर्नुहोस्।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB पोर्टमा तरल पदार्थ वा धुलो भएको कुरा पत्ता लाग्यो"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB पोर्ट स्वतः असक्षम पारियो। थप जान्न ट्याप गर्नुहोस्।"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB पोर्ट प्रयोग गर्न सुरक्षित छ"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"फोनले अब उप्रान्त तरल पदार्थ वा धुलो नभएको पत्ता लगायो"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रिपोर्ट लिँदै..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्टलाई साझेदारी गर्ने हो?"</string>

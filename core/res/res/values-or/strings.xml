@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ଫୋନ୍‌କୁ ତଳକୁ ନିଅନ୍ତୁ।"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ଡାହାଣ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ଦୟାକରି ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ସିଧାସଳଖ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ଆପଣଙ୍କର ମୁହଁ ଦେଖି ପାରୁନାହିଁ। ଫୋନ୍‌କୁ ଦେଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"ପୁଣି ମୁହଁ ପ୍ରାମାଣିକତା କରନ୍ତୁ।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ନୂଆ ମୁହଁ ଡାଟା ଷ୍ଟୋର୍ ହେବ ନାହିଁ। ପ୍ରଥମେ ପୁରୁଣାକୁ ଡିଲିଟ୍ କରନ୍ତୁ।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ମୁହଁ ପ୍ରମାଣିକିକରଣ ପ୍ରକ୍ରିୟା ବାତିଲ୍ ହୋଇଛି"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ଉପଯୋଗକର୍ତ୍ତା ମୁହଁ ପ୍ରମାଣିକିକରଣ ବାତିଲ୍‌ କରିଛନ୍ତି"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"କେରିଅର୍‌ ସେବାଗୁଡ଼ିକ ସହିତ ଧାରକଙ୍କୁ ଯୋଡ଼ିଥାଏ। ସାମାନ୍ୟ ଆପ୍‍ ପାଇଁ କଦାପି ଆବଶ୍ୟକ ହୁଏନାହିଁ।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" କନଫିଗରେଶନ୍‍ ପଢ଼ିବା ତଥା ଲେଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"ଅନୁମତି ବ୍ୟବହାର ଦେଖିବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ଏକ ଆପ୍ ପାଇଁ ଅନୁମତିର ବ୍ୟବହାର ଆରମ୍ଭ କରିବାକୁ ଧାରକକୁ ଅନୁମତି ଦେଇଥାଏ। ସାଧାରଣ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ ଏହା ଆବଶ୍ୟକ ନୁହେଁ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ପାସ୍‌ୱର୍ଡ ନିୟମାବଳୀ ସେଟ୍ କରନ୍ତୁ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ଲକ୍‍ ସ୍କ୍ରୀନ୍‍ ପାସ୍‌ୱର୍ଡ ଓ PINରେ ଅନୁମୋଦିତ ଦୀର୍ଘତା ଓ ବର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ସ୍କ୍ରୀନ୍-ଅନଲକ୍ କରିବା ଉଦ୍ୟମ ନୀରିକ୍ଷଣ କରନ୍ତୁ"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ଟେଷ୍ଟ ହାର୍‌ନେସ୍ ମୋଡ୍ ଅକ୍ଷମ କରିବାକୁ ଏକ ଫ୍ୟାକ୍ଟରୀ ରିସେଟ୍ କରନ୍ତୁ।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ପୋର୍ଟରେ ତରଳ ପଦାର୍ଥ ବା ଧୂଳି"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ପୋର୍ଟ ସ୍ୱଚାଳିତ ଭାବେ ଅକ୍ଷମ ହୋଇଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ପୋର୍ଟ ବ୍ୟବହାର କରିବା ପାଇଁ ସୁରକ୍ଷିତ ଅଟେ"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ଫୋନ୍ ଆଉ ତରଳ ପଦାର୍ଥ କିମ୍ବା ଧୂଳିର ଚିହ୍ନଟ କରୁନାହିଁ।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ବଗ୍ ରିପୋର୍ଟ ନିଆଯାଉଛି…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ବଗ୍‍ ରିପୋର୍ଟ ସେୟାର୍‌ କରିବେ?"</string>

@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ਫ਼ੋਨ ਨੂੰ ਥੋੜ੍ਹਾ ਹੇਠਾਂ ਵੱਲ ਕਰੋ।"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ਫ਼ੋਨ ਨੂੰ ਖੱਬੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ਫ਼ੋਨ ਨੂੰ ਸੱਜੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ਕਿਰਪਾ ਕਰਕੇ ਸਿੱਧਾ ਆਪਣੇ ਡੀਵਾਈਸ ਵੱਲ ਦੇਖੋ।"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਨਹੀਂ ਦਿਸ ਰਿਹਾ। ਫ਼ੋਨ ਵੱਲ ਦੇਖੋ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਹਿਲਜੁਲ। ਫ਼ੋਨ ਨੂੰ ਸਥਿਰ ਰੱਖੋ।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਦਰਜ ਕਰੋ।"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਦੁਬਾਰਾ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ਨਵਾਂ ਚਿਹਰਾ ਡਾਟਾ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ। ਪਹਿਲਾਂ ਪੁਰਾਣਾ ਹਟਾਓ।"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਨੂੰ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ਹੋਲਡਰ ਨੂੰ ਕੈਰੀਅਰ ਸੇਵਾਵਾਂ ਨਾਲ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਸ ਲਈ ਕਦੇ ਵੀ ਲੁੜੀਂਦਾ ਨਹੀਂ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਤੱਕ ਪਹੁੰਚ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ਐਪ ਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਕੌਂਫਿਗਰੇਸ਼ਨ ਨੂੰ ਪੜ੍ਹਨ ਅਤੇ ਲਿਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"ਇਜਾਜ਼ਤ ਵਰਤੋਂ ਦੇਖਣਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ਧਾਰਕ ਨੂੰ ਕਿਸੇ ਹੋਰ ਐਪ ਲਈ ਇਜਾਜ਼ਤ ਵਰਤੋਂ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
@@ -1362,7 +1358,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਬੰਦ ਕਰਨ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ਪੋਰਟ ਵਿੱਚ ਪਾਣੀ ਜਾਂ ਧੂੜ-ਮਿੱਟੀ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ਪੋਰਟ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ਪੋਰਟ ਵਰਤਣਾ ਸੁਰੱਖਿਅਤ ਹੈ"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ਫ਼ੋਨ ਹੁਣ ਪਾਣੀ ਜਾਂ ਧੂੜ-ਮਿੱਟੀ ਦਾ ਪਤਾ ਨਹੀਂ ਲਗਾਉਂਦਾ ਹੈ।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>

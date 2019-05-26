@@ -292,7 +292,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला एसएमएस पाठवू आणि पाहू द्यायचे?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"स्टोरेज"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अॅक्सेस"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फायली अॅक्सेस करू द्यायचे?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फायली अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडिओ रेकॉर्ड"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला ऑडिओ रेकॉर्ड करू द्यायचा?"</string>
@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"फोन आणखी खाली हलवा."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"फोन डावीकडे हलवा."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"फोन उजवीकडे हलवा."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"कृपया तुमच्या डिव्हाइसकडे थेट पाहा"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"तुमचा चेहरा दिसत नाही. फोनकडे पहा."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"खूप हलत आहे. फोन स्थिर धरून ठेवा."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"चेहरा ऑथेंटिकेशनचा पुन्हा प्रयत्न करा"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"नवीन फेस डेटा स्टोअर करू शकत नाही. आधी जुना हटवा."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"फेस ऑपरेशन रद्द केले आहे"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"वापरकर्त्याने फेस ऑथेंटिकेशन रद्द केले आहे"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"वाहक सेवांवर प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्य अॅप्ससाठी कधीही आवश्यकता नसावी."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"व्यत्यय आणू नका अॅक्सेस करा"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"व्यत्यय आणू नका कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी अॅपला अनुमती देते."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"व्ह्यू परवानगी वापर सुरू करा"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>
@@ -1362,7 +1358,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"टेस्ट हार्नेस मोड बंद करण्यासाठी फॅक्टरी रीसेट करा."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB पोर्ट मध्ये ओलावा किंवा धूळ आहे"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB पोर्ट आपोआप बंद होईल. अधिक जाणून घेण्यासाठी टॅप करा."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB फोर्ट वापरण्यासाठी सुरक्षित आहे"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"फोनला धूळ किंवा ओलावा आढळला नाही."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रीपोर्ट घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल शेअर करायचा?"</string>

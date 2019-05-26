@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ಫೋನ್ ಅನ್ನು ಕೆಳಗೆ ಸರಿಸಿ."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ಫೋನ್ ಅನ್ನು ಎಡಕ್ಕೆ ಸರಿಸಿ."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ಫೋನ್ ಅನ್ನು ಬಲಕ್ಕೆ ಸರಿಸಿ."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಹೆಚ್ಚಿನದ್ದನ್ನು ನೇರವಾಗಿ ನೋಡಿ."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ನಿಮ್ಮ ಮುಖ ಕಾಣಿಸುತ್ತಿಲ್ಲ. ಫೋನ್ ಕಡೆಗೆ ನೋಡಿ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ತುಂಬಾ ಅಲುಗಾಡುತ್ತಿದೆ ಫೋನ್ ಅನ್ನು ಸ್ಥಿರವಾಗಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ."</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"ಮುಖ ದೃಢೀಕರಣ ಹಾರ್ಡ್‌ವೇರ್‌ ಅನ್ನು ಬಳಸಿ ನೋಡಿ."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ಹೊಸ ಮುಖ ಡೇಟಾ ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಮೊದಲು ಹಳೆಯದನ್ನು ಅಳಿಸಿ"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ಮುಖದ ಕಾರ್ಯಚರಣೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ಮುಖ ಗುರುತಿಸುವಿಕೆಯನ್ನು ಬಳಕೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ವಾಹಕ ಸೇವೆಗಳನ್ನು ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ಅಡಚಣೆ ಮಾಡಬೇಡಿಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"ವೀಕ್ಷಣಾ ಅನುಮತಿಯ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ಆ್ಯಪ್‌ಗಾಗಿ ಅನುಮತಿ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಆ್ಯಪ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ಪರದೆ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ಪರದೆಯ ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"</string>
@@ -1362,7 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್ ಮಾಡಬೇಕು."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ಪೋರ್ಟ್‌ನಲ್ಲಿ ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿವೆ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ಪೋರ್ಟ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ಪೋರ್ಟ್ ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ಪೋರ್ಟ್ ಬಳಸಲು ಸರಿ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ಫೋನ್, ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳನ್ನು ಇನ್ನು ಮುಂದೆ ಪತ್ತೆಹಚ್ಚುವುದಿಲ್ಲ."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ದೋಷದ ವರದಿಯನ್ನು ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ಬಗ್ ವರದಿಯನ್ನು ಹಂಚುವುದೇ?"</string>
