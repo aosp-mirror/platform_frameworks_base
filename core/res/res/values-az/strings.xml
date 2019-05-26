@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Şəbəkə siqnalları"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Şəbəkə əlçatandır"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN statusu"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Cihaz administrasiyası"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"IT adminindən xəbərdarlıqlar"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Siqnallar"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Pərakəndə demo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB əlaqə"</string>
@@ -290,7 +290,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"göndərin və SMS mesajlarına baxın"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə SMS mesajları göndərmək və onlara baxmaq icazəsi verilsin?"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Depo"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Yaddaş"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"cihazınızda foto, media və fayllara daxil olun"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə cihazdakı foto, media və fayllara daxil olmaq icazəsi verilsin?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Barmaq izi ikonası"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"üz identifikasiyası proqramını idarə edin"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Proqramdan istifadə üçün barmaq izi şablonlarını əlavə etmək və silmək məqsədilə üsullara müraciət etməyə imkan verir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"üz identifikasiyası proqramından istifadə edin"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Tətbiqin üz identifikasiyası proqramından identifikasiya zamanı istifadə etməsinə icazə verir"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Üz identifikasiyası"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Üzünüzü yenidən qeydiyyatdan keçirin"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Tanınmanı təkmilləşdirmək üçün üzünüzü yenidən qeydiyyatdan keçirin"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Dəqiq üz datası əldə edilmədi. Yenidən cəhd edin."</string>
@@ -565,7 +569,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Telefonu aşağı tutun."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefonu sola hərəkət etdirin."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefonu sağa hərəkət etdirin."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Gözləriniz açıq şəkildə ekrana baxın."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Birbaşa cihaza baxın."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Üzünüz görünmür. Telefona baxın."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Cihaz stabil deyil. Telefonu tərpətməyin."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Üzünüzü yenidən qeydiyyatdan keçirin."</string>
@@ -579,15 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Üz doğrulanmadı. Avadanlıq əlçatan deyil."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Üz proqramı taymerinin vaxtı bitdi. Yenə cəhd edin."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Yeni üz datası saxlanmadı. Əvvəlcə köhnə olanı silin."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Üz əməliyyatı ləğv edildi"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Üz dorğulaması istifadəçi tərəfindən ləğv edildi"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Üz əməliyyatı ləğv edildi."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Həddindən çox cəhd. Sonraya saxlayın."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Həddindən çox cəhd. Üz doğrulaması deaktiv edildi."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Üz doğrulanmadı. Yenidən cəhd edin."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Üz doğrulaması quraşdırmamısınız"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Üz doğrulaması bu cihazda dəstəklənmir"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Üz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -648,6 +657,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Sahibinə operator xidmətləri ilə əlaqələndirməyə icazə verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"Narahat Etməyin\" funksiyasına daxil olun"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Tətbiqə \"Narahat Etməyin\" konfiqurasiyasını oxumağa və yazmağa icazə verin."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"Baxış icazəsinin istifadəsinə başlayın"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Sahibinə tətbiqin icazədən istifadəsinə başlamağa imkan verir. Adi tətbiqlər üçün heç vaxt tələb edilmir."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qaydalarını təyin edin"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidinin parolu və PINlərində icazə verilən uzunluq və simvollara nəzarət edin."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekranı kiliddən çıxarmaq üçün edilən cəhdlərə nəzarət edin"</string>
@@ -1355,7 +1366,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Test Rejimini deaktiv etmək üçün fabrika ayarlarına sıfırlayın."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB portuna maye sızıb və ya qırılıb"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB portu avtomatik deaktiv edildi. Ətraflı məlumat üçün klikləyin."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB portundan istifadə təhlükəsizdir"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon artıq maye və ya nasazlığı aşkarlamayacaq."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Baq hesabatı verilir..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Baq hesabatı paylaşılsın?"</string>
@@ -1801,7 +1813,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Enerjiyə qənaət batareya istifadəsini artırmaq üçün arxa fon fəaliyyətini, bəzi vizual effektləri və batareyadan çox istifadə edən digər funksiyalarını deaktiv edir və ya məhdudlaşdırır. "<annotation id="url">"Ətraflı məlumat"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Enerjiyə qənaət batareya istifadəsini artırmaq üçün arxa fon fəaliyyətini, bəzi vizual effektləri və batareyadan çox istifadə edən digər funksiyalarını deaktiv edir və ya məhdudlaşdırır."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin çox az hissəsini tez-tez edə bilər. Bu o deməkdir ki, məsələn, üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivləşdirin"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1898,9 +1910,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Güncəlləməni yoxlayın"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Baxmaq üçün SMS tətbiqini açın"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Bir neçə funksionallıq məhdudlaşdırıla bilər"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Kilidi açmaq üçün tıklayın"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"İstifadəçi datası kilidlidir"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Bəzi funksiyalar məhdudlaşdırıla bilər"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"İş profili kilidlidir"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"İş profilinin kilidini açmaq üçün tıklayın"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> məhsuluna bağlandı"</string>
