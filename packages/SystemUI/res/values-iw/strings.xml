@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏לא ניתן לבצע ניפוי באגים ב-USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏למשתמש המחובר לחשבון במכשיר הזה אין אפשרות להפעיל ניפוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"‏יציאת ה-USB מושבתת"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"‏כדי להגן על המכשיר שלך מנוזלים או חלקיקים, יציאת ה-USB מושבתת ולא מזהה אביזרים כלל.\n\nתתקבל התראה כשיהיה בטוח להשתמש ביציאת ה-USB."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"‏יציאת USB הופעלה לזיהוי מטענים ואביזרים"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"‏הפעלת USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"צילום מסך"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"אישור"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ניסיון נוסף"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"אזור ריק, יש להקיש עליו כדי לבטל את האימות"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"עליך לנסות שוב"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"המערכת מחפשת את הפנים שלך"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"זיהוי הפנים בוצע"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"מאושר"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"יש לגעת בחיישן טביעות האצבע"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"סמל טביעת אצבע"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"מחפש אותך…"</string>
@@ -373,8 +381,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"מופעל בשעה <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"עד <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"עיצוב כהה"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"עיצוב כהה\nלחיסכון בסוללה"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"‏NFC מושבת"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"‏NFC מופעל"</string>
@@ -451,14 +458,15 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"תכונת החיסכון בסוללה פועלת"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"כיבוי תכונת החיסכון בסוללה"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"בזמן הקלטה או העברה, האפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> יכולה לקלוט מידע רגיש, כמו האודיו המושמע, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"בזמן הקלטה או העברה, האפליקציה <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> יכולה לקלוט מידע רגיש שמוצג במסך או מופעל מהמכשיר שלך, כולל מידע רגיש כמו אודיו, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"בזמן הקלטה או העברה, השירות שמספק את הפונקציה הזו יכול לקלוט מידע רגיש שמוצג במסך או מופעל מהמכשיר שלך, כולל מידע רגיש כמו אודיו, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"חשיפת מידע רגיש בזמן העברה/הקלטה"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"אל תציג שוב"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"נקה הכל"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ניהול"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
     <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
     <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"התראות הושהו על ידי מצב \'נא לא להפריע\'"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"התחל כעת"</string>
@@ -643,26 +651,26 @@
     <string name="inline_block_button" msgid="8735843688021655065">"חסימה"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"כן, המשיכו"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"מזעור"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"התראות מתונות"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"בשקט"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"התראות קופצות"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"המשך שליחת התראות"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"השבתת ההתראות"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"שנמשיך להציג לך התראות מהאפליקציה הזאת?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"התראות מתונות"</string>
+    <string name="notification_silence_title" msgid="7352089096356977930">"ברמה מתונה"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"בעדיפות"</string>
     <string name="notification_channel_summary_low" msgid="1065819618107531284">"עוזרת לריכוז באמצעות הצגת התראות בלוח ההתראות הנפתח בלבד. תמיד שקטה."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"מציגה התראות בעדיפות נמוכה. תמיד שקטה."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"מציגה התראות בעדיפות נמוכה. תמיד שקטה."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"מציגה התראות בעדיפות נמוכה. תמיד שקטה."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"יופיעו התראות בעדיפות נמוכה. תמיד בשקט."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"יופיעו התראות בעדיפות נמוכה. תמיד בשקט."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"יופיעו התראות בעדיפות נמוכה. תמיד בשקט."</string>
     <string name="notification_channel_summary_default" msgid="3847289783382316019">"מעוררת תשומת לב באמצעות צלילים וסמל בשורת הסטטוס. מוצגת במסך הנעילה."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"לא ניתן לשנות את ההתראות האלה."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"לא ניתן להגדיר כאן את קבוצת ההתראות הזו"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"‏התראה דרך שרת proxy"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"כל ההתראות של <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"הצגת עוד"</string>
     <string name="appops_camera" msgid="8100147441602585776">"האפליקציה הזו משתמשת במצלמה."</string>
     <string name="appops_microphone" msgid="741508267659494555">"האפליקציה הזו משתמשת במיקרופון."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך."</string>
@@ -910,7 +918,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"אני רוצה לאשר"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"אני לא מרשה"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"יש להקיש כדי לתזמן את מצב החיסכון בסוללה"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"הפעלה אוטומטית כשהסוללה ברמת טעינה של <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"לא תודה"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"הופעל תזמון של חיסכון בסוללה"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"מצב חיסכון בסוללה יופעל באופן אוטומטי כשרמת טעינת הסוללה תהיה נמוכה מ-<xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
@@ -942,6 +951,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"העברה לפינה הימנית העליונה"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"העברה לפינה השמאלית התחתונה"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"העברה לפינה הימנית התחתונה"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"סגירה"</string>
 </resources>

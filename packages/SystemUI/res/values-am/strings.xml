@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"የዩኤስቢ እርማት አይፈቀድም"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"አሁን ወደዚህ መሣሪያ የገባው ተጠቃሚ የዩኤስቢ እርማትን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"የዩኤስቢ ወደብ ተሰናክሏል"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"መሣሪያዎን ከፈሳሽ ወይም ፍርስራሽ ለመጠበቅ ሲባል የዩኤስቢ ወደቡ ተሰናክሏል፣ እና ማናቸውም ተቀጥላዎችን አያገኝም።\n\nየዩኤስቢ ወደቡን እንደገና መጠቀም ችግር በማይኖረው ጊዜ ማሳወቂያ ይደርሰዎታል።"</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"ዩኤስቢ አንቃ"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ቅጽበታዊ ገጽ እይታ"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"ይቅር"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"አረጋግጥ"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"እንደገና ይሞክሩ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ባዶ ክልል፣ ፈቃድን ለመሰረዝ መታ ያድርጉ"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"እባክዎ እንደገና ይሞክሩ"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"መልክዎን በመፈለግ ላይ"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"መልክ ተረጋግጧል"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ተረጋግጧል"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"የጣት አሻራ ዳሳሹን ይንኩ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"የጣት አሻራ አዶ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"እርስዎን በመፈለግ ላይ…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ላይ ይበራል"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"እስከ <xliff:g id="TIME">%s</xliff:g> ድረስ"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"ጨለማ ገጽታ"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"ጨለም ያለ ገጽታ\nየባትሪ ቆጣቢ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"ኤንኤፍሲ"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"ኤንኤፍሲ ተሰናክሏል"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"ኤንኤፍሲ ነቅቷል"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ባትሪ ቆጣቢ በርቷል"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"አፈጻጸምን እና የጀርባ ውሂብ ይቀንሳል"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ባትሪ ቆጣቢን አጥፋ"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"በመቅረጽ ላይ ወይም በመውሰድ ጊዜ፣ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> እርስዎ የሚያጫውቱትን እንደ ኦዲዮ ያለ እና የእርስዎ የይለፍ ቃላት፣ የክፍያ መረጃ፣ እና መልዕክቶች የመሳሰሉ አደጋን ሊያስከትሉ የሚችሉ ማናቸውንም መረጃዎች ሊያዝ ይችላል።"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"እየቀረጸ ወይም cast እያደረገ ሳለ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> እንደ ኦዲዮ፣ የይለፍ ቃላት፣ የክፍያ መረጃ፣ ፎቶዎች እና መልዕክቶች ያለ ሚስጥራዊነት ያለው መረጃ ጨምሮ በማያ ገጽዎ ላይ የሚታይ ወይም ከመሣሪያዎ የተጫወተ ማንኛውም ሚስጥራዊነት ያለው መረጃ ሊይዝ ይችላል።"</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"እየቀረጸ ወይም cast እያደረገ ሳለ ይህን ተግባር የሚያቀርበው አገልግሎት እንደ ኦዲዮ፣ የይለፍ ቃላት፣ የክፍያ መረጃ፣ ፎቶዎች እና መልዕክቶች ያለ ሚስጥራዊነት ያለው መረጃ ጨምሮ በማያ ገጽዎ ላይ የሚታይ ወይም ከመሣሪያዎ የተጫወተ ማንኛውም ሚስጥራዊነት ያለው መረጃ ሊይዝ ይችላል።"</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"በመውሰድ/ ቀረጻ ላይ አደገኛ መረጃን አጋልጦ በመስጠት ላይ"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ዳግመኛ አታሳይ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ያቀናብሩ"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"ገር ማሳወቂያዎች"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"ረጋ ያሉትን ማሳወቂያዎች በሙሉ ያጽዱ"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ማሳወቂያዎች በአትረብሽ ባሉበት ቆመዋል"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"አሁን ጀምር"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ምንም ማሳወቂያ የለም"</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"አግድ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ማሳየትን ቀጥል"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"አሳንስ"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"ረጋ ያለ"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"ጸጥ እንዳለ ቆይ"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"አቋራጭ"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ማንቃቱን ቀጥል"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"ማሳወቂያዎችን አጥፋ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ከዚህ መተግበሪያ ማሳወቂያዎችን ማሳየት ይቀጥል?"</string>
@@ -651,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"እነዚህ ማሳወቂያዎች ሊሻሻሉ አይችሉም።"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"የማሳወቂያዎች ይህ ቡድን እዚህ ላይ ሊዋቀር አይችልም"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ተኪ ማሳወቂያ"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"ሁሉም <xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያዎች"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"ተጨማሪ ይመልከቱ"</string>
     <string name="appops_camera" msgid="8100147441602585776">"ይህ መተግበሪያ ካሜራውን እየተጠቀመ ነው።"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ይህ መተግበሪያ ማይክሮፎኑን እየተጠቀመ ነው።"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ይህ መተግበሪያ በማያ ገጽዎ ላይ ባሉ ሌሎች መተግበሪያዎች ላይ እያሳየ ነው።"</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"ፍቀድ"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ከልክል"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"ለባትሪ ቆጣቢ መርሐግብርን ለማስያዝ መታ ያድርጉ"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"ባትሪ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ላይ ሲሆን በራስ-ሰር ያብሩ"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"አይ፣ አመሰግናለሁ"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"የባትሪ ቆጣቢ መርሐግብር በርቷል"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ባትሪ ልክ ከ<xliff:g id="PERCENTAGE">%d</xliff:g>%% በታች ሲሆን ባትሪ ቆጣቢ በራስ-ሰር ይበራል።"</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"ወደ ላይኛው ቀኝ አንቀሳቅስ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"የግርጌውን ግራ አንቀሳቅስ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ታችኛውን ቀኝ ያንቀሳቅሱ"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"አሰናብት"</string>
 </resources>

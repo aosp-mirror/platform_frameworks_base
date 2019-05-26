@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ನೆಟ್‌ವರ್ಕ್ ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿದೆ"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN ಸ್ಥಿತಿ"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"ಸಾಧನ ನಿರ್ವಹಣೆ"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"ನಿಮ್ಮ IT ವಿಭಾಗದ ನಿರ್ವಾಹಕರಿಂದ ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"ರಿಟೇಲ್ ಡೆಮೋ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ಸಂಪರ್ಕ"</string>
@@ -549,11 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ಬೆರಳಚ್ಚು ಐಕಾನ್"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ಮುಖ ದೃಢೀಕರಣ ಹಾರ್ಡ್‌ವೇರ್‌ ಅನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಅನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ಬಳಕೆಗೆ ಮುಖದ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ಮುಖ ದೃಢೀಕರಣ ಹಾರ್ಡ್‌ವೇರ್‌ ಅನ್ನು ಬಳಸಿ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ಧೃಡೀಕರಣಕ್ಕಾಗಿ ಮುಖದ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ಮುಖ ಗುರುತಿಸುವಿಕೆ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ಫೇಸ್ ಅನ್‌ಲಾಕ್"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ಗುರುತಿಸುವಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸಲು ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ಸರಿಯಾಗಿ ಮುಖ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ಫೋನ್ ಅನ್ನು ಕೆಳಗೆ ಸರಿಸಿ."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ಫೋನ್ ಅನ್ನು ಎಡಕ್ಕೆ ಸರಿಸಿ."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ಫೋನ್ ಅನ್ನು ಬಲಕ್ಕೆ ಸರಿಸಿ."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"ನಿಮ್ಮ ತೆರೆದ ಕಣ್ಣುಗಳಿಂದ ಸ್ಕ್ರೀನ್ ಕಡೆಗೆ ನೋಡಿ."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಹೆಚ್ಚಿನದ್ದನ್ನು ನೇರವಾಗಿ ನೋಡಿ."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ನಿಮ್ಮ ಮುಖ ಕಾಣಿಸುತ್ತಿಲ್ಲ. ಫೋನ್ ಕಡೆಗೆ ನೋಡಿ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ತುಂಬಾ ಅಲುಗಾಡುತ್ತಿದೆ ಫೋನ್ ಅನ್ನು ಸ್ಥಿರವಾಗಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರುನೋಂದಣಿ ಮಾಡಿ."</string>
@@ -579,15 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"ಮುಖ ಗುರುತಿಸುವಿಕೆಯ ಅವಧಿ ಮೀರಿದೆ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ಹೊಸ ಮುಖ ಡೇಟಾ ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಮೊದಲು ಹಳೆಯದನ್ನು ಅಳಿಸಿ"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ಮುಖದ ಕಾರ್ಯಚರಣೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ಮುಖ ಗುರುತಿಸುವಿಕೆಯನ್ನು ಬಳಕೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ಮುಖದ ಕಾರ್ಯಚರಣೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಬಳಕೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳು. ಮುಖ ಗುರುತಿಸುವಿಕೆ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"ಮುಖ ಗುರುತಿಸುವಿಕೆಯನ್ನು ನೀವು ಸೆಟಪ್ ಮಾಡಿಲ್ಲ"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ಈ ಸಾಧನದಲ್ಲಿ ಮುಖ ಗುರುತಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯವು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"ನೀವು ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಿಲ್ಲ."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ಈ ಸಾಧನದಲ್ಲಿ ಫೇಸ್ ಅನ್‌ಲಾಕ್ ವೈಶಿಷ್ಟ್ಯವು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
     <string name="face_name_template" msgid="7004562145809595384">"ಮುಖದ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"ವಾಹಕ ಸೇವೆಗಳನ್ನು ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"ಅಡಚಣೆ ಮಾಡಬೇಡಿಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"ವೀಕ್ಷಣಾ ಅನುಮತಿಯ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಿ"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ಆ್ಯಪ್‌ಗಾಗಿ ಅನುಮತಿ ಬಳಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಆ್ಯಪ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ಪರದೆ ಲಾಕ್‌ನಲ್ಲಿನ ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಮತ್ತು ಪಿನ್‌ಗಳ ಅನುಮತಿಸಲಾದ ಅಕ್ಷರಗಳ ಪ್ರಮಾಣವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ಪರದೆಯ ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ"</string>
@@ -1356,7 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ಸ್ವಯಂ ಪರೀಕ್ಷೆಯಾಗುವಿಕೆ ಮೋಡ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಫ್ಯಾಕ್ಟರಿ ರಿಸೆಟ್ ಮಾಡಬೇಕು."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ಪೋರ್ಟ್‌ನಲ್ಲಿ ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳಿವೆ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ಪೋರ್ಟ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ಪೋರ್ಟ್ ಬಳಸಲು ಸುರಕ್ಷಿತವಾಗಿದೆ"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ಪೋರ್ಟ್ ಬಳಸಲು ಸರಿ ಅನ್ನು ಆಯ್ಕೆ ಮಾಡಿ"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ಫೋನ್, ದ್ರವ ಅಥವಾ ಧೂಳಿನ ಕಣಗಳನ್ನು ಇನ್ನು ಮುಂದೆ ಪತ್ತೆಹಚ್ಚುವುದಿಲ್ಲ."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ದೋಷದ ವರದಿಯನ್ನು ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ಬಗ್ ವರದಿಯನ್ನು ಹಂಚುವುದೇ?"</string>
@@ -1899,9 +1901,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"ಅಪ್‌ಡೇಟ್‌ಗಾಗಿ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ನೀವು ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿರುವಿರಿ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ವೀಕ್ಷಿಸಲು SMS ಅಪ್ಲಿಕೇಶನ್ ತೆರೆಯಿರಿ"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"ಕೆಲವು ಕಾರ್ಯನಿರ್ವಹಣೆಗಳು ಸೀಮಿತವಾಗಿರಬಹುದು"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"ಕೆಲವು ಕಾರ್ಯನಿರ್ವಹಣೆ ಸೀಮಿತವಾಗಿರಬಹುದು"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>

@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Hálózati értesítések"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Van elérhető hálózat"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-állapot"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Eszközfelügyelet"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Rendszergazda általi értesítések"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Értesítések"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Kiskereskedelmi bemutató"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-kapcsolat"</string>
@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ujjlenyomat ikon"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"arcfelismerő hardver kezelése"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Engedélyezi, hogy az alkalmazás arcsablon-hozzáadási és -törlési metódusokat hívjon."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"arcfelismerő hardver használata"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Engedélyezi, hogy az alkalmazás hitelesítésre használja az arcfelismerő hardvert"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Arcfelismerés"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Rögzítsen újra képet az arcáról"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"A felismerés javítása érdekében rögzítsen újra az arcáról készített képet"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Sikertelen az arc pontos rögzítése. Próbálja újra."</string>
@@ -565,7 +569,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Tartsa alacsonyabban a telefont."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mozgassa a telefont balra."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mozgassa a telefont jobbra."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Nyitott szemmel forduljon a telefon irányába."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Szemből nézzen az eszközre."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nem látszik az arca. Nézzen a telefonra."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Túl sok a mozgás. Tartsa stabilan a telefont."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Rögzítsen újra képet az arcáról."</string>
@@ -579,15 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Sikertelen arcellenőrzés. A hardver nem érhető el."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Időtúllépés az arcbeolvasásnál. Próbálja újra."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Nem tárolhatók újabb arcadatok. Törölje valamelyik arcot."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Az arccal kapcsolatos művelet megszakítva"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Az arc hitelesítését megszakította a felhasználó"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Az arccal kapcsolatos művelet törölve."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Túl sok próbálkozás. Próbálja újra később."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Túl sokszor próbálkozott. Arcfelismerés letiltva."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nem sikerült ellenőrizni az arcát. Próbálja újra."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Nem állította be az arcfelismerést"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Az eszköz nem támogatja az arcfelismerést"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> arc"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -648,6 +657,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lehetővé teszi a tulajdonos számára a szolgáltatókhoz való kapcsolódást. A normál alkalmazások esetében erre nincs szükség."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"hozzáférés a „Ne zavarjanak” funkcióhoz"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Az alkalmazás olvashatja és szerkesztheti a „Ne zavarjanak” funkció beállításait."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"engedélyhasználat megtekintésének elindítása"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Lehetővé teszi a felhasználó számára, hogy elindítsa az alkalmazás engedélyhasználatát. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Képernyőzár-feloldási kísérletek figyelése"</string>
@@ -1355,7 +1366,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"A Tesztelési alapkörnyezet mód kikapcsolásához állítsa vissza a gyári beállításokat."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Folyadék vagy szennyeződés az USB-portban"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-port automatikusan letiltva. Koppintson, ha további információra van szüksége."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Az USB-port biztonságosan használható"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"A telefon már nem észlel folyadékot vagy szennyeződést."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Hibajelentés készítése…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Megosztja a hibajelentést?"</string>
@@ -1898,9 +1910,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Frissítés keresése"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Új üzenetei érkeztek"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"SMS-alkalmazás megnyitása a megtekintéshez"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Egyes funkciók korlátozva lehetnek"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Koppintson a feloldáshoz"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Felhasználói adatok zárolva"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Egyes funkciók korlátozva lehetnek"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Munkahelyi profil zárolva"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"A feloldáshoz koppintson rá"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Csatlakoztatva a(z) <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> eszközhöz"</string>
