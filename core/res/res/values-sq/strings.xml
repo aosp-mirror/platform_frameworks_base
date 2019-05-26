@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Sinjalizimet e rrjetit"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Ka rrjet të disponueshëm"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Statusi i VPN-së"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administrimi i pajisjes"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Sinjalizimet nga administratori i teknologjisë së informacionit"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Sinjalizimet"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demonstrimi i shitjes me pakicë"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Lidhja USB"</string>
@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona e gjurmës së gishtit"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"menaxho harduerin për vërtetimin e fytyrës"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"përdor harduerin për vërtetimin e fytyrës"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Lejon aplikacionin të përdorë harduer vërtetimi të fytyrës për procesin e vërtetimit"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Vërtetimi me fytyrë"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Regjistro përsëri fytyrën tënde"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
@@ -565,7 +569,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Ule telefonin më poshtë."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Lëvize telefonin majtas."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Lëvize telefonin djathtas"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Shiko tek ekrani me sytë të hapur."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Shiko më drejt në pajisjen tënde."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Fytyra jote nuk shfaqet. Shiko te telefoni."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Ka shumë lëvizje. Mbaje telefonin të palëvizur."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Regjistroje përsëri fytyrën tënde."</string>
@@ -579,15 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Koha e pritjes për fytyrën skadoi. Provo përsëri."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"S\'mund të ruhen të dhëna të reja fytyre. Fshi një të vjetër në fillim."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Veprimi me fytyrën u anulua"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Vërtetimi me fytyrë u anulua nga përdoruesi"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Veprimi me fytyrën u anulua."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Shumë përpjekje. Provo sërish më vonë."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Shumë përpjekje. Vërtetimi me fytyrë u çaktivizua."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Fytyra nuk mund të verifikohet. Provo përsëri."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Nuk e ke konfiguruar vërtetimin me fytyrë."</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Vërtetimi me fytyrë nuk mbështetet në këtë pajisje"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -648,6 +657,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Lejon që mbajtësi të lidhet me shërbimet e operatorit celular. Nuk nevojitet për aplikacionet normale."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"qasje te \"Mos shqetëso\""</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"nis përdorimin e lejes për shikimin"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoro tentativat e shkyçjes së ekranit"</string>
@@ -977,7 +988,7 @@
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Muajin e fundit"</string>
     <string name="older" msgid="5211975022815554840">"Më të vjetra"</string>
-    <string name="preposition_for_date" msgid="9093949757757445117">"në <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_date" msgid="9093949757757445117">"më <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"në <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"në <xliff:g id="YEAR">%s</xliff:g>"</string>
     <string name="day" msgid="8144195776058119424">"ditë"</string>
@@ -1356,7 +1367,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lëngje ose papastërti në portën e USB-së"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Porta e USB-së është çaktivizuar automatikisht. Trokit për të mësuar më shumë."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Nuk ka rrezik të përdoret porta e USB-së"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefoni nuk i dallon më lëngjet apo papastërtitë."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>
@@ -1899,9 +1911,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Kliko për përditësim"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Hap aplikacionin SMS për ta parë"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Disa funksione mund të jenë të kufizuara"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Trokit për të shkyçur"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Të dhënat e përdoruesit të kyçura"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Disa funksione mund të jenë të kufizuara"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profili i punës është i kyçur"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Trokit për ta shkyçur profilin e punës"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"U lidh me <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

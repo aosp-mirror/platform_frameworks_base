@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració per USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"El port USB està desactivat"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Per protegir el teu dispositiu dels líquids o la pols, el port USB s\'ha desactivat i no detectarà cap accessori.\n\nRebràs una notificació quan sigui segur utilitzar-lo."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"S\'ha activat el port USB per detectar carregadors i accessoris"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Activa l\'USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Cancel·la"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Confirma"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Torna-ho a provar"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Zona buida; toca per cancel·lar l\'autenticació"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Torna-ho a provar"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"S\'està cercant la teva cara"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Cara autenticada"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmat"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes digitals"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona d\'empremta digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"S\'està cercant la teva cara…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"S\'activarà a les <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Fins a les <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Tema fosc"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Tema fosc\nEstalvi de bateria"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"L\'NFC està desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"L\'NFC està activada"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"S\'ha activat l\'estalvi de bateria"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactiva l\'estalvi de bateria"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Quan graves o emets vídeos, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot capturar informació sensible, com ara l\'àudio que estiguis reproduint, contrasenyes, dades de pagament, fotos i missatges."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Quan graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot capturar la informació sensible que es mostri a la pantalla o que reprodueixi el dispositiu, com ara àudio, contrasenyes, informació de pagament, fotos i missatges."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Quan graves o emets contingut, el servei que ofereix aquesta funció pot capturar informació sensible que es mostri a la pantalla o que reprodueixi el dispositiu, com ara àudio, contrasenyes, informació de pagament, fotos i missatges."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Es mostra informació sensible durant l\'emissió o la gravació"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Gestió"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Notificacions discretes"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Esborra totes les notificacions discretes"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificacions pausades pel mode No molestis"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Comença ara"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Cap notificació"</string>
@@ -635,26 +645,26 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Bloqueja"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continua rebent"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimitza"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"En silenci"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Continua silenciant"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Emergents"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continua avisant-me"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Desactiva les notificacions"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"Discreta"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"Prioritàries"</string>
     <string name="notification_channel_summary_low" msgid="1065819618107531284">"T\'ajuda a concentrar-te perquè les notificacions només es mostren a l\'àrea desplegable. Sempre en silenci."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Es mostra a sota de les notificacions prioritàries. Sempre en silenci."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Es mostra a sota de les notificacions prioritàries. Sempre en silenci."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Es mostra a sota de les notificacions prioritàries. Sempre en silenci."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Atrau la teva atenció amb un so i una icona a la barra d\'estat. Es mostra a la pantalla de bloqueig."</string>
+    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Es mostren a sota de les notificacions prioritàries. Sempre silencioses."</string>
+    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Es mostren a sota de les notificacions prioritàries. Sempre silencioses."</string>
+    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Es mostren a sota de les notificacions prioritàries. Sempre silencioses."</string>
+    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Atrauen la teva atenció amb un so i una icona a la barra d\'estat. Es mostren a la pantalla de bloqueig."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Aquestes notificacions no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquest grup de notificacions no es pot configurar aquí"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notificació mitjançant aplicació intermediària"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Totes les notificacions de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Mostra\'n més"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Aquesta aplicació utilitza la càmera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Aquesta aplicació utilitza el micròfon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla."</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permet"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Denega"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Toca per programar l\'estalvi de bateria"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Activa automàticament quan el nivell de bateria sigui del <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"No"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"S\'ha activat la programació de l\'estalvi de bateria"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"L\'estalvi de bateria s\'activarà automàticament quan el nivell de bateria sigui inferior al <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Mou a dalt a la dreta"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Mou a baix a l\'esquerra"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Mou a baix a la dreta"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Omet"</string>
 </resources>

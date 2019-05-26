@@ -29,7 +29,7 @@
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ခေါင်းစဉ်မဲ့&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ဖုန်းနံပါတ်မရှိပါ)"</string>
-    <string name="unknownName" msgid="6867811765370350269">"မသိရ"</string>
+    <string name="unknownName" msgid="6867811765370350269">"မသိ"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"အသံမေးလ်"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် မမှန်ကန်သောMMIကုတ်"</string>
@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"ကွန်ရက် သတိပေးချက်များ"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"ကွန်ရက်ချိတ်ဆက်မှု ရရှိနိုင်ပါသည်"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN အခြေအနေ"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"စက်ပစ္စည်း စီမံခန့်ခွဲမှု"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"သင်၏ IT စီမံခန့်ခွဲသူထံမှ သတိပေးချက်များ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"သတိပေးချက်များ"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"လက်လီအရောင်းဆိုင် သရုပ်ပြမှု"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB ချိတ်ဆက်မှု"</string>
@@ -522,11 +522,11 @@
     <string name="biometric_dialog_default_title" msgid="881952973720613213">"သင်ဖြစ်ကြောင်း အတည်ပြုပါ"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိပါ"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ သန့်ရှင်းလိုက်ပြီး ပြန်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"လက်ညှိုး အလွန်မြန်ဆန်စွာ ရွေ့ခဲ့သည်။ ထပ်မံ ကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"လက်ညှိုးအလွန်နှေးကွေးစွာ ရွေ့ခဲ့သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
@@ -549,11 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"လက်ဗွေ အိုင်ကွန်"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို စီမံပါ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို စီမံခြင်း"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"မျက်နှာ စိစစ်ခြင်း"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာမှတ်သော့ဖွင့်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ပိုမှတ်မိစေရန် သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
@@ -565,7 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ဖုန်းကို အောက်ပိုနှိမ့်ပါ။"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"မျက်လုံးဖွင့်ထားပြီး ဖန်သားပြင်ကို ကြည့်ပါ။"</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"သင့်မျက်နှာကို မမြင်ရပါ။ ဖုန်းကိုကြည့်ပါ။"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"လှုပ်လွန်းသည်။ ဖုန်းကို ငြိမ်ငြိမ်ကိုင်ပါ။"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
@@ -579,15 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"မျက်နှာအတွက် ခဏရပ်ချိန် ပြည့်သွားပြီ။ ထပ်စမ်းပါ။"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"မျက်နှာဒေတာအသစ် သိမ်း၍မရပါ။ အဟောင်းကို အရင်ဖျက်ပါ။"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"မျက်နှာဆိုင်ရာ ဆောင်ရွက်မှုကို ပယ်ဖျက်လိုက်ပါပြီ"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"အသုံးပြုသူက မျက်နှာအထောက်အထားစိစစ်မှု မလုပ်တော့ပါ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"မှတ်နှာမှတ် သော့ဖွင့်ခြင်းကို အသုံးပြုသူက မလုပ်တော့ပါ။"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"စမ်းသပ်ကြိမ် များနေပြီ။ မျက်နှာစိစစ်ခြင်း ပိတ်လိုက်သည်။"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"စမ်းသပ်ကြိမ် များနေပြီ။ မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ပိတ်လိုက်ပါပြီ။"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"မျက်နှာ အထောက်အထားစိစစ်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ဤစက်ပစ္စည်းတွင် မျက်နှာအထောက်အထား စိစစ်ခြင်းကို သုံး၍မရပါ"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ဤစက်ပစ္စည်းတွင် မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို သုံး၍မရပါ။"</string>
     <string name="face_name_template" msgid="7004562145809595384">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -648,6 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"မိုဘိုင်းဖုန်းဝန်ဆောင်မှုစနစ်တစ်ခုအား ပူးပေါင်းခွင့်ပြုရန် ကိုင်ဆောင်ထားသူအား ခွင့်ပြုပါ။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"မနှောင့်ယှက်ရန်ကို အသုံးပြုမည်"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
@@ -1356,7 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"\'စမ်းသပ်ခြင်းစနစ် မုဒ်\' ကိုပိတ်ရန် စက်ရုံထုတ်အတိုင်း ပြင်ဆင်သတ်မှတ်ပါ။"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ပို့တ်တွင် အရည် သို့မဟုတ် အမှိုက်စ ရှိနေသည်"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ပို့တ်ကို အလိုအလျောက် ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ပို့တ်ကို စိတ်ချစွာ သုံးနိုင်ပါပြီ"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ပို့တ်ကို အသုံးပြုနိုင်သည်"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ဖုန်းသည် အရည် သို့မဟုတ် အမှိုက်စတို့ကို အာရုံခံသိရှိနိုင်တော့မည် မဟုတ်ပါ။"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
@@ -1757,11 +1759,11 @@
     <string name="mediasize_japanese_kahu" msgid="6872696027560065173">"ကဟူ"</string>
     <string name="mediasize_japanese_kaku2" msgid="2359077233775455405">"ကဟူ၂"</string>
     <string name="mediasize_japanese_you4" msgid="2091777168747058008">"ယူ၄"</string>
-    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ထောင်လိုက် အရွယ်မသိ"</string>
+    <string name="mediasize_unknown_portrait" msgid="3088043641616409762">"ဒေါင်လိုက် အရွယ်မသိ"</string>
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"အလျားလိုက် အရွယ်မသိ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ဖျက်သိမ်းလိုက်ပြီး"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"အချက်အလက်များ ရိုက်ကူးစဉ် အမှားပေါ်နေ"</string>
-    <string name="reason_unknown" msgid="6048913880184628119">"မသိပါ"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"မသိ"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"စာထုတ်သောဆားဗစ်အားဖွင့်မထားပါ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ဆားဗစ် ထည့်သွင်းပြီး"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ထိတို့ခြင်းဖြင့် ဖွင့်ပါ"</string>
@@ -1899,9 +1901,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"အပ်ဒိတ်စစ်ရန်"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ကြည့်ရှုရန် SMS အက်ပ်ကိုဖွင့်ပါ"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"အချို့လုပ်ဆောင်ချက်များ ကန့်သတ်ချက်ရှိနိုင်သည်"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"သော့ဖွင့်ရန် တို့ပါ"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"အသုံးပြုသူဒေတာအား သော့ခတ်ထားသည်"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"လုပ်ဆောင်ချက် ကန့်သတ်မှုရှိနိုင်သည်"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"အလုပ်ပရိုဖိုင် သော့ခတ်ထားသည်"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"သင့်အလုပ်ပရိုဖိုင်ကို သော့ဖွင့်ရန် တို့ပါ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ချိတ်ဆက်ထားသည်"</string>

@@ -264,7 +264,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Tīkla brīdinājumi"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Tīkls ir pieejams"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN statuss"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Ierīces administrēšana"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Brīdinājumi no jūsu IT administratora"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Brīdinājumi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demonstrācijas versija veikaliem"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB savienojums"</string>
@@ -552,11 +552,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Pirksta nospieduma ikona"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"pārvaldīt sejas autentifikācijas aparatūru"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Atļauj lietotnei izsaukt metodes izmantojamo sejas veidņu pievienošanai un dzēšanai."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"izmantot sejas autentifikācijas aparatūru"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Atļauj lietotnei izmantot sejas autentifikācijas aparatūru autentificēšanai"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Sejas autentificēšana"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Atkārtoti reģistrējiet seju"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Lai uzlabotu atpazīšanu, lūdzu, atkārtoti reģistrējiet savu seju"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Neizdevās tvert sejas datus. Mēģiniet vēlreiz."</string>
@@ -568,7 +572,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Nolaidiet tālruni zemāk"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Pārvietojiet tālruni pa kreisi."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Pārvietojiet tālruni pa labi."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Paskatieties uz ekrānu, turot acis atvērtas."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lūdzu, tiešāk skatieties uz savu ierīci."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Jūsu seja nav redzama. Paskatieties uz tālruni."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Pārāk daudz kustību. Nekustīgi turiet tālruni."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
@@ -582,15 +586,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nevar verificēt seju. Aparatūra nav pieejama."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Sejas datu nolasīšanas noildze. Mēģiniet vēlreiz."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Nevar saglabāt jaunās sejas datus. Dzēsiet kādu no vecajām."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Darbība ar sejas datiem atcelta"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Lietotājs atcēla sejas autentificēšanu"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Darbība ar sejas datiem atcelta."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Pārāk daudz mēģinājumu. Vēlāk mēģiniet vēlreiz."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Pārāk daudz mēģinājumu. Sejas autentificēšana ir atspējota."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nevar verificēt seju. Mēģiniet vēlreiz."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Sejas autentifikācija nav iestatīta"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Sejas autentificēšana šajā ierīcē netiek atbalstīta"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Seja <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -651,6 +660,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Atļauj īpašniekam izveidot savienojumu ar mobilo sakaru operatoru pakalpojumiem. Parastām lietotnēm šīs atļauja nekad nav nepieciešama."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"piekļūt režīmam “Netraucēt”"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ļauj lietotnei lasīt un rakstīt režīma “Netraucēt” konfigurāciju."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"Datu skatīšana par izmantojamajām atļaujām"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Ļauj atļaujas īpašniekam sākt lietotnes atļauju izmantošanu. Parastām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>
@@ -1377,7 +1388,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Lai atspējotu drošības pārbaudes režīmu, veiciet rūpnīcas datu atiestatīšanu."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB pieslēgvietā ir šķidrums vai daļiņas"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB pieslēgvieta ir automātiski atspējota. Pieskarieties, lai uzzinātu vairāk."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB pieslēgvietas izmantošana ir droša"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Tālrunī vairs netiek konstatēts šķidrums vai gruži."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Notiek kļūdas pārskata izveide…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vai kopīgot kļūdas pārskatu?"</string>
@@ -1932,9 +1944,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Meklēt atjauninājumu"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Jums ir jaunas īsziņas."</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Lai skatītu, atveriet īsziņu lietotni."</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Funkcijas var būt ierobežotas"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Pieskarieties, lai atbloķētu."</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Lietotāja dati ir bloķēti."</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Funkcijas var būt ierobežotas"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Darba profils ir bloķēts."</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Pieskarieties, lai atbloķētu."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Izveidots savienojums ar: <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>

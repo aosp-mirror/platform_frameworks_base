@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alertes de xarxa"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Hi ha una xarxa disponible"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Estat de la VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administració del dispositiu"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Alertes de l\'administrador de TI"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostració per a botigues"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexió USB"</string>
@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona d\'empremta digital"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"gestiona el maquinari d\'autenticació facial"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utilitza el maquinari d\'autenticació facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permet que l\'aplicació faci servir maquinari d\'autenticació facial"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autenticació facial"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Per millorar el reconeixement, torna a registrar la cara"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"No es reconeix la teva cara. Torna-ho a provar."</string>
@@ -565,7 +569,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Mou el telèfon més avall."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mou el telèfon cap a l\'esquerra."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mou el telèfon cap a la dreta."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Mira la pantalla amb els ulls oberts."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Mira més directament cap al dispositiu."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se\'t veu la cara. Mira el telèfon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Massa moviment. Subjecta bé el telèfon."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Torna a registrar la teva cara."</string>
@@ -579,15 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"No es pot verificar la cara. Maquinari no disponible."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"S\'ha esgotat el temps d\'espera. Torna-ho a provar."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"No es poden desar dades facials noves. Suprimeix-ne d\'antigues."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"S\'ha cancel·lat el reconeixement facial"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"L\'usuari ha cancel·lat l\'autenticació facial"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"S\'ha cancel·lat el reconeixement facial."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Massa intents. Torna-ho a provar més tard."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Massa intents. S\'ha desactivat l\'autenticació facial."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"No es pot verificar la cara. Torna-ho a provar."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"No has configurat l\'autenticació facial"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"L\'autenticació facial no és compatible amb el dispositiu."</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -633,11 +642,11 @@
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'ha de necessitar mai per a aplicacions normals."</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"canviar el calibratge del dispositiu d\'entrada"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"Permet que l\'aplicació modifiqui els paràmetres de calibratge de la pantalla tàctil. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"accedir als certificats de DRM"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats DRM. No ha de ser mai necessari per a aplicacions normals."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permet que una aplicació proporcioni i utilitzi certificats DRM. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"rebre l\'estat de la transferència d\'Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permet que aquesta aplicació rebi informació sobre les transferències d\'Android Beam actuals."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"suprimir els certificats DRM"</string>
@@ -648,6 +657,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permet que el propietari la vinculi a serveis de l\'operador de telefonia mòbil. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accedir a No molestis"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permet que l\'aplicació llegeixi la configuració No molestis i hi escrigui."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"comença a utilitzar el permís de visualització"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Permet que un propietari comenci a utilitzar el permís amb una aplicació. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Permet controlar la longitud i el nombre de caràcters permesos a les contrasenyes i als PIN del bloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Supervisar els intents de desbloqueig de la pantalla"</string>
@@ -1355,7 +1366,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Hi ha líquid o pols al port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"El port USB es desactiva automàticament. Toca per obtenir més informació."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"És segur utilitzar el port USB"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"El telèfon ja no detecta líquids ni pols."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"S\'està creant l\'informe d\'errors…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vols compartir l\'informe d\'errors?"</string>
@@ -1801,7 +1813,7 @@
     <string name="confirm_battery_saver" msgid="639106420541753635">"D\'acord"</string>
     <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Per tal de prolongar la durada de la bateria, el mode Estalvi de bateria desactiva o restringeix les activitats en segon pla, alguns efectes visuals i altres funcions que consumeixen molta energia. "<annotation id="url">"Més informació"</annotation></string>
     <string name="battery_saver_description" msgid="6413346684861241431">"Per tal de prolongar la durada de la bateria, el mode Estalvi de bateria desactiva o restringeix les activitats en segon pla, alguns efectes visuals i altres funcions que consumeixen molta energia."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a dades, però potser ho farà menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Per reduir l\'ús de dades, la funció Economitzador de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activar Economitzador de dades?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activa"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1898,9 +1910,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació d\'SMS per veure\'ls"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Algunes funcions es limitaran"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Toca per desbloquejar"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Dades d\'usuari bloquejades"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Algunes funcions poden limitar-se"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil professional bloquejat"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Toca per desbloquejar el perfil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"S\'ha connectat a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
@@ -2026,6 +2036,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i <xliff:g id="COUNT_3">%d</xliff:g> fitxers més</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> i <xliff:g id="COUNT_1">%d</xliff:g> fitxer més</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"No es pot compartir directament"</string>
+    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"La compartició directa no està disponible"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Llista d\'aplicacions"</string>
 </resources>
