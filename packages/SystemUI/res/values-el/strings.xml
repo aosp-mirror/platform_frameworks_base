@@ -62,9 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Δεν επιτρέπεται ο εντοπισμός σφαλμάτων USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ο χρήστης που είναι συνδεδεμένος αυτήν τη στιγμή σε αυτήν τη συσκευή δεν μπορεί να ενεργοποιήσει τον εντοπισμό σφαλμάτων USB. Για να χρησιμοποιήσετε αυτήν τη λειτουργία, κάντε εναλλαγή στον κύριο χρήστη."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Η θύρα USB απενεργοποιήθηκε"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Για την προστασία της συσκευής σας από υγρασία ή ακαθαρσίες, η θύρα USB έχει απενεργοποιηθεί και δεν θα εντοπίζει τυχόν αξεσουάρ.\n\nΘα ειδοποιηθείτε όταν μπορείτε να χρησιμοποιήσετε ξανά με ασφάλεια τη θύρα USB."</string>
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Για την προστασία της συσκευής σας από υγρασία ή ακαθαρσίες, η θύρα USB έχει απενεργοποιηθεί και δεν θα εντοπίζει τυχόν αξεσουάρ.\n\nΘα ειδοποιηθείτε όταν θα μπορείτε να χρησιμοποιήσετε ξανά τη θύρα USB."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"Η θύρα USB ενεργοποιήθηκε για τον εντοπισμό φορτιστών και αξεσουάρ"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Ενεργοποίηση USB"</string>
+    <string name="learn_more" msgid="5000517160980853569">"Μάθετε περισσότερα"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ζουμ σε πλήρη οθόνη"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Προβoλή σε πλήρη οθ."</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Στιγμιότυπο οθόνης"</string>
@@ -118,6 +119,11 @@
     <string name="cancel" msgid="6442560571259935130">"Ακύρωση"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Επιβεβαίωση"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Δοκιμάστε ξανά"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Κενή περιοχή, πατήστε για ακύρωση ελέγχου ταυτότητας"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Δοκιμάστε ξανά"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Αναζήτηση για το πρόσωπό σας"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Επιβεβαιώθηκε"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Αγγίξτε τον αισθητήρα δακτυλικών αποτυπωμάτων"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Εικονίδιο δακτυλικών αποτυπωμάτων"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Αναζήτηση για εσάς…"</string>
@@ -369,8 +375,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Ενεργοποίηση στις <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Έως τις <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Σκούρο θέμα"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Σκούρο θέμα\nΕξοικονόμηση μπαταρίας"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Το NFC είναι απενεργοποιημένο"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Το NFC είναι ενεργοποιημένο"</string>
@@ -445,13 +450,14 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Η Εξοικονόμηση μπαταρίας είναι ενεργή"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Μειώνει την απόδοση και τα δεδομένα παρασκηνίου"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Απενεργοποίηση Εξοικονόμησης μπαταρίας"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Κατά την εγγραφή ή τη μετάδοση, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> μπορεί να καταγράφει τυχόν ευαίσθητες πληροφορίες, όπως ήχο του οποίου γίνεται αναπαραγωγή και τους κωδικούς πρόσβασής σας, τα στοιχεία πληρωμής, τις φωτογραφίες και τα μηνύματα."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Κατά την εγγραφή ή τη μετάδοση, η εφαρμογή <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> μπορεί να καταγράφει τυχόν ευαίσθητες πληροφορίες που εμφανίζονται στην οθόνη σας ή των οποίων γίνεται αναπαραγωγή από τη συσκευή σας, συμπεριλαμβανομένων ευαίσθητων πληροφοριών όπως ήχος, κωδικοί πρόσβασης, στοιχεία πληρωμής, φωτογραφίες και μηνύματα."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Κατά την εγγραφή ή τη μετάδοση, η υπηρεσία που παρέχει αυτήν τη λειτουργία μπορεί να καταγράφει τυχόν ευαίσθητες πληροφορίες που εμφανίζονται στην οθόνη σας ή των οποίων γίνεται αναπαραγωγή από τη συσκευή σας, συμπεριλαμβανομένων ευαίσθητων πληροφοριών όπως ήχος, κωδικοί πρόσβασης, στοιχεία πληρωμής, φωτογραφίες και μηνύματα."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Έκθεση ευαίσθητων πληροφοριών κατά τη μετάδοση/εγγραφή"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Να μην εμφανιστεί ξανά"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Διαγραφή όλων"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Διαχείριση"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Διακριτικές ειδοποιήσεις"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Καταργήστε όλες τις διακριτικές ειδοποιήσεις"</string>
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Ειδοποιήσεις σε σίγαση"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Διαγραφή όλων των ειδοποιήσεων σε σίγαση"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Οι ειδοποιήσεις τέθηκαν σε παύση από τη λειτουργία \"Μην ενοχλείτε\""</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Έναρξη τώρα"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Δεν υπάρχουν ειδοποιήσεις"</string>
@@ -635,9 +641,9 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Αποκλεισμός"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Συνέχιση εμφάνισης"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Ελαχιστοποίηση"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Διακριτικές"</string>
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Σίγαση"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Διατήρηση σε σίγαση"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Παρεμβατικές"</string>
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Ειδοποίηση"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Να συνεχιστούν οι ειδοποιήσεις"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Απενεργοποίηση ειδοποιήσεων"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Να συνεχίσουν να εμφανίζονται ειδοποιήσεις από αυτήν την εφαρμογή;"</string>
@@ -651,10 +657,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Δεν είναι δυνατή η τροποποίηση αυτών των ειδοποιήσεων"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Δεν είναι δυνατή η διαμόρφωση αυτής της ομάδας ειδοποιήσεων εδώ"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Ειδοποίηση μέσω διακομιστή μεσολάβησης"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Και των <xliff:g id="APP_NAME">%1$s</xliff:g> ειδοποιήσεων"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Εμφάνιση περισσότερων"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Αυτή η εφαρμογή χρησιμοποιεί την κάμερα."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Αυτή η εφαρμογή χρησιμοποιεί το μικρόφωνο."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Αυτή η εφαρμογή εμφανίζεται πάνω σε άλλες εφαρμογές στην οθόνη σας."</string>
@@ -898,7 +902,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Επιτρέπεται"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Δεν επιτρέπεται"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Πατήστε για προγραμματισμό της Εξοικονόμησης μπαταρίας"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Αυτόματη ενεργοποίηση όταν η στάθμη της μπαταρίας είναι στο <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="auto_saver_text" msgid="2563289953551438248">"Ενεργοποίηση όταν υπάρχει σημαντική πιθανότητα εξάντλησης της μπαταρίας"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Όχι, ευχαριστώ"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Το πρόγραμμα της Εξοικονόμησης μπαταρίας ενεργοποιήθηκε"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Η Εξοικονόμηση μπαταρίας θα ενεργοποιηθεί αυτόματα μόλις η στάθμη της μπαταρίας φτάσει κάτω από <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
@@ -930,6 +934,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Μετακίνηση επάνω δεξιά"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Μετακίνηση κάτω αριστερά"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Μετακίνηση κάτω δεξιά"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Παράβλεψη"</string>
 </resources>
