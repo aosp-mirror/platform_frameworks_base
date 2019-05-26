@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB பிழைதிருத்தம் அனுமதிக்கப்படவில்லை"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"தற்போது இந்தச் சாதனத்தில் உள்நுழைந்துள்ள பயனரால் USB பிழைதிருத்தத்தை இயக்க முடியாது. இந்த அம்சத்தை இயக்க, முதன்மைப் பயனருக்கு மாறவும்."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB போர்ட் முடக்கப்பட்டது"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"தேவையற்றவையில் இருந்து உங்கள் சாதனத்தைப் பாதுகாக்க, USB போர்ட் முடக்கப்பட்டுள்ளது, மேலும் எந்த துணைக் கருவிகளையும் கண்டறியாது.\n\nUSB போர்ட்டை மீண்டும் எப்போது பாதுகாப்பாகப் பயன்படுத்தலாம் என்பதைப் பற்றி உங்களுக்குத் தெரிவிக்கப்படும்."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"சார்ஜர்களையும் துணைக்கருவிகளையும் கண்டறிவதற்காக USB போர்ட் இயக்கப்பட்டுள்ளது"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USBயை இயக்கு"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"திரையை நிரப்ப இழு"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ஸ்கிரீன்ஷாட்"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"ரத்துசெய்"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"உறுதிப்படுத்துக"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"மீண்டும் முயல்க"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"காலியான பகுதி, அங்கீகாரத்தை ரத்துசெய்யத் தட்டவும்"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"மீண்டும் முயலவும்"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"உங்கள் முகத்தை அங்கீகரிக்கிறது"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"முகம் அங்கீகரிக்கப்பட்டது"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"உறுதிப்படுத்தப்பட்டது"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"கைரேகை ஐகான்"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"உங்கள் முகத்தைத் தேடுகிறது…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"டார்க் தீம்"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"டார்க் தீம்\nபேட்டரி சேமிப்பான்"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC முடக்கப்பட்டது"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC இயக்கப்பட்டது"</string>
@@ -445,14 +452,15 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"செயல்திறனையும் பின்புல டேட்டா உபயோகத்தையும் குறைக்கிறது"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"பேட்டரி சேமிப்பானை ஆஃப் செய்"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"ரெக்கார்டிங் செய்யும்போதோ அலைபரப்பும்போதோ நீங்கள் இயக்கும் ஆடியோ, கடவுச்சொற்கள், கட்டணத் தகவல், படங்கள் மற்றும் மெசேஜ்கள் போன்றவற்றை <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸால் படமெடுக்க இயலும்."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"ரெக்கார்டிங் செய்யும்போதோ அலைபரப்பும்போதோ, உங்கள் திரையில் காட்டப்படும் அல்லது உங்கள் சாதனத்திலிருந்து இயக்கப்படும் (ஆடியோ, கடவுச்சொற்கள், கட்டணத் தகவல், படங்கள், மெசேஜ்கள் உள்ளிட்ட) எந்த ஒரு அதிமுக்கியத் தகவலையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆல் படமெடுக்க முடியும்."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"ரெக்கார்டிங் செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் திரையில் காட்டப்படும் அல்லது உங்கள் சாதனத்திலிருந்து இயக்கப்படும் (ஆடியோ, கடவுச்சொற்கள், கட்டணத் தகவல், படங்கள், மெசேஜ்கள் உள்ளிட்ட) எந்த ஒரு அதிமுக்கியத் தகவலையும் இந்தச் செயல்பாட்டை வழங்கும் சேவையால் படமெடுக்க முடியும்."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"அலைபரப்பும்போதோ ரெக்கார்டிங் செய்யும்போதோ தனிப்பட்ட விவரங்கள் அறியப்படும் வாய்ப்புள்ளது"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"அறிவிப்புகளை நிர்வகி"</string>
-    <!-- no translation found for notification_section_header_gentle (8356064473678167305) -->
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
     <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4270384919249494640) -->
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
     <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"இப்போது தொடங்கு"</string>
@@ -533,8 +541,7 @@
     <string name="screen_pinning_title" msgid="3273740381976175811">"திரை பொருத்தப்பட்டது"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, முந்தையது மற்றும் மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முந்தையது மற்றும் முகப்புப் பொத்தான்களைத் தொட்டுப் பிடிக்கவும்."</string>
-    <!-- no translation found for screen_pinning_description_gestural (1191513974909607884) -->
-    <skip />
+    <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"பின் செய்திருப்பதை அகற்றும் வரை இதைச் செயல்பாட்டில் வைத்திருக்கும். அதை அகற்றுவதற்கு மேல்நோக்கி ஸ்வைப் செய்து பிடித்திருக்கவும்."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முகப்புப் பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"இந்தத் திரையின் பின்னை அகற்ற, முந்தையது மற்றும் மேலோட்டப் பார்வைப் பொத்தான்களைத் தொட்டுப் பிடிக்கவும்"</string>
@@ -623,7 +630,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"ஆன்"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ஆஃப்"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், பயன்பாட்டின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- பயன்பாட்டின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"ஆற்றல்மிக்க அறிவிப்புக் கட்டுப்பாடுகள் மூலம், ஆப்ஸின் அறிவிப்புகளுக்கு முக்கியத்துவ நிலையை (0-5) அமைக்கலாம். \n\n"<b>"நிலை 5"</b>" \n- அறிவிப்புப் பட்டியலின் மேலே காட்டும் \n- முழுத் திரைக் குறுக்கீட்டை அனுமதிக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 4"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- எப்போதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டும் \n\n"<b>"நிலை 3"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n\n"<b>"நிலை 2"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது, அதிர்வுறாது \n\n"<b>"நிலை 1"</b>" \n- முழுத் திரைக் குறுக்கீட்டைத் தடுக்கும் \n- ஒருபோதும் நடப்புத் திரையின் மேல் பகுதியில் அறிவிப்புகளைக் காட்டாது \n- ஒருபோதும் ஒலி எழுப்பாது அல்லது அதிர்வுறாது \n- லாக் ஸ்கிரீன் மற்றும் நிலைப்பட்டியிலிருந்து மறைக்கும் \n- அறிவிப்புகள் பட்டியலின் கீழே காட்டும் \n\n"<b>"நிலை 0"</b>" \n- ஆப்ஸின் எல்லா அறிவிப்புகளையும் தடுக்கும்"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"அறிவிப்புகள்"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"இந்த அறிவிப்புகளை இனி பார்க்கமாட்டீர்கள்"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"இந்த அறிவிப்புகள் சிறிதாக்கப்படும்"</string>
@@ -638,12 +645,14 @@
     <string name="inline_block_button" msgid="8735843688021655065">"தடு"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"அறிவிப்புகளைத் தொடர்ந்து காட்டு"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"சிறிதாக்கு"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"ஜென்டில்"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"அறிவிப்புகளை ஒலியின்றிக் காட்டு"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"இண்ட்டரப்டிவ்"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"தொடர்ந்து விழிப்பூட்டு"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"அறிவிப்புகளை முடக்கு"</string>
-    <string name="inline_keep_showing_app" msgid="1723113469580031041">"இந்தப் பயன்பாட்டின் அறிவிப்புகளைத் தொடர்ந்து காட்டவா?"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"இந்த ஆப்ஸின் அறிவிப்புகளைத் தொடர்ந்து காட்டவா?"</string>
     <string name="notification_silence_title" msgid="7352089096356977930">"ஜென்டில்"</string>
     <string name="notification_alert_title" msgid="3966526305405016221">"முன்னுரிமைப்படுத்தப்பட்டது"</string>
     <string name="notification_channel_summary_low" msgid="1065819618107531284">"கீழ் இழுக்கும் ஷேடில் வரும் அறிவிப்புகளில் மட்டும் கவனம் செலுத்த உதவுகிறது. எப்போதும் நிசப்தம்."</string>
@@ -654,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"இந்த அறிவுப்புக் குழுக்களை இங்கே உள்ளமைக்க இயலாது"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ப்ராக்ஸியான அறிவிப்பு"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"அனைத்து <xliff:g id="APP_NAME">%1$s</xliff:g> அறிவிப்புகளும்"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"மேலும் காட்டு"</string>
     <string name="appops_camera" msgid="8100147441602585776">"இந்த ஆப்ஸானது கேமராவை உபயோகிக்கிறது."</string>
     <string name="appops_microphone" msgid="741508267659494555">"இந்த ஆப்ஸானது, மைக்ரோஃபோனை உபயோகிக்கிறது."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"இந்த ஆப்ஸானது, உங்கள் திரையில் பிற ஆப்ஸின் இடைமுகத்தின் மேல் தோன்றுகிறது."</string>
@@ -894,14 +901,15 @@
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"உங்கள் மொபைல் நிறுவனம்"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையை ஆப்ஸ் மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
-    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> ஆப்ஸை, <xliff:g id="APP_2">%2$s</xliff:g> பயன்பாட்டின் விழிப்பூட்டல்களைக் காண்பிக்க அனுமதிக்கவா?"</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> ஆப்ஸை, <xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க அனுமதிக்கவா?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- இது, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டிலிருந்து தகவலைப் படிக்கும்"</string>
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- இது, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டிற்குள் சென்று செயல்பாடுகளில் ஈடுபடும்"</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"எல்லா பயன்பாட்டிலிருந்தும் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸை அனுமதி"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"அனுமதி"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"நிராகரி"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"பேட்டரி சேமிப்பானை ஆன் செய்வது தொடர்பாகத் திட்டமிட, தட்டவும்"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%% ஆக இருக்கும்போது, தானாக ஆன் செய்"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"வேண்டாம்"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"திட்டமிட்ட பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டது"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%%க்குக் கீழ் குறையும்போது, பேட்டரி சேமிப்பான் தானாகவே ஆன் செய்யப்படும்."</string>
@@ -922,8 +930,7 @@
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸைத் திறக்கும்"</string>
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> குமிழ்களுக்கான அமைப்புகள்"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸிலிருந்து குமிழ்களை அனுமதிக்கவா?"</string>
-    <!-- no translation found for manage_bubbles_text (7027739766859191408) -->
-    <skip />
+    <string name="manage_bubbles_text" msgid="7027739766859191408">"நிர்வகி"</string>
     <string name="no_bubbles" msgid="337101288173078247">"நிராகரி"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"அனுமதி"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"பிறகு கேள்"</string>
@@ -934,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"கீழே வலதுபுறமாக நகர்த்து"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"மூடுக"</string>
 </resources>
