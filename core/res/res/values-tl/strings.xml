@@ -261,7 +261,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Mga alerto sa network"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Available ang network"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Status ng VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Pamamahala ng device"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"Mga alerto mula sa iyong IT admin"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Mga Alerto"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Retail demo"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Koneksyon ng USB"</string>
@@ -525,11 +525,11 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Hindi nakilala"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Nakansela ang pag-authenticate"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Walang itinakdang pin, pattern, o password"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukan ulit."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Napakabilis ng paggalaw ng daliri. Pakisubukan ulit."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukan ulit."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Na-authenticate ang fingerprint"</string>
@@ -549,11 +549,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icon ng fingerprint"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"pamahalaan ang hardware sa authentication ng mukha"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gumamit ng hardware sa pag-authenticate ng mukha"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Pumapayag na gumamit ng face authentication hardware ang app para sa pag-authenticate"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Pag-authenticate ng Mukha"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"I-enroll ulit ang iyong mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Hindi makakuha ng tamang face data. Subukang muli."</string>
@@ -565,7 +569,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Ibaba pa ang telepono."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Igalaw ang telepono pakaliwa."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Igalaw ang telepono pakanan."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"Tingnan ang screen nang nakadilat."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Tumingin nang mas direkta sa iyong device."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Hindi makita ang mukha mo. Tumingin sa telepono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Paki-enroll muli ang iyong mukha."</string>
@@ -579,15 +583,20 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"Nag-time out ang mukha. Subukang muli."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Nakansela ang operation kaugnay ng mukha"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Kinansela ng user ang pag-authenticate ng mukha"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Nakansela ang operation kaugnay ng mukha."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Sumobra ang pagsubok. Na-disable ang face authentication."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Hindi pa na-set up ang pag-authenticate ng mukha"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Hindi sinusuportahan ang pag-authenticate ng mukha sa device"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -648,6 +657,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Pinapayagan ang may-ari na mag-bind sa mga serbisyo ng carrier. Hindi dapat kailanganin sa mga normal na app."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"i-access ang Huwag Istorbohin"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1355,7 +1366,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Mag-factory reset para i-disable ang Test Harness Mode."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Liquid o debris sa USB port"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Awtomatikong na-disable ang USB port. Mag-tap para matuto pa."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Ligtas na gamitin ang USB port"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Hindi na nakaka-detect ang telepono ng liquid o debris."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Kinukuha ang ulat ng bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Gusto mo bang ibahagi ang ulat ng bug?"</string>
@@ -1664,7 +1676,7 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Na-on ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Na-off ng Shortcut sa Accessibility ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Pindutin nang matagal ang parehong volume key sa loob ng tatlong segundo para magamit ang <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Pumili ng feature na gagamitin kapag na-tap mo ang button ng Pagiging Naa-access:"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Pumili ng feature na gagamitin kapag na-tap mo ang button ng Pagiging Accessible:"</string>
     <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Upang baguhin ang mga feature, pindutin nang matagal ang button ng Pagiging Naa-access."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Pag-magnify"</string>
     <string name="user_switched" msgid="3768006783166984410">"Kasalukuyang user <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1898,9 +1910,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Tingnan kung may update"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Mayroon kang mga bagong mensahe"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Buksan ang SMS app upang tingnan"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Limitado ilang functionality"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Mag-tap upang ma-unlock"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Naka-lock ang data ng user"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Puwedeng limitado ang ilang function"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profile sa trabaho, naka-lock"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"I-unlock ang profile sa trabaho, i-tap"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Nakakonekta sa <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
