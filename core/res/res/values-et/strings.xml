@@ -1494,7 +1494,7 @@
     <string name="find_next" msgid="5742124618942193978">"Leia järgmine"</string>
     <string name="find_previous" msgid="2196723669388360506">"Leia eelmine"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Asukohapäring kasutajalt <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Asukohapäring"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Asukohataotlus"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Taotleja: <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Jah"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Ei"</string>

@@ -1953,7 +1953,7 @@
     <string name="autofill_save_type_address" msgid="4936707762193009542">"հասցե"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"վարկային քարտ"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"օգտանուն"</string>
-    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"էլփոստի հասցե"</string>
+    <string name="autofill_save_type_email_address" msgid="5752949432129262174">"էլ․ հասցե"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Պահպանեք հանգստությունը և մոտակայքում ապաստարան փնտրեք:"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Ափամերձ և գետափնյա տարածքներից անմիջապես էվակուացվեք դեպի ավելի ապահով վայրեր (օրինակ՝ բարձրադիր գոտիներ):"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Պահպանեք հանգստությունը և մոտակայքում ապաստարան փնտրեք:"</string>
