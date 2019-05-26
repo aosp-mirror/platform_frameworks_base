@@ -267,7 +267,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"התראות רשת"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"יש רשת זמינה"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"‏סטטוס ה-VPN"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"ניהול מכשירים"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"‏התראות ממנהל ה-IT"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"התראות"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"הדגמה לקמעונאים"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"‏חיבור USB"</string>
@@ -555,11 +555,15 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"סמל טביעת אצבע"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ניהול של חומרה של זיהוי פנים לצורך אימות"</string>
+    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
+    <skip />
     <string name="permdesc_manageFace" msgid="8919637120670185330">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"שימוש בחומרה של זיהוי פנים לצורך אימות"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"מאפשרת לאפליקציה להשתמש בחומרה של זיהוי פנים לצורך אימות"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"אימות פנים"</string>
+    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
+    <skip />
+    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
+    <skip />
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"לשיפור הזיהוי יש לבצע רישום מחדש של הפנים שלך"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"לא ניתן היה לקלוט את הפנים במדויק. יש לנסות שוב."</string>
@@ -571,7 +575,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"צריך להוריד את הטלפון."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"צריך להזיז את הטלפון שמאלה."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"צריך להזיז את הטלפון ימינה."</string>
-    <string name="face_acquired_poor_gaze" msgid="8471716624377228327">"צריך להביט במסך בעיניים פקוחות."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"יש להביט ישירות אל המכשיר."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"אי אפשר לראות את הפנים שלך. צריך להביט אל הטלפון."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"יש לרשום מחדש את הפנים."</string>
@@ -579,24 +583,26 @@
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"דומה מדי, יש לשנות תנוחה."</string>
     <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"עליך ליישר קצת את הראש."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"עליך ליישר קצת את הראש."</string>
-    <!-- no translation found for face_acquired_roll_too_extreme (6312973147689664409) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (5357207702967893283) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (2535761002815565222) -->
-    <skip />
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"עליך ליישר קצת את הראש."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"יש להסיר כל דבר שמסתיר את הפנים."</string>
+    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"יש לנקות את החיישן שבקצה העליון של המסך."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
-    <string name="face_error_timeout" msgid="2605673935810019129">"חלף הזמן הקצוב לזיהוי הפנים. יש לנסות שוב."</string>
+    <!-- no translation found for face_error_timeout (981512090365729465) -->
+    <skip />
     <string name="face_error_no_space" msgid="2712120617457553825">"לא ניתן לאחסן נתוני פנים. תחילה יש למחוק פנים ישנים."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"פעולת הפנים בוטלה"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"זיהוי הפנים בוטל על ידי המשתמש"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"פעולת הפנים בוטלה."</string>
+    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
+    <skip />
     <string name="face_error_lockout" msgid="3407426963155388504">"יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"יותר מדי ניסיונות. אימות פנים הושבת."</string>
+    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
+    <skip />
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"לא ניתן לאמת את הפנים. יש לנסות שוב."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"לא הגדרת אימות פנים"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"המכשיר הזה לא תומך באימות פנים"</string>
+    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"פנים <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -657,6 +663,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"מאפשר לבעלים לאגד לשירות ספק. לעולם לא אמור להיות נחוץ לאפליקציות רגילות."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"גישה אל \'נא לא להפריע\'"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"מאפשר לאפליקציה לקרוא ולכתוב את התצורה של \'נא לא להפריע\'."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"התחלת צפייה בהרשאות השימוש"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"מאפשרת לבעלים להפעיל את השימוש בהרשאות עבור אפליקציה מסוימת. הרשאה זו אף פעם לא נדרשת עבור אפליקציות רגילות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי הגישה של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
@@ -1402,7 +1410,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"כדי להשבית את מצב מסגרת בדיקה צריך לאפס להגדרות היצרן."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏יש נוזלים או חלקיקים ביציאת ה-USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏יציאת ה-USB הושבתה באופן אוטומטי. יש להקיש לקבלת מידע נוסף."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"‏יציאת ה-USB בטוחה לשימוש"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"הטלפון לא מזהה יותר נוזלים וחלקיקים."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"עיבוד דוח על באג..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"האם לשתף דוח על באג?"</string>
@@ -1969,9 +1978,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"האם יש עדכון חדש?"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"יש לך הודעות חדשות"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏פתח את אפליקציית ה-SMS כדי להציג"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"ייתכן שחלק מהפונקציונליות תהיה מוגבלת"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"הקש כדי לבטל את הנעילה"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"נתוני משתמש נעולים"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"ייתכן שחלק מהפונקציונליות תהיה מוגבלת"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"פרופיל העבודה נעול"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"הקש לביטול נעילת פרופיל העבודה"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"מחובר אל <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
