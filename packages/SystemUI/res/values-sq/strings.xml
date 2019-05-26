@@ -726,7 +726,7 @@
     <string name="keyboard_key_num_lock" msgid="5052537581246772117">"Kyçja e numrave"</string>
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"Tastiera numerike <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"Sistemi"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Kreu"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Ekrani bazë"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Të fundit"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Prapa"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Njoftimet"</string>
