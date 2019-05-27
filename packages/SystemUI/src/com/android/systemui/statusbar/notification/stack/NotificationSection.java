@@ -260,6 +260,7 @@ class NotificationSection {
                         + ExpandableViewState.getFinalActualHeight(firstView));
                 if (shiftBackgroundWithFirst) {
                     mBounds.left += Math.max(firstView.getTranslation(), 0);
+                    mBounds.right += Math.min(firstView.getTranslation(), 0);
                 }
             }
         }
