@@ -674,9 +674,10 @@ class ShortcutPackage extends ShortcutPackageItem {
             return new ArrayList<>();
         }
 
-        // Get the list of all dynamic shortcuts in this package
+        // Get the list of all dynamic shortcuts in this package.
         final ArrayList<ShortcutInfo> shortcuts = new ArrayList<>();
-        findAll(shortcuts, ShortcutInfo::isDynamicVisible, ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
+        findAll(shortcuts, ShortcutInfo::isDynamicVisible,
+                ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
 
         final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
         for (int i = 0; i < shortcuts.size(); i++) {
