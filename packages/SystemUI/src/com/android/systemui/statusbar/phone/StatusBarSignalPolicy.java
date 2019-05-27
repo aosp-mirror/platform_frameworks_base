@@ -22,6 +22,7 @@ import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -186,8 +187,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         // Visibility of the data type indicator changed
         boolean typeChanged = statusType != state.typeId && (statusType == 0 || state.typeId == 0);
-
-        state.visible = statusIcon.visible && !mBlockMobile;
+        state.visible = statusIcon.visible && !mBlockMobile
+                && !isInEmptyStateOnSingleSimDevice(subId, statusIcon.icon);
         state.strengthId = statusIcon.icon;
         state.typeId = statusType;
         state.contentDescription = statusIcon.contentDescription;
@@ -207,6 +208,12 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
                 mWifiIconState = wifiCopy;
             }
         }
+    }
+
+    private boolean isInEmptyStateOnSingleSimDevice(int subId, int icon) {
+        return mMobileStates.size() == 1
+                && mMobileStates.get(0).subId == subId
+                && SignalDrawable.isEmptyState(icon);
     }
 
     private MobileIconState getState(int subId) {
