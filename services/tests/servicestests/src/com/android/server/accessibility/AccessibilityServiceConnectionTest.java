@@ -66,7 +66,8 @@ public class AccessibilityServiceConnectionTest {
     @Mock Context mMockContext;
     @Mock AccessibilityServiceInfo mMockServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
-    @Mock AccessibilityManagerService.SecurityPolicy mMockSecurityPolicy;
+    @Mock AccessibilitySecurityPolicy mMockSecurityPolicy;
+    @Mock AccessibilityWindowManager mMockA11yWindowManager;
     @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock GlobalActionPerformer mMockGlobalActionPerformer;
@@ -89,7 +90,7 @@ public class AccessibilityServiceConnectionTest {
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
                 COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
-                mMockGlobalActionPerformer);
+                mMockGlobalActionPerformer, mMockA11yWindowManager);
     }
 
     @After
