@@ -1359,7 +1359,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"පුරක පරීක්‍ෂා ප්‍රකාරය අබල කිරීමට කර්මාන්තශාලා යළි සැකසීමක් ඉටු කරන්න."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB තොට තුළ ද්‍රව හෝ කුණු"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB තොට ස්වයංක්‍රීයව අබල කෙරේ. තවත් දැන ගැනීමට තට්ටු කරන්න."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB තොට භාවිත කිරීම ආරක්‍ෂිතයි"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB තොට භාවිත කළාට කමක් නැත"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"දුරකථනය තවදුරටත් ද්‍රව හෝ කුණු අනාවරණ නොකරයි."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"දෝෂ වාර්තාවක් ගනිමින්…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"දෝෂ වාර්තාව බෙදා ගන්නද?"</string>

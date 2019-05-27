@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"ถือโทรศัพท์ให้ต่ำลง"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"เลื่อนโทรศัพท์ไปทางซ้าย"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"เลื่อนโทรศัพท์ไปทางขวา"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"โปรดมองตรงมาที่อุปกรณ์"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"ไม่เห็นหน้า มองที่โทรศัพท์"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"มีการเคลื่อนไหวมากเกินไป ถือโทรศัพท์นิ่งๆ"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"โปรดลงทะเบียนใบหน้าอีกครั้ง"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ยืนยันใบหน้าไม่ได้ ฮาร์ดแวร์ไม่พร้อมใช้งาน"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"ลองใช้การตรวจสอบสิทธิ์ด้วยใบหน้าอีกครั้ง"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"จัดเก็บข้อมูลใบหน้าใหม่ไม่ได้ ลบข้อมูลเก่าออกไปก่อน"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"ยกเลิกการดำเนินการด้วยใบหน้าแล้ว"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"ผู้ใช้ยกเลิกการตรวจสอบสิทธิ์ด้วยใบหน้า"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"อนุญาตให้เจ้าของเชื่อมโยงกับบริการของผู้ให้บริการ ไม่ควรต้องใช้สำหรับแอปทั่วไป"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"เข้าถึงโหมดห้ามรบกวน"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"อนุญาตให้แอปอ่านและเขียนการกำหนดค่าโหมดห้ามรบกวน"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"เริ่มการใช้สิทธิ์การดู"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"อนุญาตให้เจ้าของเริ่มการใช้สิทธิ์ของแอป ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"รีเซ็ตเป็นค่าเริ่มต้นเพื่อปิดใช้โหมดโปรแกรมทดสอบอัตโนมัติ"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"มีของเหลวหรือฝุ่นละอองในพอร์ต USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"พอร์ต USB ปิดใช้โดยอัตโนมัติ แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"ใช้พอร์ต USB ได้อย่างปลอดภัย"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"โทรศัพท์ไม่ได้ตรวจจับของเหลวและฝุ่นละอองแล้ว"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"กำลังสร้างรายงานข้อบกพร่อง…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"แชร์รายงานข้อบกพร่องไหม"</string>
@@ -1661,8 +1658,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ใช้ทางลัดการเข้าถึงพิเศษไหม"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มเป็นเวลา 3 วินาทีจะเริ่มฟีเจอร์การเข้าถึงพิเศษ\n\n ฟีเจอร์การเข้าถึงพิเศษปัจจุบัน:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n คุณสามารถเปลี่ยนฟีเจอร์ในการตั้งค่า &gt; การเข้าถึงพิเศษ"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ใช้ทางลัดการช่วยเหลือพิเศษไหม"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มเป็นเวลา 3 วินาทีจะเริ่มฟีเจอร์การช่วยเหลือพิเศษ\n\n ฟีเจอร์การช่วยเหลือพิเศษปัจจุบัน:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n คุณสามารถเปลี่ยนฟีเจอร์ในการตั้งค่า &gt; การช่วยเหลือพิเศษ"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"การกลับสี"</string>
@@ -1670,8 +1667,8 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่ม \"การเข้าถึงพิเศษ\":"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"หากต้องการเปลี่ยนฟีเจอร์ ให้แตะปุ่ม \"การเข้าถึงพิเศษ\" ค้างไว้"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่ม \"การช่วยเหลือพิเศษ\":"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"หากต้องการเปลี่ยนฟีเจอร์ ให้แตะปุ่ม \"การช่วยเหลือพิเศษ\" ค้างไว้"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"การขยาย"</string>
     <string name="user_switched" msgid="3768006783166984410">"ผู้ใช้ปัจจุบัน <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"กำลังเปลี่ยนเป็น <xliff:g id="NAME">%1$s</xliff:g>…"</string>

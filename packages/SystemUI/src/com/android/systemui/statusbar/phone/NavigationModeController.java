@@ -36,6 +36,8 @@ import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 
@@ -167,6 +169,10 @@ public class NavigationModeController implements Dumpable {
         mCurrentUserContext = getCurrentUserContext();
         int mode = getCurrentInteractionMode(mCurrentUserContext);
         mMode = mode;
+        mUiOffloadThread.submit(() -> {
+            Settings.Secure.putString(mCurrentUserContext.getContentResolver(),
+                    Secure.NAVIGATION_MODE, String.valueOf(mode));
+        });
         if (DEBUG) {
             Log.e(TAG, "updateCurrentInteractionMode: mode=" + mMode
                     + " contextUser=" + mCurrentUserContext.getUserId());

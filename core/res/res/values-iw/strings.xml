@@ -571,8 +571,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"צריך להוריד את הטלפון."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"צריך להזיז את הטלפון שמאלה."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"צריך להזיז את הטלפון ימינה."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"יש להביט ישירות אל המכשיר."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"אי אפשר לראות את הפנים שלך. צריך להביט אל הטלפון."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"יותר מדי תנועה. יש להחזיק את הטלפון בצורה יציבה."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"יש לרשום מחדש את הפנים."</string>
@@ -586,8 +585,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"לא ניתן לאמת את הפנים. החומרה לא זמינה."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"יש לנסות שוב את זיהוי הפנים לצורך אימות."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"לא ניתן לאחסן נתוני פנים. תחילה יש למחוק פנים ישנים."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"פעולת הפנים בוטלה"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"זיהוי הפנים בוטל על ידי המשתמש"</string>
@@ -656,10 +654,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"מאפשר לבעלים לאגד לשירות ספק. לעולם לא אמור להיות נחוץ לאפליקציות רגילות."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"גישה אל \'נא לא להפריע\'"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"מאפשר לאפליקציה לקרוא ולכתוב את התצורה של \'נא לא להפריע\'."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"התחלת צפייה בהרשאות השימוש"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"מאפשרת לבעלים להפעיל את השימוש בהרשאות עבור אפליקציה מסוימת. הרשאה זו אף פעם לא נדרשת עבור אפליקציות רגילות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי הגישה של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>
@@ -1405,7 +1401,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"כדי להשבית את מצב מסגרת בדיקה צריך לאפס להגדרות היצרן."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏יש נוזלים או חלקיקים ביציאת ה-USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏יציאת ה-USB הושבתה באופן אוטומטי. יש להקיש לקבלת מידע נוסף."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"‏יציאת ה-USB בטוחה לשימוש"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"הטלפון לא מזהה יותר נוזלים וחלקיקים."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"עיבוד דוח על באג..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"האם לשתף דוח על באג?"</string>

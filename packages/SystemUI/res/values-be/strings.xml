@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Адладка USB не дапускаецца"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Карыстальнік, які зараз увайшоў у гэту прыладу, не можа ўключыць адладку USB. Каб выкарыстоўваць гэту функцыю, пераключыцеся на асноўнага карыстальніка."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Порт USB адключаны"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Порт USB адключаны для аховы прылады ад вадкасці і смецця і не будзе выяўляць аксесуары.\n\nКалі можна будзе зноў бяспечна выкарыстоўваць порт USB, вы атрымаеце апавяшчэнне."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB-порту дазволена вызначаць зарадныя прылады і аксесуары"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Уключыць USB"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Павял. на ўвесь экран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Расцягн. на ўвесь экран"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Здымак экрана"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Скасаваць"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Пацвердзіць"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Паўтарыць спробу"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Пустая вобласць. Націсніце, каб скасаваць аўтэнтыфікацыю"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Паўтарыце спробу"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Ідзе пошук твару"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Твар распазнаны"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Пацверджана"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Дакраніцеся да сканера адбіткаў пальцаў"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок адбіткаў пальцаў"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Ідзе пошук вашага твару…"</string>
@@ -375,8 +383,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Уключыць у <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Да <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Цёмная тэма"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Цёмная тэма\nЭканомія зараду"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC адключаны"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC уключаны"</string>
@@ -453,13 +460,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Рэжым эканоміі зараду ўключаны"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Памяншае прадукцыйнасць і фонавую перадачу даных"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Адключыць рэжым эканоміі зараду"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Падчас запісу ці трансляцыі <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> можа збіраць канфідэнцыяльную інфармацыю, напрыклад аўдыяданыя, паролі, фота, паведамленні і звесткі пра аплату."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Падчас запісу ці трансляцыі <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> можа збіраць канфідэнцыяльную інфармацыю, адлюстраваную на экране вашай прылады, ці тую, якая прайграецца праз вашу прыладу, напрыклад аўдыяданыя, паролі, фота, паведамленні і звесткі пра аплату."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Падчас запісу ці трансляцыі служба, якая забяспечвае работу гэтай функцыі, можа збіраць канфідэнцыяльную інфармацыю, адлюстраваную на экране вашай прылады, ці тую, якая прайграецца праз вашу прыладу, напрыклад аўдыяданыя, паролі, фота, паведамленні і звесткі пра аплату."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Выкарыстанне асабістай інфармацыі падчас трансляцыі і запісу"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Не паказваць зноў"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Ачысціць усё"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Кіраваць"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Апавяшчэнні ў ціхім рэжыме"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Выдаліць усе апавяшчэнні ў ціхім рэжыме"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Паказ апавяшчэнняў прыпынены ў рэжыме \"Не турбаваць\""</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Апавяшчэнняў няма"</string>
@@ -643,9 +653,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Заблакіраваць"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Працягваць паказваць"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Згарнуць"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Ціхі рэжым"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Не ўключаць гук"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Рэжым перапынення"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Апавяшчаць далей"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Выключыць апавяшчэнні"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Працягваць паказваць апавяшчэнні гэтай праграмы?"</string>
@@ -659,10 +671,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Гэтыя апавяшчэнні нельга змяніць."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Тут канфігурыраваць гэту групу апавяшчэнняў забаронена"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Праксіраванае апавяшчэнне"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"Усе апавяшчэнні праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Разгарнуць"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Гэта праграма выкарыстоўвае камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Гэта праграма выкарыстоўвае мікрафон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Гэта праграма паказваецца на экране паверх іншых праграм."</string>
@@ -910,7 +920,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Дазволіць"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Адмовіць"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Націсніце, каб уключыць рэжым эканоміі зараду"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Уключаць аўтаматычна пры ўзроўні зараду акумулятара <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Не, дзякуй"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Уключаны рэжым эканоміі зараду"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Калі ўзровень зараду акумулятара знізіцца да <xliff:g id="PERCENTAGE">%d</xliff:g>%%, аўтаматычна ўключыцца рэжым эканоміі энергіі."</string>
@@ -942,6 +953,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Перамясціце правей і вышэй"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Перамясціць лявей і ніжэй"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Перамясціць правей і ніжэй"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Адхіліць"</string>
 </resources>

@@ -295,7 +295,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till foton, mediefiler och andra filer på enheten?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>n&lt;/b&gt; behörighet att spela in ljud?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Fysiska aktivitet"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"åtkomst till data om fysisk aktivitet"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to åtkomst till data om fysisk aktivitet?"</string>
@@ -1357,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Inaktivera testverktygsläget genom att göra en återställning till standardinställningarna."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Vätska eller smuts i USB-porten"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-porten har inaktiverats automatiskt. Tryck för att läsa mer."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Nu kan du använda USB-porten igen"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Mobilen känner inte längre av någon vätska eller smuts."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Felrapporten överförs …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>

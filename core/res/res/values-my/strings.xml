@@ -29,7 +29,7 @@
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ခေါင်းစဉ်မဲ့&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ဖုန်းနံပါတ်မရှိပါ)"</string>
-    <string name="unknownName" msgid="6867811765370350269">"မသိရ"</string>
+    <string name="unknownName" msgid="6867811765370350269">"မသိ"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"အသံမေးလ်"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် မမှန်ကန်သောMMIကုတ်"</string>
@@ -522,7 +522,7 @@
     <string name="biometric_dialog_default_title" msgid="881952973720613213">"သင်ဖြစ်ကြောင်း အတည်ပြုပါ"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
-    <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိပါ"</string>
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
@@ -1358,7 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"\'စမ်းသပ်ခြင်းစနစ် မုဒ်\' ကိုပိတ်ရန် စက်ရုံထုတ်အတိုင်း ပြင်ဆင်သတ်မှတ်ပါ။"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ပို့တ်တွင် အရည် သို့မဟုတ် အမှိုက်စ ရှိနေသည်"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ပို့တ်ကို အလိုအလျောက် ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB ပို့တ်ကို စိတ်ချစွာ သုံးနိုင်ပါပြီ"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ပို့တ်ကို အသုံးပြုနိုင်သည်"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ဖုန်းသည် အရည် သို့မဟုတ် အမှိုက်စတို့ကို အာရုံခံသိရှိနိုင်တော့မည် မဟုတ်ပါ။"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ချွတ်ယွင်းချက် အစီရင်ခံစာပြုစုနေသည်..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ချွတ်ယွင်းချက် အစီရင်ခံစာကို မျှဝေမလား။"</string>
@@ -1763,7 +1763,7 @@
     <string name="mediasize_unknown_landscape" msgid="4876995327029361552">"အလျားလိုက် အရွယ်မသိ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ဖျက်သိမ်းလိုက်ပြီး"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"အချက်အလက်များ ရိုက်ကူးစဉ် အမှားပေါ်နေ"</string>
-    <string name="reason_unknown" msgid="6048913880184628119">"မသိပါ"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"မသိ"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"စာထုတ်သောဆားဗစ်အားဖွင့်မထားပါ"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> ဆားဗစ် ထည့်သွင်းပြီး"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"ထိတို့ခြင်းဖြင့် ဖွင့်ပါ"</string>

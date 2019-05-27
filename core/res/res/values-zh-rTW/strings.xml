@@ -565,8 +565,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"請將手機拿低一點。"</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移動。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移動。"</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"請儘可能直視裝置正面。"</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"無法偵測你的臉孔，請直視手機。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"鏡頭過度晃動，請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"請重新註冊你的臉孔。"</string>
@@ -580,8 +579,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"相關硬體無法使用，因此無法驗證臉孔。"</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"請重新驗證臉孔。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"無法儲存新的臉孔資料，請先刪除舊的資料。"</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"臉孔處理作業已取消"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"使用者已取消臉孔驗證作業"</string>
@@ -650,10 +648,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"允許應用程式繫結至電信業者服務 (一般應用程式並不需要)。"</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"存取「零打擾」模式"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允許應用程式讀取及寫入「零打擾」設定。"</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"啟動檢視權限用途"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"允許應用程式開始使用其他應用程式 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"監控螢幕解鎖嘗試次數"</string>
@@ -1361,7 +1357,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"恢復原廠設定以停用測試控管工具模式。"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 連接埠中有液體或灰塵"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"系統已自動停用 USB 連接埠。輕觸即可瞭解詳情。"</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"現在可安全使用 USB 連接埠"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"手機目前無法偵測液體或灰塵。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在接收錯誤報告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享錯誤報告嗎？"</string>
@@ -1662,7 +1659,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"要使用無障礙捷徑嗎？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"啟用捷徑功能後，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。\n\n 目前設定的無障礙功能為：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n 如要變更設定的功能，請依序輕觸 [設定] &gt; [無障礙工具]。"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"啟用捷徑功能後，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。\n\n 目前設定的無障礙功能為：\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n 如要變更設定的功能，請依序輕觸 [設定] &gt; [無障礙設定]。"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"停用捷徑"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"使用捷徑"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"色彩反轉"</string>
@@ -1670,8 +1667,8 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"無障礙捷徑啟用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"無障礙捷徑停用了「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"同時按住調低及調高音量鍵三秒即可使用「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"輕觸 [無障礙工具] 按鈕後，選擇你想使用的功能："</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"如要變更指派的功能，請按住 [無障礙工具] 按鈕。"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"輕觸 [無障礙設定] 按鈕後，選擇你想使用的功能："</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"如要變更指派的功能，請按住 [無障礙設定] 按鈕。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"放大"</string>
     <string name="user_switched" msgid="3768006783166984410">"目前的使用者是 <xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>

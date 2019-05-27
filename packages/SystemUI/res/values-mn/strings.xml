@@ -62,9 +62,12 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB алдаа засалт хийх боломжгүй"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB портыг идэвхгүй болгосон"</string>
-    <string name="usb_contaminant_message" msgid="2205845572186473860">"Таны төхөөрөмжийг шингэн зүйл эсвэл бохирдлоос хамгаалах зорилгоор USB портыг идэвхгүй болгосон бөгөөд ямар ч нэмэлт хэрэгслийг илрүүлэхгүй.\n\nТанд USB портыг дахин ашиглахад аюулгүй болох үед мэдэгдэх болно."</string>
+    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
+    <skip />
     <string name="usb_port_enabled" msgid="7906141351687694867">"Цэнэглэгч болон нэмэлт хэрэгслийг илрүүлэхийн тулд USB портыг идэвхжүүлсэн"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB-г идэвхжүүлэх"</string>
+    <!-- no translation found for learn_more (5000517160980853569) -->
+    <skip />
     <string name="compat_mode_on" msgid="6623839244840638213">"Дэлгэц дүүргэх бол өсгөнө үү"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Дэлгэц дүүргэх бол татна уу"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
@@ -118,6 +121,11 @@
     <string name="cancel" msgid="6442560571259935130">"Цуцлах"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Баталгаажуулах"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Дахин оролдох"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Нотолгоог цуцлахын тулд хоосон бүсийг товшино уу"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Дахин оролдоно уу"</string>
+    <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Таны царайг хайж байна"</string>
+    <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Царайг баталгаажууллаа"</string>
+    <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Баталгаажсан"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Хурууны хээ мэдрэгчид хүрэх"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Хурууны хээний дүрс тэмдэг"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Таныг хайж байна…"</string>
@@ -369,8 +377,7 @@
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>-д"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> хүртэл"</string>
     <string name="quick_settings_ui_mode_night_label" msgid="512534812963862137">"Бараан загвар"</string>
-    <!-- no translation found for quick_settings_ui_mode_night_label_battery_saver (3496696903886673256) -->
-    <skip />
+    <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="3496696903886673256">"Бараан загвар\nБатарей хэмнэгч"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC-г цуцалсан"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC-г идэвхжүүлсэн"</string>
@@ -445,13 +452,16 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Тэжээл хэмнэгч асаалттай байна"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Ажиллагаа болон далд датаг бууруулна"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Тэжээл хэмнэгчийг унтраах"</string>
-    <string name="media_projection_dialog_text" msgid="5751657130671431216">"Бичиж эсвэл дамжуулж байгаа үед <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> таны тоглуулдаг аудио, нууц үг, төлбөрийн мэдээлэл, зураг болон мессеж зэрэг аливаа мэдрэг мэдээллийг авах боломжтой."</string>
-    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Дамжуулах/бичих үед мэдрэг мэдээллийг задруулж байна"</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"Бичиж эсвэл дамжуулж байх үед <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> аудио, нууц үг, төлбөрийн мэдээлэл, зураг болон мессеж зэрэг эмзэг мэдээлэл буюу таны дэлгэц дээрээ харуулдаг эсвэл төхөөрөмжөөсөө тоглуулдаг эмзэг мэдээллийг авах боломжтой."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Бичиж эсвэл дамжуулж байх үед энэ функцийг үзүүлж буй үйлчилгээ нь аудио, нууц үг, төлбөрийн мэдээлэл, зураг болон мессеж зэрэг эмзэг мэдээлэл буюу таны дэлгэц дээрээ харуулдаг эсвэл төхөөрөмжөөсөө тоглуулдаг эмзэг мэдээллийг авах боломжтой."</string>
+    <string name="media_projection_dialog_title" msgid="8124184308671641248">"Дамжуулах/бичих үед эмзэг мэдээллийг задруулж байна"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Дахиж үл харуулах"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Бүгдийг арилгах"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Удирдах"</string>
-    <string name="notification_section_header_gentle" msgid="8356064473678167305">"Эелдэг мэдэгдэл"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4270384919249494640">"Бүх эелдэг мэдэгдлийг устгах"</string>
+    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
+    <skip />
+    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Бүү саад бол горимын түр зогсоосон мэдэгдэл"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Одоо эхлүүлэх"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Мэдэгдэл байхгүй"</string>
@@ -635,9 +645,11 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Блоклох"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Харуулсан хэвээр байх"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Багасгах"</string>
-    <string name="inline_silent_button_silent" msgid="6904727667411781466">"Чимээгүй харуулах"</string>
+    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
+    <skip />
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Чимээгүй хэвээр харуулах"</string>
-    <string name="inline_silent_button_alert" msgid="2449191160203602471">"Дуу гаргах"</string>
+    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
+    <skip />
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Үргэлжлүүлэн сануулах"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Мэдэгдлийг унтраах"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Энэ аппаас мэдэгдэл харуулсан хэвээр байх уу?"</string>
@@ -651,10 +663,8 @@
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Эдгээр мэдэгдлийг өөрчлөх боломжгүй."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Энэ бүлэг мэдэгдлийг энд тохируулах боломжгүй байна"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Прокси хийсэн мэдэгдэл"</string>
-    <!-- no translation found for notification_channel_dialog_title (5745335243729167866) -->
-    <skip />
-    <!-- no translation found for see_more_title (5358726697042112726) -->
-    <skip />
+    <string name="notification_channel_dialog_title" msgid="5745335243729167866">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н бүх мэдэгдэл"</string>
+    <string name="see_more_title" msgid="5358726697042112726">"Дэлгэрэнгүй үзэх"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Энэ апп камерыг ашиглаж байна."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Энэ апп микрофоныг ашиглаж байна."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Энэ аппыг таны дэлгэцэд бусад аппын дээр харуулж байна."</string>
@@ -898,7 +908,8 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Зөвшөөрөх"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Татгалзах"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Тэжээл хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%% болох үед автоматаар асаах"</string>
+    <!-- no translation found for auto_saver_text (2563289953551438248) -->
+    <skip />
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Үгүй, баярлалаа"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Тэжээл хэмнэгч онцлогийн хуваарийг асаасан"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Тэжээл хэмнэгч автоматаар асна."</string>
@@ -930,6 +941,5 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="1671844272347036806">"Баруун дээш зөөх"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Зүүн доош зөөх"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Баруун доош зөөх"</string>
-    <!-- no translation found for bubble_dismiss_text (8028337712674081668) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="8028337712674081668">"Үл хэрэгсэх"</string>
 </resources>

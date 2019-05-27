@@ -571,8 +571,7 @@
     <string name="face_acquired_too_low" msgid="488983581737550912">"Тримайте телефон нижче."</string>
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Тримайте телефон лівіше."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Тримайте телефон правіше."</string>
-    <!-- no translation found for face_acquired_poor_gaze (5606479370806754905) -->
-    <skip />
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Дивіться просто на пристрій."</string>
     <string name="face_acquired_not_detected" msgid="4885504661626728809">"Обличчя не видно. Дивіться на телефон."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Забагато рухів. Тримайте телефон нерухомо."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторно проскануйте обличчя."</string>
@@ -586,8 +585,7 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
-    <!-- no translation found for face_error_timeout (3202585609451248103) -->
-    <skip />
+    <string name="face_error_timeout" msgid="3202585609451248103">"Повторіть автентифікацію за обличчям."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Не вдається зберегти нові дані про обличчя. Видаліть старі."</string>
     <string name="face_error_canceled" msgid="2768146728600802422">"Дію з обличчям скасовано"</string>
     <string name="face_error_user_canceled" msgid="9003022830076496163">"Користувач скасував автентифікацію за обличчям"</string>
@@ -656,10 +654,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Власник може підключатися до служб оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"доступ до режиму \"Не турбувати\""</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Додаток зможе переглядати та змінювати конфігурацію режиму \"Не турбувати\"."</string>
-    <!-- no translation found for permlab_startViewPermissionUsage (5484728591597709944) -->
-    <skip />
-    <!-- no translation found for permdesc_startViewPermissionUsage (4808345878203594428) -->
-    <skip />
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"перегляньте дані про використання дозволів"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Власник зможе використовувати дозволи для цього додатка. Цей дозвіл не потрібен для звичайних додатків."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Відстежувати спроби розблокування екрана"</string>
@@ -695,8 +691,8 @@
     <item msgid="8901098336658710359">"Дом."</item>
     <item msgid="869923650527136615">"Мобільний"</item>
     <item msgid="7897544654242874543">"Роб."</item>
-    <item msgid="1103601433382158155">"Роб. факс"</item>
-    <item msgid="1735177144948329370">"Дом. факс"</item>
+    <item msgid="1103601433382158155">"Робочий факс"</item>
+    <item msgid="1735177144948329370">"Домашній факс"</item>
     <item msgid="603878674477207394">"Пейджер"</item>
     <item msgid="1650824275177931637">"Інше"</item>
     <item msgid="9192514806975898961">"Указати"</item>
@@ -738,8 +734,8 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Домашній"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобільний"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Робочий"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Роб. факс"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Дом. факс"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Робочий факс"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Домашній факс"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Пейджер"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Інше"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Звор. викл."</string>
@@ -763,7 +759,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"Особиста"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Робоча"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Інше"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"Мобільний"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Мобільна"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Указати"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Домашня"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Роб."</string>
@@ -1405,7 +1401,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Щоб вимкнути режим автоматизованого тестування, відновіть заводські налаштування."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Рідина або сміття в USB-порту"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-порт автоматично вимкнено. Торкніться, щоб дізнатися більше."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"Можна безпечно використовувати USB-порт"</string>
+    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
+    <skip />
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Телефон уже не виявляє рідини або сміття."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Створюється повідомлення про помилку…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Надіслати звіт про помилку?"</string>
