@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.shared.InetAddressUtils;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -54,7 +53,7 @@ import java.util.Objects;
 @TestApi
 public final class StaticIpConfiguration implements Parcelable {
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     @Nullable
     public LinkAddress ipAddress;
     /** @hide */
