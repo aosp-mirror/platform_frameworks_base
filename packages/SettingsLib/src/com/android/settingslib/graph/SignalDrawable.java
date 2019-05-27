@@ -60,6 +60,7 @@ public class SignalDrawable extends DrawableWrapper {
     private static final int NUM_LEVEL_MASK = 0xff << NUM_LEVEL_SHIFT;
     private static final int STATE_SHIFT = 16;
     private static final int STATE_MASK = 0xff << STATE_SHIFT;
+    private static final int STATE_EMPTY = 1;
     private static final int STATE_CUT = 2;
     private static final int STATE_CARRIER_CHANGE = 3;
 
@@ -203,7 +204,7 @@ public class SignalDrawable extends DrawableWrapper {
             drawDotAndPadding(x - dotSpacing * 2, y, dotPadding, dotSize, 0);
             canvas.drawPath(mCutoutPath, mTransparentPaint);
             canvas.drawPath(mForegroundPath, mForegroundPaint);
-        } else if (isInState(STATE_CUT)) {
+        } else if (isInState(STATE_CUT) || isInState(STATE_EMPTY)) {
             float cut = (CUT_OUT * width);
             mCutoutPath.moveTo(width - padding, height - padding);
             mCutoutPath.rLineTo(-cut, 0);
@@ -268,13 +269,14 @@ public class SignalDrawable extends DrawableWrapper {
     /**
      * Returns whether this drawable is in the specified state.
      *
-     * @param state must be one of {@link #STATE_CARRIER_CHANGE} or {@link #STATE_CUT}
+     * @param state must be one of {@link #STATE_CARRIER_CHANGE}, {@link #STATE_CUT},
+     *              or {@link #STATE_EMPTY}.
      */
     private boolean isInState(int state) {
         return getState(getLevel()) == state;
     }
 
-    public static int getState(int fullState) {
+    private static int getState(int fullState) {
         return (fullState & STATE_MASK) >> STATE_SHIFT;
     }
 
@@ -286,7 +288,12 @@ public class SignalDrawable extends DrawableWrapper {
 
     /** Returns the state representing empty mobile signal with the given number of levels. */
     public static int getEmptyState(int numLevels) {
-        return getState(0, numLevels, true);
+        return (STATE_EMPTY << STATE_SHIFT) | (numLevels << NUM_LEVEL_SHIFT);
+    }
+
+    /** Returns whether fullState corresponds to the empty state. */
+    public static boolean isEmptyState(int fullState) {
+        return getState(fullState) == STATE_EMPTY;
     }
 
     /** Returns the state representing carrier change with the given number of levels. */
