@@ -33,6 +33,7 @@
 #include <android/os/IStatsCompanionService.h>
 #include <android/os/IStatsManager.h>
 #include <binder/IResultReceiver.h>
+#include <binder/ParcelFileDescriptor.h>
 #include <utils/Looper.h>
 
 #include <deque>
@@ -72,9 +73,7 @@ public:
     virtual Status informPollAlarmFired();
     virtual Status informAlarmForSubscriberTriggeringFired();
 
-    virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
-                                    const vector<String16>& version_string,
-                                    const vector<String16>& app, const vector<String16>& installer);
+    virtual Status informAllUidData(const ParcelFileDescriptor& fd);
     virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version,
                                     const String16& version_string, const String16& installer);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
@@ -194,6 +193,14 @@ public:
             const int options,
             const int32_t state,
             const std::vector<int64_t>& experimentIdsIn) override;
+
+    /**
+     * Binder call to log WatchdogRollbackOccurred atom.
+     */
+    virtual Status sendWatchdogRollbackOccurredAtom(
+            const int32_t rollbackTypeIn,
+            const android::String16& packageNameIn,
+            const int64_t packageVersionCodeIn) override;
 
     /**
      * Binder call to get registered experiment IDs.

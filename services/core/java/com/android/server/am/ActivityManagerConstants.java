@@ -120,7 +120,7 @@ final class ActivityManagerConstants extends ContentObserver {
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
      * Settings.Global. This allows it to be set experimentally unless it has been
-     * enabled/disabled in developer options. Defaults to true.
+     * enabled/disabled in developer options. Defaults to false.
      */
     private static final String KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED =
             "default_background_activity_starts_enabled";
@@ -497,7 +497,7 @@ final class ActivityManagerConstants extends ContentObserver {
             boolean enabledInDeviceConfig = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED,
-                    /*defaultValue*/ true);
+                    /*defaultValue*/ false);
             mFlagBackgroundActivityStartsEnabled = enabledInDeviceConfig;
             if (!enabledInDeviceConfig) {
                 whitelistedPackageNames = DeviceConfig.getProperty(

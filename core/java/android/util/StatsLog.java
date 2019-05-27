@@ -23,7 +23,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.app.IActivityManager;
 import android.content.Context;
 import android.os.IStatsManager;
 import android.os.RemoteException;
@@ -159,10 +158,6 @@ public final class StatsLog extends StatsLogInternal {
                     }
                     return false;
                 }
-                int userId = IActivityManager.Stub.asInterface(
-                        ServiceManager.getService("activity"))
-                        .getCurrentUser()
-                        .id;
                 service.sendBinaryPushStateChangedAtom(
                         trainName, trainVersionCode, options, state, experimentIds);
                 return true;
@@ -177,6 +172,46 @@ public final class StatsLog extends StatsLogInternal {
             }
         }
     }
+
+    /**
+     * Logs an event for watchdog rollbacks.
+     *
+     * @param rollbackType          state of the rollback.
+     * @param packageName           package name being rolled back.
+     * @param packageVersionCode    version of the package being rolled back.
+     *
+     * @return True if the log request was sent to statsd.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
+    public static boolean logWatchdogRollbackOccurred(int rollbackType, String packageName,
+            long packageVersionCode) {
+        synchronized (sLogLock) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when logging event");
+                    }
+                    return false;
+                }
+
+                service.sendWatchdogRollbackOccurredAtom(rollbackType, packageName,
+                        packageVersionCode);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Failed to connect to StatsCompanionService when logging "
+                                    + "WatchdogRollbackOccurred");
+                }
+                return false;
+            }
+        }
+    }
+
 
     private static IStatsManager getIStatsManagerLocked() throws RemoteException {
         if (sService != null) {
