@@ -49,5 +49,8 @@
                 <action android:name="android.net.INetworkStackConnector"/>
             </intent-filter>
         </service>
+        <service android:name="com.android.server.connectivity.ipmemorystore.RegularMaintenanceJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
     </application>
 </manifest>
