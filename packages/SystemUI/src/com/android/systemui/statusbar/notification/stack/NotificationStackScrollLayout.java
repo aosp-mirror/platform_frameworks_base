@@ -871,6 +871,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int lastSectionBottom =
                 mSections[0].getCurrentBounds().bottom + animationYOffset;
         int previousLeft = left;
+        int previousRight = right;
         boolean first = true;
         for (NotificationSection section : mSections) {
             if (section.getFirstVisibleChild() == null) {
@@ -878,6 +879,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             int sectionTop = section.getCurrentBounds().top + animationYOffset;
             int ownLeft = Math.min(Math.max(left, section.getCurrentBounds().left), right);
+            int ownRight = Math.max(Math.min(right, section.getCurrentBounds().right), ownLeft);
             // If sections are directly adjacent to each other, we don't want to draw them
             // as separate roundrects, as the rounded corners right next to each other look
             // bad.
@@ -885,19 +887,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     || (previousLeft != ownLeft && !first)) {
                 canvas.drawRoundRect(ownLeft,
                         backgroundRectTop,
-                        right,
+                        ownRight,
                         lastSectionBottom,
                         mCornerRadius, mCornerRadius, mBackgroundPaint);
                 backgroundRectTop = sectionTop;
             }
             previousLeft = ownLeft;
+            previousRight = ownRight;
             lastSectionBottom =
                     section.getCurrentBounds().bottom + animationYOffset;
             first = false;
         }
         canvas.drawRoundRect(previousLeft,
                 backgroundRectTop,
-                right,
+                previousRight,
                 lastSectionBottom,
                 mCornerRadius, mCornerRadius, mBackgroundPaint);
     }
@@ -2404,11 +2407,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateScrollability();
         clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private boolean isPulsing(NotificationEntry entry) {
-        return mAmbientState.isPulsing(entry);
     }
 
     @Override
@@ -5170,6 +5168,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         mPulsing = pulsing;
         mAmbientState.setPulsing(pulsing);
+        mSwipeHelper.setPulsing(pulsing);
         updateNotificationAnimationStates();
         updateAlgorithmHeightAndPadding();
         updateContentHeight();
