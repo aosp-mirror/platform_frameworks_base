@@ -395,6 +395,13 @@ public class AmbientState {
         mPulsing = hasPulsing;
     }
 
+    /**
+     * @return if we're pulsing in general
+     */
+    public boolean isPulsing() {
+        return mPulsing;
+    }
+
     public boolean isPulsing(NotificationEntry entry) {
         if (!mPulsing || mAmbientPulseManager == null) {
             return false;
