@@ -2409,8 +2409,13 @@ public class TelephonyManager {
     public @interface NetworkType{}
 
     /**
+     * Return the current data network type.
+     *
+     * @deprecated use {@link #getDataNetworkType()}
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
+    @Deprecated
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NetworkType int getNetworkType() {
         return getNetworkType(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
     }
