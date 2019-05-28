@@ -63,6 +63,25 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mWakingUp = false
     private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
     private val mDozeParameters: DozeParameters;
+    var willWakeUp = false
+        set(value) {
+            if (value && mDozeAmount != 0.0f) {
+                field = value
+            }
+        }
+
+    var pulsing: Boolean = false
+        set(value) {
+            field = value
+            if (value) {
+                // Only when setting pulsing to true we want an immediate update, since we get
+                // this already when the doze service finishes which is usually before we get
+                // the waking up callback
+                updateNotificationVisibility(animate = shouldAnimateVisibility(),
+                        increaseSpeed = false)
+            }
+        }
+
 
     init {
         mAmbientPulseManager.addListener(this)
@@ -92,8 +111,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
-        var visible = mNotificationsVisibleForExpansion || mAmbientPulseManager.hasNotifications()
-        if (!visible && mNotificationsVisible && mWakingUp && mDozeAmount != 0.0f) {
+        var visible = (mNotificationsVisibleForExpansion || mAmbientPulseManager.hasNotifications())
+                && pulsing;
+        if (!visible && mNotificationsVisible && (mWakingUp || willWakeUp) && mDozeAmount != 0.0f) {
             // let's not make notifications invisible while waking up, otherwise the animation
             // is strange
             return;
@@ -192,6 +212,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     fun setWakingUp(wakingUp: Boolean) {
+        willWakeUp = false
         mWakingUp = wakingUp
         if (wakingUp && mNotificationsVisible && !mNotificationsVisibleForExpansion) {
             // We're waking up while pulsing, let's make sure the animation looks nice
@@ -200,9 +221,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onAmbientStateChanged(entry: NotificationEntry, isPulsing: Boolean) {
-        var animate = mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking()
+        var animate = shouldAnimateVisibility()
         if (!isPulsing) {
-            if (mLinearDozeAmount != 0.0f) {
+            if (mLinearDozeAmount != 0.0f && mLinearVisibilityAmount != 0.0f) {
                 if (entry.isRowDismissed) {
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
@@ -218,4 +239,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
         updateNotificationVisibility(animate, increaseSpeed = false)
     }
+
+    private fun shouldAnimateVisibility() =
+            mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking()
 }

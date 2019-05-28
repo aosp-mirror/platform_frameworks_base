@@ -15,10 +15,15 @@
  */
 package com.android.server.devicepolicy;
 
+import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
+import android.app.admin.DevicePolicyManager;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.io.PrintWriter;
 
 /**
  * Implementation of {@link DevicePolicyCache}, to which {@link DevicePolicyManagerService} pushes
@@ -36,9 +41,13 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private final SparseBooleanArray mScreenCaptureDisabled = new SparseBooleanArray();
 
+    @GuardedBy("mLock")
+    private final SparseIntArray mPasswordQuality = new SparseIntArray();
+
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
             mScreenCaptureDisabled.delete(userHandle);
+            mPasswordQuality.delete(userHandle);
         }
     }
 
@@ -53,5 +62,27 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         synchronized (mLock) {
             mScreenCaptureDisabled.put(userHandle, disabled);
         }
+    }
+
+    @Override
+    public int getPasswordQuality(@UserIdInt int userHandle) {
+        synchronized (mLock) {
+            return mPasswordQuality.get(userHandle,
+                    DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+        }
+    }
+
+    /** Updat the password quality cache for the given user */
+    public void setPasswordQuality(int userHandle, int quality) {
+        synchronized (mLock) {
+            mPasswordQuality.put(userHandle, quality);
+        }
+    }
+
+    /** Dump content */
+    public void dump(String prefix, PrintWriter pw) {
+        pw.println("Device policy cache");
+        pw.println(prefix + "Screen capture disabled: " + mScreenCaptureDisabled.toString());
+        pw.println(prefix + "Password quality: " + mPasswordQuality.toString());
     }
 }

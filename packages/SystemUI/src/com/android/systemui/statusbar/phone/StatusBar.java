@@ -3986,6 +3986,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                     updateScrimController();
                     mPulseExpansionHandler.setPulsing(pulsing);
+                    mWakeUpCoordinator.setPulsing(pulsing);
                 }
             }, reason);
             // DozeScrimController is in pulse state, now let's ask ScrimController to start
