@@ -83,13 +83,17 @@ class ApexManager {
 
 
     ApexManager(Context context) {
+        mContext = context;
+        if (!isApexSupported()) {
+            mApexService = null;
+            return;
+        }
         try {
             mApexService = IApexService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow("apexservice"));
         } catch (ServiceNotFoundException e) {
             throw new IllegalStateException("Required service apexservice not available");
         }
-        mContext = context;
     }
 
     static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
@@ -102,6 +106,7 @@ class ApexManager {
     @interface PackageInfoFlags{}
 
     void systemReady() {
+        if (!isApexSupported()) return;
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -175,6 +180,7 @@ class ApexManager {
      *         is not found.
      */
     @Nullable PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags) {
+        if (!isApexSupported()) return null;
         populateAllPackagesCacheIfNeeded();
         boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
         boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
@@ -198,6 +204,7 @@ class ApexManager {
     // TODO(b/132324953): delete.
     @Deprecated
     @Nullable PackageInfo getPackageInfoForApexName(String apexName) {
+        if (!isApexSupported()) return null;
         populateAllPackagesCacheIfNeeded();
         return mApexNameToPackageInfoCache.get(apexName);
     }
@@ -209,6 +216,7 @@ class ApexManager {
      *         active package.
      */
     List<PackageInfo> getActivePackages() {
+        if (!isApexSupported()) return Collections.emptyList();
         populateAllPackagesCacheIfNeeded();
         return mAllPackagesCache
                 .stream()
@@ -223,6 +231,7 @@ class ApexManager {
      *         active pre-installed package.
      */
     List<PackageInfo> getFactoryPackages() {
+        if (!isApexSupported()) return Collections.emptyList();
         populateAllPackagesCacheIfNeeded();
         return mAllPackagesCache
                 .stream()
@@ -237,6 +246,7 @@ class ApexManager {
      *         inactive package.
      */
     List<PackageInfo> getInactivePackages() {
+        if (!isApexSupported()) return Collections.emptyList();
         populateAllPackagesCacheIfNeeded();
         return mAllPackagesCache
                 .stream()
@@ -251,6 +261,7 @@ class ApexManager {
      * @return {@code true} if {@code packageName} is an apex package.
      */
     boolean isApexPackage(String packageName) {
+        if (!isApexSupported()) return false;
         populateAllPackagesCacheIfNeeded();
         for (PackageInfo packageInfo : mAllPackagesCache) {
             if (packageInfo.packageName.equals(packageName)) {
@@ -268,6 +279,7 @@ class ApexManager {
      * @return an ApexSessionInfo object, or null if the session is not known.
      */
     @Nullable ApexSessionInfo getStagedSessionInfo(int sessionId) {
+        if (!isApexSupported()) return null;
         try {
             ApexSessionInfo apexSessionInfo = mApexService.getStagedSessionInfo(sessionId);
             if (apexSessionInfo.isUnknown) {
@@ -298,6 +310,7 @@ class ApexManager {
      */
     boolean submitStagedSession(
             int sessionId, @NonNull int[] childSessionIds, @NonNull ApexInfoList apexInfoList) {
+        if (!isApexSupported()) return false;
         try {
             return mApexService.submitStagedSession(sessionId, childSessionIds, apexInfoList);
         } catch (RemoteException re) {
@@ -314,6 +327,7 @@ class ApexManager {
      * @return true upon success, false if the session is unknown.
      */
     boolean markStagedSessionReady(int sessionId) {
+        if (!isApexSupported()) return false;
         try {
             return mApexService.markStagedSessionReady(sessionId);
         } catch (RemoteException re) {
@@ -331,6 +345,7 @@ class ApexManager {
      *                  successful.
      */
     void markStagedSessionSuccessful(int sessionId) {
+        if (!isApexSupported()) return;
         try {
             mApexService.markStagedSessionSuccessful(sessionId);
         } catch (RemoteException re) {
@@ -358,6 +373,7 @@ class ApexManager {
      * @return {@code true} upon success, {@code false} if any remote exception occurs
      */
     boolean abortActiveSession() {
+        if (!isApexSupported()) return false;
         try {
             mApexService.abortActiveSession();
             return true;
@@ -376,6 +392,7 @@ class ApexManager {
      * @return {@code true} upon successful uninstall, {@code false} otherwise.
      */
     boolean uninstallApex(String apexPackagePath) {
+        if (!isApexSupported()) return false;
         try {
             mApexService.unstagePackages(Collections.singletonList(apexPackagePath));
             return true;
@@ -441,6 +458,7 @@ class ApexManager {
      *                    information about that specific package will be dumped.
      */
     void dump(PrintWriter pw, @Nullable String packageName) {
+        if (!isApexSupported()) return;
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
         try {
             populateAllPackagesCacheIfNeeded();
@@ -486,6 +504,7 @@ class ApexManager {
     }
 
     public void onBootCompleted() {
+        if (!isApexSupported()) return;
         populateAllPackagesCacheIfNeeded();
     }
 }
