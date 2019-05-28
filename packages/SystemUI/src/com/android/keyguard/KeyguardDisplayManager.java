@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.NavigationBarView;
@@ -234,7 +235,8 @@ public class KeyguardDisplayManager {
 
     }
 
-    private final static class KeyguardPresentation extends Presentation {
+    @VisibleForTesting
+    static final class KeyguardPresentation extends Presentation {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
         private final InjectionInflationController mInjectableInflater;
@@ -256,7 +258,7 @@ public class KeyguardDisplayManager {
 
         KeyguardPresentation(Context context, Display display,
                 InjectionInflationController injectionInflater) {
-            super(context, display, R.style.keyguard_presentation_theme);
+            super(context, display, R.style.Theme_SystemUI_KeyguardPresentation);
             mInjectableInflater = injectionInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
