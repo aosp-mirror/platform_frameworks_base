@@ -45,7 +45,7 @@
                     android:contentDescription="@string/accessibility_quick_settings_alarm_set"
                     android:visibility="gone"/>
 
-                <TextView
+                <com.android.systemui.util.AutoMarqueeTextView
                     android:id="@+id/next_alarm_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -77,7 +77,7 @@
                     android:layout_height="@dimen/qs_header_alarm_icon_size"
                     android:visibility="gone"/>
 
-                <TextView
+                <com.android.systemui.util.AutoMarqueeTextView
                     android:id="@+id/ringer_mode_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
