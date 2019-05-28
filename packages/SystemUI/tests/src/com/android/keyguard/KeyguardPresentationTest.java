@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,18 +11,18 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.keyguard;
 
+import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.R;
+import com.android.keyguard.KeyguardDisplayManager.KeyguardPresentation;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.InjectionInflationController;
@@ -39,8 +39,9 @@ public class KeyguardPresentationTest extends SysuiTestCase {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         InjectionInflationController inflationController = new InjectionInflationController(
                 SystemUIFactory.getInstance().getRootComponent());
-        LayoutInflater inflater = inflationController
-                .injectable(LayoutInflater.from(getContext()));
-        inflater.inflate(R.layout.keyguard_presentation, null);
+        Context context = getContext();
+        KeyguardPresentation keyguardPresentation =
+                new KeyguardPresentation(context, context.getDisplay(), inflationController);
+        keyguardPresentation.onCreate(null /*savedInstanceState */);
     }
 }
