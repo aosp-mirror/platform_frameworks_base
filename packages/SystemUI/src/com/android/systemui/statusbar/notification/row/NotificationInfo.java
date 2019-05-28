@@ -20,6 +20,10 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
+
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -40,11 +44,12 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
-import android.transition.AutoTransition;
+import android.transition.ChangeBounds;
+import android.transition.Fade;
 import android.transition.TransitionManager;
+import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -62,6 +67,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 
+import java.lang.annotation.Retention;
 import java.util.List;
 import java.util.Set;
 
@@ -92,9 +98,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     // standard controls
     private static final int ACTION_ALERT = 5;
 
-    private static final int BUTTON_ANIM_TIME_MS = 200;
-
-    private static final boolean SHOW_BUTTON_SUMMARY = false;
+    private TextView mPriorityDescriptionView;
+    private TextView mSilentDescriptionView;
 
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
@@ -110,8 +115,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingChannelImportance;
     private boolean mWasShownHighPriority;
-    private boolean mShowOnLockscreen;
-    private boolean mShowInStatusBar;
     private boolean mPressedApply;
 
     /**
@@ -129,8 +132,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
-    private Drawable mSelectedBackground;
-    private Drawable mUnselectedBackground;
     private Drawable mPkgIcon;
 
     /** Whether this view is being shown as part of the blocking helper. */
@@ -145,16 +146,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnAlert = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         mChosenImportance = IMPORTANCE_DEFAULT;
-        setImportanceSummary(ACTION_ALERT, true);
-        updateButtons(ACTION_ALERT);
+        applyAlertingBehavior(BEHAVIOR_ALERTING, true /* userTriggered */);
     };
 
     // used by standard ui
     private OnClickListener mOnSilent = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
         mChosenImportance = IMPORTANCE_LOW;
-        setImportanceSummary(ACTION_TOGGLE_SILENT, true);
-        updateButtons(ACTION_TOGGLE_SILENT);
+        applyAlertingBehavior(BEHAVIOR_SILENT, true /* userTriggered */);
     };
 
     // used by standard ui
@@ -216,6 +215,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     public NotificationInfo(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+
+        mPriorityDescriptionView = findViewById(R.id.alert_summary);
+        mSilentDescriptionView = findViewById(R.id.silence_summary);
     }
 
     // Specify a CheckSaveListener to override when/if the user's changes are committed.
@@ -293,9 +300,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
 
-        mSelectedBackground = mContext.getDrawable(R.drawable.button_border_selected);
-        mUnselectedBackground = mContext.getDrawable(R.drawable.button_border_unselected);
-
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
         if (mNumUniqueChannelsInRow == 0) {
@@ -307,11 +311,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             NotificationChannel.DEFAULT_CHANNEL_ID)
                     && numTotalChannels == 1;
         }
-
-        mShowInStatusBar = !mINotificationManager.shouldHideSilentStatusIcons(
-                mContext.getPackageName());
-        mShowOnLockscreen = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0) == 1;
 
         bindHeader();
         bindChannelDetails();
@@ -376,13 +375,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         silent.setOnClickListener(mOnSilent);
         alert.setOnClickListener(mOnAlert);
 
-        if (mWasShownHighPriority) {
-            updateButtons(ACTION_ALERT);
-            setImportanceSummary(ACTION_ALERT, false);
-        } else {
-            updateButtons(ACTION_TOGGLE_SILENT);
-            setImportanceSummary(ACTION_TOGGLE_SILENT, false);
-        }
+        applyAlertingBehavior(
+                mWasShownHighPriority ? BEHAVIOR_ALERTING : BEHAVIOR_SILENT,
+                false /* userTriggered */);
     }
 
     private void bindHeader() {
@@ -545,66 +540,45 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
-    private void updateButtons(int blockState) {
-        View silence = findViewById(R.id.silence);
-        View alert = findViewById(R.id.alert);
-        TextView done = findViewById(R.id.done);
-        switch (blockState) {
-            case ACTION_TOGGLE_SILENT:
-                updateButtons(silence, alert);
-                if (mWasShownHighPriority) {
-                    done.setText(R.string.inline_ok_button);
-                } else {
-                    done.setText(R.string.inline_done_button);
-                }
-                break;
-            case ACTION_ALERT:
-                updateButtons(alert, silence);
-                if (mWasShownHighPriority) {
-                    done.setText(R.string.inline_done_button);
-                } else {
-                    done.setText(R.string.inline_ok_button);
-                }
-                break;
-        }
-    }
-
-    private void updateButtons(View selected, View unselected) {
-        selected.setBackground(mSelectedBackground);
-        selected.setSelected(true);
-        unselected.setBackground(mUnselectedBackground);
-        unselected.setSelected(false);
-    }
-
-    void setImportanceSummary(int blockState, boolean userTriggered) {
+    private void applyAlertingBehavior(@AlertingBehavior int behavior, boolean userTriggered) {
         if (userTriggered) {
-            AutoTransition transition = new AutoTransition();
-            transition.setDuration(BUTTON_ANIM_TIME_MS);
+            TransitionSet transition = new TransitionSet();
+            transition.setOrdering(TransitionSet.ORDERING_TOGETHER);
+            transition.addTransition(new Fade(Fade.OUT))
+                    .addTransition(new ChangeBounds())
+                    .addTransition(
+                            new Fade(Fade.IN)
+                                    .setStartDelay(150)
+                                    .setDuration(200)
+                                    .setInterpolator(FAST_OUT_SLOW_IN));
+            transition.setDuration(350);
+            transition.setInterpolator(FAST_OUT_SLOW_IN);
             TransitionManager.beginDelayedTransition(this, transition);
         }
-        if (SHOW_BUTTON_SUMMARY) {
-            if (blockState == ACTION_ALERT) {
-                TextView view = findViewById(R.id.alert_summary);
-                view.setVisibility(VISIBLE);
-                findViewById(R.id.silence_summary).setVisibility(GONE);
-                view.setText(R.string.notification_channel_summary_default);
-            } else {
-                TextView view = findViewById(R.id.silence_summary);
-                view.setVisibility(VISIBLE);
-                findViewById(R.id.alert_summary).setVisibility(GONE);
-                if (mShowInStatusBar) {
-                    if (mShowOnLockscreen) {
-                        view.setText(R.string.notification_channel_summary_low_status_lock);
-                    } else {
-                        view.setText(R.string.notification_channel_summary_low_status);
-                    }
-                } else if (mShowOnLockscreen) {
-                    view.setText(R.string.notification_channel_summary_low_lock);
-                } else {
-                    view.setText(R.string.notification_channel_summary_low);
-                }
-            }
+
+        View alert = findViewById(R.id.alert);
+        View silence = findViewById(R.id.silence);
+
+        switch (behavior) {
+            case BEHAVIOR_ALERTING:
+                alert.setSelected(true);
+                silence.setSelected(false);
+                mPriorityDescriptionView.setVisibility(VISIBLE);
+                mSilentDescriptionView.setVisibility(GONE);
+                break;
+            case BEHAVIOR_SILENT:
+                alert.setSelected(false);
+                silence.setSelected(true);
+                mSilentDescriptionView.setVisibility(VISIBLE);
+                mPriorityDescriptionView.setVisibility(GONE);
+                break;
+            default:
+                throw new IllegalArgumentException("Unrecognized alerting behavior: " + behavior);
         }
+
+        boolean isAChange = mWasShownHighPriority != (behavior == BEHAVIOR_ALERTING);
+        TextView done = findViewById(R.id.done);
+        done.setText(isAChange ? R.string.inline_ok_button : R.string.inline_done_button);
     }
 
     private void saveImportanceAndExitReason(@NotificationInfoAction int action) {
@@ -883,4 +857,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 .setSubtype(mIsForBlockingHelper ? MetricsEvent.BLOCKING_HELPER_DISPLAY
                         : MetricsEvent.BLOCKING_HELPER_UNKNOWN);
     }
+
+    @Retention(SOURCE)
+    @IntDef({BEHAVIOR_ALERTING, BEHAVIOR_SILENT})
+    private @interface AlertingBehavior {}
+    private static final int BEHAVIOR_ALERTING = 0;
+    private static final int BEHAVIOR_SILENT = 1;
 }
