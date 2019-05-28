@@ -254,6 +254,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".BugreportRequestedReceiver"
+            android:permission="android.permission.TRIGGER_SHELL_BUGREPORT">
+            <intent-filter>
+                <action android:name="com.android.internal.intent.action.BUGREPORT_REQUESTED" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".BugreportProgressService"
             android:exported="false"/>
