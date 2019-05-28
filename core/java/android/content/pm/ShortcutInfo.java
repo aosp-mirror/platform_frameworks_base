@@ -153,14 +153,21 @@ public final class ShortcutInfo implements Parcelable {
     public static final int CLONE_REMOVE_RES_NAMES = 1 << 3;
 
     /** @hide */
+    public static final int CLONE_REMOVE_PERSON = 1 << 4;
+
+    /** @hide */
     public static final int CLONE_REMOVE_FOR_CREATOR = CLONE_REMOVE_ICON | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
     public static final int CLONE_REMOVE_FOR_LAUNCHER = CLONE_REMOVE_ICON | CLONE_REMOVE_INTENT
-            | CLONE_REMOVE_RES_NAMES;
+            | CLONE_REMOVE_RES_NAMES | CLONE_REMOVE_PERSON;
 
     /** @hide */
     public static final int CLONE_REMOVE_FOR_LAUNCHER_APPROVAL = CLONE_REMOVE_INTENT
+            | CLONE_REMOVE_RES_NAMES | CLONE_REMOVE_PERSON;
+
+    /** @hide */
+    public static final int CLONE_REMOVE_FOR_APP_PREDICTION = CLONE_REMOVE_ICON
             | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
@@ -169,8 +176,11 @@ public final class ShortcutInfo implements Parcelable {
             CLONE_REMOVE_INTENT,
             CLONE_REMOVE_NON_KEY_INFO,
             CLONE_REMOVE_RES_NAMES,
+            CLONE_REMOVE_PERSON,
             CLONE_REMOVE_FOR_CREATOR,
-            CLONE_REMOVE_FOR_LAUNCHER
+            CLONE_REMOVE_FOR_LAUNCHER,
+            CLONE_REMOVE_FOR_LAUNCHER_APPROVAL,
+            CLONE_REMOVE_FOR_APP_PREDICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CloneFlags {}
@@ -548,7 +558,9 @@ public final class ShortcutInfo implements Parcelable {
             mDisabledMessage = source.mDisabledMessage;
             mDisabledMessageResId = source.mDisabledMessageResId;
             mCategories = cloneCategories(source.mCategories);
-            mPersons = clonePersons(source.mPersons);
+            if ((cloneFlags & CLONE_REMOVE_PERSON) == 0) {
+                mPersons = clonePersons(source.mPersons);
+            }
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
                 mIntents = cloneIntents(source.mIntents);
                 mIntentPersistableExtrases =
