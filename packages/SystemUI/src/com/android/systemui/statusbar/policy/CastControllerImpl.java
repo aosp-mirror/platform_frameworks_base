@@ -71,6 +71,7 @@ public class CastControllerImpl implements CastController {
     public CastControllerImpl(Context context) {
         mContext = context;
         mMediaRouter = (MediaRouter) context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
+        mMediaRouter.setRouterGroupId(MediaRouter.MIRRORING_GROUP_ID);
         mProjectionManager = (MediaProjectionManager)
                 context.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         mProjection = mProjectionManager.getActiveProjectionInfo();
