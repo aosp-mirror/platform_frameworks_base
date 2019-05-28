@@ -44,8 +44,7 @@
           android:adjustViewBounds="true"
           android:layout_gravity="center_vertical"
           android:gravity="center"
-          android:scaleType="centerCrop"
-          android:visibility="gone"/>
+          android:scaleType="centerCrop"/>
     <ImageView
         android:id="@+id/content_preview_file_icon"
         android:layout_width="36dp"
