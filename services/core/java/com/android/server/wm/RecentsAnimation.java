@@ -231,6 +231,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 mService.mRootActivityContainer.sendPowerHintForLaunchEndIfNeeded();
             }
 
+            // Once the target is shown, prevent spurious background app switches
+            if (reorderMode == REORDER_MOVE_TO_TOP) {
+                mService.stopAppSwitches();
+            }
+
             mService.mH.post(
                     () -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, false));
 
