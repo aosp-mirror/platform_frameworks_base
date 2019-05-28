@@ -255,7 +255,7 @@ public class StackScrollAlgorithm {
         state.paddingMap.clear();
         int notGoneIndex = 0;
         ExpandableView lastView = null;
-        int firstHiddenIndex = ambientState.isDark()
+        int firstHiddenIndex = ambientState.isDozing()
                 ? (ambientState.hasPulsingNotifications() ? 1 : 0)
                 : childCount;
 
