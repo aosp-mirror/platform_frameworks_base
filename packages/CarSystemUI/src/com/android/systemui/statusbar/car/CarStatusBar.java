@@ -311,7 +311,6 @@ public class CarStatusBar extends StatusBar implements
         return result;
     }
 
-
     @Override
     public void showKeyguard() {
         super.showKeyguard();
@@ -451,9 +450,21 @@ public class CarStatusBar extends StatusBar implements
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
                 () -> {
-                    // TODO: Update Notification Icon based on unseen count
-                    Log.d(TAG, "unseen count: " +
-                            mNotificationDataManager.getUnseenNotificationCount());
+                    if (mNavigationBarView != null && mNotificationDataManager != null) {
+                        Boolean hasUnseen =
+                                mNotificationDataManager.getUnseenNotificationCount() > 0;
+                        if (mNavigationBarView != null) {
+                            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+                        }
+
+                        if (mLeftNavigationBarView != null) {
+                            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+                        }
+
+                        if (mRightNavigationBarView != null) {
+                            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+                        }
+                    }
                 });
 
         CarHeadsUpNotificationManager carHeadsUpNotificationManager =
