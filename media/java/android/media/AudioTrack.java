@@ -101,6 +101,20 @@ public class AudioTrack extends PlayerBase
     public static final int PLAYSTATE_PAUSED  = 2;  // matches SL_PLAYSTATE_PAUSED
     /** indicates AudioTrack state is playing */
     public static final int PLAYSTATE_PLAYING = 3;  // matches SL_PLAYSTATE_PLAYING
+    /**
+      * @hide
+      * indicates AudioTrack state is stopping waiting for NATIVE_EVENT_STREAM_END to
+      * transition to PLAYSTATE_STOPPED.
+      * Only valid for offload mode.
+      */
+    private static final int PLAYSTATE_STOPPING = 4;
+    /**
+      * @hide
+      * indicates AudioTrack state is paused from stopping state. Will transition to
+      * PLAYSTATE_STOPPING if play() is called.
+      * Only valid for offload mode.
+      */
+    private static final int PLAYSTATE_PAUSED_STOPPING = 5;
 
     // keep these values in sync with android_media_AudioTrack.cpp
     /**
@@ -303,6 +317,14 @@ public class AudioTrack extends PlayerBase
      * One of PLAYSTATE_STOPPED, PLAYSTATE_PAUSED, or PLAYSTATE_PLAYING.
      */
     private int mPlayState = PLAYSTATE_STOPPED;
+
+    /**
+     * Indicates that we are expecting an end of stream callback following a call
+     * to setOffloadEndOfStream() in a gapless track transition context. The native track
+     * will be restarted automatically.
+     */
+    private boolean mOffloadEosPending = false;
+
     /**
      * Lock to ensure mPlayState updates reflect the actual state of the object.
      */
@@ -1073,6 +1095,10 @@ public class AudioTrack extends PlayerBase
      * Declares that the last write() operation on this track provided the last buffer of this
      * stream.
      * After the end of stream, previously set padding and delay values are ignored.
+     * Can only be called only if the AudioTrack is opened in offload mode
+     * {@see Builder#setOffloadedPlayback(boolean)}.
+     * Can only be called only if the AudioTrack is in state {@link #PLAYSTATE_PLAYING}
+     * {@see #getPlaystate()}.
      * Use this method in the same thread as any write() operation.
      */
     public void setOffloadEndOfStream() {
@@ -1082,7 +1108,20 @@ public class AudioTrack extends PlayerBase
         if (mState == STATE_UNINITIALIZED) {
             throw new IllegalStateException("Uninitialized track");
         }
-        native_set_eos();
+        if (mPlayState != PLAYSTATE_PLAYING) {
+            throw new IllegalStateException("EOS not supported if not playing");
+        }
+        synchronized (mStreamEventCbLock) {
+            if (mStreamEventCbInfoList.size() == 0) {
+                throw new IllegalStateException("EOS not supported without StreamEventCallback");
+            }
+        }
+
+        synchronized (mPlayStateLock) {
+            native_stop();
+            mOffloadEosPending = true;
+            mPlayState = PLAYSTATE_STOPPING;
+        }
     }
 
     /**
@@ -1366,7 +1405,11 @@ public class AudioTrack extends PlayerBase
         }
         baseRelease();
         native_release();
-        mState = STATE_UNINITIALIZED;
+        synchronized (mPlayStateLock) {
+            mState = STATE_UNINITIALIZED;
+            mPlayState = PLAYSTATE_STOPPED;
+            mPlayStateLock.notify();
+        }
     }
 
     @Override
@@ -1525,7 +1568,14 @@ public class AudioTrack extends PlayerBase
      */
     public int getPlayState() {
         synchronized (mPlayStateLock) {
-            return mPlayState;
+            switch (mPlayState) {
+                case PLAYSTATE_STOPPING:
+                    return PLAYSTATE_PLAYING;
+                case PLAYSTATE_PAUSED_STOPPING:
+                    return PLAYSTATE_PAUSED;
+                default:
+                    return mPlayState;
+            }
         }
     }
 
@@ -2260,7 +2310,12 @@ public class AudioTrack extends PlayerBase
         synchronized(mPlayStateLock) {
             baseStart();
             native_start();
-            mPlayState = PLAYSTATE_PLAYING;
+            if (mPlayState == PLAYSTATE_PAUSED_STOPPING) {
+                mPlayState = PLAYSTATE_STOPPING;
+            } else {
+                mPlayState = PLAYSTATE_PLAYING;
+                mOffloadEosPending = false;
+            }
         }
     }
 
@@ -2282,9 +2337,15 @@ public class AudioTrack extends PlayerBase
         synchronized(mPlayStateLock) {
             native_stop();
             baseStop();
-            mPlayState = PLAYSTATE_STOPPED;
-            mAvSyncHeader = null;
-            mAvSyncBytesRemaining = 0;
+            if (mOffloaded && mPlayState != PLAYSTATE_PAUSED_STOPPING) {
+                mPlayState = PLAYSTATE_STOPPING;
+            } else {
+                mPlayState = PLAYSTATE_STOPPED;
+                mOffloadEosPending = false;
+                mAvSyncHeader = null;
+                mAvSyncBytesRemaining = 0;
+                mPlayStateLock.notify();
+            }
         }
     }
 
@@ -2305,7 +2366,11 @@ public class AudioTrack extends PlayerBase
         synchronized(mPlayStateLock) {
             native_pause();
             basePause();
-            mPlayState = PLAYSTATE_PAUSED;
+            if (mPlayState == PLAYSTATE_STOPPING) {
+                mPlayState = PLAYSTATE_PAUSED_STOPPING;
+            } else {
+                mPlayState = PLAYSTATE_PAUSED;
+            }
         }
     }
 
@@ -2434,6 +2499,9 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
 
         final int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat,
                 writeMode == WRITE_BLOCKING);
@@ -2544,6 +2612,10 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
         final int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat,
                 writeMode == WRITE_BLOCKING);
 
@@ -2632,6 +2704,10 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
         final int ret = native_write_float(audioData, offsetInFloats, sizeInFloats, mAudioFormat,
                 writeMode == WRITE_BLOCKING);
 
@@ -2704,6 +2780,10 @@ public class AudioTrack extends PlayerBase
         if ( (audioData == null) || (sizeInBytes < 0) || (sizeInBytes > audioData.remaining())) {
             Log.e(TAG, "AudioTrack.write() called with invalid size (" + sizeInBytes + ") value");
             return ERROR_BAD_VALUE;
+        }
+
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
         }
 
         int ret = 0;
@@ -2790,6 +2870,10 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
         // create timestamp header if none exists
         if (mAvSyncHeader == null) {
             mAvSyncHeader = ByteBuffer.allocate(mOffset);
@@ -2857,6 +2941,25 @@ public class AudioTrack extends PlayerBase
             return ERROR_INVALID_OPERATION;
         }
         return native_reload_static();
+    }
+
+    /**
+     * When an AudioTrack in offload mode is in STOPPING play state, wait until event STREAM_END is
+     * received if blocking write or return with 0 frames written if non blocking mode.
+     */
+    private boolean blockUntilOffloadDrain(int writeMode) {
+        synchronized (mPlayStateLock) {
+            while (mPlayState == PLAYSTATE_STOPPING || mPlayState == PLAYSTATE_PAUSED_STOPPING) {
+                if (writeMode == WRITE_NON_BLOCKING) {
+                    return false;
+                }
+                try {
+                    mPlayStateLock.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            return true;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -3293,6 +3396,22 @@ public class AudioTrack extends PlayerBase
         public void handleMessage(Message msg) {
             final LinkedList<StreamEventCbInfo> cbInfoList;
             synchronized (mStreamEventCbLock) {
+                if (msg.what == NATIVE_EVENT_STREAM_END) {
+                    synchronized (mPlayStateLock) {
+                        if (mPlayState == PLAYSTATE_STOPPING) {
+                            if (mOffloadEosPending) {
+                                native_start();
+                                mPlayState = PLAYSTATE_PLAYING;
+                            } else {
+                                mAvSyncHeader = null;
+                                mAvSyncBytesRemaining = 0;
+                                mPlayState = PLAYSTATE_STOPPED;
+                            }
+                            mOffloadEosPending = false;
+                            mPlayStateLock.notify();
+                        }
+                    }
+                }
                 if (mStreamEventCbInfoList.size() == 0) {
                     return;
                 }
@@ -3560,7 +3679,6 @@ public class AudioTrack extends PlayerBase
     private native int native_getPortId();
 
     private native void native_set_delay_padding(int delayInFrames, int paddingInFrames);
-    private native void native_set_eos();
 
     //---------------------------------------------------------
     // Utility methods
