@@ -92,6 +92,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.networkstack.R;
 import com.android.networkstack.metrics.DataStallDetectionStats;
 import com.android.networkstack.metrics.DataStallStatsUtils;
+import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -420,7 +421,7 @@ public class NetworkMonitorTest {
         final WrappedNetworkMonitor nm = new WrappedNetworkMonitor();
         nm.start();
         setNetworkCapabilities(nm, nc);
-        waitForIdle(nm.getHandler());
+        HandlerUtilsKt.waitForIdle(nm.getHandler(), HANDLER_TIMEOUT_MS);
         mCreatedNetworkMonitors.add(nm);
         return nm;
     }
@@ -437,15 +438,7 @@ public class NetworkMonitorTest {
 
     private void setNetworkCapabilities(NetworkMonitor nm, NetworkCapabilities nc) {
         nm.notifyNetworkCapabilitiesChanged(nc);
-        waitForIdle(nm.getHandler());
-    }
-
-    private void waitForIdle(Handler handler) {
-        final ConditionVariable cv = new ConditionVariable(false);
-        handler.post(cv::open);
-        if (!cv.block(HANDLER_TIMEOUT_MS)) {
-            fail("Timed out waiting for handler");
-        }
+        HandlerUtilsKt.waitForIdle(nm.getHandler(), HANDLER_TIMEOUT_MS);
     }
 
     @Test
@@ -1125,7 +1118,7 @@ public class NetworkMonitorTest {
         } catch (RemoteException e) {
             fail("Unexpected exception: " + e);
         }
-        waitForIdle(monitor.getHandler());
+        HandlerUtilsKt.waitForIdle(monitor.getHandler(), HANDLER_TIMEOUT_MS);
 
         return monitor;
     }
