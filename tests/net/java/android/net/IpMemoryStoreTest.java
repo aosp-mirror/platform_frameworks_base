@@ -321,4 +321,11 @@ public class IpMemoryStoreTest {
                 eq(TEST_OTHER_DATA_NAME), any());
         assertEquals(TEST_NETWORK_ATTRIBUTES, new NetworkAttributes(mNapCaptor.getValue()));
     }
+
+    @Test
+    public void testFactoryReset() throws RemoteException {
+        startIpMemoryStore(true /* supplyService */);
+        mStore.factoryReset();
+        verify(mMockService, times(1)).factoryReset();
+    }
 }
