@@ -732,4 +732,25 @@ public class IpMemoryStoreServiceTest {
                             latch.countDown();
                         })));
     }
+
+    public void testTasksAreSerial() {
+        final long sleepTimeMs = 1000;
+        final long startTime = System.currentTimeMillis();
+        mService.retrieveNetworkAttributes("somekey", onNetworkAttributesRetrieved(
+                (status, key, attr) -> {
+                    assertTrue("Unexpected status : " + status.resultCode, status.isSuccess());
+                    try {
+                        Thread.sleep(sleepTimeMs);
+                    } catch (InterruptedException e) {
+                        fail("InterruptedException");
+                    }
+                }));
+        doLatched("Serial tasks timing out", latch ->
+                mService.retrieveNetworkAttributes("somekey", onNetworkAttributesRetrieved(
+                        (status, key, attr) -> {
+                            assertTrue("Unexpected status : " + status.resultCode,
+                                    status.isSuccess());
+                            assertTrue(System.currentTimeMillis() >= startTime + sleepTimeMs);
+                        })), DEFAULT_TIMEOUT_MS);
+    }
 }
