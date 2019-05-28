@@ -22,7 +22,6 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIB
 import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
-import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.EXTRA_BLOCKED_STATE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -4963,13 +4962,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), false);
         waitForIdle();
 
-        // Make sure we are not a bubble / reported as such to listeners
-        ArgumentCaptor<NotificationRecord> captor =
-                ArgumentCaptor.forClass(NotificationRecord.class);
-        verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
-
-        assertEquals((captor.getValue().getNotification().flags & FLAG_BUBBLE), 0);
-        assertTrue((captor.getValue().getNotification().flags & FLAG_ONLY_ALERT_ONCE) != 0);
+        // Make sure we are not a bubble
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
     }
 
     @Test
@@ -5000,13 +4996,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mNotificationDelegate.onNotificationBubbleChanged(nr.getKey(), true);
         waitForIdle();
 
-        // Make sure we are a bubble / reported as such to listeners
-        ArgumentCaptor<NotificationRecord> captor =
-                ArgumentCaptor.forClass(NotificationRecord.class);
-        verify(mListeners, times(1)).notifyPostedLocked(captor.capture(), any());
-
-        assertTrue((captor.getValue().getNotification().flags & FLAG_BUBBLE) != 0);
-        assertTrue((captor.getValue().getNotification().flags & FLAG_ONLY_ALERT_ONCE) != 0);
+        // Make sure we are a bubble
+        StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsAfter.length);
+        assertTrue((notifsAfter[0].getNotification().flags & FLAG_BUBBLE) != 0);
     }
 
     @Test
@@ -5037,7 +5030,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
-        verify(mListeners, times(0)).notifyPostedLocked(any(), any());
     }
 
     @Test
