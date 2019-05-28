@@ -49,7 +49,10 @@ LOCAL_REQUIRED_MODULES := \
 	IconShapeTeardropOverlay \
 	NavigationBarMode3ButtonOverlay \
 	NavigationBarMode2ButtonOverlay \
-	NavigationBarModeGesturalOverlay
+	NavigationBarModeGesturalOverlay \
+	NavigationBarModeGesturalOverlayNarrowBack \
+	NavigationBarModeGesturalOverlayWideBack \
+	NavigationBarModeGesturalOverlayExtraWideBack
 
 include $(BUILD_PHONY_PACKAGE)
 include $(CLEAR_VARS)
