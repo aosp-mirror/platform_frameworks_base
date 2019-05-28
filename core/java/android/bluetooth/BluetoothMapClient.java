@@ -53,6 +53,10 @@ public final class BluetoothMapClient implements BluetoothProfile {
      * NOTE: HANDLE is only valid for a single session with the device. */
     public static final String EXTRA_MESSAGE_HANDLE =
             "android.bluetooth.mapmce.profile.extra.MESSAGE_HANDLE";
+    public static final String EXTRA_MESSAGE_TIMESTAMP =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_TIMESTAMP";
+    public static final String EXTRA_MESSAGE_READ_STATUS =
+            "android.bluetooth.mapmce.profile.extra.MESSAGE_READ_STATUS";
     public static final String EXTRA_SENDER_CONTACT_URI =
             "android.bluetooth.mapmce.profile.extra.SENDER_CONTACT_URI";
     public static final String EXTRA_SENDER_CONTACT_NAME =

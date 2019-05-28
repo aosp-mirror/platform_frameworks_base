@@ -60,7 +60,6 @@ import java.util.concurrent.Executors;
  */
 public class IpMemoryStoreService extends IIpMemoryStore.Stub {
     private static final String TAG = IpMemoryStoreService.class.getSimpleName();
-    private static final int MAX_CONCURRENT_THREADS = 4;
     private static final int DATABASE_SIZE_THRESHOLD = 10 * 1024 * 1024; //10MB
     private static final int MAX_DROP_RECORD_TIMES = 500;
     private static final int MIN_DELETE_NUM = 5;
@@ -107,23 +106,17 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
             db = null;
         }
         mDb = db;
-        // The work-stealing thread pool executor will spawn threads as needed up to
-        // the max only when there is no free thread available. This generally behaves
-        // exactly like one would expect it intuitively :
-        // - When work arrives, it will spawn a new thread iff there are no available threads
-        // - When there is no work to do it will shutdown threads after a while (the while
-        //   being equal to 2 seconds (not configurable) when max threads are spun up and
-        //   twice as much for every one less thread)
-        // - When all threads are busy the work is enqueued and waits for any worker
-        //   to become available.
-        // Because the stealing pool is made for very heavily parallel execution of
-        // small tasks that spawn others, it creates a queue per thread that in this
-        // case is overhead. However, the three behaviors above make it a superior
-        // choice to cached or fixedThreadPoolExecutor, neither of which can actually
-        // enqueue a task waiting for a thread to be free. This can probably be solved
-        // with judicious subclassing of ThreadPoolExecutor, but that's a lot of dangerous
-        // complexity for little benefit in this case.
-        mExecutor = Executors.newWorkStealingPool(MAX_CONCURRENT_THREADS);
+        // The single thread executor guarantees that all work is executed sequentially on the
+        // same thread, and no two tasks can be active at the same time. This is required to
+        // ensure operations from multiple clients don't interfere with each other (in particular,
+        // operations involving a transaction must not run concurrently with other operations
+        // as the other operations might be taken as part of the transaction). By default, the
+        // single thread executor runs off an unbounded queue.
+        // TODO : investigate replacing this scheme with a scheme where each thread has its own
+        // instance of the database, as it may be faster. It is likely however that IpMemoryStore
+        // operations are mostly IO-bound anyway, and additional contention is unlikely to bring
+        // benefits. Alternatively, a read-write lock might increase throughput.
+        mExecutor = Executors.newSingleThreadExecutor();
         RegularMaintenanceJobService.schedule(mContext, this);
     }
 
@@ -410,8 +403,12 @@ public class IpMemoryStoreService extends IIpMemoryStore.Stub {
         });
     }
 
+    /**
+     * Wipe the data in IpMemoryStore database upon network factory reset.
+     */
     @Override
     public void factoryReset() {
+        mExecutor.execute(() -> IpMemoryStoreDatabase.wipeDataUponNetworkReset(mDb));
     }
 
     /** Get db size threshold. */
