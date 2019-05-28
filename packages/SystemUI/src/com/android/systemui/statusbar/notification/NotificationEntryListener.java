@@ -16,6 +16,8 @@
 package com.android.systemui.statusbar.notification;
 
 import android.annotation.Nullable;
+import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.NotificationVisibility;
@@ -97,5 +99,15 @@ public interface NotificationEntryListener {
             NotificationEntry entry,
             @Nullable NotificationVisibility visibility,
             boolean removedByUser) {
+    }
+
+    /**
+     * Called whenever notification ranking changes, in response to
+     * {@link NotificationListenerService#onNotificationRankingUpdate}. This is called after
+     * NotificationData has processed the update and notifications have been re-sorted and filtered.
+     *
+     * @param rankingMap provides access to ranking information on currently active notifications
+     */
+    default void onNotificationRankingUpdated(RankingMap rankingMap) {
     }
 }

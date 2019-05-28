@@ -732,7 +732,6 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
-
     /**
      * Changes the currently selected bubble. If the stack is already expanded, the newly selected
      * bubble will be shown immediately. This does not change the expanded state or change the
