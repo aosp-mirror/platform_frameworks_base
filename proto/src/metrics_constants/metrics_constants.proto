@@ -7376,6 +7376,9 @@ message MetricsEvent {
     // OS: Q
     FIELD_BIOMETRIC_AUTH_ERROR = 1741;
 
+    // Custom tag for NotificationItem. Hash of the NAS that made adjustments.
+    FIELD_NOTIFICATION_ASSISTANT_SERVICE_HASH = 1742;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

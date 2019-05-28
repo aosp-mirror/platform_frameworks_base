@@ -174,6 +174,7 @@ public final class NotificationRecord {
     private ArrayList<CharSequence> mSmartReplies;
 
     private final List<Adjustment> mAdjustments;
+    private String mAdjustmentIssuer;
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
@@ -683,6 +684,9 @@ public final class NotificationRecord {
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
                     importance = Math.min(IMPORTANCE_HIGH, importance);
                     setAssistantImportance(importance);
+                }
+                if (!signals.isEmpty() && adjustment.getIssuer() != null) {
+                    mAdjustmentIssuer = adjustment.getIssuer();
                 }
             }
             // We have now gotten all the information out of the adjustments and can forget them.
@@ -1296,6 +1300,13 @@ public final class NotificationRecord {
         if (mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
             lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST,
                         mAssistantImportance);
+        }
+        // Log the issuer of any adjustments that may have affected this notification. We only log
+        // the hash here as NotificationItem events are frequent, and the number of NAS
+        // implementations (and hence the chance of collisions) is low.
+        if (mAdjustmentIssuer != null) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_ASSISTANT_SERVICE_HASH,
+                    mAdjustmentIssuer.hashCode());
         }
         return lm;
     }
