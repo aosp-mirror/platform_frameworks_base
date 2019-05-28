@@ -82,6 +82,22 @@ public class WebViewUpdateServiceImpl {
     void prepareWebViewInSystemServer() {
         migrateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
+        if (getCurrentWebViewPackage() == null) {
+            // We didn't find a valid WebView implementation. Try explicitly re-enabling the
+            // fallback package for all users in case it was disabled, even if we already did the
+            // one-time migration before. If this actually changes the state, WebViewUpdater will
+            // see the PackageManager broadcast shortly and try again.
+            WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
+            WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
+            if (fallbackProvider != null) {
+                Slog.w(TAG, "No valid provider, trying to enable " + fallbackProvider.packageName);
+                mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName,
+                                                          true);
+            } else {
+                Slog.e(TAG, "No valid provider and no fallback available.");
+            }
+        }
+
         boolean multiProcessEnabled = isMultiProcessEnabled();
         mSystemInterface.notifyZygote(multiProcessEnabled);
         if (multiProcessEnabled) {
