@@ -74,7 +74,7 @@
     <color name="notification_divider_color">#FF616161</color>
 
     <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">#ffeeeeee</color>
+    <color name="notification_shade_background_color">@color/GM2_grey_200</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>
@@ -83,7 +83,7 @@
     <color name="notification_ripple_tinted_color">#30ffffff</color>
 
     <!-- The color of the gear shown behind a notification -->
-    <color name="notification_gear_color">#ff757575</color>
+    <color name="notification_gear_color">@color/GM2_grey_700</color>
 
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_light</color>
