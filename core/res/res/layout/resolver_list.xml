@@ -100,8 +100,8 @@
         android:layoutDirection="locale"
         android:measureWithLargestChild="true"
         android:background="?attr/colorBackgroundFloating"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingTop="@dimen/resolver_button_bar_spacing"
+        android:paddingBottom="@dimen/resolver_button_bar_spacing"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
         android:elevation="8dp">
