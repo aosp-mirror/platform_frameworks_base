@@ -65,7 +65,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val mDozeParameters: DozeParameters;
     var willWakeUp = false
         set(value) {
-            if (value && mDozeAmount != 0.0f) {
+            if (!value || mDozeAmount != 0.0f) {
                 field = value
             }
         }
