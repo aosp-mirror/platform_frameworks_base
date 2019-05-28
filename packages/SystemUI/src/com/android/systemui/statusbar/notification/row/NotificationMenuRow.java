@@ -340,6 +340,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 && !NotificationStackScrollLayout.isPinnedHeadsUp(getParent())
                 && !mParent.areGutsExposed()
                 && !mParent.isDark()
+                && !mParent.showingAmbientPulsing()
                 && (mCheckForDrag == null || !mHandler.hasCallbacks(mCheckForDrag))) {
             // Only show the menu if we're not a heads up view and guts aren't exposed.
             mCheckForDrag = new CheckForDrag();

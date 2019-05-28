@@ -172,11 +172,6 @@ public final class Zygote {
      */
     public static final int SOCKET_BUFFER_SIZE = 256;
 
-    /**
-     * @hide for internal use only
-     */
-    private static final int PRIORITY_MAX = -20;
-
     /** a prototype instance for a future List.toArray() */
     protected static final int[][] INT_ARRAY_2D = new int[0][0];
 
@@ -241,7 +236,8 @@ public final class Zygote {
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
             int targetSdkVersion) {
         ZygoteHooks.preFork();
-
+        // Resets nice priority for zygote process.
+        resetNicePriority();
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir);
@@ -253,7 +249,6 @@ public final class Zygote {
             // Note that this event ends at the end of handleChildProc,
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
         }
-
         ZygoteHooks.postForkCommon();
         return pid;
     }
@@ -340,16 +335,15 @@ public final class Zygote {
     public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
         ZygoteHooks.preFork();
-
+        // Resets nice priority for zygote process.
+        resetNicePriority();
         int pid = nativeForkSystemServer(
                 uid, gid, gids, runtimeFlags, rlimits,
                 permittedCapabilities, effectiveCapabilities);
-
         // Enable tracing as soon as we enter the system_server.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
         }
-
         ZygoteHooks.postForkCommon();
         return pid;
     }
@@ -467,16 +461,13 @@ public final class Zygote {
     /**
      * Fork a new unspecialized app process from the zygote
      *
-     * @param usapPoolSocket  The server socket the USAP will call accept on
      * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
-     * @param isPriorityFork  Value controlling the process priority level until accept is called
      * @return In the Zygote process this function will always return null; in unspecialized app
      *         processes this function will return a Runnable object representing the new
      *         application that is passed up from usapMain.
      */
     static Runnable forkUsap(LocalServerSocket usapPoolSocket,
-                             int[] sessionSocketRawFDs,
-                             boolean isPriorityFork) {
+                             int[] sessionSocketRawFDs) {
         FileDescriptor[] pipeFDs = null;
 
         try {
@@ -486,8 +477,7 @@ public final class Zygote {
         }
 
         int pid =
-                nativeForkUsap(pipeFDs[0].getInt$(), pipeFDs[1].getInt$(),
-                               sessionSocketRawFDs, isPriorityFork);
+                nativeForkUsap(pipeFDs[0].getInt$(), pipeFDs[1].getInt$(), sessionSocketRawFDs);
 
         if (pid == 0) {
             IoUtils.closeQuietly(pipeFDs[0]);
@@ -501,9 +491,8 @@ public final class Zygote {
     }
 
     private static native int nativeForkUsap(int readPipeFD,
-                                             int writePipeFD,
-                                             int[] sessionSocketRawFDs,
-                                             boolean isPriorityFork);
+                                                 int writePipeFD,
+                                                 int[] sessionSocketRawFDs);
 
     /**
      * This function is used by unspecialized app processes to wait for specialization requests from
@@ -525,11 +514,6 @@ public final class Zygote {
 
         // Load resources
         ZygoteInit.nativePreloadGraphicsDriver();
-
-        // Change the priority to max before calling accept so we can respond to new specialization
-        // requests as quickly as possible.  This will be reverted to the default priority in the
-        // native specialization code.
-        boostUsapPriority();
 
         while (true) {
             try {
@@ -633,12 +617,6 @@ public final class Zygote {
                                      args.mRemainingArgs,
                                      null /* classLoader */);
     }
-
-    private static void boostUsapPriority() {
-        nativeBoostUsapPriority();
-    }
-
-    private static native void nativeBoostUsapPriority();
 
     private static final String USAP_ERROR_PREFIX = "Invalid command to USAP: ";
 
@@ -877,6 +855,15 @@ public final class Zygote {
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             boolean isZygote, String instructionSet) {
         ZygoteHooks.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
+    }
+
+    /**
+     * Resets the calling thread priority to the default value (Thread.NORM_PRIORITY
+     * or nice value 0). This updates both the priority value in java.lang.Thread and
+     * the nice value (setpriority).
+     */
+    static void resetNicePriority() {
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
     }
 
     /**
