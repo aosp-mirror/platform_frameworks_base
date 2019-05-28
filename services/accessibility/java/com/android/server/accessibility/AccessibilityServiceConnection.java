@@ -32,7 +32,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
-import com.android.server.accessibility.AccessibilityManagerService.SecurityPolicy;
 import com.android.server.accessibility.AccessibilityManagerService.UserState;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -67,11 +66,11 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     public AccessibilityServiceConnection(UserState userState, Context context,
             ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
-            Object lock, SecurityPolicy securityPolicy, SystemSupport systemSupport,
+            Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer) {
+            GlobalActionPerformer globalActionPerfomer, AccessibilityWindowManager awm) {
         super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
-                securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer);
+                securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer, awm);
         mUserStateWeakReference = new WeakReference<UserState>(userState);
         mIntent = new Intent().setComponent(mComponentName);
         mMainHandler = mainHandler;

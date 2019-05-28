@@ -19,7 +19,6 @@ package android.net.util;
 import static android.net.util.DnsUtils.IPV6_ADDR_SCOPE_GLOBAL;
 import static android.net.util.DnsUtils.IPV6_ADDR_SCOPE_LINKLOCAL;
 import static android.net.util.DnsUtils.IPV6_ADDR_SCOPE_SITELOCAL;
-import static android.net.util.DnsUtils.rfc6724Sort;
 
 import static org.junit.Assert.assertEquals;
 
@@ -53,24 +52,6 @@ public class DnsUtilsTest {
             @Nullable String srcAddr) {
         return new DnsUtils.SortableAddress(stringToAddress(addr),
                 srcAddr != null ? stringToAddress(srcAddr) : null);
-    }
-
-    @Test
-    public void testRfc6724Sort() {
-        final List<InetAddress> testAddresses = Arrays.asList(
-                stringToAddress("172.217.24.14"),
-                stringToAddress("216.58.200.46"),
-                stringToAddress("2404:6800:4008:802::200e"));
-
-        final List<InetAddress> expected = Arrays.asList(
-                stringToAddress("2404:6800:4008:802::200e"),
-                stringToAddress("172.217.24.14"),
-                stringToAddress("216.58.200.46"));
-
-        final List<InetAddress> result = rfc6724Sort(null, testAddresses);
-
-        assertEquals(result.size(), testAddresses.size());
-        assertEquals(result, expected);
     }
 
     @Test

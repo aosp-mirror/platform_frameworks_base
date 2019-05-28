@@ -82,10 +82,11 @@ class UiAutomationManager {
             IAccessibilityServiceClient serviceClient,
             Context context, AccessibilityServiceInfo accessibilityServiceInfo,
             int id, Handler mainHandler,
-            AccessibilityManagerService.SecurityPolicy securityPolicy,
+            AccessibilitySecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer, int flags) {
+            GlobalActionPerformer globalActionPerfomer,
+            AccessibilityWindowManager awm, int flags) {
         synchronized (mLock) {
             accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
 
@@ -105,7 +106,7 @@ class UiAutomationManager {
             mSystemSupport = systemSupport;
             mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
                     mainHandler, mLock, securityPolicy, systemSupport, windowManagerInternal,
-                    globalActionPerfomer);
+                    globalActionPerfomer, awm);
             mUiAutomationServiceOwner = owner;
             mUiAutomationFlags = flags;
             mUiAutomationServiceInfo = accessibilityServiceInfo;
@@ -221,11 +222,12 @@ class UiAutomationManager {
 
         UiAutomationService(Context context, AccessibilityServiceInfo accessibilityServiceInfo,
                 int id, Handler mainHandler, Object lock,
-                AccessibilityManagerService.SecurityPolicy securityPolicy,
+                AccessibilitySecurityPolicy securityPolicy,
                 SystemSupport systemSupport, WindowManagerInternal windowManagerInternal,
-                GlobalActionPerformer globalActionPerfomer) {
+                GlobalActionPerformer globalActionPerfomer, AccessibilityWindowManager awm) {
             super(context, COMPONENT_NAME, accessibilityServiceInfo, id, mainHandler, lock,
-                    securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer);
+                    securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer,
+                    awm);
             mMainHandler = mainHandler;
         }
 

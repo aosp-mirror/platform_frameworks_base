@@ -8825,6 +8825,18 @@ public final class Settings {
                 SettingsValidators.JSON_OBJECT_VALIDATOR;
 
         /**
+         * Navigation bar mode.
+         *  0 = 3 button
+         *  1 = 2 button
+         *  2 = fully gestural
+         * @hide
+         */
+        public static final String NAVIGATION_MODE =
+                "navigation_mode";
+        private static final Validator NAVIGATION_MODE_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */
@@ -8967,6 +8979,7 @@ public final class Settings {
             SKIP_GESTURE,
             SILENCE_GESTURE,
             THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+            NAVIGATION_MODE,
             AWARE_ENABLED,
             SKIP_GESTURE_COUNT,
             SILENCE_ALARMS_GESTURE_COUNT,
@@ -9152,6 +9165,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_GESTURE, SILENCE_GESTURE_VALIDATOR);
             VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                     THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
+            VALIDATORS.put(NAVIGATION_MODE, NAVIGATION_MODE_VALIDATOR);
             VALIDATORS.put(AWARE_ENABLED, AWARE_ENABLED_VALIDATOR);
             VALIDATORS.put(SKIP_GESTURE_COUNT, SKIP_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_ALARMS_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);

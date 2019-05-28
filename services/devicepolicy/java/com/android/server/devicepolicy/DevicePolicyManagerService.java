@@ -2333,8 +2333,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
+            updatePasswordQualityCacheForUserGroup(userHandle);
             mPolicyCache.onUserRemoved(userHandle);
-
             mOwners.removeProfileOwner(userHandle);
             mOwners.writeProfileOwner(userHandle);
 
@@ -3650,6 +3650,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateScreenCaptureDisabled(userId,
                 getScreenCaptureDisabled(null, userId));
         pushUserRestrictions(userId);
+        // When system user is started (device boot), load cache for all users.
+        // This is to mitigate the potential race between loading the cache and keyguard
+        // reading the value during user switch, due to onStartUser() being asynchronous.
+        updatePasswordQualityCacheForUserGroup(
+                userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
 
         startOwnerService(userId, "start-user");
     }
@@ -4135,13 +4140,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.quality != quality) {
-                metrics.quality = quality;
-                updatePasswordValidityCheckpointLocked(userId, parent);
-                saveSettingsLocked(userId);
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
+                final PasswordMetrics metrics = ap.minimumPasswordMetrics;
+                if (metrics.quality != quality) {
+                    metrics.quality = quality;
+                    updatePasswordValidityCheckpointLocked(userId, parent);
+                    updatePasswordQualityCacheForUserGroup(userId);
+                    saveSettingsLocked(userId);
+                }
+                maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_QUALITY)
@@ -4171,6 +4182,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         metrics, userHandle, parent);
 
         saveSettingsLocked(credentialOwner);
+    }
+
+    /**
+     * Update password quality values in policy cache for all users in the same user group as
+     * the given user. The cached password quality for user X is the aggregated quality among all
+     * admins who have influence of user X's screenlock, i.e. it's equivalent to the return value of
+     * getPasswordQuality(null, user X, false).
+     *
+     * Caches for all users in the same user group often need to be updated alltogether because a
+     * user's admin policy can affect another's aggregated password quality in some situation.
+     * For example a managed profile's policy will affect the parent user if the profile has unified
+     * challenge. A profile can also explicitly set a parent password quality which will affect the
+     * aggregated password quality of the parent user.
+     */
+    private void updatePasswordQualityCacheForUserGroup(@UserIdInt int userId) {
+        final List<UserInfo> users;
+        if (userId == UserHandle.USER_ALL) {
+            users = mUserManager.getUsers();
+        } else {
+            users = mUserManager.getProfiles(userId);
+        }
+        for (UserInfo userInfo : users) {
+            final int currentUserId = userInfo.id;
+            mPolicyCache.setPasswordQuality(currentUserId,
+                    getPasswordQuality(null, currentUserId, false));
+        }
     }
 
     @Override
@@ -8849,6 +8886,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mStatLogger.dump(pw, "  ");
             pw.println();
             pw.println("  Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
+            pw.println();
+            mPolicyCache.dump("  ", pw);
         }
     }
 
@@ -11319,8 +11358,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @Override
         public void reportSeparateProfileChallengeChanged(@UserIdInt int userId) {
-            synchronized (getLockObject()) {
-                updateMaximumTimeToLockLocked(userId);
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
+                synchronized (getLockObject()) {
+                    updateMaximumTimeToLockLocked(userId);
+                    updatePasswordQualityCacheForUserGroup(userId);
+                }
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
             }
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SEPARATE_PROFILE_CHALLENGE_CHANGED)
@@ -11336,7 +11381,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId) {
             synchronized (getLockObject()) {
-                DevicePolicyData policy = getUserData(userId);
                 if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING,
                         UserHandle.of(userId))) {
                     Log.e(LOG_TAG, "printing is enabled");

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.Handler;
@@ -125,9 +126,7 @@ class KeyguardDisableHandler {
         return new KeyguardDisableHandler(new Injector() {
             @Override
             public boolean dpmRequiresPassword(int userId) {
-                DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
-                        Context.DEVICE_POLICY_SERVICE);
-                return dpm == null || dpm.getPasswordQuality(null, userId)
+                return DevicePolicyCache.getInstance().getPasswordQuality(userId)
                         != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             }
 
