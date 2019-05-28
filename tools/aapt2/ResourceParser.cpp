@@ -769,16 +769,14 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
     return std::move(string);
   }
 
-  // If the text is empty, and the value is not allowed to be a string, encode it as a @null.
-  if (util::TrimWhitespace(raw_value).empty()) {
-    return ResourceUtils::MakeNull();
-  }
-
   if (allow_raw_value) {
     // We can't parse this so return a RawString if we are allowed.
     return util::make_unique<RawString>(
         table_->string_pool.MakeRef(util::TrimWhitespace(raw_value),
                                     StringPool::Context(config_)));
+  } else if (util::TrimWhitespace(raw_value).empty()) {
+    // If the text is empty, and the value is not allowed to be a string, encode it as a @null.
+    return ResourceUtils::MakeNull();
   }
   return {};
 }
