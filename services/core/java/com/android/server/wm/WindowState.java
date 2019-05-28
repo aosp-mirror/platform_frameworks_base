@@ -4008,6 +4008,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WindowInfo getWindowInfo() {
         WindowInfo windowInfo = WindowInfo.obtain();
+        windowInfo.displayId = getDisplayId();
         windowInfo.type = mAttrs.type;
         windowInfo.layer = mLayer;
         windowInfo.token = mClient.asBinder();

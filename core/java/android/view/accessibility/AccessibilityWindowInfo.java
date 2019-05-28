@@ -24,6 +24,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
+import android.view.Display;
 import android.view.accessibility.AccessibilityEvent.WindowsChangeTypes;
 
 import java.util.Objects;
@@ -100,6 +101,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private static AtomicInteger sNumInstancesInUse;
 
     // Data.
+    private int mDisplayId = Display.INVALID_DISPLAY;
     private int mType = UNDEFINED_WINDOW_ID;
     private int mLayer = UNDEFINED_WINDOW_ID;
     private int mBooleanProperties;
@@ -428,6 +430,27 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     /**
+     * Sets the display Id.
+     *
+     * @param displayId The display id.
+     *
+     * @hide
+     */
+    public void setDisplayId(int displayId) {
+        mDisplayId = displayId;
+    }
+
+    /**
+     * Returns the ID of the display this window is on, for use with
+     * {@link android.hardware.display.DisplayManager#getDisplay(int)}.
+     *
+     * @return The logical display id.
+     */
+    public int getDisplayId() {
+        return mDisplayId;
+    }
+
+    /**
      * Returns a cached instance if such is available or a new one is
      * created.
      *
@@ -493,6 +516,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(mDisplayId);
         parcel.writeInt(mType);
         parcel.writeInt(mLayer);
         parcel.writeInt(mBooleanProperties);
@@ -522,6 +546,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @param other The other instance.
      */
     private void init(AccessibilityWindowInfo other) {
+        mDisplayId = other.mDisplayId;
         mType = other.mType;
         mLayer = other.mLayer;
         mBooleanProperties = other.mBooleanProperties;
@@ -543,6 +568,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     }
 
     private void initFromParcel(Parcel parcel) {
+        mDisplayId = parcel.readInt();
         mType = parcel.readInt();
         mLayer = parcel.readInt();
         mBooleanProperties = parcel.readInt();
@@ -591,6 +617,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         StringBuilder builder = new StringBuilder();
         builder.append("AccessibilityWindowInfo[");
         builder.append("title=").append(mTitle);
+        builder.append(", displayId=").append(mDisplayId);
         builder.append(", id=").append(mId);
         builder.append(", type=").append(typeToString(mType));
         builder.append(", layer=").append(mLayer);
@@ -628,6 +655,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Clears the internal state.
      */
     private void clear() {
+        mDisplayId = Display.INVALID_DISPLAY;
         mType = UNDEFINED_WINDOW_ID;
         mLayer = UNDEFINED_WINDOW_ID;
         mBooleanProperties = 0;
@@ -688,44 +716,6 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
     }
 
-    /**
-     * Checks whether this window changed. The argument should be
-     * another state of the same window, which is have the same id
-     * and type as they never change.
-     *
-     * @param other The new state.
-     * @return Whether something changed.
-     *
-     * @hide
-     */
-    public boolean changed(AccessibilityWindowInfo other) {
-        if (other.mId != mId) {
-            throw new IllegalArgumentException("Not same window.");
-        }
-        if (other.mType != mType) {
-            throw new IllegalArgumentException("Not same type.");
-        }
-        if (!mBoundsInScreen.equals(other.mBoundsInScreen)) {
-            return true;
-        }
-        if (mLayer != other.mLayer) {
-            return true;
-        }
-        if (mBooleanProperties != other.mBooleanProperties) {
-            return true;
-        }
-        if (mParentId != other.mParentId) {
-            return true;
-        }
-        if (mChildIds == null) {
-            if (other.mChildIds != null) {
-                return true;
-            }
-        } else if (!mChildIds.equals(other.mChildIds)) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Reports how this window differs from a possibly different state of the same window. The
@@ -778,6 +768,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         if (!Objects.equals(mChildIds, other.mChildIds)) {
             changes |= AccessibilityEvent.WINDOWS_CHANGE_CHILDREN;
         }
+        //TODO(b/1338122): Add DISPLAY_CHANGED type for multi-display
         return changes;
     }
 

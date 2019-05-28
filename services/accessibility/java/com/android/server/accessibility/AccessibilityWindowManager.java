@@ -1009,6 +1009,7 @@ public class AccessibilityWindowManager
         reportedWindow.setTitle(window.title);
         reportedWindow.setAnchorId(window.accessibilityIdOfAnchor);
         reportedWindow.setPictureInPicture(window.inPictureInPicture);
+        reportedWindow.setDisplayId(window.displayId);
 
         final int parentId = findWindowIdLocked(userId, window.parentToken);
         if (parentId >= 0) {

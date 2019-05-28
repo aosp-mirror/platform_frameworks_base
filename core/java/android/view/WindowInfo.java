@@ -50,6 +50,7 @@ public class WindowInfo implements Parcelable {
     public long accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     public boolean inPictureInPicture;
     public boolean hasFlagWatchOutsideTouch;
+    public int displayId = Display.INVALID_DISPLAY;
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -65,6 +66,7 @@ public class WindowInfo implements Parcelable {
 
     public static WindowInfo obtain(WindowInfo other) {
         WindowInfo window = obtain();
+        window.displayId = other.displayId;
         window.type = other.type;
         window.layer = other.layer;
         window.token = other.token;
@@ -100,6 +102,7 @@ public class WindowInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(displayId);
         parcel.writeInt(type);
         parcel.writeInt(layer);
         parcel.writeStrongBinder(token);
@@ -125,6 +128,7 @@ public class WindowInfo implements Parcelable {
         StringBuilder builder = new StringBuilder();
         builder.append("WindowInfo[");
         builder.append("title=").append(title);
+        builder.append(", displayId=").append(displayId);
         builder.append(", type=").append(type);
         builder.append(", layer=").append(layer);
         builder.append(", token=").append(token);
@@ -140,6 +144,7 @@ public class WindowInfo implements Parcelable {
     }
 
     private void initFromParcel(Parcel parcel) {
+        displayId = parcel.readInt();
         type = parcel.readInt();
         layer = parcel.readInt();
         token = parcel.readStrongBinder();
@@ -162,6 +167,7 @@ public class WindowInfo implements Parcelable {
     }
 
     private void clear() {
+        displayId = Display.INVALID_DISPLAY;
         type = 0;
         layer = 0;
         token = null;

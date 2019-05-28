@@ -1368,6 +1368,9 @@ final class AccessibilityController {
             if (oldWindow.accessibilityIdOfAnchor != newWindow.accessibilityIdOfAnchor) {
                 return true;
             }
+            if (oldWindow.displayId != newWindow.displayId) {
+                return true;
+            }
             return false;
         }
 
