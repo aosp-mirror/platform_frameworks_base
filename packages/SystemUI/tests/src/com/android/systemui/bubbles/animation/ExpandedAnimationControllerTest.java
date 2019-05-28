@@ -43,10 +43,14 @@ import org.mockito.Spy;
 @RunWith(AndroidTestingRunner.class)
 public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestCase {
 
+    private int mDisplayWidth = 500;
+    private int mDisplayHeight = 1000;
+
     @Spy
     private ExpandedAnimationController mExpandedController =
             new ExpandedAnimationController(
-                new Point(500, 1000) /* displaySize */, 0 /* expandedViewPadding */);
+                    new Point(mDisplayWidth, mDisplayHeight) /* displaySize */,
+                    0 /* expandedViewPadding */);
     private int mStackOffset;
     private float mBubblePadding;
     private float mBubbleSize;
@@ -58,11 +62,11 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         super.setUp();
         addOneMoreThanRenderLimitBubbles();
         mLayout.setController(mExpandedController);
+
         Resources res = mLayout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-
         mExpansionPoint = new PointF(100, 100);
     }
 
@@ -243,7 +247,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private void testBubblesInCorrectExpandedPositions() {
         // Check all the visible bubbles to see if they're in the right place.
         for (int i = 0; i < Math.min(mLayout.getChildCount(), mMaxRenderedBubbles); i++) {
-            assertEquals(mBubblePadding + (i * (mBubbleSize + mBubblePadding)),
+            assertEquals(getBubbleLeft(i),
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
             assertEquals(mExpandedController.getExpandedY(),
@@ -253,5 +257,34 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
                 assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
             }
         }
+    }
+
+    /**
+     * @param index Bubble index in row.
+     * @return Bubble left x from left edge of screen.
+     */
+    public float getBubbleLeft(int index) {
+        float bubbleLeftFromRowLeft = index * (mBubbleSize + mBubblePadding);
+        return getRowLeft() + bubbleLeftFromRowLeft;
+    }
+
+    private float getRowLeft() {
+        if (mLayout == null) {
+            return 0;
+        }
+        int bubbleCount = mLayout.getChildCount();
+        if (bubbleCount > mMaxRenderedBubbles) {
+            bubbleCount = mMaxRenderedBubbles;
+        }
+        // Width calculations.
+        double bubble = bubbleCount * mBubbleSize;
+        float gap = (bubbleCount - 1) * mBubblePadding;
+        float row = gap + (float) bubble;
+
+        float halfRow = row / 2f;
+        float centerScreen = mDisplayWidth / 2;
+        float rowLeftFromScreenLeft = centerScreen - halfRow;
+
+        return rowLeftFromScreenLeft;
     }
 }
