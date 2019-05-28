@@ -402,6 +402,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mRow).setEntry(eq(mEntry));
         assertEquals(1, mEntry.systemGeneratedSmartActions.size());
         assertEquals("action", mEntry.systemGeneratedSmartActions.get(0).title);
+        verify(mEntryListener).onNotificationRankingUpdated(mRankingMap);
     }
 
     @Test
