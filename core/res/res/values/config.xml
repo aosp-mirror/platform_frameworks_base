@@ -1172,6 +1172,9 @@
 
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
+    <!-- The character count of the minimum match for comparison phone numbers -->
+    <integer name="config_phonenumber_compare_min_match">7</integer>
+
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
     <integer name="config_criticalBatteryWarningLevel">5</integer>
