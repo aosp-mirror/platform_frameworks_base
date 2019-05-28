@@ -615,12 +615,13 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     @Override
-    public void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
+    public boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp, boolean hasDndAccess) {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(channel.getId());
         Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
+        boolean needsPolicyFileChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -637,17 +638,28 @@ public class PreferencesHelper implements RankingConfig {
             if (existing != null && fromTargetApp) {
                 if (existing.isDeleted()) {
                     existing.setDeleted(false);
+                    needsPolicyFileChange = true;
 
                     // log a resurrected channel as if it's new again
                     MetricsLogger.action(getChannelLog(channel, pkg).setType(
                             com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
                 }
 
-                existing.setName(channel.getName().toString());
-                existing.setDescription(channel.getDescription());
-                existing.setBlockableSystem(channel.isBlockableSystem());
-                if (existing.getGroup() == null) {
+                if (!Objects.equals(channel.getName().toString(), existing.getName().toString())) {
+                    existing.setName(channel.getName().toString());
+                    needsPolicyFileChange = true;
+                }
+                if (!Objects.equals(channel.getDescription(), existing.getDescription())) {
+                    existing.setDescription(channel.getDescription());
+                    needsPolicyFileChange = true;
+                }
+                if (channel.isBlockableSystem() != existing.isBlockableSystem()) {
+                    existing.setBlockableSystem(channel.isBlockableSystem());
+                    needsPolicyFileChange = true;
+                }
+                if (channel.getGroup() != null && existing.getGroup() == null) {
                     existing.setGroup(channel.getGroup());
+                    needsPolicyFileChange = true;
                 }
 
                 // Apps are allowed to downgrade channel importance if the user has not changed any
@@ -656,23 +668,30 @@ public class PreferencesHelper implements RankingConfig {
                 if (existing.getUserLockedFields() == 0 &&
                         channel.getImportance() < existing.getImportance()) {
                     existing.setImportance(channel.getImportance());
+                    needsPolicyFileChange = true;
                 }
 
                 // system apps and dnd access apps can bypass dnd if the user hasn't changed any
                 // fields on the channel yet
                 if (existing.getUserLockedFields() == 0 && hasDndAccess) {
                     boolean bypassDnd = channel.canBypassDnd();
-                    existing.setBypassDnd(bypassDnd);
+                    if (bypassDnd != existing.canBypassDnd()) {
+                        existing.setBypassDnd(bypassDnd);
+                        needsPolicyFileChange = true;
 
-                    if (bypassDnd != mAreChannelsBypassingDnd
-                            || previousExistingImportance != existing.getImportance()) {
-                        updateChannelsBypassingDnd(mContext.getUserId());
+                        if (bypassDnd != mAreChannelsBypassingDnd
+                                || previousExistingImportance != existing.getImportance()) {
+                            updateChannelsBypassingDnd(mContext.getUserId());
+                        }
                     }
                 }
 
                 updateConfig();
-                return;
+                return needsPolicyFileChange;
             }
+
+            needsPolicyFileChange = true;
+
             if (channel.getImportance() < IMPORTANCE_NONE
                     || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
                 throw new IllegalArgumentException("Invalid importance level");
@@ -708,6 +727,8 @@ public class PreferencesHelper implements RankingConfig {
             MetricsLogger.action(getChannelLog(channel, pkg).setType(
                     com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_OPEN));
         }
+
+        return needsPolicyFileChange;
     }
 
     void clearLockedFieldsLocked(NotificationChannel channel) {
