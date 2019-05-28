@@ -41,8 +41,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ActivityTaskManager;
-import android.app.IActivityTaskManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -54,6 +52,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.Log;
@@ -139,7 +138,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
-    private final IActivityTaskManager mActivityTaskManager;
     private final BubbleTaskStackListener mTaskStackListener;
     private BubbleStateChangeListener mStateChangeListener;
     private BubbleExpandListener mExpandListener;
@@ -251,7 +249,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mStatusBarStateListener = new StatusBarStateListener();
         Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
 
-        mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = new BubbleTaskStackListener();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
@@ -509,6 +506,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 entry.setBubbleDismissed(false); // updates come back as bubbles even if dismissed
                 updateBubble(entry);
             }
+        }
+
+        @Override
+        public void onNotificationRankingUpdated(RankingMap rankingMap) {
+            // Forward to BubbleData to block any bubbles which should no longer be shown
+            mBubbleData.notificationRankingUpdated(rankingMap);
         }
     };
 

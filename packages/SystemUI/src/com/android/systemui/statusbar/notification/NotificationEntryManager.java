@@ -483,6 +483,10 @@ public class NotificationEntryManager implements
         }
 
         updateNotifications();
+
+        for (NotificationEntryListener listener : mNotificationEntryListeners) {
+            listener.onNotificationRankingUpdated(rankingMap);
+        }
     }
 
     private void updateRankingOfPendingNotifications(
