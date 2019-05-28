@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -35,6 +36,8 @@ public class FloatingRotationButton implements RotationButton {
     private final Context mContext;
     private final WindowManager mWindowManager;
     private final KeyButtonView mKeyButtonView;
+    private final int mDiameter;
+    private final int mMargin;
     private KeyButtonDrawable mKeyButtonDrawable;
     private boolean mIsShowing;
     private boolean mCanShow = true;
@@ -46,6 +49,11 @@ public class FloatingRotationButton implements RotationButton {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mKeyButtonView = (KeyButtonView) LayoutInflater.from(mContext).inflate(
                 R.layout.rotate_suggestion, null);
+        mKeyButtonView.setVisibility(View.VISIBLE);
+
+        Resources resources = mContext.getResources();
+        mDiameter = resources.getDimensionPixelSize(R.dimen.floating_rotation_button_diameter);
+        mMargin = resources.getDimensionPixelSize(R.dimen.floating_rotation_button_margin);
     }
 
     @Override
@@ -66,11 +74,8 @@ public class FloatingRotationButton implements RotationButton {
         mIsShowing = true;
         int flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        float density = mContext.getResources().getDisplayMetrics().density;
-        int diameter = (int) density * 48;
-        int margin = (int) density * 4;
-        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(diameter, diameter,
-                margin, margin, WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, flags,
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(mDiameter, mDiameter,
+                mMargin, mMargin, WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("FloatingRotationButton");
