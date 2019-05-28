@@ -1973,4 +1973,14 @@ interface ITelephony {
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
 
     boolean isApnMetered(int apnType, int subId);
+
+    /**
+     * Returns the MMS user agent.
+     */
+    String getMmsUserAgent(int subId);
+
+    /**
+     * Returns the MMS user agent profile URL.
+     */
+    String getMmsUAProfUrl(int subId);
 }
