@@ -170,9 +170,10 @@ public class BubbleClockController implements ClockPlugin {
             return;
         }
         final int length = colorPalette.length;
-        final int color = colorPalette[Math.max(0, length - 3)];
-        mLockClock.setTextColor(color);
-        mAnalogClock.setClockColors(color, color);
+        final int primaryColor = colorPalette[Math.max(0, length - 2)];
+        final int secondaryColor = colorPalette[Math.max(0, length - 5)];
+        mLockClock.setTextColor(primaryColor);
+        mAnalogClock.setClockColors(secondaryColor, primaryColor);
     }
 
     @Override
