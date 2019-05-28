@@ -162,15 +162,15 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
             }
 
             if ((opResult.output != null) && (opResult.output.length > 0)) {
-                if (inputLength > 0) {
+                if (inputLength + mBufferedLength > 0) {
                     // More output might be produced in this loop -- buffer the current output
                     if (bufferedOutput == null) {
                         bufferedOutput = new ByteArrayOutputStream();
-                        try {
-                            bufferedOutput.write(opResult.output);
-                        } catch (IOException e) {
-                            throw new ProviderException("Failed to buffer output", e);
-                        }
+                    }
+                    try {
+                        bufferedOutput.write(opResult.output);
+                    } catch (IOException e) {
+                        throw new ProviderException("Failed to buffer output", e);
                     }
                 } else {
                     // No more output will be produced in this loop
