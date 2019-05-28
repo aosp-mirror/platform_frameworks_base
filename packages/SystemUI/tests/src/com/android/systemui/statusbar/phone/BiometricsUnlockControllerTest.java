@@ -71,8 +71,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private UnlockMethodCache mUnlockMethodCache;
     @Mock
-    private TunerService mTunerService;
-    @Mock
     private Handler mHandler;
     private BiometricUnlockController mBiometricUnlockController;
 
@@ -192,9 +190,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         TestableBiometricUnlockController(boolean faceDismissesKeyguard) {
             super(mContext, mDozeScrimController,
                     mKeyguardViewMediator, mScrimController, mStatusBar, mUnlockMethodCache,
-                    mHandler, mUpdateMonitor, mTunerService, 0 /* wakeUpDelay */,
-                    faceDismissesKeyguard);
-            mFaceDismissesKeyguard = faceDismissesKeyguard;
+                    mHandler, mUpdateMonitor, 0 /* wakeUpDelay */,
+                    new KeyguardBypassController(faceDismissesKeyguard));
         }
     }
 }
