@@ -51,7 +51,8 @@ public class NavigationBarRotationContextTest extends SysuiTestCase {
     public final SysuiTestableContext mContext = new SysuiTestableContext(
             InstrumentationRegistry.getContext(), getLeakCheck());
     private final TestableDependency mDependency = new TestableDependency(mContext);
-    private RotationContextButton mButton;
+    private RotationButtonController mRotationButtonController;
+    private RotationButton mRotationButton;
 
     @Before
     public void setup() {
@@ -59,50 +60,66 @@ public class NavigationBarRotationContextTest extends SysuiTestCase {
         mDependency.injectMockDependency(RotationLockController.class);
 
         final View view = new View(mContext);
-        mButton = spy(new RotationContextButton(RES_UNDEF, RES_UNDEF, mContext, RES_UNDEF));
+        mRotationButton = mock(RotationButton.class);
+        mRotationButtonController = spy(
+                new RotationButtonController(mContext, RES_UNDEF, mRotationButton));
         final KeyButtonDrawable kbd = mock(KeyButtonDrawable.class);
-        doReturn(view).when(mButton).getCurrentView();
-        doReturn(kbd).when(mButton).getNewDrawable();
+        doReturn(view).when(mRotationButton).getCurrentView();
+        doReturn(true).when(mRotationButton).acceptRotationProposal();
     }
 
     @Test
     public void testOnInvalidRotationProposal() {
-        mButton.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE + 1, false /* isValid */);
-        verify(mButton, times(1)).setRotateSuggestionButtonState(false /* visible */);
+        mRotationButtonController.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE + 1,
+                false /* isValid */);
+        verify(mRotationButtonController, times(1)).setRotateSuggestionButtonState(
+                false /* visible */);
     }
 
     @Test
     public void testOnSameRotationProposal() {
-        mButton.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE, true /* isValid */);
-        verify(mButton, times(1)).setRotateSuggestionButtonState(false /* visible */);
+        mRotationButtonController.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE,
+                true /* isValid */);
+        verify(mRotationButtonController, times(1)).setRotateSuggestionButtonState(
+                false /* visible */);
     }
 
     @Test
     public void testOnRotationProposalShowButtonShowNav() {
         // No navigation bar should not call to set visibility state
-        mButton.onNavigationBarWindowVisibilityChange(false /* showing */);
-        verify(mButton, times(0)).setRotateSuggestionButtonState(false /* visible */);
-        verify(mButton, times(0)).setRotateSuggestionButtonState(true /* visible */);
+        mRotationButtonController.onNavigationBarWindowVisibilityChange(false /* showing */);
+        verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
+                false /* visible */);
+        verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
+                true /* visible */);
 
         // No navigation bar with rotation change should not call to set visibility state
-        mButton.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE + 1, true /* isValid */);
-        verify(mButton, times(0)).setRotateSuggestionButtonState(false /* visible */);
-        verify(mButton, times(0)).setRotateSuggestionButtonState(true /* visible */);
+        mRotationButtonController.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE + 1,
+                true /* isValid */);
+        verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
+                false /* visible */);
+        verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
+                true /* visible */);
 
         // Since rotation has changed rotation should be pending, show mButton when showing nav bar
-        mButton.onNavigationBarWindowVisibilityChange(true /* showing */);
-        verify(mButton, times(1)).setRotateSuggestionButtonState(true /* visible */);
+        mRotationButtonController.onNavigationBarWindowVisibilityChange(true /* showing */);
+        verify(mRotationButtonController, times(1)).setRotateSuggestionButtonState(
+                true /* visible */);
     }
 
     @Test
     public void testOnRotationProposalShowButton() {
         // Navigation bar being visible should not call to set visibility state
-        mButton.onNavigationBarWindowVisibilityChange(true /* showing */);
-        verify(mButton, times(0)).setRotateSuggestionButtonState(false /* visible */);
-        verify(mButton, times(0)).setRotateSuggestionButtonState(true /* visible */);
+        mRotationButtonController.onNavigationBarWindowVisibilityChange(true /* showing */);
+        verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
+                false /* visible */);
+        verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
+                true /* visible */);
 
         // Navigation bar is visible and rotation requested
-        mButton.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE + 1, true /* isValid */);
-        verify(mButton, times(1)).setRotateSuggestionButtonState(true /* visible */);
+        mRotationButtonController.onRotationProposal(DEFAULT_ROTATE, DEFAULT_ROTATE + 1,
+                true /* isValid */);
+        verify(mRotationButtonController, times(1)).setRotateSuggestionButtonState(
+                true /* visible */);
     }
 }
