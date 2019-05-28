@@ -661,12 +661,6 @@ public class AdbDebuggingManager {
         return mTestUserKeyFile == null ? getAdbFile(ADB_KEYS_FILE) : mTestUserKeyFile;
     }
 
-    private void createKeyFile(File keyFile) throws IOException {
-        keyFile.createNewFile();
-        FileUtils.setPermissions(keyFile.toString(),
-                FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP, -1, -1);
-    }
-
     private void writeKey(String key) {
         try {
             File keyFile = getUserKeyFile();
@@ -675,14 +669,13 @@ public class AdbDebuggingManager {
                 return;
             }
 
-            if (!keyFile.exists()) {
-                createKeyFile(keyFile);
-            }
-
             FileOutputStream fo = new FileOutputStream(keyFile, true);
             fo.write(key.getBytes());
             fo.write('\n');
             fo.close();
+
+            FileUtils.setPermissions(keyFile.toString(),
+                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP, -1, -1);
         } catch (IOException ex) {
             Slog.e(TAG, "Error writing key:" + ex);
         }
@@ -698,10 +691,6 @@ public class AdbDebuggingManager {
                 return;
             }
 
-            if (!keyFile.exists()) {
-                createKeyFile(keyFile);
-            }
-
             atomicKeyFile = new AtomicFile(keyFile);
             fo = atomicKeyFile.startWrite();
             for (String key : keys) {
@@ -709,6 +698,9 @@ public class AdbDebuggingManager {
                 fo.write('\n');
             }
             atomicKeyFile.finishWrite(fo);
+
+            FileUtils.setPermissions(keyFile.toString(),
+                    FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP, -1, -1);
         } catch (IOException ex) {
             Slog.e(TAG, "Error writing keys: " + ex);
             if (atomicKeyFile != null) {
