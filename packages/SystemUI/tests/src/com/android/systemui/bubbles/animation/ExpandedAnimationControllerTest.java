@@ -61,7 +61,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     public void setUp() throws Exception {
         super.setUp();
         addOneMoreThanRenderLimitBubbles();
-        mLayout.setController(mExpandedController);
+        mLayout.setActiveController(mExpandedController);
 
         Resources res = mLayout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);

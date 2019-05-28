@@ -138,6 +138,13 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         }
 
         @Override
+        protected boolean isActiveController(PhysicsAnimationController controller) {
+            // Return true since otherwise all test controllers will be seen as inactive since they
+            // are wrapped by MainThreadAnimationControllerWrapper.
+            return true;
+        }
+
+        @Override
         public boolean post(Runnable action) {
             return mMainThreadHandler.post(action);
         }
@@ -148,9 +155,9 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
         }
 
         @Override
-        public void setController(PhysicsAnimationController controller) {
+        public void setActiveController(PhysicsAnimationController controller) {
             runOnMainThreadAndBlock(
-                    () -> super.setController(
+                    () -> super.setActiveController(
                             new MainThreadAnimationControllerWrapper(controller)));
         }
 
@@ -264,6 +271,12 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
             void onChildRemoved(View child, int index, Runnable finishRemoval) {
                 runOnMainThreadAndBlock(
                         () -> mWrappedController.onChildRemoved(child, index, finishRemoval));
+            }
+
+            @Override
+            void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
+                runOnMainThreadAndBlock(
+                        () -> mWrappedController.onActiveControllerForLayout(layout));
             }
 
             @Override

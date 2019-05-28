@@ -103,20 +103,6 @@ public class ExpandedAnimationController
     private float mBubbleDraggingOutVelX;
     private float mBubbleDraggingOutVelY;
 
-    @Override
-    protected void setLayout(PhysicsAnimationLayout layout) {
-        super.setLayout(layout);
-
-        final Resources res = layout.getResources();
-        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingPx = res.getDimensionPixelSize(R.dimen.bubble_padding);
-        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mPipDismissHeight = res.getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height);
-        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
-    }
-
     /**
      * Animates expanding the bubbles into a row along the top of the screen.
      */
@@ -294,6 +280,24 @@ public class ExpandedAnimationController
             insets.getDisplayCutout() != null
                 ? insets.getDisplayCutout().getSafeInsetTop()
                 : 0);
+    }
+
+    @Override
+    void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
+        final Resources res = layout.getResources();
+        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubblePaddingPx = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mStatusBarHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mPipDismissHeight = res.getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height);
+        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
+
+        // Ensure that all child views are at 1x scale, and visible, in case they were animating
+        // in.
+        mLayout.setVisibility(View.VISIBLE);
+        animationsForChildrenFromIndex(0 /* startIndex */, (index, animation) ->
+                animation.scaleX(1f).scaleY(1f).alpha(1f)).startAll();
     }
 
     @Override

@@ -332,7 +332,7 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer = new PhysicsAnimationLayout(context);
         mBubbleContainer.setMaxRenderedChildren(
                 getResources().getInteger(R.integer.bubbles_max_rendered));
-        mBubbleContainer.setController(mStackAnimationController);
+        mBubbleContainer.setActiveController(mStackAnimationController);
         mBubbleContainer.setElevation(elevation);
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
@@ -909,7 +909,7 @@ public class BubbleStackView extends FrameLayout {
             };
 
             if (shouldExpand) {
-                mBubbleContainer.setController(mExpandedAnimationController);
+                mBubbleContainer.setActiveController(mExpandedAnimationController);
                 mExpandedAnimationController.expandFromStack(
                         mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
                         /* collapseTo */,
@@ -921,7 +921,7 @@ public class BubbleStackView extends FrameLayout {
                 mBubbleContainer.cancelAllAnimations();
                 mExpandedAnimationController.collapseBackToStack(
                         () -> {
-                            mBubbleContainer.setController(mStackAnimationController);
+                            mBubbleContainer.setActiveController(mStackAnimationController);
                             updateAfter.run();
                         });
             }
@@ -1014,7 +1014,7 @@ public class BubbleStackView extends FrameLayout {
         }
 
         mStackAnimationController.cancelStackPositionAnimations();
-        mBubbleContainer.setController(mStackAnimationController);
+        mBubbleContainer.setActiveController(mStackAnimationController);
         hideFlyoutImmediate();
 
         mDraggingInDismissTarget = false;
