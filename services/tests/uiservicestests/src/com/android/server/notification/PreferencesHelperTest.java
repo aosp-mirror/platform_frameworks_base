@@ -2676,4 +2676,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, channel1.getId(), false)
                 .isImportanceLockedByCriticalDeviceFunction());
     }
+
+    @Test
+    public void testSetBubblesAllowed_false() {
+        mHelper.setBubblesAllowed(PKG_O, UID_O, false);
+        assertFalse(mHelper.areBubblesAllowed(PKG_O, UID_O));
+        verify(mHandler, times(1)).requestSort();
+    }
 }
