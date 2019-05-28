@@ -76,6 +76,7 @@ import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextLinksParams;
+import android.view.textclassifier.TextSelection;
 import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 
 import androidx.test.InstrumentationRegistry;
@@ -1017,6 +1018,50 @@ public class TextViewActivityTest {
 
         final SelectionEvent lastEvent = selectionEvents.get(selectionEvents.size() - 1);
         assertEquals(SelectionEvent.ACTION_COPY, lastEvent.getEventType());
+    }
+
+    @Test
+    public void testSelectionMetricsLogger_abandonEventIncludesEntityType() throws Throwable {
+        final List<SelectionEvent> selectionEvents = new ArrayList<>();
+        final TextClassifier classifier = new TextClassifier() {
+            @Override
+            public void onSelectionEvent(SelectionEvent event) {
+                selectionEvents.add(event);
+            }
+
+            @Override
+            public TextSelection suggestSelection(TextSelection.Request request) {
+                return new TextSelection.Builder(request.getStartIndex(), request.getEndIndex())
+                        .setEntityType(TextClassifier.TYPE_PHONE, 1)
+                        .build();
+            }
+        };
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        mActivityRule.runOnUiThread(() -> textView.setTextClassifier(classifier));
+        mInstrumentation.waitForIdleSync();
+        final String text = "My number is 987654321";
+
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('9')));
+        sleepForFloatingToolbarPopup();
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(0));
+        mInstrumentation.waitForIdleSync();
+
+        // Abandon event is logged 100ms later. See SelectionActionModeHelper.SelectionTracker
+        final long abandonDelay = 100;
+        final long pollInterval = 10;
+        long waitTime = 0;
+        SelectionEvent lastEvent;
+        do {
+            lastEvent = selectionEvents.get(selectionEvents.size() - 1);
+            if (lastEvent.getEventType() == SelectionEvent.ACTION_ABANDON) {
+                break;
+            }
+            Thread.sleep(pollInterval);
+            waitTime += pollInterval;
+        } while (waitTime < abandonDelay * 10);
+        assertEquals(SelectionEvent.ACTION_ABANDON, lastEvent.getEventType());
+        assertEquals(TextClassifier.TYPE_PHONE, lastEvent.getEntityType());
     }
 
     @Test

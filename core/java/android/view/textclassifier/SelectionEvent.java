@@ -120,8 +120,8 @@ public final class SelectionEvent implements Parcelable {
 
     private final int mAbsoluteStart;
     private final int mAbsoluteEnd;
-    private final @EntityType String mEntityType;
 
+    private @EntityType String mEntityType;
     private @EventType int mEventType;
     private String mPackageName = "";
     private String mWidgetType = TextClassifier.WIDGET_TYPE_UNKNOWN;
@@ -390,6 +390,10 @@ public final class SelectionEvent implements Parcelable {
     @NonNull
     public String getEntityType() {
         return mEntityType;
+    }
+
+    void setEntityType(@EntityType String entityType) {
+        mEntityType = Preconditions.checkNotNull(entityType);
     }
 
     /**
