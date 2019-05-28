@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IWindow;
@@ -83,6 +84,7 @@ public class AccessibilityWindowManager
             mInteractionConnections = new SparseArray<>();
     private final SparseArray<SparseArray<IBinder>> mWindowTokens = new SparseArray<>();
 
+    private final List<WindowInfo> mCachedWindowInfos = new ArrayList<>();
     private List<AccessibilityWindowInfo> mWindows;
 
     private RemoteAccessibilityConnection mPictureInPictureActionReplacingConnection;
@@ -173,23 +175,131 @@ public class AccessibilityWindowManager
     }
 
     /**
-     * Callbacks from from window manager when there's an accessibility change in windows.
+     * Callbacks from window manager when there's an accessibility change in windows.
      *
+     * @param forceSend Send the windows for accessibility even if they haven't changed.
      * @param windows The windows of current display for accessibility.
      */
     @Override
-    public void onWindowsForAccessibilityChanged(@NonNull List<WindowInfo> windows) {
+    public void onWindowsForAccessibilityChanged(boolean forceSend,
+            @NonNull List<WindowInfo> windows) {
         synchronized (mLock) {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Windows changed: " + windows);
             }
 
-            // Let the policy update the focused and active windows.
-            updateWindowsLocked(mAccessibilityUserManager.getCurrentUserIdLocked(), windows);
-
-            // Someone may be waiting for the windows - advertise it.
-            mLock.notifyAll();
+            if (shouldUpdateWindowsLocked(forceSend, windows)) {
+                cacheWindows(windows);
+                // Let the policy update the focused and active windows.
+                updateWindowsLocked(mAccessibilityUserManager.getCurrentUserIdLocked(), windows);
+                // Someone may be waiting for the windows - advertise it.
+                mLock.notifyAll();
+            }
         }
+    }
+
+    private boolean shouldUpdateWindowsLocked(boolean forceSend,
+            @NonNull List<WindowInfo> windows) {
+        if (forceSend) {
+            return true;
+        }
+
+        final int windowCount = windows.size();
+        // We computed the windows and if they changed notify the client.
+        if (mCachedWindowInfos.size() != windowCount) {
+            // Different size means something changed.
+            return true;
+        } else if (!mCachedWindowInfos.isEmpty() || !windows.isEmpty()) {
+            // Since we always traverse windows from high to low layer
+            // the old and new windows at the same index should be the
+            // same, otherwise something changed.
+            for (int i = 0; i < windowCount; i++) {
+                WindowInfo oldWindow = mCachedWindowInfos.get(i);
+                WindowInfo newWindow = windows.get(i);
+                // We do not care for layer changes given the window
+                // order does not change. This brings no new information
+                // to the clients.
+                if (windowChangedNoLayer(oldWindow, newWindow)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void cacheWindows(List<WindowInfo> windows) {
+        final int oldWindowCount = mCachedWindowInfos.size();
+        for (int i = oldWindowCount - 1; i >= 0; i--) {
+            mCachedWindowInfos.remove(i).recycle();
+        }
+        final int newWindowCount = windows.size();
+        for (int i = 0; i < newWindowCount; i++) {
+            WindowInfo newWindow = windows.get(i);
+            mCachedWindowInfos.add(WindowInfo.obtain(newWindow));
+        }
+    }
+
+    private boolean windowChangedNoLayer(WindowInfo oldWindow, WindowInfo newWindow) {
+        if (oldWindow == newWindow) {
+            return false;
+        }
+        if (oldWindow == null) {
+            return true;
+        }
+        if (newWindow == null) {
+            return true;
+        }
+        if (oldWindow.type != newWindow.type) {
+            return true;
+        }
+        if (oldWindow.focused != newWindow.focused) {
+            return true;
+        }
+        if (oldWindow.token == null) {
+            if (newWindow.token != null) {
+                return true;
+            }
+        } else if (!oldWindow.token.equals(newWindow.token)) {
+            return true;
+        }
+        if (oldWindow.parentToken == null) {
+            if (newWindow.parentToken != null) {
+                return true;
+            }
+        } else if (!oldWindow.parentToken.equals(newWindow.parentToken)) {
+            return true;
+        }
+        if (oldWindow.activityToken == null) {
+            if (newWindow.activityToken != null) {
+                return true;
+            }
+        } else if (!oldWindow.activityToken.equals(newWindow.activityToken)) {
+            return true;
+        }
+        if (!oldWindow.boundsInScreen.equals(newWindow.boundsInScreen)) {
+            return true;
+        }
+        if (oldWindow.childTokens != null && newWindow.childTokens != null
+                && !oldWindow.childTokens.equals(newWindow.childTokens)) {
+            return true;
+        }
+        if (!TextUtils.equals(oldWindow.title, newWindow.title)) {
+            return true;
+        }
+        if (oldWindow.accessibilityIdOfAnchor != newWindow.accessibilityIdOfAnchor) {
+            return true;
+        }
+        if (oldWindow.inPictureInPicture != newWindow.inPictureInPicture) {
+            return true;
+        }
+        if (oldWindow.hasFlagWatchOutsideTouch != newWindow.hasFlagWatchOutsideTouch) {
+            return true;
+        }
+        if (oldWindow.displayId != newWindow.displayId) {
+            return true;
+        }
+        return false;
     }
 
     /**

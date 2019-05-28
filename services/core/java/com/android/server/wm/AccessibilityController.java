@@ -43,9 +43,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -1036,12 +1034,9 @@ final class AccessibilityController {
 
         private static final boolean DEBUG = false;
 
-        private final SparseArray<WindowState> mTempWindowStates =
-                new SparseArray<WindowState>();
+        private final SparseArray<WindowState> mTempWindowStates = new SparseArray<>();
 
-        private final List<WindowInfo> mOldWindows = new ArrayList<WindowInfo>();
-
-        private final Set<IBinder> mTempBinderSet = new ArraySet<IBinder>();
+        private final Set<IBinder> mTempBinderSet = new ArraySet<>();
 
         private final RectF mTempRectF = new RectF();
 
@@ -1098,8 +1093,7 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
 
-            boolean windowsChanged = false;
-            List<WindowInfo> windows = new ArrayList<WindowInfo>();
+            List<WindowInfo> windows = new ArrayList<>();
 
             synchronized (mService.mGlobalLock) {
                 // Do not send the windows if there is no current focus as
@@ -1169,46 +1163,9 @@ final class AccessibilityController {
 
                 visibleWindows.clear();
                 addedWindows.clear();
-
-                if (!forceSend) {
-                    // We computed the windows and if they changed notify the client.
-                    if (mOldWindows.size() != windows.size()) {
-                        // Different size means something changed.
-                        windowsChanged = true;
-                    } else if (!mOldWindows.isEmpty() || !windows.isEmpty()) {
-                        // Since we always traverse windows from high to low layer
-                        // the old and new windows at the same index should be the
-                        // same, otherwise something changed.
-                        for (int i = 0; i < windowCount; i++) {
-                            WindowInfo oldWindow = mOldWindows.get(i);
-                            WindowInfo newWindow = windows.get(i);
-                            // We do not care for layer changes given the window
-                            // order does not change. This brings no new information
-                            // to the clients.
-                            if (windowChangedNoLayer(oldWindow, newWindow)) {
-                                windowsChanged = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (forceSend || windowsChanged) {
-                    cacheWindows(windows);
-                }
             }
 
-            // Now we do not hold the lock, so send the windows over.
-            if (forceSend || windowsChanged) {
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "Windows changed or force sending:" + windows);
-                }
-                mCallback.onWindowsForAccessibilityChanged(windows);
-            } else {
-                if (DEBUG) {
-                    Log.i(LOG_TAG, "No windows changed.");
-                }
-            }
+            mCallback.onWindowsForAccessibilityChanged(forceSend, windows);
 
             // Recycle the windows as we do not need them.
             clearAndRecycleWindows(windows);
@@ -1311,67 +1268,6 @@ final class AccessibilityController {
             window.layer = tokenOut.size();
             out.add(window);
             tokenOut.add(window.token);
-        }
-
-        private void cacheWindows(List<WindowInfo> windows) {
-            final int oldWindowCount = mOldWindows.size();
-            for (int i = oldWindowCount - 1; i >= 0; i--) {
-                mOldWindows.remove(i).recycle();
-            }
-            final int newWindowCount = windows.size();
-            for (int i = 0; i < newWindowCount; i++) {
-                WindowInfo newWindow = windows.get(i);
-                mOldWindows.add(WindowInfo.obtain(newWindow));
-            }
-        }
-
-        private boolean windowChangedNoLayer(WindowInfo oldWindow, WindowInfo newWindow) {
-            if (oldWindow == newWindow) {
-                return false;
-            }
-            if (oldWindow == null) {
-                return true;
-            }
-            if (newWindow == null) {
-                return true;
-            }
-            if (oldWindow.type != newWindow.type) {
-                return true;
-            }
-            if (oldWindow.focused != newWindow.focused) {
-                return true;
-            }
-            if (oldWindow.token == null) {
-                if (newWindow.token != null) {
-                    return true;
-                }
-            } else if (!oldWindow.token.equals(newWindow.token)) {
-                return true;
-            }
-            if (oldWindow.parentToken == null) {
-                if (newWindow.parentToken != null) {
-                    return true;
-                }
-            } else if (!oldWindow.parentToken.equals(newWindow.parentToken)) {
-                return true;
-            }
-            if (!oldWindow.boundsInScreen.equals(newWindow.boundsInScreen)) {
-                return true;
-            }
-            if (oldWindow.childTokens != null && newWindow.childTokens != null
-                    && !oldWindow.childTokens.equals(newWindow.childTokens)) {
-                return true;
-            }
-            if (!TextUtils.equals(oldWindow.title, newWindow.title)) {
-                return true;
-            }
-            if (oldWindow.accessibilityIdOfAnchor != newWindow.accessibilityIdOfAnchor) {
-                return true;
-            }
-            if (oldWindow.displayId != newWindow.displayId) {
-                return true;
-            }
-            return false;
         }
 
         private static void clearAndRecycleWindows(List<WindowInfo> windows) {
