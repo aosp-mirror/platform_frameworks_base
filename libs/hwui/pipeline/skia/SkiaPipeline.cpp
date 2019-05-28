@@ -30,6 +30,8 @@
 
 #include <unistd.h>
 
+#include <android-base/properties.h>
+
 using namespace android::uirenderer::renderthread;
 
 namespace android {
@@ -240,12 +242,11 @@ static void savePictureAsync(const sk_sp<SkData>& data, const std::string& filen
 
 SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface) {
     if (CC_UNLIKELY(Properties::skpCaptureEnabled)) {
-        char prop[PROPERTY_VALUE_MAX] = {'\0'};
         if (mCaptureSequence <= 0) {
-            property_get(PROPERTY_CAPTURE_SKP_FILENAME, prop, "0");
+            std::string prop = base::GetProperty(PROPERTY_CAPTURE_SKP_FILENAME, "0");
             if (prop[0] != '0' && mCapturedFile != prop) {
                 mCapturedFile = prop;
-                mCaptureSequence = property_get_int32(PROPERTY_CAPTURE_SKP_FRAMES, 1);
+                mCaptureSequence = base::GetIntProperty(PROPERTY_CAPTURE_SKP_FRAMES, 1);
             }
         }
         if (mCaptureSequence > 0 || mPictureCapturedCallback) {
