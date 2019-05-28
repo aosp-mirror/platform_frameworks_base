@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.apex.ApexInfo;
 import android.content.Context;
 import android.content.pm.PackageParser.Component;
 import android.content.pm.PackageParser.Package;
@@ -497,10 +498,17 @@ public class PackageParserTest {
 
     @Test
     public void testApexPackageInfoGeneration() throws Exception {
-        File apexFile = copyRawResourceToFile("com.android.tzdata.apex",
+        String apexPackageName = "com.android.tzdata.apex";
+        File apexFile = copyRawResourceToFile(apexPackageName,
                 R.raw.com_android_tzdata);
+        ApexInfo apexInfo = new ApexInfo();
+        apexInfo.isActive = true;
+        apexInfo.isFactory = false;
+        apexInfo.packageName = apexPackageName;
+        apexInfo.packagePath = apexFile.getPath();
+        apexInfo.versionCode = 191000070;
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
-        PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexFile, flags);
+        PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexInfo, flags);
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
         assertTrue(pi.applicationInfo.enabled);
         assertEquals(28, pi.applicationInfo.targetSdkVersion);
@@ -515,5 +523,7 @@ public class PackageParserTest {
         assertNotNull(pi.signingInfo);
         assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
         assertTrue(pi.isApex);
+        assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
+        assertTrue((pi.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0);
     }
 }
