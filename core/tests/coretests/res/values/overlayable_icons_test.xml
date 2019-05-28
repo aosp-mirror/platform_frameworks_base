@@ -20,15 +20,18 @@
   <array name="overlayable_icons">
     <item>@*android:drawable/ic_audio_alarm</item>
     <item>@*android:drawable/ic_audio_alarm_mute</item>
+    <item>@*android:drawable/ic_battery_80_24dp</item>
     <item>@*android:drawable/ic_bluetooth_share_icon</item>
     <item>@*android:drawable/ic_bt_headphones_a2dp</item>
     <item>@*android:drawable/ic_bt_headset_hfp</item>
     <item>@*android:drawable/ic_bt_hearing_aid</item>
     <item>@*android:drawable/ic_bt_laptop</item>
+    <item>@*android:drawable/ic_bt_misc_hid</item>
     <item>@*android:drawable/ic_bt_network_pan</item>
     <item>@*android:drawable/ic_bt_pointing_hid</item>
     <item>@*android:drawable/ic_corp_badge</item>
     <item>@*android:drawable/ic_expand_more</item>
+    <item>@*android:drawable/ic_faster_emergency</item>
     <item>@*android:drawable/ic_file_copy</item>
     <item>@*android:drawable/ic_lock</item>
     <item>@*android:drawable/ic_lock_bugreport</item>
@@ -36,6 +39,7 @@
     <item>@*android:drawable/ic_lock_power_off</item>
     <item>@*android:drawable/ic_lockscreen_ime</item>
     <item>@*android:drawable/ic_mode_edit</item>
+    <item>@*android:drawable/ic_notifications_alerted</item>
     <item>@*android:drawable/ic_phone</item>
     <item>@*android:drawable/ic_qs_airplane</item>
     <item>@*android:drawable/ic_qs_auto_rotate</item>
