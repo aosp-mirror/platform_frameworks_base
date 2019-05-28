@@ -185,7 +185,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
-    private static final int WATCHDOG_TIMEOUT_MILLIS = 3000;
+    private static final int WATCHDOG_TIMEOUT_MILLIS = 5000;
 
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -251,6 +251,123 @@ public class ChooserActivity extends ResolverActivity {
 
     // Sorted list of DisplayResolveInfos for the alphabetical app section.
     private List<ResolverActivity.DisplayResolveInfo> mSortedList = new ArrayList<>();
+
+    private ContentPreviewCoordinator mPreviewCoord;
+
+    private class ContentPreviewCoordinator {
+        private static final int IMAGE_LOAD_TIMEOUT_MILLIS = 300;
+        private static final int IMAGE_FADE_IN_MILLIS = 150;
+        private static final int IMAGE_LOAD_TIMEOUT = 1;
+        private static final int IMAGE_LOAD_INTO_VIEW = 2;
+
+        private final View mParentView;
+        private boolean mHideParentOnFail;
+        private boolean mAtLeastOneLoaded = false;
+
+        class LoadUriTask {
+            public final Uri mUri;
+            public final int mImageResourceId;
+            public final int mExtraCount;
+            public final Bitmap mBmp;
+
+            LoadUriTask(int imageResourceId, Uri uri, int extraCount, Bitmap bmp) {
+                this.mImageResourceId = imageResourceId;
+                this.mUri = uri;
+                this.mExtraCount = extraCount;
+                this.mBmp = bmp;
+            }
+        }
+
+        // If at least one image loads within the timeout period, allow other
+        // loads to continue. Otherwise terminate and optionally hide
+        // the parent area
+        private final Handler mHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case IMAGE_LOAD_TIMEOUT:
+                        maybeHideContentPreview();
+                        break;
+
+                    case IMAGE_LOAD_INTO_VIEW:
+                        if (isFinishing()) break;
+
+                        LoadUriTask task = (LoadUriTask) msg.obj;
+                        RoundedRectImageView imageView = mParentView.findViewById(
+                                task.mImageResourceId);
+                        if (task.mBmp == null) {
+                            imageView.setVisibility(View.GONE);
+                            maybeHideContentPreview();
+                            return;
+                        }
+
+                        mAtLeastOneLoaded = true;
+                        imageView.setVisibility(View.VISIBLE);
+                        imageView.setAlpha(0.0f);
+                        imageView.setImageBitmap(task.mBmp);
+
+                        ValueAnimator fadeAnim = ObjectAnimator.ofFloat(imageView, "alpha", 0.0f,
+                                1.0f);
+                        fadeAnim.setInterpolator(new DecelerateInterpolator(1.0f));
+                        fadeAnim.setDuration(IMAGE_FADE_IN_MILLIS);
+                        fadeAnim.start();
+
+                        if (task.mExtraCount > 0) {
+                            imageView.setExtraImageCount(task.mExtraCount);
+                        }
+                }
+            }
+        };
+
+        ContentPreviewCoordinator(View parentView, boolean hideParentOnFail) {
+            super();
+
+            this.mParentView = parentView;
+            this.mHideParentOnFail = hideParentOnFail;
+        }
+
+        private void loadUriIntoView(final int imageResourceId, final Uri uri,
+                final int extraImages) {
+            mHandler.sendEmptyMessageDelayed(IMAGE_LOAD_TIMEOUT, IMAGE_LOAD_TIMEOUT_MILLIS);
+
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
+                final Bitmap bmp = loadThumbnail(uri, new Size(200, 200));
+                final Message msg = Message.obtain();
+                msg.what = IMAGE_LOAD_INTO_VIEW;
+                msg.obj = new LoadUriTask(imageResourceId, uri, extraImages, bmp);
+                mHandler.sendMessage(msg);
+            });
+        }
+
+        private void cancelLoads() {
+            mHandler.removeMessages(IMAGE_LOAD_INTO_VIEW);
+            mHandler.removeMessages(IMAGE_LOAD_TIMEOUT);
+        }
+
+        private void maybeHideContentPreview() {
+            if (!mAtLeastOneLoaded && mHideParentOnFail) {
+                Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
+                        + " within " + IMAGE_LOAD_TIMEOUT_MILLIS + "ms.");
+                collapseParentView();
+                if (mChooserRowAdapter != null) {
+                    mChooserRowAdapter.hideContentPreview();
+                }
+                mHideParentOnFail = false;
+            }
+        }
+
+        private void collapseParentView() {
+            // This will effectively hide the content preview row by forcing the height
+            // to zero. It is faster than forcing a relayout of the listview
+            final View v = mParentView;
+            int widthSpec = MeasureSpec.makeMeasureSpec(v.getWidth(), MeasureSpec.EXACTLY);
+            int heightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
+            v.measure(widthSpec, heightSpec);
+            v.getLayoutParams().height = 0;
+            v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getTop());
+            v.invalidate();
+        }
+    }
 
     private final Handler mChooserHandler = new Handler() {
         @Override
@@ -621,14 +738,15 @@ public class ChooserActivity extends ResolverActivity {
     private ViewGroup displayContentPreview(@ContentPreviewType int previewType,
             Intent targetIntent, LayoutInflater layoutInflater, ViewGroup convertView,
             ViewGroup parent) {
+        if (convertView != null) return convertView;
+
         switch (previewType) {
             case CONTENT_PREVIEW_TEXT:
-                return displayTextContentPreview(targetIntent, layoutInflater, convertView, parent);
+                return displayTextContentPreview(targetIntent, layoutInflater, parent);
             case CONTENT_PREVIEW_IMAGE:
-                return displayImageContentPreview(targetIntent, layoutInflater, convertView,
-                        parent);
+                return displayImageContentPreview(targetIntent, layoutInflater, parent);
             case CONTENT_PREVIEW_FILE:
-                return displayFileContentPreview(targetIntent, layoutInflater, convertView, parent);
+                return displayFileContentPreview(targetIntent, layoutInflater, parent);
             default:
                 Log.e(TAG, "Unexpected content preview type: " + previewType);
         }
@@ -637,10 +755,9 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private ViewGroup displayTextContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
-            ViewGroup convertView, ViewGroup parent) {
-        ViewGroup contentPreviewLayout =
-                convertView != null ? convertView : (ViewGroup) layoutInflater.inflate(
-                        R.layout.chooser_grid_preview_text, parent, false);
+            ViewGroup parent) {
+        ViewGroup contentPreviewLayout = (ViewGroup) layoutInflater.inflate(
+                R.layout.chooser_grid_preview_text, parent, false);
 
         contentPreviewLayout.findViewById(R.id.copy_button).setOnClickListener(
                 this::onCopyButtonClicked);
@@ -677,12 +794,8 @@ public class ChooserActivity extends ResolverActivity {
             if (previewThumbnail == null) {
                 previewThumbnailView.setVisibility(View.GONE);
             } else {
-                Bitmap bmp = loadThumbnail(previewThumbnail, new Size(100, 100));
-                if (bmp == null) {
-                    previewThumbnailView.setVisibility(View.GONE);
-                } else {
-                    previewThumbnailView.setImageBitmap(bmp);
-                }
+                mPreviewCoord = new ContentPreviewCoordinator(contentPreviewLayout, false);
+                mPreviewCoord.loadUriIntoView(R.id.content_preview_thumbnail, previewThumbnail, 0);
             }
         }
 
@@ -690,15 +803,15 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private ViewGroup displayImageContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
-            ViewGroup convertView, ViewGroup parent) {
-        ViewGroup contentPreviewLayout =
-                convertView != null ? convertView : (ViewGroup) layoutInflater.inflate(
-                        R.layout.chooser_grid_preview_image, parent, false);
+            ViewGroup parent) {
+        ViewGroup contentPreviewLayout = (ViewGroup) layoutInflater.inflate(
+                R.layout.chooser_grid_preview_image, parent, false);
+        mPreviewCoord = new ContentPreviewCoordinator(contentPreviewLayout, true);
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
             Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-            loadUriIntoView(R.id.content_preview_image_1_large, uri, contentPreviewLayout);
+            mPreviewCoord.loadUriIntoView(R.id.content_preview_image_1_large, uri, 0);
         } else {
             ContentResolver resolver = getContentResolver();
 
@@ -717,21 +830,16 @@ public class ChooserActivity extends ResolverActivity {
                 return contentPreviewLayout;
             }
 
-            loadUriIntoView(R.id.content_preview_image_1_large, imageUris.get(0),
-                    contentPreviewLayout);
+            mPreviewCoord.loadUriIntoView(R.id.content_preview_image_1_large, imageUris.get(0), 0);
 
             if (imageUris.size() == 2) {
-                loadUriIntoView(R.id.content_preview_image_2_large, imageUris.get(1),
-                        contentPreviewLayout);
+                mPreviewCoord.loadUriIntoView(R.id.content_preview_image_2_large,
+                        imageUris.get(1), 0);
             } else if (imageUris.size() > 2) {
-                loadUriIntoView(R.id.content_preview_image_2_small, imageUris.get(1),
-                        contentPreviewLayout);
-                RoundedRectImageView imageView = loadUriIntoView(
-                        R.id.content_preview_image_3_small, imageUris.get(2), contentPreviewLayout);
-
-                if (imageUris.size() > 3) {
-                    imageView.setExtraImageCount(imageUris.size() - 3);
-                }
+                mPreviewCoord.loadUriIntoView(R.id.content_preview_image_2_small,
+                        imageUris.get(1), 0);
+                mPreviewCoord.loadUriIntoView(R.id.content_preview_image_3_small,
+                        imageUris.get(2), imageUris.size() - 3);
             }
         }
 
@@ -803,11 +911,10 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private ViewGroup displayFileContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
-            ViewGroup convertView, ViewGroup parent) {
+            ViewGroup parent) {
 
-        ViewGroup contentPreviewLayout =
-                convertView != null ? convertView : (ViewGroup) layoutInflater.inflate(
-                        R.layout.chooser_grid_preview_file, parent, false);
+        ViewGroup contentPreviewLayout = (ViewGroup) layoutInflater.inflate(
+                R.layout.chooser_grid_preview_file, parent, false);
 
         // TODO(b/120417119): Disable file copy until after moving to sysui,
         // due to permissions issues
@@ -839,6 +946,10 @@ public class ChooserActivity extends ResolverActivity {
                         R.id.content_preview_filename);
                 fileNameView.setText(fileName);
 
+                View thumbnailView = contentPreviewLayout.findViewById(
+                        R.id.content_preview_file_thumbnail);
+                thumbnailView.setVisibility(View.GONE);
+
                 ImageView fileIconView = contentPreviewLayout.findViewById(
                         R.id.content_preview_file_icon);
                 fileIconView.setVisibility(View.VISIBLE);
@@ -849,30 +960,23 @@ public class ChooserActivity extends ResolverActivity {
         return contentPreviewLayout;
     }
 
-    private void loadFileUriIntoView(Uri uri, View parent) {
+    private void loadFileUriIntoView(final Uri uri, final View parent) {
         FileInfo fileInfo = extractFileInfo(uri, getContentResolver());
 
         TextView fileNameView = parent.findViewById(R.id.content_preview_filename);
         fileNameView.setText(fileInfo.name);
 
         if (fileInfo.hasThumbnail) {
-            loadUriIntoView(R.id.content_preview_file_thumbnail, uri, parent);
+            mPreviewCoord = new ContentPreviewCoordinator(parent, false);
+            mPreviewCoord.loadUriIntoView(R.id.content_preview_file_thumbnail, uri, 0);
         } else {
+            View thumbnailView = parent.findViewById(R.id.content_preview_file_thumbnail);
+            thumbnailView.setVisibility(View.GONE);
+
             ImageView fileIconView = parent.findViewById(R.id.content_preview_file_icon);
             fileIconView.setVisibility(View.VISIBLE);
             fileIconView.setImageResource(R.drawable.chooser_file_generic);
         }
-    }
-
-    private RoundedRectImageView loadUriIntoView(int imageResourceId, Uri uri, View parent) {
-        RoundedRectImageView imageView = parent.findViewById(imageResourceId);
-        Bitmap bmp = loadThumbnail(uri, new Size(200, 200));
-        if (bmp != null) {
-            imageView.setVisibility(View.VISIBLE);
-            imageView.setImageBitmap(bmp);
-        }
-
-        return imageView;
     }
 
     @VisibleForTesting
@@ -944,6 +1048,9 @@ public class ChooserActivity extends ResolverActivity {
         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_RESULT);
         mChooserHandler.removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT);
         mChooserHandler.removeMessages(SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED);
+
+        if (mPreviewCoord != null) mPreviewCoord.cancelLoads();
+
         if (mAppPredictor != null) {
             mAppPredictor.unregisterPredictionUpdates(mAppPredictorCallback);
             mAppPredictor.destroy();
@@ -2036,9 +2143,12 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
-        if (mChooserRowAdapter.calculateChooserTargetWidth(availableWidth)
+        if (mChooserRowAdapter.consumeLayoutRequest()
+                || mChooserRowAdapter.calculateChooserTargetWidth(availableWidth)
                 || mAdapterView.getAdapter() == null) {
-            mAdapterView.setAdapter(mChooserRowAdapter);
+            if (mAdapterView.getAdapter() == null) {
+                mAdapterView.setAdapter(mChooserRowAdapter);
+            }
 
             getMainThreadHandler().post(() -> {
                 if (mResolverDrawerLayout == null || mChooserRowAdapter == null) {
@@ -2589,6 +2699,9 @@ public class ChooserActivity extends ResolverActivity {
         private int mChooserTargetWidth = 0;
         private boolean mShowAzLabelIfPoss;
 
+        private boolean mHideContentPreview = false;
+        private boolean mLayoutRequested = false;
+
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
@@ -2651,6 +2764,18 @@ public class ChooserActivity extends ResolverActivity {
             return maxTargets;
         }
 
+        public void hideContentPreview() {
+            mHideContentPreview = true;
+            mLayoutRequested = true;
+            notifyDataSetChanged();
+        }
+
+        public boolean consumeLayoutRequest() {
+            boolean oldValue = mLayoutRequested;
+            mLayoutRequested = false;
+            return oldValue;
+        }
+
         @Override
         public boolean areAllItemsEnabled() {
             return false;
@@ -2684,7 +2809,8 @@ public class ChooserActivity extends ResolverActivity {
                 return 0;
             }
 
-            if (mChooserListAdapter == null || mChooserListAdapter.getCount() == 0) {
+            if (mHideContentPreview || mChooserListAdapter == null
+                    || mChooserListAdapter.getCount() == 0) {
                 return 0;
             }
 
