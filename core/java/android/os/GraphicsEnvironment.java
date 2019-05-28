@@ -466,9 +466,8 @@ public class GraphicsEnvironment {
      */
     private String getAngleDebugPackage(Context context, Bundle coreSettings) {
         final boolean appIsDebuggable = isDebuggable(context);
-        final boolean appIsProfileable = isProfileable(context);
         final boolean deviceIsDebuggable = getCanLoadSystemLibraries() == 1;
-        if (appIsDebuggable || appIsProfileable || deviceIsDebuggable) {
+        if (appIsDebuggable || deviceIsDebuggable) {
             String debugPackage;
 
             if (coreSettings != null) {
