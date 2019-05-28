@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.apex.ApexInfo;
@@ -26,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -42,8 +44,13 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Collection;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * ApexManager class handles communications with the apex service to perform operation and queries,
@@ -59,10 +66,10 @@ class ApexManager {
      * AndroidManifest.xml}
      *
      * <p>Note that key of this map is {@code packageName} field of the corresponding {@code
-     * AndroidManfiset.xml}.
+     * AndroidManifest.xml}.
       */
     @GuardedBy("mLock")
-    private ArrayMap<String, PackageInfo> mActivePackagesCache;
+    private List<PackageInfo> mAllPackagesCache;
     /**
      * A map from {@code apexName} to the {@Link PackageInfo} generated from the {@code
      * AndroidManifest.xml}.
@@ -74,6 +81,7 @@ class ApexManager {
     @GuardedBy("mLock")
     private ArrayMap<String, PackageInfo> mApexNameToPackageInfoCache;
 
+
     ApexManager(Context context) {
         try {
             mApexService = IApexService.Stub.asInterface(
@@ -83,6 +91,15 @@ class ApexManager {
         }
         mContext = context;
     }
+
+    static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
+    static final int MATCH_FACTORY_PACKAGE = 1 << 1;
+    @IntDef(
+            flag = true,
+            prefix = { "MATCH_"},
+            value = {MATCH_ACTIVE_PACKAGE, MATCH_FACTORY_PACKAGE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface PackageInfoFlags{}
 
     void systemReady() {
         mContext.registerReceiver(new BroadcastReceiver() {
@@ -94,16 +111,18 @@ class ApexManager {
         }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
-    private void populateActivePackagesCacheIfNeeded() {
+    private void populateAllPackagesCacheIfNeeded() {
         synchronized (mLock) {
-            if (mActivePackagesCache != null) {
+            if (mAllPackagesCache != null) {
                 return;
             }
-            mActivePackagesCache = new ArrayMap<>();
             mApexNameToPackageInfoCache = new ArrayMap<>();
             try {
-                final ApexInfo[] activePkgs = mApexService.getActivePackages();
-                for (ApexInfo ai : activePkgs) {
+                mAllPackagesCache = new ArrayList<>();
+                HashSet<String> activePackagesSet = new HashSet<>();
+                HashSet<String> factoryPackagesSet = new HashSet<>();
+                final ApexInfo[] allPkgs = mApexService.getAllPackages();
+                for (ApexInfo ai : allPkgs) {
                     // If the device is using flattened APEX, don't report any APEX
                     // packages since they won't be managed or updated by PackageManager.
                     if ((new File(ai.packagePath)).isDirectory()) {
@@ -111,11 +130,27 @@ class ApexManager {
                     }
                     try {
                         final PackageInfo pkg = PackageParser.generatePackageInfoFromApex(
-                                new File(ai.packagePath), PackageManager.GET_META_DATA
-                                | PackageManager.GET_SIGNING_CERTIFICATES);
-                        mActivePackagesCache.put(pkg.packageName, pkg);
-                        // TODO(b/132324953): remove.
-                        mApexNameToPackageInfoCache.put(ai.packageName, pkg);
+                                ai, PackageManager.GET_META_DATA
+                                        | PackageManager.GET_SIGNING_CERTIFICATES);
+                        mAllPackagesCache.add(pkg);
+                        if (ai.isActive) {
+                            if (activePackagesSet.contains(pkg.packageName)) {
+                                throw new IllegalStateException(
+                                        "Two active packages have the same name: "
+                                                + pkg.packageName);
+                            }
+                            activePackagesSet.add(ai.packageName);
+                            // TODO(b/132324953): remove.
+                            mApexNameToPackageInfoCache.put(ai.packageName, pkg);
+                        }
+                        if (ai.isFactory) {
+                            if (factoryPackagesSet.contains(pkg.packageName)) {
+                                throw new IllegalStateException(
+                                        "Two factory packages have the same name: "
+                                                + pkg.packageName);
+                            }
+                            factoryPackagesSet.add(ai.packageName);
+                        }
                     } catch (PackageParserException pe) {
                         throw new IllegalStateException("Unable to parse: " + ai, pe);
                     }
@@ -128,41 +163,85 @@ class ApexManager {
     }
 
     /**
-     * Retrieves information about an active APEX package.
+     * Retrieves information about an APEX package.
      *
      * @param packageName the package name to look for. Note that this is the package name reported
      *                    in the APK container manifest (i.e. AndroidManifest.xml), which might
      *                    differ from the one reported in the APEX manifest (i.e.
      *                    apex_manifest.json).
+     * @param flags the type of package to return. This may match to active packages
+     *              and factory (pre-installed) packages.
      * @return a PackageInfo object with the information about the package, or null if the package
      *         is not found.
      */
-    @Nullable PackageInfo getActivePackage(String packageName) {
-        populateActivePackagesCacheIfNeeded();
-        return mActivePackagesCache.get(packageName);
+    @Nullable PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags) {
+        populateAllPackagesCacheIfNeeded();
+        boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
+        boolean matchFactory = (flags & MATCH_FACTORY_PACKAGE) != 0;
+        for (PackageInfo packageInfo: mAllPackagesCache) {
+            if (!packageInfo.packageName.equals(packageName)) {
+                continue;
+            }
+            if ((!matchActive || isActive(packageInfo))
+                    && (!matchFactory || isFactory(packageInfo))) {
+                return packageInfo;
+            }
+        }
+        return null;
     }
 
     /**
-     * Returns a {@link PackageInfo} for an APEX package keyed by it's {@code apexName}.
+     * Returns a {@link PackageInfo} for an active APEX package keyed by it's {@code apexName}.
      *
      * @deprecated this API will soon be deleted, please don't depend on it.
      */
     // TODO(b/132324953): delete.
     @Deprecated
     @Nullable PackageInfo getPackageInfoForApexName(String apexName) {
-        populateActivePackagesCacheIfNeeded();
+        populateAllPackagesCacheIfNeeded();
         return mApexNameToPackageInfoCache.get(apexName);
     }
 
     /**
      * Retrieves information about all active APEX packages.
      *
-     * @return a Collection of PackageInfo object, each one containing information about a different
+     * @return a List of PackageInfo object, each one containing information about a different
      *         active package.
      */
-    Collection<PackageInfo> getActivePackages() {
-        populateActivePackagesCacheIfNeeded();
-        return mActivePackagesCache.values();
+    List<PackageInfo> getActivePackages() {
+        populateAllPackagesCacheIfNeeded();
+        return mAllPackagesCache
+                .stream()
+                .filter(item -> isActive(item))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves information about all active pre-installed APEX packages.
+     *
+     * @return a List of PackageInfo object, each one containing information about a different
+     *         active pre-installed package.
+     */
+    List<PackageInfo> getFactoryPackages() {
+        populateAllPackagesCacheIfNeeded();
+        return mAllPackagesCache
+                .stream()
+                .filter(item -> isFactory(item))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves information about all inactive APEX packages.
+     *
+     * @return a List of PackageInfo object, each one containing information about a different
+     *         inactive package.
+     */
+    List<PackageInfo> getInactivePackages() {
+        populateAllPackagesCacheIfNeeded();
+        return mAllPackagesCache
+                .stream()
+                .filter(item -> !isActive(item))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -172,8 +251,13 @@ class ApexManager {
      * @return {@code true} if {@code packageName} is an apex package.
      */
     boolean isApexPackage(String packageName) {
-        populateActivePackagesCacheIfNeeded();
-        return mActivePackagesCache.containsKey(packageName);
+        populateAllPackagesCacheIfNeeded();
+        for (PackageInfo packageInfo : mAllPackagesCache) {
+            if (packageInfo.packageName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -301,6 +385,55 @@ class ApexManager {
     }
 
     /**
+     * Whether an APEX package is active or not.
+     *
+     * @param packageInfo the package to check
+     * @return {@code true} if this package is active, {@code false} otherwise.
+     */
+    private static boolean isActive(PackageInfo packageInfo) {
+        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
+    }
+
+    /**
+     * Whether the APEX package is pre-installed or not.
+     *
+     * @param packageInfo the package to check
+     * @return {@code true} if this package is pre-installed, {@code false} otherwise.
+     */
+    private static boolean isFactory(PackageInfo packageInfo) {
+        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * Dump information about the packages contained in a particular cache
+     * @param packagesCache the cache to print information about.
+     * @param packageName a {@link String} containing a package name, or {@code null}. If set, only
+     *                    information about that specific package will be dumped.
+     * @param ipw the {@link IndentingPrintWriter} object to send information to.
+     */
+    void dumpFromPackagesCache(
+            List<PackageInfo> packagesCache,
+            @Nullable String packageName,
+            IndentingPrintWriter ipw) {
+        ipw.println();
+        ipw.increaseIndent();
+        for (PackageInfo pi : packagesCache) {
+            if (packageName != null && !packageName.equals(pi.packageName)) {
+                continue;
+            }
+            ipw.println(pi.packageName);
+            ipw.increaseIndent();
+            ipw.println("Version: " + pi.versionCode);
+            ipw.println("Path: " + pi.applicationInfo.sourceDir);
+            ipw.println("IsActive: " + isActive(pi));
+            ipw.println("IsFactory: " + isFactory(pi));
+            ipw.decreaseIndent();
+        }
+        ipw.decreaseIndent();
+        ipw.println();
+    }
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -309,23 +442,16 @@ class ApexManager {
      */
     void dump(PrintWriter pw, @Nullable String packageName) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
-        ipw.println();
-        ipw.println("Active APEX packages:");
-        ipw.increaseIndent();
         try {
-            populateActivePackagesCacheIfNeeded();
-            for (PackageInfo pi : mActivePackagesCache.values()) {
-                if (packageName != null && !packageName.equals(pi.packageName)) {
-                    continue;
-                }
-                ipw.println(pi.packageName);
-                ipw.increaseIndent();
-                ipw.println("Version: " + pi.versionCode);
-                ipw.println("Path: " + pi.applicationInfo.sourceDir);
-                ipw.decreaseIndent();
-            }
-            ipw.decreaseIndent();
+            populateAllPackagesCacheIfNeeded();
             ipw.println();
+            ipw.println("Active APEX packages:");
+            dumpFromPackagesCache(getActivePackages(), packageName, ipw);
+            ipw.println("Inactive APEX packages:");
+            dumpFromPackagesCache(getInactivePackages(), packageName, ipw);
+            ipw.println("Factory APEX packages:");
+            dumpFromPackagesCache(getFactoryPackages(), packageName, ipw);
+            ipw.increaseIndent();
             ipw.println("APEX session state:");
             ipw.increaseIndent();
             final ApexSessionInfo[] sessions = mApexService.getSessions();
@@ -360,6 +486,6 @@ class ApexManager {
     }
 
     public void onBootCompleted() {
-        populateActivePackagesCacheIfNeeded();
+        populateAllPackagesCacheIfNeeded();
     }
 }
