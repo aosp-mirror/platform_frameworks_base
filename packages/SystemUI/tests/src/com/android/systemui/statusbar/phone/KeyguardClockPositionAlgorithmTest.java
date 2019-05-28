@@ -383,7 +383,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void positionClock() {
         mClockPositionAlgorithm.setup(EMPTY_MARGIN, SCREEN_HEIGHT, mNotificationStackHeight,
                 mPanelExpansion, SCREEN_HEIGHT, mKeyguardStatusHeight, mPreferredClockY,
-                mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG);
+                mHasCustomClock, mHasVisibleNotifs, mDark, ZERO_DRAG, false /* positionLikeDark */);
         mClockPositionAlgorithm.run(mClockPosition);
     }
 }

@@ -453,7 +453,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
     private void updateContinuousClipping(final ExpandableNotificationRow row) {
         StatusBarIconView icon = row.getEntry().expandedIcon;
-        boolean needsContinuousClipping = ViewState.isAnimatingY(icon) && !mAmbientState.isDark();
+        boolean needsContinuousClipping = ViewState.isAnimatingY(icon) && !mAmbientState.isDozing();
         boolean isContinuousClipping = icon.getTag(TAG_CONTINUOUS_CLIPPING) != null;
         if (needsContinuousClipping && !isContinuousClipping) {
             final ViewTreeObserver observer = icon.getViewTreeObserver();
@@ -829,7 +829,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private void setOpenedAmount(float openedAmount) {
         mNoAnimationsInThisFrame = openedAmount == 1.0f && mOpenedAmount == 0.0f;
         mOpenedAmount = openedAmount;
-        if (!mAmbientState.isPanelFullWidth() || mAmbientState.isDark()) {
+        if (!mAmbientState.isPanelFullWidth() || mAmbientState.isDozing()) {
             // We don't do a transformation at all, lets just assume we are fully opened
             openedAmount = 1.0f;
         }
