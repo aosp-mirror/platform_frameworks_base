@@ -2162,6 +2162,7 @@ package android.os.strictmode {
 package android.permission {
 
   public final class PermissionControllerManager {
+    method @RequiresPermission("android.permission.GET_RUNTIME_PERMISSIONS") public void getAppPermissions(@NonNull String, @NonNull android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, @Nullable android.os.Handler);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
     field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
     field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
@@ -2169,9 +2170,23 @@ package android.permission {
     field public static final int REASON_MALWARE = 1; // 0x1
   }
 
+  public static interface PermissionControllerManager.OnGetAppPermissionResultCallback {
+    method public void onGetAppPermissions(@NonNull java.util.List<android.permission.RuntimePermissionPresentationInfo>);
+  }
+
   public abstract static class PermissionControllerManager.OnRevokeRuntimePermissionsCallback {
     ctor public PermissionControllerManager.OnRevokeRuntimePermissionsCallback();
     method public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>);
+  }
+
+  public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
+    ctor public RuntimePermissionPresentationInfo(@NonNull CharSequence, boolean, boolean);
+    method public int describeContents();
+    method @NonNull public CharSequence getLabel();
+    method public boolean isGranted();
+    method public boolean isStandard();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
   }
 
 }
