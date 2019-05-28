@@ -30,9 +30,12 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
-import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_FALLBACK;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTP;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTPS;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
@@ -443,6 +446,16 @@ public class ConnectivityServiceTest {
     }
 
     private class MockNetworkAgent {
+        private static final int VALIDATION_RESULT_BASE = NETWORK_VALIDATION_PROBE_DNS
+                | NETWORK_VALIDATION_PROBE_HTTP
+                | NETWORK_VALIDATION_PROBE_HTTPS;
+        private static final int VALIDATION_RESULT_VALID = VALIDATION_RESULT_BASE
+                | NETWORK_VALIDATION_RESULT_VALID;
+        private static final int VALIDATION_RESULT_PARTIAL = VALIDATION_RESULT_BASE
+                | NETWORK_VALIDATION_PROBE_FALLBACK
+                | NETWORK_VALIDATION_RESULT_PARTIAL;
+        private static final int VALIDATION_RESULT_INVALID = 0;
+
         private final INetworkMonitor mNetworkMonitor;
         private final NetworkInfo mNetworkInfo;
         private final NetworkCapabilities mNetworkCapabilities;
@@ -460,17 +473,17 @@ public class ConnectivityServiceTest {
         private String mRedirectUrl;
 
         private INetworkMonitorCallbacks mNmCallbacks;
-        private int mNmValidationResult = NETWORK_TEST_RESULT_INVALID;
+        private int mNmValidationResult = VALIDATION_RESULT_BASE;
         private String mNmValidationRedirectUrl = null;
         private boolean mNmProvNotificationRequested = false;
 
         void setNetworkValid() {
-            mNmValidationResult = NETWORK_TEST_RESULT_VALID;
+            mNmValidationResult = VALIDATION_RESULT_VALID;
             mNmValidationRedirectUrl = null;
         }
 
         void setNetworkInvalid() {
-            mNmValidationResult = NETWORK_TEST_RESULT_INVALID;
+            mNmValidationResult = VALIDATION_RESULT_INVALID;
             mNmValidationRedirectUrl = null;
         }
 
@@ -480,7 +493,12 @@ public class ConnectivityServiceTest {
         }
 
         void setNetworkPartial() {
-            mNmValidationResult = NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY;
+            mNmValidationResult = VALIDATION_RESULT_PARTIAL;
+            mNmValidationRedirectUrl = null;
+        }
+
+        void setNetworkPartialValid() {
+            mNmValidationResult = VALIDATION_RESULT_PARTIAL | VALIDATION_RESULT_VALID;
             mNmValidationRedirectUrl = null;
         }
 
@@ -597,7 +615,7 @@ public class ConnectivityServiceTest {
         private void onValidationRequested() {
             try {
                 if (mNmProvNotificationRequested
-                        && mNmValidationResult == NETWORK_TEST_RESULT_VALID) {
+                        && ((mNmValidationResult & NETWORK_VALIDATION_RESULT_VALID) != 0)) {
                     mNmCallbacks.hideProvisioningNotification();
                     mNmProvNotificationRequested = false;
                 }
@@ -2651,7 +2669,7 @@ public class ConnectivityServiceTest {
 
         // With HTTPS probe disabled, NetworkMonitor should pass the network validation with http
         // probe.
-        mWiFiNetworkAgent.setNetworkValid();
+        mWiFiNetworkAgent.setNetworkPartialValid();
         // If the user chooses yes to use this partial connectivity wifi, switch the default
         // network to wifi and check if wifi becomes valid or not.
         mCm.setAcceptPartialConnectivity(mWiFiNetworkAgent.getNetwork(), true /* accept */,
@@ -2746,6 +2764,55 @@ public class ConnectivityServiceTest {
         callback.expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
         mWiFiNetworkAgent.disconnect();
         callback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+    }
+
+    @Test
+    public void testCaptivePortalOnPartialConnectivity() throws RemoteException {
+        final TestNetworkCallback captivePortalCallback = new TestNetworkCallback();
+        final NetworkRequest captivePortalRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_CAPTIVE_PORTAL).build();
+        mCm.registerNetworkCallback(captivePortalRequest, captivePortalCallback);
+
+        final TestNetworkCallback validatedCallback = new TestNetworkCallback();
+        final NetworkRequest validatedRequest = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_VALIDATED).build();
+        mCm.registerNetworkCallback(validatedRequest, validatedCallback);
+
+        // Bring up a network with a captive portal.
+        // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        String redirectUrl = "http://android.com/path";
+        mWiFiNetworkAgent.connectWithCaptivePortal(redirectUrl);
+        captivePortalCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), redirectUrl);
+
+        // Check that startCaptivePortalApp sends the expected command to NetworkMonitor.
+        mCm.startCaptivePortalApp(mWiFiNetworkAgent.getNetwork());
+        verify(mWiFiNetworkAgent.mNetworkMonitor, timeout(TIMEOUT_MS).times(1))
+                .launchCaptivePortalApp();
+
+        // Report that the captive portal is dismissed with partial connectivity, and check that
+        // callbacks are fired.
+        mWiFiNetworkAgent.setNetworkPartial();
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
+        waitForIdle();
+        captivePortalCallback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY,
+                mWiFiNetworkAgent);
+
+        // Report partial connectivity is accepted.
+        mWiFiNetworkAgent.setNetworkPartialValid();
+        mCm.setAcceptPartialConnectivity(mWiFiNetworkAgent.getNetwork(), true /* accept */,
+                false /* always */);
+        waitForIdle();
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
+        captivePortalCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        validatedCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
+        NetworkCapabilities nc =
+                validatedCallback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY,
+                mWiFiNetworkAgent);
+
+        mCm.unregisterNetworkCallback(captivePortalCallback);
+        mCm.unregisterNetworkCallback(validatedCallback);
     }
 
     @Test
@@ -3816,11 +3883,20 @@ public class ConnectivityServiceTest {
         networkCallback.assertNoCallback();
     }
 
+    @Test
+    public void testUnfulfillableNetworkRequest() throws Exception {
+        runUnfulfillableNetworkRequest(false);
+    }
+
+    @Test
+    public void testUnfulfillableNetworkRequestAfterUnregister() throws Exception {
+        runUnfulfillableNetworkRequest(true);
+    }
+
     /**
      * Validate the callback flow for a factory releasing a request as unfulfillable.
      */
-    @Test
-    public void testUnfulfillableNetworkRequest() throws Exception {
+    private void runUnfulfillableNetworkRequest(boolean preUnregister) throws Exception {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
@@ -3855,14 +3931,25 @@ public class ConnectivityServiceTest {
             }
         }
 
-        // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
         testFactory.expectRemoveRequests(1);
-        testFactory.triggerUnfulfillable(requests.get(newRequestId));
-        networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
-        testFactory.waitForRequests();
+        if (preUnregister) {
+            mCm.unregisterNetworkCallback(networkCallback);
 
-        // unregister network callback - a no-op, but should not fail
-        mCm.unregisterNetworkCallback(networkCallback);
+            // Simulate the factory releasing the request as unfulfillable: no-op since
+            // the callback has already been unregistered (but a test that no exceptions are
+            // thrown).
+            testFactory.triggerUnfulfillable(requests.get(newRequestId));
+        } else {
+            // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
+            testFactory.triggerUnfulfillable(requests.get(newRequestId));
+
+            networkCallback.expectCallback(CallbackState.UNAVAILABLE, null);
+            testFactory.waitForRequests();
+
+            // unregister network callback - a no-op (since already freed by the
+            // on-unavailable), but should not fail or throw exceptions.
+            mCm.unregisterNetworkCallback(networkCallback);
+        }
 
         testFactory.unregister();
         handlerThread.quit();
