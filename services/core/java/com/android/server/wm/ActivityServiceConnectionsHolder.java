@@ -101,7 +101,13 @@ public class ActivityServiceConnectionsHolder<T> {
         if (mConnections == null || mConnections.isEmpty()) {
             return;
         }
-        mService.mH.post(() -> mService.mAmInternal.disconnectActivityFromServices(this));
+        // Capture and null out mConnections, to guarantee that we process
+        // disconnect of these specific connections exactly once even if
+        // we're racing with rapid activity lifecycle churn and this
+        // method is invoked more than once on this object.
+        final Object disc = mConnections;
+        mConnections = null;
+        mService.mH.post(() -> mService.mAmInternal.disconnectActivityFromServices(this, disc));
     }
 
     public void dump(PrintWriter pw, String prefix) {
