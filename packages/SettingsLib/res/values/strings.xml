@@ -631,7 +631,7 @@
 
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
-    <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
+    <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR_LIMIT=NONE] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Label indicating network has been manually marked as metered -->
     <string name="wifi_metered_label">Metered</string>
@@ -771,9 +771,9 @@
     <!-- UI debug setting: enable various types of OpenGL traces [CHAR LIMIT=25] -->
     <string name="enable_opengl_traces_title">Enable OpenGL traces</string>
 
-    <!-- UI debug setting: disable USB audio routing title [CHAR LIMIT=32] -->
+    <!-- UI debug setting: disable USB audio routing title [CHAR LIMIT=60] -->
     <string name="usb_audio_disable_routing">Disable USB audio routing</string>
-    <!-- UI debug setting: disable USB audio routing summary [CHAR LIMIT=50] -->
+    <!-- UI debug setting: disable USB audio routing summary [CHAR_LIMIT=NONE] -->
     <string name="usb_audio_disable_routing_summary">Disable automatic routing to USB audio peripherals</string>
 
     <!-- UI debug setting: show layout bounds information [CHAR LIMIT=25] -->
@@ -811,7 +811,7 @@
     <!-- UI debug setting: scaling factor for all Animator-based animations [CHAR LIMIT=25] -->
     <string name="animator_duration_scale_title">Animator duration scale</string>
 
-    <!-- UI debug setting: simulate secondary display devices using overlays [CHAR LIMIT=25] -->
+    <!-- UI debug setting: simulate secondary display devices using overlays [CHAR LIMIT=45] -->
     <string name="overlay_display_devices_title">Simulate secondary displays</string>
 
     <!-- Preference category for application debugging development settings. [CHAR LIMIT=25] -->
