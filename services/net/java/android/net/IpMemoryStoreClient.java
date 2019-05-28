@@ -212,4 +212,16 @@ public abstract class IpMemoryStoreClient {
                             null, null, null));
         }
     }
+
+    /**
+     * Wipe the data in the database upon network factory reset.
+     */
+    public void factoryReset() {
+        try {
+            runWhenServiceReady(service -> ignoringRemoteException(
+                    () -> service.factoryReset()));
+        } catch (ExecutionException m) {
+            Log.e(TAG, "Error executing factory reset", m);
+        }
+    }
 }
