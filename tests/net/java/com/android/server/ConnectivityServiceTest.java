@@ -615,7 +615,7 @@ public class ConnectivityServiceTest {
         private void onValidationRequested() {
             try {
                 if (mNmProvNotificationRequested
-                        && mNmValidationResult == VALIDATION_RESULT_VALID) {
+                        && ((mNmValidationResult & NETWORK_VALIDATION_RESULT_VALID) != 0)) {
                     mNmCallbacks.hideProvisioningNotification();
                     mNmProvNotificationRequested = false;
                 }
@@ -2781,10 +2781,10 @@ public class ConnectivityServiceTest {
         // Bring up a network with a captive portal.
         // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
-        String firstRedirectUrl = "http://example.com/firstPath";
-        mWiFiNetworkAgent.connectWithCaptivePortal(firstRedirectUrl);
+        String redirectUrl = "http://android.com/path";
+        mWiFiNetworkAgent.connectWithCaptivePortal(redirectUrl);
         captivePortalCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
-        assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), firstRedirectUrl);
+        assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), redirectUrl);
 
         // Check that startCaptivePortalApp sends the expected command to NetworkMonitor.
         mCm.startCaptivePortalApp(mWiFiNetworkAgent.getNetwork());
@@ -2794,7 +2794,7 @@ public class ConnectivityServiceTest {
         // Report that the captive portal is dismissed with partial connectivity, and check that
         // callbacks are fired.
         mWiFiNetworkAgent.setNetworkPartial();
-        mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
+        mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
         waitForIdle();
         captivePortalCallback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY,
                 mWiFiNetworkAgent);
@@ -2805,6 +2805,7 @@ public class ConnectivityServiceTest {
                 false /* always */);
         waitForIdle();
         mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
+        captivePortalCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
         validatedCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
         NetworkCapabilities nc =
                 validatedCallback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY,
