@@ -157,6 +157,7 @@ public final class PermissionControllerManager {
      *
      * @hide
      */
+    @TestApi
     public interface OnGetAppPermissionResultCallback {
         /**
          * The result for {@link #getAppPermissions(String, OnGetAppPermissionResultCallback,
@@ -456,6 +457,7 @@ public final class PermissionControllerManager {
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
     public void getAppPermissions(@NonNull String packageName,
             @NonNull OnGetAppPermissionResultCallback callback, @Nullable Handler handler) {

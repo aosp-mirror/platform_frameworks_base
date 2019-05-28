@@ -22,7 +22,8 @@
         android:sharedUserId="android.uid.shell"
         >
 
-    <!-- Standard permissions granted to the shell. -->
+        <!-- Standard permissions granted to the shell. -->
+    <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
