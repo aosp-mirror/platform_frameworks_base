@@ -1036,18 +1036,11 @@ public class NotificationManagerService extends SystemService {
                     final StatusBarNotification n = r.sbn;
                     final int callingUid = n.getUid();
                     final String pkg = n.getPackageName();
-                    final boolean wasBubble = r.getNotification().isBubbleNotification();
                     if (isBubble && isNotificationAppropriateToBubble(r, pkg, callingUid,
                             null /* oldEntry */)) {
                         r.getNotification().flags |= FLAG_BUBBLE;
                     } else {
                         r.getNotification().flags &= ~FLAG_BUBBLE;
-                    }
-                    if (wasBubble != r.getNotification().isBubbleNotification()) {
-                        // Add the "alert only once" flag so that the notification won't HUN
-                        // unnecessarily just because the bubble flag was changed.
-                        r.getNotification().flags |= FLAG_ONLY_ALERT_ONCE;
-                        mListeners.notifyPostedLocked(r, r);
                     }
                 }
             }

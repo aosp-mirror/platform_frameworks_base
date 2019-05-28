@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
@@ -547,8 +548,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     mNotificationEntryManager.performRemoveNotification(bubble.entry.notification,
                             UNDEFINED_DISMISS_REASON);
                 } else {
-                    // The notification is still in the shade but we've removed the bubble so
-                    // lets make sure NoMan knows it's not a bubble anymore
+                    // Update the flag for SysUI
+                    bubble.entry.notification.getNotification().flags &= ~FLAG_BUBBLE;
+
+                    // Make sure NoMan knows it's not a bubble anymore so anyone querying it will
+                    // get right result back
                     try {
                         mBarService.onNotificationBubbleChanged(bubble.getKey(),
                                 false /* isBubble */);
