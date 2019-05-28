@@ -23,6 +23,6 @@
         android:fillColor="?android:attr/colorControlActivated"
         android:pathData="M4,15.3V19c0,0.55,0.45,1,1,1h3.69l2.6,2.6c0.39,0.39,1.02,0.39,1.41,0l2.6-2.6H19c0.55,0,1-0.45,1-1v-3.69l2.6-2.6 c0.39-0.39,0.39-1.02,0-1.41L20,8.69V5c0-0.55-0.45-1-1-1h-3.69l-2.6-2.6c-0.39-0.39-1.02-0.39-1.41,0L8.69,4H5C4.45,4,4,4.45,4,5 v3.69l-2.6,2.6c-0.39,0.39-0.39,1.02,0,1.41L4,15.3z M12,7c2.76,0,5,2.24,5,5s-2.24,5-5,5s-5-2.24-5-5S9.24,7,12,7z" />
     <path
-        android:fillColor="?android:attr/colorPrimary"
+        android:fillColor="?android:attr/colorBackgroundFloating"
         android:pathData="M 12 7 C 14.7614237492 7 17 9.23857625085 17 12 C 17 14.7614237492 14.7614237492 17 12 17 C 9.23857625085 17 7 14.7614237492 7 12 C 7 9.23857625085 9.23857625085 7 12 7 Z" />
 </vector>
