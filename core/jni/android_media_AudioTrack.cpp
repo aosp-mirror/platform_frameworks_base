@@ -1301,18 +1301,6 @@ static void android_media_AudioTrack_set_delay_padding(JNIEnv *env,  jobject thi
     lpTrack->setParameters(param.toString());
 }
 
-static void android_media_AudioTrack_set_eos(JNIEnv *env,  jobject thiz) {
-    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
-    if (lpTrack == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "AudioTrack not initialized");
-        return;
-    }
-    AudioParameter param = AudioParameter();
-    param.addInt(String8("EOS"), 1);
-    lpTrack->setParameters(param.toString());
-}
-
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
@@ -1389,7 +1377,6 @@ static const JNINativeMethod gMethods[] = {
     {"native_setPresentation", "(II)I", (void *)android_media_AudioTrack_setPresentation},
     {"native_getPortId", "()I", (void *)android_media_AudioTrack_get_port_id},
     {"native_set_delay_padding", "(II)V", (void *)android_media_AudioTrack_set_delay_padding},
-    {"native_set_eos",        "()V",    (void *)android_media_AudioTrack_set_eos},
 };
 
 
