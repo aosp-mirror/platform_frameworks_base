@@ -65,6 +65,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.SparseIntArray;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -96,6 +97,7 @@ public class PermissionMonitorTest {
     private static final int SYSTEM_UID1 = 1000;
     private static final int SYSTEM_UID2 = 1008;
     private static final int VPN_UID = 10002;
+    private static final String REAL_SYSTEM_PACKAGE_NAME = "android";
     private static final String MOCK_PACKAGE1 = "appName1";
     private static final String MOCK_PACKAGE2 = "appName2";
     private static final String SYSTEM_PACKAGE1 = "sysName1";
@@ -188,8 +190,10 @@ public class PermissionMonitorTest {
     private static PackageInfo buildPackageInfo(boolean hasSystemPermission, int uid, int userId) {
         final PackageInfo pkgInfo;
         if (hasSystemPermission) {
-            pkgInfo = packageInfoWithPermissions(new String[] {CHANGE_NETWORK_STATE, NETWORK_STACK},
-                    PARTITION_SYSTEM);
+            final String[] systemPermissions = new String[]{
+                    CHANGE_NETWORK_STATE, NETWORK_STACK, CONNECTIVITY_USE_RESTRICTED_NETWORKS
+            };
+            pkgInfo = packageInfoWithPermissions(systemPermissions, PARTITION_SYSTEM);
         } else {
             pkgInfo = packageInfoWithPermissions(new String[] {}, "");
         }
@@ -645,5 +649,17 @@ public class PermissionMonitorTest {
 
         mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{MOCK_UID1});
+    }
+
+    @Test
+    public void testRealSystemPermission() throws Exception {
+        // Use the real context as this test must ensure the *real* system package holds the
+        // necessary permission.
+        final Context realContext = InstrumentationRegistry.getContext();
+        final PermissionMonitor monitor = new PermissionMonitor(realContext, mNetdService);
+        final PackageManager manager = realContext.getPackageManager();
+        final PackageInfo systemInfo = manager.getPackageInfo(REAL_SYSTEM_PACKAGE_NAME,
+                GET_PERMISSIONS | MATCH_ANY_USER);
+        assertTrue(monitor.hasPermission(systemInfo, CONNECTIVITY_USE_RESTRICTED_NETWORKS));
     }
 }
