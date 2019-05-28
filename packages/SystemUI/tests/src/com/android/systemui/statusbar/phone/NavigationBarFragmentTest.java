@@ -271,6 +271,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
             when(view.getBarTransitions()).thenReturn(mock(BarTransitions.class));
             when(view.getLightTransitionsController()).thenReturn(
                     mock(LightBarTransitionsController.class));
+            when(view.getRotationButtonController()).thenReturn(
+                    mock(RotationButtonController.class));
             return view;
         }
     }

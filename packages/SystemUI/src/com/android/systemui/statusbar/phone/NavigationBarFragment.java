@@ -188,7 +188,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         @Override
         public void onQuickStepStarted() {
             // Use navbar dragging as a signal to hide the rotate button
-            mNavigationBarView.getRotateSuggestionButton().setRotateSuggestionButtonState(false);
+            mNavigationBarView.getRotationButtonController().setRotateSuggestionButtonState(false);
 
             // Hide the notifications panel when quick step starts
             mStatusBar.collapsePanel(true /* animate */);
@@ -333,16 +333,16 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
         // Currently there is no accelerometer sensor on non-default display.
         if (mIsOnDefaultDisplay) {
-            final RotationContextButton rotationButton =
-                    mNavigationBarView.getRotateSuggestionButton();
-            rotationButton.setListener(mRotationButtonListener);
-            rotationButton.addRotationCallback(mRotationWatcher);
+            mNavigationBarView.getRotateSuggestionButton().setListener(mRotationButtonListener);
+
+            final RotationButtonController rotationButtonController =
+                    mNavigationBarView.getRotationButtonController();
+            rotationButtonController.addRotationCallback(mRotationWatcher);
 
             // Reset user rotation pref to match that of the WindowManager if starting in locked
             // mode. This will automatically happen when switching from auto-rotate to locked mode.
-            if (display != null && rotationButton.isRotationLocked()) {
-                final int winRotation = display.getRotation();
-                rotationButton.setRotationLockedAtAngle(winRotation);
+            if (display != null && rotationButtonController.isRotationLocked()) {
+                rotationButtonController.setRotationLockedAtAngle(display.getRotation());
             }
         } else {
             mDisabledFlags2 |= StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
@@ -458,34 +458,34 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
 
             updateSystemUiStateFlags(-1);
-            mNavigationBarView.getRotateSuggestionButton()
-                    .onNavigationBarWindowVisibilityChange(isNavBarWindowVisible());
+            mNavigationBarView.getRotationButtonController().onNavigationBarWindowVisibilityChange(
+                    isNavBarWindowVisible());
         }
     }
 
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
         final int winRotation = mNavigationBarView.getDisplay().getRotation();
-        final boolean rotateSuggestionsDisabled = RotationContextButton
+        final boolean rotateSuggestionsDisabled = RotationButtonController
                 .hasDisable2RotateSuggestionFlag(mDisabledFlags2);
+        final RotationButtonController rotationButtonController =
+                mNavigationBarView.getRotationButtonController();
+        final RotationButton rotationButton = rotationButtonController.getRotationButton();
+
         if (RotationContextButton.DEBUG_ROTATION) {
             Log.v(TAG, "onRotationProposal proposedRotation=" + Surface.rotationToString(rotation)
                     + ", winRotation=" + Surface.rotationToString(winRotation)
                     + ", isValid=" + isValid + ", mNavBarWindowState="
                     + StatusBarManager.windowStateToString(mNavigationBarWindowState)
                     + ", rotateSuggestionsDisabled=" + rotateSuggestionsDisabled
-                    + ", isRotateButtonVisible=" + (mNavigationBarView == null ? "null" :
-                        mNavigationBarView.getRotateSuggestionButton().isVisible()));
+                    + ", isRotateButtonVisible=" + (mNavigationBarView == null ? "null"
+                    : rotationButton.isVisible()));
         }
 
         // Respect the disabled flag, no need for action as flag change callback will handle hiding
         if (rotateSuggestionsDisabled) return;
 
-        View rotationButton = mNavigationBarView.getRotateSuggestionButton().getCurrentView();
-        if (rotationButton != null && rotationButton.isAttachedToWindow()) {
-            mNavigationBarView.getRotateSuggestionButton()
-                    .onRotationProposal(rotation, winRotation, isValid);
-        }
+        rotationButtonController.onRotationProposal(rotation, winRotation, isValid);
     }
 
     /** Restores the System UI flags saved state to {@link NavigationBarFragment}. */
@@ -593,7 +593,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private void setDisabled2Flags(int state2) {
         // Method only called on change of disable2 flags
         if (mNavigationBarView != null) {
-            mNavigationBarView.getRotateSuggestionButton().onDisable2FlagChanged(state2);
+            mNavigationBarView.getRotationButtonController().onDisable2FlagChanged(state2);
         }
     }
 
@@ -862,8 +862,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         boolean[] feedbackEnabled = new boolean[1];
         int a11yFlags = getA11yButtonState(feedbackEnabled);
 
-        mNavigationBarView.getRotateSuggestionButton()
-                .setAccessibilityFeedbackEnabled(feedbackEnabled[0]);
+        mNavigationBarView.getRotationButtonController().setAccessibilityFeedbackEnabled(
+                feedbackEnabled[0]);
 
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
