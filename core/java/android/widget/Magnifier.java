@@ -106,6 +106,8 @@ public final class Magnifier {
     // Lock to synchronize between the UI thread and the thread that handles pixel copy results.
     // Only sync mWindow writes from UI thread with mWindow reads from sPixelCopyHandlerThread.
     private final Object mLock = new Object();
+    // The lock used to synchronize the UI and render threads when a #dismiss is performed.
+    private final Object mDestroyLock = new Object();
 
     /**
      * Initializes a magnifier.
@@ -173,7 +175,7 @@ public final class Magnifier {
                             mParentSurface.mSurface,
                             mWindowWidth, mWindowHeight, mWindowElevation, mWindowCornerRadius,
                             Handler.getMain() /* draw the magnifier on the UI thread */, mLock,
-                            mCallback);
+                            mDestroyLock, mCallback);
                 }
             }
             performPixelCopy(startX, startY, true /* update window position */);
@@ -187,9 +189,11 @@ public final class Magnifier {
      */
     public void dismiss() {
         if (mWindow != null) {
-            synchronized (mLock) {
-                mWindow.destroy();
-                mWindow = null;
+            synchronized (mDestroyLock) {
+                synchronized (mLock) {
+                    mWindow.destroy();
+                    mWindow = null;
+                }
             }
             mPrevPosInView.x = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
             mPrevPosInView.y = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
@@ -478,14 +482,16 @@ public final class Magnifier {
         // is performed on the UI thread and a frame callback on the render thread.
         // When both mLock and mDestroyLock need to be held at the same time,
         // mDestroyLock should be acquired before mLock in order to avoid deadlocks.
-        private final Object mDestroyLock = new Object();
+        private final Object mDestroyLock;
 
         InternalPopupWindow(final Context context, final Display display,
                 final Surface parentSurface,
                 final int width, final int height, final float elevation, final float cornerRadius,
-                final Handler handler, final Object lock, final Callback callback) {
+                final Handler handler, final Object lock, final Object destroyLock,
+                final Callback callback) {
             mDisplay = display;
             mLock = lock;
+            mDestroyLock = destroyLock;
             mCallback = callback;
 
             mContentWidth = width;
