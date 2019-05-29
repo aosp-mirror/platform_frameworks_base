@@ -16,17 +16,15 @@
 
 package com.android.systemui.assist;
 
-import android.app.StatusBarManager;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.phone.NavigationBarFragment;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.shared.system.QuickStepContract;
 
 /**
  * Assistant Handle behavior that makes Assistant handles show/hide when the home handle is
@@ -34,47 +32,68 @@ import com.android.systemui.statusbar.phone.NavigationBarFragment;
  */
 final class AssistHandleLikeHomeBehavior implements BehaviorController {
 
-    private final CommandQueue.Callbacks mCallbacks = new CommandQueue.Callbacks() {
+    private final StatusBarStateController.StateListener mStatusBarStateListener =
+            new StatusBarStateController.StateListener() {
+                @Override
+                public void onDozingChanged(boolean isDozing) {
+                    handleDozingChanged(isDozing);
+                }
+            };
+    private final OverviewProxyService.OverviewProxyListener mOverviewProxyListener =
+            new OverviewProxyService.OverviewProxyListener() {
         @Override
-        public void setWindowState(int displayId, int window, int state) {
-            if (mNavBarDisplayId == displayId
-                    && window == StatusBarManager.WINDOW_NAVIGATION_BAR) {
-                handleWindowStateChanged(state);
-            }
+        public void onSystemUiStateChanged(int sysuiStateFlags) {
+            handleSystemUiStateChange(sysuiStateFlags);
         }
     };
+    private final StatusBarStateController mStatusBarStateController;
+    private final OverviewProxyService mOverviewProxyService;
 
-    private CommandQueue mCommandQueue;
-    private int mNavBarDisplayId;
-    private boolean mIsNavBarWindowVisible;
+    private boolean mIsDozing;
+    private boolean mIsHomeHandleHiding;
 
     @Nullable private AssistHandleCallbacks mAssistHandleCallbacks;
+
+    AssistHandleLikeHomeBehavior() {
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+    }
 
     @Override
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {
         mAssistHandleCallbacks = callbacks;
-        NavigationBarFragment navigationBarFragment =
-                Dependency.get(NavigationBarController.class).getDefaultNavigationBarFragment();
-        mNavBarDisplayId = navigationBarFragment.mDisplayId;
-        mIsNavBarWindowVisible = navigationBarFragment.isNavBarWindowVisible();
-        mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
-        mCommandQueue.addCallback(mCallbacks);
+        mIsDozing = mStatusBarStateController.isDozing();
+        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mOverviewProxyService.addCallback(mOverviewProxyListener);
         callbackForCurrentState();
     }
 
     @Override
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
-        mCommandQueue.removeCallback(mCallbacks);
+        mOverviewProxyService.removeCallback(mOverviewProxyListener);
     }
 
-    private void handleWindowStateChanged(int state) {
-        boolean newVisibility = state == StatusBarManager.WINDOW_STATE_SHOWING;
-        if (mIsNavBarWindowVisible == newVisibility) {
+    private static boolean isHomeHandleHiding(int sysuiStateFlags) {
+        return (sysuiStateFlags & QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN) != 0;
+    }
+
+    private void handleDozingChanged(boolean isDozing) {
+        if (mIsDozing == isDozing) {
             return;
         }
 
-        mIsNavBarWindowVisible = newVisibility;
+        mIsDozing = isDozing;
+        callbackForCurrentState();
+    }
+
+    private void handleSystemUiStateChange(int sysuiStateFlags) {
+        boolean isHomeHandleHiding = isHomeHandleHiding(sysuiStateFlags);
+        if (mIsHomeHandleHiding == isHomeHandleHiding) {
+            return;
+        }
+
+        mIsHomeHandleHiding = isHomeHandleHiding;
         callbackForCurrentState();
     }
 
@@ -83,10 +102,10 @@ final class AssistHandleLikeHomeBehavior implements BehaviorController {
             return;
         }
 
-        if (mIsNavBarWindowVisible) {
-            mAssistHandleCallbacks.showAndStay();
-        } else {
+        if (mIsHomeHandleHiding || mIsDozing) {
             mAssistHandleCallbacks.hide();
+        } else {
+            mAssistHandleCallbacks.showAndStay();
         }
     }
 }
