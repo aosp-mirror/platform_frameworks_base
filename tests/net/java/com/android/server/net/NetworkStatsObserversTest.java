@@ -28,8 +28,6 @@ import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
-import static com.android.internal.util.TestUtils.waitForIdleHandler;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -56,6 +54,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.net.VpnInfo;
 import com.android.server.net.NetworkStatsServiceTest.LatchedHandler;
+import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -457,7 +456,7 @@ public class NetworkStatsObserversTest {
     }
 
     private void waitForObserverToIdle() {
-        waitForIdleHandler(mObserverHandlerThread, WAIT_TIMEOUT_MS);
-        waitForIdleHandler(mHandler, WAIT_TIMEOUT_MS);
+        HandlerUtilsKt.waitForIdle(mObserverHandlerThread, WAIT_TIMEOUT_MS);
+        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT_MS);
     }
 }

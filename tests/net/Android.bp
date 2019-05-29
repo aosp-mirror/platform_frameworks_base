@@ -10,6 +10,7 @@ java_defaults {
         "framework-protos",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
+        "net-tests-utils",
         "platform-test-annotations",
         "services.core",
         "services.net",
