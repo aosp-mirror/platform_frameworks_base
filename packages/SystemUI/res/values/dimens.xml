@@ -218,7 +218,7 @@
     <dimen name="notification_guts_option_horizontal_padding">15dp</dimen>
 
     <!-- The vertical space between items in the alert selections in the inline settings -->
-    <dimen name="notification_guts_option_vertical_padding">20dp</dimen>
+    <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
 
     <!-- The vertical space between the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_margin">6dp</dimen>
@@ -227,7 +227,7 @@
     <dimen name="notification_importance_toggle_marginTop">28dp</dimen>
     <dimen name="notification_importance_toggle_marginBottom">28dp</dimen>
     <dimen name="notification_importance_text_marginTop">20dp</dimen>
-    <dimen name="notification_importance_button_separation">16dp</dimen>
+    <dimen name="notification_importance_button_separation">8dp</dimen>
     <dimen name="notification_importance_button_width">178dp</dimen>
     <dimen name="notification_importance_button_horiz_padding">28dp</dimen>
     <dimen name="notification_importance_drawable_padding">8dp</dimen>
@@ -236,8 +236,9 @@
     <dimen name="notification_importance_description_text">14sp</dimen>
     <dimen name="notification_importance_channel_text">16sp</dimen>
     <dimen name="notification_importance_channel_group_text">14sp</dimen>
-    <dimen name="notification_importance_button_text">16sp</dimen>
-    <dimen name="notification_importance_button_padding">14dp</dimen>
+    <dimen name="notification_importance_button_text">14sp</dimen>
+    <dimen name="notification_importance_button_padding">16dp</dimen>
+    <dimen name="notification_importance_button_description_top_margin">12dp</dimen>
     <dimen name="rect_button_radius">8dp</dimen>
 
     <!-- The minimum height for the snackbar shown after the snooze option has been chosen. -->
@@ -950,7 +951,7 @@
 
     <!-- Global actions grid layout -->
     <dimen name="global_actions_grid_side_margin">4dp</dimen>
-    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
+    <dimen name="global_actions_grid_container_bottom_margin">8dp</dimen>
 
     <!-- Used to workaround a bug where shadows are clipped during animations by expanding
          the bounds of the parent view. -->

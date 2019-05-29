@@ -518,8 +518,11 @@ public class TrustManagerService extends SystemService {
                     agentInfo = mActiveAgents.valueAt(index);
                 }
 
-                boolean directUnlock = resolveInfo.serviceInfo.directBootAware
-                    && agentInfo.settings.canUnlockProfile;
+                boolean directUnlock = false;
+                if (agentInfo.settings != null) {
+                    directUnlock = resolveInfo.serviceInfo.directBootAware
+                        && agentInfo.settings.canUnlockProfile;
+                }
 
                 if (directUnlock) {
                     if (DEBUG) Slog.d(TAG, "refreshAgentList: trustagent " + name

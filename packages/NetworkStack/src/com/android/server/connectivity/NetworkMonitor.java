@@ -683,9 +683,9 @@ public class NetworkMonitor extends StateMachine {
         public void enter() {
             maybeLogEvaluationResult(
                     networkEventType(validationStage(), EvaluationResult.VALIDATED));
-            // If the user has accepted that and HTTPS probing is disabled, then mark the network
-            // as validated and partial so that settings can keep informing the user that the
-            // connection is limited.
+            // If the user has accepted partial connectivity and HTTPS probing is disabled, then
+            // mark the network as validated and partial so that settings can keep informing the
+            // user that the connection is limited.
             int result = NETWORK_VALIDATION_RESULT_VALID;
             if (!mUseHttps && mAcceptPartialConnectivity) {
                 result |= NETWORK_VALIDATION_RESULT_PARTIAL;
@@ -1054,6 +1054,11 @@ public class NetworkMonitor extends StateMachine {
             // TODO: Consider abandoning this state after a few attempts and
             // transitioning back to EvaluatingState, to perhaps give ourselves
             // the opportunity to (re)detect a captive portal or something.
+            //
+            // TODO: distinguish between CMD_EVALUATE_PRIVATE_DNS messages that are caused by server
+            // lookup failures (which should continue to do exponential backoff) and
+            // CMD_EVALUATE_PRIVATE_DNS messages that are caused by user reconfiguration (which
+            // should be processed immediately.
             sendMessageDelayed(CMD_EVALUATE_PRIVATE_DNS, mPrivateDnsReevalDelayMs);
             mPrivateDnsReevalDelayMs *= 2;
             if (mPrivateDnsReevalDelayMs > MAX_REEVALUATE_DELAY_MS) {
