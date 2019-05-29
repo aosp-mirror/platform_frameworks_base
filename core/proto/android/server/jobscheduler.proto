@@ -273,9 +273,11 @@ message ConstantsProto {
         // The maximum number of jobs an app can run within this particular standby bucket's
         // window size.
         optional int32 max_job_count_rare = 11;
+        // The period of time used to rate limit recently run jobs.
+        optional int32 rate_limiting_window_ms = 19;
         // The maximum number of jobs that should be allowed to run in the past
-        // {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS}.
-        optional int32 max_job_count_per_allowed_time = 12;
+        // rate_limiting_window_ms.
+        optional int32 max_job_count_per_rate_limiting_window = 12;
         // The maximum number of timing sessions an app can run within this particular standby
         // bucket's window size.
         optional int32 max_session_count_active = 13;
@@ -289,8 +291,8 @@ message ConstantsProto {
         // bucket's window size.
         optional int32 max_session_count_rare = 16;
         // The maximum number of timing sessions that should be allowed to run in the past
-        // {@link QUOTA_CONTROLLER_ALLOWED_TIME_PER_PERIOD_MS}.
-        optional int32 max_session_count_per_allowed_time = 17;
+        // rate_limiting_window_ms.
+        optional int32 max_session_count_per_rate_limiting_window = 17;
         // Treat two distinct {@link TimingSession}s as the same if they start and end within this
         // amount of time of each other.
         optional int64 timing_session_coalescing_duration_ms = 18;
@@ -517,63 +519,56 @@ message StateControllerProto {
             optional int64 expiration_time_elapsed = 2;
             optional int64 window_size_ms = 3;
 
-            /** The total amount of time the app ran in its respective bucket window size. */
+            optional int32 job_count_limit = 14;
+            optional int32 session_count_limit = 15;
+
+            // The total amount of time the app ran in its respective bucket window size.
             optional int64 execution_time_in_window_ms = 4;
             optional int32 bg_job_count_in_window = 5;
 
-            /**
-             * The total amount of time the app ran in the last
-             * {@link QuotaController#MAX_PERIOD_MS}.
-             */
+            // The total amount of time the app ran in the last
+            // {@link QuotaController#MAX_PERIOD_MS}.
             optional int64 execution_time_in_max_period_ms = 6;
             optional int32 bg_job_count_in_max_period = 7;
 
-            /**
-             * The number of {@link TimingSession}s within the bucket window size. This will include
-             * sessions that started before the window as long as they end within the window.
-             */
+            // The number of {@link TimingSession}s within the bucket window size. This will include
+            // sessions that started before the window as long as they end within the window.
             optional int32 session_count_in_window = 11;
 
-            /**
-             * The time after which the sum of all the app's sessions plus
-             * ConstantsProto.QuotaController.in_quota_buffer_ms equals the quota. This is only
-             * valid if
-             * execution_time_in_window_ms >=
-             *   ConstantsProto.QuotaController.allowed_time_per_period_ms
-             * or
-             * execution_time_in_max_period_ms >=
-             *   ConstantsProto.QuotaController.max_execution_time_ms.
-             */
-            optional int64 quota_cutoff_time_elapsed = 8;
+            // The time after which the app will be under the bucket quota. This is only valid if
+            // execution_time_in_window_ms >=
+            //   ConstantsProto.QuotaController.allowed_time_per_period_ms
+            // or
+            // execution_time_in_max_period_ms >=
+            //   ConstantsProto.QuotaController.max_execution_time_ms
+            // or
+            // bg_job_count_in_window >= job_count_limit
+            // or
+            // session_count_in_window >= session_count_limit.
+            optional int64 in_quota_time_elapsed = 8;
 
-            /**
-             * The time after which job_count_in_allowed_time should be considered invalid, in the
-             * elapsed realtime timebase.
-             */
+            // The time after which job_count_in_rate_limiting_window should be considered invalid,
+            // in the elapsed realtime timebase.
             optional int64 job_count_expiration_time_elapsed = 9;
 
-            /**
-             * The number of jobs that ran in at least the last
-             * ConstantsProto.QuotaController.allowed_time_per_period_ms.
-             * It may contain a few stale entries since cleanup won't happen exactly every
-             * ConstantsProto.QuotaController.allowed_time_per_period_ms.
-             */
-            optional int32 job_count_in_allowed_time = 10;
+            // The number of jobs that ran in at least the last
+            // ConstantsProto.QuotaController.rate_limiting_window_ms.
+            // It may contain a few stale entries since cleanup won't happen exactly every
+            // ConstantsProto.QuotaController.rate_limiting_window_ms. This should only be
+            // considered valid before elapsed realtime has reached
+            // job_count_expiration_time_elapsed.
+            optional int32 job_count_in_rate_limiting_window = 10;
 
-            /**
-             * The time after which {@link #timingSessionCountInAllowedTime} should be considered
-             * invalid, in the elapsed realtime timebase.
-             */
+            // The time after which {@link #timingSessionCountInAllowedTime} should be considered
+            // invalid, in the elapsed realtime timebase.
             optional int64 session_count_expiration_time_elapsed = 12;
 
-            /**
-             * The number of {@link TimingSession}s that ran in at least the last
-             * {@link #mAllowedTimePerPeriodMs}. It may contain a few stale entries since cleanup won't
-             * happen exactly every {@link #mAllowedTimePerPeriodMs}. This should only be considered
-             * valid before elapsed realtime has reached
-             * {@link #timingSessionCountExpirationTimeElapsed}.
-             */
-            optional int32 session_count_in_allowed_time = 13;
+            // The number of {@link TimingSession}s that ran in at least the last
+            // ConstantsProto.QuotaController.rate_limiting_window_ms. It may contain a few stale
+            // entries since cleanup won't happen exactly every
+            // ConstantsProto.QuotaController.rate_limiting_window_ms. This should only be considered
+            // valid before elapsed realtime has reached session_count_expiration_time_elapsed.
+            optional int32 session_count_in_rate_limiting_window = 13;
         }
 
         message Package {
