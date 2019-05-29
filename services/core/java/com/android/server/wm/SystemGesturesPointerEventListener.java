@@ -113,7 +113,12 @@ class SystemGesturesPointerEventListener implements PointerEventListener {
         // statistics because it passes every touch event though a GestureDetector. By creating an
         // anonymous subclass of GestureDetector, these statistics will be recorded with a unique
         // source name that can be filtered.
-        mGestureDetector = new GestureDetector(mContext, new FlingGestureDetector(), mHandler) {};
+
+        // GestureDetector would get a ViewConfiguration instance by context, that may also
+        // create a new WindowManagerImpl for the new display, and lock WindowManagerGlobal
+        // temporarily in the constructor that would make a deadlock.
+        mHandler.post(() -> mGestureDetector =
+                new GestureDetector(mContext, new FlingGestureDetector(), mHandler) {});
     }
 
     @Override
