@@ -23,7 +23,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -34,7 +33,6 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -272,7 +270,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             Trace.endSection();
         };
 
-        if (!delayWakeUp) {
+        if (!delayWakeUp && mMode != MODE_NONE) {
             wakeUp.run();
         }
         switch (mMode) {
