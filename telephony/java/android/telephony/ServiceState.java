@@ -341,6 +341,7 @@ public class ServiceState implements Parcelable {
 
     private String mOperatorAlphaLongRaw;
     private String mOperatorAlphaShortRaw;
+    private boolean mIsIwlanPreferred;
 
     /**
      * get String description of roaming type
@@ -427,6 +428,7 @@ public class ServiceState implements Parcelable {
         mNrFrequencyRange = s.mNrFrequencyRange;
         mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
         mOperatorAlphaShortRaw = s.mOperatorAlphaShortRaw;
+        mIsIwlanPreferred = s.mIsIwlanPreferred;
     }
 
     /**
@@ -463,6 +465,7 @@ public class ServiceState implements Parcelable {
         mNrFrequencyRange = in.readInt();
         mOperatorAlphaLongRaw = in.readString();
         mOperatorAlphaShortRaw = in.readString();
+        mIsIwlanPreferred = in.readBoolean();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -492,6 +495,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mNrFrequencyRange);
         out.writeString(mOperatorAlphaLongRaw);
         out.writeString(mOperatorAlphaShortRaw);
+        out.writeBoolean(mIsIwlanPreferred);
     }
 
     public int describeContents() {
@@ -853,7 +857,8 @@ public class ServiceState implements Parcelable {
                     mNetworkRegistrationInfos,
                     mNrFrequencyRange,
                     mOperatorAlphaLongRaw,
-                    mOperatorAlphaShortRaw);
+                    mOperatorAlphaShortRaw,
+                    mIsIwlanPreferred);
         }
     }
 
@@ -885,7 +890,8 @@ public class ServiceState implements Parcelable {
                     && equalsHandlesNulls(mOperatorAlphaShortRaw, s.mOperatorAlphaShortRaw)
                     && mNetworkRegistrationInfos.size() == s.mNetworkRegistrationInfos.size()
                     && mNetworkRegistrationInfos.containsAll(s.mNetworkRegistrationInfos)
-                    && mNrFrequencyRange == s.mNrFrequencyRange;
+                    && mNrFrequencyRange == s.mNrFrequencyRange
+                    && mIsIwlanPreferred == s.mIsIwlanPreferred;
         }
     }
 
@@ -1043,6 +1049,7 @@ public class ServiceState implements Parcelable {
                     .append(", mNrFrequencyRange=").append(mNrFrequencyRange)
                     .append(", mOperatorAlphaLongRaw=").append(mOperatorAlphaLongRaw)
                     .append(", mOperatorAlphaShortRaw=").append(mOperatorAlphaShortRaw)
+                    .append(", mIsIwlanPreferred=").append(mIsIwlanPreferred)
                     .append("}").toString();
         }
     }
@@ -1085,6 +1092,7 @@ public class ServiceState implements Parcelable {
         }
         mOperatorAlphaLongRaw = null;
         mOperatorAlphaShortRaw = null;
+        mIsIwlanPreferred = false;
     }
 
     public void setStateOutOfService() {
@@ -1459,20 +1467,9 @@ public class ServiceState implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage
     public int getRilDataRadioTechnology() {
-        NetworkRegistrationInfo wwanRegInfo = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        NetworkRegistrationInfo wlanRegInfo = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-        if (wlanRegInfo != null
-                && wlanRegInfo.getAccessNetworkTechnology() == TelephonyManager.NETWORK_TYPE_IWLAN
-                && wlanRegInfo.getRegistrationState()
-                == NetworkRegistrationInfo.REGISTRATION_STATE_HOME) {
-            return RIL_RADIO_TECHNOLOGY_IWLAN;
-        } else if (wwanRegInfo != null) {
-            return networkTypeToRilRadioTechnology(wwanRegInfo.getAccessNetworkTechnology());
-        }
-        return RIL_RADIO_TECHNOLOGY_UNKNOWN;
+        return networkTypeToRilRadioTechnology(getDataNetworkType());
     }
+
     /**
      * @hide
      * @Deprecated to be removed Q3 2013 use {@link #getRilDataRadioTechnology} or
@@ -1608,26 +1605,40 @@ public class ServiceState implements Parcelable {
         }
     }
 
-    /** @hide */
+    /**
+     * Get current data network type.
+     *
+     * Note that for IWLAN AP-assisted mode device, which is reporting both camped access networks
+     * (cellular RAT and IWLAN)at the same time, this API is simulating the old legacy mode device
+     * behavior,
+     *
+     * @return Current data network type
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public @TelephonyManager.NetworkType int getDataNetworkType() {
-        final NetworkRegistrationInfo iwlanRegState = getNetworkRegistrationInfo(
+        final NetworkRegistrationInfo iwlanRegInfo = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-        if (iwlanRegState != null && iwlanRegState.getRegistrationState()
-                == NetworkRegistrationInfo.REGISTRATION_STATE_HOME) {
-            // If the device is on IWLAN, return IWLAN as the network type. This is to simulate the
-            // behavior of legacy mode device. In the future caller should use
-            // requestNetworkRegistrationInfo() to retrieve the actual data network type on cellular
-            // or on IWLAN.
-            return iwlanRegState.getAccessNetworkTechnology();
+        final NetworkRegistrationInfo wwanRegInfo = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        // For legacy mode device, or AP-assisted mode device but IWLAN is out of service, use
+        // the RAT from cellular.
+        if (iwlanRegInfo == null || !iwlanRegInfo.isInService()) {
+            return (wwanRegInfo != null) ? wwanRegInfo.getAccessNetworkTechnology()
+                    : TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
 
-        final NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        if (regState != null) {
-            return regState.getAccessNetworkTechnology();
+        // At this point, it must be an AP-assisted mode device and IWLAN is in service. We should
+        // use the RAT from IWLAN service is cellular is out of service, or when both are in service
+        // and any APN type of data is preferred on IWLAN.
+        if (!wwanRegInfo.isInService() || mIsIwlanPreferred) {
+            return iwlanRegInfo.getAccessNetworkTechnology();
         }
-        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+
+        // If both cellular and IWLAN are in service, but no APN is preferred on IWLAN, still use
+        // the RAT from cellular.
+        return wwanRegInfo.getAccessNetworkTechnology();
     }
 
     /** @hide */
@@ -1975,5 +1986,15 @@ public class ServiceState implements Parcelable {
      */
     public String getOperatorAlphaShortRaw() {
         return mOperatorAlphaShortRaw;
+    }
+
+    /**
+     * Set to {@code true} if any data network is preferred on IWLAN.
+     *
+     * @param isIwlanPreferred {@code true} if IWLAN is preferred.
+     * @hide
+     */
+    public void setIwlanPreferred(boolean isIwlanPreferred) {
+        mIsIwlanPreferred = isIwlanPreferred;
     }
 }
