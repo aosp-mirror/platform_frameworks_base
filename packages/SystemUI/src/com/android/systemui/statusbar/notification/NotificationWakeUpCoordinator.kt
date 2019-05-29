@@ -228,7 +228,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
                     animate = false
-                } else {
+                } else if (!mWakingUp && !willWakeUp){
                     entry.setAmbientGoingAway(true)
                     mEntrySetToClearWhenFinished.add(entry)
                 }
