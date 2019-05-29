@@ -32,12 +32,12 @@ import android.util.Log;
  * @hide
  */
 public abstract class BluetoothProfileConnector<T> {
-    private int mProfileId;
+    private final int mProfileId;
     private BluetoothProfile.ServiceListener mServiceListener;
-    private BluetoothProfile mProfileProxy;
+    private final BluetoothProfile mProfileProxy;
     private Context mContext;
-    private String mProfileName;
-    private String mServiceName;
+    private final String mProfileName;
+    private final String mServiceName;
     private volatile T mService;
 
     private final IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
@@ -65,7 +65,7 @@ public abstract class BluetoothProfileConnector<T> {
             logDebug("Proxy object disconnected");
             doUnbind();
             if (mServiceListener != null) {
-                mServiceListener.onServiceDisconnected(BluetoothProfile.A2DP);
+                mServiceListener.onServiceDisconnected(mProfileId);
             }
         }
     };
