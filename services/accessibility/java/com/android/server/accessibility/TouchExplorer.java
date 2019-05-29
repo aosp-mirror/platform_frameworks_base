@@ -75,10 +75,6 @@ class TouchExplorer extends BaseEventStreamTransformation
     // pointers so they can be considered moving in the same direction.
     private static final float MAX_DRAGGING_ANGLE_COS = 0.525321989f; // cos(pi/4)
 
-    // The minimal distance before we take the middle of the distance between
-    // the two dragging pointers as opposed to use the location of the primary one.
-    private static final int MIN_POINTER_DISTANCE_TO_USE_MIDDLE_LOCATION_DIP = 200;
-
     // The timeout after which we are no longer trying to detect a gesture.
     private static final int EXIT_GESTURE_DETECTION_TIMEOUT = 2000;
 
@@ -114,10 +110,6 @@ class TouchExplorer extends BaseEventStreamTransformation
 
     // Helper to detect gestures.
     private final AccessibilityGestureDetector mGestureDetector;
-
-    // The scaled minimal distance before we take the middle of the distance between
-    // the two dragging pointers as opposed to use the location of the primary one.
-    private final int mScaledMinPointerDistanceToUseMiddleLocation;
 
     // Helper class to track received pointers.
     private final TouchState.ReceivedPointerTracker mReceivedPointerTracker;
@@ -188,9 +180,6 @@ class TouchExplorer extends BaseEventStreamTransformation
         } else {
             mGestureDetector = detector;
         }
-        final float density = context.getResources().getDisplayMetrics().density;
-        mScaledMinPointerDistanceToUseMiddleLocation =
-            (int) (MIN_POINTER_DISTANCE_TO_USE_MIDDLE_LOCATION_DIP * density);
     }
 
     @Override
@@ -610,11 +599,11 @@ class TouchExplorer extends BaseEventStreamTransformation
                     } break;
                     case 2: {
                         if (isDraggingGesture(event)) {
+                            // Adjust event location to the middle location of the two pointers.
                             final float firstPtrX = event.getX(0);
                             final float firstPtrY = event.getY(0);
                             final float secondPtrX = event.getX(1);
                             final float secondPtrY = event.getY(1);
-
                             final int pointerIndex = event.findPointerIndex(mDraggingPointerId);
                             final float deltaX =
                                     (pointerIndex == 0) ? (secondPtrX - firstPtrX)
@@ -622,12 +611,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                             final float deltaY =
                                     (pointerIndex == 0) ? (secondPtrY - firstPtrY)
                                             : (firstPtrY - secondPtrY);
-                            final double distance = Math.hypot(deltaX, deltaY);
-
-                            if (distance > mScaledMinPointerDistanceToUseMiddleLocation) {
-                                event.offsetLocation(deltaX / 2, deltaY / 2);
-                            }
-
+                            event.offsetLocation(deltaX / 2, deltaY / 2);
                             // If still dragging send a drag event.
                             sendMotionEvent(event, MotionEvent.ACTION_MOVE, pointerIdBits,
                                     policyFlags);
@@ -1181,8 +1165,6 @@ class TouchExplorer extends BaseEventStreamTransformation
                 + ", mLongPressingPointerId: " + mLongPressingPointerId
                 + ", mLongPressingPointerDeltaX: " + mLongPressingPointerDeltaX
                 + ", mLongPressingPointerDeltaY: " + mLongPressingPointerDeltaY
-                + ", mScaledMinPointerDistanceToUseMiddleLocation: "
-                + mScaledMinPointerDistanceToUseMiddleLocation
                 + ", mTempPoint: " + mTempPoint
                 + " }";
     }
