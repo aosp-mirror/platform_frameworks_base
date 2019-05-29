@@ -52,7 +52,6 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
-import static com.android.internal.util.TestUtils.waitForIdleHandler;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
 
 import static org.junit.Assert.assertEquals;
@@ -104,6 +103,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
+import com.android.testutils.HandlerUtilsKt;
 
 import libcore.io.IoUtils;
 
@@ -1057,8 +1057,6 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsSummary(buildEmptyStats());
         expectNetworkStatsUidDetail(buildEmptyStats());
 
-
-
         // Register and verify request and that binder was called
         DataUsageRequest request =
                 mService.registerUsageCallback(mServiceContext.getOpPackageName(), inputRequest,
@@ -1070,13 +1068,10 @@ public class NetworkStatsServiceTest {
 
         // Send dummy message to make sure that any previous message has been handled
         mHandler.sendMessage(mHandler.obtainMessage(-1));
-        waitForIdleHandler(mHandler, WAIT_TIMEOUT);
-
-
+        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
 
         // Make sure that the caller binder gets connected
         verify(mBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
-
 
         // modify some number on wifi, and trigger poll event
         // not enough traffic to call data usage callback
@@ -1410,7 +1405,7 @@ public class NetworkStatsServiceTest {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
         // Send dummy message to make sure that any previous message has been handled
         mHandler.sendMessage(mHandler.obtainMessage(-1));
-        waitForIdleHandler(mHandler, WAIT_TIMEOUT);
+        HandlerUtilsKt.waitForIdle(mHandler, WAIT_TIMEOUT);
     }
 
     static class LatchedHandler extends Handler {
