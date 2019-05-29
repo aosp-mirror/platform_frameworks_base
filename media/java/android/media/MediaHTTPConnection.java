@@ -38,6 +38,7 @@ import java.net.URL;
 import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** @hide */
 public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
@@ -82,6 +83,10 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     // from com.squareup.okhttp.internal.http
     private final static int HTTP_TEMP_REDIRECT = 307;
     private final static int MAX_REDIRECTS = 20;
+
+    // The number of threads that are currently running disconnect() (possibly
+    // not yet holding the synchronized lock).
+    private final AtomicInteger mNumDisconnectingThreads = new AtomicInteger(0);
 
     @UnsupportedAppUsage
     public MediaHTTPConnection() {
@@ -155,19 +160,24 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     @Override
     @UnsupportedAppUsage
     public void disconnect() {
-        HttpURLConnection connectionToDisconnect = mConnection;
-        // Call disconnect() before blocking for the lock in order to ensure that any
-        // other thread that is blocked in readAt() will return quickly.
-        if (connectionToDisconnect != null) {
-            connectionToDisconnect.disconnect();
-        }
-        synchronized (this) {
-            // It's unlikely but possible that while we were waiting to acquire the lock, another
-            // thread concurrently started a new connection; if so, we're disconnecting that one
-            // here, too.
-            teardownConnection();
-            mHeaders = null;
-            mURL = null;
+        mNumDisconnectingThreads.incrementAndGet();
+        try {
+            HttpURLConnection connectionToDisconnect = mConnection;
+            // Call disconnect() before blocking for the lock in order to ensure that any
+            // other thread that is blocked in readAt() will return quickly.
+            if (connectionToDisconnect != null) {
+                connectionToDisconnect.disconnect();
+            }
+            synchronized (this) {
+                // It's possible that while we were waiting to acquire the lock, another thread
+                // concurrently started a new connection; if so, we're disconnecting that one
+                // here, too.
+                teardownConnection();
+                mHeaders = null;
+                mURL = null;
+            }
+        } finally {
+            mNumDisconnectingThreads.decrementAndGet();
         }
     }
 
@@ -224,11 +234,36 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             boolean noProxy = isLocalHost(url);
 
             while (true) {
+                // If another thread is concurrently disconnect()ing, there's a race
+                // between them and us. Therefore, we check mNumDisconnectingThreads shortly
+                // (not atomically) before & after writing mConnection. This guarantees that
+                // we won't "lose" a disconnect by creating a new connection that might
+                // miss the disconnect.
+                //
+                // Note that throwing an instanceof IOException is also what this thread
+                // would have done if another thread disconnect()ed the connection while
+                // this thread was blocked reading from that connection further down in this
+                // loop.
+                if (mNumDisconnectingThreads.get() > 0) {
+                    throw new IOException("concurrently disconnecting");
+                }
                 if (noProxy) {
                     mConnection = (HttpURLConnection)url.openConnection(Proxy.NO_PROXY);
                 } else {
                     mConnection = (HttpURLConnection)url.openConnection();
                 }
+                // If another thread is concurrently disconnecting, throwing IOException will
+                // cause us to release the lock, giving the other thread a chance to acquire
+                // it. It also ensures that the catch block will run, which will tear down
+                // the connection even if the other thread happens to already be on its way
+                // out of disconnect().
+                if (mNumDisconnectingThreads.get() > 0) {
+                    throw new IOException("concurrently disconnecting");
+                }
+                // If we get here without having thrown, we know that other threads
+                // will see our write to mConnection. Any disconnect() on that mConnection
+                // instance will cause our read from/write to that connection instance below
+                // to encounter an instanceof IOException.
                 mConnection.setConnectTimeout(CONNECT_TIMEOUT_MS);
 
                 // handle redirects ourselves if we do not allow cross-domain redirect
