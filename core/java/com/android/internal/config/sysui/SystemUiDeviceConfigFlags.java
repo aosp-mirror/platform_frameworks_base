@@ -113,5 +113,25 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String PROPERTY_PERMISSIONS_HUB_ENABLED = "permissions_hub_enabled";
 
+    // Flags related to Assistant Handles
+
+    /**
+     * (String) Which behavior mode for the Assistant Handles to use.
+     */
+    public static final String ASSIST_HANDLES_BEHAVIOR_MODE = "assist_handles_behavior_mode";
+
+    /**
+     * (long) How long, in milliseconds, to display Assist Handles when showing them temporarily.
+     */
+    public static final String ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS =
+            "assist_handles_show_and_go_duration_ms";
+
+    /**
+     * (long) How long, in milliseconds, to wait before displaying Assist Handles temporarily after
+     * hiding them.
+     */
+    public static final String ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS =
+            "assist_handles_shown_frequency_threshold_ms";
+
     private SystemUiDeviceConfigFlags() { }
 }
