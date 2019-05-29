@@ -133,5 +133,17 @@ public final class SystemUiDeviceConfigFlags {
     public static final String ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS =
             "assist_handles_shown_frequency_threshold_ms";
 
+    /**
+     * (long) How long, in milliseconds, for teaching behaviors to wait before considering the user
+     * taught.
+     */
+    public static final String ASSIST_HANDLES_LEARN_TIME_MS = "assist_handles_learn_time_ms";
+
+    /**
+     * (int) How many times for teaching behaviors to see the user perform an action to consider it
+     * taught.
+     */
+    public static final String ASSIST_HANDLES_LEARN_COUNT = "assist_handles_learn_count";
+
     private SystemUiDeviceConfigFlags() { }
 }
