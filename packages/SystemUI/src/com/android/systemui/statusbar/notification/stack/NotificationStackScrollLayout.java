@@ -5709,6 +5709,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 view.setTranslationY(wakeUplocation);
             }
         }
+        mDimmedNeedsAnimation = true;
     }
 
     @Override
