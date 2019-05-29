@@ -5356,30 +5356,18 @@ public class TelephonyManager {
      * Returns the MMS user agent.
      */
     public String getMmsUserAgent() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getMmsUserAgent(getSubId());
-            }
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-        return null;
+        if (mContext == null) return null;
+        return SubscriptionManager.getResourcesForSubId(mContext, getSubId()).getString(
+                com.android.internal.R.string.config_mms_user_agent);
     }
 
     /**
      * Returns the MMS user agent profile URL.
      */
     public String getMmsUAProfUrl() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getMmsUAProfUrl(getSubId());
-            }
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-        return null;
+        if (mContext == null) return null;
+        return SubscriptionManager.getResourcesForSubId(mContext, getSubId()).getString(
+                com.android.internal.R.string.config_mms_user_agent_profile_url);
     }
 
     /**

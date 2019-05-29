@@ -48,6 +48,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.apex.ApexInfo;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
@@ -8382,20 +8383,29 @@ public class PackageParser {
      * PackageInfo parser specifically for apex files.
      * NOTE: It will collect certificates
      *
-     * @param apexFile
+     * @param apexInfo
      * @return PackageInfo
      * @throws PackageParserException
      */
-    public static PackageInfo generatePackageInfoFromApex(File apexFile, int flags)
+    public static PackageInfo generatePackageInfoFromApex(ApexInfo apexInfo, int flags)
             throws PackageParserException {
         PackageParser pp = new PackageParser();
+        File apexFile = new File(apexInfo.packagePath);
         final Package p = pp.parsePackage(apexFile, flags, false);
         PackageUserState state = new PackageUserState();
         PackageInfo pi = generatePackageInfo(p, EmptyArray.INT, flags, 0, 0,
                 Collections.emptySet(), state);
-
         pi.applicationInfo.sourceDir = apexFile.getPath();
-        pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
+        if (apexInfo.isFactory) {
+            pi.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        } else {
+            pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_SYSTEM;
+        }
+        if (apexInfo.isActive) {
+            pi.applicationInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
+        } else {
+            pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_INSTALLED;
+        }
         pi.isApex = true;
 
         // Collect certificates

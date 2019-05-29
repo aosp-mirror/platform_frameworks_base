@@ -38,6 +38,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -248,9 +249,8 @@ public class MobileSignalController extends SignalController<
     }
 
     private void updateInflateSignalStrength() {
-        mInflateSignalStrengths = SubscriptionManager.getResourcesForSubId(mContext,
-               mSubscriptionInfo.getSubscriptionId())
-               .getBoolean(R.bool.config_inflateSignalStrength);
+        mInflateSignalStrengths = SignalStrengthUtil.shouldInflateSignalStrength(mContext,
+                mSubscriptionInfo.getSubscriptionId());
     }
 
     private int getNumLevels() {

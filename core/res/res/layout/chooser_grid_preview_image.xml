@@ -33,7 +33,6 @@
 
     <view class="com.android.internal.app.ChooserActivity$RoundedRectImageView"
           android:id="@+id/content_preview_image_1_large"
-          android:visibility="gone"
           android:layout_width="120dp"
           android:layout_height="140dp"
           android:layout_alignParentTop="true"
