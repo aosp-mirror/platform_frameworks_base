@@ -25,7 +25,6 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.ConditionVariable;
-import android.os.Environment;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -159,7 +158,7 @@ public class CameraTest extends ActivityInstrumentationTestCase<MediaFrameworkTe
                 if (rawData != null) {
                     int rawDataLength = rawData.length;
                     File rawoutput = new File(
-                            Environment.getExternalStorageDirectory().toString(), "/test.bmp");
+                            mContext.getExternalFilesDir(null).getPath(), "/test.bmp");
                     FileOutputStream outstream = new FileOutputStream(rawoutput);
                     outstream.write(rawData);                   
                     Log.v(TAG, "JpegPictureCallback rawDataLength = " + rawDataLength);
