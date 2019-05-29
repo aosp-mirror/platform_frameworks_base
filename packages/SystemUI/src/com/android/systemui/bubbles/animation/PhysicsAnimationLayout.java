@@ -139,6 +139,9 @@ public class PhysicsAnimationLayout extends FrameLayout {
          */
         abstract void onChildRemoved(View child, int index, Runnable finishRemoval);
 
+        /** Called when a child view has been reordered in the view hierachy. */
+        abstract void onChildReordered(View child, int oldIndex, int newIndex);
+
         /**
          * Called when the controller is set as the active animation controller for the given
          * layout. Once active, the controller can start animations using the animator instances
@@ -311,40 +314,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
     @Override
     public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        super.addView(child, index, params);
-
-        // Set up animations for the new view, if the controller is set. If it isn't set, we'll be
-        // setting up animations for all children when setActiveController is called.
-        if (mController != null) {
-            for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
-                setUpAnimationForChild(property, child, index);
-            }
-
-            mController.onChildAdded(child, index);
-        }
+        addViewInternal(child, index, params, false /* isReorder */);
     }
 
     @Override
     public void removeView(View view) {
-        removeViewAndThen(view, /* callback */ null);
-    }
-
-    @Override
-    public void removeViewAt(int index) {
-        removeView(getChildAt(index));
-    }
-
-    /** Immediately moves the view from wherever it currently is, to the given index. */
-    public void moveViewTo(View view, int index) {
-        super.removeView(view);
-        addView(view, index);
-    }
-
-    /**
-     * Let the controller know that this view should be removed, and then call the callback once the
-     * controller has finished any removal animations and the view has actually been removed.
-     */
-    public void removeViewAndThen(View view, Runnable callback) {
         if (mController != null) {
             final int index = indexOfChild(view);
 
@@ -359,19 +333,28 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 // any are still running and then remove it.
                 cancelAnimationsOnView(view);
                 removeTransientView(view);
-
-                if (callback != null) {
-                    callback.run();
-                }
             });
         } else {
             // Without a controller, nobody will animate this view out, so it gets an unceremonious
             // departure.
             super.removeView(view);
+        }
+    }
 
-            if (callback != null) {
-                callback.run();
-            }
+    @Override
+    public void removeViewAt(int index) {
+        removeView(getChildAt(index));
+    }
+
+    /** Immediately re-orders the view to the given index. */
+    public void reorderView(View view, int index) {
+        final int oldIndex = indexOfChild(view);
+
+        super.removeView(view);
+        addViewInternal(view, index, view.getLayoutParams(), true /* isReorder */);
+
+        if (mController != null) {
+            mController.onChildReordered(view, oldIndex, index);
         }
     }
 
@@ -449,6 +432,26 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return "ALPHA";
         } else {
             return "Unknown animation property.";
+        }
+    }
+
+    /**
+     * Adds a view to the layout. If this addition is not the result of a call to
+     * {@link #reorderView}, this will also notify the controller via
+     * {@link PhysicsAnimationController#onChildAdded} and set up animations for the view.
+     */
+    private void addViewInternal(
+            View child, int index, ViewGroup.LayoutParams params, boolean isReorder) {
+        super.addView(child, index, params);
+
+        // Set up animations for the new view, if the controller is set. If it isn't set, we'll be
+        // setting up animations for all children when setActiveController is called.
+        if (mController != null && !isReorder) {
+            for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
+                setUpAnimationForChild(property, child, index);
+            }
+
+            mController.onChildAdded(child, index);
         }
     }
 

@@ -23,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -486,6 +485,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
                 finishRemoval.run();
             }
         }
+
+        @Override
+        void onChildReordered(View child, int oldIndex, int newIndex) {}
 
         @Override
         void onActiveControllerForLayout(PhysicsAnimationLayout layout) {}

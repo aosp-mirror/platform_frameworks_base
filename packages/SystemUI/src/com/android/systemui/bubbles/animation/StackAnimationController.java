@@ -651,6 +651,9 @@ public class StackAnimationController extends
     }
 
     @Override
+    void onChildReordered(View child, int oldIndex, int newIndex) {}
+
+    @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
         Resources res = layout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);

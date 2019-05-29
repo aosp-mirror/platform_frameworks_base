@@ -275,6 +275,12 @@ public class PhysicsAnimationLayoutTestCase extends SysuiTestCase {
             }
 
             @Override
+            void onChildReordered(View child, int oldIndex, int newIndex) {
+                runOnMainThreadAndBlock(
+                        () -> mWrappedController.onChildReordered(child, oldIndex, newIndex));
+            }
+
+            @Override
             void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
                 runOnMainThreadAndBlock(
                         () -> mWrappedController.onActiveControllerForLayout(layout));

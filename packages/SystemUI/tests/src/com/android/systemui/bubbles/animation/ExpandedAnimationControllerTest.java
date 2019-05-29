@@ -73,14 +73,14 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     @Test
     public void testExpansionAndCollapse() throws InterruptedException {
         Runnable afterExpand = Mockito.mock(Runnable.class);
-        mExpandedController.expandFromStack(mExpansionPoint, afterExpand);
+        mExpandedController.expandFromStack(afterExpand);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testBubblesInCorrectExpandedPositions();
         verify(afterExpand).run();
 
         Runnable afterCollapse = Mockito.mock(Runnable.class);
-        mExpandedController.collapseBackToStack(afterCollapse);
+        mExpandedController.collapseBackToStack(mExpansionPoint, afterCollapse);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testStackedAtPosition(mExpansionPoint.x, mExpansionPoint.y, -1);
@@ -139,7 +139,6 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         assertEquals(500f, draggedBubble.getTranslationY(), 1f);
 
         // Snap it back and make sure it made it back correctly.
-        mExpandedController.prepareForDismissalWithVelocity(draggedBubble, 0f, 0f);
         mLayout.removeView(draggedBubble);
         waitForLayoutMessageQueue();
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
@@ -169,7 +168,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
         // Dismiss the now-magneted bubble, verify that the callback was called.
         final Runnable afterDismiss = Mockito.mock(Runnable.class);
-        mExpandedController.dismissDraggedOutBubble(afterDismiss);
+        mExpandedController.dismissDraggedOutBubble(draggedOutView, afterDismiss);
         waitForPropertyAnimations(DynamicAnimation.ALPHA);
         verify(after).run();
 
@@ -224,7 +223,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     /** Expand the stack and wait for animations to finish. */
     private void expand() throws InterruptedException {
-        mExpandedController.expandFromStack(mExpansionPoint, Mockito.mock(Runnable.class));
+        mExpandedController.expandFromStack(Mockito.mock(Runnable.class));
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
     }
 

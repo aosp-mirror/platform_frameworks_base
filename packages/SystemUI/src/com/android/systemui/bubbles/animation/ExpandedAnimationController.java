@@ -22,6 +22,7 @@ import android.graphics.PointF;
 import android.view.View;
 import android.view.WindowInsets;
 
+import androidx.annotation.Nullable;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
@@ -67,6 +68,12 @@ public class ExpandedAnimationController
     /** Whether the dragged-out bubble is in the dismiss target. */
     private boolean mIndividualBubbleWithinDismissTarget = false;
 
+    private boolean mAnimatingExpand = false;
+    private boolean mAnimatingCollapse = false;
+    private Runnable mAfterExpand;
+    private Runnable mAfterCollapse;
+    private PointF mCollapsePoint;
+
     /**
      * Whether the dragged out bubble is springing towards the touch point, rather than using the
      * default behavior of moving directly to the touch point.
@@ -95,42 +102,60 @@ public class ExpandedAnimationController
     private View mBubbleDraggingOut;
 
     /**
-     * Drag velocities for the dragging-out bubble when the drag finished. These are used by
-     * {@link #onChildRemoved} to animate out the bubble while respecting touch velocity.
-     */
-    private float mBubbleDraggingOutVelX;
-    private float mBubbleDraggingOutVelY;
-
-    /**
      * Animates expanding the bubbles into a row along the top of the screen.
      */
-    public void expandFromStack(PointF collapseTo, Runnable after) {
-        animationsForChildrenFromIndex(
-                0, /* startIndex */
-                new ChildAnimationConfigurator() {
-                    @Override
-                    public void configureAnimationForChildAtIndex(
-                            int index, PhysicsAnimationLayout.PhysicsPropertyAnimator animation) {
-                        animation.position(getBubbleLeft(index), getExpandedY());
-                    }
-            })
-            .startAll(after);
+    public void expandFromStack(Runnable after) {
+        mAnimatingCollapse = false;
+        mAnimatingExpand = true;
+        mAfterExpand = after;
 
-        mCollapseToPoint = collapseTo;
+        startOrUpdateExpandAnimation();
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
-    public void collapseBackToStack(Runnable after) {
-        // Stack to the left if we're going to the left, or right if not.
-        final float sideMultiplier = mLayout.isFirstChildXLeftOfCenter(mCollapseToPoint.x) ? -1 : 1;
+    public void collapseBackToStack(PointF collapsePoint, Runnable after) {
+        mAnimatingExpand = false;
+        mAnimatingCollapse = true;
+        mAfterCollapse = after;
+        mCollapsePoint = collapsePoint;
 
+        startOrUpdateCollapseAnimation();
+    }
+
+    private void startOrUpdateExpandAnimation() {
         animationsForChildrenFromIndex(
                 0, /* startIndex */
-                (index, animation) ->
+                (index, animation) -> animation.position(getBubbleLeft(index), getExpandedY()))
+                .startAll(() -> {
+                    mAnimatingExpand = false;
+
+                    if (mAfterExpand != null) {
+                        mAfterExpand.run();
+                    }
+
+                    mAfterExpand = null;
+                });
+    }
+
+    private void startOrUpdateCollapseAnimation() {
+        // Stack to the left if we're going to the left, or right if not.
+        final float sideMultiplier = mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x) ? -1 : 1;
+        animationsForChildrenFromIndex(
+                0, /* startIndex */
+                (index, animation) -> {
                     animation.position(
-                            mCollapseToPoint.x + (sideMultiplier * index * mStackOffsetPx),
-                            mCollapseToPoint.y))
-            .startAll(after /* endAction */);
+                            mCollapsePoint.x + (sideMultiplier * index * mStackOffsetPx),
+                            mCollapsePoint.y);
+                })
+                .startAll(() -> {
+                    mAnimatingCollapse = false;
+
+                    if (mAfterCollapse != null) {
+                        mAfterCollapse.run();
+                    }
+
+                    mAfterCollapse = null;
+                });
     }
 
     /** Prepares the given bubble to be dragged out. */
@@ -174,10 +199,10 @@ public class ExpandedAnimationController
     }
 
     /** Plays a dismiss animation on the dragged out bubble. */
-    public void dismissDraggedOutBubble(Runnable after) {
+    public void dismissDraggedOutBubble(View bubble, Runnable after) {
         mIndividualBubbleWithinDismissTarget = false;
 
-        animationForChild(mBubbleDraggingOut)
+        animationForChild(bubble)
                 .withStiffness(SpringForce.STIFFNESS_HIGH)
                 .scaleX(1.1f)
                 .scaleY(1.1f)
@@ -185,6 +210,10 @@ public class ExpandedAnimationController
                 .start();
 
         updateBubblePositions();
+    }
+
+    @Nullable public View getDraggedOutBubble() {
+        return mBubbleDraggingOut;
     }
 
     /** Magnets the given bubble to the dismiss target. */
@@ -225,24 +254,17 @@ public class ExpandedAnimationController
         final int index = mLayout.indexOfChild(bubbleView);
 
         animationForChildAtIndex(index)
-            .position(getBubbleLeft(index), getExpandedY())
-            .withPositionStartVelocities(velX, velY)
-            .start(() -> bubbleView.setTranslationZ(0f) /* after */);
+                .position(getBubbleLeft(index), getExpandedY())
+                .withPositionStartVelocities(velX, velY)
+                .start(() -> bubbleView.setTranslationZ(0f) /* after */);
 
-        mBubbleDraggingOut = null;
-        mBubbleDraggedOutEnough = false;
         updateBubblePositions();
     }
 
-    /**
-     * Sets configuration variables so that when the given bubble is removed, the animations are
-     * started with the given velocities.
-     */
-    public void prepareForDismissalWithVelocity(View bubbleView, float velX, float velY) {
-        mBubbleDraggingOut = bubbleView;
-        mBubbleDraggingOutVelX = velX;
-        mBubbleDraggingOutVelY = velY;
+    /** Resets bubble drag out gesture flags. */
+    public void onGestureFinished() {
         mBubbleDraggedOutEnough = false;
+        mBubbleDraggingOut = null;
     }
 
     /**
@@ -326,14 +348,21 @@ public class ExpandedAnimationController
 
     @Override
     void onChildAdded(View child, int index) {
-        child.setTranslationX(getXForChildAtIndex(index));
-
-        animationForChild(child)
-                .translationY(
-                        getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
-                        getExpandedY() /* to */)
-                .start();
-        updateBubblePositions();
+        // If a bubble is added while the expand/collapse animations are playing, update the
+        // animation to include the new bubble.
+        if (mAnimatingExpand) {
+            startOrUpdateExpandAnimation();
+        } else if (mAnimatingCollapse) {
+            startOrUpdateCollapseAnimation();
+        } else {
+            child.setTranslationX(getXForChildAtIndex(index));
+            animationForChild(child)
+                    .translationY(
+                            getExpandedY() - mBubbleSizePx * ANIMATE_TRANSLATION_FACTOR, /* from */
+                            getExpandedY() /* to */)
+                    .start();
+            updateBubblePositions();
+        }
     }
 
     @Override
@@ -357,7 +386,16 @@ public class ExpandedAnimationController
         updateBubblePositions();
     }
 
+    @Override
+    void onChildReordered(View child, int oldIndex, int newIndex) {
+        updateBubblePositions();
+    }
+
     private void updateBubblePositions() {
+        if (mAnimatingExpand || mAnimatingCollapse) {
+            return;
+        }
+
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             final View bubble = mLayout.getChildAt(i);
 
@@ -366,6 +404,7 @@ public class ExpandedAnimationController
             if (bubble.equals(mBubbleDraggingOut)) {
                 return;
             }
+
             animationForChild(bubble)
                     .translationX(getBubbleLeft(i))
                     .start();
