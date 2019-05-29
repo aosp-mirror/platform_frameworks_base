@@ -3584,6 +3584,10 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             final String[] packagesForUid = mIPackageManager.getPackagesForUid(uid);
+            if (ArrayUtils.isEmpty(packagesForUid)) {
+                // It's possible the package got uninstalled already, so just ignore.
+                return Zygote.MOUNT_EXTERNAL_NONE;
+            }
             if (packageName == null) {
                 packageName = packagesForUid[0];
             }
