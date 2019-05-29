@@ -1763,7 +1763,7 @@ class AlarmManagerService extends SystemService {
                                 + ", callingPackage: " + callingPackage;
                 // STOPSHIP (b/128866264): Just to catch breakages. Remove before final release.
                 Slog.wtf(TAG, errorMsg);
-                throw new UnsupportedOperationException(errorMsg);
+                throw new IllegalStateException(errorMsg);
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
                     interval, operation, directReceiver, listenerTag, flags, true, workSource,
