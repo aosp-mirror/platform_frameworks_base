@@ -4309,6 +4309,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
+            if ("1".equals(SystemProperties.get("debug.ignoreappsignalhandler"))) {
+                runtimeFlags |= Zygote.DEBUG_IGNORE_APP_SIGNAL_HANDLER;
+            }
             if (mNativeDebuggingApp != null && mNativeDebuggingApp.equals(app.processName)) {
                 // Enable all debug flags required by the native debugger.
                 runtimeFlags |= Zygote.DEBUG_ALWAYS_JIT;          // Don't interpret anything

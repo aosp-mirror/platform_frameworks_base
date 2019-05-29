@@ -99,6 +99,14 @@ public final class Zygote {
      */
     public static final int USE_APP_IMAGE_STARTUP_CACHE = 1 << 16;
 
+    /**
+     * When set, application specified signal handlers are not chained (i.e, ignored)
+     * by the runtime.
+     *
+     * Used for debugging only. Usage: set debug.ignoreappsignalhandler to 1.
+     */
+    public static final int DEBUG_IGNORE_APP_SIGNAL_HANDLER = 1 << 17;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
