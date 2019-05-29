@@ -271,6 +271,8 @@ public class StackAnimationController extends
                 },
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
+        // If we're flinging now, there's no more touch event to catch up to.
+        mFirstBubbleSpringingToTouch = false;
         mIsMovingFromFlinging = true;
         return destinationRelativeX;
     }
