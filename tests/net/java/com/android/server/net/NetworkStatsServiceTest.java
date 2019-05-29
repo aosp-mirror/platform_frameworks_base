@@ -61,7 +61,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1028,6 +1027,51 @@ public class NetworkStatsServiceTest {
         assertUidTotal(sTemplateWifi, UID_RED, 2000L, 200L, 1000L, 100L, 1);
         assertUidTotal(sTemplateWifi, UID_BLUE, 1000L, 100L, 500L, 50L, 1);
         assertUidTotal(sTemplateWifi, UID_VPN, 300L, 0L, 150L, 0L, 2);
+    }
+
+    @Test
+    public void vpnWithOneUnderlyingIfaceAndOwnTraffic() throws Exception {
+        // WiFi network is connected and VPN is using WiFi (which has TEST_IFACE).
+        expectDefaultSettings();
+        NetworkState[] networkStates = new NetworkState[] {buildWifiState(), buildVpnState()};
+        VpnInfo[] vpnInfos = new VpnInfo[] {createVpnInfo(new String[] {TEST_IFACE})};
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectBandwidthControlCheck();
+
+        mService.forceUpdateIfaces(
+                new Network[] {WIFI_NETWORK, VPN_NETWORK},
+                vpnInfos,
+                networkStates,
+                getActiveIface(networkStates));
+        // create some traffic (assume 10 bytes of MTU for VPN interface and 1 byte encryption
+        // overhead per packet):
+        // 1000 bytes (100 packets) were sent, and 2000 bytes (200 packets) were received by UID_RED
+        // over VPN.
+        // 500 bytes (50 packets) were sent, and 1000 bytes (100 packets) were received by UID_BLUE
+        // over VPN.
+        // Additionally, the VPN sends 6000 bytes (600 packets) of its own traffic into the tun
+        // interface (passing that traffic to the VPN endpoint), and receives 5000 bytes (500
+        // packets) from it. Including overhead that is 6600/5500 bytes.
+        // VPN sent 8250 bytes (750 packets), and received 8800 (800 packets) over WiFi.
+        // Of 8250 bytes sent over WiFi, expect 1000 bytes attributed to UID_RED, 500 bytes
+        // attributed to UID_BLUE, and 6750 bytes attributed to UID_VPN.
+        // Of 8800 bytes received over WiFi, expect 2000 bytes attributed to UID_RED, 1000 bytes
+        // attributed to UID_BLUE, and 5800 bytes attributed to UID_VPN.
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 3)
+                .addValues(TUN_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 2000L, 200L, 1000L, 100L, 1L)
+                .addValues(TUN_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 1000L, 100L, 500L, 50L, 1L)
+                .addValues(TUN_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 5000L, 500L, 6000L, 600L, 1L)
+                // VPN received 8800 bytes over WiFi in background (SET_DEFAULT).
+                .addValues(TEST_IFACE, UID_VPN, SET_DEFAULT, TAG_NONE, 8800L, 800L, 0L, 0L, 1L)
+                // VPN sent 8250 bytes over WiFi in foreground (SET_FOREGROUND).
+                .addValues(TEST_IFACE, UID_VPN, SET_FOREGROUND, TAG_NONE, 0L, 0L, 8250L, 750L, 1L));
+
+        forcePollAndWaitForIdle();
+
+        assertUidTotal(sTemplateWifi, UID_RED, 2000L, 200L, 1000L, 100L, 1);
+        assertUidTotal(sTemplateWifi, UID_BLUE, 1000L, 100L, 500L, 50L, 1);
+        assertUidTotal(sTemplateWifi, UID_VPN, 5800L, 500L, 6750L, 600L, 2);
     }
 
     @Test
