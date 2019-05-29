@@ -638,7 +638,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     final String docId = DocumentsContract.getDocumentId(documentUri);
                     try {
                         final Bundle out = new Bundle();
-                        final Uri uri = Uri.fromFile(getFileForDocId(docId));
+                        final Uri uri = Uri.fromFile(getFileForDocId(docId, true));
                         out.putParcelable(DocumentsContract.EXTRA_URI, uri);
                         return out;
                     } catch (FileNotFoundException e) {
