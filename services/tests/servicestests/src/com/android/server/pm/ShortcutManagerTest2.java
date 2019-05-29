@@ -423,9 +423,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(123, si.getRank());
-        assertEquals("person", si.getPersons()[0].getName());
-        assertEquals("personKey", si.getPersons()[0].getKey());
-        assertEquals("personUri", si.getPersons()[0].getUri());
+        assertEquals(null, si.getPersons());
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
@@ -451,6 +449,30 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_KEY_FIELDS_ONLY
                 | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
+        assertEquals(null, si.getBitmapPath());
+
+        assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
+
+        si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION);
+
+        assertEquals(mClientContext.getPackageName(), si.getPackage());
+        assertEquals("id", si.getId());
+        assertEquals(new ComponentName("a", "b"), si.getActivity());
+        assertEquals(null, si.getIcon());
+        assertEquals("title", si.getTitle());
+        assertEquals("text", si.getText());
+        assertEquals("dismes", si.getDisabledMessage());
+        assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
+        assertEquals("action", si.getIntent().getAction());
+        assertEquals("val", si.getIntent().getStringExtra("key"));
+        assertEquals(123, si.getRank());
+        assertEquals("person", si.getPersons()[0].getName());
+        assertEquals("personKey", si.getPersons()[0].getKey());
+        assertEquals("personUri", si.getPersons()[0].getUri());
+        assertEquals(1, si.getExtras().getInt("k"));
+
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_LONG_LIVED, si.getFlags());
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());

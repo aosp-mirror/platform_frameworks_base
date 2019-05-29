@@ -941,6 +941,10 @@ public class NetworkMonitorTest {
             .notifyNetworkTested(intCaptor.capture(), any());
         List<Integer> intArgs = intCaptor.getAllValues();
 
+        // None of these exact values can be known in advance except for intArgs.get(0) because the
+        // HTTP and HTTPS probes race and the order in which they complete is non-deterministic.
+        // Thus, check only exact value for intArgs.get(0) and only check the validation result for
+        // the rest ones.
         assertEquals(Integer.valueOf(NETWORK_VALIDATION_PROBE_DNS
                 | NETWORK_VALIDATION_PROBE_FALLBACK | NETWORK_VALIDATION_RESULT_VALID),
                 intArgs.get(0));

@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
  */
 class CarNavigationBarView extends LinearLayout {
     private View mNavButtons;
-    private View mNotificationsButton;
+    private CarNavigationButton mNotificationsButton;
     private CarStatusBar mCarStatusBar;
     private Context mContext;
     private View mLockScreenButtons;
@@ -151,10 +151,20 @@ class CarNavigationBarView extends LinearLayout {
      * Nav buttons will be shown.
      */
     public void hideKeyguardButtons() {
-        if (mLockScreenButtons == null) {
-            return;
-        }
+        if (mLockScreenButtons == null) return;
+
         mNavButtons.setVisibility(View.VISIBLE);
         mLockScreenButtons.setVisibility(View.GONE);
+    }
+
+    /**
+     * Toggles the notification unseen indicator on/off.
+     *
+     * @param hasUnseen true if the unseen notification count is great than 0.
+     */
+    void toggleNotificationUnseenIndicator(Boolean hasUnseen) {
+        if (mNotificationsButton == null) return;
+
+        mNotificationsButton.setUnseen(hasUnseen);
     }
 }
