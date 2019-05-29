@@ -54,7 +54,6 @@ import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageWriter;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.util.Pair;
@@ -62,6 +61,8 @@ import android.util.Size;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -128,7 +129,8 @@ public class CameraTestUtils extends Assert {
     private static final Location sTestLocation2 = new Location(LocationManager.NETWORK_PROVIDER);
 
     protected static final String DEBUG_FILE_NAME_BASE =
-            Environment.getExternalStorageDirectory().getPath();
+            InstrumentationRegistry.getInstrumentation().getTargetContext()
+            .getExternalFilesDir(null).getPath();
 
     static {
         sTestLocation0.setTime(1199145600L);
