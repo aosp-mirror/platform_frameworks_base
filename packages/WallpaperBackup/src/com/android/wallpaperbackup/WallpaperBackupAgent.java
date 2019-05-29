@@ -238,8 +238,11 @@ public class WallpaperBackupAgent extends BackupAgent {
                     mWm.clear(FLAG_LOCK);
                 }
             } else {
-                if (DEBUG) {
-                    Slog.v(TAG, "Can't use wallpaper service " + wpService);
+                // If we've restored a live wallpaper, but the component doesn't exist,
+                // we should log it as an error so we can easily identify the problem
+                // in reports from users
+                if (wpService != null) {
+                    Slog.e(TAG, "Wallpaper service " + wpService + " isn't available.");
                 }
             }
         } catch (Exception e) {
