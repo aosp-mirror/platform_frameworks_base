@@ -24,9 +24,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.Dependency;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SysUiServiceProvider;
@@ -46,6 +50,7 @@ import java.util.function.Supplier;
 public final class AssistHandleBehaviorController implements AssistHandleCallbacks {
 
     private static final String TAG = "AssistHandleBehavior";
+
     private static final boolean IS_DEBUG_DEVICE =
             Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
                     || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
@@ -86,6 +91,19 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mInGesturalMode = QuickStepContract.isGesturalMode(
                 Dependency.get(NavigationModeController.class)
                         .addListener(this::handleNavigationModeChange));
+
+        setBehavior(DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE,
+                mCurrentBehavior.toString()));
+        DeviceConfig.addOnPropertyChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                mHandler::post,
+                (namespace, name, value) -> {
+                    if (SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE.equals(name)) {
+                        setBehavior(value);
+                    }
+                });
 
         if (IS_DEBUG_DEVICE) {
             context.registerReceiver(new BroadcastReceiver() {
@@ -136,13 +154,29 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mCurrentBehavior = behavior;
     }
 
-    private static long getShownFrequencyThreshold() {
-        return SystemProperties.getLong(
-                SHOWN_FREQUENCY_THRESHOLD_KEY, DEFAULT_SHOWN_FREQUENCY_THRESHOLD_MS);
+    private void setBehavior(@Nullable String behavior) {
+        try {
+            setBehavior(AssistHandleBehavior.valueOf(behavior));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            Log.e(TAG, "Invalid behavior: " + behavior, e);
+        }
     }
 
-    private static long getShowAndGoDuration() {
-        return SystemProperties.getLong(SHOW_AND_GO_DURATION_KEY, DEFAULT_SHOW_AND_GO_DURATION_MS);
+    private long getShownFrequencyThreshold() {
+        long configValue = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS,
+                DEFAULT_SHOWN_FREQUENCY_THRESHOLD_MS);
+        return SystemProperties.getLong(
+                SHOWN_FREQUENCY_THRESHOLD_KEY, configValue);
+    }
+
+    private long getShowAndGoDuration() {
+        long configValue = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS,
+                DEFAULT_SHOW_AND_GO_DURATION_MS);
+        return SystemProperties.getLong(SHOW_AND_GO_DURATION_KEY, configValue);
     }
 
     private void maybeShowHandles(boolean ignoreThreshold) {

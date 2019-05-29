@@ -16,22 +16,19 @@
 
 package com.android.systemui.assist;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.Rect;
-import android.view.View;
-import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 
 /**
@@ -65,53 +62,45 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                     handleTaskStackTopChanged(taskId);
                 }
             };
-    private final CommandQueue.Callbacks mCallbacks = new CommandQueue.Callbacks() {
-        @Override
-        public void setSystemUiVisibility(int displayId, int vis,
-                int fullscreenStackVis, int dockedStackVis, int mask,
-                Rect fullscreenStackBounds, Rect dockedStackBounds,
-                boolean navbarColorManagedByIme) {
-            if (mStatusBarDisplayId == displayId) {
-                handleSystemUiVisibilityChange(vis, mask);
-            }
-        }
-    };
     private final OverviewProxyService.OverviewProxyListener mOverviewProxyListener =
             new OverviewProxyService.OverviewProxyListener() {
                 @Override
                 public void onOverviewShown(boolean fromHome) {
                     handleOverviewShown();
                 }
+
+                @Override
+                public void onSystemUiStateChanged(int sysuiStateFlags) {
+                    handleSystemUiStateChanged(sysuiStateFlags);
+                }
             };
 
-    private StatusBarStateController mStatusBarStateController;
-    private ActivityManagerWrapper mActivityManagerWrapper;
-    private OverviewProxyService mOverviewProxyService;
-    private int mStatusBarDisplayId;
-    private CommandQueue mCommandQueue;
+    private final StatusBarStateController mStatusBarStateController;
+    private final ActivityManagerWrapper mActivityManagerWrapper;
+    private final OverviewProxyService mOverviewProxyService;
+
     private boolean mOnLockscreen;
     private boolean mIsDozing;
     private int mRunningTaskId;
-    private boolean mIsImmersive;
+    private boolean mIsNavBarHidden;
 
     @Nullable private AssistHandleCallbacks mAssistHandleCallbacks;
+
+    AssistHandleReminderExpBehavior() {
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+        mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+    }
 
     @Override
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {
         mAssistHandleCallbacks = callbacks;
-        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         mOnLockscreen = onLockscreen(mStatusBarStateController.getState());
         mIsDozing = mStatusBarStateController.isDozing();
         mStatusBarStateController.addCallback(mStatusBarStateListener);
-        mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
-        mRunningTaskId = mActivityManagerWrapper.getRunningTask().taskId;
+        ActivityManager.RunningTaskInfo runningTaskInfo = mActivityManagerWrapper.getRunningTask();
+        mRunningTaskId = runningTaskInfo == null ? 0 : runningTaskInfo.taskId;
         mActivityManagerWrapper.registerTaskStackListener(mTaskStackChangeListener);
-        mStatusBarDisplayId =
-                ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE))
-                        .getDefaultDisplay().getDisplayId();
-        mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
-        mCommandQueue.addCallback(mCallbacks);
-        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mOverviewProxyService.addCallback(mOverviewProxyListener);
         callbackForCurrentState();
     }
@@ -121,8 +110,11 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mAssistHandleCallbacks = null;
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mActivityManagerWrapper.unregisterTaskStackListener(mTaskStackChangeListener);
-        mCommandQueue.removeCallback(mCallbacks);
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
+    }
+
+    private static boolean isNavBarHidden(int sysuiStateFlags) {
+        return (sysuiStateFlags & QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN) != 0;
     }
 
     private void handleStatusBarStateChanged(int newState) {
@@ -153,13 +145,13 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         callbackForCurrentState();
     }
 
-    private void handleSystemUiVisibilityChange(int vis, int mask) {
-        boolean isImmersive = isImmersive(vis, mask);
-        if (mIsImmersive == isImmersive) {
+    private void handleSystemUiStateChanged(int sysuiStateFlags) {
+        boolean isNavBarHidden = isNavBarHidden(sysuiStateFlags);
+        if (mIsNavBarHidden == isNavBarHidden) {
             return;
         }
 
-        mIsImmersive = isImmersive;
+        mIsNavBarHidden = isNavBarHidden;
         callbackForCurrentState();
     }
 
@@ -172,17 +164,12 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
                 || statusBarState == StatusBarState.SHADE_LOCKED;
     }
 
-    private boolean isImmersive(int vis, int mask) {
-        return ((vis & mask)
-                & (View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)) != 0;
-    }
-
     private void callbackForCurrentState() {
         if (mAssistHandleCallbacks == null) {
             return;
         }
 
-        if (mIsDozing || mIsImmersive) {
+        if (mIsDozing || mIsNavBarHidden) {
             mAssistHandleCallbacks.hide();
         } else if (mOnLockscreen) {
             mAssistHandleCallbacks.showAndStay();
