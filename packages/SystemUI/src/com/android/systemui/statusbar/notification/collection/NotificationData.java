@@ -25,6 +25,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
@@ -69,7 +70,8 @@ public class NotificationData {
         mHeadsUpManager = headsUpManager;
     }
 
-    private final Comparator<NotificationEntry> mRankingComparator =
+    @VisibleForTesting
+    protected final Comparator<NotificationEntry> mRankingComparator =
             new Comparator<NotificationEntry>() {
         private final Ranking mRankingA = new Ranking();
         private final Ranking mRankingB = new Ranking();
@@ -120,6 +122,8 @@ public class NotificationData {
             } else if (aSystemMax != bSystemMax) {
                 // Upsort PRIORITY_MAX system notifications
                 return aSystemMax ? -1 : 1;
+            } else if (a.isHighPriority() != b.isHighPriority()) {
+                return -1 * Boolean.compare(a.isHighPriority(), b.isHighPriority());
             } else if (aRank != bRank) {
                 return aRank - bRank;
             } else {
@@ -231,17 +235,14 @@ public class NotificationData {
 
     /**
      * Returns true if this notification should be displayed in the high-priority notifications
-     * section (and on the lockscreen and status bar).
+     * section
      */
     public boolean isHighPriority(StatusBarNotification statusBarNotification) {
         if (mRankingMap != null) {
             getRanking(statusBarNotification.getKey(), mTmpRanking);
             if (mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
-                    || isImportantOngoing(statusBarNotification.getNotification())
-                    || statusBarNotification.getNotification().hasMediaSession()
-                    || hasPerson(statusBarNotification.getNotification())
-                    || hasStyle(statusBarNotification.getNotification(),
-                    Notification.MessagingStyle.class)) {
+                    || hasHighPriorityCharacteristics(
+                            mTmpRanking.getChannel(), statusBarNotification)) {
                 return true;
             }
             if (mGroupManager.isSummaryOfGroup(statusBarNotification)) {
@@ -254,6 +255,25 @@ public class NotificationData {
                 }
             }
         }
+        return false;
+    }
+
+    private boolean hasHighPriorityCharacteristics(NotificationChannel channel,
+            StatusBarNotification statusBarNotification) {
+
+        if (isImportantOngoing(statusBarNotification.getNotification())
+                || statusBarNotification.getNotification().hasMediaSession()
+                || hasPerson(statusBarNotification.getNotification())
+                || hasStyle(statusBarNotification.getNotification(),
+                Notification.MessagingStyle.class)) {
+            // Users who have long pressed and demoted to silent should not see the notification
+            // in the top section
+            if (channel != null && channel.hasUserSetImportance()) {
+                return false;
+            }
+            return true;
+        }
+
         return false;
     }
 
