@@ -25,6 +25,7 @@ import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
 import android.renderscript.ScriptIntrinsicBlur
+import android.util.Log
 import android.util.MathUtils
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val TAG = "MediaArtworkProcessor"
 private const val COLOR_ALPHA = (255 * 0.7f).toInt()
 private const val BLUR_RADIUS = 25f
 private const val DOWNSAMPLE = 6
@@ -42,45 +44,54 @@ class MediaArtworkProcessor @Inject constructor() {
     private val mTmpSize = Point()
     private var mArtworkCache: Bitmap? = null
 
-    fun processArtwork(context: Context, artwork: Bitmap): Bitmap {
+    fun processArtwork(context: Context, artwork: Bitmap): Bitmap? {
         if (mArtworkCache != null) {
-            return mArtworkCache!!
+            return mArtworkCache
         }
-
-        context.display.getSize(mTmpSize)
         val renderScript = RenderScript.create(context)
-        val rect = Rect(0, 0, artwork.width, artwork.height)
-        MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
-        var inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
-                true /* filter */)
-        // Render script blurs only support ARGB_8888, we need a conversion if we got a
-        // different bitmap config.
-        if (inBitmap.config != Bitmap.Config.ARGB_8888) {
-            val oldIn = inBitmap
-            inBitmap = oldIn.copy(Bitmap.Config.ARGB_8888, false /* isMutable */)
-            oldIn.recycle()
-        }
-        val input = Allocation.createFromBitmap(renderScript, inBitmap,
-                Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE)
-        val outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
-                Bitmap.Config.ARGB_8888)
-        val output = Allocation.createFromBitmap(renderScript, outBitmap)
         val blur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript))
-        blur.setRadius(BLUR_RADIUS)
-        blur.setInput(input)
-        blur.forEach(output)
-        output.copyTo(outBitmap)
+        var input: Allocation? = null
+        var output: Allocation? = null
+        var inBitmap: Bitmap? = null
+        try {
+            context.display.getSize(mTmpSize)
+            val rect = Rect(0, 0, artwork.width, artwork.height)
+            MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
+            inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
+                    true /* filter */)
+            // Render script blurs only support ARGB_8888, we need a conversion if we got a
+            // different bitmap config.
+            if (inBitmap.config != Bitmap.Config.ARGB_8888) {
+                val oldIn = inBitmap
+                inBitmap = oldIn.copy(Bitmap.Config.ARGB_8888, false /* isMutable */)
+                oldIn.recycle()
+            }
+            val outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
+                    Bitmap.Config.ARGB_8888)
 
-        val swatch = MediaNotificationProcessor.findBackgroundSwatch(artwork)
+            input = Allocation.createFromBitmap(renderScript, inBitmap,
+                    Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE)
+            output = Allocation.createFromBitmap(renderScript, outBitmap)
 
-        input.destroy()
-        output.destroy()
-        inBitmap.recycle()
-        blur.destroy()
+            blur.setRadius(BLUR_RADIUS)
+            blur.setInput(input)
+            blur.forEach(output)
+            output.copyTo(outBitmap)
 
-        val canvas = Canvas(outBitmap)
-        canvas.drawColor(ColorUtils.setAlphaComponent(swatch.rgb, COLOR_ALPHA))
-        return outBitmap
+            val swatch = MediaNotificationProcessor.findBackgroundSwatch(artwork)
+
+            val canvas = Canvas(outBitmap)
+            canvas.drawColor(ColorUtils.setAlphaComponent(swatch.rgb, COLOR_ALPHA))
+            return outBitmap
+        } catch (ex: IllegalArgumentException) {
+            Log.e(TAG, "error while processing artwork", ex)
+            return null
+        } finally {
+            input?.destroy()
+            output?.destroy()
+            blur.destroy()
+            inBitmap?.recycle()
+        }
     }
 
     fun clearCache() {
