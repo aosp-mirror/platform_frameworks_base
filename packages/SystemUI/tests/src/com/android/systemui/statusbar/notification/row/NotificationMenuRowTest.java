@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
+import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -100,8 +101,31 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
 
     @Test
     public void testNoAppOpsInSlowSwipe() {
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
+        Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 0);
+
+        NotificationMenuRow row = new NotificationMenuRow(mContext);
+        row.createMenu(mRow, null);
+
+        ViewGroup container = (ViewGroup) row.getMenuView();
+        // noti blocking
+        assertEquals(1, container.getChildCount());
+    }
+
+    @Test
+    public void testNoSnoozeInSlowSwipe() {
+        Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 0);
+
+        NotificationMenuRow row = new NotificationMenuRow(mContext);
+        row.createMenu(mRow, null);
+
+        ViewGroup container = (ViewGroup) row.getMenuView();
+        // just for noti blocking
+        assertEquals(1, container.getChildCount());
+    }
+
+    @Test
+    public void testSnoozeInSlowSwipe() {
+        Settings.Secure.putInt(mContext.getContentResolver(), SHOW_NOTIFICATION_SNOOZE, 1);
 
         NotificationMenuRow row = new NotificationMenuRow(mContext);
         row.createMenu(mRow, null);
