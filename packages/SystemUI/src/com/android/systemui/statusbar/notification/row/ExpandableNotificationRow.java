@@ -648,6 +648,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (!getShowingLayout().isDimmable()) {
             return false;
         }
+        if (showingAmbientPulsing()) {
+            return false;
+        }
         return super.isDimmable();
     }
 
