@@ -48,10 +48,10 @@ fun isPermissionsHubEnabled() = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_P
 
 @Singleton
 class PrivacyItemController @Inject constructor(
-        val context: Context,
-        private val appOpsController: AppOpsController,
-        @Named(MAIN_HANDLER_NAME) private val uiHandler: Handler,
-        @Named(BG_HANDLER_NAME) private val bgHandler: Handler
+    val context: Context,
+    private val appOpsController: AppOpsController,
+    @Named(MAIN_HANDLER_NAME) private val uiHandler: Handler,
+    @Named(BG_HANDLER_NAME) private val bgHandler: Handler
 ) : Dumpable {
 
     @VisibleForTesting
@@ -95,12 +95,14 @@ class PrivacyItemController @Inject constructor(
 
     private var indicatorsAvailable = isPermissionsHubEnabled()
     @VisibleForTesting
-    internal val devicePropertyChangedListener =
-            object : DeviceConfig.OnPropertyChangedListener {
-        override fun onPropertyChanged(namespace: String, name: String, value: String?) {
-            if (DeviceConfig.NAMESPACE_PRIVACY.equals(namespace) &&
-                    SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED.equals(name)) {
-                indicatorsAvailable = java.lang.Boolean.parseBoolean(value)
+    internal val devicePropertiesChangedListener =
+            object : DeviceConfig.OnPropertiesChangedListener {
+        override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
+            if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace()) &&
+                    properties.getKeyset().contains(
+                    SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED)) {
+                indicatorsAvailable = properties.getBoolean(
+                        SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false)
                 messageHandler.removeMessages(MSG_UPDATE_LISTENING_STATE)
                 messageHandler.sendEmptyMessage(MSG_UPDATE_LISTENING_STATE)
             }
@@ -130,8 +132,10 @@ class PrivacyItemController @Inject constructor(
         }
 
     init {
-        DeviceConfig.addOnPropertyChangedListener(
-                DeviceConfig.NAMESPACE_PRIVACY, context.mainExecutor, devicePropertyChangedListener)
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_PRIVACY,
+                context.mainExecutor,
+                devicePropertiesChangedListener)
     }
 
     private fun unregisterReceiver() {
@@ -268,8 +272,8 @@ class PrivacyItemController @Inject constructor(
     }
 
     private class H(
-            private val outerClass: WeakReference<PrivacyItemController>,
-            looper: Looper
+        private val outerClass: WeakReference<PrivacyItemController>,
+        looper: Looper
     ) : Handler(looper) {
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
