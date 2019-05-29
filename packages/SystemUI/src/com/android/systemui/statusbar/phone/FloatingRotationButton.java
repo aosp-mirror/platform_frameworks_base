@@ -136,7 +136,10 @@ public class FloatingRotationButton implements RotationButton {
 
     @Override
     public void setOnClickListener(View.OnClickListener onClickListener) {
-        mKeyButtonView.setOnClickListener(onClickListener);
+        mKeyButtonView.setOnClickListener(view -> {
+            hide();
+            onClickListener.onClick(view);
+        });
     }
 
     @Override
