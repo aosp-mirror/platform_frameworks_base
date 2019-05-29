@@ -194,7 +194,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
             final Notification.Action action =
                     statusBarNotification.getNotification().actions[actionIndex];
-            if (Objects.equals(action.actionIntent, actionIntent)) {
+            if (!Objects.equals(action.actionIntent, actionIntent)) {
                 Log.w(TAG, "actionIntent does not match");
                 return;
             }

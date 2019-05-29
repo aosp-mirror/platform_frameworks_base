@@ -410,6 +410,7 @@ public class IpMemoryStoreDatabase {
     private static final String[] DATA_COLUMN = new String[] {
             PrivateDataContract.COLNAME_DATA
     };
+
     @Nullable
     static byte[] retrieveBlob(@NonNull final SQLiteDatabase db, @NonNull final String key,
             @NonNull final String clientId, @NonNull final String name) {
@@ -429,6 +430,57 @@ public class IpMemoryStoreDatabase {
         final byte[] result = cursor.getBlob(0); // index in the DATA_COLUMN array
         cursor.close();
         return result;
+    }
+
+    /**
+     * Wipe all data in tables when network factory reset occurs.
+     */
+    static void wipeDataUponNetworkReset(@NonNull final SQLiteDatabase db) {
+        for (int remainingRetries = 3; remainingRetries > 0; --remainingRetries) {
+            db.beginTransaction();
+            try {
+                db.delete(NetworkAttributesContract.TABLENAME, null, null);
+                db.delete(PrivateDataContract.TABLENAME, null, null);
+                final Cursor cursorNetworkAttributes = db.query(
+                        // table name
+                        NetworkAttributesContract.TABLENAME,
+                        // column name
+                        new String[] { NetworkAttributesContract.COLNAME_L2KEY },
+                        null, // selection
+                        null, // selectionArgs
+                        null, // groupBy
+                        null, // having
+                        null, // orderBy
+                        "1"); // limit
+                if (0 != cursorNetworkAttributes.getCount()) {
+                    cursorNetworkAttributes.close();
+                    continue;
+                }
+                cursorNetworkAttributes.close();
+                final Cursor cursorPrivateData = db.query(
+                        // table name
+                        PrivateDataContract.TABLENAME,
+                        // column name
+                        new String[] { PrivateDataContract.COLNAME_L2KEY },
+                        null, // selection
+                        null, // selectionArgs
+                        null, // groupBy
+                        null, // having
+                        null, // orderBy
+                        "1"); // limit
+                if (0 != cursorPrivateData.getCount()) {
+                    cursorPrivateData.close();
+                    continue;
+                }
+                cursorPrivateData.close();
+                db.setTransactionSuccessful();
+                return;
+            } catch (SQLiteException e) {
+                Log.e(TAG, "Could not wipe the data in database", e);
+            } finally {
+                db.endTransaction();
+            }
+        }
     }
 
     /**

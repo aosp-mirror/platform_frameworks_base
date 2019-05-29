@@ -770,7 +770,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (mShouldDrawNotificationBackground
                 && (mSections[0].getCurrentBounds().top
                 < mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom
-                || mAmbientState.isDark())) {
+                || mAmbientState.isDozing())) {
             drawBackground(canvas);
         } else if (mInHeadsUpPinnedMode || mHeadsUpAnimatingAway) {
             drawHeadsUpBackground(canvas);
@@ -804,7 +804,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 canvas.drawLine(0, y, getWidth(), y, mDebugPaint);
             }
             canvas.drawText(Integer.toString(getMaxNegativeScrollAmount()), getWidth() - 100,
-                    getIntrinsicPadding() + 30, mDebugPaint);
+                    getTopPadding() + 30, mDebugPaint);
             canvas.drawText(Integer.toString(getMaxPositiveScrollAmount()), getWidth() - 100,
                     getHeight() - 30, mDebugPaint);
         }
@@ -842,7 +842,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 break;
             }
         }
-        if (!mAmbientState.isDark() || anySectionHasVisibleChild) {
+        if (!mAmbientState.isDozing() || anySectionHasVisibleChild) {
             drawBackgroundRects(canvas, left, right, top, backgroundTopAnimationOffset);
         }
 
@@ -1438,7 +1438,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int notGoneChildCount = getNotGoneChildCount();
         if (mEmptyShadeView.getVisibility() == GONE && notGoneChildCount != 0) {
             if (isHeadsUpTransition()
-                    || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDark())) {
+                    || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDozing())) {
                 appearPosition = getTopHeadsUpPinnedHeight();
             } else {
                 appearPosition = 0;
@@ -2403,7 +2403,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         mIntrinsicContentHeight = height;
 
-        mContentHeight = height + mTopPadding + mBottomMargin;
+        // The topPadding can be bigger than the regular padding when qs is expanded, in that
+        // state the maxPanelHeight and the contentHeight should be bigger
+        mContentHeight = height + Math.max(mIntrinsicPadding, mTopPadding) + mBottomMargin;
         updateScrollability();
         clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
@@ -2783,12 +2785,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      *
      * @param qsHeight               the top padding imposed by the quick settings panel
      * @param animate                whether to animate the change
-     * @param ignoreIntrinsicPadding if true, {@link #getIntrinsicPadding()} is ignored and
-     *                               {@code qsHeight} is the final top padding
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public void updateTopPadding(float qsHeight, boolean animate,
-            boolean ignoreIntrinsicPadding) {
+    public void updateTopPadding(float qsHeight, boolean animate) {
         int topPadding = (int) qsHeight;
         int minStackHeight = getLayoutMinHeight();
         if (topPadding + minStackHeight > getHeight()) {
@@ -2796,8 +2795,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         } else {
             mTopPaddingOverflow = 0;
         }
-        setTopPadding(ignoreIntrinsicPadding ? topPadding : clampPadding(topPadding),
-                animate);
+        setTopPadding(topPadding, animate);
         setExpandedHeight(mExpandedHeight);
     }
 
@@ -3532,7 +3530,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void generateTopPaddingEvent() {
         if (mTopPaddingNeedsAnimation) {
             AnimationEvent event;
-            if (mAmbientState.isDark()) {
+            if (mAmbientState.isDozing()) {
                 event = new AnimationEvent(null /* view */,
                         AnimationEvent.ANIMATION_TYPE_TOP_PADDING_CHANGED,
                         KeyguardSliceView.DEFAULT_ANIM_DURATION);
@@ -4712,21 +4710,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     /**
-     * See {@link AmbientState#setDark}.
+     * See {@link AmbientState#setDozing}.
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setDark(boolean dark, boolean animate, @Nullable PointF touchWakeUpScreenLocation) {
-        if (mAmbientState.isDark() == dark) {
+    public void setDozing(boolean dozing, boolean animate,
+            @Nullable PointF touchWakeUpScreenLocation) {
+        if (mAmbientState.isDozing() == dozing) {
             return;
         }
-        mAmbientState.setDark(dark);
+        mAmbientState.setDozing(dozing);
         if (animate && mAnimationsEnabled) {
             mDarkNeedsAnimation = true;
             mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
             mNeedsAnimation = true;
-        } else {
-            setDarkAmount(dark ? 1f : 0f);
-            updateBackground();
         }
         requestChildrenUpdate();
         updateWillNotDraw();
@@ -6348,7 +6344,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         (int) (dragLengthY / mDisplayMetrics.density),
                         0 /* velocityDp - N/A */);
 
-                if (!mAmbientState.isDark() || startingChild != null) {
+                if (!mAmbientState.isDozing() || startingChild != null) {
                     // We have notifications, go to locked shade.
                     mShadeController.goToLockedShade(startingChild);
                     if (startingChild instanceof ExpandableNotificationRow) {

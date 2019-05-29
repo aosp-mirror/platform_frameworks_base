@@ -2271,11 +2271,6 @@
   <java-symbol type="anim" name="lock_screen_wallpaper_exit" />
   <java-symbol type="anim" name="launch_task_behind_source" />
   <java-symbol type="anim" name="wallpaper_open_exit" />
-  <java-symbol type="anim" name="lock_to_error" />
-  <java-symbol type="anim" name="lock_lock" />
-  <java-symbol type="anim" name="lock_unlock" />
-  <java-symbol type="anim" name="lock_in" />
-  <java-symbol type="anim" name="lock_scanning" />
 
   <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="dimen" name="status_bar_icon_size" />
@@ -3775,6 +3770,7 @@
   <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
   <java-symbol type="dimen" name="resolver_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
+  <java-symbol type="dimen" name="resolver_button_bar_spacing"/>
 
   <!-- For DropBox -->
   <java-symbol type="integer" name="config_dropboxLowPriorityBroadcastRateLimitPeriod" />
@@ -3796,4 +3792,5 @@
   <java-symbol type="style" name="Animation.DeviceDefault.Activity.Resolver" />
   
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
+  <java-symbol type="bool" name="config_inflateSignalStrength" />
 </resources>

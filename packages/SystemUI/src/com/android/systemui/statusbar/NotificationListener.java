@@ -169,6 +169,5 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     public interface NotificationSettingsListener {
 
         default void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) { }
-
     }
 }

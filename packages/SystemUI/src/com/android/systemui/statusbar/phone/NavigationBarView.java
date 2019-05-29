@@ -22,6 +22,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_H
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
+import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 
 import android.animation.LayoutTransition;
@@ -130,7 +131,6 @@ public class NavigationBarView extends FrameLayout implements
     private boolean mImeVisible;
 
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
-    private final ContextualButtonGroup mStartContextualButtonGroup;
     private final ContextualButtonGroup mContextualButtonGroup;
     private Configuration mConfiguration;
     private Configuration mTmpLastConfiguration;
@@ -138,6 +138,8 @@ public class NavigationBarView extends FrameLayout implements
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
+    private FloatingRotationButton mFloatingRotationButton;
+    private RotationButtonController mRotationButtonController;
 
     private NavBarTintController mTintController;
 
@@ -232,24 +234,12 @@ public class NavigationBarView extends FrameLayout implements
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener = info -> {
         // When the nav bar is in 2-button or 3-button mode, or when IME is visible in fully
         // gestural mode, the entire nav bar should be touchable.
-        if (!QuickStepContract.isGesturalMode(mNavBarMode) || mImeVisible) {
+        if (!isGesturalMode(mNavBarMode) || mImeVisible) {
             info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
             return;
         }
         info.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-        RotationContextButton rotationContextButton = getRotateSuggestionButton();
-        // If the rotate suggestion button is not visible in fully gestural mode, the entire nav bar
-        // is not touchable so that the app underneath can be clicked through.
-        if (rotationContextButton.getVisibility() != VISIBLE) {
-            info.touchableRegion.setEmpty();
-        } else {
-            // Set the rotate suggestion button area to be touchable.
-            rotationContextButton.getCurrentView().getLocationInWindow(mTmpPosition);
-            Rect rect = new Rect(mTmpPosition[0], mTmpPosition[1],
-                    mTmpPosition[0] + mRotationButtonBounds.width(),
-                    mTmpPosition[1] + mRotationButtonBounds.height());
-            info.touchableRegion.union(rect);
-        }
+        info.touchableRegion.setEmpty();
     };
 
     public NavigationBarView(Context context, AttributeSet attrs) {
@@ -258,15 +248,14 @@ public class NavigationBarView extends FrameLayout implements
         mIsVertical = false;
         mLongClickableAccessibilityButton = false;
         mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
-        boolean isGesturalMode = QuickStepContract.isGesturalMode(mNavBarMode);
+        boolean isGesturalMode = isGesturalMode(mNavBarMode);
 
         // Set up the context group of buttons
         mContextualButtonGroup = new ContextualButtonGroup(R.id.menu_container);
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
                 R.drawable.ic_ime_switcher_default);
         final RotationContextButton rotateSuggestionButton = new RotationContextButton(
-                R.id.rotate_suggestion, R.drawable.ic_sysbar_rotate_button, getContext(),
-                R.style.RotateButtonCCWStart90);
+                R.id.rotate_suggestion, R.drawable.ic_sysbar_rotate_button);
         final ContextualButton accessibilityButton =
                 new ContextualButton(R.id.accessibility_button,
                         R.drawable.ic_sysbar_accessibility_button);
@@ -278,13 +267,12 @@ public class NavigationBarView extends FrameLayout implements
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
+        mFloatingRotationButton = new FloatingRotationButton(context);
+        mRotationButtonController = new RotationButtonController(context,
+                R.style.RotateButtonCCWStart90,
+                isGesturalMode ? mFloatingRotationButton : rotateSuggestionButton);
 
         final ContextualButton backButton = new ContextualButton(R.id.back, 0);
-        mStartContextualButtonGroup = new ContextualButtonGroup(R.id.start_menu_container);
-        if (isGesturalMode) {
-            mStartContextualButtonGroup.addButton(rotateSuggestionButton);
-        }
-        mStartContextualButtonGroup.addButton(backButton);
 
         mConfiguration = new Configuration();
         mTmpLastConfiguration = new Configuration();
@@ -301,7 +289,6 @@ public class NavigationBarView extends FrameLayout implements
         mButtonDispatchers.put(R.id.accessibility_button, accessibilityButton);
         mButtonDispatchers.put(R.id.rotate_suggestion, rotateSuggestionButton);
         mButtonDispatchers.put(R.id.menu_container, mContextualButtonGroup);
-        mButtonDispatchers.put(R.id.start_menu_container, mStartContextualButtonGroup);
         mDeadZone = new DeadZone(this);
 
         mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService);
@@ -390,6 +377,14 @@ public class NavigationBarView extends FrameLayout implements
         return mCurrentView;
     }
 
+    public RotationButtonController getRotationButtonController() {
+        return mRotationButtonController;
+    }
+
+    public FloatingRotationButton getFloatingRotationButton() {
+        return mFloatingRotationButton;
+    }
+
     public ButtonDispatcher getRecentsButton() {
         return mButtonDispatchers.get(R.id.recent_apps);
     }
@@ -412,10 +407,6 @@ public class NavigationBarView extends FrameLayout implements
 
     public RotationContextButton getRotateSuggestionButton() {
         return (RotationContextButton) mButtonDispatchers.get(R.id.rotate_suggestion);
-    }
-
-    public ContextualButtonGroup getStartContextualButtonGroup() {
-        return mStartContextualButtonGroup;
     }
 
     public ButtonDispatcher getHomeHandle() {
@@ -454,7 +445,6 @@ public class NavigationBarView extends FrameLayout implements
         if (densityChange || dirChange) {
             mRecentIcon = getDrawable(R.drawable.ic_sysbar_recent);
             mContextualButtonGroup.updateIcons();
-            mStartContextualButtonGroup.updateIcons();
         }
         if (orientationChange || densityChange || dirChange) {
             mBackIcon = getBackDrawable();
@@ -490,7 +480,7 @@ public class NavigationBarView extends FrameLayout implements
             return;
         }
 
-        if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+        if (isGesturalMode(mNavBarMode)) {
             drawable.setRotation(degrees);
             return;
         }
@@ -561,6 +551,7 @@ public class NavigationBarView extends FrameLayout implements
             mTransitionListener.onBackAltCleared();
         }
         mImeVisible = visible;
+        mRotationButtonController.getRotationButton().setCanShowRotationButton(!mImeVisible);
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -603,7 +594,7 @@ public class NavigationBarView extends FrameLayout implements
 
         mBarTransitions.reapplyDarkIntensity();
 
-        boolean disableHome = QuickStepContract.isGesturalMode(mNavBarMode)
+        boolean disableHome = isGesturalMode(mNavBarMode)
                 || ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
         // TODO(b/113914868): investigation log for disappearing home button
@@ -613,7 +604,7 @@ public class NavigationBarView extends FrameLayout implements
         // Always disable recents when alternate car mode UI is active and for secondary displays.
         boolean disableRecent = isRecentsButtonDisabled();
 
-        boolean disableBack = !useAltBack && (QuickStepContract.isGesturalMode(mNavBarMode)
+        boolean disableBack = !useAltBack && (isGesturalMode(mNavBarMode)
                 || ((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0));
 
         // When screen pinning, don't hide back and home when connected service or back and
@@ -641,7 +632,6 @@ public class NavigationBarView extends FrameLayout implements
         }
 
         getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
-        mStartContextualButtonGroup.setButtonVisibility(R.id.back, !disableBack);
         getHomeButton().setVisibility(disableHome      ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
     }
@@ -782,7 +772,7 @@ public class NavigationBarView extends FrameLayout implements
 
         // Color adaption is tied with showing home handle, only avaliable if visible
         mTintController.onNavigationModeChanged(mNavBarMode);
-        if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+        if (isGesturalMode(mNavBarMode)) {
             mTintController.start();
         } else {
             mTintController.stop();
@@ -939,7 +929,7 @@ public class NavigationBarView extends FrameLayout implements
                 "onMeasure: (%dx%d) old: (%dx%d)", w, h, getMeasuredWidth(), getMeasuredHeight()));
 
         final boolean newVertical = w > 0 && h > w
-                && !QuickStepContract.isGesturalMode(mNavBarMode);
+                && !isGesturalMode(mNavBarMode);
         if (newVertical != mIsVertical) {
             mIsVertical = newVertical;
             if (DEBUG) {
@@ -950,7 +940,7 @@ public class NavigationBarView extends FrameLayout implements
             notifyVerticalChangedListener(newVertical);
         }
 
-        if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+        if (isGesturalMode(mNavBarMode)) {
             // Update the nav bar background to match the height of the visible nav bar
             int height = mIsVertical
                     ? getResources().getDimensionPixelSize(

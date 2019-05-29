@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -30,6 +31,8 @@ import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.os.Trace;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -49,6 +52,9 @@ import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -247,11 +253,11 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         mIsFaceUnlockState = state == STATE_SCANNING_FACE;
         if (state != mLastState || mLastDozing != mDozing || mLastPulsing != mPulsing
                 || mLastScreenOn != mScreenOn || mLastBouncerVisible != mBouncerVisible || force) {
-            int iconAnimRes = getAnimationResForTransition(mLastState, state, mLastPulsing,
-                    mPulsing, mLastDozing, mDozing, mBouncerVisible);
-            boolean isAnim = iconAnimRes != -1;
+            @LockAnimIndex final int lockAnimIndex = getAnimationIndexForTransition(mLastState,
+                    state, mLastPulsing, mPulsing, mLastDozing, mDozing, mBouncerVisible);
+            boolean isAnim = lockAnimIndex != -1;
 
-            int iconRes = isAnim ? iconAnimRes : getIconForState(state);
+            int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(state);
             if (iconRes != mIconRes) {
                 mIconRes = iconRes;
 
@@ -272,7 +278,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                         @Override
                         public void onAnimationEnd(Drawable drawable) {
                             if (getDrawable() == animation && state == getState()
-                                    && doesAnimationLoop(iconAnimRes)) {
+                                    && doesAnimationLoop(lockAnimIndex)) {
                                 animation.start();
                             } else {
                                 Trace.endAsyncSection("LockIcon#Animation", state);
@@ -360,11 +366,11 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         return iconRes;
     }
 
-    private boolean doesAnimationLoop(int resourceId) {
-        return resourceId == com.android.internal.R.anim.lock_scanning;
+    private boolean doesAnimationLoop(@LockAnimIndex int lockAnimIndex) {
+        return lockAnimIndex == SCANNING;
     }
 
-    private int getAnimationResForTransition(int oldState, int newState,
+    private int getAnimationIndexForTransition(int oldState, int newState,
             boolean wasPulsing, boolean pulsing, boolean wasDozing, boolean dozing,
             boolean bouncerVisible) {
 
@@ -380,17 +386,66 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         boolean turningOn = wasDozing && !dozing && !mWasPulsingOnThisFrame;
 
         if (isError) {
-            return com.android.internal.R.anim.lock_to_error;
+            return ERROR;
         } else if (justUnlocked) {
-            return com.android.internal.R.anim.lock_unlock;
+            return UNLOCK;
         } else if (justLocked) {
-            return com.android.internal.R.anim.lock_lock;
+            return LOCK;
         } else if (newState == STATE_SCANNING_FACE && bouncerVisible) {
-            return com.android.internal.R.anim.lock_scanning;
+            return SCANNING;
         } else if ((nowPulsing || turningOn) && newState != STATE_LOCK_OPEN) {
-            return com.android.internal.R.anim.lock_in;
+            return LOCK_IN;
         }
         return -1;
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ERROR, UNLOCK, LOCK, SCANNING, LOCK_IN})
+    @interface LockAnimIndex {}
+    private static final int ERROR = 0, UNLOCK = 1, LOCK = 2, SCANNING = 3, LOCK_IN = 4;
+    private static final int[][] LOCK_ANIM_RES_IDS = new int[][] {
+            {
+                    R.anim.lock_to_error,
+                    R.anim.lock_unlock,
+                    R.anim.lock_lock,
+                    R.anim.lock_scanning,
+                    R.anim.lock_in,
+            },
+            {
+                    R.anim.lock_to_error_circular,
+                    R.anim.lock_unlock_circular,
+                    R.anim.lock_lock_circular,
+                    R.anim.lock_scanning_circular,
+                    R.anim.lock_in_circular,
+            },
+            {
+                    R.anim.lock_to_error_filled,
+                    R.anim.lock_unlock_filled,
+                    R.anim.lock_lock_filled,
+                    R.anim.lock_scanning_filled,
+                    R.anim.lock_in_filled,
+            },
+            {
+                    R.anim.lock_to_error_rounded,
+                    R.anim.lock_unlock_rounded,
+                    R.anim.lock_lock_rounded,
+                    R.anim.lock_scanning_rounded,
+                    R.anim.lock_in_rounded,
+            },
+    };
+
+    private int getThemedAnimationResId(@LockAnimIndex int lockAnimIndex) {
+        final String setting = TextUtils.emptyIfNull(
+                Settings.Secure.getString(getContext().getContentResolver(),
+                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES));
+        if (setting.contains("com.android.theme.icon_pack.circular.android")) {
+            return LOCK_ANIM_RES_IDS[1][lockAnimIndex];
+        } else if (setting.contains("com.android.theme.icon_pack.filled.android")) {
+            return LOCK_ANIM_RES_IDS[2][lockAnimIndex];
+        } else if (setting.contains("com.android.theme.icon_pack.rounded.android")) {
+            return LOCK_ANIM_RES_IDS[3][lockAnimIndex];
+        }
+        return LOCK_ANIM_RES_IDS[0][lockAnimIndex];
     }
 
     private int getState() {

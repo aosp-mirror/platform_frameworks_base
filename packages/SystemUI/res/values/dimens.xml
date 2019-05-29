@@ -38,7 +38,6 @@
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
     <dimen name="navigation_home_handle_width">72dp</dimen>
 
-
     <!-- Size of the nav bar edge panels, should be greater to the
          edge sensitivity + the drag threshold -->
     <dimen name="navigation_edge_panel_width">70dp</dimen>
@@ -56,6 +55,9 @@
     <item name="navigation_luminance_threshold" type="dimen" format="float">0.5</item>
     <!-- Luminance change threshold that allows applying new value if difference was exceeded -->
     <item name="navigation_luminance_change_threshold" type="dimen" format="float">0.05</item>
+
+    <dimen name="floating_rotation_button_diameter">40dp</dimen>
+    <dimen name="floating_rotation_button_margin">4dp</dimen>
 
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
@@ -218,7 +220,7 @@
     <dimen name="notification_guts_option_horizontal_padding">15dp</dimen>
 
     <!-- The vertical space between items in the alert selections in the inline settings -->
-    <dimen name="notification_guts_option_vertical_padding">20dp</dimen>
+    <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
 
     <!-- The vertical space between the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_margin">6dp</dimen>
@@ -227,7 +229,7 @@
     <dimen name="notification_importance_toggle_marginTop">28dp</dimen>
     <dimen name="notification_importance_toggle_marginBottom">28dp</dimen>
     <dimen name="notification_importance_text_marginTop">20dp</dimen>
-    <dimen name="notification_importance_button_separation">16dp</dimen>
+    <dimen name="notification_importance_button_separation">8dp</dimen>
     <dimen name="notification_importance_button_width">178dp</dimen>
     <dimen name="notification_importance_button_horiz_padding">28dp</dimen>
     <dimen name="notification_importance_drawable_padding">8dp</dimen>
@@ -236,8 +238,9 @@
     <dimen name="notification_importance_description_text">14sp</dimen>
     <dimen name="notification_importance_channel_text">16sp</dimen>
     <dimen name="notification_importance_channel_group_text">14sp</dimen>
-    <dimen name="notification_importance_button_text">16sp</dimen>
-    <dimen name="notification_importance_button_padding">14dp</dimen>
+    <dimen name="notification_importance_button_text">14sp</dimen>
+    <dimen name="notification_importance_button_padding">16dp</dimen>
+    <dimen name="notification_importance_button_description_top_margin">12dp</dimen>
     <dimen name="rect_button_radius">8dp</dimen>
 
     <!-- The minimum height for the snackbar shown after the snooze option has been chosen. -->
@@ -950,7 +953,7 @@
 
     <!-- Global actions grid layout -->
     <dimen name="global_actions_grid_side_margin">4dp</dimen>
-    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
+    <dimen name="global_actions_grid_container_bottom_margin">8dp</dimen>
 
     <!-- Used to workaround a bug where shadows are clipped during animations by expanding
          the bounds of the parent view. -->
