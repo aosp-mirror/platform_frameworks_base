@@ -68,10 +68,6 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
-import static com.android.internal.util.TestUtils.waitForIdleHandler;
-import static com.android.internal.util.TestUtils.waitForIdleLooper;
-import static com.android.internal.util.TestUtils.waitForIdleSerialExecutor;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -196,6 +192,7 @@ import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -375,19 +372,19 @@ public class ConnectivityServiceTest {
 
     public void waitForIdle(int timeoutMsAsInt) {
         long timeoutMs = timeoutMsAsInt;
-        waitForIdleHandler(mService.mHandlerThread, timeoutMs);
+        HandlerUtilsKt.waitForIdle(mService.mHandlerThread, timeoutMs);
         waitForIdle(mCellNetworkAgent, timeoutMs);
         waitForIdle(mWiFiNetworkAgent, timeoutMs);
         waitForIdle(mEthernetNetworkAgent, timeoutMs);
-        waitForIdleHandler(mService.mHandlerThread, timeoutMs);
-        waitForIdleLooper(ConnectivityThread.getInstanceLooper(), timeoutMs);
+        HandlerUtilsKt.waitForIdle(mService.mHandlerThread, timeoutMs);
+        HandlerUtilsKt.waitForIdle(ConnectivityThread.get(), timeoutMs);
     }
 
     public void waitForIdle(MockNetworkAgent agent, long timeoutMs) {
         if (agent == null) {
             return;
         }
-        waitForIdleHandler(agent.mHandlerThread, timeoutMs);
+        HandlerUtilsKt.waitForIdle(agent.mHandlerThread, timeoutMs);
     }
 
     private void waitForIdle() {
@@ -1220,7 +1217,7 @@ public class ConnectivityServiceTest {
         }
 
         public void waitForIdle(int timeoutMs) {
-            waitForIdleHandler(mHandlerThread, timeoutMs);
+            HandlerUtilsKt.waitForIdle(mHandlerThread, timeoutMs);
         }
 
         public void waitForIdle() {
@@ -4107,7 +4104,7 @@ public class ConnectivityServiceTest {
         }
 
         public void assertNoCallback() {
-            waitForIdleSerialExecutor(mExecutor, TIMEOUT_MS);
+            HandlerUtilsKt.waitForIdleSerialExecutor(mExecutor, TIMEOUT_MS);
             CallbackValue cv = mCallbacks.peek();
             assertNull("Unexpected callback: " + cv, cv);
         }
