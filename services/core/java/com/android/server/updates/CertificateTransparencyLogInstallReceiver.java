@@ -16,25 +16,30 @@
 
 package com.android.server.updates;
 
-import com.android.internal.util.HexDump;
 import android.os.FileUtils;
-import android.system.Os;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Base64;
 import android.util.Slog;
+
+import com.android.internal.util.HexDump;
+
+import libcore.io.Streams;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringBufferInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.PublicKey;
 import java.security.NoSuchAlgorithmException;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInstallReceiver {
 
@@ -46,14 +51,13 @@ public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInsta
     }
 
     @Override
-    protected void install(byte[] content, int version) throws IOException {
+    protected void install(InputStream inputStream, int version) throws IOException {
         /* Install is complicated here because we translate the input, which is a JSON file
          * containing log information to a directory with a file per log. To support atomically
          * replacing the old configuration directory with the new there's a bunch of steps. We
          * create a new directory with the logs and then do an atomic update of the current symlink
          * to point to the new directory.
          */
-
         // 1. Ensure that the update dir exists and is readable
         updateDir.mkdir();
         if (!updateDir.isDirectory()) {
@@ -72,7 +76,8 @@ public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInsta
             // and so we cannot delete the directory since its in use. Instead just bump the version
             // and return.
             if (newVersion.getCanonicalPath().equals(currentSymlink.getCanonicalPath())) {
-                writeUpdate(updateDir, updateVersion, Long.toString(version).getBytes());
+                writeUpdate(updateDir, updateVersion,
+                        new ByteArrayInputStream(Long.toString(version).getBytes()));
                 deleteOldLogDirectories();
                 return;
             } else {
@@ -92,6 +97,7 @@ public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInsta
 
             // 4. For each log in the log file create the corresponding file in <new_version>/ .
             try {
+                byte[] content = Streams.readFullyNoClose(inputStream);
                 JSONObject json = new JSONObject(new String(content, StandardCharsets.UTF_8));
                 JSONArray logs = json.getJSONArray("logs");
                 for (int i = 0; i < logs.length(); i++) {
@@ -119,7 +125,8 @@ public class CertificateTransparencyLogInstallReceiver extends ConfigUpdateInsta
         }
         Slog.i(TAG, "CT log directory updated to " + newVersion.getAbsolutePath());
         // 7. Update the current version information
-        writeUpdate(updateDir, updateVersion, Long.toString(version).getBytes());
+        writeUpdate(updateDir, updateVersion,
+                new ByteArrayInputStream(Long.toString(version).getBytes()));
         // 8. Cleanup
         deleteOldLogDirectories();
     }
