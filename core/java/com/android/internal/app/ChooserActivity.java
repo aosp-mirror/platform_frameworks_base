@@ -1603,7 +1603,8 @@ public class ChooserActivity extends ResolverActivity {
      */
     @Nullable
     private AppPredictor getAppPredictorForDirectShareIfEnabled() {
-        return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS ? getAppPredictor() : null;
+        return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS && !ActivityManager.isLowRamDeviceStatic()
+                ? getAppPredictor() : null;
     }
 
     /**
@@ -2349,6 +2350,8 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public void onListRebuilt() {
+            updateAlphabeticalList();
+
             // don't support direct share on low ram devices
             if (ActivityManager.isLowRamDeviceStatic()) {
                 return;
@@ -2379,7 +2382,6 @@ public class ChooserActivity extends ResolverActivity {
 
                 queryTargetServices(this);
             }
-            updateAlphabeticalList();
         }
 
         @Override
@@ -2830,7 +2832,7 @@ public class ChooserActivity extends ResolverActivity {
         // There can be at most one row in the listview, that is internally
         // a ViewGroup with 2 rows
         public int getServiceTargetRowCount() {
-            if (isSendAction(getTargetIntent())) {
+            if (isSendAction(getTargetIntent()) && !ActivityManager.isLowRamDeviceStatic()) {
                 return 1;
             }
             return 0;
