@@ -62,7 +62,7 @@ class BrushPropertyDrawable : Drawable {
         return _size
     }
 
-    override fun draw(c: Canvas?) {
+    override fun draw(c: Canvas) {
         c?.let {
             val w = bounds.width().toFloat()
             val h = bounds.height().toFloat()
