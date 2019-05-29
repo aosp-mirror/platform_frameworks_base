@@ -7379,6 +7379,15 @@ message MetricsEvent {
     // Custom tag for NotificationItem. Hash of the NAS that made adjustments.
     FIELD_NOTIFICATION_ASSISTANT_SERVICE_HASH = 1742;
 
+    // Report interactions with seekbar on media notifications
+    // OPEN: Seekbar is visible
+    // CLOSE: Seekbar is not visible
+    // DETAIL: Seekbar scrubber enabled / disabled
+    //  Subtype: 0 disabled, cannot seek; 1 enabled, can seek
+    // UPDATE: Scrubber was moved by user
+    // CATEGORY: NOTIFICATION
+    MEDIA_NOTIFICATION_SEEKBAR = 1743;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
