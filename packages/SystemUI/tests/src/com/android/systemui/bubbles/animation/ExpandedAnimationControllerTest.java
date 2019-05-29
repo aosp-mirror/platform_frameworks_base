@@ -60,7 +60,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
         mLayout.setActiveController(mExpandedController);
 
         Resources res = mLayout.getResources();
@@ -236,26 +236,19 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
             assertEquals(x + i * offsetMultiplier * mStackOffset,
                     mLayout.getChildAt(i).getTranslationX(), 2f);
             assertEquals(y, mLayout.getChildAt(i).getTranslationY(), 2f);
-
-            if (i < mMaxRenderedBubbles) {
-                assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
-            }
+            assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
         }
     }
 
     /** Check that children are in the correct positions for being expanded. */
     private void testBubblesInCorrectExpandedPositions() {
         // Check all the visible bubbles to see if they're in the right place.
-        for (int i = 0; i < Math.min(mLayout.getChildCount(), mMaxRenderedBubbles); i++) {
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
             assertEquals(getBubbleLeft(i),
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
             assertEquals(mExpandedController.getExpandedY(),
                     mLayout.getChildAt(i).getTranslationY(), 2f);
-
-            if (i < mMaxRenderedBubbles) {
-                assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
-            }
         }
     }
 
@@ -273,9 +266,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
             return 0;
         }
         int bubbleCount = mLayout.getChildCount();
-        if (bubbleCount > mMaxRenderedBubbles) {
-            bubbleCount = mMaxRenderedBubbles;
-        }
+
         // Width calculations.
         double bubble = bubbleCount * mBubbleSize;
         float gap = (bubbleCount - 1) * mBubblePadding;

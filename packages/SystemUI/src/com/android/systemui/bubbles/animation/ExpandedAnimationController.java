@@ -63,8 +63,6 @@ public class ExpandedAnimationController
     private Point mDisplaySize;
     /** Size of dismiss target at bottom of screen. */
     private float mPipDismissHeight;
-    /** Max number of bubbles shown in row above expanded view.*/
-    private int mBubblesMaxRendered;
 
     /** Whether the dragged-out bubble is in the dismiss target. */
     private boolean mIndividualBubbleWithinDismissTarget = false;
@@ -291,7 +289,6 @@ public class ExpandedAnimationController
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
         mPipDismissHeight = res.getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height);
-        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
         // in.
@@ -360,19 +357,6 @@ public class ExpandedAnimationController
         updateBubblePositions();
     }
 
-    @Override
-    protected void setChildVisibility(View child, int index, int visibility) {
-        if (visibility == View.VISIBLE) {
-            // Set alpha to 0 but then become visible immediately so the animation is visible.
-            child.setAlpha(0f);
-            child.setVisibility(View.VISIBLE);
-        }
-
-        animationForChild(child)
-                .alpha(visibility == View.GONE ? 0f : 1f)
-                .start(() -> super.setChildVisibility(child, index, visibility) /* after */);
-    }
-
     private void updateBubblePositions() {
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             final View bubble = mLayout.getChildAt(i);
@@ -407,10 +391,7 @@ public class ExpandedAnimationController
             return 0;
         }
         int bubbleCount = mLayout.getChildCount();
-        if (bubbleCount > mBubblesMaxRendered) {
-            // Only shown bubbles are relevant for calculating position.
-            bubbleCount = mBubblesMaxRendered;
-        }
+
         // Width calculations.
         double bubble = bubbleCount * mBubbleSizePx;
         float gap = (bubbleCount - 1) * mBubblePaddingPx;

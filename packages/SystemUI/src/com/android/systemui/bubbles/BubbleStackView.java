@@ -330,8 +330,6 @@ public class BubbleStackView extends FrameLayout {
         mSurfaceSynchronizer = synchronizer != null ? synchronizer : DEFAULT_SURFACE_SYNCHRONIZER;
 
         mBubbleContainer = new PhysicsAnimationLayout(context);
-        mBubbleContainer.setMaxRenderedChildren(
-                getResources().getInteger(R.integer.bubbles_max_rendered));
         mBubbleContainer.setActiveController(mStackAnimationController);
         mBubbleContainer.setElevation(elevation);
         mBubbleContainer.setClipChildren(false);

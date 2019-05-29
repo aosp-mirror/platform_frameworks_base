@@ -170,15 +170,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         }
 
         /**
-         * Sets the child's visibility when it moves beyond or within the limits set by a call to
-         * {@link PhysicsAnimationLayout#setMaxRenderedChildren}. This can be overridden to animate
-         * this transition.
-         */
-        protected void setChildVisibility(View child, int index, int visibility) {
-            child.setVisibility(visibility);
-        }
-
-        /**
          * Returns a {@link PhysicsPropertyAnimator} instance for the given child view.
          */
         protected PhysicsPropertyAnimator animationForChild(View child) {
@@ -260,23 +251,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
     /** The currently active animation controller. */
     @Nullable protected PhysicsAnimationController mController;
 
-    /**
-     * The maximum number of children to render and animate at a time. See
-     * {@link #setMaxRenderedChildren}.
-     */
-    private int mMaxRenderedChildren = 5;
-
     public PhysicsAnimationLayout(Context context) {
         super(context);
-    }
-
-    /**
-     * The maximum number of children to render and animate at a time. Any child views added beyond
-     * this limit will be set to {@link View#GONE}. If any animations attempt to run on the view,
-     * the corresponding property will be set with no animation.
-     */
-    public void setMaxRenderedChildren(int max) {
-        this.mMaxRenderedChildren = max;
     }
 
     /**
@@ -346,8 +322,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
             mController.onChildAdded(child, index);
         }
-
-        setChildrenVisibility();
     }
 
     @Override
@@ -377,8 +351,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
             // Remove the view and add it back as a transient view so we can animate it out.
             super.removeView(view);
             addTransientView(view, index);
-
-            setChildrenVisibility();
 
             // Tell the controller to animate this view out, and call the callback when it's
             // finished.
@@ -508,55 +480,22 @@ public class PhysicsAnimationLayout extends FrameLayout {
         SpringAnimation newAnim = new SpringAnimation(child, property);
         newAnim.addUpdateListener((animation, value, velocity) -> {
             final int indexOfChild = indexOfChild(child);
-            final int nextAnimInChain =
-                    mController.getNextAnimationInChain(property, indexOfChild);
+            final int nextAnimInChain = mController.getNextAnimationInChain(property, indexOfChild);
 
             if (nextAnimInChain == PhysicsAnimationController.NONE || indexOfChild < 0) {
                 return;
             }
 
-            final int animIndex = indexOfChild(child);
-            final float offset =
-                    mController.getOffsetForChainedPropertyAnimation(property);
-
-            // If this property's animations should be chained, then check to see if there is a
-            // subsequent animation within the rendering limit, and if so, tell it to animate to
-            // this animation's new value (plus the offset).
-            if (nextAnimInChain < Math.min(getChildCount(), mMaxRenderedChildren)) {
-                getAnimationAtIndex(property, animIndex + 1)
+            final float offset = mController.getOffsetForChainedPropertyAnimation(property);
+            if (nextAnimInChain < getChildCount()) {
+                getAnimationAtIndex(property, nextAnimInChain)
                         .animateToFinalPosition(value + offset);
-            } else if (nextAnimInChain < getChildCount()) {
-                // If the next child view is not rendered, update the property directly without
-                // animating it, so that the view is still in the correct state if it later
-                // becomes visible.
-                for (int i = nextAnimInChain; i < getChildCount(); i++) {
-                    // 'value' here is the value of the last child within the rendering limit,
-                    // not the first child's value - so we want to subtract the last child's
-                    // index when calculating the offset.
-                    property.setValue(getChildAt(i), value + offset * (i - animIndex));
-                }
             }
         });
 
         newAnim.setSpring(mController.getSpringForce(property, child));
         newAnim.addEndListener(new AllAnimationsForPropertyFinishedEndListener(property));
         child.setTag(getTagIdForProperty(property), newAnim);
-    }
-
-    /** Hides children beyond the max rendering count. */
-    private void setChildrenVisibility() {
-        for (int i = 0; i < getChildCount(); i++) {
-            final int targetVisibility = i < mMaxRenderedChildren ? View.VISIBLE : View.GONE;
-            final View targetView = getChildAt(i);
-
-            if (targetView.getVisibility() != targetVisibility) {
-                if (mController != null) {
-                    mController.setChildVisibility(targetView, i, targetVisibility);
-                } else {
-                    targetView.setVisibility(targetVisibility);
-                }
-            }
-        }
     }
 
     /** Return a stable ID to use as a tag key for the given property's animations. */

@@ -77,21 +77,9 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     }
 
     @Test
-    public void testRenderVisibility() throws InterruptedException {
-        mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
-
-        // The last child should be GONE, the rest VISIBLE.
-        for (int i = 0; i < mMaxRenderedBubbles + 1; i++) {
-            assertEquals(i == mMaxRenderedBubbles ? View.GONE : View.VISIBLE,
-                    mLayout.getChildAt(i).getVisibility());
-        }
-    }
-
-    @Test
     public void testHierarchyChanges() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         // Make sure the controller was notified of all the views we added.
         for (View mView : mViews) {
@@ -116,7 +104,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     @Test
     public void testUpdateValueNotChained() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         // Don't chain any values.
         mTestableController.setChainedProperties(Sets.newHashSet());
@@ -147,7 +135,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     @Test
     public void testSetEndActions() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
         mTestableController.setChainedProperties(Sets.newHashSet());
 
         final CountDownLatch xLatch = new CountDownLatch(1);
@@ -190,7 +178,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     @Test
     public void testRemoveEndListeners() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
         mTestableController.setChainedProperties(Sets.newHashSet());
 
         final CountDownLatch xLatch = new CountDownLatch(1);
@@ -229,7 +217,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     public void testSetController() throws InterruptedException {
         // Add the bubbles, then set the controller, to make sure that a controller added to an
         // already-initialized view works correctly.
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
         mLayout.setActiveController(mTestableController);
         testChainedTranslationAnimations();
 
@@ -284,7 +272,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     @Test
     public void testArePropertiesAnimating() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         assertFalse(mLayout.arePropertiesAnimating(
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y));
@@ -308,7 +296,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     @Test
     public void testCancelAllAnimations() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         mTestableController.animationForChildAtIndex(0)
                 .position(1000, 1000)
@@ -321,29 +309,10 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
         assertTrue(mViews.get(0).getTranslationY() < 1000);
     }
 
-    @Test
-    public void testSetChildVisibility() throws InterruptedException {
-        mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
-
-        // The last view should have been set to GONE by the controller, since we added one more
-        // than the limit and it got pushed off. None of the first children should have been set
-        // VISIBLE, since they would have been animated in by onChildAdded.
-        Mockito.verify(mTestableController).setChildVisibility(
-                mViews.get(mViews.size() - 1), 5, View.GONE);
-        Mockito.verify(mTestableController, never()).setChildVisibility(
-                any(View.class), anyInt(), eq(View.VISIBLE));
-
-        // Remove the first view, which should cause the last view to become visible again.
-        mLayout.removeView(mViews.get(0));
-        Mockito.verify(mTestableController).setChildVisibility(
-                mViews.get(mViews.size() - 1), 4, View.VISIBLE);
-    }
-
     /** Standard test of chained translation animations. */
     private void testChainedTranslationAnimations() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         assertEquals(0, mLayout.getChildAt(0).getTranslationX(), .1f);
         assertEquals(0, mLayout.getChildAt(1).getTranslationX(), .1f);
@@ -354,11 +323,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X);
 
-        // Since we enabled chaining, animating the first view to 100 should animate the second to
-        // 115 (since we set the offset to 15) and the third to 130, etc. Despite the sixth bubble
-        // not being visible, or animated, make sure that it has the appropriate chained
-        // translation.
-        for (int i = 0; i < mMaxRenderedBubbles + 1; i++) {
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
             assertEquals(
                     100 + i * TEST_TRANSLATION_X_OFFSET,
                     mLayout.getChildAt(i).getTranslationX(), .1f);
@@ -384,7 +349,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
     @Test
     public void testPhysicsAnimator() throws InterruptedException {
         mLayout.setActiveController(mTestableController);
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         Runnable afterAll = Mockito.mock(Runnable.class);
         Runnable after = Mockito.spy(new Runnable() {
@@ -432,7 +397,7 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
         mLayout.setActiveController(mTestableController);
 
-        addOneMoreThanRenderLimitBubbles();
+        addOneMoreThanBubbleLimitBubbles();
 
         Runnable allEnd = Mockito.mock(Runnable.class);
 
@@ -524,10 +489,5 @@ public class PhysicsAnimationLayoutTest extends PhysicsAnimationLayoutTestCase {
 
         @Override
         void onActiveControllerForLayout(PhysicsAnimationLayout layout) {}
-
-        @Override
-        protected void setChildVisibility(View child, int index, int visibility) {
-            super.setChildVisibility(child, index, visibility);
-        }
     }
 }
