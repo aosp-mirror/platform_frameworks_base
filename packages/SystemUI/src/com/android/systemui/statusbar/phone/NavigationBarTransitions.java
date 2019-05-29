@@ -173,6 +173,7 @@ public final class NavigationBarTransitions extends BarTransitions implements
         for (int i = buttonDispatchers.size() - 1; i >= 0; i--) {
             buttonDispatchers.valueAt(i).setDarkIntensity(darkIntensity);
         }
+        mView.getRotationButtonController().setDarkIntensity(darkIntensity);
         if (mAutoDim) {
             applyLightsOut(false, true);
         }

@@ -1679,6 +1679,7 @@
          @hide -->
     <permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"
         android:protectionLevel="signature|privileged" />
+    <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
 
     <!-- @SystemApi Allows an internal user to set signal strength in NetworkRequest. This kind of
          request will wake up device when signal strength meets the given value.
@@ -2807,6 +2808,13 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.STATUS_BAR"
         android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to trigger bugreport via shell using the bugreport API.
+        <p>Not for use by third-party applications.
+        @hide
+    -->
+    <permission android:name="android.permission.TRIGGER_SHELL_BUGREPORT"
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to be the status bar.  Currently used only by SystemUI.apk
     @hide -->

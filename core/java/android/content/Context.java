@@ -4090,6 +4090,7 @@ public abstract class Context {
      * @hide
      * @see #getSystemService(String)
      */
+    @TestApi
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**

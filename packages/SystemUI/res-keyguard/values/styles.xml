@@ -103,9 +103,12 @@
         <item name="android:colorControlActivated">?attr/wallpaperTextColor</item>
     </style>
 
-    <style name="keyguard_presentation_theme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
-        <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
-        <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+    <style name="Theme.SystemUI.KeyguardPresentation">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:colorBackground">@*android:color/background_material_dark</item>
     </style>
 
     <style name="TextAppearance.Keyguard" parent="Theme.SystemUI">

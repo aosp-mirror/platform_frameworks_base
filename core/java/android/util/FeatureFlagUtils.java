@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -29,6 +30,7 @@ import java.util.Map;
  *
  * @hide
  */
+@TestApi
 public class FeatureFlagUtils {
 
     public static final String FFLAG_PREFIX = "sys.fflag.";
@@ -44,6 +46,7 @@ public class FeatureFlagUtils {
     static {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
+        DEFAULT_FLAGS.put("settings_call_bugreport_api", "false");
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
         DEFAULT_FLAGS.put("settings_network_and_internet_v2", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");

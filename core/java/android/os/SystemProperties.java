@@ -174,6 +174,7 @@ public class SystemProperties {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static boolean getBoolean(@NonNull String key, boolean def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);

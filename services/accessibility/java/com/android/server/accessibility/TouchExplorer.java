@@ -16,6 +16,10 @@
 
 package com.android.server.accessibility;
 
+import static android.view.MotionEvent.INVALID_POINTER_ID;
+
+import static com.android.server.accessibility.TouchState.ALL_POINTER_ID_BITS;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
@@ -32,7 +36,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -72,17 +75,6 @@ class TouchExplorer extends BaseEventStreamTransformation
     // pointers so they can be considered moving in the same direction.
     private static final float MAX_DRAGGING_ANGLE_COS = 0.525321989f; // cos(pi/4)
 
-    // Constant referring to the ids bits of all pointers.
-    private static final int ALL_POINTER_ID_BITS = 0xFFFFFFFF;
-
-    // This constant captures the current implementation detail that
-    // pointer IDs are between 0 and 31 inclusive (subject to change).
-    // (See MAX_POINTER_ID in frameworks/base/include/ui/Input.h)
-    private static final int MAX_POINTER_COUNT = 32;
-
-    // Invalid pointer ID.
-    private static final int INVALID_POINTER_ID = -1;
-
     // The minimal distance before we take the middle of the distance between
     // the two dragging pointers as opposed to use the location of the primary one.
     private static final int MIN_POINTER_DISTANCE_TO_USE_MIDDLE_LOCATION_DIP = 200;
@@ -97,7 +89,7 @@ class TouchExplorer extends BaseEventStreamTransformation
     private final int mDoubleTapSlop;
 
     // The current state of the touch explorer.
-    private int mCurrentState = STATE_TOUCH_EXPLORING;
+    private TouchState mState;
 
     // The ID of the pointer used for dragging.
     private int mDraggingPointerId;
@@ -128,10 +120,10 @@ class TouchExplorer extends BaseEventStreamTransformation
     private final int mScaledMinPointerDistanceToUseMiddleLocation;
 
     // Helper class to track received pointers.
-    private final ReceivedPointerTracker mReceivedPointerTracker;
+    private final TouchState.ReceivedPointerTracker mReceivedPointerTracker;
 
     // Helper class to track injected pointers.
-    private final InjectedPointerTracker mInjectedPointerTracker;
+    private final TouchState.InjectedPointerTracker mInjectedPointerTracker;
 
     // Handle to the accessibility manager service.
     private final AccessibilityManagerService mAms;
@@ -152,10 +144,7 @@ class TouchExplorer extends BaseEventStreamTransformation
     private int mLongPressingPointerDeltaY;
 
 
-    // Whether touch exploration is in progress.
-    private boolean mTouchExplorationInProgress;
-
-    /**
+/**
      * Creates a new instance.
      *
      * @param context A context handle for accessing resources.
@@ -179,8 +168,9 @@ class TouchExplorer extends BaseEventStreamTransformation
             AccessibilityGestureDetector detector) {
         mContext = context;
         mAms = service;
-        mReceivedPointerTracker = new ReceivedPointerTracker();
-        mInjectedPointerTracker = new InjectedPointerTracker();
+        mState = new TouchState();
+        mReceivedPointerTracker = mState.getReceivedPointerTracker();
+        mInjectedPointerTracker = mState.getInjectedPointerTracker();
         mDetermineUserIntentTimeout = ViewConfiguration.getDoubleTapTimeout();
         mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
         mHandler = new Handler(context.getMainLooper());
@@ -226,23 +216,18 @@ class TouchExplorer extends BaseEventStreamTransformation
     }
 
     private void clear(MotionEvent event, int policyFlags) {
-        switch (mCurrentState) {
-            case STATE_TOUCH_EXPLORING: {
-                // If a touch exploration gesture is in progress send events for its end.
-                sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
-            } break;
-            case STATE_DRAGGING: {
-                mDraggingPointerId = INVALID_POINTER_ID;
-                // Send exit to all pointers that we have delivered.
-                sendUpForInjectedDownPointers(event, policyFlags);
-            } break;
-            case STATE_DELEGATING: {
-                // Send exit to all pointers that we have delivered.
-                sendUpForInjectedDownPointers(event, policyFlags);
-            } break;
-            case STATE_GESTURE_DETECTING: {
-                // No state specific cleanup required.
-            } break;
+        if (mState.isTouchExploring()) {
+            // If a touch exploration gesture is in progress send events for its end.
+            sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
+        }  else if (mState.isDragging()) {
+            mDraggingPointerId = INVALID_POINTER_ID;
+            // Send exit to all pointers that we have delivered.
+            sendUpForInjectedDownPointers(event, policyFlags);
+        } else if (mState.isDelegating()) {
+            // Send exit to all pointers that we have delivered.
+            sendUpForInjectedDownPointers(event, policyFlags);
+        } else if (mState.isGestureDetecting()) {
+            // No state specific cleanup required.
         }
         // Remove all pending callbacks.
         mSendHoverEnterAndMoveDelayed.cancel();
@@ -250,18 +235,14 @@ class TouchExplorer extends BaseEventStreamTransformation
         mExitGestureDetectionModeDelayed.cancel();
         mSendTouchExplorationEndDelayed.cancel();
         mSendTouchInteractionEndDelayed.cancel();
-        // Reset the pointer trackers.
-        mReceivedPointerTracker.clear();
-        mInjectedPointerTracker.clear();
         // Clear the gesture detector
         mGestureDetector.clear();
         // Go to initial state.
+        mState.clear();
         // Clear the long pressing pointer remap data.
         mLongPressingPointerId = -1;
         mLongPressingPointerDeltaX = 0;
         mLongPressingPointerDeltaY = 0;
-        mCurrentState = STATE_TOUCH_EXPLORING;
-        mTouchExplorationInProgress = false;
         mAms.onTouchInteractionEnd();
     }
 
@@ -275,7 +256,7 @@ class TouchExplorer extends BaseEventStreamTransformation
         if (DEBUG) {
             Slog.d(LOG_TAG, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
-            Slog.d(LOG_TAG, getStateSymbolicName(mCurrentState));
+            Slog.d(LOG_TAG, mState.toString());
         }
 
         mReceivedPointerTracker.onMotionEvent(rawEvent);
@@ -290,21 +271,16 @@ class TouchExplorer extends BaseEventStreamTransformation
             return;
         }
 
-        switch(mCurrentState) {
-            case STATE_TOUCH_EXPLORING: {
-                handleMotionEventStateTouchExploring(event, rawEvent, policyFlags);
-            } break;
-            case STATE_DRAGGING: {
-                handleMotionEventStateDragging(event, policyFlags);
-            } break;
-            case STATE_DELEGATING: {
-                handleMotionEventStateDelegating(event, policyFlags);
-            } break;
-            case STATE_GESTURE_DETECTING: {
-                // Already handled.
-            } break;
-            default:
-                Slog.e(LOG_TAG, "Illegal state: " + mCurrentState);
+        if (mState.isTouchExploring()) {
+            handleMotionEventStateTouchExploring(event, rawEvent, policyFlags);
+        } else if (mState.isDragging()) {
+            handleMotionEventStateDragging(event, policyFlags);
+        } else if (mState.isDelegating()) {
+            handleMotionEventStateDelegating(event, policyFlags);
+        } else if (mState.isGestureDetecting()) {
+            // Already handled.
+        } else {
+            Slog.e(LOG_TAG, "Illegal state: " + mState);
                 clear(event, policyFlags);
         }
     }
@@ -334,7 +310,7 @@ class TouchExplorer extends BaseEventStreamTransformation
     @Override
     public void onDoubleTapAndHold(MotionEvent event, int policyFlags) {
         // Ignore the event if we aren't touch exploring.
-        if (mCurrentState != STATE_TOUCH_EXPLORING) {
+        if (!mState.isTouchExploring()) {
             return;
         }
 
@@ -347,13 +323,12 @@ class TouchExplorer extends BaseEventStreamTransformation
                 AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK)) {
             Slog.e(LOG_TAG, "ACTION_LONG_CLICK failed.");
         }
-
     }
 
     @Override
     public boolean onDoubleTap(MotionEvent event, int policyFlags) {
         // Ignore the event if we aren't touch exploring.
-        if (mCurrentState != STATE_TOUCH_EXPLORING) {
+        if (!mState.isTouchExploring()) {
             return false;
         }
 
@@ -379,21 +354,21 @@ class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onGestureStarted() {
-      // We have to perform gesture detection, so
-      // clear the current state and try to detect.
-      mCurrentState = STATE_GESTURE_DETECTING;
-      mSendHoverEnterAndMoveDelayed.cancel();
-      mSendHoverExitDelayed.cancel();
-      mExitGestureDetectionModeDelayed.post();
-      // Send accessibility event to announce the start
-      // of gesture recognition.
-      sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_START);
-      return false;
+        // We have to perform gesture detection, so
+        // clear the current state and try to detect.
+        mState.startGestureDetecting();
+        mSendHoverEnterAndMoveDelayed.cancel();
+        mSendHoverExitDelayed.cancel();
+        mExitGestureDetectionModeDelayed.post();
+        // Send accessibility event to announce the start
+        // of gesture recognition.
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_GESTURE_DETECTION_START);
+        return false;
     }
 
     @Override
     public boolean onGestureCompleted(int gestureId) {
-        if (mCurrentState != STATE_GESTURE_DETECTING) {
+        if (!mState.isGestureDetecting()) {
             return false;
         }
 
@@ -406,10 +381,10 @@ class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public boolean onGestureCancelled(MotionEvent event, int policyFlags) {
-        if (mCurrentState == STATE_GESTURE_DETECTING) {
+        if (mState.isGestureDetecting()) {
             endGestureDetection(event.getActionMasked() == MotionEvent.ACTION_UP);
             return true;
-        } else if (mCurrentState == STATE_TOUCH_EXPLORING) {
+        } else if (mState.isTouchExploring()) {
             // If the finger is still moving, pass the event on.
             if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
                 final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
@@ -436,8 +411,6 @@ class TouchExplorer extends BaseEventStreamTransformation
      */
     private void handleMotionEventStateTouchExploring(MotionEvent event, MotionEvent rawEvent,
             int policyFlags) {
-        ReceivedPointerTracker receivedTracker = mReceivedPointerTracker;
-
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 mAms.onTouchInteractionStart();
@@ -449,7 +422,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                 mSendHoverExitDelayed.cancel();
 
                 // If a touch exploration gesture is in progress send events for its end.
-                if(mTouchExplorationInProgress) {
+                if (mState.isTouchExplorationInProgress()) {
                     sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
                 }
 
@@ -463,11 +436,12 @@ class TouchExplorer extends BaseEventStreamTransformation
                     mSendTouchInteractionEndDelayed.cancel();
                 }
 
-                if (!mGestureDetector.firstTapDetected() && !mTouchExplorationInProgress) {
+                if (!mGestureDetector.firstTapDetected()
+                        && !mState.isTouchExplorationInProgress()) {
                     if (!mSendHoverEnterAndMoveDelayed.isPending()) {
                         // Deliver hover enter with a delay to have a chance
                         // to detect what the user is trying to do.
-                        final int pointerId = receivedTracker.getPrimaryPointerId();
+                        final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
                         final int pointerIdBits = (1 << pointerId);
                         mSendHoverEnterAndMoveDelayed.post(event, true, pointerIdBits,
                                 policyFlags);
@@ -485,7 +459,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                 mSendHoverExitDelayed.cancel();
             } break;
             case MotionEvent.ACTION_MOVE: {
-                final int pointerId = receivedTracker.getPrimaryPointerId();
+                final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
                 final int pointerIndex = event.findPointerIndex(pointerId);
                 final int pointerIdBits = (1 << pointerId);
                 switch (event.getPointerCount()) {
@@ -496,7 +470,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                             // Cache the event until we discern exploration from gesturing.
                             mSendHoverEnterAndMoveDelayed.addEvent(event);
                         } else {
-                            if (mTouchExplorationInProgress) {
+                            if (mState.isTouchExplorationInProgress()) {
                                 sendTouchExplorationGestureStartAndHoverEnterIfNeeded(policyFlags);
                                 sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits,
                                         policyFlags);
@@ -512,15 +486,17 @@ class TouchExplorer extends BaseEventStreamTransformation
                             mSendHoverEnterAndMoveDelayed.cancel();
                             mSendHoverExitDelayed.cancel();
                         } else {
-                            if (mTouchExplorationInProgress) {
+                            if (mState.isTouchExplorationInProgress()) {
                                 // If the user is touch exploring the second pointer may be
                                 // performing a double tap to activate an item without need
                                 // for the user to lift his exploring finger.
                                 // It is *important* to use the distance traveled by the pointers
                                 // on the screen which may or may not be magnified.
-                                final float deltaX = receivedTracker.getReceivedPointerDownX(
-                                        pointerId) - rawEvent.getX(pointerIndex);
-                                final float deltaY = receivedTracker.getReceivedPointerDownY(
+                                final float deltaX =
+                                        mReceivedPointerTracker.getReceivedPointerDownX(pointerId)
+                                        - rawEvent.getX(pointerIndex);
+                                final float deltaY =
+                                        mReceivedPointerTracker.getReceivedPointerDownY(
                                         pointerId) - rawEvent.getY(pointerIndex);
                                 final double moveDelta = Math.hypot(deltaX, deltaY);
                                 if (moveDelta < mDoubleTapSlop) {
@@ -537,14 +513,15 @@ class TouchExplorer extends BaseEventStreamTransformation
                         if (isDraggingGesture(event)) {
                             // Two pointers moving in the same direction within
                             // a given distance perform a drag.
-                            mCurrentState = STATE_DRAGGING;
+                            mState.startDragging();
                             mDraggingPointerId = pointerId;
-                            event.setEdgeFlags(receivedTracker.getLastReceivedDownEdgeFlags());
+                            event.setEdgeFlags(
+                                    mReceivedPointerTracker.getLastReceivedDownEdgeFlags());
                             sendMotionEvent(event, MotionEvent.ACTION_DOWN, pointerIdBits,
                                     policyFlags);
                         } else {
                             // Two pointers moving arbitrary are delegated to the view hierarchy.
-                            mCurrentState = STATE_DELEGATING;
+                            mState.startDelegating();
                             sendDownForAllNotInjectedPointers(event, policyFlags);
                         }
                     } break;
@@ -563,7 +540,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                         }
 
                         // More than two pointers are delegated to the view hierarchy.
-                        mCurrentState = STATE_DELEGATING;
+                        mState.startDelegating();
                         event = MotionEvent.obtainNoHistory(event);
                         sendDownForAllNotInjectedPointers(event, policyFlags);
                     }
@@ -617,7 +594,7 @@ class TouchExplorer extends BaseEventStreamTransformation
             case MotionEvent.ACTION_POINTER_DOWN: {
                 // We are in dragging state so we have two pointers and another one
                 // goes down => delegate the three pointers to the view hierarchy
-                mCurrentState = STATE_DELEGATING;
+                mState.startDelegating();
                 if (mDraggingPointerId != INVALID_POINTER_ID) {
                     sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
                 }
@@ -657,7 +634,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                         } else {
                             // The two pointers are moving either in different directions or
                             // no close enough => delegate the gesture to the view hierarchy.
-                            mCurrentState = STATE_DELEGATING;
+                            mState.startDelegating();
                             // Remove move history before send injected non-move events
                             event = MotionEvent.obtainNoHistory(event);
                             // Send an event to the end of the drag gesture.
@@ -668,7 +645,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                         }
                     } break;
                     default: {
-                        mCurrentState = STATE_DELEGATING;
+                        mState.startDelegating();
                         event = MotionEvent.obtainNoHistory(event);
                         // Send an event to the end of the drag gesture.
                         sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits,
@@ -681,7 +658,7 @@ class TouchExplorer extends BaseEventStreamTransformation
             case MotionEvent.ACTION_POINTER_UP: {
                  final int pointerId = event.getPointerId(event.getActionIndex());
                  if (pointerId == mDraggingPointerId) {
-                     mDraggingPointerId = INVALID_POINTER_ID;
+                    mDraggingPointerId = INVALID_POINTER_ID;
                      // Send an event to the end of the drag gesture.
                      sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
                  }
@@ -697,7 +674,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                     // Send an event to the end of the drag gesture.
                     sendMotionEvent(event, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
                 }
-                mCurrentState = STATE_TOUCH_EXPLORING;
+                mState.startTouchExploring();
             } break;
         }
     }
@@ -735,7 +712,7 @@ class TouchExplorer extends BaseEventStreamTransformation
                 mAms.onTouchInteractionEnd();
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
 
-                mCurrentState = STATE_TOUCH_EXPLORING;
+                mState.startTouchExploring();
             } break;
             default: {
                 // Deliver the event.
@@ -755,7 +732,7 @@ class TouchExplorer extends BaseEventStreamTransformation
         }
 
         mExitGestureDetectionModeDelayed.cancel();
-        mCurrentState = STATE_TOUCH_EXPLORING;
+        mState.startTouchExploring();
     }
 
     /**
@@ -769,14 +746,7 @@ class TouchExplorer extends BaseEventStreamTransformation
             AccessibilityEvent event = AccessibilityEvent.obtain(type);
             event.setWindowId(mAms.getActiveWindowId());
             accessibilityManager.sendAccessibilityEvent(event);
-            switch (type) {
-                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START: {
-                    mTouchExplorationInProgress = true;
-                } break;
-                case AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END: {
-                    mTouchExplorationInProgress = false;
-                } break;
-            }
+            mState.onInjectedAccessibilityEvent(type);
         }
     }
 
@@ -788,7 +758,6 @@ class TouchExplorer extends BaseEventStreamTransformation
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendDownForAllNotInjectedPointers(MotionEvent prototype, int policyFlags) {
-        InjectedPointerTracker injectedPointers = mInjectedPointerTracker;
 
         // Inject the injected pointers.
         int pointerIdBits = 0;
@@ -796,7 +765,7 @@ class TouchExplorer extends BaseEventStreamTransformation
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
             // Do not send event for already delivered pointers.
-            if (!injectedPointers.isInjectedPointerDown(pointerId)) {
+            if (!mInjectedPointerTracker.isInjectedPointerDown(pointerId)) {
                 pointerIdBits |= (1 << pointerId);
                 final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
                 sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
@@ -843,13 +812,12 @@ class TouchExplorer extends BaseEventStreamTransformation
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendUpForInjectedDownPointers(MotionEvent prototype, int policyFlags) {
-        final InjectedPointerTracker injectedTracked = mInjectedPointerTracker;
         int pointerIdBits = 0;
         final int pointerCount = prototype.getPointerCount();
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
             // Skip non injected down pointers.
-            if (!injectedTracked.isInjectedPointerDown(pointerId)) {
+            if (!mInjectedPointerTracker.isInjectedPointerDown(pointerId)) {
                 continue;
             }
             pointerIdBits |= (1 << pointerId);
@@ -962,9 +930,8 @@ class TouchExplorer extends BaseEventStreamTransformation
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN: {
-                InjectedPointerTracker injectedTracker = mInjectedPointerTracker;
                 // Compute the action based on how many down pointers are injected.
-                if (injectedTracker.getInjectedPointerDownCount() == 0) {
+                if (mInjectedPointerTracker.getInjectedPointerDownCount() == 0) {
                     return MotionEvent.ACTION_DOWN;
                 } else {
                     return (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
@@ -972,9 +939,8 @@ class TouchExplorer extends BaseEventStreamTransformation
                 }
             }
             case MotionEvent.ACTION_POINTER_UP: {
-                InjectedPointerTracker injectedTracker = mInjectedPointerTracker;
                 // Compute the action based on how many down pointers are injected.
-                if (injectedTracker.getInjectedPointerDownCount() == 1) {
+                if (mInjectedPointerTracker.getInjectedPointerDownCount() == 1) {
                     return MotionEvent.ACTION_UP;
                 } else {
                     return (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
@@ -993,42 +959,20 @@ class TouchExplorer extends BaseEventStreamTransformation
      * @return True if the gesture is a dragging one.
      */
     private boolean isDraggingGesture(MotionEvent event) {
-        ReceivedPointerTracker receivedTracker = mReceivedPointerTracker;
 
         final float firstPtrX = event.getX(0);
         final float firstPtrY = event.getY(0);
         final float secondPtrX = event.getX(1);
         final float secondPtrY = event.getY(1);
 
-        final float firstPtrDownX = receivedTracker.getReceivedPointerDownX(0);
-        final float firstPtrDownY = receivedTracker.getReceivedPointerDownY(0);
-        final float secondPtrDownX = receivedTracker.getReceivedPointerDownX(1);
-        final float secondPtrDownY = receivedTracker.getReceivedPointerDownY(1);
+        final float firstPtrDownX = mReceivedPointerTracker.getReceivedPointerDownX(0);
+        final float firstPtrDownY = mReceivedPointerTracker.getReceivedPointerDownY(0);
+        final float secondPtrDownX = mReceivedPointerTracker.getReceivedPointerDownX(1);
+        final float secondPtrDownY = mReceivedPointerTracker.getReceivedPointerDownY(1);
 
         return GestureUtils.isDraggingGesture(firstPtrDownX, firstPtrDownY, secondPtrDownX,
                 secondPtrDownY, firstPtrX, firstPtrY, secondPtrX, secondPtrY,
                 MAX_DRAGGING_ANGLE_COS);
-    }
-
-    /**
-     * Gets the symbolic name of a state.
-     *
-     * @param state A state.
-     * @return The state symbolic name.
-     */
-    private static String getStateSymbolicName(int state) {
-        switch (state) {
-            case STATE_TOUCH_EXPLORING:
-                return "STATE_TOUCH_EXPLORING";
-            case STATE_DRAGGING:
-                return "STATE_DRAGGING";
-            case STATE_DELEGATING:
-                return "STATE_DELEGATING";
-            case STATE_GESTURE_DETECTING:
-                return "STATE_GESTURE_DETECTING";
-            default:
-                return "Unknown state: " + state;
-        }
     }
 
     /**
@@ -1229,384 +1173,18 @@ class TouchExplorer extends BaseEventStreamTransformation
 
     @Override
     public String toString() {
-        return "TouchExplorer { " +
-                "mCurrentState: " + getStateSymbolicName(mCurrentState) +
-                ", mDetermineUserIntentTimeout: " + mDetermineUserIntentTimeout +
-                ", mDoubleTapSlop: " + mDoubleTapSlop +
-                ", mDraggingPointerId: " + mDraggingPointerId +
-                ", mLongPressingPointerId: " + mLongPressingPointerId +
-                ", mLongPressingPointerDeltaX: " + mLongPressingPointerDeltaX +
-                ", mLongPressingPointerDeltaY: " + mLongPressingPointerDeltaY +
-                ", mScaledMinPointerDistanceToUseMiddleLocation: "
-                + mScaledMinPointerDistanceToUseMiddleLocation +
-                ", mTempPoint: " + mTempPoint +
-                ", mTouchExplorationInProgress: " + mTouchExplorationInProgress +
-                " }";
+        return "TouchExplorer { "
+                + "mTouchState: " + mState
+                + ", mDetermineUserIntentTimeout: " + mDetermineUserIntentTimeout
+                + ", mDoubleTapSlop: " + mDoubleTapSlop
+                + ", mDraggingPointerId: " + mDraggingPointerId
+                + ", mLongPressingPointerId: " + mLongPressingPointerId
+                + ", mLongPressingPointerDeltaX: " + mLongPressingPointerDeltaX
+                + ", mLongPressingPointerDeltaY: " + mLongPressingPointerDeltaY
+                + ", mScaledMinPointerDistanceToUseMiddleLocation: "
+                + mScaledMinPointerDistanceToUseMiddleLocation
+                + ", mTempPoint: " + mTempPoint
+                + " }";
     }
 
-    class InjectedPointerTracker {
-        private static final String LOG_TAG_INJECTED_POINTER_TRACKER = "InjectedPointerTracker";
-
-        // Keep track of which pointers sent to the system are down.
-        private int mInjectedPointersDown;
-
-        // The time of the last injected down.
-        private long mLastInjectedDownEventTime;
-
-        // The last injected hover event.
-        private MotionEvent mLastInjectedHoverEvent;
-
-        /**
-         * Processes an injected {@link MotionEvent} event.
-         *
-         * @param event The event to process.
-         */
-        public void onMotionEvent(MotionEvent event) {
-            final int action = event.getActionMasked();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN:
-                case MotionEvent.ACTION_POINTER_DOWN: {
-                    final int pointerId = event.getPointerId(event.getActionIndex());
-                    final int pointerFlag = (1 << pointerId);
-                    mInjectedPointersDown |= pointerFlag;
-                    mLastInjectedDownEventTime = event.getDownTime();
-                } break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_POINTER_UP: {
-                    final int pointerId = event.getPointerId(event.getActionIndex());
-                    final int pointerFlag = (1 << pointerId);
-                    mInjectedPointersDown &= ~pointerFlag;
-                    if (mInjectedPointersDown == 0) {
-                        mLastInjectedDownEventTime = 0;
-                    }
-                } break;
-                case MotionEvent.ACTION_HOVER_ENTER:
-                case MotionEvent.ACTION_HOVER_MOVE:
-                case MotionEvent.ACTION_HOVER_EXIT: {
-                    if (mLastInjectedHoverEvent != null) {
-                        mLastInjectedHoverEvent.recycle();
-                    }
-                    mLastInjectedHoverEvent = MotionEvent.obtain(event);
-                } break;
-            }
-            if (DEBUG) {
-                Slog.i(LOG_TAG_INJECTED_POINTER_TRACKER, "Injected pointer:\n" + toString());
-            }
-        }
-
-        /**
-         * Clears the internals state.
-         */
-        public void clear() {
-            mInjectedPointersDown = 0;
-        }
-
-        /**
-         * @return The time of the last injected down event.
-         */
-        public long getLastInjectedDownEventTime() {
-            return mLastInjectedDownEventTime;
-        }
-
-        /**
-         * @return The number of down pointers injected to the view hierarchy.
-         */
-        public int getInjectedPointerDownCount() {
-            return Integer.bitCount(mInjectedPointersDown);
-        }
-
-        /**
-         * @return The bits of the injected pointers that are down.
-         */
-        public int getInjectedPointersDown() {
-            return mInjectedPointersDown;
-        }
-
-        /**
-         * Whether an injected pointer is down.
-         *
-         * @param pointerId The unique pointer id.
-         * @return True if the pointer is down.
-         */
-        public boolean isInjectedPointerDown(int pointerId) {
-            final int pointerFlag = (1 << pointerId);
-            return (mInjectedPointersDown & pointerFlag) != 0;
-        }
-
-        /**
-         * @return The the last injected hover event.
-         */
-        public MotionEvent getLastInjectedHoverEvent() {
-            return mLastInjectedHoverEvent;
-        }
-
-        /**
-         * @return The the last injected hover event.
-         */
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("=========================");
-            builder.append("\nDown pointers #");
-            builder.append(Integer.bitCount(mInjectedPointersDown));
-            builder.append(" [ ");
-            for (int i = 0; i < MAX_POINTER_COUNT; i++) {
-                if ((mInjectedPointersDown & i) != 0) {
-                    builder.append(i);
-                    builder.append(" ");
-                }
-            }
-            builder.append("]");
-            builder.append("\n=========================");
-            return builder.toString();
-        }
-    }
-
-    class ReceivedPointerTracker {
-        private static final String LOG_TAG_RECEIVED_POINTER_TRACKER = "ReceivedPointerTracker";
-
-        // Keep track of where and when a pointer went down.
-        private final float[] mReceivedPointerDownX = new float[MAX_POINTER_COUNT];
-        private final float[] mReceivedPointerDownY = new float[MAX_POINTER_COUNT];
-        private final long[] mReceivedPointerDownTime = new long[MAX_POINTER_COUNT];
-
-        // Which pointers are down.
-        private int mReceivedPointersDown;
-
-        // The edge flags of the last received down event.
-        private int mLastReceivedDownEdgeFlags;
-
-        // Primary pointer which is either the first that went down
-        // or if it goes up the next one that most recently went down.
-        private int mPrimaryPointerId;
-
-        // Keep track of the last up pointer data.
-        private long mLastReceivedUpPointerDownTime;
-        private float mLastReceivedUpPointerDownX;
-        private float mLastReceivedUpPointerDownY;
-
-        private MotionEvent mLastReceivedEvent;
-
-        /**
-         * Clears the internals state.
-         */
-        public void clear() {
-            Arrays.fill(mReceivedPointerDownX, 0);
-            Arrays.fill(mReceivedPointerDownY, 0);
-            Arrays.fill(mReceivedPointerDownTime, 0);
-            mReceivedPointersDown = 0;
-            mPrimaryPointerId = 0;
-            mLastReceivedUpPointerDownTime = 0;
-            mLastReceivedUpPointerDownX = 0;
-            mLastReceivedUpPointerDownY = 0;
-        }
-
-        /**
-         * Processes a received {@link MotionEvent} event.
-         *
-         * @param event The event to process.
-         */
-        public void onMotionEvent(MotionEvent event) {
-            if (mLastReceivedEvent != null) {
-                mLastReceivedEvent.recycle();
-            }
-            mLastReceivedEvent = MotionEvent.obtain(event);
-
-            final int action = event.getActionMasked();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN: {
-                    handleReceivedPointerDown(event.getActionIndex(), event);
-                } break;
-                case MotionEvent.ACTION_POINTER_DOWN: {
-                    handleReceivedPointerDown(event.getActionIndex(), event);
-                } break;
-                case MotionEvent.ACTION_UP: {
-                    handleReceivedPointerUp(event.getActionIndex(), event);
-                } break;
-                case MotionEvent.ACTION_POINTER_UP: {
-                    handleReceivedPointerUp(event.getActionIndex(), event);
-                } break;
-            }
-            if (DEBUG) {
-                Slog.i(LOG_TAG_RECEIVED_POINTER_TRACKER, "Received pointer:\n" + toString());
-            }
-        }
-
-        /**
-         * @return The last received event.
-         */
-        public MotionEvent getLastReceivedEvent() {
-            return mLastReceivedEvent;
-        }
-
-        /**
-         * @return The number of received pointers that are down.
-         */
-        public int getReceivedPointerDownCount() {
-            return Integer.bitCount(mReceivedPointersDown);
-        }
-
-        /**
-         * Whether an received pointer is down.
-         *
-         * @param pointerId The unique pointer id.
-         * @return True if the pointer is down.
-         */
-        public boolean isReceivedPointerDown(int pointerId) {
-            final int pointerFlag = (1 << pointerId);
-            return (mReceivedPointersDown & pointerFlag) != 0;
-        }
-
-        /**
-         * @param pointerId The unique pointer id.
-         * @return The X coordinate where the pointer went down.
-         */
-        public float getReceivedPointerDownX(int pointerId) {
-            return mReceivedPointerDownX[pointerId];
-        }
-
-        /**
-         * @param pointerId The unique pointer id.
-         * @return The Y coordinate where the pointer went down.
-         */
-        public float getReceivedPointerDownY(int pointerId) {
-            return mReceivedPointerDownY[pointerId];
-        }
-
-        /**
-         * @param pointerId The unique pointer id.
-         * @return The time when the pointer went down.
-         */
-        public long getReceivedPointerDownTime(int pointerId) {
-            return mReceivedPointerDownTime[pointerId];
-        }
-
-        /**
-         * @return The id of the primary pointer.
-         */
-        public int getPrimaryPointerId() {
-            if (mPrimaryPointerId == INVALID_POINTER_ID) {
-                mPrimaryPointerId = findPrimaryPointerId();
-            }
-            return mPrimaryPointerId;
-        }
-
-        /**
-         * @return The time when the last up received pointer went down.
-         */
-        public long getLastReceivedUpPointerDownTime() {
-            return mLastReceivedUpPointerDownTime;
-        }
-
-        /**
-         * @return The down X of the last received pointer that went up.
-         */
-        public float getLastReceivedUpPointerDownX() {
-            return mLastReceivedUpPointerDownX;
-        }
-
-        /**
-         * @return The down Y of the last received pointer that went up.
-         */
-        public float getLastReceivedUpPointerDownY() {
-            return mLastReceivedUpPointerDownY;
-        }
-
-        /**
-         * @return The edge flags of the last received down event.
-         */
-        public int getLastReceivedDownEdgeFlags() {
-            return mLastReceivedDownEdgeFlags;
-        }
-
-        /**
-         * Handles a received pointer down event.
-         *
-         * @param pointerIndex The index of the pointer that has changed.
-         * @param event The event to be handled.
-         */
-        private void handleReceivedPointerDown(int pointerIndex, MotionEvent event) {
-            final int pointerId = event.getPointerId(pointerIndex);
-            final int pointerFlag = (1 << pointerId);
-
-            mLastReceivedUpPointerDownTime = 0;
-            mLastReceivedUpPointerDownX = 0;
-            mLastReceivedUpPointerDownX = 0;
-
-            mLastReceivedDownEdgeFlags = event.getEdgeFlags();
-
-            mReceivedPointersDown |= pointerFlag;
-            mReceivedPointerDownX[pointerId] = event.getX(pointerIndex);
-            mReceivedPointerDownY[pointerId] = event.getY(pointerIndex);
-            mReceivedPointerDownTime[pointerId] = event.getEventTime();
-
-            mPrimaryPointerId = pointerId;
-        }
-
-        /**
-         * Handles a received pointer up event.
-         *
-         * @param pointerIndex The index of the pointer that has changed.
-         * @param event The event to be handled.
-         */
-        private void handleReceivedPointerUp(int pointerIndex, MotionEvent event) {
-            final int pointerId = event.getPointerId(pointerIndex);
-            final int pointerFlag = (1 << pointerId);
-
-            mLastReceivedUpPointerDownTime = getReceivedPointerDownTime(pointerId);
-            mLastReceivedUpPointerDownX = mReceivedPointerDownX[pointerId];
-            mLastReceivedUpPointerDownY = mReceivedPointerDownY[pointerId];
-
-            mReceivedPointersDown &= ~pointerFlag;
-            mReceivedPointerDownX[pointerId] = 0;
-            mReceivedPointerDownY[pointerId] = 0;
-            mReceivedPointerDownTime[pointerId] = 0;
-
-            if (mPrimaryPointerId == pointerId) {
-                mPrimaryPointerId = INVALID_POINTER_ID;
-            }
-        }
-
-        /**
-         * @return The primary pointer id.
-         */
-        private int findPrimaryPointerId() {
-            int primaryPointerId = INVALID_POINTER_ID;
-            long minDownTime = Long.MAX_VALUE;
-
-            // Find the pointer that went down first.
-            int pointerIdBits = mReceivedPointersDown;
-            while (pointerIdBits > 0) {
-                final int pointerId = Integer.numberOfTrailingZeros(pointerIdBits);
-                pointerIdBits &= ~(1 << pointerId);
-                final long downPointerTime = mReceivedPointerDownTime[pointerId];
-                if (downPointerTime < minDownTime) {
-                    minDownTime = downPointerTime;
-                    primaryPointerId = pointerId;
-                }
-            }
-            return primaryPointerId;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            builder.append("=========================");
-            builder.append("\nDown pointers #");
-            builder.append(getReceivedPointerDownCount());
-            builder.append(" [ ");
-            for (int i = 0; i < MAX_POINTER_COUNT; i++) {
-                if (isReceivedPointerDown(i)) {
-                    builder.append(i);
-                    builder.append(" ");
-                }
-            }
-            builder.append("]");
-            builder.append("\nPrimary pointer id [ ");
-            builder.append(getPrimaryPointerId());
-            builder.append(" ]");
-            builder.append("\n=========================");
-            return builder.toString();
-        }
-    }
 }

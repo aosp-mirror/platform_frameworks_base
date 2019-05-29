@@ -236,6 +236,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public final void adjustNotification(@NonNull Adjustment adjustment) {
         if (!isBound()) return;
         try {
+            setAdjustmentIssuer(adjustment);
             getNotificationInterface().applyEnqueuedAdjustmentFromAssistant(mWrapper, adjustment);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
@@ -253,6 +254,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     public final void adjustNotifications(@NonNull List<Adjustment> adjustments) {
         if (!isBound()) return;
         try {
+            for (Adjustment adjustment : adjustments) {
+                setAdjustmentIssuer(adjustment);
+            }
             getNotificationInterface().applyAdjustmentsFromAssistant(mWrapper, adjustments);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
@@ -366,6 +370,12 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
     }
 
+    private void setAdjustmentIssuer(@Nullable Adjustment adjustment) {
+        if (adjustment != null) {
+            adjustment.setIssuer(getOpPackageName() + "/" + getClass().getName());
+        }
+    }
+
     private final class MyHandler extends Handler {
         public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
         public static final int MSG_ON_NOTIFICATION_SNOOZED = 2;
@@ -389,6 +399,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     NotificationChannel channel = (NotificationChannel) args.arg2;
                     args.recycle();
                     Adjustment adjustment = onNotificationEnqueued(sbn, channel);
+                    setAdjustmentIssuer(adjustment);
                     if (adjustment != null) {
                         if (!isBound()) {
                             Log.w(TAG, "MSG_ON_NOTIFICATION_ENQUEUED: service not bound, skip.");
