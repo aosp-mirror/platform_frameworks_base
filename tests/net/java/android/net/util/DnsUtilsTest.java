@@ -57,24 +57,38 @@ public class DnsUtilsTest {
     @Test
     public void testRfc6724Comparator() {
         final List<DnsUtils.SortableAddress> test = Arrays.asList(
-                makeSortableAddress("216.58.200.36"),             // Ipv4
-                makeSortableAddress("2404:6800:4008:801::2004"),  // global
-                makeSortableAddress("::1"),                       // loop back
-                makeSortableAddress("fe80::c46f:1cff:fe04:39b4"), // link local
-                makeSortableAddress("::ffff:192.168.95.3"),       // IPv4-mapped IPv6
-                makeSortableAddress("2001::47c1"),                // teredo tunneling
-                makeSortableAddress("::216.58.200.36"),           // IPv4-compatible
-                makeSortableAddress("3ffe::1234:5678"));          // 6bone
+                // Ipv4
+                makeSortableAddress("216.58.200.36", "192.168.1.1"),
+                // global with different scope src
+                makeSortableAddress("2404:6800:4008:801::2004", "fe80::1111:2222"),
+                // global without src addr
+                makeSortableAddress("2404:6800:cafe:801::1"),
+                // loop back
+                makeSortableAddress("::1", "::1"),
+                // link local
+                makeSortableAddress("fe80::c46f:1cff:fe04:39b4", "fe80::1"),
+                // teredo tunneling
+                makeSortableAddress("2001::47c1", "2001::2"),
+                // 6bone without src addr
+                makeSortableAddress("3ffe::1234:5678"),
+                // IPv4-compatible
+                makeSortableAddress("::216.58.200.36", "::216.58.200.9"),
+                // 6bone
+                makeSortableAddress("3ffe::1234:5678", "3ffe::1234:1"),
+                // IPv4-mapped IPv6
+                makeSortableAddress("::ffff:192.168.95.7", "::ffff:192.168.95.1"));
 
         final List<InetAddress> expected = Arrays.asList(
                 stringToAddress("::1"),                       // loop back
                 stringToAddress("fe80::c46f:1cff:fe04:39b4"), // link local
-                stringToAddress("2404:6800:4008:801::2004"),  // global
                 stringToAddress("216.58.200.36"),             // Ipv4
-                stringToAddress("::ffff:192.168.95.3"),       // IPv4-mapped IPv6
+                stringToAddress("::ffff:192.168.95.7"),       // IPv4-mapped IPv6
                 stringToAddress("2001::47c1"),                // teredo tunneling
-                stringToAddress("::216.58.200.36"),            // IPv4-compatible
-                stringToAddress("3ffe::1234:5678"));          // 6bone
+                stringToAddress("::216.58.200.36"),           // IPv4-compatible
+                stringToAddress("3ffe::1234:5678"),           // 6bone
+                stringToAddress("2404:6800:4008:801::2004"),  // global with different scope src
+                stringToAddress("2404:6800:cafe:801::1"),     // global without src addr
+                stringToAddress("3ffe::1234:5678"));          // 6bone without src addr
 
         Collections.sort(test, new DnsUtils.Rfc6724Comparator());
 
