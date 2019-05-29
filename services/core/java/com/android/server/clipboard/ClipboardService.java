@@ -775,8 +775,7 @@ public class ClipboardService extends SystemService {
                     // if the application has the permission, let it to access user's clipboard.
                     // To passed synthesized uid user#10_app#systemui may not tell the real uid.
                     // userId must pass intending userId. i.e. user#10.
-                    allowed = mContentCaptureInternal.isContentCaptureServiceForUser(
-                            Binder.getCallingUid(), userId);
+                    allowed = mContentCaptureInternal.isContentCaptureServiceForUser(uid, userId);
                 }
                 if (!allowed && mAutofillInternal != null) {
                     // ...or the Augmented Autofill Service
@@ -785,8 +784,7 @@ public class ClipboardService extends SystemService {
                     // if the application has the permission, let it to access user's clipboard.
                     // To passed synthesized uid user#10_app#systemui may not tell the real uid.
                     // userId must pass intending userId. i.e. user#10.
-                    allowed = mAutofillInternal.isAugmentedAutofillServiceForUser(
-                            Binder.getCallingUid(), userId);
+                    allowed = mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId);
                 }
                 if (!allowed) {
                     Slog.e(TAG, "Denying clipboard access to " + callingPackage
