@@ -433,7 +433,23 @@ public class ScreenDecorations extends SystemUI implements Tunable,
             if (mOverlay != null) {
                 updateLayoutParams();
                 updateViews();
+                if (mAssistHintVisible) {
+                    // If assist handles are visible, hide them without animation and then make them
+                    // show once again (with corrected rotation).
+                    hideAssistHandles();
+                    setAssistHintVisible(true);
+                }
             }
+        }
+    }
+
+    private void hideAssistHandles() {
+        if (mOverlay != null && mBottomOverlay != null) {
+            mOverlay.findViewById(R.id.assist_hint_left).setVisibility(View.GONE);
+            mOverlay.findViewById(R.id.assist_hint_right).setVisibility(View.GONE);
+            mBottomOverlay.findViewById(R.id.assist_hint_left).setVisibility(View.GONE);
+            mBottomOverlay.findViewById(R.id.assist_hint_right).setVisibility(View.GONE);
+            mAssistHintVisible = false;
         }
     }
 
