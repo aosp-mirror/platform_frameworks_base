@@ -36,7 +36,6 @@ import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.rollback.IRollbackManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -116,12 +115,9 @@ public class StagingManager {
         final PackageInfo packageInfo = mApexManager.getPackageInfoForApexName(packageName);
 
         if (packageInfo == null) {
-            // Only allow installing new apexes if on a debuggable build.
-            if (!Build.IS_DEBUGGABLE) {
-                Slog.w(TAG, "Attempted to install new apex " + packageName + " on user build");
-                return false;
-            }
-            return true;
+            // Don't allow installation of new APEX.
+            Slog.e(TAG, "Attempted to install a new apex " + packageName + ". Rejecting");
+            return false;
         }
 
         final SigningDetails existingSigningDetails;
