@@ -30,3 +30,15 @@ java_sdk_library {
     srcs_lib_whitelist_pkgs: ["android"],
     compile_dex: true,
 }
+
+// Make the current.txt available for use by the cts/tests/signature tests.
+// ========================================================================
+filegroup {
+    name: "android-test-mock-current.txt",
+    visibility: [
+        "//cts/tests/signature/api",
+    ],
+    srcs: [
+        "api/current.txt",
+    ],
+}
