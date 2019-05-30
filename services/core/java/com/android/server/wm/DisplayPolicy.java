@@ -2720,9 +2720,9 @@ public class DisplayPolicy {
                 res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
 
         // This should calculate how much above the frame we accept gestures.
-        mBottomGestureAdditionalInset = Math.max(0,
+        mBottomGestureAdditionalInset =
                 res.getDimensionPixelSize(R.dimen.navigation_bar_gesture_height)
-                        - getNavigationBarFrameHeight(portraitRotation, uiMode));
+                        - getNavigationBarFrameHeight(portraitRotation, uiMode);
 
         updateConfigurationAndScreenSizeDependentBehaviors();
         mWindowOutsetBottom = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
