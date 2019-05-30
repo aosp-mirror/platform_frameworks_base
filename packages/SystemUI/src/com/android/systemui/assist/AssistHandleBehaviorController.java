@@ -16,11 +16,7 @@
 
 package com.android.systemui.assist;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -37,7 +33,6 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -51,18 +46,17 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private static final String TAG = "AssistHandleBehavior";
 
-    private static final boolean IS_DEBUG_DEVICE =
-            Build.TYPE.toLowerCase(Locale.ROOT).contains("debug")
-                    || Build.TYPE.toLowerCase(Locale.ROOT).equals("eng");
-
     private static final String SHOWN_FREQUENCY_THRESHOLD_KEY =
             "ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS";
     private static final long DEFAULT_SHOWN_FREQUENCY_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(10);
     private static final String SHOW_AND_GO_DURATION_KEY = "ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS";
     private static final long DEFAULT_SHOW_AND_GO_DURATION_MS = TimeUnit.SECONDS.toMillis(3);
-    private static final String BEHAVIOR_KEY = "behavior";
-    private static final String SET_BEHAVIOR_ACTION =
-            "com.android.systemui.SET_ASSIST_HANDLE_BEHAVIOR";
+
+    /**
+     * This is the default behavior that will be used once the system is up. It will be set once the
+     * behavior dependencies are available. This ensures proper behavior lifecycle.
+     */
+    private static final AssistHandleBehavior DEFAULT_BEHAVIOR = AssistHandleBehavior.REMINDER_EXP;
 
     private final Context mContext;
     private final Handler mHandler;
@@ -71,6 +65,10 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private boolean mHandlesShowing = false;
     private long mHandlesLastHiddenAt;
+    /**
+     * This should always be initialized as {@link AssistHandleBehavior#OFF} to ensure proper
+     * behavior lifecycle.
+     */
     private AssistHandleBehavior mCurrentBehavior = AssistHandleBehavior.OFF;
     private boolean mInGesturalMode;
 
@@ -95,7 +93,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         setBehavior(DeviceConfig.getString(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE,
-                mCurrentBehavior.toString()));
+                DEFAULT_BEHAVIOR.toString()));
         DeviceConfig.addOnPropertyChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 mHandler::post,
@@ -104,20 +102,6 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
                         setBehavior(value);
                     }
                 });
-
-        if (IS_DEBUG_DEVICE) {
-            context.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String behaviorString = intent.getExtras().getString(BEHAVIOR_KEY);
-                    try {
-                        setBehavior(AssistHandleBehavior.valueOf(behaviorString));
-                    } catch (IllegalArgumentException e) {
-                        Log.e(TAG, "Invalid behavior identifier: " + behaviorString);
-                    }
-                }
-            }, new IntentFilter(SET_BEHAVIOR_ACTION));
-        }
     }
 
     @Override
@@ -139,6 +123,10 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     public void showAndStay() {
         mHandler.removeCallbacks(mHideHandles);
         mHandler.post(() -> maybeShowHandles(/* ignoreThreshold = */ true));
+    }
+
+    void onAssistantGesturePerformed() {
+        mCurrentBehavior.getController().onAssistantGesturePerformed();
     }
 
     void setBehavior(AssistHandleBehavior behavior) {
@@ -233,6 +221,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     interface BehaviorController {
         void onModeActivated(Context context, AssistHandleCallbacks callbacks);
-        void onModeDeactivated();
+        default void onModeDeactivated() {}
+        default void onAssistantGesturePerformed() {}
     }
 }
