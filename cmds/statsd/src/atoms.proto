@@ -48,6 +48,7 @@ import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
+import "frameworks/base/core/proto/android/stats/location/location_enums.proto";
 import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
@@ -301,6 +302,7 @@ message Atom {
         ContentCaptureServiceEvents content_capture_service_events = 207;
         ContentCaptureSessionEvents content_capture_session_events = 208;
         ContentCaptureFlushed content_capture_flushed = 209;
+        LocationManagerApiUsageReported location_manager_api_usage_reported = 210;
     }
 
     // Pulled events will start at field 10000.
@@ -6484,4 +6486,61 @@ message AppOps {
     // For long-running operations, total duration of the operation
     // while the app was in the background (only for trusted requests)
     optional int64 trusted_background_duration_millis = 9;
+}
+
+/**
+ * Location Manager API Usage information(e.g. API under usage,
+ * API call's parameters).
+ * Logged from:
+ *  frameworks/base/services/core/java/com/android/server/LocationManagerService.java
+ */
+message LocationManagerApiUsageReported {
+
+    // Indicating if usage starts or usage ends.
+    optional android.stats.location.UsageState state = 1;
+
+    // LocationManagerService's API in use.
+    // We can identify which API from LocationManager is
+    // invoking current LMS API by the combination of
+    // API parameter(e.g. is_listener_null, is_intent_null,
+    // is_location_request_null)
+    optional android.stats.location.LocationManagerServiceApi api_in_use = 2;
+
+    // Name of the package calling the API.
+    optional string calling_package_name = 3;
+
+    // Type of the location provider.
+    optional android.stats.location.ProviderType provider = 4;
+
+    // Quality of the location request
+    optional android.stats.location.LocationRequestQuality quality = 5;
+
+    // The desired interval for active location updates, in milliseconds.
+    // Bucketized to reduce cardinality.
+    optional android.stats.location.LocationRequestIntervalBucket bucketized_interval = 6;
+
+    // Minimum distance between location updates, in meters.
+    // Bucketized to reduce cardinality.
+    optional android.stats.location.SmallestDisplacementBucket
+            bucketized_smallest_displacement = 7;
+
+    // The number of location updates.
+    optional int64 num_updates = 8;
+
+    // The request expiration time, in millisecond since boot.
+    // Bucketized to reduce cardinality.
+    optional android.stats.location.ExpirationBucket
+            bucketized_expire_in = 9;
+
+    // Type of Callback passed in for this API.
+    optional android.stats.location.CallbackType callback_type = 10;
+
+    // The radius of the central point of the alert
+    // region, in meters. Only for API REQUEST_GEOFENCE.
+    // Bucketized to reduce cardinality.
+    optional android.stats.location.GeofenceRadiusBucket bucketized_radius = 11;
+
+    // Activity Importance of API caller.
+    // Categorized to 3 types that are interesting from location's perspective.
+    optional android.stats.location.ActivityImportance activiy_importance = 12;
 }
