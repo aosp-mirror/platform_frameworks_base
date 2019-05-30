@@ -16,31 +16,10 @@
 
 package com.android.systemui.assist;
 
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
-
 public enum AssistHandleBehavior {
 
-    TEST(new AssistHandleOffBehavior()),
-    OFF(new AssistHandleOffBehavior()),
-    LIKE_HOME(new AssistHandleLikeHomeBehavior()),
-    REMINDER_EXP(new AssistHandleReminderExpBehavior());
-
-    private BehaviorController mController;
-
-    AssistHandleBehavior(BehaviorController controller) {
-        mController = controller;
-    }
-
-    BehaviorController getController() {
-        return mController;
-    }
-
-    @VisibleForTesting
-    void setTestController(BehaviorController controller) {
-        if (this.equals(TEST)) {
-            mController = controller;
-        }
-    }
+    TEST,
+    OFF,
+    LIKE_HOME,
+    REMINDER_EXP;
 }
