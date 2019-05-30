@@ -13362,10 +13362,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
             mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
-            if (mParent != null) {
+            if (mParent != null && mParent instanceof View) {
                 try {
                     mParent.notifySubtreeAccessibilityStateChanged(
-                            this, this, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+                            this, (View) mParent, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
                 } catch (AbstractMethodError e) {
                     Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);
