@@ -147,11 +147,16 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // Let's notify the scroller that an animation started
             notifyAnimationStart(mLinearDozeAmount == 1.0f)
         }
+        setDozeAmount(linear, eased)
+    }
+
+    fun setDozeAmount(linear: Float, eased: Float) {
+        val changed = linear != mLinearDozeAmount
         mLinearDozeAmount = linear
         mDozeAmount = eased
         mStackScroller.setDozeAmount(mDozeAmount)
         updateDarkAmount()
-        if (linear == 0.0f) {
+        if (changed && linear == 0.0f) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false);
             setNotificationsVisibleForExpansion(visible = false, animate = false,
                     increaseSpeed = false)
@@ -164,16 +169,12 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     private fun updateDozeAmountIfBypass(): Boolean {
         if (mBypassController.bypassEnabled) {
+            var amount = 1.0f;
             if (mStatusBarStateController.state == StatusBarState.SHADE
                     || mStatusBarStateController.state == StatusBarState.SHADE_LOCKED) {
-                mDozeAmount = 0.0f
-                mLinearDozeAmount = 0.0f
-            } else {
-                mDozeAmount = 1.0f
-                mLinearDozeAmount = 1.0f
+                amount = 0.0f;
             }
-            updateDarkAmount()
-            mStackScroller.setDozeAmount(mDozeAmount)
+            setDozeAmount(amount,  amount)
             return true
         }
         return false
