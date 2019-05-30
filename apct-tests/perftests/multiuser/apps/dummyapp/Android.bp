@@ -13,7 +13,7 @@
 // limitations under the License.
 
 android_test_helper_app {
-    name: "PerftestMultiuserDummyApp",
+    name: "MultiUserPerfDummyApp",
 
     srcs: ["src/**/*.java"],
 
