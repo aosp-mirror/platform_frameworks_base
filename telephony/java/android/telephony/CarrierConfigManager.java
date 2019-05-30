@@ -1973,26 +1973,6 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_WIFI_STRING_ARRAY = "carrier_wifi_string_array";
 
     /**
-     * Base64 Encoding method the carrier will use for encoding encrypted IMSI and SSID.
-     * The value set as below:
-     * 2045 - RFC2045 (default value)
-     * 4648 - RFC4648
-     *
-     * @hide
-     */
-    public static final String KEY_IMSI_ENCODING_METHOD_INT = "imsi_encoding_method_int";
-
-    /**
-     * Defines the sequence of sending an encrypted IMSI identity for EAP-SIM/AKA authentication.
-     * The value set as below:
-     * 1 - encrypted IMSI as EAP-RESPONSE/IDENTITY (default one).
-     * 2 - anonymous as EAP-RESPONSE/IDENTITY -> encrypted IMSI as EAP-RESPONSE/AKA|SIM-IDENTITY.
-     *
-     * @hide
-     */
-    public static final String KEY_EAP_IDENTITY_SEQUENCE_INT = "imsi_eap_identity_sequence_int";
-
-    /**
      * Time delay (in ms) after which we show the notification to switch the preferred
      * network.
      * @hide
@@ -3265,8 +3245,6 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
-        sDefaults.putInt(KEY_IMSI_ENCODING_METHOD_INT, 2045);
-        sDefaults.putInt(KEY_EAP_IDENTITY_SEQUENCE_INT, 1);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
