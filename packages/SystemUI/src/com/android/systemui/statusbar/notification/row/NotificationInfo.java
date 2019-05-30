@@ -65,6 +65,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 
 import java.lang.annotation.Retention;
@@ -104,6 +105,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
     private MetricsLogger mMetricsLogger;
+    private VisualStabilityManager mVisualStabilityManager;
     private ChannelEditorDialogController mChannelEditorDialogController;
 
     private String mPackageName;
@@ -244,6 +246,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     void bindNotification(
             final PackageManager pm,
             final INotificationManager iNotificationManager,
+            final VisualStabilityManager visualStabilityManager,
             final String pkg,
             final NotificationChannel notificationChannel,
             final Set<NotificationChannel> uniqueChannelsInRow,
@@ -256,7 +259,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             int importance,
             boolean wasShownHighPriority)
             throws RemoteException {
-        bindNotification(pm, iNotificationManager, pkg, notificationChannel,
+        bindNotification(pm, iNotificationManager, visualStabilityManager, pkg, notificationChannel,
                 uniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
                 onAppSettingsClick, isDeviceProvisioned, isNonblockable,
                 false /* isBlockingHelper */,
@@ -266,6 +269,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     public void bindNotification(
             PackageManager pm,
             INotificationManager iNotificationManager,
+            VisualStabilityManager visualStabilityManager,
             String pkg,
             NotificationChannel notificationChannel,
             Set<NotificationChannel> uniqueChannelsInRow,
@@ -281,6 +285,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mMetricsLogger = Dependency.get(MetricsLogger.class);
+        mVisualStabilityManager = visualStabilityManager;
         mChannelEditorDialogController = Dependency.get(ChannelEditorDialogController.class);
         mPackageName = pkg;
         mUniqueChannelsInRow = uniqueChannelsInRow;
@@ -537,6 +542,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                     new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
                             mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
                             mStartingChannelImportance, newImportance));
+            mVisualStabilityManager.temporarilyAllowReordering();
         }
     }
 
