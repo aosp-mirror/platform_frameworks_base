@@ -35,6 +35,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ScreenDecorations;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
 
 /**
@@ -92,12 +94,12 @@ public class DefaultUiController implements AssistManager.UiController {
         if (progress == 1) {
             animateInvocationCompletion(type, 0);
         } else if (progress == 0) {
-            mInvocationInProgress = false;
             hide();
         } else {
             if (!mInvocationInProgress) {
                 attach();
                 mInvocationInProgress = true;
+                updateAssistHandleVisibility();
             }
             setProgressInternal(type, progress);
         }
@@ -129,6 +131,7 @@ public class DefaultUiController implements AssistManager.UiController {
         }
         mInvocationLightsView.hide();
         mInvocationInProgress = false;
+        updateAssistHandleVisibility();
     }
 
     /**
@@ -137,6 +140,12 @@ public class DefaultUiController implements AssistManager.UiController {
     public void setInvocationColors(@ColorInt int color1, @ColorInt int color2,
             @ColorInt int color3, @ColorInt int color4) {
         mInvocationLightsView.setColors(color1, color2, color3, color4);
+    }
+
+    private void updateAssistHandleVisibility() {
+        ScreenDecorations decorations = SysUiServiceProvider.getComponent(mRoot.getContext(),
+                ScreenDecorations.class);
+        decorations.setAssistHintBlocked(mInvocationInProgress);
     }
 
     private void attach() {
