@@ -20,12 +20,14 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.ViewGroup;
+
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
@@ -108,11 +110,19 @@ public class SystemUIFactory {
     public SystemUIFactory() {}
 
     protected void init(Context context) {
-        mRootComponent = DaggerSystemUIFactory_SystemUIRootComponent.builder()
+        initWithRootComponent(DaggerSystemUIFactory_SystemUIRootComponent.builder()
                 .systemUIFactory(this)
                 .dependencyProvider(new com.android.systemui.DependencyProvider())
                 .contextHolder(new ContextHolder(context))
-                .build();
+                .build());
+    }
+
+    protected void initWithRootComponent(@NonNull SystemUIRootComponent rootComponent) {
+        if (mRootComponent != null) {
+            throw new RuntimeException("Root component can be set only once.");
+        }
+
+        mRootComponent = rootComponent;
     }
 
     public SystemUIRootComponent getRootComponent() {

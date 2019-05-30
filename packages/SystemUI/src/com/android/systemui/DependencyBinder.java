@@ -42,8 +42,6 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -173,12 +171,6 @@ public abstract class DependencyBinder {
     @Binds
     public abstract NextAlarmController provideNextAlarmController(
             NextAlarmControllerImpl controllerImpl);
-
-    /**
-     */
-    @Binds
-    public abstract DeviceProvisionedController provideDeviceProvisionedController(
-            DeviceProvisionedControllerImpl controllerImpl);
 
     /**
      */

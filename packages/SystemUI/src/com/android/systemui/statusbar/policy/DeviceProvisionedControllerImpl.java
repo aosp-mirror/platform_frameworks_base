@@ -40,7 +40,7 @@ import javax.inject.Singleton;
 public class DeviceProvisionedControllerImpl extends CurrentUserTracker implements
         DeviceProvisionedController {
 
-    private static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
+    protected static final String TAG = DeviceProvisionedControllerImpl.class.getSimpleName();
     private final ArrayList<DeviceProvisionedListener> mListeners = new ArrayList<>();
     private final ContentResolver mContentResolver;
     private final Context mContext;
