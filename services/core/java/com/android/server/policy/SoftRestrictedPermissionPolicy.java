@@ -24,17 +24,29 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.os.Build;
+import android.util.Log;
 
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
  * the policies in one place.
  */
 public abstract class SoftRestrictedPermissionPolicy {
+    private static final String LOG_TAG = SoftRestrictedPermissionPolicy.class.getSimpleName();
+
+    private static final int FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT =
+            FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
+                    | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
+                    | FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
+
     private static final SoftRestrictedPermissionPolicy DUMMY_POLICY =
             new SoftRestrictedPermissionPolicy() {
                 @Override
@@ -50,6 +62,11 @@ public abstract class SoftRestrictedPermissionPolicy {
                 @Override
                 public boolean shouldSetAppOpIfNotDefault() {
                     return false;
+                }
+
+                @Override
+                public boolean canBeGranted() {
+                    return true;
                 }
             };
 
@@ -70,11 +87,13 @@ public abstract class SoftRestrictedPermissionPolicy {
             // collections.
             case READ_EXTERNAL_STORAGE:
             case WRITE_EXTERNAL_STORAGE: {
-                boolean applyRestriction = (context.getPackageManager().getPermissionFlags(
-                        permission, appInfo.packageName, context.getUser())
-                        & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                int flags = context.getPackageManager().getPermissionFlags(
+                        permission, appInfo.packageName, context.getUser());
+                boolean applyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                boolean isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
                 boolean hasRequestedLegacyExternalStorage =
                         appInfo.hasRequestedLegacyExternalStorage();
+                int targetSDK = appInfo.targetSdkVersion;
 
                 return new SoftRestrictedPermissionPolicy() {
                     @Override
@@ -99,6 +118,19 @@ public abstract class SoftRestrictedPermissionPolicy {
                         // turn on isolated storage. This will make the app loose all its files.
                         return getAppOpMode() != MODE_IGNORED;
                     }
+
+                    @Override
+                    public boolean canBeGranted() {
+                        if (isWhiteListed || targetSDK >= Build.VERSION_CODES.Q) {
+                            return true;
+                        } else {
+                            Log.w(LOG_TAG, permission + " for " + appInfo.packageName
+                                    + " is not whitelisted and targetSDK " + targetSDK + "<"
+                                    + Build.VERSION_CODES.Q);
+
+                            return false;
+                        }
+                    }
                 };
             }
             default:
@@ -122,4 +154,9 @@ public abstract class SoftRestrictedPermissionPolicy {
      * {@link AppOpsManager#MODE_DEFAULT}.
      */
     public abstract boolean shouldSetAppOpIfNotDefault();
+
+    /**
+     * @return If the permission can be granted
+     */
+    public abstract boolean canBeGranted();
 }
