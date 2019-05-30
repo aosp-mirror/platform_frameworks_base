@@ -348,6 +348,9 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     void onDisplayChanged(DisplayContent dc) {
         adjustBoundsForDisplayChangeIfNeeded(dc);
         super.onDisplayChanged(dc);
+        final int displayId = (dc != null) ? dc.getDisplayId() : Display.INVALID_DISPLAY;
+        mWmService.mAtmService.getTaskChangeNotificationController().notifyTaskDisplayChanged(
+                mTaskId, displayId);
     }
 
     /**
