@@ -81,6 +81,7 @@ static void release_global_ref(const void* /*data*/, void* context) {
 // Regular JNI
 static jlong Font_Builder_getNativeAsset(
     JNIEnv* env, jobject clazz, jobject assetMgr, jstring path, jboolean isAsset, jint cookie) {
+#ifdef __ANDROID__ // Layoutlib does not support native AssetManager
     NPE_CHECK_RETURN_ZERO(env, assetMgr);
     NPE_CHECK_RETURN_ZERO(env, path);
 
@@ -109,6 +110,9 @@ static jlong Font_Builder_getNativeAsset(
     }
 
     return reinterpret_cast<jlong>(asset.release());
+#else
+    return 0;
+#endif
 }
 
 // Regular JNI
@@ -118,7 +122,7 @@ static jobject Font_Builder_getAssetBuffer(JNIEnv* env, jobject clazz, jlong nat
 }
 
 // CriticalNative
-static jlong Font_Builder_getReleaseNativeAssetFunc() {
+static jlong Font_Builder_getReleaseNativeAssetFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(&releaseAsset);
 }
 
@@ -128,7 +132,7 @@ static jlong Font_Builder_initBuilder(JNIEnv*, jobject) {
 }
 
 // Critical Native
-static void Font_Builder_addAxis(jlong builderPtr, jint tag, jfloat value) {
+static void Font_Builder_addAxis(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, jint tag, jfloat value) {
     toBuilder(builderPtr)->axes.emplace_back(static_cast<minikin::AxisTag>(tag), value);
 }
 
@@ -181,7 +185,7 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
 }
 
 // Critical Native
-static jlong Font_Builder_getReleaseNativeFont() {
+static jlong Font_Builder_getReleaseNativeFont(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(releaseFont);
 }
 

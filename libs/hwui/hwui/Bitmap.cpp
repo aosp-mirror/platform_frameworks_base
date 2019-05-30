@@ -17,17 +17,23 @@
 
 #include "HardwareBitmapUploader.h"
 #include "Properties.h"
+#ifdef __ANDROID__  // Layoutlib does not support render thread
 #include "renderthread/RenderProxy.h"
+#endif
 #include "utils/Color.h"
 #include <utils/Trace.h>
 
+#ifndef _WIN32
 #include <sys/mman.h>
+#endif
 
 #include <cutils/ashmem.h>
 #include <log/log.h>
 
+#ifndef _WIN32
 #include <binder/IServiceManager.h>
 #include <private/gui/ComposerService.h>
+#endif
 #include <ui/PixelFormat.h>
 
 #include <SkCanvas.h>
@@ -76,6 +82,7 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
 }
 
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
+#ifdef __ANDROID__
     // Create new ashmem region with read/write priv
     int fd = ashmem_create_region("bitmap", size);
     if (fd < 0) {
@@ -94,10 +101,17 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
         return nullptr;
     }
     return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes));
+#else
+    return Bitmap::allocateHeapBitmap(size, info, rowBytes);
+#endif
 }
 
 sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(const SkBitmap& bitmap) {
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     return uirenderer::HardwareBitmapUploader::allocateHardwareBitmap(bitmap);
+#else
+    return Bitmap::allocateHeapBitmap(bitmap.info());
+#endif
 }
 
 sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap) {
@@ -133,6 +147,7 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
 }
 
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer, SkColorType colorType,
                                  sk_sp<SkColorSpace> colorSpace, SkAlphaType alphaType,
                                  BitmapPalette palette) {
@@ -140,9 +155,13 @@ sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer, SkColorType co
                                          colorType, alphaType, colorSpace);
     return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info, palette));
 }
+#endif
 
 sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
                                  size_t size, bool readOnly) {
+#ifdef _WIN32 // ashmem not implemented on Windows
+     return nullptr;
+#else
     if (info.colorType() == kUnknown_SkColorType) {
         LOG_ALWAYS_FATAL("unknown bitmap configuration");
         return nullptr;
@@ -163,6 +182,7 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, size_t rowBytes, int f
         bitmap->setImmutable();
     }
     return bitmap;
+#endif
 }
 
 void Bitmap::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
@@ -217,6 +237,7 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info
     mPixelStorage.ashmem.size = mappedSize;
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette)
         : SkPixelRef(info.width(), info.height(), nullptr,
                      bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride())
@@ -230,6 +251,7 @@ Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette pal
     mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
                                               mInfo.alphaType(), mInfo.refColorSpace());
 }
+#endif
 
 Bitmap::~Bitmap() {
     switch (mPixelStorageType) {
@@ -238,17 +260,23 @@ Bitmap::~Bitmap() {
                                             mPixelStorage.external.context);
             break;
         case PixelStorageType::Ashmem:
+#ifndef _WIN32 // ashmem not implemented on Windows
             munmap(mPixelStorage.ashmem.address, mPixelStorage.ashmem.size);
+#endif
             close(mPixelStorage.ashmem.fd);
             break;
         case PixelStorageType::Heap:
             free(mPixelStorage.heap.address);
+#ifdef __ANDROID__
             mallopt(M_PURGE, 0);
+#endif
             break;
         case PixelStorageType::Hardware:
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
             auto buffer = mPixelStorage.hardware.buffer;
             buffer->decStrong(buffer);
             mPixelStorage.hardware.buffer = nullptr;
+#endif
             break;
     }
 }
@@ -307,11 +335,13 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 }
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     if (isHardware()) {
         outBitmap->allocPixels(mInfo);
         uirenderer::renderthread::RenderProxy::copyHWBitmapInto(this, outBitmap);
         return;
     }
+#endif
     outBitmap->setInfo(mInfo, rowBytes());
     outBitmap->setPixelRef(sk_ref_sp(this), 0, 0);
 }
@@ -321,12 +351,14 @@ void Bitmap::getBounds(SkRect* bounds) const {
     bounds->set(0, 0, SkIntToScalar(width()), SkIntToScalar(height()));
 }
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 GraphicBuffer* Bitmap::graphicBuffer() {
     if (isHardware()) {
         return mPixelStorage.hardware.buffer;
     }
     return nullptr;
 }
+#endif
 
 sk_sp<SkImage> Bitmap::makeImage() {
     sk_sp<SkImage> image = mImage;

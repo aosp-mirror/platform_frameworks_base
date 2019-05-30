@@ -81,17 +81,17 @@ static void releaseFunc(jlong ptr) {
 }
 
 // CriticalNative
-static jlong Typeface_getReleaseFunc() {
+static jlong Typeface_getReleaseFunc(CRITICAL_JNI_PARAMS) {
     return toJLong(&releaseFunc);
 }
 
 // CriticalNative
-static jint Typeface_getStyle(jlong faceHandle) {
+static jint Typeface_getStyle(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
     return toTypeface(faceHandle)->fAPIStyle;
 }
 
 // CriticalNative
-static jint Typeface_getWeight(jlong faceHandle) {
+static jint Typeface_getWeight(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
     return toTypeface(faceHandle)->fStyle.weight();
 }
 
@@ -108,7 +108,7 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
 }
 
 // CriticalNative
-static void Typeface_setDefault(jlong faceHandle) {
+static void Typeface_setDefault(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
     Typeface::setDefault(toTypeface(faceHandle));
     minikin::SystemFonts::registerDefault(toTypeface(faceHandle)->fFontCollection);
 }

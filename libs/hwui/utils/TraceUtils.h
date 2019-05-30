@@ -16,6 +16,7 @@
 #ifndef TRACE_UTILS_H
 #define TRACE_UTILS_H
 
+#include <cutils/trace.h>
 #include <utils/Trace.h>
 
 #define ATRACE_FORMAT(fmt, ...)           \

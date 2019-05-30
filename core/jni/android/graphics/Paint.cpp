@@ -650,154 +650,154 @@ namespace PaintGlue {
 
     // ------------------ @CriticalNative ---------------------------
 
-    static void reset(jlong objHandle) {
+    static void reset(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         reinterpret_cast<Paint*>(objHandle)->reset();
     }
 
-    static void assign(jlong dstPaintHandle, jlong srcPaintHandle) {
+    static void assign(CRITICAL_JNI_PARAMS_COMMA jlong dstPaintHandle, jlong srcPaintHandle) {
         Paint* dst = reinterpret_cast<Paint*>(dstPaintHandle);
         const Paint* src = reinterpret_cast<Paint*>(srcPaintHandle);
         *dst = *src;
     }
 
-    static jint getFlags(jlong paintHandle) {
+    static jint getFlags(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         uint32_t flags = reinterpret_cast<Paint*>(paintHandle)->getJavaFlags();
         return static_cast<jint>(flags);
     }
 
-    static void setFlags(jlong paintHandle, jint flags) {
+    static void setFlags(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint flags) {
         reinterpret_cast<Paint*>(paintHandle)->setJavaFlags(flags);
     }
 
-    static jint getHinting(jlong paintHandle) {
+    static jint getHinting(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         return (SkFontHinting)reinterpret_cast<Paint*>(paintHandle)->getSkFont().getHinting()
                 == SkFontHinting::kNone ? 0 : 1;
     }
 
-    static void setHinting(jlong paintHandle, jint mode) {
+    static void setHinting(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint mode) {
         reinterpret_cast<Paint*>(paintHandle)->getSkFont().setHinting(
                 mode == 0 ? SkFontHinting::kNone : SkFontHinting::kNormal);
     }
 
-    static void setAntiAlias(jlong paintHandle, jboolean aa) {
+    static void setAntiAlias(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean aa) {
         reinterpret_cast<Paint*>(paintHandle)->setAntiAlias(aa);
     }
 
-    static void setLinearText(jlong paintHandle, jboolean linearText) {
+    static void setLinearText(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean linearText) {
         reinterpret_cast<Paint*>(paintHandle)->getSkFont().setLinearMetrics(linearText);
     }
 
-    static void setSubpixelText(jlong paintHandle, jboolean subpixelText) {
+    static void setSubpixelText(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean subpixelText) {
         reinterpret_cast<Paint*>(paintHandle)->getSkFont().setSubpixel(subpixelText);
     }
 
-    static void setUnderlineText(jlong paintHandle, jboolean underlineText) {
+    static void setUnderlineText(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean underlineText) {
         reinterpret_cast<Paint*>(paintHandle)->setUnderline(underlineText);
     }
 
-    static void setStrikeThruText(jlong paintHandle, jboolean strikeThruText) {
+    static void setStrikeThruText(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean strikeThruText) {
         reinterpret_cast<Paint*>(paintHandle)->setStrikeThru(strikeThruText);
     }
 
-    static void setFakeBoldText(jlong paintHandle, jboolean fakeBoldText) {
+    static void setFakeBoldText(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean fakeBoldText) {
         reinterpret_cast<Paint*>(paintHandle)->getSkFont().setEmbolden(fakeBoldText);
     }
 
-    static void setFilterBitmap(jlong paintHandle, jboolean filterBitmap) {
+    static void setFilterBitmap(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean filterBitmap) {
         reinterpret_cast<Paint*>(paintHandle)->setFilterQuality(
                 filterBitmap ? kLow_SkFilterQuality : kNone_SkFilterQuality);
     }
 
-    static void setDither(jlong paintHandle, jboolean dither) {
+    static void setDither(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean dither) {
         reinterpret_cast<Paint*>(paintHandle)->setDither(dither);
     }
 
-    static jint getStyle(jlong objHandle) {
+    static jint getStyle(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         return static_cast<jint>(obj->getStyle());
     }
 
-    static void setStyle(jlong objHandle, jint styleHandle) {
+    static void setStyle(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jint styleHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         Paint::Style style = static_cast<Paint::Style>(styleHandle);
         obj->setStyle(style);
     }
 
-    static void setColorLong(jlong paintHandle, jlong colorSpaceHandle,
+    static void setColorLong(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jlong colorSpaceHandle,
             jlong colorLong) {
         SkColor4f color = GraphicsJNI::convertColorLong(colorLong);
         sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
         reinterpret_cast<Paint*>(paintHandle)->setColor4f(color, cs.get());
     }
 
-    static void setColor(jlong paintHandle, jint color) {
+    static void setColor(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint color) {
         reinterpret_cast<Paint*>(paintHandle)->setColor(color);
     }
 
-    static void setAlpha(jlong paintHandle, jint a) {
+    static void setAlpha(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint a) {
         reinterpret_cast<Paint*>(paintHandle)->setAlpha(a);
     }
 
-    static jfloat getStrokeWidth(jlong paintHandle) {
+    static jfloat getStrokeWidth(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getStrokeWidth());
     }
 
-    static void setStrokeWidth(jlong paintHandle, jfloat width) {
+    static void setStrokeWidth(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat width) {
         reinterpret_cast<Paint*>(paintHandle)->setStrokeWidth(width);
     }
 
-    static jfloat getStrokeMiter(jlong paintHandle) {
+    static jfloat getStrokeMiter(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getStrokeMiter());
     }
 
-    static void setStrokeMiter(jlong paintHandle, jfloat miter) {
+    static void setStrokeMiter(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat miter) {
         reinterpret_cast<Paint*>(paintHandle)->setStrokeMiter(miter);
     }
 
-    static jint getStrokeCap(jlong objHandle) {
+    static jint getStrokeCap(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         return static_cast<jint>(obj->getStrokeCap());
     }
 
-    static void setStrokeCap(jlong objHandle, jint capHandle) {
+    static void setStrokeCap(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jint capHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         Paint::Cap cap = static_cast<Paint::Cap>(capHandle);
         obj->setStrokeCap(cap);
     }
 
-    static jint getStrokeJoin(jlong objHandle) {
+    static jint getStrokeJoin(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         return static_cast<jint>(obj->getStrokeJoin());
     }
 
-    static void setStrokeJoin(jlong objHandle, jint joinHandle) {
+    static void setStrokeJoin(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jint joinHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         Paint::Join join = (Paint::Join) joinHandle;
         obj->setStrokeJoin(join);
     }
 
-    static jboolean getFillPath(jlong objHandle, jlong srcHandle, jlong dstHandle) {
+    static jboolean getFillPath(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong srcHandle, jlong dstHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkPath* src = reinterpret_cast<SkPath*>(srcHandle);
         SkPath* dst = reinterpret_cast<SkPath*>(dstHandle);
         return obj->getFillPath(*src, dst) ? JNI_TRUE : JNI_FALSE;
     }
 
-    static jlong setShader(jlong objHandle, jlong shaderHandle) {
+    static jlong setShader(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong shaderHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
         obj->setShader(sk_ref_sp(shader));
         return reinterpret_cast<jlong>(obj->getShader());
     }
 
-    static jlong setColorFilter(jlong objHandle, jlong filterHandle) {
+    static jlong setColorFilter(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong filterHandle) {
         Paint* obj = reinterpret_cast<Paint *>(objHandle);
         SkColorFilter* filter  = reinterpret_cast<SkColorFilter *>(filterHandle);
         obj->setColorFilter(sk_ref_sp(filter));
         return reinterpret_cast<jlong>(obj->getColorFilter());
     }
 
-    static void setXfermode(jlong paintHandle, jint xfermodeHandle) {
+    static void setXfermode(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint xfermodeHandle) {
         // validate that the Java enum values match our expectations
         static_assert(0 == static_cast<int>(SkBlendMode::kClear), "xfermode_mismatch");
         static_assert(1 == static_cast<int>(SkBlendMode::kSrc), "xfermode_mismatch");
@@ -834,132 +834,132 @@ namespace PaintGlue {
         paint->setBlendMode(mode);
     }
 
-    static jlong setPathEffect(jlong objHandle, jlong effectHandle) {
+    static jlong setPathEffect(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong effectHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkPathEffect* effect  = reinterpret_cast<SkPathEffect*>(effectHandle);
         obj->setPathEffect(sk_ref_sp(effect));
         return reinterpret_cast<jlong>(obj->getPathEffect());
     }
 
-    static jlong setMaskFilter(jlong objHandle, jlong maskfilterHandle) {
+    static jlong setMaskFilter(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong maskfilterHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         SkMaskFilter* maskfilter  = reinterpret_cast<SkMaskFilter*>(maskfilterHandle);
         obj->setMaskFilter(sk_ref_sp(maskfilter));
         return reinterpret_cast<jlong>(obj->getMaskFilter());
     }
 
-    static void setTypeface(jlong objHandle, jlong typefaceHandle) {
+    static void setTypeface(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong typefaceHandle) {
         Paint* paint = reinterpret_cast<Paint*>(objHandle);
         paint->setAndroidTypeface(reinterpret_cast<Typeface*>(typefaceHandle));
     }
 
-    static jint getTextAlign(jlong objHandle) {
+    static jint getTextAlign(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         return static_cast<jint>(obj->getTextAlign());
     }
 
-    static void setTextAlign(jlong objHandle, jint alignHandle) {
+    static void setTextAlign(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jint alignHandle) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         Paint::Align align = static_cast<Paint::Align>(alignHandle);
         obj->setTextAlign(align);
     }
 
-    static void setTextLocalesByMinikinLocaleListId(jlong objHandle,
+    static void setTextLocalesByMinikinLocaleListId(CRITICAL_JNI_PARAMS_COMMA jlong objHandle,
             jint minikinLocaleListId) {
         Paint* obj = reinterpret_cast<Paint*>(objHandle);
         obj->setMinikinLocaleListId(minikinLocaleListId);
     }
 
-    static jboolean isElegantTextHeight(jlong paintHandle) {
+    static jboolean isElegantTextHeight(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
         return obj->getFamilyVariant() == minikin::FamilyVariant::ELEGANT;
     }
 
-    static void setElegantTextHeight(jlong paintHandle, jboolean aa) {
+    static void setElegantTextHeight(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean aa) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
         obj->setFamilyVariant(
                 aa ? minikin::FamilyVariant::ELEGANT : minikin::FamilyVariant::DEFAULT);
     }
 
-    static jfloat getTextSize(jlong paintHandle) {
+    static jfloat getTextSize(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize());
     }
 
-    static void setTextSize(jlong paintHandle, jfloat textSize) {
+    static void setTextSize(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat textSize) {
         if (textSize >= 0) {
             reinterpret_cast<Paint*>(paintHandle)->getSkFont().setSize(textSize);
         }
     }
 
-    static jfloat getTextScaleX(jlong paintHandle) {
+    static jfloat getTextScaleX(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getSkFont().getScaleX());
     }
 
-    static void setTextScaleX(jlong paintHandle, jfloat scaleX) {
+    static void setTextScaleX(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat scaleX) {
         reinterpret_cast<Paint*>(paintHandle)->getSkFont().setScaleX(scaleX);
     }
 
-    static jfloat getTextSkewX(jlong paintHandle) {
+    static jfloat getTextSkewX(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSkewX());
     }
 
-    static void setTextSkewX(jlong paintHandle, jfloat skewX) {
+    static void setTextSkewX(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat skewX) {
         reinterpret_cast<Paint*>(paintHandle)->getSkFont().setSkewX(skewX);
     }
 
-    static jfloat getLetterSpacing(jlong paintHandle) {
+    static jfloat getLetterSpacing(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return paint->getLetterSpacing();
     }
 
-    static void setLetterSpacing(jlong paintHandle, jfloat letterSpacing) {
+    static void setLetterSpacing(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat letterSpacing) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         paint->setLetterSpacing(letterSpacing);
     }
 
-    static jfloat getWordSpacing(jlong paintHandle) {
+    static jfloat getWordSpacing(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return paint->getWordSpacing();
     }
 
-    static void setWordSpacing(jlong paintHandle, jfloat wordSpacing) {
+    static void setWordSpacing(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat wordSpacing) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         paint->setWordSpacing(wordSpacing);
     }
 
-    static jint getStartHyphenEdit(jlong paintHandle, jint hyphen) {
+    static jint getStartHyphenEdit(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return static_cast<jint>(paint->getStartHyphenEdit());
     }
 
-    static jint getEndHyphenEdit(jlong paintHandle, jint hyphen) {
+    static jint getEndHyphenEdit(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return static_cast<jint>(paint->getEndHyphenEdit());
     }
 
-    static void setStartHyphenEdit(jlong paintHandle, jint hyphen) {
+    static void setStartHyphenEdit(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         paint->setStartHyphenEdit((uint32_t)hyphen);
     }
 
-    static void setEndHyphenEdit(jlong paintHandle, jint hyphen) {
+    static void setEndHyphenEdit(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         paint->setEndHyphenEdit((uint32_t)hyphen);
     }
 
-    static jfloat ascent(jlong paintHandle) {
+    static jfloat ascent(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fAscent);
     }
 
-    static jfloat descent(jlong paintHandle) {
+    static jfloat descent(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fDescent);
     }
 
-    static jfloat getUnderlinePosition(jlong paintHandle) {
+    static jfloat getUnderlinePosition(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar position;
@@ -971,7 +971,7 @@ namespace PaintGlue {
         }
     }
 
-    static jfloat getUnderlineThickness(jlong paintHandle) {
+    static jfloat getUnderlineThickness(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar thickness;
@@ -983,17 +983,17 @@ namespace PaintGlue {
         }
     }
 
-    static jfloat getStrikeThruPosition(jlong paintHandle) {
+    static jfloat getStrikeThruPosition(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize();
         return SkScalarToFloat(Paint::kStdStrikeThru_Top * textSize);
     }
 
-    static jfloat getStrikeThruThickness(jlong paintHandle) {
+    static jfloat getStrikeThruThickness(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize();
         return SkScalarToFloat(Paint::kStdStrikeThru_Thickness * textSize);
     }
 
-    static void setShadowLayer(jlong paintHandle, jfloat radius,
+    static void setShadowLayer(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat radius,
                                jfloat dx, jfloat dy, jlong colorSpaceHandle,
                                jlong colorLong) {
         SkColor4f color = GraphicsJNI::convertColorLong(colorLong);
@@ -1009,12 +1009,12 @@ namespace PaintGlue {
         }
     }
 
-    static jboolean hasShadowLayer(jlong paintHandle) {
+    static jboolean hasShadowLayer(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         return paint->getLooper() && paint->getLooper()->asABlurShadow(nullptr);
     }
 
-    static jboolean equalsForTextMeasurement(jlong lPaint, jlong rPaint) {
+    static jboolean equalsForTextMeasurement(CRITICAL_JNI_PARAMS_COMMA jlong lPaint, jlong rPaint) {
         if (lPaint == rPaint) {
             return true;
         }
