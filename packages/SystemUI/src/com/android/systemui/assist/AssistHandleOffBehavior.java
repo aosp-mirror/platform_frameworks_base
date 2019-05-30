@@ -27,9 +27,4 @@ final class AssistHandleOffBehavior implements BehaviorController {
     public void onModeActivated(Context context, AssistHandleCallbacks callbacks) {
         callbacks.hide();
     }
-
-    @Override
-    public void onModeDeactivated() {
-        // Do nothing
-    }
 }
