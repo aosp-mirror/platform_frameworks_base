@@ -1,0 +1,122 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.stats.location;
+option java_outer_classname = "LocationStatsEnums";
+
+
+// APIs from LocationManagerService
+enum LocationManagerServiceApi {
+    API_UNKNOWN = 0;
+    API_REQUEST_LOCATION_UPDATES = 1;
+    API_ADD_GNSS_MEASUREMENTS_LISTENER = 2;
+    API_REGISTER_GNSS_STATUS_CALLBACK = 3;
+    API_REQUEST_GEOFENCE = 4;
+    API_SEND_EXTRA_COMMAND = 5;
+}
+
+enum UsageState {
+    USAGE_STARTED = 0;
+    USAGE_ENDED = 1;
+}
+
+// Type of location providers
+enum ProviderType {
+    PROVIDER_UNKNOWN = 0;
+    PROVIDER_NETWORK = 1;
+    PROVIDER_GPS = 2;
+    PROVIDER_PASSIVE = 3;
+    PROVIDER_FUSED = 4;
+}
+
+// Type of Callback passed in for this API
+enum CallbackType {
+    CALLBACK_UNKNOWN = 0;
+    // Current API does not need a callback, e.g. sendExtraCommand
+    CALLBACK_NOT_APPLICABLE = 1;
+    CALLBACK_LISTENER = 2;
+    CALLBACK_PENDING_INTENT = 3;
+}
+
+// Possible values for mQuality field in
+// frameworks/base/location/java/android/location/LocationRequest.java
+enum LocationRequestQuality {
+    QUALITY_UNKNOWN = 0;
+    ACCURACY_FINE = 100;
+    ACCURACY_BLOCK = 102;
+    ACCURACY_CITY = 104;
+    POWER_NONE = 200;
+    POWER_LOW = 201;
+    POWER_HIGH = 203;
+}
+
+// Bucketized values for interval field in
+// frameworks/base/location/java/android/location/LocationRequest.java
+enum LocationRequestIntervalBucket {
+    INTERVAL_UNKNOWN = 0;
+    INTERVAL_BETWEEN_0_SEC_AND_1_SEC = 1;
+    INTERVAL_BETWEEN_1_SEC_AND_5_SEC = 2;
+    INTERVAL_BETWEEN_5_SEC_AND_1_MIN = 3;
+    INTERVAL_BETWEEN_1_MIN_AND_10_MIN = 4;
+    INTERVAL_BETWEEN_10_MIN_AND_1_HOUR = 5;
+    INTERVAL_LARGER_THAN_1_HOUR = 6;
+}
+
+// Bucketized values for small displacement field in
+// frameworks/base/location/java/android/location/LocationRequest.java
+// Value in meters.
+enum SmallestDisplacementBucket {
+    DISTANCE_UNKNOWN = 0;
+    DISTANCE_ZERO = 1;
+    DISTANCE_BETWEEN_0_AND_100 = 2;
+    DISTANCE_LARGER_THAN_100 = 3;
+}
+
+// Bucketized values for expire_in field in
+// frameworks/base/location/java/android/location/LocationRequest.java
+enum ExpirationBucket {
+    EXPIRATION_UNKNOWN = 0;
+    EXPIRATION_BETWEEN_0_AND_20_SEC = 1;
+    EXPIRATION_BETWEEN_20_SEC_AND_1_MIN = 2;
+    EXPIRATION_BETWEEN_1_MIN_AND_10_MIN = 3;
+    EXPIRATION_BETWEEN_10_MIN_AND_1_HOUR = 4;
+    EXPIRATION_LARGER_THAN_1_HOUR = 5;
+    EXPIRATION_NO_EXPIRY = 6;
+}
+
+// Bucketized values for radius field in
+// frameworks/base/location/java/android/location/Geofence.java
+// Value in meters.
+enum GeofenceRadiusBucket {
+    RADIUS_UNKNOWN = 0;
+    RADIUS_BETWEEN_0_AND_100 = 1;
+    RADIUS_BETWEEN_100_AND_200 = 2;
+    RADIUS_BETWEEN_200_AND_300 = 3;
+    RADIUS_BETWEEN_300_AND_1000 = 4;
+    RADIUS_BETWEEN_1000_AND_10000 = 5;
+    RADIUS_LARGER_THAN_100000 = 6;
+    RADIUS_NEGATIVE = 7;
+}
+
+// Caller Activity Importance.
+enum ActivityImportance {
+    IMPORTANCE_UNKNOWN = 0;
+    IMPORTANCE_TOP = 1;
+    IMPORTANCE_FORGROUND_SERVICE = 2;
+    IMPORTANCE_BACKGROUND = 3;
+}
