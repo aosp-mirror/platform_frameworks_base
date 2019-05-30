@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_FULLY_OPAQUE;
-import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_FULLY_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.ScrimController.OPAQUE;
+import static com.android.systemui.statusbar.phone.ScrimController.SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -68,6 +68,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     private SynchronousScrimController mScrimController;
     private ScrimView mScrimBehind;
     private ScrimView mScrimInFront;
+    private ScrimView mScrimForBubble;
     private ScrimState mScrimState;
     private float mScrimBehindAlpha;
     private GradientColors mScrimInFrontColor;
@@ -83,6 +84,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void setup() {
         mScrimBehind = spy(new ScrimView(getContext()));
         mScrimInFront = new ScrimView(getContext());
+        mScrimForBubble = new ScrimView(getContext());
         mWakeLock = mock(WakeLock.class);
         mAlarmManager = mock(AlarmManager.class);
         mAlwaysOnEnabled = true;
@@ -91,6 +93,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
         mScrimController = new SynchronousScrimController(mScrimBehind, mScrimInFront,
+                mScrimForBubble,
                 (scrimState, scrimBehindAlpha, scrimInFrontColor) -> {
                     mScrimState = scrimState;
                     mScrimBehindAlpha = scrimBehindAlpha;
@@ -112,21 +115,28 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void transitionToKeyguard() {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be visible without tint
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
-        assertScrimTint(mScrimBehind, true /* tinted */);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(true /* front */,
+                true /* behind */,
+                false /* bubble */);
     }
 
     @Test
     public void transitionToAod_withRegularWallpaper() {
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be visible with tint
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
-        assertScrimTint(mScrimBehind, true /* tinted */);
-        assertScrimTint(mScrimInFront, true /* tinted */);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(true /* front */,
+                true /* behind */,
+                false /* bubble */);
     }
 
     @Test
@@ -134,14 +144,18 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be transparent
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
 
         // Pulsing notification should conserve AOD wallpaper.
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
     }
 
     @Test
@@ -150,11 +164,14 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be visible with tint
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
-        assertScrimTint(mScrimBehind, true /* tinted */);
-        assertScrimTint(mScrimInFront, true /* tinted */);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(true /* front */,
+                true /* behind */,
+                false /* bubble */);
     }
 
     @Test
@@ -164,11 +181,14 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         mScrimController.setHasBackdrop(true);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be visible with tint
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
-        assertScrimTint(mScrimBehind, true /* tinted */);
-        assertScrimTint(mScrimInFront, true /* tinted */);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(true /* front */,
+                true /* behind */,
+                false /* bubble */);
     }
 
     @Test
@@ -177,27 +197,32 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         mScrimController.setAodFrontScrimAlpha(0.5f);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be visible without tint
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
 
         // ... but that it does take effect once we enter the AOD state.
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be semi-transparent
-        // Back scrim should be visible
-        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(SEMI_TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
 
         // ... and that if we set it while we're in AOD, it does take immediate effect.
         mScrimController.setAodFrontScrimAlpha(1f);
-        assertScrimVisibility(VISIBILITY_FULLY_OPAQUE, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(OPAQUE /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
 
         // ... and make sure we recall the previous front scrim alpha even if we transition away
         // for a bit.
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_OPAQUE, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(OPAQUE /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
 
         // ... and alpha updates should be completely ignored if always_on is off.
         // Passing it forward would mess up the wake-up transition.
@@ -221,19 +246,28 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setWallpaperSupportsAmbientMode(false);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
 
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be semi-transparent so the user can see the wallpaper
         // Pulse callback should have been invoked
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
-        assertScrimTint(mScrimBehind, true /* tinted */);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(false /* front */,
+                true /* behind */,
+                false /* bubble */);
 
         mScrimController.setWakeLockScreenSensorActive(true);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
     }
 
     @Test
@@ -242,8 +276,13 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
-        assertScrimTint(mScrimBehind, false /* tinted */);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(false /* front */,
+                false /* behind */,
+                false /* bubble */);
     }
 
     @Test
@@ -252,8 +291,12 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
-        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
-        assertScrimTint(mScrimBehind, false /* tinted */);
+        assertScrimAlpha(SEMI_TRANSPARENT /* front */,
+                TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
+        assertScrimTint(false /* front */,
+                false /* behind */,
+                false /* bubble */);
     }
 
     @Test
@@ -261,15 +304,19 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setPanelExpansion(0f);
         mScrimController.transitionTo(ScrimState.UNLOCKED);
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be transparent
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
-        assertScrimTint(mScrimBehind, false /* tinted */);
-        assertScrimTint(mScrimInFront, false /* tinted */);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(false /* front */,
+                false /* behind */,
+                false /* bubble */);
 
         // Back scrim should be visible after start dragging
         mScrimController.setPanelExpansion(0.5f);
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
     }
 
     @Test
@@ -277,10 +324,17 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
         mScrimController.finishAnimationsImmediately();
 
+        assertScrimTint(false /* front */,
+                false /* behind */,
+                false /* bubble */);
+
         // Front scrim should be transparent
-        Assert.assertEquals(ScrimController.VISIBILITY_FULLY_TRANSPARENT,
+        Assert.assertEquals(ScrimController.TRANSPARENT,
                 mScrimInFront.getViewAlpha(), 0.0f);
         // Back scrim should be visible
+        Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
+                mScrimBehind.getViewAlpha(), 0.0f);
+        // Bubble scrim should be visible
         Assert.assertEquals(ScrimController.GRADIENT_SCRIM_ALPHA_BUSY,
                 mScrimBehind.getViewAlpha(), 0.0f);
     }
@@ -351,16 +405,22 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setPanelExpansion(0f);
         mScrimController.finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.UNLOCKED);
-        // Immediately tinted after the transition starts
-        assertScrimTint(mScrimInFront, true /* tinted */);
-        assertScrimTint(mScrimBehind, true /* tinted */);
+
+        // Immediately tinted black after the transition starts
+        assertScrimTint(true /* front */,
+                true /* behind */,
+                true  /* bubble */);
+
         mScrimController.finishAnimationsImmediately();
-        // Front scrim should be transparent
-        // Back scrim should be transparent
-        // Neither scrims should be tinted anymore after the animation.
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
-        assertScrimTint(mScrimInFront, false /* tinted */);
-        assertScrimTint(mScrimBehind, false /* tinted */);
+
+        // All scrims should be transparent at the end of fade transition.
+        assertScrimAlpha(TRANSPARENT /* front */,
+                TRANSPARENT /* behind */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(false /* front */,
+                false /* behind */,
+                false  /* bubble */);
     }
 
     @Test
@@ -375,9 +435,11 @@ public class ScrimControllerTest extends SysuiTestCase {
                         // Front scrim should be black in the middle of the transition
                         Assert.assertTrue("Scrim should be visible during transition. Alpha: "
                                 + mScrimInFront.getViewAlpha(), mScrimInFront.getViewAlpha() > 0);
-                        assertScrimTint(mScrimInFront, true /* tinted */);
+                        assertScrimTint(true /* front */,
+                                true /* behind */,
+                                true /* bubble */);
                         Assert.assertSame("Scrim should be visible during transition.",
-                                mScrimVisibility, VISIBILITY_FULLY_OPAQUE);
+                                mScrimVisibility, OPAQUE);
                     }
                 });
         mScrimController.finishAnimationsImmediately();
@@ -553,11 +615,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setKeyguardOccluded(true);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* behind */,
+                TRANSPARENT /* bubble */);
 
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* behind */,
+                TRANSPARENT /* bubble */);
     }
 
     @Test
@@ -565,11 +631,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                TRANSPARENT /* behind */,
+                TRANSPARENT /* bubble */);
 
         mScrimController.setKeyguardOccluded(true);
         mScrimController.finishAnimationsImmediately();
-        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimAlpha(TRANSPARENT /* front */,
+                OPAQUE /* behind */,
+                TRANSPARENT /* bubble */);
     }
 
     @Test
@@ -608,33 +678,68 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimInFront.getDefaultFocusHighlightEnabled());
         Assert.assertFalse("Scrim shouldn't have focus highlight",
                 mScrimBehind.getDefaultFocusHighlightEnabled());
+        Assert.assertFalse("Scrim shouldn't have focus highlight",
+                mScrimForBubble.getDefaultFocusHighlightEnabled());
     }
 
-    private void assertScrimTint(ScrimView scrimView, boolean tinted) {
-        final boolean viewIsTinted = scrimView.getTint() != Color.TRANSPARENT;
-        final String name = scrimView == mScrimInFront ? "front" : "back";
+    private void assertScrimTint(boolean front, boolean behind, boolean bubble) {
         Assert.assertEquals("Tint test failed at state " + mScrimController.getState()
-                +" with scrim: " + name + " and tint: " + Integer.toHexString(scrimView.getTint()),
-                tinted, viewIsTinted);
+                        + " with scrim: " + getScrimName(mScrimInFront) + " and tint: "
+                        + Integer.toHexString(mScrimInFront.getTint()),
+                front, mScrimInFront.getTint() != Color.TRANSPARENT);
+
+        Assert.assertEquals("Tint test failed at state " + mScrimController.getState()
+                        + " with scrim: " + getScrimName(mScrimBehind) + " and tint: "
+                        + Integer.toHexString(mScrimBehind.getTint()),
+                behind, mScrimBehind.getTint() != Color.TRANSPARENT);
+
+        Assert.assertEquals("Tint test failed at state " + mScrimController.getState()
+                        + " with scrim: " + getScrimName(mScrimForBubble) + " and tint: "
+                        + Integer.toHexString(mScrimForBubble.getTint()),
+                bubble, mScrimForBubble.getTint() != Color.TRANSPARENT);
     }
 
-    private void assertScrimVisibility(int inFront, int behind) {
-        boolean inFrontVisible = inFront != ScrimController.VISIBILITY_FULLY_TRANSPARENT;
-        boolean behindVisible = behind != ScrimController.VISIBILITY_FULLY_TRANSPARENT;
-        Assert.assertEquals("Unexpected front scrim visibility. Alpha is "
-                + mScrimInFront.getViewAlpha(), inFrontVisible, mScrimInFront.getViewAlpha() > 0);
-        Assert.assertEquals("Unexpected back scrim visibility. Alpha is "
-                + mScrimBehind.getViewAlpha(), behindVisible, mScrimBehind.getViewAlpha() > 0);
-
-        final int visibility;
-        if (inFront == VISIBILITY_FULLY_OPAQUE || behind == VISIBILITY_FULLY_OPAQUE) {
-            visibility = VISIBILITY_FULLY_OPAQUE;
-        } else if (inFront > VISIBILITY_FULLY_TRANSPARENT || behind > VISIBILITY_FULLY_TRANSPARENT) {
-            visibility = VISIBILITY_SEMI_TRANSPARENT;
-        } else {
-            visibility = VISIBILITY_FULLY_TRANSPARENT;
+    private String getScrimName(ScrimView scrim) {
+        if (scrim == mScrimInFront) {
+            return "front";
+        } else if (scrim == mScrimBehind) {
+            return "back";
+        } else if (scrim == mScrimForBubble) {
+            return "bubble";
         }
-        Assert.assertEquals("Invalid visibility.", visibility, mScrimVisibility);
+        return "unknown_scrim";
+    }
+
+    private void assertScrimAlpha(int front, int behind, int bubble) {
+        // Check single scrim visibility.
+        Assert.assertEquals("Unexpected front scrim alpha: "
+                        + mScrimInFront.getViewAlpha(),
+                front != TRANSPARENT /* expected */,
+                mScrimInFront.getViewAlpha() > TRANSPARENT /* actual */);
+
+        Assert.assertEquals("Unexpected back scrim alpha: "
+                        + mScrimBehind.getViewAlpha(),
+                behind != TRANSPARENT /* expected */,
+                mScrimBehind.getViewAlpha() > TRANSPARENT /* actual */);
+
+        Assert.assertEquals(
+                "Unexpected bubble scrim alpha: "
+                        + mScrimForBubble.getViewAlpha(), /* message */
+                bubble != TRANSPARENT /* expected */,
+                mScrimForBubble.getViewAlpha() > TRANSPARENT /* actual */);
+
+        // Check combined scrim visibility.
+        final int visibility;
+        if (front == OPAQUE || behind == OPAQUE || bubble == OPAQUE) {
+            visibility = OPAQUE;
+        } else if (front > TRANSPARENT || behind > TRANSPARENT || bubble > TRANSPARENT) {
+            visibility = SEMI_TRANSPARENT;
+        } else {
+            visibility = TRANSPARENT;
+        }
+        Assert.assertEquals("Invalid visibility.",
+                visibility /* expected */,
+                mScrimVisibility);
     }
 
     /**
@@ -646,11 +751,12 @@ public class ScrimControllerTest extends SysuiTestCase {
         boolean mOnPreDrawCalled;
 
         SynchronousScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+                ScrimView scrimForBubble,
                 TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
                 Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
                 AlarmManager alarmManager) {
-            super(scrimBehind, scrimInFront, scrimStateListener, scrimVisibleListener,
-                    dozeParameters, alarmManager);
+            super(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
+                    scrimVisibleListener, dozeParameters, alarmManager);
         }
 
         @Override
@@ -661,13 +767,14 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         void finishAnimationsImmediately() {
             boolean[] animationFinished = {false};
-            setOnAnimationFinished(()-> animationFinished[0] = true);
+            setOnAnimationFinished(() -> animationFinished[0] = true);
             // Execute code that will trigger animations.
             onPreDraw();
             // Force finish all animations.
             mLooper.processAllMessages();
             endAnimation(mScrimBehind, TAG_KEY_ANIM);
             endAnimation(mScrimInFront, TAG_KEY_ANIM);
+            endAnimation(mScrimForBubble, TAG_KEY_ANIM);
 
             if (!animationFinished[0]) {
                 throw new IllegalStateException("Animation never finished");
@@ -705,6 +812,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         /**
          * Do not wait for a frame since we're in a test environment.
+         *
          * @param callback What to execute.
          */
         @Override

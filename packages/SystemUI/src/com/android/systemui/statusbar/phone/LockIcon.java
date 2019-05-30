@@ -539,7 +539,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
      */
     public void onScrimVisibilityChanged(@ScrimVisibility int scrimsVisible) {
         if (mWakeAndUnlockRunning
-                && scrimsVisible == ScrimController.VISIBILITY_FULLY_TRANSPARENT) {
+                && scrimsVisible == ScrimController.TRANSPARENT) {
             mWakeAndUnlockRunning = false;
             update();
         }
