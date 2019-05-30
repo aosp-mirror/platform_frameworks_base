@@ -105,3 +105,11 @@ java_test_host {
     test_suites: ["general-tests"],
     test_config: "StagedRollbackTest.xml",
 }
+
+java_test_host {
+    name: "SecondaryUserRollbackTest",
+    srcs: ["SecondaryUserRollbackTest/src/**/*.java"],
+    libs: ["tradefed"],
+    test_suites: ["general-tests"],
+    test_config: "SecondaryUserRollbackTest.xml",
+}
