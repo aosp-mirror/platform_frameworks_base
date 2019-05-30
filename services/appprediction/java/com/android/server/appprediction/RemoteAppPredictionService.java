@@ -42,6 +42,8 @@ public class RemoteAppPredictionService extends
 
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
+    private final RemoteAppPredictionServiceCallbacks mCallback;
+
     public RemoteAppPredictionService(Context context, String serviceInterface,
             ComponentName componentName, int userId,
             RemoteAppPredictionServiceCallbacks callback, boolean bindInstantServiceAllowed,
@@ -50,6 +52,7 @@ public class RemoteAppPredictionService extends
                 context.getMainThreadHandler(),
                 bindInstantServiceAllowed ? Context.BIND_ALLOW_INSTANT : 0,
                 verbose, /* initialCapacity= */ 1);
+        mCallback = callback;
     }
 
     @Override
@@ -141,5 +144,17 @@ public class RemoteAppPredictionService extends
          * Notifies a the failure or timeout of a remote call.
          */
         void onFailureOrTimeout(boolean timedOut);
+
+        /**
+         * Notifies change in connected state of the remote service.
+         */
+        void onConnectedStateChanged(boolean connected);
+    }
+
+    @Override // from AbstractRemoteService
+    protected void handleOnConnectedStateChanged(boolean connected) {
+        if (mCallback != null) {
+            mCallback.onConnectedStateChanged(connected);
+        }
     }
 }
