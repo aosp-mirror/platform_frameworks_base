@@ -2382,7 +2382,11 @@ class ActivityStack extends ConfigurationContainer {
                 r.setVisible(true);
             }
             if (r != starting) {
-                mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
+                // We should not resume activities that being launched behind because these
+                // activities are actually behind other fullscreen activities, but still required
+                // to be visible (such as performing Recents animation).
+                mStackSupervisor.startSpecificActivityLocked(r, andResume && !r.mLaunchTaskBehind,
+                        true /* checkConfig */);
                 return true;
             }
         }
