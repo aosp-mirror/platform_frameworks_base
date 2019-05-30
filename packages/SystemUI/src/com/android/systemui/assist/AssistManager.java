@@ -246,13 +246,17 @@ public class AssistManager implements ConfigurationChangedReceiver {
         if (args == null) {
             args = new Bundle();
         }
+        int invocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
+        if (invocationType == INVOCATION_TYPE_GESTURE) {
+            mHandleController.onAssistantGesturePerformed();
+        }
         args.putInt(INVOCATION_PHONE_STATE_KEY, mPhoneStateMonitor.getPhoneState());
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         // Logs assistant start with invocation type.
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
                         .setType(MetricsEvent.TYPE_OPEN).setSubtype(
-                        args.getInt(INVOCATION_TYPE_KEY)));
+                        invocationType));
         startAssistInternal(args, assistComponent, isService);
     }
 
