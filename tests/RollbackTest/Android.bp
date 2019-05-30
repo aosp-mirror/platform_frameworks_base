@@ -95,7 +95,7 @@ android_test {
         ":RollbackTestAppASplitV2",
     ],
     test_config: "RollbackTest.xml",
-    sdk_version: "test_current",
+    // TODO: sdk_version: "test_current" when Intent#resolveSystemservice is TestApi
 }
 
 java_test_host {
