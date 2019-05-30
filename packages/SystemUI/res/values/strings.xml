@@ -2459,4 +2459,11 @@
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
     <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=20] -->
     <string name="bubble_dismiss_text">Dismiss</string>
+
+    <!-- Notification content text when the system navigation mode changes as a result of changing the default launcher [CHAR LIMIT=NONE] -->
+    <string name="notification_content_system_nav_changed">System navigation updated. To make changes, go to Settings.</string>
+
+    <!-- Notification content text when switching to a default launcher that supports gesture navigation [CHAR LIMIT=NONE] -->
+    <string name="notification_content_gesture_nav_available">Go to Settings to update system navigation</string>
+
 </resources>
