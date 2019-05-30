@@ -94,6 +94,14 @@ public abstract class TaskStackChangeListener {
     public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) { }
 
     /**
+     * Called when a task is reparented to a stack on a different display.
+     *
+     * @param taskId id of the task which was moved to a different display.
+     * @param newDisplayId id of the new display.
+     */
+    public void onTaskDisplayChanged(int taskId, int newDisplayId) { }
+
+    /**
      * Checks that the current user matches the process. Since
      * {@link android.app.ITaskStackListener} is not multi-user aware, handlers of
      * {@link TaskStackChangeListener} should make this call to verify that we don't act on events

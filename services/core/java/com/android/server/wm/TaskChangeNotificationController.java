@@ -56,6 +56,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_BACK_PRESSED_ON_TASK_ROOT = 21;
     private static final int NOTIFY_SINGLE_TASK_DISPLAY_DRAWN = 22;
     private static final int NOTIFY_SINGLE_TASK_DISPLAY_EMPTY = 23;
+    private static final int NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG = 24;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -164,6 +165,10 @@ class TaskChangeNotificationController {
         l.onSingleTaskDisplayEmpty(m.arg1);
     };
 
+    private final TaskStackConsumer mNotifyTaskDisplayChanged = (l, m) -> {
+        l.onTaskDisplayChanged(m.arg1, m.arg2);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -248,6 +253,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_SINGLE_TASK_DISPLAY_EMPTY:
                     forAllRemoteListeners(mNotifySingleTaskDisplayEmpty, msg);
+                    break;
+                case NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyTaskDisplayChanged, msg);
                     break;
             }
         }
@@ -512,6 +520,16 @@ class TaskChangeNotificationController {
                 NOTIFY_SINGLE_TASK_DISPLAY_EMPTY,
                 displayId, 0 /* unused */);
         forAllLocalListeners(mNotifySingleTaskDisplayEmpty, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify listeners that a task is reparented to another display.
+     */
+    void notifyTaskDisplayChanged(int taskId, int newDisplayId) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_DISPLAY_CHANGED_LISTENERS_MSG,
+                taskId, newDisplayId);
+        forAllLocalListeners(mNotifyTaskStackChanged, msg);
         msg.sendToTarget();
     }
 }
