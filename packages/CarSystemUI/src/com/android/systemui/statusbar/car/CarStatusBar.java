@@ -389,22 +389,18 @@ public class CarStatusBar extends StatusBar implements
                         }
                     }
                 });
+
+        // Attached to the Handle bar to close the notification shade
+        GestureDetector handleBarCloseNotificationGestureDetector = new GestureDetector(mContext,
+                new HandleBarCloseNotificationGestureListener());
+
         mNavBarNotificationTouchListener =
                 (v, event) -> {
                     boolean consumed = navBarCloseNotificationGestureDetector.onTouchEvent(event);
                     if (consumed) {
                         return true;
                     }
-                    if (event.getActionMasked() == MotionEvent.ACTION_UP
-                            && mNotificationView.getVisibility() == View.VISIBLE) {
-                        if (mSettleClosePercentage < mPercentageFromBottom) {
-                            animateNotificationPanel(
-                                    DEFAULT_FLING_VELOCITY, false);
-                        } else {
-                            animateNotificationPanel(DEFAULT_FLING_VELOCITY,
-                                    true);
-                        }
-                    }
+                    maybeCompleteAnimation(event);
                     return true;
                 };
 
@@ -418,15 +414,7 @@ public class CarStatusBar extends StatusBar implements
                     if (consumed) {
                         return true;
                     }
-                    if (event1.getActionMasked() == MotionEvent.ACTION_UP
-                            && mNotificationView.getVisibility() == View.VISIBLE) {
-                        if (mSettleOpenPercentage > mPercentageFromBottom) {
-                            animateNotificationPanel(DEFAULT_FLING_VELOCITY, true);
-                        } else {
-                            animateNotificationPanel(
-                                    DEFAULT_FLING_VELOCITY, false);
-                        }
-                    }
+                    maybeCompleteAnimation(event1);
                     return true;
                 }
         );
@@ -498,6 +486,13 @@ public class CarStatusBar extends StatusBar implements
             }
             return false;
         });
+
+        mHandleBar.setOnTouchListener((v, event) -> {
+            handleBarCloseNotificationGestureDetector.onTouchEvent(event);
+            maybeCompleteAnimation(event);
+            return true;
+        });
+
         mNotificationList = mNotificationView.findViewById(R.id.notifications);
         mNotificationList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -610,6 +605,17 @@ public class CarStatusBar extends StatusBar implements
         }
 
         setPanelExpanded(false);
+    }
+
+    private void maybeCompleteAnimation(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_UP
+                && mNotificationView.getVisibility() == View.VISIBLE) {
+            if (mSettleClosePercentage < mPercentageFromBottom) {
+                animateNotificationPanel(DEFAULT_FLING_VELOCITY, false);
+            } else {
+                animateNotificationPanel(DEFAULT_FLING_VELOCITY, true);
+            }
+        }
     }
 
     /**
@@ -1054,8 +1060,10 @@ public class CarStatusBar extends StatusBar implements
     private static final int SWIPE_MAX_OFF_PATH = 75;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
-    // Only responsible for open hooks. Since once the panel opens it covers all elements
-    // there is no need to merge with close.
+    /**
+     * Only responsible for open hooks. Since once the panel opens it covers all elements
+     * there is no need to merge with close.
+     */
     private abstract class OpenNotificationGestureListener extends
             GestureDetector.SimpleOnGestureListener {
 
@@ -1098,7 +1106,9 @@ public class CarStatusBar extends StatusBar implements
         protected abstract void openNotification();
     }
 
-    // to be installed on the open panel notification panel
+    /**
+     * To be installed on the open panel notification panel
+     */
     private abstract class CloseNotificationGestureListener extends
             GestureDetector.SimpleOnGestureListener {
 
@@ -1172,7 +1182,9 @@ public class CarStatusBar extends StatusBar implements
         protected abstract void close();
     }
 
-    // To be installed on the nav bars.
+    /**
+     * To be installed on the nav bars.
+     */
     private abstract class NavBarCloseNotificationGestureListener extends
             CloseNotificationGestureListener {
         @Override
@@ -1201,7 +1213,28 @@ public class CarStatusBar extends StatusBar implements
     }
 
     /**
-     * SystemUi version onf the notification manager that overrides methods such that the
+     * To be installed on the handle bar.
+     */
+    private class HandleBarCloseNotificationGestureListener extends
+            GestureDetector.SimpleOnGestureListener {
+
+        @Override
+        public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
+                float distanceY) {
+            calculatePercentageFromBottom(event2.getRawY());
+            // To prevent the jump in the clip bounds while closing the notification shade using
+            // the handle bar we should calculate the height using the diff of event1 and event2.
+            // This will help the notification shade to clip smoothly as the event2 value changes
+            // as event1 value will be fixed.
+            int clipHeight =
+                    mNotificationView.getHeight() - (int) (event1.getRawY() - event2.getRawY());
+            setNotificationViewClipBounds(clipHeight);
+            return true;
+        }
+    }
+
+    /**
+     * SystemUi version of the notification manager that overrides methods such that the
      * notifications end up in the status bar layouts instead of a standalone window.
      */
     private class CarSystemUIHeadsUpNotificationManager extends CarHeadsUpNotificationManager {
