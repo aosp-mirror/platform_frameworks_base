@@ -17,10 +17,10 @@
 package com.android.systemui.statusbar.phone
 
 import android.content.Context
+import android.hardware.face.FaceManager
 import android.provider.Settings
 import com.android.internal.annotations.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.systemui.R
 import com.android.systemui.tuner.TunerService
 
 import javax.inject.Inject
@@ -32,8 +32,13 @@ class KeyguardBypassController {
     @Inject
     constructor(context: Context,
                 tunerService: TunerService) {
-        val dismissByDefault = if (context.getResources().getBoolean(
-                R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
+        val faceManager = context.getSystemService(FaceManager::class.java)
+        if (faceManager?.isHardwareDetected != true) {
+            return
+        }
+
+        val dismissByDefault = if (context.resources.getBoolean(
+                com.android.internal.R.bool.config_faceAuthDismissesKeyguard)) 1 else 0
         tunerService.addTunable(
                 object : TunerService.Tunable {
                         override fun onTuningChanged(key: String?, newValue: String?) {
