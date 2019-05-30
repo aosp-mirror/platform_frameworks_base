@@ -27,6 +27,7 @@ import static org.junit.Assert.fail;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.VersionedPackage;
+import android.net.NetworkStackClient;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
@@ -41,6 +42,8 @@ import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -70,9 +73,12 @@ public class PackageWatchdogTest {
     private static final long SHORT_DURATION = TimeUnit.SECONDS.toMillis(1);
     private static final long LONG_DURATION = TimeUnit.SECONDS.toMillis(5);
     private TestLooper mTestLooper;
+    @Mock
+    private NetworkStackClient mNetworkStackClient;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
         adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG);
@@ -732,7 +738,8 @@ public class PackageWatchdogTest {
                 new AtomicFile(new File(context.getFilesDir(), "package-watchdog.xml"));
         Handler handler = new Handler(mTestLooper.getLooper());
         PackageWatchdog watchdog =
-                new PackageWatchdog(context, policyFile, handler, handler, controller);
+                new PackageWatchdog(context, policyFile, handler, handler, controller,
+                        mNetworkStackClient);
         // Verify controller is not automatically started
         assertFalse(controller.mIsEnabled);
         if (withPackagesReady) {
