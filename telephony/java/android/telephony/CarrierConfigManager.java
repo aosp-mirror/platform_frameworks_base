@@ -2649,6 +2649,68 @@ public class CarrierConfigManager {
     public static final String KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION =
             "carrier_auto_cancel_cs_notification";
 
+    /**
+     * GPS configs. See android.hardware.gnss@1.0 IGnssConfiguration.
+     * @hide
+     */
+    public static final class Gps {
+        /** Prefix of all Gps.KEY_* constants. */
+        public static final String KEY_PREFIX = "gps.";
+
+        /**
+         * Location information during (and after) an emergency call is only provided over control
+         * plane signaling from the network.
+         * @hide
+         */
+        public static final int SUPL_EMERGENCY_MODE_TYPE_CP_ONLY = 0;
+
+        /**
+         * Location information during (and after) an emergency call is provided over the data
+         * plane and serviced by the framework GNSS service, but if it fails, the carrier also
+         * supports control plane backup signaling.
+         * @hide
+         */
+        public static final int SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK = 1;
+
+        /**
+         * Location information during (and after) an emergency call is provided over the data plane
+         * and serviced by the framework GNSS service only. There is no backup signalling over the
+         * control plane if it fails.
+         * @hide
+         */
+        public static final int SUPL_EMERGENCY_MODE_TYPE_DP_ONLY = 2;
+
+        /**
+         * Control Plane / SUPL NI emergency extension time in seconds. Default to "0".
+         */
+        public static final String KEY_ES_EXTENSION_SEC_STRING = KEY_PREFIX + "es_extension_sec";
+
+        /**
+         * Determines whether or not SUPL ES mode supports a control-plane mechanism to get a user's
+         * location in the event that data plane SUPL fails or is otherwise unavailable.
+         * <p>
+         * An integer value determines the support type of this carrier. If this carrier only
+         * supports data plane SUPL ES, then the value will be
+         * {@link #SUPL_EMERGENCY_MODE_TYPE_DP_ONLY}. If the carrier supports control plane fallback
+         * for emergency SUPL, the value will be {@link #SUPL_EMERGENCY_MODE_TYPE_CP_FALLBACK}.
+         * If the carrier does not support data plane SUPL using the framework, the value will be
+         * {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
+         * <p>
+         * The default value for this configuration is {@link #SUPL_EMERGENCY_MODE_TYPE_CP_ONLY}.
+         * @hide
+         */
+        public static final String KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT = KEY_PREFIX
+                + "es_supl_control_plane_support_int";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putString(KEY_ES_EXTENSION_SEC_STRING, "0");
+            defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
+                    SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
+            return defaults;
+        }
+    }
+
    /**
     * An int array containing CDMA enhanced roaming indicator values for Home (non-roaming) network.
     * The default values come from 3GPP2 C.R1001 table 8.1-1.
@@ -3133,6 +3195,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_ENTRY_OR_EXIT_HYSTERESIS_TIME_LONG, 10000);
         /* Default value is 10 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
+        sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {
                         1 /* Roaming Indicator Off */
