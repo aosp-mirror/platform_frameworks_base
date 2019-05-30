@@ -991,6 +991,11 @@ public class Build {
          * engaged. It's now time to see if you can dance.</em>
          */
         public static final int Q = 29;
+
+        /**
+         * R.
+         */
+        public static final int R = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
