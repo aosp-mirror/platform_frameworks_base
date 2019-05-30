@@ -86,6 +86,7 @@ public class AttentionManagerServiceTest {
         UserState mUserState = new UserState(0,
                 mContext,
                 mLock,
+                mMockHandler,
                 componentName);
         mUserState.mService = new MockIAttentionService();
         mSpyUserState = spy(mUserState);
