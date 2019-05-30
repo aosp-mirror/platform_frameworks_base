@@ -158,14 +158,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private boolean mHasTopCutout = false;
     private boolean mPrivacyChipLogged = false;
 
-    private final DeviceConfig.OnPropertyChangedListener mPropertyListener =
-            new DeviceConfig.OnPropertyChangedListener() {
+    private final DeviceConfig.OnPropertiesChangedListener mPropertiesListener =
+            new DeviceConfig.OnPropertiesChangedListener() {
                 @Override
-                public void onPropertyChanged(String namespace, String name, String value) {
-                    if (DeviceConfig.NAMESPACE_PRIVACY.equals(namespace)
-                            && SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED.equals(
-                            name)) {
-                        mPermissionsHubEnabled = Boolean.valueOf(value);
+                public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                    if (DeviceConfig.NAMESPACE_PRIVACY.equals(properties.getNamespace())
+                            && properties.getKeyset()
+                            .contains(SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED)) {
+                        mPermissionsHubEnabled = properties.getBoolean(
+                                SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED, false);
                         StatusIconContainer iconContainer = findViewById(R.id.statusIcons);
                         iconContainer.setIgnoredSlots(getIgnoredIconSlots());
                     }
@@ -257,8 +258,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         mPermissionsHubEnabled = PrivacyItemControllerKt.isPermissionsHubEnabled();
         // Change the ignored slots when DeviceConfig flag changes
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
-                mContext.getMainExecutor(), mPropertyListener);
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
+                mContext.getMainExecutor(), mPropertiesListener);
 
     }
 

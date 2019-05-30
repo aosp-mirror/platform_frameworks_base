@@ -1986,4 +1986,14 @@ interface ITelephony {
      * outgoing SmsManager operation.
      */
     oneway void enqueueSmsPickResult(String callingPackage, IIntegerConsumer subIdResult);
+
+    /**
+     * Returns the MMS user agent.
+     */
+    String getMmsUserAgent(int subId);
+
+    /**
+     * Returns the MMS user agent profile URL.
+     */
+    String getMmsUAProfUrl(int subId);
 }

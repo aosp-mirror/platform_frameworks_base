@@ -51,7 +51,6 @@ import android.net.LinkProperties;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.util.SharedLog;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.Looper;
@@ -63,6 +62,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.testutils.HandlerUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -90,6 +90,7 @@ public class OffloadControllerTest {
     private static final String IPV6_DISCARD_PREFIX = "100::/64";
     private static final String USB_PREFIX = "192.168.42.0/24";
     private static final String WIFI_PREFIX = "192.168.43.0/24";
+    private static final long WAIT_FOR_IDLE_TIMEOUT = 2 * 1000;
 
     @Mock private OffloadHardwareInterface mHardware;
     @Mock private ApplicationInfo mApplicationInfo;
@@ -131,9 +132,7 @@ public class OffloadControllerTest {
     }
 
     private void waitForIdle() {
-        ConditionVariable cv = new ConditionVariable();
-        new Handler(Looper.getMainLooper()).post(() -> { cv.open(); });
-        cv.block();
+        HandlerUtilsKt.waitForIdle(new Handler(Looper.getMainLooper()), WAIT_FOR_IDLE_TIMEOUT);
     }
 
     private OffloadController makeOffloadController() throws Exception {

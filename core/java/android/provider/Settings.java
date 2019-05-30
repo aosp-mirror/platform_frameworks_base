@@ -8081,6 +8081,15 @@ public final class Settings {
                 "lock_screen_show_silent_notifications";
 
         /**
+         * Indicates whether snooze options should be shown on notifications
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String SHOW_NOTIFICATION_SNOOZE = "show_notification_snooze";
+
+        /**
          * List of TV inputs that are currently hidden. This is a string
          * containing the IDs of all hidden TV inputs. Each ID is encoded by
          * {@link android.net.Uri#encode(String)} and separated by ':'.
@@ -8963,6 +8972,7 @@ public final class Settings {
             LOCK_SCREEN_CUSTOM_CLOCK_FACE,
             LOCK_SCREEN_SHOW_NOTIFICATIONS,
             LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
+            SHOW_NOTIFICATION_SNOOZE,
             ZEN_DURATION,
             SHOW_ZEN_UPGRADE_NOTIFICATION,
             SHOW_ZEN_SETTINGS_SUGGESTION,
@@ -9145,6 +9155,7 @@ public final class Settings {
             VALIDATORS.put(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, BOOLEAN_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_SHOW_NOTIFICATIONS, BOOLEAN_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(SHOW_NOTIFICATION_SNOOZE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
             VALIDATORS.put(SHOW_ZEN_UPGRADE_NOTIFICATION, BOOLEAN_VALIDATOR);
             VALIDATORS.put(SHOW_ZEN_SETTINGS_SUGGESTION, BOOLEAN_VALIDATOR);

@@ -50,6 +50,8 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.leak.LeakDetector;
 
@@ -211,5 +213,12 @@ public class DependencyProvider {
     @Provides
     public PackageManagerWrapper providePackageManagerWrapper() {
         return PackageManagerWrapper.getInstance();
+    }
+
+    @Singleton
+    @Provides
+    public DeviceProvisionedController provideDeviceProvisionedController(Context context,
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+        return new DeviceProvisionedControllerImpl(context, mainHandler);
     }
 }

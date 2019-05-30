@@ -60,6 +60,12 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.PathInterpolator;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -72,6 +78,7 @@ import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.SecureSetting;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.NavigationBarTransitions;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.tuner.TunablePadding;
 import com.android.systemui.tuner.TunerService;
@@ -85,7 +92,8 @@ import java.util.List;
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
  * for antialiasing and emulation purposes.
  */
-public class ScreenDecorations extends SystemUI implements Tunable {
+public class ScreenDecorations extends SystemUI implements Tunable,
+        NavigationBarTransitions.DarkIntensityListener {
     private static final boolean DEBUG = false;
     private static final String TAG = "ScreenDecorations";
 
@@ -93,13 +101,17 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     public static final String PADDING = "sysui_rounded_content_padding";
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
+    private static final boolean VERBOSE = false;
 
     private DisplayManager mDisplayManager;
     private DisplayManager.DisplayListener mDisplayListener;
 
-    @VisibleForTesting protected int mRoundedDefault;
-    @VisibleForTesting protected int mRoundedDefaultTop;
-    @VisibleForTesting protected int mRoundedDefaultBottom;
+    @VisibleForTesting
+    protected int mRoundedDefault;
+    @VisibleForTesting
+    protected int mRoundedDefaultTop;
+    @VisibleForTesting
+    protected int mRoundedDefaultBottom;
     private View mOverlay;
     private View mBottomOverlay;
     private float mDensity;
@@ -111,6 +123,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private SecureSetting mColorInversionSetting;
     private boolean mPendingRotationChange;
     private Handler mHandler;
+    private boolean mAssistHintBlocked = false;
+    private boolean mIsReceivingNavBarColor = false;
 
     /**
      * Converts a set of {@link Rect}s into a {@link Region}
@@ -137,15 +151,32 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         putComponent(ScreenDecorations.class, this);
     }
 
-    private void fade(View view, boolean fadeIn) {
+    private void fade(View view, boolean fadeIn, boolean isLeft) {
         if (fadeIn) {
             view.animate().cancel();
-            view.setAlpha(0f);
+            view.setAlpha(1f);
             view.setVisibility(View.VISIBLE);
-            view.animate().alpha(1f);
+
+            AnimationSet anim = new AnimationSet(true);
+            anim.setDuration(900);
+
+            Animation scaleAnimation = new ScaleAnimation(2f, 1f, 2f, 1f,
+                    ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
+            anim.addAnimation(scaleAnimation);
+            anim.setInterpolator(new PathInterpolator(0.02f, 0.44f, 0.67f, 1.00f));
+
+            Animation translateAnimation = new TranslateAnimation(
+                    TranslateAnimation.RELATIVE_TO_SELF, isLeft ? -0.2f : 0.2f,
+                    TranslateAnimation.RELATIVE_TO_SELF,
+                    0f,
+                    TranslateAnimation.RELATIVE_TO_SELF, 0.2f, TranslateAnimation.RELATIVE_TO_SELF,
+                    0f);
+            anim.addAnimation(translateAnimation);
+            anim.setInterpolator(new OvershootInterpolator());
+            view.startAnimation(anim);
         } else {
             view.animate().cancel();
-            view.animate().alpha(0f).withEndAction(() -> view.setVisibility(View.INVISIBLE));
+            view.animate().setDuration(400).alpha(0f);
         }
 
     }
@@ -161,32 +192,56 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             return;
         }
 
+        if (mAssistHintBlocked && visible) {
+            if (VERBOSE) {
+                Log.v(TAG, "Assist hint blocked, cannot make it visible");
+            }
+            return;
+        }
+
         if (mAssistHintVisible != visible) {
             mAssistHintVisible = visible;
 
-            View assistHintTopLeft = mOverlay.findViewById(R.id.assist_hint_left);
-            View assistHintTopRight = mOverlay.findViewById(R.id.assist_hint_right);
-            View assistHintBottomLeft = mBottomOverlay.findViewById(R.id.assist_hint_left);
-            View assistHintBottomRight = mBottomOverlay.findViewById(R.id.assist_hint_right);
+            CornerHandleView assistHintTopLeft = mOverlay.findViewById(R.id.assist_hint_left);
+            CornerHandleView assistHintTopRight = mOverlay.findViewById(R.id.assist_hint_right);
+            CornerHandleView assistHintBottomLeft = mBottomOverlay.findViewById(
+                    R.id.assist_hint_left);
+            CornerHandleView assistHintBottomRight = mBottomOverlay.findViewById(
+                    R.id.assist_hint_right);
 
             switch (mRotation) {
                 case RotationUtils.ROTATION_NONE:
-                    fade(assistHintBottomLeft, mAssistHintVisible);
-                    fade(assistHintBottomRight, mAssistHintVisible);
+                    fade(assistHintBottomLeft, mAssistHintVisible, /* isLeft = */ true);
+                    fade(assistHintBottomRight, mAssistHintVisible, /* isLeft = */ false);
                     break;
                 case RotationUtils.ROTATION_LANDSCAPE:
-                    fade(assistHintTopRight, mAssistHintVisible);
-                    fade(assistHintBottomRight, mAssistHintVisible);
+                    fade(assistHintTopRight, mAssistHintVisible, /* isLeft = */ true);
+                    fade(assistHintBottomRight, mAssistHintVisible, /* isLeft = */ false);
                     break;
                 case RotationUtils.ROTATION_SEASCAPE:
-                    fade(assistHintTopLeft, mAssistHintVisible);
-                    fade(assistHintBottomLeft, mAssistHintVisible);
+                    fade(assistHintTopLeft, mAssistHintVisible, /* isLeft = */ false);
+                    fade(assistHintBottomLeft, mAssistHintVisible,  /* isLeft = */ true);
                     break;
                 case RotationUtils.ROTATION_UPSIDE_DOWN:
-                    fade(assistHintTopLeft, mAssistHintVisible);
-                    fade(assistHintTopRight, mAssistHintVisible);
+                    fade(assistHintTopLeft, mAssistHintVisible, /* isLeft = */ false);
+                    fade(assistHintTopRight, mAssistHintVisible, /* isLeft = */ true);
                     break;
             }
+        }
+    }
+
+    /**
+     * Prevents the assist hint from becoming visible even if `mAssistHintVisible` is true.
+     */
+    public void setAssistHintBlocked(boolean blocked) {
+        if (!mHandler.getLooper().isCurrentThread()) {
+            mHandler.post(() -> setAssistHintBlocked(blocked));
+            return;
+        }
+
+        mAssistHintBlocked = blocked;
+        if (mAssistHintVisible && mAssistHintBlocked) {
+            setAssistHintVisible(false);
         }
     }
 
@@ -253,12 +308,12 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 .inflate(R.layout.rounded_corners, null);
         mCutoutTop = new DisplayCutoutView(mContext, true,
                 this::updateWindowVisibilities, this);
-        ((ViewGroup)mOverlay).addView(mCutoutTop);
+        ((ViewGroup) mOverlay).addView(mCutoutTop);
         mBottomOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
         mCutoutBottom = new DisplayCutoutView(mContext, false,
                 this::updateWindowVisibilities, this);
-        ((ViewGroup)mBottomOverlay).addView(mCutoutBottom);
+        ((ViewGroup) mBottomOverlay).addView(mCutoutBottom);
 
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         mOverlay.setAlpha(0);
@@ -378,7 +433,23 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             if (mOverlay != null) {
                 updateLayoutParams();
                 updateViews();
+                if (mAssistHintVisible) {
+                    // If assist handles are visible, hide them without animation and then make them
+                    // show once again (with corrected rotation).
+                    hideAssistHandles();
+                    setAssistHintVisible(true);
+                }
             }
+        }
+    }
+
+    private void hideAssistHandles() {
+        if (mOverlay != null && mBottomOverlay != null) {
+            mOverlay.findViewById(R.id.assist_hint_left).setVisibility(View.GONE);
+            mOverlay.findViewById(R.id.assist_hint_right).setVisibility(View.GONE);
+            mBottomOverlay.findViewById(R.id.assist_hint_left).setVisibility(View.GONE);
+            mBottomOverlay.findViewById(R.id.assist_hint_right).setVisibility(View.GONE);
+            mAssistHintVisible = false;
         }
     }
 
@@ -416,7 +487,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         } else if (mRotation == RotationUtils.ROTATION_LANDSCAPE) {
             updateView(topLeft, Gravity.TOP | Gravity.LEFT, 0);
             updateView(topRight, Gravity.BOTTOM | Gravity.LEFT, 270);
-            updateView(bottomLeft, Gravity.TOP | Gravity.RIGHT, 90);;
+            updateView(bottomLeft, Gravity.TOP | Gravity.RIGHT, 90);
             updateView(bottomRight, Gravity.BOTTOM | Gravity.RIGHT, 180);
         } else if (mRotation == RotationUtils.ROTATION_UPSIDE_DOWN) {
             updateView(topLeft, Gravity.BOTTOM | Gravity.LEFT, 270);
@@ -477,7 +548,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     }
 
     private void updateView(View v, int gravity, int rotation) {
-        ((FrameLayout.LayoutParams)v.getLayoutParams()).gravity = gravity;
+        ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity = gravity;
         v.setRotation(rotation);
     }
 
@@ -613,6 +684,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 setSize(mOverlay.findViewById(R.id.right), sizeTop);
                 setSize(mBottomOverlay.findViewById(R.id.left), sizeBottom);
                 setSize(mBottomOverlay.findViewById(R.id.right), sizeBottom);
+                setSize(mOverlay.findViewById(R.id.assist_hint_left), sizeTop * 2);
+                setSize(mOverlay.findViewById(R.id.assist_hint_right), sizeTop * 2);
+                setSize(mBottomOverlay.findViewById(R.id.assist_hint_left), sizeBottom * 2);
+                setSize(mBottomOverlay.findViewById(R.id.assist_hint_right), sizeBottom * 2);
             }
         });
     }
@@ -622,6 +697,27 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         params.width = pixelSize;
         params.height = pixelSize;
         view.setLayoutParams(params);
+    }
+
+    @Override
+    public void onDarkIntensity(float darkIntensity) {
+        if (mOverlay != null) {
+            CornerHandleView assistHintTopLeft = mOverlay.findViewById(R.id.assist_hint_left);
+            CornerHandleView assistHintTopRight = mOverlay.findViewById(R.id.assist_hint_right);
+
+            assistHintTopLeft.updateDarkness(darkIntensity);
+            assistHintTopRight.updateDarkness(darkIntensity);
+        }
+
+        if (mBottomOverlay != null) {
+            CornerHandleView assistHintBottomLeft = mBottomOverlay.findViewById(
+                    R.id.assist_hint_left);
+            CornerHandleView assistHintBottomRight = mBottomOverlay.findViewById(
+                    R.id.assist_hint_right);
+
+            assistHintBottomLeft.updateDarkness(darkIntensity);
+            assistHintBottomRight.updateDarkness(darkIntensity);
+        }
     }
 
     @VisibleForTesting

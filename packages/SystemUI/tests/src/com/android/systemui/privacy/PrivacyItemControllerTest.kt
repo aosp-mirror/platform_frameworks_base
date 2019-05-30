@@ -48,12 +48,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyList
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -281,13 +284,31 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
     @Test
     fun testNotListeningWhenIndicatorsDisabled() {
-        privacyItemController.devicePropertyChangedListener.onPropertyChanged(
+        val properties = getProperties(
                 DeviceConfig.NAMESPACE_PRIVACY,
                 SystemUiDeviceConfigFlags.PROPERTY_PERMISSIONS_HUB_ENABLED,
-                "false")
+                false)
+        privacyItemController.devicePropertiesChangedListener.onPropertiesChanged(properties)
         privacyItemController.addCallback(callback)
         testableLooper.processAllMessages()
         verify(appOpsController, never()).addCallback(eq(PrivacyItemController.OPS),
                 any(AppOpsController.Callback::class.java))
+    }
+
+    private fun getProperties(namespace: String, name: String, value: Boolean):
+            DeviceConfig.Properties {
+        val properties = mock<DeviceConfig.Properties>(DeviceConfig.Properties::class.java)
+        doReturn(namespace).`when`(properties).getNamespace()
+        doReturn(setOf(name)).`when`(properties).getKeyset()
+        doAnswer {
+            val key: String = it.getArgument(0)
+            val defaultValue: Boolean = it.getArgument(1)
+            if (name.equals(key, ignoreCase = true)) {
+                value
+            } else {
+                defaultValue
+            }
+        }.`when`(properties).getBoolean(anyString(), anyBoolean())
+        return properties
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.provider.Settings.Secure.SHOW_NOTIFICATION_SNOOZE;
+
 import static com.android.systemui.SwipeHelper.SWIPED_FAR_ENOUGH_SIZE_FRACTION;
 
 import android.animation.Animator;
@@ -29,6 +31,7 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
@@ -255,9 +258,13 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mLeftMenuItems.clear();
         mRightMenuItems.clear();
+
+        boolean showSnooze = Settings.Secure.getInt(mContext.getContentResolver(),
+                SHOW_NOTIFICATION_SNOOZE, 0) == 1;
+
         // Construct the menu items based on the notification
-        if (!isForeground) {
-            // Only show snooze for non-foreground notifications
+        if (!isForeground && showSnooze) {
+            // Only show snooze for non-foreground notifications, and if the setting is on
             mSnoozeItem = createSnoozeItem(mContext);
         }
         mAppOpsItem = createAppOpsItem(mContext);
@@ -268,7 +275,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
 
         if (!mIsUsingBidirectionalSwipe) {
-            if (!isForeground) {
+            if (!isForeground && showSnooze) {
                 mRightMenuItems.add(mSnoozeItem);
             }
             mRightMenuItems.add(mInfoItem);

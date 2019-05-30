@@ -10578,7 +10578,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // notifyAppeared was not sent.
 
         // ContentCapture
-        if (isLaidOut() && isImportantForContentCapture() && isTextEditable()) {
+        if (isLaidOut() && isImportantForContentCapture()) {
             final ContentCaptureManager cm = mContext.getSystemService(ContentCaptureManager.class);
             if (cm != null && cm.isContentCaptureEnabled()) {
                 final ContentCaptureSession session = getContentCaptureSession();

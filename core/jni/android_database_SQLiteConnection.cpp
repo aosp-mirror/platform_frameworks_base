@@ -604,12 +604,12 @@ static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
             size_t sizeIncludingNull = sqlite3_column_bytes(statement, i) + 1;
             status = window->putString(addedRows, i, text, sizeIncludingNull);
             if (status) {
-                LOG_WINDOW("Failed allocating %u bytes for text at %d,%d, error=%d",
+                LOG_WINDOW("Failed allocating %zu bytes for text at %d,%d, error=%d",
                         sizeIncludingNull, startPos + addedRows, i, status);
                 result = CPR_FULL;
                 break;
             }
-            LOG_WINDOW("%d,%d is TEXT with %u bytes",
+            LOG_WINDOW("%d,%d is TEXT with %zu bytes",
                     startPos + addedRows, i, sizeIncludingNull);
         } else if (type == SQLITE_INTEGER) {
             // INTEGER data
@@ -621,7 +621,7 @@ static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
                 result = CPR_FULL;
                 break;
             }
-            LOG_WINDOW("%d,%d is INTEGER 0x%016llx", startPos + addedRows, i, value);
+            LOG_WINDOW("%d,%d is INTEGER %" PRId64, startPos + addedRows, i, value);
         } else if (type == SQLITE_FLOAT) {
             // FLOAT data
             double value = sqlite3_column_double(statement, i);
@@ -639,12 +639,12 @@ static CopyRowResult copyRow(JNIEnv* env, CursorWindow* window,
             size_t size = sqlite3_column_bytes(statement, i);
             status = window->putBlob(addedRows, i, blob, size);
             if (status) {
-                LOG_WINDOW("Failed allocating %u bytes for blob at %d,%d, error=%d",
+                LOG_WINDOW("Failed allocating %zu bytes for blob at %d,%d, error=%d",
                         size, startPos + addedRows, i, status);
                 result = CPR_FULL;
                 break;
             }
-            LOG_WINDOW("%d,%d is Blob with %u bytes",
+            LOG_WINDOW("%d,%d is Blob with %zu bytes",
                     startPos + addedRows, i, size);
         } else if (type == SQLITE_NULL) {
             // NULL field
@@ -756,8 +756,8 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
         }
     }
 
-    LOG_WINDOW("Resetting statement %p after fetching %d rows and adding %d rows"
-            "to the window in %d bytes",
+    LOG_WINDOW("Resetting statement %p after fetching %d rows and adding %d rows "
+            "to the window in %zu bytes",
             statement, totalRows, addedRows, window->size() - window->freeSpace());
     sqlite3_reset(statement);
 

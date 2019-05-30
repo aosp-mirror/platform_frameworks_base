@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.os.AsyncTask;
 import android.os.UserHandle;
+import android.util.Slog;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
@@ -154,7 +155,10 @@ public class WebViewUpdateServiceImpl {
         WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
         WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
         if (fallbackProvider != null) {
+            Slog.i(TAG, "One-time migration: enabling " + fallbackProvider.packageName);
             mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName, true);
+        } else {
+            Slog.i(TAG, "Skipping one-time migration: no fallback provider");
         }
         mSystemInterface.enableFallbackLogic(false);
     }

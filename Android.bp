@@ -738,7 +738,7 @@ java_defaults {
             "system/security/keystore/binder",
         ],
 
-        generate_get_transaction_name: true
+        generate_get_transaction_name: true,
     },
 
     exclude_srcs: [
@@ -876,7 +876,7 @@ gensrcs {
     name: "framework-javastream-protos",
     depfile: true,
 
-    tool_files: [ "tools/genprotos.sh", ],
+    tool_files: ["tools/genprotos.sh"],
     tools: [
         "aprotoc",
         "protoc-gen-javastream",
@@ -887,13 +887,13 @@ gensrcs {
     // end up with a command that is extremely long, potentially going passed MAX_ARG_STRLEN due to
     // the way sbox rewrites the command. See b/70221552.
     cmd: "$(location tools/genprotos.sh) " +
-              " $(location aprotoc) " +
-              " $(location protoc-gen-javastream) " +
-              " $(location soong_zip) " +
-              " $(genDir) " +
-              " $(depfile) " +
-              " $(in) " +
-              " $(out)",
+        " $(location aprotoc) " +
+        " $(location protoc-gen-javastream) " +
+        " $(location soong_zip) " +
+        " $(genDir) " +
+        " $(depfile) " +
+        " $(in) " +
+        " $(out)",
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
@@ -911,7 +911,7 @@ filegroup {
         "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
-    ]
+    ],
 }
 
 filegroup {
@@ -932,7 +932,7 @@ filegroup {
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/android/net/shared/*.java",
-    ]
+    ],
 }
 
 // Build ext.jar
@@ -968,7 +968,7 @@ java_library_host {
         type: "full",
     },
     errorprone: {
-        javacflags: ["-Xep:MissingOverride:OFF"],  // b/72714520
+        javacflags: ["-Xep:MissingOverride:OFF"], // b/72714520
     },
 }
 
@@ -1253,11 +1253,11 @@ filegroup {
 }
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
-     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
-     "-overview $(location core/java/overview.html) " +
-     // Federate Support Library references against local API file.
-     "-federate SupportLib https://developer.android.com " +
-     "-federationapi SupportLib $(location :current-support-api) "
+    "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
+    "-overview $(location core/java/overview.html) " +
+    // Federate Support Library references against local API file.
+    "-federate SupportLib https://developer.android.com " +
+    "-federationapi SupportLib $(location :current-support-api) "
 
 framework_docs_only_libs = [
     "voip-common",
@@ -1297,7 +1297,22 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide RequiresPermission " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo"
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
+
+// http://b/129765390 Rewrite links to "platform" or "technotes" folders
+// which are siblings (and thus outside of) {@docRoot}.
+//
+// We have to escape \ as \\ and $ as $$ here because they get resolved by
+// different layers of the build tooling. The arguments are wrapped in '' so
+// that the shell doesn't add yet another level of escaping.
+metalava_framework_docs_args += " --replace-documentation " +
+    // packages whose descendants to apply replacement to (all packages from
+    // libcore/ojluni/src/main/java that contribute to documentation).
+    "com.sun:java:javax:jdk.net:sun " +
+    // regex of the string to replace
+    "'(<a\\s+href\\s?=[\\*\\s]*\")(?:(?:\\{@docRoot\\}/\\.\\./)|(?:(?:\\.\\./)+))((?:platform|technotes).+)\">' " +
+    // replacement (with $1, $2 backreferences to the regex groups)
+    "'$$1https://docs.oracle.com/javase/8/docs/$$2\">' "
 
 stubs_defaults {
     name: "framework-doc-stubs-default",
@@ -1332,7 +1347,7 @@ stubs_defaults {
 doc_defaults {
     name: "framework-docs-default",
     libs: framework_docs_only_libs +
-         ["stub-annotations"],
+        ["stub-annotations"],
     html_dirs: [
         "docs/html",
     ],
@@ -1465,8 +1480,8 @@ droiddoc {
         "android.whichdoc offline",
     ],
     proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
-    args: framework_docs_only_args  + " -hide 101 -hide 104 -hide 108" +
-        " -offlinemode -title \"Android System SDK\" -referenceonly",
+    args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
+    " -offlinemode -title \"Android System SDK\" -referenceonly",
     write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
@@ -1483,7 +1498,7 @@ droiddoc {
         "android.hasSamples true",
     ],
     proofread_file: "online-sdk-docs-proofrerad.txt",
-    args: framework_docs_only_args  +
+    args: framework_docs_only_args +
         " -toroot / -samplegroup Admin " +
         " -samplegroup Background " +
         " -samplegroup Connectivity " +
@@ -1576,10 +1591,10 @@ droiddoc {
     ],
     proofread_file: "ds-static-docs-proofrerad.txt",
     args: framework_docs_only_args +
-          " -staticonly " +
-          " -toroot / " +
-          " -devsite " +
-          " -ignoreJdLinks ",
+        " -staticonly " +
+        " -toroot / " +
+        " -devsite " +
+        " -ignoreJdLinks ",
 }
 
 droiddoc {
@@ -1593,9 +1608,9 @@ droiddoc {
     ],
     proofread_file: "ds-ref-navtree-docs-proofrerad.txt",
     args: framework_docs_only_args +
-          " -toroot / " +
-          " -atLinksNavtree " +
-          " -navtreeonly ",
+        " -toroot / " +
+        " -atLinksNavtree " +
+        " -navtreeonly ",
 }
 
 droiddoc {
@@ -1635,8 +1650,8 @@ droiddoc {
     ],
     proofread_file: "hidden-docs-proofrerad.txt",
     args: framework_docs_only_args +
-          " -referenceonly " +
-          " -title \"Android SDK - Including hidden APIs.\"",
+        " -referenceonly " +
+        " -title \"Android SDK - Including hidden APIs.\"",
 }
 
 droidstubs {
@@ -1688,9 +1703,8 @@ droidstubs {
     args: metalava_framework_docs_args +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi "
+        " --show-annotation android.annotation.TestApi ",
 }
-
 
 droidstubs {
     name: "hiddenapi-mappings",
@@ -1710,7 +1724,7 @@ droidstubs {
         " --hide UnhiddenSystemApi " +
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi "
+        " --show-annotation android.annotation.TestApi ",
 }
 
 filegroup {
@@ -1834,5 +1848,5 @@ filegroup {
 aidl_mapping {
     name: "framework-aidl-mappings",
     srcs: [":framework-defaults"],
-    output: "framework-aidl-mappings.txt"
+    output: "framework-aidl-mappings.txt",
 }
