@@ -66,7 +66,9 @@ public class RotationContextButton extends ContextualButton implements
 
     @Override
     public void onDestroy() {
-        mRotationButtonController.cleanUp();
+        if (mRotationButtonController != null) {
+            mRotationButtonController.cleanUp();
+        }
     }
 
     @Override

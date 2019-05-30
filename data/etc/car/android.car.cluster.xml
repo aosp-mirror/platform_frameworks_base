@@ -15,16 +15,10 @@
   ~ limitations under the License
   -->
 <permissions>
-    <privapp-permissions package="com.android.car">
-        <permission name="android.permission.LOCATION_HARDWARE"/>
+    <privapp-permissions package="android.car.cluster">
+        <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
-        <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
-        <permission name="android.permission.MODIFY_PHONE_STATE"/>
-        <permission name="android.permission.PROVIDE_TRUST_AGENT"/>
-        <permission name="android.permission.REAL_GET_TASKS"/>
-        <permission name="android.permission.REBOOT"/>
-        <permission name="android.permission.READ_LOGS"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 </permissions>

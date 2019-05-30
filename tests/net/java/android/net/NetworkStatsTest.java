@@ -569,7 +569,7 @@ public class NetworkStatsTest {
             .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
                     DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
 
-        assertTrue(delta.toString(), delta.migrateTun(tunUid, tunIface, underlyingIface));
+        delta.migrateTun(tunUid, tunIface, new String[] {underlyingIface});
         assertEquals(20, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
@@ -650,7 +650,7 @@ public class NetworkStatsTest {
             .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
                     DEFAULT_NETWORK_NO,  75500L, 37L, 130000L, 70L, 0L);
 
-        assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
+        delta.migrateTun(tunUid, tunIface, new String[]{underlyingIface});
         assertEquals(9, delta.size());
 
         // tunIface entries should not be changed.
@@ -810,6 +810,37 @@ public class NetworkStatsTest {
         assertEquals(2, stats.size());
         assertEquals(entry1, stats.getValues(0, null));
         assertEquals(entry2, stats.getValues(1, null));
+    }
+
+    @Test
+    public void testFilterDebugEntries() {
+        NetworkStats.Entry entry1 = new NetworkStats.Entry(
+                "test1", 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats.Entry entry2 = new NetworkStats.Entry(
+                "test2", 10101, SET_DBG_VPN_IN, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats.Entry entry3 = new NetworkStats.Entry(
+                "test2", 10101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats.Entry entry4 = new NetworkStats.Entry(
+                "test2", 10101, SET_DBG_VPN_OUT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
+
+        NetworkStats stats = new NetworkStats(TEST_START, 4)
+                .addValues(entry1)
+                .addValues(entry2)
+                .addValues(entry3)
+                .addValues(entry4);
+
+        stats.filterDebugEntries();
+
+        assertEquals(2, stats.size());
+        assertEquals(entry1, stats.getValues(0, null));
+        assertEquals(entry3, stats.getValues(1, null));
     }
 
     @Test

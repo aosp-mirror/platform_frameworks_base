@@ -67,7 +67,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private val mDozeParameters: DozeParameters;
     var willWakeUp = false
         set(value) {
-            if (value && mDozeAmount != 0.0f) {
+            if (!value || mDozeAmount != 0.0f) {
                 field = value
             }
         }
@@ -254,7 +254,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
                     // if we animate, we see the shelf briefly visible. Instead we fully animate
                     // the notification and its background out
                     animate = false
-                } else {
+                } else if (!mWakingUp && !willWakeUp){
                     entry.setAmbientGoingAway(true)
                     mEntrySetToClearWhenFinished.add(entry)
                 }
