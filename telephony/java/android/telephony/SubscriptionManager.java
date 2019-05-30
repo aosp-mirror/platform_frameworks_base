@@ -775,6 +775,14 @@ public class SubscriptionManager {
     public static final int PROFILE_CLASS_DEFAULT = PROFILE_CLASS_UNSET;
 
     /**
+     * TelephonyProvider column name IMSI (International Mobile Subscriber Identity).
+     * <P>Type: TEXT </P>
+     * @hide
+     */
+    //TODO: add @SystemApi
+    public static final String IMSI = "imsi";
+
+    /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
      *
