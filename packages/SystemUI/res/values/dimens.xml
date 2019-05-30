@@ -1109,8 +1109,8 @@
     <dimen name="bubble_flyout_space_from_bubble">8dp</dimen>
     <!-- Padding around a collapsed bubble -->
     <dimen name="bubble_view_padding">0dp</dimen>
-    <!-- Padding between bubbles when displayed in expanded state -->
-    <dimen name="bubble_padding">8dp</dimen>
+    <!-- Padding between status bar and bubbles when displayed in expanded state -->
+    <dimen name="bubble_padding_top">8dp</dimen>
     <!-- Size of individual bubbles. -->
     <dimen name="individual_bubble_size">52dp</dimen>
     <!-- Size of the circle around the bubbles when they're in the dismiss target. -->

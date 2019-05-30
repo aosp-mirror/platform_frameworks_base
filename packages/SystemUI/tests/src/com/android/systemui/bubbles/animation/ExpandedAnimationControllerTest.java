@@ -138,8 +138,8 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         assertEquals(500f, draggedBubble.getTranslationX(), 1f);
         assertEquals(500f, draggedBubble.getTranslationY(), 1f);
 
-        // Snap it back and make sure it made it back correctly.
-        mExpandedController.prepareForDismissalWithVelocity(draggedBubble, 0f, 0f);
+        // Snap bubble back and make sure it returned correctly.
+        mExpandedController.prepareForDismissalWithVelocity(draggedBubble);
         mLayout.removeView(draggedBubble);
         waitForLayoutMessageQueue();
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);

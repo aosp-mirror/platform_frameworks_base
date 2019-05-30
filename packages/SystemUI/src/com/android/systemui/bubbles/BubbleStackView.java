@@ -172,7 +172,7 @@ public class BubbleStackView extends FrameLayout {
     private float mVerticalPosPercentBeforeRotation = -1;
 
     private int mBubbleSize;
-    private int mBubblePadding;
+    private int mBubblePaddingTop;
     private int mExpandedViewPadding;
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
@@ -302,7 +302,7 @@ public class BubbleStackView extends FrameLayout {
 
         Resources res = getResources();
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mExpandedAnimateXDistance =
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_x_distance);
         mExpandedAnimateYDistance =
@@ -1305,7 +1305,7 @@ public class BubbleStackView extends FrameLayout {
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getExpandedViewY() {
-        return getStatusBarHeight() + mBubbleSize + mBubblePadding + mPointerHeight;
+        return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop + mPointerHeight;
     }
 
     /**

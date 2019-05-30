@@ -146,7 +146,7 @@ public class StackAnimationController extends
      * the screen or the IME. This does not apply to the left/right sides of the screen since the
      * stack goes offscreen intentionally.
      */
-    private int mBubblePadding;
+    private int mBubblePaddingTop;
     /** How far offscreen the stack rests. */
     private int mBubbleOffscreen;
     /** How far down the screen the stack starts, when there is no pre-existing location. */
@@ -161,7 +161,7 @@ public class StackAnimationController extends
         Resources res = layout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
         mIndividualBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mBubblePadding = res.getDimensionPixelSize(R.dimen.bubble_padding);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleOffscreen = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
         mStackStartingVerticalOffset =
                 res.getDimensionPixelSize(R.dimen.bubble_stack_starting_offset_y);
@@ -449,7 +449,7 @@ public class StackAnimationController extends
                                     : 0);
 
             allowableRegion.top =
-                    mBubblePadding
+                    mBubblePaddingTop
                             + Math.max(
                             mStatusBarHeight,
                             insets.getDisplayCutout() != null
@@ -458,8 +458,8 @@ public class StackAnimationController extends
             allowableRegion.bottom =
                     mLayout.getHeight()
                             - mIndividualBubbleSize
-                            - mBubblePadding
-                            - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePadding : 0f)
+                            - mBubblePaddingTop
+                            - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePaddingTop : 0f)
                             - Math.max(
                             insets.getSystemWindowInsetBottom(),
                             insets.getDisplayCutout() != null
