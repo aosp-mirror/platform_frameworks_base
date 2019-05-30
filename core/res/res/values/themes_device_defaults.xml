@@ -1473,14 +1473,10 @@ easier.
         <item name="colorError">@color/error_color_device_default_light</item>
         <item name="colorEdgeEffect">@color/edge_effect_device_default_light</item>
 
-        <!-- Add divider that matches material -->
+        <!-- Add white nav bar with divider that matches material -->
         <item name="navigationBarDividerColor">@color/navigation_bar_divider_device_default_settings</item>
-
-        <!-- Add transparent nav and status bars with light icons to support drawing edge-to-edge
-        for Q gestural navigation-->
-        <item name="navigationBarColor">@android:color/transparent</item>
+        <item name="navigationBarColor">@android:color/white</item>
         <item name="windowLightNavigationBar">true</item>
-        <item name="statusBarColor">@android:color/transparent</item>
 
         <!-- Dialog attributes -->
         <item name="dialogCornerRadius">@dimen/config_dialogCornerRadius</item>
