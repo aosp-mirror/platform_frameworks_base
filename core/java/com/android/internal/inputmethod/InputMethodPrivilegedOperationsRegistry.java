@@ -132,4 +132,21 @@ public final class InputMethodPrivilegedOperationsRegistry {
             }
         }
     }
+
+    /**
+     * Check the given IME token registration status.
+     *
+     * @param token IME token
+     * @return {@code true} when the IME token has already registered
+     *         {@link InputMethodPrivilegedOperations}, {@code false} otherwise.
+     */
+    @AnyThread
+    public static boolean isRegistered(IBinder token) {
+        synchronized (sLock) {
+            if (sRegistry == null) {
+                return false;
+            }
+            return sRegistry.containsKey(token);
+        }
+    }
 }
