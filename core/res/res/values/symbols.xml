@@ -313,7 +313,8 @@
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
-  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_russian" />
+  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_russia" />
+  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_kazakhstan" />
   <java-symbol type="bool" name="config_single_volume" />
   <java-symbol type="bool" name="config_voice_capable" />
   <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
