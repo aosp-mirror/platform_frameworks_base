@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
+import android.app.BroadcastOptions;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
@@ -148,6 +149,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private int mTaskId;
     private boolean mIsTaskOverlay;
     private boolean mIsLockTask;
+    private BroadcastOptions mBroadcastOptions;
 
     final boolean mDumping;
 
@@ -313,6 +315,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mTaskId = INVALID_TASK_ID;
         mIsTaskOverlay = false;
         mIsLockTask = false;
+        mBroadcastOptions = null;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
             @Override
@@ -371,6 +374,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mIsTaskOverlay = true;
                 } else if (opt.equals("--lock-task")) {
                     mIsLockTask = true;
+                } else if (opt.equals("--allow-background-activity-starts")) {
+                    if (mBroadcastOptions == null) {
+                        mBroadcastOptions = BroadcastOptions.makeBasic();
+                    }
+                    mBroadcastOptions.setBackgroundActivityStartsAllowed(true);
                 } else {
                     return false;
                 }
@@ -717,8 +725,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 : new String[] {mReceiverPermission};
         pw.println("Broadcasting: " + intent);
         pw.flush();
+        Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
         mInterface.broadcastIntent(null, intent, null, receiver, 0, null, null, requiredPermissions,
-                android.app.AppOpsManager.OP_NONE, null, true, false, mUserId);
+                android.app.AppOpsManager.OP_NONE, bundle, true, false, mUserId);
         receiver.waitForFinish();
         return 0;
     }
@@ -2967,6 +2976,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | all | current: Specify which user to send to; if not");
             pw.println("          specified then send to all users.");
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
+            pw.println("      --allow-background-activity-starts: The receiver may start activities");
+            pw.println("          even if in the background.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current] [--no-hidden-api-checks]");
             pw.println("          [--no-isolated-storage]");
