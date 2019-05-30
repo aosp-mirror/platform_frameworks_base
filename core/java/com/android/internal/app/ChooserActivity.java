@@ -1434,6 +1434,22 @@ public class ChooserActivity extends ResolverActivity {
                 List<ShortcutManager.ShareShortcutInfo> resultList,
                 List<DisplayResolveInfo> driList,
                 @Nullable List<AppTarget> appTargets) {
+        if (appTargets != null && appTargets.size() != resultList.size()) {
+            throw new RuntimeException("resultList and appTargets must have the same size."
+                    + " resultList.size()=" + resultList.size()
+                    + " appTargets.size()=" + appTargets.size());
+        }
+
+        for (int i = resultList.size() - 1; i >= 0; i--) {
+            final String packageName = resultList.get(i).getTargetComponent().getPackageName();
+            if (!isPackageEnabled(packageName)) {
+                resultList.remove(i);
+                if (appTargets != null) {
+                    appTargets.remove(i);
+                }
+            }
+        }
+
         // Match ShareShortcutInfos with DisplayResolveInfos to be able to use the old code path
         // for direct share targets. After ShareSheet is refactored we should use the
         // ShareShortcutInfos directly.
@@ -1447,7 +1463,6 @@ public class ChooserActivity extends ResolverActivity {
                     ChooserTarget chooserTarget = convertToChooserTarget(shareShortcutInfo);
                     chooserTargets.add(chooserTarget);
                     if (mDirectShareAppTargetCache != null && appTargets != null) {
-                        // Note that appTargets.size() == resultList.size() is always true.
                         mDirectShareAppTargetCache.put(chooserTarget, appTargets.get(j));
                     }
                 }
@@ -1471,6 +1486,24 @@ public class ChooserActivity extends ResolverActivity {
         final Message msg = Message.obtain();
         msg.what = SHORTCUT_MANAGER_SHARE_TARGET_RESULT_COMPLETED;
         mChooserHandler.sendMessage(msg);
+    }
+
+    private boolean isPackageEnabled(String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return false;
+        }
+        ApplicationInfo appInfo;
+        try {
+            appInfo = getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+
+        if (appInfo != null && appInfo.enabled
+                && (appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) == 0) {
+            return true;
+        }
+        return false;
     }
 
     private ChooserTarget convertToChooserTarget(ShortcutManager.ShareShortcutInfo shareShortcut) {
@@ -1603,7 +1636,8 @@ public class ChooserActivity extends ResolverActivity {
      */
     @Nullable
     private AppPredictor getAppPredictorForDirectShareIfEnabled() {
-        return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS ? getAppPredictor() : null;
+        return USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS && !ActivityManager.isLowRamDeviceStatic()
+                ? getAppPredictor() : null;
     }
 
     /**
@@ -2349,6 +2383,8 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public void onListRebuilt() {
+            updateAlphabeticalList();
+
             // don't support direct share on low ram devices
             if (ActivityManager.isLowRamDeviceStatic()) {
                 return;
@@ -2379,7 +2415,6 @@ public class ChooserActivity extends ResolverActivity {
 
                 queryTargetServices(this);
             }
-            updateAlphabeticalList();
         }
 
         @Override
@@ -2830,7 +2865,7 @@ public class ChooserActivity extends ResolverActivity {
         // There can be at most one row in the listview, that is internally
         // a ViewGroup with 2 rows
         public int getServiceTargetRowCount() {
-            if (isSendAction(getTargetIntent())) {
+            if (isSendAction(getTargetIntent()) && !ActivityManager.isLowRamDeviceStatic()) {
                 return 1;
             }
             return 0;

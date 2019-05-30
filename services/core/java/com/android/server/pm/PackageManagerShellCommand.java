@@ -2496,9 +2496,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
             }
-            if (replaceExisting) {
-                sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
-            }
+        }
+        if (replaceExisting) {
+            sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
         }
         return params;
     }
