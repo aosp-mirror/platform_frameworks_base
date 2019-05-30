@@ -48,8 +48,9 @@ public class GlobalActionsGridLayoutTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mGridLayout = spy((GlobalActionsGridLayout)
-                LayoutInflater.from(mContext).inflate(R.layout.global_actions_grid, null));
+        mGridLayout = spy(LayoutInflater.from(mContext)
+                .inflate(R.layout.global_actions_grid, null)
+                .requireViewById(R.id.global_actions_view));
         mListGrid = spy(mGridLayout.getListView());
         doReturn(mListGrid).when(mGridLayout).getListView();
     }
