@@ -16,27 +16,53 @@
 
 package com.android.server.util;
 
+import static android.os.Binder.getCallingPid;
 import static android.os.Binder.getCallingUid;
 
 import android.os.Process;
 import android.os.UserHandle;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Utility class to check calling permissions on the network stack.
  */
 public final class PermissionUtil {
+    private static final AtomicInteger sSystemPid = new AtomicInteger(-1);
 
     /**
      * Check that the caller is allowed to communicate with the network stack.
      * @throws SecurityException The caller is not allowed to communicate with the network stack.
      */
     public static void checkNetworkStackCallingPermission() {
-        // TODO: check that the calling PID is the system server.
         final int caller = getCallingUid();
-        if (caller != Process.SYSTEM_UID
-                && UserHandle.getAppId(caller) != Process.BLUETOOTH_UID
-                && UserHandle.getAppId(caller) != Process.PHONE_UID) {
+        if (caller == Process.SYSTEM_UID) {
+            checkConsistentSystemPid();
+            return;
+        }
+
+        if (UserHandle.getAppId(caller) != Process.BLUETOOTH_UID) {
             throw new SecurityException("Invalid caller: " + caller);
+        }
+    }
+
+    private static void checkConsistentSystemPid() {
+        // Apart from the system server process, no process with a system UID should try to
+        // communicate with the network stack. This is to ensure that the network stack does not
+        // need to maintain behavior for clients it was not designed to work with.
+        // Checking that all calls from a system UID originate from the same PID loosely enforces
+        // this restriction as if another system process calls the network stack first, the system
+        // server would lose access to the network stack and cause obvious failures. If the system
+        // server calls the network stack first, other clients would lose access as expected.
+        final int systemPid = getCallingPid();
+        if (sSystemPid.compareAndSet(-1, systemPid)) {
+            // sSystemPid was unset (-1): this was the first call
+            return;
+        }
+
+        if (sSystemPid.get() != systemPid) {
+            throw new SecurityException("Invalid PID for the system server, expected "
+                    + sSystemPid.get() + " but was called from " + systemPid);
         }
     }
 
