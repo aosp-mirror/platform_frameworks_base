@@ -233,6 +233,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @VisibleForTesting
     protected HdmiDeviceInfo addDeviceInfo(HdmiDeviceInfo deviceInfo) {
         assertRunOnServiceThread();
+        mService.checkLogicalAddressConflictAndReallocate(deviceInfo.getLogicalAddress());
         HdmiDeviceInfo oldDeviceInfo = getCecDeviceInfo(deviceInfo.getLogicalAddress());
         if (oldDeviceInfo != null) {
             removeDeviceInfo(deviceInfo.getId());
