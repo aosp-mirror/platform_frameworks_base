@@ -485,7 +485,10 @@ public class CaptivePortalLoginActivity extends Activity {
             if (request.isForMainFrame()) {
                 mMainFrameUrl = request.getUrl().toString();
             }
-            return false;
+            // Be careful that two shouldOverrideUrlLoading methods are overridden, but
+            // shouldOverrideUrlLoading(WebView view, String url) was deprecated in API level 24.
+            // TODO: delete deprecated one ??
+            return shouldOverrideUrlLoading(view, mMainFrameUrl);
         }
 
         // A web page consisting of a large broken lock icon to indicate SSL failure.
