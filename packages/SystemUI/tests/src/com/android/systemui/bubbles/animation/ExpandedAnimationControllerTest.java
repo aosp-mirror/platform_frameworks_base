@@ -60,8 +60,8 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        addOneMoreThanRenderLimitBubbles();
-        mLayout.setController(mExpandedController);
+        addOneMoreThanBubbleLimitBubbles();
+        mLayout.setActiveController(mExpandedController);
 
         Resources res = mLayout.getResources();
         mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
@@ -73,14 +73,14 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     @Test
     public void testExpansionAndCollapse() throws InterruptedException {
         Runnable afterExpand = Mockito.mock(Runnable.class);
-        mExpandedController.expandFromStack(mExpansionPoint, afterExpand);
+        mExpandedController.expandFromStack(afterExpand);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testBubblesInCorrectExpandedPositions();
         verify(afterExpand).run();
 
         Runnable afterCollapse = Mockito.mock(Runnable.class);
-        mExpandedController.collapseBackToStack(afterCollapse);
+        mExpandedController.collapseBackToStack(mExpansionPoint, afterCollapse);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testStackedAtPosition(mExpansionPoint.x, mExpansionPoint.y, -1);
@@ -139,7 +139,6 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         assertEquals(500f, draggedBubble.getTranslationY(), 1f);
 
         // Snap it back and make sure it made it back correctly.
-        mExpandedController.prepareForDismissalWithVelocity(draggedBubble, 0f, 0f);
         mLayout.removeView(draggedBubble);
         waitForLayoutMessageQueue();
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
@@ -169,7 +168,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
         // Dismiss the now-magneted bubble, verify that the callback was called.
         final Runnable afterDismiss = Mockito.mock(Runnable.class);
-        mExpandedController.dismissDraggedOutBubble(afterDismiss);
+        mExpandedController.dismissDraggedOutBubble(draggedOutView, afterDismiss);
         waitForPropertyAnimations(DynamicAnimation.ALPHA);
         verify(after).run();
 
@@ -224,7 +223,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
 
     /** Expand the stack and wait for animations to finish. */
     private void expand() throws InterruptedException {
-        mExpandedController.expandFromStack(mExpansionPoint, Mockito.mock(Runnable.class));
+        mExpandedController.expandFromStack(Mockito.mock(Runnable.class));
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
     }
 
@@ -236,26 +235,19 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
             assertEquals(x + i * offsetMultiplier * mStackOffset,
                     mLayout.getChildAt(i).getTranslationX(), 2f);
             assertEquals(y, mLayout.getChildAt(i).getTranslationY(), 2f);
-
-            if (i < mMaxRenderedBubbles) {
-                assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
-            }
+            assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
         }
     }
 
     /** Check that children are in the correct positions for being expanded. */
     private void testBubblesInCorrectExpandedPositions() {
         // Check all the visible bubbles to see if they're in the right place.
-        for (int i = 0; i < Math.min(mLayout.getChildCount(), mMaxRenderedBubbles); i++) {
+        for (int i = 0; i < mLayout.getChildCount(); i++) {
             assertEquals(getBubbleLeft(i),
                     mLayout.getChildAt(i).getTranslationX(),
                     2f);
             assertEquals(mExpandedController.getExpandedY(),
                     mLayout.getChildAt(i).getTranslationY(), 2f);
-
-            if (i < mMaxRenderedBubbles) {
-                assertEquals(1f, mLayout.getChildAt(i).getAlpha(), .01f);
-            }
         }
     }
 
@@ -273,9 +265,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
             return 0;
         }
         int bubbleCount = mLayout.getChildCount();
-        if (bubbleCount > mMaxRenderedBubbles) {
-            bubbleCount = mMaxRenderedBubbles;
-        }
+
         // Width calculations.
         double bubble = bubbleCount * mBubbleSize;
         float gap = (bubbleCount - 1) * mBubblePadding;
