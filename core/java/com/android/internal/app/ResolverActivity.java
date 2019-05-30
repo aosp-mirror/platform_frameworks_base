@@ -383,9 +383,11 @@ public class ResolverActivity extends Activity {
                 mSystemWindowInsets.right, 0);
 
         View emptyView = findViewById(R.id.empty);
-        emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                + getResources().getDimensionPixelSize(
-                        R.dimen.chooser_edge_margin_normal) * 2);
+        if (emptyView != null) {
+            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                    + getResources().getDimensionPixelSize(
+                            R.dimen.chooser_edge_margin_normal) * 2);
+        }
 
         if (mFooterSpacer == null) {
             mFooterSpacer = new Space(getApplicationContext());

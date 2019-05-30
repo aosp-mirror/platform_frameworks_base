@@ -16,6 +16,10 @@
 
 package com.android.server.job.controllers;
 
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
@@ -75,17 +79,28 @@ import java.util.function.Predicate;
 /**
  * Controller that tracks whether an app has exceeded its standby bucket quota.
  *
- * Each job in each bucket is given 10 minutes to run within its respective time window. Active
- * jobs can run indefinitely, working set jobs can run for 10 minutes within a 2 hour window,
- * frequent jobs get to run 10 minutes in an 8 hour window, and rare jobs get to run 10 minutes in
- * a 24 hour window. The windows are rolling, so as soon as a job would have some quota based on its
- * bucket, it will be eligible to run. When a job's bucket changes, its new quota is immediately
- * applied to it.
+ * With initial defaults, each app in each bucket is given 10 minutes to run within its respective
+ * time window. Active jobs can run indefinitely, working set jobs can run for 10 minutes within a
+ * 2 hour window, frequent jobs get to run 10 minutes in an 8 hour window, and rare jobs get to run
+ * 10 minutes in a 24 hour window. The windows are rolling, so as soon as a job would have some
+ * quota based on its bucket, it will be eligible to run. When a job's bucket changes, its new
+ * quota is immediately applied to it.
+ *
+ * Job and session count limits are included to prevent abuse/spam. Each bucket has its own limit on
+ * the number of jobs or sessions that can run within the window. Regardless of bucket, apps will
+ * not be allowed to run more than 20 jobs within the past 10 minutes.
  *
  * Jobs are throttled while an app is not in a foreground state. All jobs are allowed to run
  * freely when an app enters the foreground state and are restricted when the app leaves the
- * foreground state. However, jobs that are started while the app is in the TOP state are not
- * restricted regardless of the app's state change.
+ * foreground state. However, jobs that are started while the app is in the TOP state do not count
+ * towards any quota and are not restricted regardless of the app's state change.
+ *
+ * Jobs will not be throttled when the device is charging. The device is considered to be charging
+ * once the {@link BatteryManager#ACTION_CHARGING} intent has been broadcast.
+ *
+ * Note: all limits are enforced per bucket window unless explicitly stated otherwise.
+ * All stated values are configurable and subject to change. See {@link QcConstants} for current
+ * defaults.
  *
  * Test: atest com.android.server.job.controllers.QuotaControllerTest
  */
@@ -93,8 +108,6 @@ public final class QuotaController extends StateController {
     private static final String TAG = "JobScheduler.Quota";
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
-
-    private static final long MINUTE_IN_MILLIS = 60 * 1000L;
 
     private static final String ALARM_TAG_CLEANUP = "*job.cleanup*";
     private static final String ALARM_TAG_QUOTA_CHECK = "*job.quota_check*";
@@ -244,6 +257,8 @@ public final class QuotaController extends StateController {
         public long expirationTimeElapsed;
 
         public long windowSizeMs;
+        public int jobCountLimit;
+        public int sessionCountLimit;
 
         /** The total amount of time the app ran in its respective bucket window size. */
         public long executionTimeInWindowMs;
@@ -260,54 +275,58 @@ public final class QuotaController extends StateController {
         public int sessionCountInWindow;
 
         /**
-         * The time after which the sum of all the app's sessions plus {@link #mQuotaBufferMs}
-         * equals the quota. This is only valid if
-         * executionTimeInWindowMs >= {@link #mAllowedTimePerPeriodMs} or
-         * executionTimeInMaxPeriodMs >= {@link #mMaxExecutionTimeMs}.
+         * The time after which the app will be under the bucket quota and can start running jobs
+         * again. This is only valid if
+         * {@link #executionTimeInWindowMs} >= {@link #mAllowedTimePerPeriodMs},
+         * {@link #executionTimeInMaxPeriodMs} >= {@link #mMaxExecutionTimeMs},
+         * {@link #bgJobCountInWindow} >= {@link #jobCountLimit}, or
+         * {@link #sessionCountInWindow} >= {@link #sessionCountLimit}.
          */
-        public long quotaCutoffTimeElapsed;
+        public long inQuotaTimeElapsed;
 
         /**
-         * The time after which {@link #jobCountInAllowedTime} should be considered invalid, in the
-         * elapsed realtime timebase.
+         * The time after which {@link #jobCountInRateLimitingWindow} should be considered invalid,
+         * in the elapsed realtime timebase.
          */
-        public long jobCountExpirationTimeElapsed;
+        public long jobRateLimitExpirationTimeElapsed;
 
         /**
-         * The number of jobs that ran in at least the last {@link #mAllowedTimePerPeriodMs}.
+         * The number of jobs that ran in at least the last {@link #mRateLimitingWindowMs}.
          * It may contain a few stale entries since cleanup won't happen exactly every
-         * {@link #mAllowedTimePerPeriodMs}.
+         * {@link #mRateLimitingWindowMs}.
          */
-        public int jobCountInAllowedTime;
+        public int jobCountInRateLimitingWindow;
 
         /**
-         * The time after which {@link #sessionCountInAllowedTime} should be considered
+         * The time after which {@link #sessionCountInRateLimitingWindow} should be considered
          * invalid, in the elapsed realtime timebase.
          */
-        public long sessionCountExpirationTimeElapsed;
+        public long sessionRateLimitExpirationTimeElapsed;
 
         /**
          * The number of {@link TimingSession}s that ran in at least the last
-         * {@link #mAllowedTimePerPeriodMs}. It may contain a few stale entries since cleanup won't
-         * happen exactly every {@link #mAllowedTimePerPeriodMs}. This should only be considered
-         * valid before elapsed realtime has reached {@link #sessionCountExpirationTimeElapsed}.
+         * {@link #mRateLimitingWindowMs}. It may contain a few stale entries since cleanup won't
+         * happen exactly every {@link #mRateLimitingWindowMs}. This should only be considered
+         * valid before elapsed realtime has reached {@link #sessionRateLimitExpirationTimeElapsed}.
          */
-        public int sessionCountInAllowedTime;
+        public int sessionCountInRateLimitingWindow;
 
         @Override
         public String toString() {
             return "expirationTime=" + expirationTimeElapsed + ", "
-                    + "windowSize=" + windowSizeMs + ", "
+                    + "windowSizeMs=" + windowSizeMs + ", "
+                    + "jobCountLimit=" + jobCountLimit + ", "
+                    + "sessionCountLimit=" + sessionCountLimit + ", "
                     + "executionTimeInWindow=" + executionTimeInWindowMs + ", "
                     + "bgJobCountInWindow=" + bgJobCountInWindow + ", "
                     + "executionTimeInMaxPeriod=" + executionTimeInMaxPeriodMs + ", "
                     + "bgJobCountInMaxPeriod=" + bgJobCountInMaxPeriod + ", "
                     + "sessionCountInWindow=" + sessionCountInWindow + ", "
-                    + "quotaCutoffTime=" + quotaCutoffTimeElapsed + ", "
-                    + "jobCountExpirationTime=" + jobCountExpirationTimeElapsed + ", "
-                    + "jobCountInAllowedTime=" + jobCountInAllowedTime + ", "
-                    + "sessionCountExpirationTime=" + sessionCountExpirationTimeElapsed + ", "
-                    + "sessionCountInAllowedTime=" + sessionCountInAllowedTime;
+                    + "inQuotaTime=" + inQuotaTimeElapsed + ", "
+                    + "jobCountExpirationTime=" + jobRateLimitExpirationTimeElapsed + ", "
+                    + "jobCountInRateLimitingWindow=" + jobCountInRateLimitingWindow + ", "
+                    + "sessionCountExpirationTime=" + sessionRateLimitExpirationTimeElapsed + ", "
+                    + "sessionCountInRateLimitingWindow=" + sessionCountInRateLimitingWindow;
         }
 
         @Override
@@ -316,18 +335,21 @@ public final class QuotaController extends StateController {
                 ExecutionStats other = (ExecutionStats) obj;
                 return this.expirationTimeElapsed == other.expirationTimeElapsed
                         && this.windowSizeMs == other.windowSizeMs
+                        && this.jobCountLimit == other.jobCountLimit
+                        && this.sessionCountLimit == other.sessionCountLimit
                         && this.executionTimeInWindowMs == other.executionTimeInWindowMs
                         && this.bgJobCountInWindow == other.bgJobCountInWindow
                         && this.executionTimeInMaxPeriodMs == other.executionTimeInMaxPeriodMs
                         && this.sessionCountInWindow == other.sessionCountInWindow
                         && this.bgJobCountInMaxPeriod == other.bgJobCountInMaxPeriod
-                        && this.quotaCutoffTimeElapsed == other.quotaCutoffTimeElapsed
-                        && this.jobCountExpirationTimeElapsed == other.jobCountExpirationTimeElapsed
-                        && this.jobCountInAllowedTime == other.jobCountInAllowedTime
-                        && this.sessionCountExpirationTimeElapsed
-                        == other.sessionCountExpirationTimeElapsed
-                        && this.sessionCountInAllowedTime
-                        == other.sessionCountInAllowedTime;
+                        && this.inQuotaTimeElapsed == other.inQuotaTimeElapsed
+                        && this.jobRateLimitExpirationTimeElapsed
+                                == other.jobRateLimitExpirationTimeElapsed
+                        && this.jobCountInRateLimitingWindow == other.jobCountInRateLimitingWindow
+                        && this.sessionRateLimitExpirationTimeElapsed
+                                == other.sessionRateLimitExpirationTimeElapsed
+                        && this.sessionCountInRateLimitingWindow
+                                == other.sessionCountInRateLimitingWindow;
             } else {
                 return false;
             }
@@ -338,16 +360,18 @@ public final class QuotaController extends StateController {
             int result = 0;
             result = 31 * result + hashLong(expirationTimeElapsed);
             result = 31 * result + hashLong(windowSizeMs);
+            result = 31 * result + hashLong(jobCountLimit);
+            result = 31 * result + hashLong(sessionCountLimit);
             result = 31 * result + hashLong(executionTimeInWindowMs);
             result = 31 * result + bgJobCountInWindow;
             result = 31 * result + hashLong(executionTimeInMaxPeriodMs);
             result = 31 * result + bgJobCountInMaxPeriod;
             result = 31 * result + sessionCountInWindow;
-            result = 31 * result + hashLong(quotaCutoffTimeElapsed);
-            result = 31 * result + hashLong(jobCountExpirationTimeElapsed);
-            result = 31 * result + jobCountInAllowedTime;
-            result = 31 * result + hashLong(sessionCountExpirationTimeElapsed);
-            result = 31 * result + sessionCountInAllowedTime;
+            result = 31 * result + hashLong(inQuotaTimeElapsed);
+            result = 31 * result + hashLong(jobRateLimitExpirationTimeElapsed);
+            result = 31 * result + jobCountInRateLimitingWindow;
+            result = 31 * result + hashLong(sessionRateLimitExpirationTimeElapsed);
+            result = 31 * result + sessionCountInRateLimitingWindow;
             return result;
         }
     }
@@ -399,19 +423,19 @@ public final class QuotaController extends StateController {
     private boolean mShouldThrottle;
 
     /** How much time each app will have to run jobs within their standby bucket window. */
-    private long mAllowedTimePerPeriodMs = 10 * MINUTE_IN_MILLIS;
+    private long mAllowedTimePerPeriodMs = QcConstants.DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
 
     /**
      * The maximum amount of time an app can have its jobs running within a {@link #MAX_PERIOD_MS}
      * window.
      */
-    private long mMaxExecutionTimeMs = 4 * 60 * MINUTE_IN_MILLIS;
+    private long mMaxExecutionTimeMs = QcConstants.DEFAULT_MAX_EXECUTION_TIME_MS;
 
     /**
      * How much time the app should have before transitioning from out-of-quota to in-quota.
      * This should not affect processing if the app is already in-quota.
      */
-    private long mQuotaBufferMs = 30 * 1000L; // 30 seconds
+    private long mQuotaBufferMs = QcConstants.DEFAULT_IN_QUOTA_BUFFER_MS;
 
     /**
      * {@link #mAllowedTimePerPeriodMs} - {@link #mQuotaBufferMs}. This can be used to determine
@@ -425,14 +449,19 @@ public final class QuotaController extends StateController {
      */
     private long mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
 
-    /** The maximum number of jobs that can run within the past {@link #mAllowedTimePerPeriodMs}. */
-    private int mMaxJobCountPerAllowedTime = 20;
+    /** The period of time used to rate limit recently run jobs. */
+    private long mRateLimitingWindowMs = QcConstants.DEFAULT_RATE_LIMITING_WINDOW_MS;
+
+    /** The maximum number of jobs that can run within the past {@link #mRateLimitingWindowMs}. */
+    private int mMaxJobCountPerRateLimitingWindow =
+            QcConstants.DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
 
     /**
      * The maximum number of {@link TimingSession}s that can run within the past {@link
-     * #mAllowedTimePerPeriodMs}.
+     * #mRateLimitingWindowMs}.
      */
-    private int mMaxSessionCountPerAllowedTime = 20;
+    private int mMaxSessionCountPerRateLimitingWindow =
+            QcConstants.DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW;
 
     private long mNextCleanupTimeElapsed = 0;
     private final AlarmManager.OnAlarmListener mSessionCleanupAlarmListener =
@@ -486,11 +515,11 @@ public final class QuotaController extends StateController {
      * The rolling window size for each standby bucket. Within each window, an app will have 10
      * minutes to run its jobs.
      */
-    private final long[] mBucketPeriodsMs = new long[] {
-            10 * MINUTE_IN_MILLIS, // 10 minutes for ACTIVE -- ACTIVE apps can run jobs at any time
-            2 * 60 * MINUTE_IN_MILLIS, // 2 hours for WORKING
-            8 * 60 * MINUTE_IN_MILLIS, // 8 hours for FREQUENT
-            24 * 60 * MINUTE_IN_MILLIS // 24 hours for RARE
+    private final long[] mBucketPeriodsMs = new long[]{
+            QcConstants.DEFAULT_WINDOW_SIZE_ACTIVE_MS,
+            QcConstants.DEFAULT_WINDOW_SIZE_WORKING_MS,
+            QcConstants.DEFAULT_WINDOW_SIZE_FREQUENT_MS,
+            QcConstants.DEFAULT_WINDOW_SIZE_RARE_MS
     };
 
     /** The maximum period any bucket can have. */
@@ -503,15 +532,12 @@ public final class QuotaController extends StateController {
      *
      * @see #mBucketPeriodsMs
      */
-    private final int[] mMaxBucketJobCounts = new int[] {
-            200,  // ACTIVE   -- 1200/hr
-            1200, // WORKING  -- 600/hr
-            1800, // FREQUENT -- 225/hr
-            2400  // RARE     -- 100/hr
+    private final int[] mMaxBucketJobCounts = new int[]{
+            QcConstants.DEFAULT_MAX_JOB_COUNT_ACTIVE,
+            QcConstants.DEFAULT_MAX_JOB_COUNT_WORKING,
+            QcConstants.DEFAULT_MAX_JOB_COUNT_FREQUENT,
+            QcConstants.DEFAULT_MAX_JOB_COUNT_RARE
     };
-
-    /** The minimum number of jobs that any bucket will be allowed to run. */
-    private static final int MIN_BUCKET_JOB_COUNT = 100;
 
     /**
      * The maximum number of {@link TimingSession}s based on its standby bucket. For each max value
@@ -527,14 +553,12 @@ public final class QuotaController extends StateController {
             QcConstants.DEFAULT_MAX_SESSION_COUNT_RARE
     };
 
-    /** The minimum number of {@link TimingSession}s that any bucket will be allowed to run. */
-    private static final int MIN_BUCKET_SESSION_COUNT = 3;
-
     /**
      * Treat two distinct {@link TimingSession}s as the same if they start and end within this
      * amount of time of each other.
      */
-    private long mTimingSessionCoalescingDurationMs = 0;
+    private long mTimingSessionCoalescingDurationMs =
+            QcConstants.DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS;
 
     /** An app has reached its quota. The message should contain a {@link Package} object. */
     private static final int MSG_REACHED_QUOTA = 0;
@@ -761,8 +785,8 @@ public final class QuotaController extends StateController {
             final int standbyBucket) {
         final long now = sElapsedRealtimeClock.millis();
         final boolean isUnderAllowedTimeQuota =
-                (stats.jobCountExpirationTimeElapsed <= now
-                        || stats.jobCountInAllowedTime < mMaxJobCountPerAllowedTime);
+                (stats.jobRateLimitExpirationTimeElapsed <= now
+                        || stats.jobCountInRateLimitingWindow < mMaxJobCountPerRateLimitingWindow);
         return isUnderAllowedTimeQuota
                 && (stats.bgJobCountInWindow < mMaxBucketJobCounts[standbyBucket]);
     }
@@ -770,10 +794,8 @@ public final class QuotaController extends StateController {
     private boolean isUnderSessionCountQuotaLocked(@NonNull ExecutionStats stats,
             final int standbyBucket) {
         final long now = sElapsedRealtimeClock.millis();
-        final boolean isUnderAllowedTimeQuota =
-                (stats.sessionCountExpirationTimeElapsed <= now
-                        || stats.sessionCountInAllowedTime
-                        < mMaxSessionCountPerAllowedTime);
+        final boolean isUnderAllowedTimeQuota = (stats.sessionRateLimitExpirationTimeElapsed <= now
+                || stats.sessionCountInRateLimitingWindow < mMaxSessionCountPerRateLimitingWindow);
         return isUnderAllowedTimeQuota
                 && stats.sessionCountInWindow < mMaxBucketSessionCounts[standbyBucket];
     }
@@ -924,12 +946,18 @@ public final class QuotaController extends StateController {
         }
         if (refreshStatsIfOld) {
             final long bucketWindowSizeMs = mBucketPeriodsMs[standbyBucket];
+            final int jobCountLimit = mMaxBucketJobCounts[standbyBucket];
+            final int sessionCountLimit = mMaxBucketSessionCounts[standbyBucket];
             Timer timer = mPkgTimers.get(userId, packageName);
             if ((timer != null && timer.isActive())
                     || stats.expirationTimeElapsed <= sElapsedRealtimeClock.millis()
-                    || stats.windowSizeMs != bucketWindowSizeMs) {
+                    || stats.windowSizeMs != bucketWindowSizeMs
+                    || stats.jobCountLimit != jobCountLimit
+                    || stats.sessionCountLimit != sessionCountLimit) {
                 // The stats are no longer valid.
                 stats.windowSizeMs = bucketWindowSizeMs;
+                stats.jobCountLimit = jobCountLimit;
+                stats.sessionCountLimit = sessionCountLimit;
                 updateExecutionStatsLocked(userId, packageName, stats);
             }
         }
@@ -945,7 +973,7 @@ public final class QuotaController extends StateController {
         stats.executionTimeInMaxPeriodMs = 0;
         stats.bgJobCountInMaxPeriod = 0;
         stats.sessionCountInWindow = 0;
-        stats.quotaCutoffTimeElapsed = 0;
+        stats.inQuotaTimeElapsed = 0;
 
         Timer timer = mPkgTimers.get(userId, packageName);
         final long nowElapsed = sElapsedRealtimeClock.millis();
@@ -958,12 +986,12 @@ public final class QuotaController extends StateController {
             // invalidate now.
             stats.expirationTimeElapsed = nowElapsed;
             if (stats.executionTimeInWindowMs >= mAllowedTimeIntoQuotaMs) {
-                stats.quotaCutoffTimeElapsed = Math.max(stats.quotaCutoffTimeElapsed,
-                        nowElapsed - mAllowedTimeIntoQuotaMs);
+                stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
+                        nowElapsed - mAllowedTimeIntoQuotaMs + stats.windowSizeMs);
             }
             if (stats.executionTimeInMaxPeriodMs >= mMaxExecutionTimeIntoQuotaMs) {
-                stats.quotaCutoffTimeElapsed = Math.max(stats.quotaCutoffTimeElapsed,
-                        nowElapsed - mMaxExecutionTimeIntoQuotaMs);
+                stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
+                        nowElapsed - mMaxExecutionTimeIntoQuotaMs + MAX_PERIOD_MS);
             }
         }
 
@@ -985,36 +1013,40 @@ public final class QuotaController extends StateController {
             TimingSession session = sessions.get(i);
 
             // Window management.
-            if (startWindowElapsed < session.startTimeElapsed) {
-                stats.executionTimeInWindowMs += session.endTimeElapsed - session.startTimeElapsed;
+            if (startWindowElapsed < session.endTimeElapsed) {
+                final long start;
+                if (startWindowElapsed < session.startTimeElapsed) {
+                    start = session.startTimeElapsed;
+                    emptyTimeMs =
+                            Math.min(emptyTimeMs, session.startTimeElapsed - startWindowElapsed);
+                } else {
+                    // The session started before the window but ended within the window. Only
+                    // include the portion that was within the window.
+                    start = startWindowElapsed;
+                    emptyTimeMs = 0;
+                }
+
+                stats.executionTimeInWindowMs += session.endTimeElapsed - start;
                 stats.bgJobCountInWindow += session.bgJobCount;
-                emptyTimeMs = Math.min(emptyTimeMs, session.startTimeElapsed - startWindowElapsed);
                 if (stats.executionTimeInWindowMs >= mAllowedTimeIntoQuotaMs) {
-                    stats.quotaCutoffTimeElapsed = Math.max(stats.quotaCutoffTimeElapsed,
-                            session.startTimeElapsed + stats.executionTimeInWindowMs
-                                    - mAllowedTimeIntoQuotaMs);
+                    stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
+                            start + stats.executionTimeInWindowMs - mAllowedTimeIntoQuotaMs
+                                    + stats.windowSizeMs);
+                }
+                if (stats.bgJobCountInWindow >= stats.jobCountLimit) {
+                    stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
+                            session.endTimeElapsed + stats.windowSizeMs);
                 }
                 if (i == loopStart
                         || (sessions.get(i + 1).startTimeElapsed - session.endTimeElapsed)
                                 > mTimingSessionCoalescingDurationMs) {
                     // Coalesce sessions if they are very close to each other in time
                     sessionCountInWindow++;
-                }
-            } else if (startWindowElapsed < session.endTimeElapsed) {
-                // The session started before the window but ended within the window. Only include
-                // the portion that was within the window.
-                stats.executionTimeInWindowMs += session.endTimeElapsed - startWindowElapsed;
-                stats.bgJobCountInWindow += session.bgJobCount;
-                emptyTimeMs = 0;
-                if (stats.executionTimeInWindowMs >= mAllowedTimeIntoQuotaMs) {
-                    stats.quotaCutoffTimeElapsed = Math.max(stats.quotaCutoffTimeElapsed,
-                            startWindowElapsed + stats.executionTimeInWindowMs
-                                    - mAllowedTimeIntoQuotaMs);
-                }
-                if (i == loopStart
-                        || (sessions.get(i + 1).startTimeElapsed - session.endTimeElapsed)
-                                > mTimingSessionCoalescingDurationMs) {
-                    sessionCountInWindow++;
+
+                    if (sessionCountInWindow >= stats.sessionCountLimit) {
+                        stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
+                                session.endTimeElapsed + stats.windowSizeMs);
+                    }
                 }
             }
 
@@ -1025,9 +1057,9 @@ public final class QuotaController extends StateController {
                 stats.bgJobCountInMaxPeriod += session.bgJobCount;
                 emptyTimeMs = Math.min(emptyTimeMs, session.startTimeElapsed - startMaxElapsed);
                 if (stats.executionTimeInMaxPeriodMs >= mMaxExecutionTimeIntoQuotaMs) {
-                    stats.quotaCutoffTimeElapsed = Math.max(stats.quotaCutoffTimeElapsed,
+                    stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
                             session.startTimeElapsed + stats.executionTimeInMaxPeriodMs
-                                    - mMaxExecutionTimeIntoQuotaMs);
+                                    - mMaxExecutionTimeIntoQuotaMs + MAX_PERIOD_MS);
                 }
             } else if (startMaxElapsed < session.endTimeElapsed) {
                 // The session started before the window but ended within the window. Only include
@@ -1036,9 +1068,9 @@ public final class QuotaController extends StateController {
                 stats.bgJobCountInMaxPeriod += session.bgJobCount;
                 emptyTimeMs = 0;
                 if (stats.executionTimeInMaxPeriodMs >= mMaxExecutionTimeIntoQuotaMs) {
-                    stats.quotaCutoffTimeElapsed = Math.max(stats.quotaCutoffTimeElapsed,
+                    stats.inQuotaTimeElapsed = Math.max(stats.inQuotaTimeElapsed,
                             startMaxElapsed + stats.executionTimeInMaxPeriodMs
-                                    - mMaxExecutionTimeIntoQuotaMs);
+                                    - mMaxExecutionTimeIntoQuotaMs + MAX_PERIOD_MS);
                 }
             } else {
                 // This session ended before the window. No point in going any further.
@@ -1094,11 +1126,11 @@ public final class QuotaController extends StateController {
                 stats = new ExecutionStats();
                 appStats[i] = stats;
             }
-            if (stats.jobCountExpirationTimeElapsed <= now) {
-                stats.jobCountExpirationTimeElapsed = now + mAllowedTimePerPeriodMs;
-                stats.jobCountInAllowedTime = 0;
+            if (stats.jobRateLimitExpirationTimeElapsed <= now) {
+                stats.jobRateLimitExpirationTimeElapsed = now + mRateLimitingWindowMs;
+                stats.jobCountInRateLimitingWindow = 0;
             }
-            stats.jobCountInAllowedTime += count;
+            stats.jobCountInRateLimitingWindow += count;
         }
     }
 
@@ -1115,11 +1147,11 @@ public final class QuotaController extends StateController {
                 stats = new ExecutionStats();
                 appStats[i] = stats;
             }
-            if (stats.sessionCountExpirationTimeElapsed <= now) {
-                stats.sessionCountExpirationTimeElapsed = now + mAllowedTimePerPeriodMs;
-                stats.sessionCountInAllowedTime = 0;
+            if (stats.sessionRateLimitExpirationTimeElapsed <= now) {
+                stats.sessionRateLimitExpirationTimeElapsed = now + mRateLimitingWindowMs;
+                stats.sessionCountInRateLimitingWindow = 0;
             }
-            stats.sessionCountInAllowedTime++;
+            stats.sessionCountInRateLimitingWindow++;
         }
     }
 
@@ -1367,18 +1399,17 @@ public final class QuotaController extends StateController {
         }
 
         // The time this app will have quota again.
-        long inQuotaTimeElapsed = stats.quotaCutoffTimeElapsed + stats.windowSizeMs;
-        if (stats.executionTimeInMaxPeriodMs >= mMaxExecutionTimeMs) {
+        long inQuotaTimeElapsed = stats.inQuotaTimeElapsed;
+        if (!isUnderJobCountQuota && stats.bgJobCountInWindow < stats.jobCountLimit) {
+            // App hit the rate limit.
             inQuotaTimeElapsed = Math.max(inQuotaTimeElapsed,
-                    stats.quotaCutoffTimeElapsed + MAX_PERIOD_MS);
+                    stats.jobRateLimitExpirationTimeElapsed);
         }
-        if (!isUnderJobCountQuota) {
+        if (!isUnderTimingSessionCountQuota
+                && stats.sessionCountInWindow < stats.sessionCountLimit) {
+            // App hit the rate limit.
             inQuotaTimeElapsed = Math.max(inQuotaTimeElapsed,
-                    stats.jobCountExpirationTimeElapsed + mAllowedTimePerPeriodMs);
-        }
-        if (!isUnderTimingSessionCountQuota) {
-            inQuotaTimeElapsed = Math.max(inQuotaTimeElapsed,
-                    stats.sessionCountExpirationTimeElapsed + mAllowedTimePerPeriodMs);
+                    stats.sessionRateLimitExpirationTimeElapsed);
         }
         // Only schedule the alarm if:
         // 1. There isn't one currently scheduled
@@ -1399,7 +1430,7 @@ public final class QuotaController extends StateController {
                     ALARM_TAG_QUOTA_CHECK, alarmListener, mHandler);
             alarmListener.setTriggerTime(inQuotaTimeElapsed);
         } else if (DEBUG) {
-            Slog.d(TAG, "No need to scheduling start alarm for " + pkgString);
+            Slog.d(TAG, "No need to schedule start alarm for " + pkgString);
         }
     }
 
@@ -1968,14 +1999,15 @@ public final class QuotaController extends StateController {
         private static final String KEY_MAX_JOB_COUNT_WORKING = "max_job_count_working";
         private static final String KEY_MAX_JOB_COUNT_FREQUENT = "max_job_count_frequent";
         private static final String KEY_MAX_JOB_COUNT_RARE = "max_job_count_rare";
-        private static final String KEY_MAX_JOB_COUNT_PER_ALLOWED_TIME =
-                "max_count_per_allowed_time";
+        private static final String KEY_RATE_LIMITING_WINDOW_MS = "rate_limiting_window_ms";
+        private static final String KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW =
+                "max_job_count_per_rate_limiting_window";
         private static final String KEY_MAX_SESSION_COUNT_ACTIVE = "max_session_count_active";
         private static final String KEY_MAX_SESSION_COUNT_WORKING = "max_session_count_working";
         private static final String KEY_MAX_SESSION_COUNT_FREQUENT = "max_session_count_frequent";
         private static final String KEY_MAX_SESSION_COUNT_RARE = "max_session_count_rare";
-        private static final String KEY_MAX_SESSION_COUNT_PER_ALLOWED_TIME =
-                "max_session_count_per_allowed_time";
+        private static final String KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW =
+                "max_session_count_per_rate_limiting_window";
         private static final String KEY_TIMING_SESSION_COALESCING_DURATION_MS =
                 "timing_session_coalescing_duration_ms";
 
@@ -1984,7 +2016,7 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_IN_QUOTA_BUFFER_MS =
                 30 * 1000L; // 30 seconds
         private static final long DEFAULT_WINDOW_SIZE_ACTIVE_MS =
-                10 * 60 * 1000L; // 10 minutes for ACTIVE -- ACTIVE apps can run jobs at any time
+                DEFAULT_ALLOWED_TIME_PER_PERIOD_MS; // ACTIVE apps can run jobs at any time
         private static final long DEFAULT_WINDOW_SIZE_WORKING_MS =
                 2 * 60 * 60 * 1000L; // 2 hours
         private static final long DEFAULT_WINDOW_SIZE_FREQUENT_MS =
@@ -1992,16 +2024,18 @@ public final class QuotaController extends StateController {
         private static final long DEFAULT_WINDOW_SIZE_RARE_MS =
                 24 * 60 * 60 * 1000L; // 24 hours
         private static final long DEFAULT_MAX_EXECUTION_TIME_MS =
-                4 * 60 * 60 * 1000L; // 4 hours
-        private static final int DEFAULT_MAX_JOB_COUNT_ACTIVE =
-                200; // 1200/hr
-        private static final int DEFAULT_MAX_JOB_COUNT_WORKING =
-                1200; // 600/hr
-        private static final int DEFAULT_MAX_JOB_COUNT_FREQUENT =
-                1800; // 225/hr
-        private static final int DEFAULT_MAX_JOB_COUNT_RARE =
-                2400; // 100/hr
-        private static final int DEFAULT_MAX_JOB_COUNT_PER_ALLOWED_TIME = 20;
+                4 * HOUR_IN_MILLIS;
+        private static final long DEFAULT_RATE_LIMITING_WINDOW_MS =
+                10 * MINUTE_IN_MILLIS;
+        private static final int DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW = 20;
+        private static final int DEFAULT_MAX_JOB_COUNT_ACTIVE = // 20/window = 120/hr = 1/session
+                DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
+        private static final int DEFAULT_MAX_JOB_COUNT_WORKING = // 120/window = 60/hr = 12/session
+                (int) (60.0 * DEFAULT_WINDOW_SIZE_WORKING_MS / HOUR_IN_MILLIS);
+        private static final int DEFAULT_MAX_JOB_COUNT_FREQUENT = // 200/window = 25/hr = 25/session
+                (int) (25.0 * DEFAULT_WINDOW_SIZE_FREQUENT_MS / HOUR_IN_MILLIS);
+        private static final int DEFAULT_MAX_JOB_COUNT_RARE = // 48/window = 2/hr = 16/session
+                (int) (2.0 * DEFAULT_WINDOW_SIZE_RARE_MS / HOUR_IN_MILLIS);
         private static final int DEFAULT_MAX_SESSION_COUNT_ACTIVE =
                 20; // 120/hr
         private static final int DEFAULT_MAX_SESSION_COUNT_WORKING =
@@ -2010,8 +2044,8 @@ public final class QuotaController extends StateController {
                 8; // 1/hr
         private static final int DEFAULT_MAX_SESSION_COUNT_RARE =
                 3; // .125/hr
-        private static final int DEFAULT_MAX_SESSION_COUNT_PER_ALLOWED_TIME = 20;
-        private static final long DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS = 0;
+        private static final int DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = 20;
+        private static final long DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS = 5000; // 5 seconds
 
         /** How much time each app will have to run jobs within their standby bucket window. */
         public long ALLOWED_TIME_PER_PERIOD_MS = DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
@@ -2079,11 +2113,14 @@ public final class QuotaController extends StateController {
          */
         public int MAX_JOB_COUNT_RARE = DEFAULT_MAX_JOB_COUNT_RARE;
 
+        /** The period of time used to rate limit recently run jobs. */
+        public long RATE_LIMITING_WINDOW_MS = DEFAULT_RATE_LIMITING_WINDOW_MS;
+
         /**
-         * The maximum number of jobs that can run within the past
-         * {@link #ALLOWED_TIME_PER_PERIOD_MS}.
+         * The maximum number of jobs that can run within the past {@link #RATE_LIMITING_WINDOW_MS}.
          */
-        public int MAX_JOB_COUNT_PER_ALLOWED_TIME = DEFAULT_MAX_JOB_COUNT_PER_ALLOWED_TIME;
+        public int MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW =
+                DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW;
 
         /**
          * The maximum number of {@link TimingSession}s an app can run within this particular
@@ -2113,7 +2150,8 @@ public final class QuotaController extends StateController {
          * The maximum number of {@link TimingSession}s that can run within the past
          * {@link #ALLOWED_TIME_PER_PERIOD_MS}.
          */
-        public int MAX_SESSION_COUNT_PER_ALLOWED_TIME = DEFAULT_MAX_SESSION_COUNT_PER_ALLOWED_TIME;
+        public int MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW =
+                DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW;
 
         /**
          * Treat two distinct {@link TimingSession}s as the same if they start and end within this
@@ -2121,6 +2159,29 @@ public final class QuotaController extends StateController {
          */
         public long TIMING_SESSION_COALESCING_DURATION_MS =
                 DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS;
+
+        // Safeguards
+
+        /** The minimum number of jobs that any bucket will be allowed to run within its window. */
+        private static final int MIN_BUCKET_JOB_COUNT = 10;
+
+        /**
+         * The minimum number of {@link TimingSession}s that any bucket will be allowed to run
+         * within its window.
+         */
+        private static final int MIN_BUCKET_SESSION_COUNT = 1;
+
+        /** The minimum value that {@link #MAX_EXECUTION_TIME_MS} can have. */
+        private static final long MIN_MAX_EXECUTION_TIME_MS = 60 * MINUTE_IN_MILLIS;
+
+        /** The minimum value that {@link #MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW} can have. */
+        private static final int MIN_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW = 10;
+
+        /** The minimum value that {@link #MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW} can have. */
+        private static final int MIN_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = 10;
+
+        /** The minimum value that {@link #RATE_LIMITING_WINDOW_MS} can have. */
+        private static final long MIN_RATE_LIMITING_WINDOW_MS = 30 * SECOND_IN_MILLIS;
 
         QcConstants(Handler handler) {
             super(handler);
@@ -2167,8 +2228,11 @@ public final class QuotaController extends StateController {
                     KEY_MAX_JOB_COUNT_FREQUENT, DEFAULT_MAX_JOB_COUNT_FREQUENT);
             MAX_JOB_COUNT_RARE = mParser.getInt(
                     KEY_MAX_JOB_COUNT_RARE, DEFAULT_MAX_JOB_COUNT_RARE);
-            MAX_JOB_COUNT_PER_ALLOWED_TIME = mParser.getInt(
-                    KEY_MAX_JOB_COUNT_PER_ALLOWED_TIME, DEFAULT_MAX_JOB_COUNT_PER_ALLOWED_TIME);
+            RATE_LIMITING_WINDOW_MS = mParser.getLong(
+                    KEY_RATE_LIMITING_WINDOW_MS, DEFAULT_RATE_LIMITING_WINDOW_MS);
+            MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW = mParser.getInt(
+                    KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                    DEFAULT_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
             MAX_SESSION_COUNT_ACTIVE = mParser.getInt(
                     KEY_MAX_SESSION_COUNT_ACTIVE, DEFAULT_MAX_SESSION_COUNT_ACTIVE);
             MAX_SESSION_COUNT_WORKING = mParser.getInt(
@@ -2177,9 +2241,9 @@ public final class QuotaController extends StateController {
                     KEY_MAX_SESSION_COUNT_FREQUENT, DEFAULT_MAX_SESSION_COUNT_FREQUENT);
             MAX_SESSION_COUNT_RARE = mParser.getInt(
                     KEY_MAX_SESSION_COUNT_RARE, DEFAULT_MAX_SESSION_COUNT_RARE);
-            MAX_SESSION_COUNT_PER_ALLOWED_TIME = mParser.getInt(
-                    KEY_MAX_SESSION_COUNT_PER_ALLOWED_TIME,
-                    DEFAULT_MAX_SESSION_COUNT_PER_ALLOWED_TIME);
+            MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW = mParser.getInt(
+                    KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+                    DEFAULT_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
             TIMING_SESSION_COALESCING_DURATION_MS = mParser.getLong(
                     KEY_TIMING_SESSION_COALESCING_DURATION_MS,
                     DEFAULT_TIMING_SESSION_COALESCING_DURATION_MS);
@@ -2192,7 +2256,14 @@ public final class QuotaController extends StateController {
             synchronized (mLock) {
                 boolean changed = false;
 
-                long newAllowedTimeMs = Math.min(MAX_PERIOD_MS,
+                long newMaxExecutionTimeMs = Math.max(MIN_MAX_EXECUTION_TIME_MS,
+                        Math.min(MAX_PERIOD_MS, MAX_EXECUTION_TIME_MS));
+                if (mMaxExecutionTimeMs != newMaxExecutionTimeMs) {
+                    mMaxExecutionTimeMs = newMaxExecutionTimeMs;
+                    mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
+                    changed = true;
+                }
+                long newAllowedTimeMs = Math.min(mMaxExecutionTimeMs,
                         Math.max(MINUTE_IN_MILLIS, ALLOWED_TIME_PER_PERIOD_MS));
                 if (mAllowedTimePerPeriodMs != newAllowedTimeMs) {
                     mAllowedTimePerPeriodMs = newAllowedTimeMs;
@@ -2231,47 +2302,44 @@ public final class QuotaController extends StateController {
                     mBucketPeriodsMs[RARE_INDEX] = newRarePeriodMs;
                     changed = true;
                 }
-                long newMaxExecutionTimeMs = Math.max(60 * MINUTE_IN_MILLIS,
-                        Math.min(MAX_PERIOD_MS, MAX_EXECUTION_TIME_MS));
-                if (mMaxExecutionTimeMs != newMaxExecutionTimeMs) {
-                    mMaxExecutionTimeMs = newMaxExecutionTimeMs;
-                    mMaxExecutionTimeIntoQuotaMs = mMaxExecutionTimeMs - mQuotaBufferMs;
+                long newRateLimitingWindowMs = Math.min(MAX_PERIOD_MS,
+                        Math.max(MIN_RATE_LIMITING_WINDOW_MS, RATE_LIMITING_WINDOW_MS));
+                if (mRateLimitingWindowMs != newRateLimitingWindowMs) {
+                    mRateLimitingWindowMs = newRateLimitingWindowMs;
                     changed = true;
                 }
-                int newMaxCountPerAllowedPeriod = Math.max(10,
-                        MAX_JOB_COUNT_PER_ALLOWED_TIME);
-                if (mMaxJobCountPerAllowedTime != newMaxCountPerAllowedPeriod) {
-                    mMaxJobCountPerAllowedTime = newMaxCountPerAllowedPeriod;
+                int newMaxJobCountPerRateLimitingWindow = Math.max(
+                        MIN_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                        MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
+                if (mMaxJobCountPerRateLimitingWindow != newMaxJobCountPerRateLimitingWindow) {
+                    mMaxJobCountPerRateLimitingWindow = newMaxJobCountPerRateLimitingWindow;
                     changed = true;
                 }
-                int newActiveMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_ACTIVE));
+                int newActiveMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_ACTIVE);
                 if (mMaxBucketJobCounts[ACTIVE_INDEX] != newActiveMaxJobCount) {
                     mMaxBucketJobCounts[ACTIVE_INDEX] = newActiveMaxJobCount;
                     changed = true;
                 }
-                int newWorkingMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_WORKING));
+                int newWorkingMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_WORKING);
                 if (mMaxBucketJobCounts[WORKING_INDEX] != newWorkingMaxJobCount) {
                     mMaxBucketJobCounts[WORKING_INDEX] = newWorkingMaxJobCount;
                     changed = true;
                 }
-                int newFrequentMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_FREQUENT));
+                int newFrequentMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_FREQUENT);
                 if (mMaxBucketJobCounts[FREQUENT_INDEX] != newFrequentMaxJobCount) {
                     mMaxBucketJobCounts[FREQUENT_INDEX] = newFrequentMaxJobCount;
                     changed = true;
                 }
-                int newRareMaxJobCount = Math.max(mMaxJobCountPerAllowedTime,
-                        Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_RARE));
+                int newRareMaxJobCount = Math.max(MIN_BUCKET_JOB_COUNT, MAX_JOB_COUNT_RARE);
                 if (mMaxBucketJobCounts[RARE_INDEX] != newRareMaxJobCount) {
                     mMaxBucketJobCounts[RARE_INDEX] = newRareMaxJobCount;
                     changed = true;
                 }
-                int newMaxSessionCountPerAllowedPeriod = Math.max(10,
-                        MAX_SESSION_COUNT_PER_ALLOWED_TIME);
-                if (mMaxSessionCountPerAllowedTime != newMaxSessionCountPerAllowedPeriod) {
-                    mMaxSessionCountPerAllowedTime = newMaxSessionCountPerAllowedPeriod;
+                int newMaxSessionCountPerRateLimitPeriod = Math.max(
+                        MIN_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+                        MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
+                if (mMaxSessionCountPerRateLimitingWindow != newMaxSessionCountPerRateLimitPeriod) {
+                    mMaxSessionCountPerRateLimitingWindow = newMaxSessionCountPerRateLimitPeriod;
                     changed = true;
                 }
                 int newActiveMaxSessionCount =
@@ -2332,14 +2400,15 @@ public final class QuotaController extends StateController {
             pw.printPair(KEY_MAX_JOB_COUNT_WORKING, MAX_JOB_COUNT_WORKING).println();
             pw.printPair(KEY_MAX_JOB_COUNT_FREQUENT, MAX_JOB_COUNT_FREQUENT).println();
             pw.printPair(KEY_MAX_JOB_COUNT_RARE, MAX_JOB_COUNT_RARE).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_PER_ALLOWED_TIME, MAX_JOB_COUNT_PER_ALLOWED_TIME)
-                    .println();
+            pw.printPair(KEY_RATE_LIMITING_WINDOW_MS, RATE_LIMITING_WINDOW_MS).println();
+            pw.printPair(KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                    MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW).println();
             pw.printPair(KEY_MAX_SESSION_COUNT_ACTIVE, MAX_SESSION_COUNT_ACTIVE).println();
             pw.printPair(KEY_MAX_SESSION_COUNT_WORKING, MAX_SESSION_COUNT_WORKING).println();
             pw.printPair(KEY_MAX_SESSION_COUNT_FREQUENT, MAX_SESSION_COUNT_FREQUENT).println();
             pw.printPair(KEY_MAX_SESSION_COUNT_RARE, MAX_SESSION_COUNT_RARE).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_PER_ALLOWED_TIME, MAX_SESSION_COUNT_PER_ALLOWED_TIME)
-                    .println();
+            pw.printPair(KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+                    MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW).println();
             pw.printPair(KEY_TIMING_SESSION_COALESCING_DURATION_MS,
                     TIMING_SESSION_COALESCING_DURATION_MS).println();
             pw.decreaseIndent();
@@ -2365,8 +2434,10 @@ public final class QuotaController extends StateController {
             proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_FREQUENT,
                     MAX_JOB_COUNT_FREQUENT);
             proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_RARE, MAX_JOB_COUNT_RARE);
-            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_PER_ALLOWED_TIME,
-                    MAX_JOB_COUNT_PER_ALLOWED_TIME);
+            proto.write(ConstantsProto.QuotaController.RATE_LIMITING_WINDOW_MS,
+                    RATE_LIMITING_WINDOW_MS);
+            proto.write(ConstantsProto.QuotaController.MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+                    MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW);
             proto.write(ConstantsProto.QuotaController.MAX_SESSION_COUNT_ACTIVE,
                     MAX_SESSION_COUNT_ACTIVE);
             proto.write(ConstantsProto.QuotaController.MAX_SESSION_COUNT_WORKING,
@@ -2375,8 +2446,8 @@ public final class QuotaController extends StateController {
                     MAX_SESSION_COUNT_FREQUENT);
             proto.write(ConstantsProto.QuotaController.MAX_SESSION_COUNT_RARE,
                     MAX_SESSION_COUNT_RARE);
-            proto.write(ConstantsProto.QuotaController.MAX_SESSION_COUNT_PER_ALLOWED_TIME,
-                    MAX_SESSION_COUNT_PER_ALLOWED_TIME);
+            proto.write(ConstantsProto.QuotaController.MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+                    MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW);
             proto.write(ConstantsProto.QuotaController.TIMING_SESSION_COALESCING_DURATION_MS,
                     TIMING_SESSION_COALESCING_DURATION_MS);
             proto.end(qcToken);
@@ -2431,18 +2502,23 @@ public final class QuotaController extends StateController {
     }
 
     @VisibleForTesting
-    int getMaxJobCountPerAllowedTime() {
-        return mMaxJobCountPerAllowedTime;
+    int getMaxJobCountPerRateLimitingWindow() {
+        return mMaxJobCountPerRateLimitingWindow;
+    }
+
+    @VisibleForTesting
+    int getMaxSessionCountPerRateLimitingWindow() {
+        return mMaxSessionCountPerRateLimitingWindow;
+    }
+
+    @VisibleForTesting
+    long getRateLimitingWindowMs() {
+        return mRateLimitingWindowMs;
     }
 
     @VisibleForTesting
     long getTimingSessionCoalescingDurationMs() {
         return mTimingSessionCoalescingDurationMs;
-    }
-
-    @VisibleForTesting
-    int getMaxSessionCountPerAllowedTime() {
-        return mMaxSessionCountPerAllowedTime;
     }
 
     @VisibleForTesting
@@ -2659,6 +2735,12 @@ public final class QuotaController extends StateController {
                                 StateControllerProto.QuotaController.ExecutionStats.WINDOW_SIZE_MS,
                                 es.windowSizeMs);
                         proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.JOB_COUNT_LIMIT,
+                                es.jobCountLimit);
+                        proto.write(
+                                StateControllerProto.QuotaController.ExecutionStats.SESSION_COUNT_LIMIT,
+                                es.sessionCountLimit);
+                        proto.write(
                                 StateControllerProto.QuotaController.ExecutionStats.EXECUTION_TIME_IN_WINDOW_MS,
                                 es.executionTimeInWindowMs);
                         proto.write(
@@ -2674,20 +2756,20 @@ public final class QuotaController extends StateController {
                                 StateControllerProto.QuotaController.ExecutionStats.SESSION_COUNT_IN_WINDOW,
                                 es.sessionCountInWindow);
                         proto.write(
-                                StateControllerProto.QuotaController.ExecutionStats.QUOTA_CUTOFF_TIME_ELAPSED,
-                                es.quotaCutoffTimeElapsed);
+                                StateControllerProto.QuotaController.ExecutionStats.IN_QUOTA_TIME_ELAPSED,
+                                es.inQuotaTimeElapsed);
                         proto.write(
                                 StateControllerProto.QuotaController.ExecutionStats.JOB_COUNT_EXPIRATION_TIME_ELAPSED,
-                                es.jobCountExpirationTimeElapsed);
+                                es.jobRateLimitExpirationTimeElapsed);
                         proto.write(
-                                StateControllerProto.QuotaController.ExecutionStats.JOB_COUNT_IN_ALLOWED_TIME,
-                                es.jobCountInAllowedTime);
+                                StateControllerProto.QuotaController.ExecutionStats.JOB_COUNT_IN_RATE_LIMITING_WINDOW,
+                                es.jobCountInRateLimitingWindow);
                         proto.write(
                                 StateControllerProto.QuotaController.ExecutionStats.SESSION_COUNT_EXPIRATION_TIME_ELAPSED,
-                                es.sessionCountExpirationTimeElapsed);
+                                es.sessionRateLimitExpirationTimeElapsed);
                         proto.write(
-                                StateControllerProto.QuotaController.ExecutionStats.SESSION_COUNT_IN_ALLOWED_TIME,
-                                es.sessionCountInAllowedTime);
+                                StateControllerProto.QuotaController.ExecutionStats.SESSION_COUNT_IN_RATE_LIMITING_WINDOW,
+                                es.sessionCountInRateLimitingWindow);
                         proto.end(esToken);
                     }
                 }

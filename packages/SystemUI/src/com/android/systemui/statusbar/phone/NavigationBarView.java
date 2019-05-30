@@ -299,7 +299,7 @@ public class NavigationBarView extends FrameLayout implements
         return mTintController;
     }
 
-    public BarTransitions getBarTransitions() {
+    public NavigationBarTransitions getBarTransitions() {
         return mBarTransitions;
     }
 
