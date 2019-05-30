@@ -953,30 +953,21 @@ public class Vpn {
             return false;
         }
 
-        LinkProperties lp = makeLinkProperties();
-        final boolean hadInternetCapability = mNetworkCapabilities.hasCapability(
-                NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        final boolean willHaveInternetCapability = providesRoutesToMostDestinations(lp);
-        if (hadInternetCapability != willHaveInternetCapability) {
-            // A seamless handover would have led to a change to INTERNET capability, which
-            // is supposed to be immutable for a given network. In this case bail out and do not
-            // perform handover.
-            Log.i(TAG, "Handover not possible due to changes to INTERNET capability");
-            return false;
-        }
-
-        agent.sendLinkProperties(lp);
+        agent.sendLinkProperties(makeLinkProperties());
         return true;
     }
 
     private void agentConnect() {
         LinkProperties lp = makeLinkProperties();
 
-        if (providesRoutesToMostDestinations(lp)) {
-            mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        } else {
-            mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-        }
+        // VPN either provide a default route (IPv4 or IPv6 or both), or they are a split tunnel
+        // that falls back to the default network, which by definition provides INTERNET (unless
+        // there is no default network, in which case none of this matters in any sense).
+        // Also, it guarantees that when a VPN applies to an app, the VPN will always be reported
+        // as the network by getDefaultNetwork and registerDefaultNetworkCallback. This in turn
+        // protects the invariant that apps calling CM#bindProcessToNetwork(getDefaultNetwork())
+        // the same as if they use the default network.
+        mNetworkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
 
         mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
 
