@@ -86,6 +86,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -170,6 +171,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     public int mDisplayId;
     private boolean mIsOnDefaultDisplay;
     public boolean mHomeBlockedThisTouch;
+    private ScreenDecorations mScreenDecorations;
 
     private Handler mHandler = Dependency.get(Dependency.MAIN_HANDLER);
 
@@ -348,12 +350,17 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mDisabledFlags2 |= StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
         }
         setDisabled2Flags(mDisabledFlags2);
+
+        mScreenDecorations = SysUiServiceProvider.getComponent(getContext(),
+                ScreenDecorations.class);
+        getBarTransitions().addDarkIntensityListener(mScreenDecorations);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         if (mNavigationBarView != null) {
+            mNavigationBarView.getBarTransitions().removeDarkIntensityListener(mScreenDecorations);
             mNavigationBarView.getBarTransitions().destroy();
             mNavigationBarView.getLightTransitionsController().destroy(getContext());
         }
@@ -1020,7 +1027,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         getBarTransitions().transitionTo(barMode, animate);
     }
 
-    private BarTransitions getBarTransitions() {
+    public NavigationBarTransitions getBarTransitions() {
         return mNavigationBarView.getBarTransitions();
     }
 
