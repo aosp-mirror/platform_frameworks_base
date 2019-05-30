@@ -237,9 +237,15 @@ public class NetworkNotificationManager {
                     + getTransportName(transportType));
             return;
         }
-
-        final String channelId = highPriority ? SystemNotificationChannels.NETWORK_ALERTS :
-                SystemNotificationChannels.NETWORK_STATUS;
+        // When replacing an existing notification for a given network, don't alert, just silently
+        // update the existing notification. Note that setOnlyAlertOnce() will only work for the
+        // same id, and the id used here is the NotificationType which is different in every type of
+        // notification. This is required because the notification metrics only track the ID but not
+        // the tag.
+        final boolean hasPreviousNotification = previousNotifyType != null;
+        final String channelId = (highPriority && !hasPreviousNotification)
+                ? SystemNotificationChannels.NETWORK_ALERTS
+                : SystemNotificationChannels.NETWORK_STATUS;
         Notification.Builder builder = new Notification.Builder(mContext, channelId)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(notifyType == NotificationType.NETWORK_SWITCH)
