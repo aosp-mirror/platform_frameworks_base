@@ -22,8 +22,9 @@ import android.stats.devicepolicy.nano.StringList;
 import android.util.StatsLog;
 
 import com.android.framework.protobuf.nano.MessageNano;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+
+import java.util.Arrays;
 
 /**
  * A wrapper for logging managed device events using {@link StatsLog}.
@@ -45,7 +46,7 @@ import com.android.internal.util.Preconditions;
  * @see StatsLog
  * @hide
  */
-public final class DevicePolicyEventLogger {
+public class DevicePolicyEventLogger {
     private final int mEventId;
     private int mIntValue;
     private boolean mBooleanValue;
@@ -71,7 +72,6 @@ public final class DevicePolicyEventLogger {
     /**
      * Returns the event id.
      */
-    @VisibleForTesting
     public int getEventId() {
         return mEventId;
     }
@@ -87,7 +87,6 @@ public final class DevicePolicyEventLogger {
     /**
      * Returns the generic <code>int</code> value.
      */
-    @VisibleForTesting
     public int getInt() {
         return mIntValue;
     }
@@ -103,7 +102,6 @@ public final class DevicePolicyEventLogger {
     /**
      * Returns the generic <code>boolean</code> value.
      */
-    @VisibleForTesting
     public boolean getBoolean() {
         return mBooleanValue;
     }
@@ -119,7 +117,6 @@ public final class DevicePolicyEventLogger {
     /**
      * Returns the time period in milliseconds.
      */
-    @VisibleForTesting
     public long getTimePeriod() {
         return mTimePeriodMs;
     }
@@ -162,11 +159,13 @@ public final class DevicePolicyEventLogger {
     }
 
     /**
-     * Returns the generic <code>String[]</code> value.
+     * Returns a copy of the generic <code>String[]</code> value.
      */
-    @VisibleForTesting
     public String[] getStringArray() {
-        return mStringArrayValue;
+        if (mStringArrayValue == null) {
+            return null;
+        }
+        return Arrays.copyOf(mStringArrayValue, mStringArrayValue.length);
     }
 
     /**
@@ -188,7 +187,6 @@ public final class DevicePolicyEventLogger {
     /**
      * Returns the package name of the admin application.
      */
-    @VisibleForTesting
     public String getAdminPackageName() {
         return mAdminPackageName;
     }
