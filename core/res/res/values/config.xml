@@ -1276,9 +1276,14 @@
          meanings. -->
     <integer name="config_defaultRingVibrationIntensity">2</integer>
 
+    <!-- Whether to use the strict phone number matcher by default. -->
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
-    <bool name="config_use_strict_phone_number_comparation_for_russian">true</bool>
+    <!-- Whether to use the strict phone number matcher in Russia. -->
+    <bool name="config_use_strict_phone_number_comparation_for_russia">true</bool>
+
+    <!-- Whether to use the strict phone number matcher in Kazakhstan. -->
+    <bool name="config_use_strict_phone_number_comparation_for_kazakhstan">true</bool>
 
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
