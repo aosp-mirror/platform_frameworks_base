@@ -15033,24 +15033,26 @@ public class PackageManagerService extends IPackageManager.Stub
 
         void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
             mCurrentState.put(args, currentStatus);
-            boolean success = true;
             if (mCurrentState.size() != mChildParams.size()) {
                 return;
             }
+            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
             for (Integer status : mCurrentState.values()) {
                 if (status == PackageManager.INSTALL_UNKNOWN) {
                     return;
                 } else if (status != PackageManager.INSTALL_SUCCEEDED) {
-                    success = false;
+                    completeStatus = status;
                     break;
                 }
             }
             final List<InstallRequest> installRequests = new ArrayList<>(mCurrentState.size());
             for (Map.Entry<InstallArgs, Integer> entry : mCurrentState.entrySet()) {
                 installRequests.add(new InstallRequest(entry.getKey(),
-                        createPackageInstalledInfo(entry.getValue())));
+                        createPackageInstalledInfo(completeStatus)));
             }
-            processInstallRequestsAsync(success, installRequests);
+            processInstallRequestsAsync(
+                    completeStatus == PackageManager.INSTALL_SUCCEEDED,
+                    installRequests);
         }
     }
 
