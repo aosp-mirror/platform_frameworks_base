@@ -43,6 +43,18 @@ import javax.inject.Singleton
 
 const val TAG = "ChannelDialogController"
 
+/**
+ * ChannelEditorDialogController is the controller for the dialog half-shelf
+ * that allows users to quickly turn off channels. It is launched from the NotificationInfo
+ * guts view and displays controls for toggling app notifications as well as up to 4 channels
+ * from that app like so:
+ *
+ *   APP TOGGLE                                                 <on/off>
+ *   - Channel from which we launched                           <on/off>
+ *   -                                                          <on/off>
+ *   - the next 3 channels sorted alphabetically for that app   <on/off>
+ *   -                                                          <on/off>
+ */
 @Singleton
 class ChannelEditorDialogController @Inject constructor(
     c: Context,
@@ -57,6 +69,9 @@ class ChannelEditorDialogController @Inject constructor(
     private var packageName: String? = null
     private var appName: String? = null
     private var onSettingsClickListener: NotificationInfo.OnSettingsClickListener? = null
+
+    // Caller should set this if they care about when we dismiss
+    var onFinishListener: OnChannelEditorDialogFinishedListener? = null
 
     // Channels handed to us from NotificationInfo
     @VisibleForTesting
@@ -144,6 +159,7 @@ class ChannelEditorDialogController @Inject constructor(
     private fun done() {
         resetState()
         dialog.dismiss()
+        onFinishListener?.onChannelEditorDialogFinished()
     }
 
     private fun resetState() {
@@ -240,7 +256,7 @@ class ChannelEditorDialogController @Inject constructor(
 
             findViewById<TextView>(R.id.see_more_button)?.setOnClickListener {
                 onSettingsClickListener?.onClick(it, null, appUid!!)
-                dismiss()
+                done()
             }
 
             window?.apply {
@@ -264,4 +280,8 @@ class ChannelEditorDialogController @Inject constructor(
             or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
             or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
             or WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+}
+
+interface OnChannelEditorDialogFinishedListener {
+    fun onChannelEditorDialogFinished()
 }
