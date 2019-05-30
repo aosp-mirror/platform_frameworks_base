@@ -94,12 +94,14 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE,
                 DEFAULT_BEHAVIOR.toString()));
-        DeviceConfig.addOnPropertyChangedListener(
+        DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 mHandler::post,
-                (namespace, name, value) -> {
-                    if (SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE.equals(name)) {
-                        setBehavior(value);
+                (properties) -> {
+                    if (properties.getKeyset().contains(
+                            SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE)) {
+                        setBehavior(properties.getString(
+                                SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE, null));
                     }
                 });
     }
