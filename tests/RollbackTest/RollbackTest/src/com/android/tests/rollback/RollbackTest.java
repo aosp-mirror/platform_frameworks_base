@@ -147,9 +147,15 @@ public class RollbackTest {
             // TODO: Race condition between the timeout and when the broadcast is
             // received could lead to test flakiness.
             Intent broadcast = broadcastReceiver.poll(5, TimeUnit.SECONDS);
-            assertNotNull(broadcast);
-            assertNull(broadcastReceiver.poll(0, TimeUnit.SECONDS));
-
+            if (context.getUser().isSystem()) {
+                // Only system user should receive those broadcasts.
+                assertNotNull(broadcast);
+                assertNull(broadcastReceiver.poll(0, TimeUnit.SECONDS));
+            } else {
+                // This is in case the test was running under a secondary user, in which case
+                // the broadcast won't be received here.
+                assertNull(broadcast);
+            }
             // Verify the recent rollback has been recorded.
             rollback = getUniqueRollbackInfoForPackage(
                     rm.getRecentlyCommittedRollbacks(), TEST_APP_A);
