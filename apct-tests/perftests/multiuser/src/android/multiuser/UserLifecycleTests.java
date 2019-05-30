@@ -326,6 +326,34 @@ public class UserLifecycleTests {
         }
     }
 
+    /**
+     * Tests starting (unlocking) and launching a previously-launched app
+     * in an already-created, but no-longer-running, profile.
+     * A sort of combination of {@link #managedProfileUnlockAndLaunchApp} and
+     * {@link #managedProfileUnlock_stopped}}.
+     */
+    @Test
+    public void managedProfileUnlockAndLaunchApp_stopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int userId = createManagedProfile();
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard(null, null);
+            installPreexistingApp(userId, DUMMY_PACKAGE_NAME);
+            startUserInBackground(userId);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+            stopUser(userId, true);
+            TimeUnit.SECONDS.sleep(1); // Brief cool-down before re-starting profile.
+            mRunner.resumeTiming();
+
+            startUserInBackground(userId);
+            startApp(userId, DUMMY_PACKAGE_NAME);
+
+            mRunner.pauseTiming();
+            removeUser(userId);
+            mRunner.resumeTiming();
+        }
+    }
+
     /** Tests installing a pre-existing app in a newly-created profile. */
     @Test
     public void managedProfileInstall() throws Exception {
