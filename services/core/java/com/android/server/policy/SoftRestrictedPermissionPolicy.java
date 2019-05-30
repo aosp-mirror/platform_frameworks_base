@@ -38,6 +38,9 @@ import android.util.Log;
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
  * the policies in one place.
+ *
+ * This is the twin of
+ * {@link com.android.packageinstaller.permission.utils.SoftRestrictedPermissionPolicy}
  */
 public abstract class SoftRestrictedPermissionPolicy {
     private static final String LOG_TAG = SoftRestrictedPermissionPolicy.class.getSimpleName();
