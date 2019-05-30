@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.graphics.Region;
-import android.graphics.Region.Op;
 import android.util.Log;
 import android.util.Pools;
 import android.view.DisplayCutout;
@@ -78,6 +76,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private int[] mTmpTwoArray = new int[2];
     private boolean mHeadsUpGoingAway;
     private int mStatusBarState;
+    private Rect mTouchableRegion = new Rect();
 
     private AnimationStateHandler mAnimationStateHandler;
 
@@ -297,10 +296,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     @Nullable
     public void updateTouchableRegion(ViewTreeObserver.InternalInsetsInfo info) {
         info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
+        info.touchableRegion.set(calculateTouchableRegion());
+    }
 
+    public Rect calculateTouchableRegion() {
         if (!hasPinnedHeadsUp()) {
-            info.touchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
-            updateRegionForNotch(info.touchableRegion);
+            mTouchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
+            updateRegionForNotch(mTouchableRegion);
         } else {
             NotificationEntry topEntry = getTopEntry();
             if (topEntry.isChildInGroup()) {
@@ -315,11 +317,12 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             int minX = mTmpTwoArray[0];
             int maxX = mTmpTwoArray[0] + topRow.getWidth();
             int height = topRow.getIntrinsicHeight();
-            info.touchableRegion.set(minX, 0, maxX, mHeadsUpInset + height);
+            mTouchableRegion.set(minX, 0, maxX, mHeadsUpInset + height);
         }
+        return mTouchableRegion;
     }
 
-    private void updateRegionForNotch(Region region) {
+    private void updateRegionForNotch(Rect region) {
         DisplayCutout cutout = mStatusBarWindowView.getRootWindowInsets().getDisplayCutout();
         if (cutout == null) {
             return;
@@ -330,7 +333,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         Rect bounds = new Rect();
         ScreenDecorations.DisplayCutoutView.boundsFromDirection(cutout, Gravity.TOP, bounds);
         bounds.offset(0, mDisplayCutoutTouchableRegionSize);
-        region.op(bounds, Op.UNION);
+        region.union(bounds);
     }
 
     @Override
