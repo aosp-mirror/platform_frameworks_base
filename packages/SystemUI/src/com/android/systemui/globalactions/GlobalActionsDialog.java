@@ -551,7 +551,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private class EmergencyDialerAction extends EmergencyAction {
         private EmergencyDialerAction() {
-            super(R.drawable.ic_faster_emergency,
+            super(com.android.systemui.R.drawable.ic_emergency_star,
                     R.string.global_action_emergency);
         }
 
