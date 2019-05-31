@@ -4012,7 +4012,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void dozeTimeTick() {
             mNotificationPanel.dozeTimeTick();
-            mNotificationIconAreaController.dozeTimeTick();
             if (mAmbientIndicationContainer instanceof DozeReceiver) {
                 ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
             }
