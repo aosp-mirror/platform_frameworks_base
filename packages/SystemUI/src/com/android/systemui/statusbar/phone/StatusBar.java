@@ -1313,7 +1313,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && !mDozing
                 && !ONLY_CORE_APPS;
         mNotificationPanel.setQsExpansionEnabled(expandEnabled);
-        // STOPSHIP(kozynski, b/129405675) Remove log
         Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
     }
 
