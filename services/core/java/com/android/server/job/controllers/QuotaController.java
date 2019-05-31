@@ -617,7 +617,7 @@ public final class QuotaController extends StateController {
         jobStatus.setTrackingController(JobStatus.TRACKING_QUOTA);
         if (mShouldThrottle) {
             final boolean isWithinQuota = isWithinQuotaLocked(jobStatus);
-            jobStatus.setQuotaConstraintSatisfied(isWithinQuota);
+            setConstraintSatisfied(jobStatus, isWithinQuota);
             if (!isWithinQuota) {
                 maybeScheduleStartAlarmLocked(userId, pkgName,
                         getEffectiveStandbyBucket(jobStatus));
@@ -1282,10 +1282,10 @@ public final class QuotaController extends StateController {
                 // An app in the ACTIVE bucket may be out of quota while the job could be in quota
                 // for some reason. Therefore, avoid setting the real value here and check each job
                 // individually.
-                changed |= js.setQuotaConstraintSatisfied(realInQuota);
+                changed |= setConstraintSatisfied(js, realInQuota);
             } else {
                 // This job is somehow exempted. Need to determine its own quota status.
-                changed |= js.setQuotaConstraintSatisfied(isWithinQuotaLocked(js));
+                changed |= setConstraintSatisfied(js, isWithinQuotaLocked(js));
             }
         }
         if (!realInQuota) {
@@ -1310,7 +1310,7 @@ public final class QuotaController extends StateController {
 
         @Override
         public void accept(JobStatus jobStatus) {
-            wasJobChanged |= jobStatus.setQuotaConstraintSatisfied(isWithinQuotaLocked(jobStatus));
+            wasJobChanged |= setConstraintSatisfied(jobStatus, isWithinQuotaLocked(jobStatus));
             final int userId = jobStatus.getSourceUserId();
             final String packageName = jobStatus.getSourcePackageName();
             final int realStandbyBucket = jobStatus.getStandbyBucket();
@@ -1432,6 +1432,14 @@ public final class QuotaController extends StateController {
         } else if (DEBUG) {
             Slog.d(TAG, "No need to schedule start alarm for " + pkgString);
         }
+    }
+
+    private boolean setConstraintSatisfied(@NonNull JobStatus jobStatus, boolean isWithinQuota) {
+        if (!isWithinQuota && jobStatus.getWhenStandbyDeferred() == 0) {
+            // Mark that the job is being deferred due to buckets.
+            jobStatus.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
+        }
+        return jobStatus.setQuotaConstraintSatisfied(isWithinQuota);
     }
 
     private final class ChargingTracker extends BroadcastReceiver {
