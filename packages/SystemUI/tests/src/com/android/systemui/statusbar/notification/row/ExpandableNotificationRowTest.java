@@ -37,9 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
-import android.app.Notification;
 import android.app.NotificationChannel;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -140,7 +138,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testIconColorShouldBeUpdatedWhenSettingDark() throws Exception {
         ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
-        row.setDark(true, false, 0);
+        row.setDozing(true, false, 0);
         verify(row).updateShelfIconColor();
     }
 
@@ -212,7 +210,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testClickSound() throws Exception {
         assertTrue("Should play sounds by default.", mGroupRow.isSoundEffectsEnabled());
-        mGroupRow.setDark(true /* dark */, false /* fade */, 0 /* delay */);
+        mGroupRow.setDozing(true /* dark */, false /* fade */, 0 /* delay */);
         mGroupRow.setSecureStateProvider(()-> false);
         assertFalse("Shouldn't play sounds when dark and trusted.",
                 mGroupRow.isSoundEffectsEnabled());

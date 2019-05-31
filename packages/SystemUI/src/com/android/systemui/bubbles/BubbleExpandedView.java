@@ -515,7 +515,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         viewState.gone = false;
         viewState.hidden = false;
         viewState.dimmed = false;
-        viewState.dark = false;
+        viewState.dozing = false;
         viewState.alpha = 1f;
         viewState.notGoneIndex = -1;
         viewState.xTranslation = 0;

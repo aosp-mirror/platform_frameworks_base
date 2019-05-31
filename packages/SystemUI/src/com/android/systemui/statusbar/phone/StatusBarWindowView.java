@@ -415,7 +415,6 @@ public class StatusBarWindowView extends FrameLayout {
         }
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded()
-                && stackScrollLayout.getVisibility() == View.VISIBLE
                 && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mService.isBouncerShowing()
                 && !mService.isDozing()) {
