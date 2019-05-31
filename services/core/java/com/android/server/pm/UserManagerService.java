@@ -100,6 +100,7 @@ import com.android.server.LockGuard;
 import com.android.server.SystemService;
 import com.android.server.am.UserState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.io.IoUtils;
@@ -3450,17 +3451,26 @@ public class UserManagerService extends IUserManager.Stub {
         if (userInfo == null) {
             return;
         }
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("onBeforeStartUser-" + userId);
         final int userSerial = userInfo.serialNumber;
         // Migrate only if build fingerprints mismatch
         boolean migrateAppsData = !Build.FINGERPRINT.equals(userInfo.lastLoggedInFingerprint);
+        t.traceBegin("prepareUserData");
         mUserDataPreparer.prepareUserData(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
+        t.traceEnd();
+        t.traceBegin("reconcileAppsData");
         mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE, migrateAppsData);
+        t.traceEnd();
 
         if (userId != UserHandle.USER_SYSTEM) {
+            t.traceBegin("applyUserRestrictions");
             synchronized (mRestrictionsLock) {
                 applyUserRestrictionsLR(userId);
             }
+            t.traceEnd();
         }
+        t.traceEnd(); // onBeforeStartUser
     }
 
     /**

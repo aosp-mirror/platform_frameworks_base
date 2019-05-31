@@ -292,7 +292,6 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StatsLog;
 import android.util.TimeUtils;
-import android.util.TimingsTraceLog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 import android.view.Display;
@@ -359,6 +358,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
+import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -5074,7 +5074,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     final void finishBooting() {
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "FinishBooting");
+        TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        t.traceBegin("FinishBooting");
 
         synchronized (this) {
             if (!mBootAnimationComplete) {
@@ -5191,7 +5192,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.scheduleStartProfiles();
         }
 
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        t.traceEnd();
     }
 
     @Override
@@ -8847,8 +8848,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    public void systemReady(final Runnable goingCallback, TimingsTraceLog traceLog) {
-        traceLog.traceBegin("PhaseActivityManagerReady");
+    /**
+     * Ready. Set. Go!
+     */
+    public void systemReady(final Runnable goingCallback, @NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("PhaseActivityManagerReady");
         synchronized(this) {
             if (mSystemReady) {
                 // If we're done calling all the receivers, run the next "boot phase" passed in
@@ -8933,7 +8937,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new RuntimeException("System user not started while current user is:"
                     + currentUserId);
         }
-        traceLog.traceBegin("ActivityManagerStartApps");
+        t.traceBegin("ActivityManagerStartApps");
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                 Integer.toString(currentUserId), currentUserId);
         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
@@ -8992,8 +8996,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new String[] {INTERACT_ACROSS_USERS}, OP_NONE,
                         null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
                         UserHandle.USER_ALL);
-            } catch (Throwable t) {
-                Slog.wtf(TAG, "Failed sending first user broadcasts", t);
+            } catch (Throwable e) {
+                Slog.wtf(TAG, "Failed sending first user broadcasts", e);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -9019,8 +9023,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }, mHandler);
 
-            traceLog.traceEnd(); // ActivityManagerStartApps
-            traceLog.traceEnd(); // PhaseActivityManagerReady
+            t.traceEnd(); // ActivityManagerStartApps
+            t.traceEnd(); // PhaseActivityManagerReady
         }
     }
 
