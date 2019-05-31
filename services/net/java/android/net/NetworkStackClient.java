@@ -33,6 +33,7 @@ import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
 import android.net.util.SharedLog;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.Process;
@@ -41,6 +42,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -60,14 +62,22 @@ public class NetworkStackClient {
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
     private static final String IN_PROCESS_SUFFIX = ".InProcess";
     private static final String PREFS_FILE = "NetworkStackClientPrefs.xml";
-    private static final String PREF_KEY_LAST_CRASH_UPTIME = "lastcrash";
+    private static final String PREF_KEY_LAST_CRASH_TIME = "lastcrash_time";
     private static final String CONFIG_MIN_CRASH_INTERVAL_MS = "min_crash_interval";
+    private static final String CONFIG_MIN_UPTIME_BEFORE_CRASH_MS = "min_uptime_before_crash";
+    private static final String CONFIG_ALWAYS_RATELIMIT_NETWORKSTACK_CRASH =
+            "always_ratelimit_networkstack_crash";
 
     // Even if the network stack is lost, do not crash the system more often than this.
     // Connectivity would be broken, but if the user needs the device for something urgent
     // (like calling emergency services) we should not bootloop the device.
     // This is the default value: the actual value can be adjusted via device config.
-    private static final long DEFAULT_MIN_CRASH_INTERVAL_MS = 6 * 3_600_000L;
+    private static final long DEFAULT_MIN_CRASH_INTERVAL_MS = 6 * DateUtils.HOUR_IN_MILLIS;
+
+    // Even if the network stack is lost, do not crash the system server if it was less than
+    // this much after boot. This avoids bootlooping the device, and crashes should address very
+    // infrequent failures, not failures on boot.
+    private static final long DEFAULT_MIN_UPTIME_BEFORE_CRASH_MS = 30 * DateUtils.MINUTE_IN_MILLIS;
 
     private static NetworkStackClient sInstance;
 
@@ -82,12 +92,6 @@ public class NetworkStackClient {
     private final SharedLog mLog = new SharedLog(TAG);
 
     private volatile boolean mWasSystemServerInitialized = false;
-
-    /**
-     * If non-zero, indicates that the last framework start happened after a crash of the
-     * NetworkStack which was at the specified uptime.
-     */
-    private volatile long mLastCrashUptime = 0L;
 
     @GuardedBy("mHealthListeners")
     private final ArraySet<NetworkStackHealthListener> mHealthListeners = new ArraySet<>();
@@ -258,12 +262,6 @@ public class NetworkStackClient {
     public void start(Context context) {
         log("Starting network stack");
 
-        final SharedPreferences prefs = getSharedPreferences(context);
-        mLastCrashUptime = prefs.getLong(PREF_KEY_LAST_CRASH_UPTIME, 0L);
-        // Remove the preference after getting the last crash uptime, so mLastCrashUptime always
-        // indicates this is the first start since the last crash.
-        prefs.edit().remove(PREF_KEY_LAST_CRASH_UPTIME).commit();
-
         final PackageManager pm = context.getPackageManager();
 
         // Try to bind in-process if the device was shipped with an in-process version
@@ -344,21 +342,40 @@ public class NetworkStackClient {
         logWtf(message, null);
         // uptime is monotonic even after a framework restart
         final long uptime = SystemClock.elapsedRealtime();
+        final long now = System.currentTimeMillis();
         final long minCrashIntervalMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_CONNECTIVITY,
                 CONFIG_MIN_CRASH_INTERVAL_MS, DEFAULT_MIN_CRASH_INTERVAL_MS);
+        final long minUptimeBeforeCrash = DeviceConfig.getLong(DeviceConfig.NAMESPACE_CONNECTIVITY,
+                CONFIG_MIN_UPTIME_BEFORE_CRASH_MS, DEFAULT_MIN_UPTIME_BEFORE_CRASH_MS);
+        final boolean alwaysRatelimit = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CONNECTIVITY,
+                CONFIG_ALWAYS_RATELIMIT_NETWORKSTACK_CRASH, false);
 
-        // Either the framework was not restarted after a crash of the NetworkStack, or the min
-        // crash interval has passed since then.
-        if (mLastCrashUptime == 0L || uptime - mLastCrashUptime > minCrashIntervalMs) {
+        final SharedPreferences prefs = getSharedPreferences(context);
+        final long lastCrashTime = tryGetLastCrashTime(prefs);
+
+        // Only crash if there was enough time since boot, and (if known) enough time passed since
+        // the last crash.
+        // time and lastCrashTime may be unreliable if devices have incorrect clock time, but they
+        // are only used to limit the number of crashes compared to only using the time since boot,
+        // which would also be OK behavior by itself.
+        // - If lastCrashTime is incorrectly more than the current time, only look at uptime
+        // - If it is much less than current time, only look at uptime
+        // - If current time is during the next few hours after last crash time, don't crash.
+        //   Considering that this only matters if last boot was some time ago, it's likely that
+        //   time will be set correctly. Otherwise, not crashing is not a big problem anyway. Being
+        //   in this last state would also not last for long since the window is only a few hours.
+        final boolean alwaysCrash = Build.IS_DEBUGGABLE && !alwaysRatelimit;
+        final boolean justBooted = uptime < minUptimeBeforeCrash;
+        final boolean haveLastCrashTime = (lastCrashTime != 0) && (lastCrashTime < now);
+        final boolean haveKnownRecentCrash =
+                haveLastCrashTime && (now < lastCrashTime + minCrashIntervalMs);
+        if (alwaysCrash || (!justBooted && !haveKnownRecentCrash)) {
             // The system is not bound to its network stack (for example due to a crash in the
             // network stack process): better crash rather than stay in a bad state where all
             // networking is broken.
             // Using device-encrypted SharedPreferences as DeviceConfig does not have a synchronous
             // API to persist settings before a crash.
-            final SharedPreferences prefs = getSharedPreferences(context);
-            if (!prefs.edit().putLong(PREF_KEY_LAST_CRASH_UPTIME, uptime).commit()) {
-                logWtf("Could not persist last crash uptime", null);
-            }
+            tryWriteLastCrashTime(prefs, now);
             throw new IllegalStateException(message);
         }
 
@@ -375,11 +392,36 @@ public class NetworkStackClient {
         }
     }
 
-    private SharedPreferences getSharedPreferences(Context context) {
-        final File prefsFile = new File(
-                Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM), PREFS_FILE);
-        return context.createDeviceProtectedStorageContext()
-                .getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
+    @Nullable
+    private SharedPreferences getSharedPreferences(@NonNull Context context) {
+        try {
+            final File prefsFile = new File(
+                    Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM), PREFS_FILE);
+            return context.createDeviceProtectedStorageContext()
+                    .getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
+        } catch (Throwable e) {
+            logWtf("Error loading shared preferences", e);
+            return null;
+        }
+    }
+
+    private long tryGetLastCrashTime(@Nullable SharedPreferences prefs) {
+        if (prefs == null) return 0L;
+        try {
+            return prefs.getLong(PREF_KEY_LAST_CRASH_TIME, 0L);
+        } catch (Throwable e) {
+            logWtf("Error getting last crash time", e);
+            return 0L;
+        }
+    }
+
+    private void tryWriteLastCrashTime(@Nullable SharedPreferences prefs, long value) {
+        if (prefs == null) return;
+        try {
+            prefs.edit().putLong(PREF_KEY_LAST_CRASH_TIME, value).commit();
+        } catch (Throwable e) {
+            logWtf("Error writing last crash time", e);
+        }
     }
 
     /**
