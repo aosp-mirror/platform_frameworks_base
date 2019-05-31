@@ -86,6 +86,10 @@ class ChannelEditorDialogController @Inject constructor(
     internal val groupNameLookup = hashMapOf<String, CharSequence>()
     private val channelGroupList = mutableListOf<NotificationChannelGroup>()
 
+    /**
+     * Give the controller all of the information it needs to present the dialog
+     * for a given app. Does a bunch of querying of NoMan, but won't present anything yet
+     */
     fun prepareDialogForApp(
         appName: String,
         packageName: String,
@@ -154,6 +158,13 @@ class ChannelEditorDialogController @Inject constructor(
     fun show() {
         initDialog()
         dialog.show()
+    }
+
+    /**
+     * Close the dialog without saving. For external callers
+     */
+    fun close() {
+        done()
     }
 
     private fun done() {
