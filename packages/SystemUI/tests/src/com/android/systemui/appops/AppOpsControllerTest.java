@@ -16,7 +16,10 @@
 
 package com.android.systemui.appops;
 
+import static junit.framework.TestCase.assertFalse;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -188,5 +191,22 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
                 AppOpsManager.MODE_ALLOWED);
         verify(mMockHandler).scheduleRemoval(any(AppOpItem.class), anyLong());
+    }
+
+    @Test
+    public void noItemsAfterStopListening() {
+        mController.setBGHandler(mMockHandler);
+
+        mController.setListening(true);
+        mController.onOpActiveChanged(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                true);
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
+        assertFalse(mController.getActiveAppOps().isEmpty());
+
+        mController.setListening(false);
+
+        verify(mMockHandler).removeCallbacksAndMessages(null);
+        assertTrue(mController.getActiveAppOps().isEmpty());
     }
 }
