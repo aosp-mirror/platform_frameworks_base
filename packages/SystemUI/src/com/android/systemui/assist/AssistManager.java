@@ -40,8 +40,11 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.ConfigurationChangedReceiver;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.assist.ui.DefaultUiController;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -49,6 +52,40 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
  * Class to manage everything related to assist in SystemUI.
  */
 public class AssistManager implements ConfigurationChangedReceiver {
+
+    /**
+     * Controls the UI for showing Assistant invocation progress.
+     */
+    public interface UiController {
+        /**
+         * Updates the invocation progress.
+         *
+         * @param type     one of INVOCATION_TYPE_GESTURE, INVOCATION_TYPE_ACTIVE_EDGE,
+         *                 INVOCATION_TYPE_VOICE, INVOCATION_TYPE_QUICK_SEARCH_BAR,
+         *                 INVOCATION_HOME_BUTTON_LONG_PRESS
+         * @param progress a float between 0 and 1 inclusive. 0 represents the beginning of the
+         *                 gesture; 1 represents the end.
+         */
+        void onInvocationProgress(int type, float progress);
+
+        /**
+         * Called when an invocation gesture completes.
+         *
+         * @param velocity the speed of the invocation gesture, in pixels per millisecond. For
+         *                 drags, this is 0.
+         */
+        void onGestureCompletion(float velocity);
+
+        /**
+         * Called with the Bundle from VoiceInteractionSessionListener.onSetUiHints.
+         */
+        void processBundle(Bundle hints);
+
+        /**
+         * Hides the UI.
+         */
+        void hide();
+    }
 
     private static final String TAG = "AssistManager";
 
@@ -76,6 +113,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private final InterestingConfigChanges mInterestingConfigChanges;
     private final PhoneStateMonitor mPhoneStateMonitor;
     private final AssistHandleBehaviorController mHandleController;
+    private final UiController mUiController;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -85,16 +123,16 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
 
-        @Override
-        public void onFailed() throws RemoteException {
-            mView.post(mHideRunnable);
-        }
+                @Override
+                public void onFailed() throws RemoteException {
+                    mView.post(mHideRunnable);
+                }
 
-        @Override
-        public void onShown() throws RemoteException {
-            mView.post(mHideRunnable);
-        }
-    };
+                @Override
+                public void onShown() throws RemoteException {
+                    mView.post(mHideRunnable);
+                }
+            };
 
     private Runnable mHideRunnable = new Runnable() {
         @Override
@@ -111,7 +149,8 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = new PhoneStateMonitor(context);
-        mHandleController = new AssistHandleBehaviorController(context, new Handler());
+        mHandleController =
+                new AssistHandleBehaviorController(context, mAssistUtils, new Handler());
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
@@ -119,6 +158,23 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
         onConfigurationChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
+
+        mUiController = new DefaultUiController(mContext);
+
+        OverviewProxyService overviewProxy = Dependency.get(OverviewProxyService.class);
+        overviewProxy.addCallback(new OverviewProxyService.OverviewProxyListener() {
+            @Override
+            public void onAssistantProgress(float progress) {
+                // Progress goes from 0 to 1 to indicate how close the assist gesture is to
+                // completion.
+                onInvocationProgress(INVOCATION_TYPE_GESTURE, progress);
+            }
+
+            @Override
+            public void onAssistantGestureCompletion(float velocity) {
+                onGestureCompletion(velocity);
+            }
+        });
     }
 
     protected void registerVoiceInteractionSessionListener() {
@@ -191,26 +247,32 @@ public class AssistManager implements ConfigurationChangedReceiver {
         if (args == null) {
             args = new Bundle();
         }
+        int invocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
+        if (invocationType == INVOCATION_TYPE_GESTURE) {
+            mHandleController.onAssistantGesturePerformed();
+        }
         args.putInt(INVOCATION_PHONE_STATE_KEY, mPhoneStateMonitor.getPhoneState());
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         // Logs assistant start with invocation type.
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
-                    .setType(MetricsEvent.TYPE_OPEN).setSubtype(args.getInt(INVOCATION_TYPE_KEY)));
+                        .setType(MetricsEvent.TYPE_OPEN).setSubtype(
+                        invocationType));
         startAssistInternal(args, assistComponent, isService);
     }
 
     /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */
     public void onInvocationProgress(int type, float progress) {
-        // intentional no-op, vendor's AssistManager implementation should override if needed.
+        mUiController.onInvocationProgress(type, progress);
     }
 
-    /** Called when the user has invoked the assistant with the incoming velocity, in pixels per
+    /**
+     * Called when the user has invoked the assistant with the incoming velocity, in pixels per
      * millisecond. For invocations without a velocity (e.g. slow drag), the velocity is set to
      * zero.
      */
-    public void onAssistantGestureCompletion(float velocity) {
-        // intentional no-op, vendor's AssistManager implementation should override if needed.
+    public void onGestureCompletion(float velocity) {
+        mUiController.onGestureCompletion(velocity);
     }
 
     public void hideAssist() {
@@ -264,7 +326,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
 
         final SearchManager searchManager =
-            (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+                (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         if (searchManager == null) {
             return;
         }
@@ -329,7 +391,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 // Look for the search icon specified in the activity meta-data
                 Bundle metaData = isService
                         ? packageManager.getServiceInfo(
-                                component, PackageManager.GET_META_DATA).metaData
+                        component, PackageManager.GET_META_DATA).metaData
                         : packageManager.getActivityInfo(
                                 component, PackageManager.GET_META_DATA).metaData;
                 if (metaData != null) {

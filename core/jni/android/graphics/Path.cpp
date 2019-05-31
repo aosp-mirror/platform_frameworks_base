@@ -475,32 +475,32 @@ public:
 
     // ---------------- @CriticalNative -------------------------
 
-    static void reset(jlong objHandle) {
+    static void reset(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->reset();
     }
 
-    static void rewind(jlong objHandle) {
+    static void rewind(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         obj->rewind();
     }
 
-    static jboolean isEmpty(jlong objHandle) {
+    static jboolean isEmpty(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         return obj->isEmpty();
     }
 
-    static jboolean isConvex(jlong objHandle) {
+    static jboolean isConvex(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         return obj->isConvex();
     }
 
-    static jint getFillType(jlong objHandle) {
+    static jint getFillType(CRITICAL_JNI_PARAMS_COMMA jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         return obj->getFillType();
     }
 
-    static void setFillType(jlong pathHandle, jint ftHandle) {;
+    static void setFillType(CRITICAL_JNI_PARAMS_COMMA jlong pathHandle, jint ftHandle) {;
         SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
         SkPath::FillType ft = static_cast<SkPath::FillType>(ftHandle);
         path->setFillType(ft);

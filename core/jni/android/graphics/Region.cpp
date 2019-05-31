@@ -18,7 +18,9 @@
 #include "SkPath.h"
 #include "GraphicsJNI.h"
 
+#ifdef __ANDROID__ // Layoutlib does not support parcel
 #include <binder/Parcel.h>
+#endif
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
@@ -206,6 +208,7 @@ static jstring Region_toString(JNIEnv* env, jobject clazz, jlong regionHandle) {
 
 static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 {
+#ifdef __ANDROID__ // Layoutlib does not support parcel
     if (parcel == nullptr) {
         return 0;
     }
@@ -225,10 +228,14 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
     }
 
     return reinterpret_cast<jlong>(region);
+#else
+    return 0;
+#endif
 }
 
 static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHandle, jobject parcel)
 {
+#ifdef __ANDROID__ // Layoutlib does not support parcel
     const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
     if (parcel == nullptr) {
         return JNI_FALSE;
@@ -249,6 +256,9 @@ static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHan
 
     p->writeInt32Vector(rects);
     return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

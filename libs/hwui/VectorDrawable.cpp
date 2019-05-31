@@ -487,6 +487,7 @@ Bitmap& Tree::getBitmapUpdateIfDirty() {
 }
 
 void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context) {
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     SkRect dst;
     sk_sp<SkSurface> surface = mCache.getSurface(&dst);
     bool canReuseSurface = surface && dst.width() >= mProperties.getScaledWidth() &&
@@ -514,6 +515,7 @@ void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* 
         }
         mCache.dirty = false;
     }
+#endif
 }
 
 void Tree::Cache::setAtlas(sp<skiapipeline::VectorDrawableAtlas> newAtlas,
@@ -526,6 +528,7 @@ void Tree::Cache::setAtlas(sp<skiapipeline::VectorDrawableAtlas> newAtlas,
 
 sk_sp<SkSurface> Tree::Cache::getSurface(SkRect* bounds) {
     sk_sp<SkSurface> surface;
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     sp<skiapipeline::VectorDrawableAtlas> atlas = mAtlas.promote();
     if (atlas.get() && mAtlasKey != INVALID_ATLAS_KEY) {
         auto atlasEntry = atlas->getEntry(mAtlasKey);
@@ -533,17 +536,20 @@ sk_sp<SkSurface> Tree::Cache::getSurface(SkRect* bounds) {
         surface = atlasEntry.surface;
         mAtlasKey = atlasEntry.key;
     }
+#endif
 
     return surface;
 }
 
 void Tree::Cache::clear() {
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     sp<skiapipeline::VectorDrawableAtlas> lockAtlas = mAtlas.promote();
     if (lockAtlas.get()) {
         lockAtlas->releaseEntry(mAtlasKey);
     }
     mAtlas = nullptr;
     mAtlasKey = INVALID_ATLAS_KEY;
+#endif
 }
 
 void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) {

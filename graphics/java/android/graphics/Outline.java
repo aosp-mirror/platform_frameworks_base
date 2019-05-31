@@ -273,17 +273,17 @@ public final class Outline {
     }
 
     /**
-     * Sets the Constructs an Outline from a
+     * Sets the Outline to a
      * {@link android.graphics.Path#isConvex() convex path}.
+     *
+     * @param convexPath used to construct the Outline. As of
+     * {@link android.os.Build.VERSION_CODES#Q}, it is no longer required to be
+     * convex.
      */
     public void setConvexPath(@NonNull Path convexPath) {
         if (convexPath.isEmpty()) {
             setEmpty();
             return;
-        }
-
-        if (!convexPath.isConvex()) {
-            throw new IllegalArgumentException("path must be convex");
         }
 
         if (mPath == null) {

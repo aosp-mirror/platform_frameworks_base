@@ -105,7 +105,7 @@ public:
         void* arg);
 
     /** return a pointer to the VM running in this process */
-    static JavaVM* getJavaVM() { return mJavaVM; }
+    static JavaVM* getJavaVM();
 
     /** return a pointer to the JNIEnv pointer for this thread */
     static JNIEnv* getJNIEnv();

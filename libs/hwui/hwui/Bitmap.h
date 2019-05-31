@@ -23,7 +23,9 @@
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
 #include <ui/GraphicBuffer.h>
+#endif
 
 namespace android {
 
@@ -71,11 +73,13 @@ public:
     /* The createFrom factories construct a new Bitmap object by wrapping the already allocated
      * memory that is provided as an input param.
      */
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
                                     SkColorType colorType,
                                     sk_sp<SkColorSpace> colorSpace,
                                     SkAlphaType alphaType = kPremul_SkAlphaType,
                                     BitmapPalette palette = BitmapPalette::Unknown);
+#endif
     static sk_sp<Bitmap> createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
                                     size_t size, bool readOnly);
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
@@ -105,7 +109,9 @@ public:
 
     PixelStorageType pixelStorageType() const { return mPixelStorageType; }
 
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     GraphicBuffer* graphicBuffer();
+#endif
 
     /**
      * Creates or returns a cached SkImage and is safe to be invoked from either
@@ -136,7 +142,9 @@ private:
     Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
            size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette);
+#endif
 
     virtual ~Bitmap();
     void* getStorage() const;
@@ -165,9 +173,11 @@ private:
             void* address;
             size_t size;
         } heap;
+#ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
         struct {
             GraphicBuffer* buffer;
         } hardware;
+#endif
     } mPixelStorage;
 
     sk_sp<SkImage> mImage;  // Cache is used only for HW Bitmaps with Skia pipeline.

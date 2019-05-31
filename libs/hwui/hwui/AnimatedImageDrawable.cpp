@@ -24,6 +24,12 @@
 
 #include <optional>
 
+#ifdef __APPLE__
+    // macOS SDK 10.10 does not support CLOCK_MONOTONIC, which is not an issue since
+    // the value of the argument is not used in the host definition of systemTime
+#define CLOCK_MONOTONIC
+#endif
+
 namespace android {
 
 AnimatedImageDrawable::AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed)

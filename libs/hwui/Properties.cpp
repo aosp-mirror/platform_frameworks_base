@@ -17,11 +17,14 @@
 #include "Properties.h"
 #include "Debug.h"
 #include "DeviceInfo.h"
+#ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
+#endif
 #include "SkTraceEventCommon.h"
 
 #include <algorithm>
 #include <cstdlib>
+#include <optional>
 
 #include <android-base/properties.h>
 #include <cutils/compiler.h>
@@ -29,6 +32,16 @@
 
 namespace android {
 namespace uirenderer {
+
+#ifndef __ANDROID__ // Layoutlib does not compile HWUIProperties.sysprop as it depends on cutils properties
+std::optional<bool> use_vulkan() {
+    return base::GetBoolProperty("ro.hwui.use_vulkan", false);
+}
+
+std::optional<std::int32_t> render_ahead() {
+    return base::GetIntProperty("ro.hwui.render_ahead", 0);
+}
+#endif
 
 bool Properties::debugLayersUpdates = false;
 bool Properties::debugOverdraw = false;

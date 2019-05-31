@@ -313,7 +313,8 @@
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
-  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_russian" />
+  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_russia" />
+  <java-symbol type="bool" name="config_use_strict_phone_number_comparation_for_kazakhstan" />
   <java-symbol type="bool" name="config_single_volume" />
   <java-symbol type="bool" name="config_voice_capable" />
   <java-symbol type="bool" name="config_requireCallCapableAccountForHandle" />
@@ -2581,6 +2582,7 @@
   <java-symbol type="array" name="config_face_acquire_vendor_keyguard_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_biometricprompt_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_biometricprompt_ignorelist" />
+  <java-symbol type="bool" name="config_faceAuthDismissesKeyguard" />
 
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />
@@ -2875,6 +2877,7 @@
   <java-symbol type="bool" name="config_allowSeamlessRotationDespiteNavBarMoving" />
   <java-symbol type="dimen" name="config_backGestureInset" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
+  <java-symbol type="bool" name="config_showGesturalNavigationHints" />
 
   <!-- EditText suggestion popup. -->
   <java-symbol type="id" name="suggestionWindowContainer" />

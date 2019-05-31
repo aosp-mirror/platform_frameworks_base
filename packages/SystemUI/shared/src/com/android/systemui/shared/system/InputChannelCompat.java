@@ -18,7 +18,6 @@ package com.android.systemui.shared.system;
 
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Pair;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.InputChannel;
@@ -39,19 +38,6 @@ public class InputChannelCompat {
          * @param ev event to be handled
          */
         void onInputEvent(InputEvent ev);
-    }
-
-    /**
-     * Creates a dispatcher and receiver pair to better handle events across threads.
-     */
-    public static Pair<InputEventDispatcher, InputEventReceiver> createPair(String name,
-            Looper looper, Choreographer choreographer, InputEventListener listener) {
-        InputChannel[] channels = InputChannel.openInputChannelPair(name);
-
-        InputEventDispatcher dispatcher = new InputEventDispatcher(channels[0], looper);
-        InputEventReceiver receiver = new InputEventReceiver(channels[1], looper, choreographer,
-                listener);
-        return Pair.create(dispatcher, receiver);
     }
 
     /**

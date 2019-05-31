@@ -18,11 +18,18 @@ android_test {
     srcs: ["src/**/*.java"],
     static_libs: [
         "junit",
+        "mockito-target-extended-minus-junit4",
         "frameworks-base-testutils",
         "androidx.test.rules",
         "services.core",
+        "services.net",
     ],
     libs: ["android.test.runner"],
+    jni_libs: [
+        // mockito-target-extended dependencies
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
     platform_apis: true,
     test_suites: ["device-tests"],
 }

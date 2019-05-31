@@ -1276,9 +1276,14 @@
          meanings. -->
     <integer name="config_defaultRingVibrationIntensity">2</integer>
 
+    <!-- Whether to use the strict phone number matcher by default. -->
     <bool name="config_use_strict_phone_number_comparation">false</bool>
 
-    <bool name="config_use_strict_phone_number_comparation_for_russian">true</bool>
+    <!-- Whether to use the strict phone number matcher in Russia. -->
+    <bool name="config_use_strict_phone_number_comparation_for_russia">true</bool>
+
+    <!-- Whether to use the strict phone number matcher in Kazakhstan. -->
+    <bool name="config_use_strict_phone_number_comparation_for_kazakhstan">true</bool>
 
     <!-- Display low battery warning when battery level dips to this value.
          Also, the battery stats are flushed to disk when we hit this level.  -->
@@ -3306,6 +3311,10 @@
          (which normally prevents seamless rotation). -->
     <bool name="config_allowSeamlessRotationDespiteNavBarMoving">false</bool>
 
+    <!-- Controls whether hints for gestural navigation are shown when the device is setup.
+         This should only be set when the device has gestural navigation enabled by default. -->
+    <bool name="config_showGesturalNavigationHints">false</bool>
+
     <!-- Default insets [LEFT/RIGHTxTOP/BOTTOM] from the screen edge for picture-in-picture windows.
          These values are in DPs and will be converted to pixel sizes internally. -->
     <string translatable="false" name="config_defaultPictureInPictureScreenEdgeInsets">16x16</string>
@@ -4116,6 +4125,9 @@
     <!-- Same as the above, but are defined by vendorCodes -->
     <integer-array name="config_face_acquire_vendor_biometricprompt_ignorelist" translatable="false" >
     </integer-array>
+
+    <!-- If face auth sends the user directly to home/last open app, or stays on keyguard -->
+    <bool name="config_faceAuthDismissesKeyguard">true</bool>
 
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes

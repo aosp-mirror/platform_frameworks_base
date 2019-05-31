@@ -113,8 +113,7 @@ public class Build {
 
     /**
      * A hardware serial number, if available. Alphanumeric only, case-insensitive.
-     * For apps targeting SDK higher than {@link Build.VERSION_CODES#O_MR1} this
-     * field is set to {@link Build#UNKNOWN}.
+     * This field is always set to {@link Build#UNKNOWN}.
      *
      * @deprecated Use {@link #getSerial()} instead.
      **/
@@ -992,6 +991,11 @@ public class Build {
          * engaged. It's now time to see if you can dance.</em>
          */
         public static final int Q = 29;
+
+        /**
+         * R.
+         */
+        public static final int R = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */

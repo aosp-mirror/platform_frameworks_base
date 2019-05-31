@@ -21,7 +21,9 @@ import static com.android.tests.rollback.RollbackTestUtils.getUniqueRollbackInfo
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
@@ -30,6 +32,8 @@ import androidx.test.InstrumentationRegistry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -54,6 +58,8 @@ public class StagedRollbackTest {
     private static final String TEST_APP_A = "com.android.tests.rollback.testapp.A";
     private static final String TEST_APP_A_V1 = "RollbackTestAppAv1.apk";
     private static final String TEST_APP_A_CRASHING_V2 = "RollbackTestAppACrashingV2.apk";
+    private static final String NETWORK_STACK_CONNECTOR_CLASS =
+            "android.net.INetworkStackConnector";
 
     /**
      * Adopts common shell permissions needed for rollback tests.
@@ -156,5 +162,45 @@ public class StagedRollbackTest {
         assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback, new VersionedPackage(TEST_APP_A, 2));
         assertTrue(rollback.isStaged());
         assertNotEquals(-1, rollback.getCommittedSessionId());
+    }
+
+    @Test
+    public void resetNetworkStack() throws Exception {
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        String networkStack = getNetworkStackPackageName();
+
+        rm.expireRollbackForPackage(networkStack);
+        RollbackTestUtils.uninstall(networkStack);
+
+        assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        networkStack));
+    }
+
+    @Test
+    public void assertNetworkStackRollbackAvailable() throws Exception {
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        assertNotNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        getNetworkStackPackageName()));
+    }
+
+    @Test
+    public void assertNetworkStackRollbackCommitted() throws Exception {
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        assertNotNull(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName()));
+    }
+
+    @Test
+    public void assertNoNetworkStackRollbackCommitted() throws Exception {
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        assertNull(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName()));
+    }
+
+    private String getNetworkStackPackageName() {
+        Intent intent = new Intent(NETWORK_STACK_CONNECTOR_CLASS);
+        ComponentName comp = intent.resolveSystemService(
+                InstrumentationRegistry.getContext().getPackageManager(), 0);
+        return comp.getPackageName();
     }
 }

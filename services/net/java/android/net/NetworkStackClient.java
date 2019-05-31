@@ -26,22 +26,27 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
 import android.net.util.SharedLog;
 import android.os.Binder;
-import android.os.Build;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -54,6 +59,15 @@ public class NetworkStackClient {
 
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
     private static final String IN_PROCESS_SUFFIX = ".InProcess";
+    private static final String PREFS_FILE = "NetworkStackClientPrefs.xml";
+    private static final String PREF_KEY_LAST_CRASH_UPTIME = "lastcrash";
+    private static final String CONFIG_MIN_CRASH_INTERVAL_MS = "min_crash_interval";
+
+    // Even if the network stack is lost, do not crash the system more often than this.
+    // Connectivity would be broken, but if the user needs the device for something urgent
+    // (like calling emergency services) we should not bootloop the device.
+    // This is the default value: the actual value can be adjusted via device config.
+    private static final long DEFAULT_MIN_CRASH_INTERVAL_MS = 6 * 3_600_000L;
 
     private static NetworkStackClient sInstance;
 
@@ -67,10 +81,32 @@ public class NetworkStackClient {
     @GuardedBy("mLog")
     private final SharedLog mLog = new SharedLog(TAG);
 
-    private volatile boolean mNetworkStackStartRequested = false;
+    private volatile boolean mWasSystemServerInitialized = false;
+
+    /**
+     * If non-zero, indicates that the last framework start happened after a crash of the
+     * NetworkStack which was at the specified uptime.
+     */
+    private volatile long mLastCrashUptime = 0L;
+
+    @GuardedBy("mHealthListeners")
+    private final ArraySet<NetworkStackHealthListener> mHealthListeners = new ArraySet<>();
 
     private interface NetworkStackCallback {
         void onNetworkStackConnected(INetworkStackConnector connector);
+    }
+
+    /**
+     * Callback interface for severe failures of the NetworkStack.
+     *
+     * <p>Useful for health monitors such as PackageWatchdog.
+     */
+    public interface NetworkStackHealthListener {
+        /**
+         * Called when there is a severe failure of the network stack.
+         * @param packageName Package name of the network stack.
+         */
+        void onNetworkStackFailure(@NonNull String packageName);
     }
 
     private NetworkStackClient() { }
@@ -83,6 +119,15 @@ public class NetworkStackClient {
             sInstance = new NetworkStackClient();
         }
         return sInstance;
+    }
+
+    /**
+     * Add a {@link NetworkStackHealthListener} to listen to network stack health events.
+     */
+    public void registerHealthListener(@NonNull NetworkStackHealthListener listener) {
+        synchronized (mHealthListeners) {
+            mHealthListeners.add(listener);
+        }
     }
 
     /**
@@ -147,6 +192,16 @@ public class NetworkStackClient {
     }
 
     private class NetworkStackConnection implements ServiceConnection {
+        @NonNull
+        private final Context mContext;
+        @NonNull
+        private final String mPackageName;
+
+        private NetworkStackConnection(@NonNull Context context, @NonNull String packageName) {
+            mContext = context;
+            mPackageName = packageName;
+        }
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             logi("Network stack service connected");
@@ -155,14 +210,14 @@ public class NetworkStackClient {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            // The system has lost its network stack (probably due to a crash in the
-            // network stack process): better crash rather than stay in a bad state where all
-            // networking is broken.
             // onServiceDisconnected is not being called on device shutdown, so this method being
             // called always indicates a bad state for the system server.
-            maybeCrashWithTerribleFailure("Lost network stack");
+            // This code path is only run by the system server: only the system server binds
+            // to the NetworkStack as a service. Other processes get the NetworkStack from
+            // the ServiceManager.
+            maybeCrashWithTerribleFailure("Lost network stack", mContext, mPackageName);
         }
-    };
+    }
 
     private void registerNetworkStackService(@NonNull IBinder service) {
         final INetworkStackConnector connector = INetworkStackConnector.Stub.asInterface(service);
@@ -189,7 +244,7 @@ public class NetworkStackClient {
      */
     public void init() {
         log("Network stack init");
-        mNetworkStackStartRequested = true;
+        mWasSystemServerInitialized = true;
     }
 
     /**
@@ -202,6 +257,13 @@ public class NetworkStackClient {
      */
     public void start(Context context) {
         log("Starting network stack");
+
+        final SharedPreferences prefs = getSharedPreferences(context);
+        mLastCrashUptime = prefs.getLong(PREF_KEY_LAST_CRASH_UPTIME, 0L);
+        // Remove the preference after getting the last crash uptime, so mLastCrashUptime always
+        // indicates this is the first start since the last crash.
+        prefs.edit().remove(PREF_KEY_LAST_CRASH_UPTIME).commit();
+
         final PackageManager pm = context.getPackageManager();
 
         // Try to bind in-process if the device was shipped with an in-process version
@@ -216,16 +278,19 @@ public class NetworkStackClient {
         }
 
         if (intent == null) {
-            maybeCrashWithTerribleFailure("Could not resolve the network stack");
+            maybeCrashWithTerribleFailure("Could not resolve the network stack", context, null);
             return;
         }
 
+        final String packageName = intent.getComponent().getPackageName();
+
         // Start the network stack. The service will be added to the service manager in
         // NetworkStackConnection.onServiceConnected().
-        if (!context.bindServiceAsUser(intent, new NetworkStackConnection(),
+        if (!context.bindServiceAsUser(intent, new NetworkStackConnection(context, packageName),
                 Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
             maybeCrashWithTerribleFailure(
-                    "Could not bind to network stack in-process, or in app with " + intent);
+                    "Could not bind to network stack in-process, or in app with " + intent,
+                    context, packageName);
             return;
         }
 
@@ -274,11 +339,47 @@ public class NetworkStackClient {
         }
     }
 
-    private void maybeCrashWithTerribleFailure(@NonNull String message) {
+    private void maybeCrashWithTerribleFailure(@NonNull String message,
+            @NonNull Context context, @Nullable String packageName) {
         logWtf(message, null);
-        if (Build.IS_DEBUGGABLE) {
+        // uptime is monotonic even after a framework restart
+        final long uptime = SystemClock.elapsedRealtime();
+        final long minCrashIntervalMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_CONNECTIVITY,
+                CONFIG_MIN_CRASH_INTERVAL_MS, DEFAULT_MIN_CRASH_INTERVAL_MS);
+
+        // Either the framework was not restarted after a crash of the NetworkStack, or the min
+        // crash interval has passed since then.
+        if (mLastCrashUptime == 0L || uptime - mLastCrashUptime > minCrashIntervalMs) {
+            // The system is not bound to its network stack (for example due to a crash in the
+            // network stack process): better crash rather than stay in a bad state where all
+            // networking is broken.
+            // Using device-encrypted SharedPreferences as DeviceConfig does not have a synchronous
+            // API to persist settings before a crash.
+            final SharedPreferences prefs = getSharedPreferences(context);
+            if (!prefs.edit().putLong(PREF_KEY_LAST_CRASH_UPTIME, uptime).commit()) {
+                logWtf("Could not persist last crash uptime", null);
+            }
             throw new IllegalStateException(message);
         }
+
+        // Here the system crashed recently already. Inform listeners that something is
+        // definitely wrong.
+        if (packageName != null) {
+            final ArraySet<NetworkStackHealthListener> listeners;
+            synchronized (mHealthListeners) {
+                listeners = new ArraySet<>(mHealthListeners);
+            }
+            for (NetworkStackHealthListener listener : listeners) {
+                listener.onNetworkStackFailure(packageName);
+            }
+        }
+    }
+
+    private SharedPreferences getSharedPreferences(Context context) {
+        final File prefsFile = new File(
+                Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM), PREFS_FILE);
+        return context.createDeviceProtectedStorageContext()
+                .getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
     }
 
     /**
@@ -350,7 +451,7 @@ public class NetworkStackClient {
                     "Only the system server should try to bind to the network stack.");
         }
 
-        if (!mNetworkStackStartRequested) {
+        if (!mWasSystemServerInitialized) {
             // The network stack is not being started in this process, e.g. this process is not
             // the system server. Get a remote connector registered by the system server.
             final INetworkStackConnector connector = getRemoteConnector();
