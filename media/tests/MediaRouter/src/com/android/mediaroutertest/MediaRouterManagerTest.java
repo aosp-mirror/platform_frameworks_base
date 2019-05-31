@@ -17,7 +17,6 @@
 package com.android.mediaroutertest;
 
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -30,13 +29,16 @@ import android.media.MediaRouter2Manager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.TextUtils;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -96,7 +98,7 @@ public class MediaRouterManagerTest {
         mManager.removeCallback(mockCallback);
     }
 
-    @Test
+    //TODO: Recover this test when media router 2 is finalized.
     public void testRouteRemoved() {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
         mManager.addCallback(mExecutor, mockCallback);
@@ -129,9 +131,6 @@ public class MediaRouterManagerTest {
 
         MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
 
-        verify(mockCallback, after(AWAIT_MS).never()).onControlCategoriesChanged(uid,
-                TEST_CONTROL_CATEGORIES);
-
         InstrumentationRegistry.getInstrumentation().runOnMainSync(
                 (Runnable) () -> {
                     mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
@@ -142,5 +141,50 @@ public class MediaRouterManagerTest {
                 .onControlCategoriesChanged(uid, TEST_CONTROL_CATEGORIES);
 
         mManager.removeCallback(mockCallback);
+    }
+
+    @Test
+    public void selectRouteTest() throws Exception {
+        final int uid = android.os.Process.myUid();
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                (Runnable) () -> {
+                    mRouter.addCallback(TEST_CONTROL_CATEGORIES, mExecutor, mockRouterCallback);
+                }
+        );
+
+        MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
+            MediaRoute2Info mSelectedRoute = null;
+
+            @Override
+            public void onRouteAdded(MediaRoute2Info routeInfo) {
+                if (mSelectedRoute == null) {
+                    mSelectedRoute = routeInfo;
+                    mManager.selectRoute(uid, mSelectedRoute);
+                }
+            }
+
+            @Override
+            public void onRouteSelected(int uid, MediaRoute2Info route) {
+                if (mSelectedRoute != null && route != null
+                        && TextUtils.equals(route.getId(), mSelectedRoute.getId())) {
+                    latch.countDown();
+                }
+            }
+
+            @Override
+            public void onControlCategoriesChanged(int uid, List<String> categories) {
+
+            }
+        };
+
+        mManager.addCallback(mExecutor, managerCallback);
+
+        Assert.assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        mManager.removeCallback(managerCallback);
     }
 }

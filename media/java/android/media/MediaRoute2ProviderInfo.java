@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 
 import java.util.Arrays;
@@ -82,8 +83,11 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
         return true;
     }
 
+    /**
+     * @hide
+     */
     @Nullable
-    String getUniqueId() {
+    public String getUniqueId() {
         return mUniqueId;
     }
 
@@ -149,9 +153,21 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
          * {@link com.android.server.media.MediaRouterService} and used to identify providers.
          * The id set by {@link MediaRoute2ProviderService} will be ignored.
          * </p>
+         * @hide
          */
         public Builder setUniqueId(@Nullable String uniqueId) {
+            if (TextUtils.equals(mUniqueId, uniqueId)) {
+                return this;
+            }
             mUniqueId = uniqueId;
+            final int count = mRoutes.size();
+            for (int i = 0; i < count; i++) {
+                MediaRoute2Info route = mRoutes.valueAt(i);
+                mRoutes.setValueAt(i, new MediaRoute2Info.Builder(route)
+                        .setProviderId(mUniqueId)
+                        .build());
+            }
+
             return this;
         }
 
@@ -164,7 +180,12 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
             if (mRoutes.containsValue(route)) {
                 throw new IllegalArgumentException("route descriptor already added");
             }
-            mRoutes.put(route.getId(), route);
+            if (mUniqueId != null) {
+                mRoutes.put(route.getId(),
+                        new MediaRoute2Info.Builder(route).setProviderId(mUniqueId).build());
+            } else {
+                mRoutes.put(route.getId(), route);
+            }
             return this;
         }
 

@@ -23,6 +23,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.util.Objects;
+
 /**
  * Describes the properties of a route.
  * @hide
@@ -43,6 +45,8 @@ public final class MediaRoute2Info implements Parcelable {
 
     @NonNull
     final String mId;
+    @Nullable
+    final String mProviderId;
     @NonNull
     final String mName;
     @Nullable
@@ -52,6 +56,7 @@ public final class MediaRoute2Info implements Parcelable {
 
     MediaRoute2Info(@NonNull Builder builder) {
         mId = builder.mId;
+        mProviderId = builder.mProviderId;
         mName = builder.mName;
         mDescription = builder.mDescription;
         mExtras = builder.mExtras;
@@ -59,26 +64,61 @@ public final class MediaRoute2Info implements Parcelable {
 
     MediaRoute2Info(@NonNull Parcel in) {
         mId = in.readString();
+        mProviderId = in.readString();
         mName = in.readString();
         mDescription = in.readString();
         mExtras = in.readBundle();
     }
 
     /**
-     * Returns true if the route info has all of the required field
+     * Returns true if the route info has all of the required field.
+     * A route info only obtained from {@link com.android.server.media.MediaRouterService}
+     * is valid.
      * @hide
      */
     //TODO: Reconsider the validity of a route info when fields are added.
     public boolean isValid() {
-        if (TextUtils.isEmpty(getId()) || TextUtils.isEmpty(getName())) {
+        if (TextUtils.isEmpty(getId()) || TextUtils.isEmpty(getName())
+                || TextUtils.isEmpty(getProviderId())) {
             return false;
         }
         return true;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MediaRoute2Info)) {
+            return false;
+        }
+        MediaRoute2Info other = (MediaRoute2Info) obj;
+        return Objects.equals(mId, other.mId)
+                && Objects.equals(mProviderId, other.mProviderId)
+                && Objects.equals(mName, other.mName)
+                && Objects.equals(mDescription, other.mDescription)
+                //TODO: This will be evaluated as false in most cases. Try not to.
+                && Objects.equals(mExtras, other.mExtras);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mId, mName, mDescription);
+    }
+
     @NonNull
     public String getId() {
         return mId;
+    }
+
+    /**
+     * Gets the provider id of the route.
+     * @hide
+     */
+    @Nullable
+    public String getProviderId() {
+        return mProviderId;
     }
 
     @NonNull
@@ -104,6 +144,7 @@ public final class MediaRoute2Info implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
+        dest.writeString(mProviderId);
         dest.writeString(mName);
         dest.writeString(mDescription);
         dest.writeBundle(mExtras);
@@ -115,6 +156,8 @@ public final class MediaRoute2Info implements Parcelable {
                 .append("MediaRouteInfo{ ")
                 .append("id=").append(getId())
                 .append(", name=").append(getName())
+                .append(", description=").append(getDescription())
+                .append(", providerId=").append(getProviderId())
                 .append(" }");
         return result.toString();
     }
@@ -124,6 +167,7 @@ public final class MediaRoute2Info implements Parcelable {
      */
     public static final class Builder {
         String mId;
+        String mProviderId;
         String mName;
         String mDescription;
         Bundle mExtras;
@@ -145,8 +189,14 @@ public final class MediaRoute2Info implements Parcelable {
             }
 
             setId(routeInfo.mId);
+            if (!TextUtils.isEmpty(routeInfo.mProviderId)) {
+                setProviderId(routeInfo.mProviderId);
+            }
             setName(routeInfo.mName);
             mDescription = routeInfo.mDescription;
+            if (routeInfo.mExtras != null) {
+                mExtras = new Bundle(routeInfo.mExtras);
+            }
         }
 
         /**
@@ -158,6 +208,19 @@ public final class MediaRoute2Info implements Parcelable {
                 throw new IllegalArgumentException("id must not be null or empty");
             }
             mId = id;
+            return this;
+        }
+
+        /**
+         * Sets the provider id of the route.
+         * @hide
+         */
+        @NonNull
+        public Builder setProviderId(@NonNull String providerId) {
+            if (TextUtils.isEmpty(providerId)) {
+                throw new IllegalArgumentException("id must not be null or empty");
+            }
+            mProviderId = providerId;
             return this;
         }
 
@@ -179,6 +242,15 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setDescription(@Nullable String description) {
             mDescription = description;
+            return this;
+        }
+
+        /**
+         * Sets a bundle of extras for the route.
+         */
+        @NonNull
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
             return this;
         }
 
