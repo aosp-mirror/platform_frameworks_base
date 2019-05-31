@@ -126,7 +126,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -267,8 +266,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mTopPaddingNeedsAnimation;
     private boolean mDimmedNeedsAnimation;
     private boolean mHideSensitiveNeedsAnimation;
-    private boolean mDarkNeedsAnimation;
-    private int mDarkAnimationOriginIndex;
+    private boolean mDozingNeedsAnimation;
     private boolean mActivateNeedsAnimation;
     private boolean mGoToFullShadeNeedsAnimation;
     private boolean mIsExpanded = true;
@@ -409,9 +407,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final ViewOutlineProvider mOutlineProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            if (mAmbientState.isDarkAtAll()) {
-                float xProgress = mDarkXInterpolator.getInterpolation(
-                        (1 - mLinearDarkAmount) * mBackgroundXFactor);
+            if (mAmbientState.isHiddenAtAll()) {
+                float xProgress = mHideXInterpolator.getInterpolation(
+                        (1 - mLinearHideAmount) * mBackgroundXFactor);
                 outline.setRoundRect(mBackgroundAnimationRect,
                         MathUtils.lerp(mCornerRadius / 2.0f, mCornerRadius,
                                 xProgress));
@@ -427,14 +425,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private View mForcedScroll;
 
     /**
-     * @see #setDarkAmount(float, float)
+     * @see #setHideAmount(float, float)
      */
-    private float mInterpolatedDarkAmount = 0f;
+    private float mInterpolatedHideAmount = 0f;
 
     /**
-     * @see #setDarkAmount(float, float)
+     * @see #setHideAmount(float, float)
      */
-    private float mLinearDarkAmount = 0f;
+    private float mLinearHideAmount = 0f;
 
     /**
      * How fast the background scales in the X direction as a factor of the Y expansion.
@@ -495,16 +493,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             Dependency.get(VisualStabilityManager.class);
     protected boolean mClearAllEnabled;
 
-    private Interpolator mDarkXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
+    private Interpolator mHideXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
     private NotificationPanelView mNotificationPanel;
     private final ShadeController mShadeController = Dependency.get(ShadeController.class);
 
     private final NotificationGutsManager
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
     private final NotificationSectionsManager mSectionsManager;
-    /**
-     * If the {@link NotificationShelf} should be visible when dark.
-     */
     private boolean mAnimateBottomOnLayout;
 
     @Inject
@@ -571,7 +566,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             blockingHelperManager.setNotificationShadeExpanded(height);
         });
 
-        updateWillNotDraw();
+        boolean willDraw = mShouldDrawNotificationBackground || DEBUG;
+        setWillNotDraw(!willDraw);
         mBackgroundPaint.setAntiAlias(true);
         if (DEBUG) {
             mDebugPaint = new Paint();
@@ -814,17 +810,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int lockScreenRight = getWidth() - mSidePaddings;
         int lockScreenTop = mSections[0].getCurrentBounds().top;
         int lockScreenBottom = mSections[NUM_SECTIONS - 1].getCurrentBounds().bottom;
-        int darkLeft = getWidth() / 2;
-        int darkTop = mTopPadding;
+        int hiddenLeft = getWidth() / 2;
+        int hiddenTop = mTopPadding;
 
-        float yProgress = 1 - mInterpolatedDarkAmount;
-        float xProgress = mDarkXInterpolator.getInterpolation(
-                (1 - mLinearDarkAmount) * mBackgroundXFactor);
+        float yProgress = 1 - mInterpolatedHideAmount;
+        float xProgress = mHideXInterpolator.getInterpolation(
+                (1 - mLinearHideAmount) * mBackgroundXFactor);
 
-        int left = (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress);
-        int right = (int) MathUtils.lerp(darkLeft, lockScreenRight, xProgress);
-        int top = (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress);
-        int bottom = (int) MathUtils.lerp(darkTop, lockScreenBottom, yProgress);
+        int left = (int) MathUtils.lerp(hiddenLeft, lockScreenLeft, xProgress);
+        int right = (int) MathUtils.lerp(hiddenLeft, lockScreenRight, xProgress);
+        int top = (int) MathUtils.lerp(hiddenTop, lockScreenTop, yProgress);
+        int bottom = (int) MathUtils.lerp(hiddenTop, lockScreenBottom, yProgress);
         mBackgroundAnimationRect.set(
                 left,
                 top,
@@ -940,7 +936,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         // Interpolate between semi-transparent notification panel background color
         // and white AOD separator.
         float colorInterpolation = MathUtils.smoothStep(0.4f /* start */, 1f /* end */,
-                mLinearDarkAmount);
+                mLinearHideAmount);
         int color = ColorUtils.blendARGB(mBgColor, Color.WHITE, colorInterpolation);
 
         if (mCachedBackgroundColor != color) {
@@ -1361,11 +1357,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (!mAmbientPulseManager.hasNotifications() && mAmbientState.isFullyDark()) {
-            setClipBounds(null);
-        } else if (mAmbientState.isDarkAtAll()) {
+        if (mAmbientState.isHiddenAtAll()) {
             clipToOutline = true;
             invalidateOutline();
+            if (isFullyHidden()) {
+                setClipBounds(null);
+            }
         } else if (clipped) {
             setClipBounds(mRequestedClipBounds);
         } else {
@@ -2434,7 +2431,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updateBackground() {
         // No need to update the background color if it's not being drawn.
-        if (!mShouldDrawNotificationBackground || mAmbientState.isFullyDark()) {
+        if (!mShouldDrawNotificationBackground) {
             return;
         }
 
@@ -3356,7 +3353,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         generateActivateEvent();
         generateDimmedEvent();
         generateHideSensitiveEvent();
-        generateDarkEvent();
+        generateDozingEvent();
         generateGoToFullShadeEvent();
         generateViewResizeEvent();
         generateGroupExpansionEvent();
@@ -3571,17 +3568,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private void generateDarkEvent() {
-        if (mDarkNeedsAnimation) {
+    private void generateDozingEvent() {
+        if (mDozingNeedsAnimation) {
             AnimationEvent ev = new AnimationEvent(null,
-                    AnimationEvent.ANIMATION_TYPE_DARK,
+                    AnimationEvent.ANIMATION_TYPE_DOZING,
                     new AnimationFilter()
-                            .animateDark()
+                            .animateDozing()
                             .animateY(mShelf));
-            ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
             mAnimationEvents.add(ev);
         }
-        mDarkNeedsAnimation = false;
+        mDozingNeedsAnimation = false;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4711,18 +4707,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         mAmbientState.setDozing(dozing);
         if (animate && mAnimationsEnabled) {
-            mDarkNeedsAnimation = true;
-            mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
+            mDozingNeedsAnimation = true;
             mNeedsAnimation = true;
         }
         requestChildrenUpdate();
-        updateWillNotDraw();
         notifyHeightChangeListener(mShelf);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private void updatePanelTranslation() {
-        setTranslationX(mHorizontalPanelTranslation + mAntiBurnInOffsetX * mInterpolatedDarkAmount);
+        setTranslationX(mHorizontalPanelTranslation + mAntiBurnInOffsetX * mInterpolatedHideAmount);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -4732,49 +4726,30 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     /**
-     * Updates whether or not this Layout will perform its own custom drawing (i.e. whether or
-     * not {@link #onDraw(Canvas)} is called). This method should be called whenever the
-     * {@link #mAmbientState}'s dark mode is toggled.
-     */
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void updateWillNotDraw() {
-        boolean willDraw = mShouldDrawNotificationBackground || DEBUG;
-        setWillNotDraw(!willDraw);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void setDarkAmount(float darkAmount) {
-        setDarkAmount(darkAmount, darkAmount);
-    }
-
-    /**
-     * Sets the current dark amount.
+     * Sets the current hide amount.
      *
-     * @param linearDarkAmount       The dark amount that follows linear interpoloation in the
+     * @param linearHideAmount       The hide amount that follows linear interpoloation in the
      *                               animation,
      *                               i.e. animates from 0 to 1 or vice-versa in a linear manner.
-     * @param interpolatedDarkAmount The dark amount that follows the actual interpolation of the
+     * @param interpolatedHideAmount The hide amount that follows the actual interpolation of the
      *                               animation curve.
      */
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setDarkAmount(float linearDarkAmount, float interpolatedDarkAmount) {
-        mLinearDarkAmount = linearDarkAmount;
-        mInterpolatedDarkAmount = interpolatedDarkAmount;
-        boolean wasFullyDark = mAmbientState.isFullyDark();
-        boolean wasDarkAtAll = mAmbientState.isDarkAtAll();
-        mAmbientState.setDarkAmount(interpolatedDarkAmount);
-        boolean nowFullyDark = mAmbientState.isFullyDark();
-        boolean nowDarkAtAll = mAmbientState.isDarkAtAll();
-        if (nowFullyDark != wasFullyDark) {
-            updateContentHeight();
-            if (nowFullyDark) {
-                updateDarkShelfVisibility();
-            }
+    public void setHideAmount(float linearHideAmount, float interpolatedHideAmount) {
+        mLinearHideAmount = linearHideAmount;
+        mInterpolatedHideAmount = interpolatedHideAmount;
+        boolean wasFullyHidden = mAmbientState.isFullyHidden();
+        boolean wasHiddenAtAll = mAmbientState.isHiddenAtAll();
+        mAmbientState.setHideAmount(interpolatedHideAmount);
+        boolean nowFullyHidden = mAmbientState.isFullyHidden();
+        boolean nowHiddenAtAll = mAmbientState.isHiddenAtAll();
+        if (nowFullyHidden != wasFullyHidden) {
+            setVisibility(mAmbientState.isFullyHidden() ? View.INVISIBLE : View.VISIBLE);
         }
-        if (!wasDarkAtAll && nowDarkAtAll) {
+        if (!wasHiddenAtAll && nowHiddenAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
         }
-        if (nowFullyDark != wasFullyDark || wasDarkAtAll != nowDarkAtAll) {
+        if (nowFullyHidden != wasFullyHidden || wasHiddenAtAll != nowHiddenAtAll) {
             invalidateOutline();
         }
         updateAlgorithmHeightAndPadding();
@@ -4783,39 +4758,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         requestChildrenUpdate();
     }
 
-    private void updateDarkShelfVisibility() {
-        DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
-        if (dozeParameters.shouldControlScreenOff()) {
-            mShelf.fadeInTranslating();
-        }
-        updateClipping();
-    }
-
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public void notifyDarkAnimationStart(boolean dark) {
-        // We only swap the scaling factor if we're fully dark or fully awake to avoid
+    public void notifyHideAnimationStart(boolean hide) {
+        // We only swap the scaling factor if we're fully hidden or fully awake to avoid
         // interpolation issues when playing with the power button.
-        if (mInterpolatedDarkAmount == 0 || mInterpolatedDarkAmount == 1) {
-            mBackgroundXFactor = dark ? 1.8f : 1.5f;
-            mDarkXInterpolator = dark
+        if (mInterpolatedHideAmount == 0 || mInterpolatedHideAmount == 1) {
+            mBackgroundXFactor = hide ? 1.8f : 1.5f;
+            mHideXInterpolator = hide
                     ? Interpolators.FAST_OUT_SLOW_IN_REVERSE
                     : Interpolators.FAST_OUT_SLOW_IN;
-        }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
-        if (screenLocation == null || screenLocation.y < mTopPadding) {
-            return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
-        }
-        if (screenLocation.y > getBottomMostNotificationBottom()) {
-            return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW;
-        }
-        View child = getClosestChildAtRawPosition(screenLocation.x, screenLocation.y);
-        if (child != null) {
-            return getNotGoneIndex(child);
-        } else {
-            return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
         }
     }
 
@@ -5416,8 +5367,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public boolean isFullyDark() {
-        return mAmbientState.isFullyDark();
+    public boolean isFullyHidden() {
+        return mAmbientState.isFullyHidden();
     }
 
     /**
@@ -5661,7 +5612,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     /**
-     * Set the amount how much we're dozing. This is different from how dark the shade is, when
+     * Set the amount how much we're dozing. This is different from how hidden the shade is, when
      * the notification is pulsing.
      */
     public void setDozeAmount(float dozeAmount) {
@@ -5880,7 +5831,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         .animateY()
                         .animateZ(),
 
-                // ANIMATION_TYPE_DARK
+                // ANIMATION_TYPE_DOZING
                 null, // Unused
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
@@ -5944,7 +5895,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // ANIMATION_TYPE_EVERYTHING
                 new AnimationFilter()
                         .animateAlpha()
-                        .animateDark()
+                        .animateDozing()
                         .animateDimmed()
                         .animateHideSensitive()
                         .animateHeight()
@@ -5976,7 +5927,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // ANIMATION_TYPE_CHANGE_POSITION
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
-                // ANIMATION_TYPE_DARK
+                // ANIMATION_TYPE_DOZING
                 StackStateAnimator.ANIMATION_DURATION_WAKEUP,
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
@@ -6014,7 +5965,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         static final int ANIMATION_TYPE_ACTIVATED_CHILD = 4;
         static final int ANIMATION_TYPE_DIMMED = 5;
         static final int ANIMATION_TYPE_CHANGE_POSITION = 6;
-        static final int ANIMATION_TYPE_DARK = 7;
+        static final int ANIMATION_TYPE_DOZING = 7;
         static final int ANIMATION_TYPE_GO_TO_FULL_SHADE = 8;
         static final int ANIMATION_TYPE_HIDE_SENSITIVE = 9;
         static final int ANIMATION_TYPE_VIEW_RESIZE = 10;
@@ -6025,16 +5976,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         static final int ANIMATION_TYPE_HEADS_UP_OTHER = 15;
         static final int ANIMATION_TYPE_EVERYTHING = 16;
 
-        static final int DARK_ANIMATION_ORIGIN_INDEX_ABOVE = -1;
-        static final int DARK_ANIMATION_ORIGIN_INDEX_BELOW = -2;
-
         final long eventStartTime;
         final ExpandableView mChangingView;
         final int animationType;
         final AnimationFilter filter;
         final long length;
         View viewAfterChangingView;
-        int darkAnimationOriginIndex;
         boolean headsUpFromBottom;
 
         AnimationEvent(ExpandableView view, int type) {

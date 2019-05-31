@@ -173,7 +173,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupManager).collapseAllGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
-        doNothing().when(notificationShelf).fadeInTranslating();
     }
 
     @After
@@ -194,9 +193,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testAntiBurnInOffset() {
         final int burnInOffset = 30;
         mStackScroller.setAntiBurnInOffsetX(burnInOffset);
-        mStackScroller.setDarkAmount(0.0f, 0.0f);
+        mStackScroller.setHideAmount(0.0f, 0.0f);
         Assert.assertEquals(0 /* expected */, mStackScroller.getTranslationX(), 0.01 /* delta */);
-        mStackScroller.setDarkAmount(1.0f, 1.0f);
+        mStackScroller.setHideAmount(1.0f, 1.0f);
         Assert.assertEquals(burnInOffset /* expected */, mStackScroller.getTranslationX(),
                 0.01 /* delta */);
     }
@@ -386,7 +385,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         NotificationSwipeHelper swipeActionHelper =
                 (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
         swipeActionHelper.setExposedMenuView(new View(mContext));
-        mStackScroller.setDarkAmount(0.1f, 0.1f);
+        mStackScroller.setHideAmount(0.1f, 0.1f);
         assertNull(swipeActionHelper.getExposedMenuView());
     }
 
