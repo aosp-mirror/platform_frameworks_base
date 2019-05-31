@@ -462,6 +462,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         if (mHeaderTextContainerAlphaAnimator != null) {
             mHeaderTextContainerAlphaAnimator.setPosition(keyguardExpansionFraction);
+            if (keyguardExpansionFraction > 0) {
+                mHeaderTextContainerView.setVisibility(VISIBLE);
+            } else {
+                mHeaderTextContainerView.setVisibility(INVISIBLE);
+            }
         }
         if (mPrivacyChipAlphaAnimator != null) {
             mPrivacyChip.setExpanded(expansionFraction > 0.5);
