@@ -19,8 +19,8 @@ package android.database.sqlite;
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteDebug.Consts;
 import android.database.sqlite.SQLiteDebug.DbStats;
+import android.database.sqlite.SQLiteDebug.NoPreloadHolder;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
@@ -214,7 +214,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         try {
             mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
                     mConfiguration.label,
-                    SQLiteDebug.Consts.DEBUG_SQL_STATEMENTS, SQLiteDebug.Consts.DEBUG_SQL_TIME,
+                    NoPreloadHolder.DEBUG_SQL_STATEMENTS, NoPreloadHolder.DEBUG_SQL_TIME,
                     mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         } finally {
             mRecentOperations.endOperation(cookie);
@@ -1500,7 +1500,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
                 operation.mFinished = true;
                 final long execTime = operation.mEndTime - operation.mStartTime;
                 mPool.onStatementExecuted(execTime);
-                return SQLiteDebug.Consts.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
+                return NoPreloadHolder.DEBUG_LOG_SLOW_QUERIES && SQLiteDebug.shouldLogSlowQuery(
                         execTime);
             }
             return false;
@@ -1608,7 +1608,7 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
             if (mSql != null) {
                 msg.append(", sql=\"").append(trimSqlForDisplay(mSql)).append("\"");
             }
-            final boolean dumpDetails = allowDetailedLog && Consts.DEBUG_LOG_DETAILED
+            final boolean dumpDetails = allowDetailedLog && NoPreloadHolder.DEBUG_LOG_DETAILED
                     && mBindArgs != null && mBindArgs.size() != 0;
             if (dumpDetails) {
                 msg.append(", bindArgs=[");
