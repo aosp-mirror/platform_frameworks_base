@@ -237,6 +237,11 @@ static const char* ENABLE_APEX_IMAGE = "enable_apex_image";
 // Flag to pass to the runtime when using the apex image.
 static const char* kApexImageOption = "-Ximage:/system/framework/apex.art";
 
+// Feature flag name for disabling lock profiling.
+static const char* DISABLE_LOCK_PROFILING = "disable_lock_profiling";
+// Runtime option disabling lock profiling.
+static const char* kLockProfThresholdRuntimeOption = "-Xlockprofthreshold:0";
+
 static AndroidRuntime* gCurRuntime = NULL;
 
 /*
@@ -683,6 +688,17 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
         ALOGI("Using dalvik.vm.boot-image: '%s'\n", bootImageBuf);
     } else {
         ALOGI("Using default boot image");
+    }
+
+    std::string disable_lock_profiling =
+        server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                             DISABLE_LOCK_PROFILING,
+                                                             /*default_value=*/ "");
+    if (disable_lock_profiling == "true") {
+        addOption(kLockProfThresholdRuntimeOption);
+        ALOGI("Disabling lock profiling: '%s'\n", kLockProfThresholdRuntimeOption);
+    } else {
+        ALOGI("Leaving lock profiling enabled");
     }
 
     bool checkJni = false;
