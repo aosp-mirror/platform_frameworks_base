@@ -22,9 +22,10 @@ import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
-import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -70,7 +71,8 @@ public class CameraTestHelper {
             try {
                 Log.v(TAG, "JPEG picture taken");
                 fos = new FileOutputStream(String.format("%s/%s/%s-%d.jpg",
-                        Environment.getExternalStorageDirectory(), CAMERA_STRESS_IMAGES_DIRECTORY,
+                        InstrumentationRegistry.getInstrumentation().getTargetContext()
+                        .getExternalFilesDir(null).getPath(), CAMERA_STRESS_IMAGES_DIRECTORY,
                         CAMERA_STRESS_IMAGES_PREFIX, System.currentTimeMillis()));
                 fos.write(data);
             } catch (FileNotFoundException e) {
@@ -95,7 +97,8 @@ public class CameraTestHelper {
     public void setupCameraTest() {
         // Create the test images directory if it doesn't exist
         File stressImagesDirectory = new File(String.format("%s/%s",
-                Environment.getExternalStorageDirectory(), CAMERA_STRESS_IMAGES_DIRECTORY));
+                InstrumentationRegistry.getInstrumentation().getTargetContext()
+                .getExternalFilesDir(null).getPath(), CAMERA_STRESS_IMAGES_DIRECTORY));
         if (!stressImagesDirectory.exists()) {
             stressImagesDirectory.mkdir();
         }
@@ -129,7 +132,8 @@ public class CameraTestHelper {
     public void cleanupTestImages() {
         try {
             File stressImagesDirectory = new File(String.format("%s/%s",
-                    Environment.getExternalStorageDirectory(), CAMERA_STRESS_IMAGES_DIRECTORY));
+                    InstrumentationRegistry.getInstrumentation().getTargetContext()
+                    .getExternalFilesDir(null).getPath(), CAMERA_STRESS_IMAGES_DIRECTORY));
             File[] stressImages = stressImagesDirectory.listFiles();
             for (File f : stressImages) {
                 f.delete();

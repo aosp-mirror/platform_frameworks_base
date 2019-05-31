@@ -56,6 +56,8 @@ import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
+import com.android.systemui.util.wakelock.SettableWakeLock;
+import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -101,6 +103,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private final Handler mHandler;
     private final AlarmManager.OnAlarmListener mUpdateNextAlarm = this::updateNextAlarm;
     private final HashSet<Integer> mMediaInvisibleStates;
+    private final Object mMediaToken = new Object();
+    private SettableWakeLock mMediaWakeLock;
     private ZenModeController mZenModeController;
     private String mDatePattern;
     private DateFormat mDateFormat;
@@ -114,7 +118,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private PendingIntent mPendingIntent;
     protected NotificationMediaManager mMediaManager;
     private StatusBarStateController mStatusBarStateController;
-    protected MediaMetadata mMediaMetaData;
+    private CharSequence mMediaTitle;
+    private CharSequence mMediaArtist;
     protected boolean mDozing;
     private boolean mMediaIsVisible;
 
@@ -218,24 +223,18 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected boolean needsMediaLocked() {
-        return mMediaMetaData != null && mMediaIsVisible && mDozing;
+        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && mDozing;
     }
 
     protected void addMediaLocked(ListBuilder listBuilder) {
-        if (mMediaMetaData == null) {
+        if (TextUtils.isEmpty(mMediaTitle)) {
             return;
         }
+        listBuilder.setHeader(new ListBuilder.HeaderBuilder(mHeaderUri).setTitle(mMediaTitle));
 
-        CharSequence title = mMediaMetaData.getText(MediaMetadata.METADATA_KEY_TITLE);
-        if (TextUtils.isEmpty(title)) {
-            title = getContext().getResources().getString(R.string.music_controls_no_title);
-        }
-        listBuilder.setHeader(new ListBuilder.HeaderBuilder(mHeaderUri).setTitle(title));
-
-        CharSequence album = mMediaMetaData.getText(MediaMetadata.METADATA_KEY_ARTIST);
-        if (!TextUtils.isEmpty(album)) {
+        if (!TextUtils.isEmpty(mMediaArtist)) {
             RowBuilder albumBuilder = new RowBuilder(mMediaUri);
-            albumBuilder.setTitle(album);
+            albumBuilder.setTitle(mMediaArtist);
 
             Icon mediaIcon = mMediaManager == null ? null : mMediaManager.getMediaIcon();
             IconCompat mediaIconCompat = mediaIcon == null ? null
@@ -306,6 +305,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
         mZenModeController.addCallback(this);
         mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
         mPendingIntent = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
+        mMediaWakeLock = new SettableWakeLock(WakeLock.createPartial(getContext(), "media"),
+                "media");
         KeyguardSliceProvider.sInstance = this;
         registerClockUpdate();
         updateClockLocked();
@@ -425,12 +426,42 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state) {
         synchronized (this) {
             boolean nextVisible = !mMediaInvisibleStates.contains(state);
-            if (nextVisible == mMediaIsVisible && metadata == mMediaMetaData) {
-                return;
+            mHandler.removeCallbacksAndMessages(mMediaToken);
+            if (mMediaIsVisible && !nextVisible) {
+                // We need to delay this event for a few millis when stopping to avoid jank in the
+                // animation. The media app might not send its update when buffering, and the slice
+                // would end up without a header for 0.5 second.
+                mMediaWakeLock.setAcquired(true);
+                mHandler.postDelayed(() -> {
+                    updateMediaStateLocked(metadata, state);
+                    mMediaWakeLock.setAcquired(false);
+                }, mMediaToken, 2000);
+            } else {
+                mMediaWakeLock.setAcquired(false);
+                updateMediaStateLocked(metadata, state);
             }
-            mMediaMetaData = metadata;
-            mMediaIsVisible = nextVisible;
         }
+    }
+
+    private void updateMediaStateLocked(MediaMetadata metadata, @PlaybackState.State int state) {
+        boolean nextVisible = !mMediaInvisibleStates.contains(state);
+        CharSequence title = null;
+        if (metadata != null) {
+            title = metadata.getText(MediaMetadata.METADATA_KEY_TITLE);
+            if (TextUtils.isEmpty(title)) {
+                title = getContext().getResources().getString(R.string.music_controls_no_title);
+            }
+        }
+        CharSequence artist = metadata == null ? null : metadata.getText(
+                MediaMetadata.METADATA_KEY_ARTIST);
+
+        if (nextVisible == mMediaIsVisible && TextUtils.equals(title, mMediaTitle)
+                && TextUtils.equals(artist, mMediaArtist)) {
+            return;
+        }
+        mMediaTitle = title;
+        mMediaArtist = artist;
+        mMediaIsVisible = nextVisible;
         notifyChange();
     }
 
