@@ -49,6 +49,11 @@ public class AutoMarqueeTextView extends TextView {
     }
 
     @Override
+    protected void onFinishInflate() {
+        onVisibilityAggregated(isVisibleToUser());
+    }
+
+    @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         setSelected(true);
