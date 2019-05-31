@@ -16,14 +16,12 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.KeyValueSettingObserver;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -140,62 +138,36 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getKvBackupAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (DEBUG_SCHEDULING) {
-                Slog.v(TAG, "getKvBackupAgentTimeoutMillis(): " + mKvBackupAgentTimeoutMillis);
-            }
             return mKvBackupAgentTimeoutMillis;
         }
     }
 
     public long getFullBackupAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (DEBUG_SCHEDULING) {
-                Slog.v(TAG, "getFullBackupAgentTimeoutMillis(): " + mFullBackupAgentTimeoutMillis);
-            }
             return mFullBackupAgentTimeoutMillis;
         }
     }
 
     public long getSharedBackupAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (DEBUG_SCHEDULING) {
-                Slog.v(
-                        TAG,
-                        "getSharedBackupAgentTimeoutMillis(): " + mSharedBackupAgentTimeoutMillis);
-            }
             return mSharedBackupAgentTimeoutMillis;
         }
     }
 
     public long getRestoreAgentTimeoutMillis() {
         synchronized (mLock) {
-            if (DEBUG_SCHEDULING) {
-                Slog.v(TAG, "getRestoreAgentTimeoutMillis(): " + mRestoreAgentTimeoutMillis);
-            }
             return mRestoreAgentTimeoutMillis;
         }
     }
 
     public long getRestoreAgentFinishedTimeoutMillis() {
         synchronized (mLock) {
-            if (DEBUG_SCHEDULING) {
-                Slog.v(
-                        TAG,
-                        "getRestoreAgentFinishedTimeoutMillis(): "
-                                + mRestoreAgentFinishedTimeoutMillis);
-            }
             return mRestoreAgentFinishedTimeoutMillis;
         }
     }
 
     public long getQuotaExceededTimeoutMillis() {
         synchronized (mLock) {
-            if (DEBUG_SCHEDULING) {
-                Slog.v(
-                        TAG,
-                        "getQuotaExceededTimeoutMillis(): "
-                                + mQuotaExceededTimeoutMillis);
-            }
             return mQuotaExceededTimeoutMillis;
         }
     }
