@@ -2280,8 +2280,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (bucket >= mConstants.STANDBY_BEATS.length
                             || (mHeartbeat > appLastRan
                             && mHeartbeat < appLastRan + mConstants.STANDBY_BEATS[bucket])) {
-                        // TODO: log/trace that we're deferring the job due to bucketing if we
-                        // hit this
                         if (job.getWhenStandbyDeferred() == 0) {
                             if (DEBUG_STANDBY) {
                                 Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "

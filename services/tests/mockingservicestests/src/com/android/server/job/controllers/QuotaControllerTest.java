@@ -2450,6 +2450,8 @@ public class QuotaControllerTest {
                 timeout(remainingTimeMs + 2 * SECOND_IN_MILLIS).times(1))
                 .onControllerStateChanged();
         assertFalse(jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertEquals(JobSchedulerService.sElapsedRealtimeClock.millis(),
+                jobStatus.getWhenStandbyDeferred());
     }
 
     /**
@@ -2606,6 +2608,8 @@ public class QuotaControllerTest {
                 "testStartAlarmScheduled_TimingSessionCount_AllowedTime", 42);
         mQuotaController.maybeStartTrackingJobLocked(throttledJob, null);
         assertFalse(throttledJob.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
+        assertEquals(JobSchedulerService.sElapsedRealtimeClock.millis(),
+                throttledJob.getWhenStandbyDeferred());
 
         ExecutionStats stats = mQuotaController.getExecutionStatsLocked(SOURCE_USER_ID,
                 SOURCE_PACKAGE, standbyBucket);
