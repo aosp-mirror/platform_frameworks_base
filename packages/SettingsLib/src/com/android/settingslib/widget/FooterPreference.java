@@ -17,6 +17,7 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -55,9 +56,26 @@ public class FooterPreference extends Preference {
         title.setLongClickable(false);
     }
 
+    @Override
+    public void setSummary(CharSequence summary) {
+        setTitle(summary);
+    }
+
+    @Override
+    public void setSummary(int summaryResId) {
+        setTitle(summaryResId);
+    }
+
+    @Override
+    public CharSequence getSummary() {
+        return getTitle();
+    }
+
     private void init() {
         setIcon(R.drawable.ic_info_outline_24);
-        setKey(KEY_FOOTER);
         setOrder(ORDER_FOOTER);
+        if (TextUtils.isEmpty(getKey())) {
+            setKey(KEY_FOOTER);
+        }
     }
 }
