@@ -223,6 +223,8 @@ class ChannelEditorDialogController @Inject constructor(
         dialog = Dialog(context)
 
         dialog.window?.requestFeature(Window.FEATURE_NO_TITLE)
+        // Prevent a11y readers from reading the first element in the dialog twice
+        dialog.setTitle("\u00A0")
         dialog.apply {
             setContentView(R.layout.notif_half_shelf)
             setCanceledOnTouchOutside(true)
