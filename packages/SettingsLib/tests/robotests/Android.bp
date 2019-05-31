@@ -35,6 +35,6 @@ android_robolectric_test {
     java_resource_dirs: ["config"],
     instrumentation_for: "SettingsLibShell",
     test_options: {
-        timeout: "36000",
+        timeout: 36000,
     },
 }
