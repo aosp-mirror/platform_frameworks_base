@@ -5867,8 +5867,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     Intent getSecondaryHomeIntent(String preferredPackage) {
         final Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
-        if (preferredPackage == null) {
-            // Using the component stored in config if no package name.
+        final boolean useSystemProvidedLauncher = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useSystemProvidedLauncherForSecondary);
+        if (preferredPackage == null || useSystemProvidedLauncher) {
+            // Using the component stored in config if no package name or forced.
             final String secondaryHomeComponent = mContext.getResources().getString(
                     com.android.internal.R.string.config_secondaryHomeComponent);
             intent.setComponent(ComponentName.unflattenFromString(secondaryHomeComponent));
