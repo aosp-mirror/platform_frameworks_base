@@ -16,6 +16,7 @@
 
 package com.android.systemui.colorextraction;
 
+import android.annotation.ColorInt;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -113,7 +114,11 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         super.onColorsChanged(colors, which);
 
         if ((which & WallpaperManager.FLAG_SYSTEM) != 0) {
+            @ColorInt int oldColor = mWpHiddenColors.getMainColor();
             updateDefaultGradients(colors);
+            if (oldColor != mWpHiddenColors.getMainColor()) {
+                triggerColorsChanged(WallpaperManager.FLAG_SYSTEM);
+            }
         }
     }
 
@@ -121,6 +126,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
     public void onUiModeChanged() {
         WallpaperColors systemColors = getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
         updateDefaultGradients(systemColors);
+        triggerColorsChanged(WallpaperManager.FLAG_SYSTEM);
     }
 
     /**
