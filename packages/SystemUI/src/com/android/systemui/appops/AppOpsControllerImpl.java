@@ -100,6 +100,13 @@ public class AppOpsControllerImpl implements AppOpsController,
         } else {
             mAppOps.stopWatchingActive(this);
             mAppOps.stopWatchingNoted(this);
+            mBGHandler.removeCallbacksAndMessages(null); // null removes all
+            synchronized (mActiveItems) {
+                mActiveItems.clear();
+            }
+            synchronized (mNotedItems) {
+                mNotedItems.clear();
+            }
         }
     }
 
