@@ -569,9 +569,8 @@ import com.android.internal.annotations.GuardedBy;
         return mBrokerHandler.hasMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
     }
 
-    //###
     // must be called synchronized on mConnectedDevices
-    /*package*/  boolean hasScheduledA2dpSinkConnectionState(BluetoothDevice btDevice) {
+    /*package*/ boolean hasScheduledA2dpSinkConnectionState(BluetoothDevice btDevice) {
         return mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE,
                 new BtHelper.BluetoothA2dpDeviceInfo(btDevice));
     }

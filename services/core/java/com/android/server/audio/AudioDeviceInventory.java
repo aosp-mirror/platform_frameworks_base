@@ -146,6 +146,7 @@ public final class AudioDeviceInventory {
         }
     }
 
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
             @AudioService.BtProfileConnectionState int state) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
@@ -259,6 +260,7 @@ public final class AudioDeviceInventory {
         }
     }
 
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void onBluetoothA2dpActiveDeviceChange(
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo, int event) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
@@ -532,6 +534,7 @@ public final class AudioDeviceInventory {
         return mCurAudioRoutes;
     }
 
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void setBluetoothA2dpDeviceConnectionState(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
             int profile, boolean suppressNoisyIntent, int musicDevice, int a2dpVolume) {
@@ -559,9 +562,13 @@ public final class AudioDeviceInventory {
             final BtHelper.BluetoothA2dpDeviceInfo a2dpDeviceInfo =
                     new BtHelper.BluetoothA2dpDeviceInfo(device, a2dpVolume, a2dpCodec);
             if (profile == BluetoothProfile.A2DP) {
-                mDeviceBroker.postA2dpSinkConnection(state,
-                        a2dpDeviceInfo,
-                        delay);
+                if (delay == 0) {
+                    onSetA2dpSinkConnectionState(a2dpDeviceInfo, state);
+                } else {
+                    mDeviceBroker.postA2dpSinkConnection(state,
+                            a2dpDeviceInfo,
+                            delay);
+                }
             } else { //profile == BluetoothProfile.A2DP_SINK
                 mDeviceBroker.postA2dpSourceConnection(state,
                         a2dpDeviceInfo,
