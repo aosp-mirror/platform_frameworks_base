@@ -646,7 +646,7 @@ public class NotificationInfoTest extends SysuiTestCase {
         doCallRealMethod().when(guts).closeControls(anyInt(), anyInt(), anyBoolean(), anyBoolean());
         mNotificationInfo.setGutsParent(guts);
 
-        mNotificationInfo.closeControls(mNotificationInfo);
+        mNotificationInfo.closeControls(mNotificationInfo, true);
 
         verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
     }
