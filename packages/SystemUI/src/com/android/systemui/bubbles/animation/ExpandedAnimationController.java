@@ -361,7 +361,7 @@ public class ExpandedAnimationController
      * @return Bubble left x from left edge of screen.
      */
     public float getBubbleLeft(int index) {
-        float bubbleFromRowLeft = index * (mBubbleSizePx + getSpaceBetweenBubbles());
+        final float bubbleFromRowLeft = index * (mBubbleSizePx + getSpaceBetweenBubbles());
         return getRowLeft() + bubbleFromRowLeft;
     }
 
@@ -408,7 +408,6 @@ public class ExpandedAnimationController
 
         final int gapCount = mBubblesMaxRendered - 1;
         final float gapWidth = totalGapWidth / gapCount;
-
         return gapWidth;
     }
 }
