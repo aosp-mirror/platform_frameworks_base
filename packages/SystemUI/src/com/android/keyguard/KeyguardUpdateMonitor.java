@@ -111,6 +111,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
+    private static final boolean DEBUG_FACE = true;
     private static final int LOW_BATTERY_THRESHOLD = 20;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
@@ -182,6 +183,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * Prudently disable lockscreen.
      */
     public static final boolean CORE_APPS_ONLY;
+
     static {
         try {
             CORE_APPS_ONLY = IPackageManager.Stub.asInterface(
@@ -734,6 +736,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (acquireInfo != FaceManager.FACE_ACQUIRED_GOOD) {
             return;
         }
+        if (DEBUG_FACE) Log.d(TAG, "Face acquired");
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -760,6 +763,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 Log.d(TAG, "Face authentication disabled by DPM for userId: " + userId);
                 return;
             }
+            if (DEBUG_FACE) Log.d(TAG, "Face auth succeeded for user " + userId);
             onFaceAuthenticated(userId);
         } finally {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
@@ -768,6 +772,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceHelp(int msgId, String helpString) {
+        if (DEBUG_FACE) Log.d(TAG, "Face help received: " + helpString);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -786,6 +791,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     };
 
     private void handleFaceError(int msgId, String errString) {
+        if (DEBUG_FACE) Log.d(TAG, "Face error received: " + errString);
         if (msgId == FaceManager.FACE_ERROR_CANCELED
                 && mFaceRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
