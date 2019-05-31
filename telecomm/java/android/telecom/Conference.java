@@ -95,6 +95,10 @@ public abstract class Conference extends Conferenceable {
     private Bundle mExtras;
     private Set<String> mPreviousExtraKeys;
     private final Object mExtrasLock = new Object();
+    private Uri mAddress;
+    private int mAddressPresentation;
+    private String mCallerDisplayName;
+    private int mCallerDisplayNamePresentation;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -987,9 +991,64 @@ public abstract class Conference extends Conferenceable {
      */
     public final void setAddress(Uri address, int presentation) {
         Log.d(this, "setAddress %s", address);
+        mAddress = address;
+        mAddressPresentation = presentation;
         for (Listener l : mListeners) {
             l.onAddressChanged(this, address, presentation);
         }
+    }
+
+    /**
+     * Returns the "address" associated with the conference.  This is applicable in two cases:
+     * <ol>
+     *     <li>When {@link #setConferenceState(boolean)} is used to mark a conference as
+     *     temporarily "not a conference"; we need to present the correct address in the in-call
+     *     UI.</li>
+     *     <li>When the conference is not hosted on the current device, we need to know the address
+     *     information for the purpose of showing the original address to the user, as well as for
+     *     logging to the call log.</li>
+     * </ol>
+     * @return The address of the conference, or {@code null} if not applicable.
+     * @hide
+     */
+    public final Uri getAddress() {
+        return mAddress;
+    }
+
+    /**
+     * Returns the address presentation associated with the conference.
+     * <p>
+     * This is applicable in two cases:
+     * <ol>
+     *     <li>When {@link #setConferenceState(boolean)} is used to mark a conference as
+     *     temporarily "not a conference"; we need to present the correct address in the in-call
+     *     UI.</li>
+     *     <li>When the conference is not hosted on the current device, we need to know the address
+     *     information for the purpose of showing the original address to the user, as well as for
+     *     logging to the call log.</li>
+     * </ol>
+     * @return The address of the conference, or {@code null} if not applicable.
+     * @hide
+     */
+    public final int getAddressPresentation() {
+        return mAddressPresentation;
+    }
+
+    /**
+     * @return The caller display name (CNAP).
+     * @hide
+     */
+    public final String getCallerDisplayName() {
+        return mCallerDisplayName;
+    }
+
+    /**
+     * @return The presentation requirements for the handle.
+     *         See {@link TelecomManager} for valid values.
+     * @hide
+     */
+    public final int getCallerDisplayNamePresentation() {
+        return mCallerDisplayNamePresentation;
     }
 
     /**
@@ -1004,6 +1063,8 @@ public abstract class Conference extends Conferenceable {
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
         Log.d(this, "setCallerDisplayName %s", callerDisplayName);
+        mCallerDisplayName = callerDisplayName;
+        mCallerDisplayNamePresentation = presentation;
         for (Listener l : mListeners) {
             l.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
         }
