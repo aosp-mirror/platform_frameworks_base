@@ -37,7 +37,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,6 +78,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
+        when(mUnlockMethodCache.isUnlockingWithFacePossible()).thenReturn(true);
         mContext.addMockSystemService(PowerManager.class, mPowerManager);
         mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
         mDependency.injectTestDependency(StatusBarWindowController.class,
@@ -191,7 +191,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
             super(mContext, mDozeScrimController,
                     mKeyguardViewMediator, mScrimController, mStatusBar, mUnlockMethodCache,
                     mHandler, mUpdateMonitor, 0 /* wakeUpDelay */,
-                    new KeyguardBypassController(faceDismissesKeyguard));
+                    new KeyguardBypassController(faceDismissesKeyguard, mUnlockMethodCache));
         }
     }
 }
