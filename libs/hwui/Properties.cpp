@@ -191,14 +191,14 @@ RenderPipelineType Properties::getRenderPipelineType() {
 }
 
 void Properties::overrideRenderPipelineType(RenderPipelineType type) {
-#if !defined(HWUI_GLES_WRAP_ENABLED)
     // If we're doing actual rendering then we can't change the renderer after it's been set.
     // Unit tests can freely change this as often as it wants, though, as there's no actual
     // GL rendering happening
     if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
+        LOG_ALWAYS_FATAL_IF(sRenderPipelineType != type,
+                "Trying to change pipeline but it's already set");
         return;
     }
-#endif
     sRenderPipelineType = type;
 }
 

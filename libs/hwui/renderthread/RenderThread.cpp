@@ -31,10 +31,6 @@
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
 
-#ifdef HWUI_GLES_WRAP_ENABLED
-#include "debug/GlesDriver.h"
-#endif
-
 #include <GrContextOptions.h>
 #include <gl/GrGLInterface.h>
 
@@ -197,12 +193,7 @@ void RenderThread::requireGlContext() {
     }
     mEglManager->initialize();
 
-#ifdef HWUI_GLES_WRAP_ENABLED
-    debug::GlesDriver* driver = debug::GlesDriver::get();
-    sk_sp<const GrGLInterface> glInterface(driver->getSkiaInterface());
-#else
     sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
-#endif
     LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
     GrContextOptions options;
