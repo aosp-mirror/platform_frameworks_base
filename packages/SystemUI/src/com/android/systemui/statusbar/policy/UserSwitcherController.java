@@ -111,7 +111,9 @@ public class UserSwitcherController implements Dumpable {
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
             @Named(MAIN_HANDLER_NAME) Handler handler, ActivityStarter activityStarter) {
         mContext = context;
-        mGuestResumeSessionReceiver.register(context);
+        if (!UserManager.isGuestUserEphemeral()) {
+            mGuestResumeSessionReceiver.register(context);
+        }
         mKeyguardMonitor = keyguardMonitor;
         mHandler = handler;
         mActivityStarter = activityStarter;
