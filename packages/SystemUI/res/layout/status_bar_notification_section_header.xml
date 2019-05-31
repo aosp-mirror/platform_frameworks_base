@@ -44,6 +44,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="@dimen/notification_section_header_padding_left"
+            android:gravity="start"
+            android:textAlignment="gravity"
             android:text="@string/notification_section_header_gentle"
             android:textSize="12sp"
             android:textColor="@color/notification_section_header_label_color"
