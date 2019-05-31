@@ -939,18 +939,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return;
         }
 
-        float alpha =
-                BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
-        alpha *= 1f - mInterpolatedDarkAmount;
-        // We need to manually blend in the background color.
-        int scrimColor = mScrimController.getBackgroundColor();
-        int awakeColor = ColorUtils.blendARGB(scrimColor, mBgColor, alpha);
-
         // Interpolate between semi-transparent notification panel background color
         // and white AOD separator.
         float colorInterpolation = MathUtils.smoothStep(0.4f /* start */, 1f /* end */,
                 mLinearDarkAmount);
-        int color = ColorUtils.blendARGB(awakeColor, Color.WHITE, colorInterpolation);
+        int color = ColorUtils.blendARGB(mBgColor, Color.WHITE, colorInterpolation);
 
         if (mCachedBackgroundColor != color) {
             mCachedBackgroundColor = color;
