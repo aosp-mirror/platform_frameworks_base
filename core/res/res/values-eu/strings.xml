@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Hatz-markaren ikonoa"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"kudeatu aurpegiaren bidez desblokeatzeko hardwarea"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Aurpegi-txantiloiak gehitu eta ezabatzeko metodoei dei egitea baimentzen dio aplikazioari."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"erabili aurpegiaren bidez desblokeatzeko hardwarea"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Autentifikazioa egiteko aurpegiaren bidez desblokeatzeko hardwarea erabiltzeko baimena ematen dio aplikazioari"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Aurpegiaren bidez desblokeatzeko aukera"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Erregistratu aurpegia berriro"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Ezagutzea hobetzeko, erregistratu aurpegia berriro"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Ezin izan dira bildu argazkiaren datu zehatzak. Saiatu berriro."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ezin da egiaztatu aurpegia. Hardwarea ez dago erabilgarri."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Saiatu berriro aurpegiaren bidez desblokeatzen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Ezin dira gorde aurpegiaren datu berriak. Ezabatu zaharrak."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Utzi da aurpegiaren bidezko eragiketa."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Erabiltzaileak bertan behera utzi du aurpegiaren bidez desblokeatzea."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Saiakera gehiegi egin dira. Aurpegiaren bidez desblokeatzeko aukera desgaitu egin da."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Ez duzu konfiguratu aurpegiaren bidez desblokeatzeko aukera."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Gailu honek ez du onartzen aurpegiaren bidez desblokeatzea."</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -621,8 +612,8 @@
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Telekomunikabideekiko konexioak kudeatzea baimentzen die aplikazioei."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"erabili pantaila deiak abian direnean"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzeko aukera ematen die aplikazioei."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"elkarreragin telefono-zerbitzuekin"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Deiak egiteko eta jasotzeko telefonia-zerbitzuekin elkarreragitea baimentzen die aplikazioei."</string>
+    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"jardun interakzioan telefono-zerbitzuekin"</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Deiak egiteko eta jasotzeko telefonia-zerbitzuekin interakzioan aritzea baimentzen die aplikazioei."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"eskaini erabiltzaileentzako aukerak deiak abian direnean"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Deiak abian direnean erabiltzeko aukera eskaintzea baimentzen die aplikazioei."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"irakurri sare-erabileraren historia"</string>
@@ -978,8 +969,8 @@
     <string name="searchview_description_submit" msgid="2688450133297983542">"Bidali kontsulta"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Ahozko bilaketa"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"\"Arakatu ukituta\" eginbidea gaitu nahi duzu?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> zerbitzuak \"Arakatu ukituta\" eginbidea gaitu nahi du. Eginbide hori aktibatuta dagoenean, hatzaren azpian duzunaren azalpena ikus edo entzun dezakezu, edo tabletarekin elkarrekintzan aritzeko keinuak egin ditzakezu."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> zerbitzuak \"Arakatu ukituta\" eginbidea gaitu nahi du. Eginbide hori aktibatuta dagoenean, hatzaren azpian duzunaren azalpena ikus edo entzun dezakezu, edo telefonoarekin elkarrekintzan aritzeko keinuak egin ditzakezu."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> zerbitzuak \"Arakatu ukituta\" eginbidea gaitu nahi du. Eginbide hori aktibatuta dagoenean, hatzaren azpian duzunaren azalpena ikus edo entzun dezakezu, edo tabletarekin interakzioan aritzeko keinuak egin ditzakezu."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> zerbitzuak \"Arakatu ukituta\" eginbidea gaitu nahi du. Eginbide hori aktibatuta dagoenean, hatzaren azpian duzunaren azalpena ikus edo entzun dezakezu, edo telefonoarekin interakzioan aritzeko keinuak egin ditzakezu."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Duela hilabete"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Duela hilabete baino gutxiago"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1160,7 +1151,7 @@
     <string name="use_a_different_app" msgid="8134926230585710243">"Erabili beste aplikazio bat"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Garbitu aplikazio lehenetsia Sistemaren ezarpenak &gt; Aplikazioak &gt; Deskargatutakoak atalean."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Aukeratu ekintza bat"</string>
-    <string name="chooseUsbActivity" msgid="6894748416073583509">"Aukeratu USB gailurako aplikazioa"</string>
+    <string name="chooseUsbActivity" msgid="6894748416073583509">"Aukeratu USB bidezko gailurako aplikazioa"</string>
     <string name="noApplications" msgid="2991814273936504689">"Ez dago ekintza hori egin dezakeen aplikaziorik."</string>
     <string name="aerr_application" msgid="250320989337856518">"Gelditu egin da <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="aerr_process" msgid="6201597323218674729">"Gelditu egin da <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Proba-materialaren modua desgaitzeko, berrezarri jatorrizko datuak."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Likidoa edo zikinkeriak daude USB atakan"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ataka automatikoki desgaitu da. Informazio gehiago lortzeko, sakatu hau."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Erabiltzeko moduan dago USB ataka"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonoak ez du hautematen likidorik edo zikinkeriarik."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Akatsen txostena sortzen…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Akatsen txostena partekatu nahi duzu?"</string>
@@ -1910,7 +1900,7 @@
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Aplikazioa Android-en bertsio zaharrago baterako sortu zenez, baliteke behar bezala ez funtzionatzea. Bilatu eguneratzerik baden, edo jarri garatzailearekin harremanetan."</string>
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Bilatu eguneratzeak"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Mezu berriak dituzu"</string>
-    <string name="new_sms_notification_content" msgid="7002938807812083463">"Mezuak ikusteko, ireki SMS mezuen aplikazioa"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Mezuak ikusteko, ireki SMS mezuetarako aplikazioa"</string>
     <string name="profile_encrypted_title" msgid="4260432497586829134">"Baliteke funtzio batzuk mugatuta egotea"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Blokeatuta dago laneko profila"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Sakatu profila desblokeatzeko"</string>
