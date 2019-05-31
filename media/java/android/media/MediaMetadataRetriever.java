@@ -869,7 +869,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * This key retrieves the location information, if available.
      * The location should be specified according to ISO-6709 standard, under
      * a mp4/3gp box "@xyz". Location with longitude of -90 degrees and latitude
-     * of 180 degrees will be retrieved as "-90.0000+180.0000", for instance.
+     * of 180 degrees will be retrieved as "+180.0000-90.0000/", for instance.
      */
     public static final int METADATA_KEY_LOCATION        = 23;
     /**
