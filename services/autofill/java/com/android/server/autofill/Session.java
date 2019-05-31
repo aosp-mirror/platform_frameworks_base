@@ -2178,6 +2178,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private void requestNewFillResponseOnViewEnteredIfNecessaryLocked(@NonNull AutofillId id,
             @NonNull ViewState viewState, int flags) {
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+            mForAugmentedAutofillOnly = false;
             if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
             requestNewFillResponseLocked(viewState, ViewState.STATE_RESTARTED_SESSION, flags);
             return;
