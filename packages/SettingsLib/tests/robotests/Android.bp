@@ -36,7 +36,7 @@ android_robolectric_test {
     instrumentation_for: "SettingsLibShell",
     coverage_libs: ["SettingsLib"],
     test_options: {
-        timeout: "36000",
+        timeout: 36000,
     },
 }
 
