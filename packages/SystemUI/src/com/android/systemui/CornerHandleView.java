@@ -36,9 +36,9 @@ import com.android.settingslib.Utils;
 public class CornerHandleView extends View {
     private static final boolean ALLOW_TUNING = false;
     private static final int ANGLE_DEGREES = 50;
-    public static final int MARGIN_DP = 11;
-    public static final int RADIUS_DP = 37;
-    public static final float STROKE_DP = 2.5f;
+    private static final float STROKE_DP = 2.5f;
+    // Radius to use if none is available.
+    private static final int FALLBACK_RADIUS_DP = 15;
 
     private Paint mPaint;
     private int mLightColor;
@@ -71,7 +71,7 @@ public class CornerHandleView extends View {
 
     /**
      * Receives an intensity from 0 (lightest) to 1 (darkest) and sets the handle color
-     * approriately. Intention is to match the home handle color.
+     * appropriately. Intention is to match the home handle color.
      */
     public void updateDarkness(float darkIntensity) {
         mPaint.setColor((int) ArgbEvaluator.getInstance().evaluate(darkIntensity,
@@ -115,20 +115,37 @@ public class CornerHandleView extends View {
     }
 
     private int getMarginPx() {
+        // Hand-derived function to map radiusPx to the margin amount.
+        // https://www.wolframalpha.com/input/?i=0.001402+*+x+%5E2%E2%88%920.08661+*+x%2B17.20+from+40+to+180
+        int radius = getRadiusPx();
+        int marginPx = (int) (0.001402f * radius * radius - 0.08661f * radius + 17.2f);
         if (ALLOW_TUNING) {
-            return SystemProperties.getInt("CORNER_HANDLE_MARGIN_PX",
-                    (int) convertDpToPixel(MARGIN_DP, getContext()));
+            return SystemProperties.getInt("CORNER_HANDLE_MARGIN_PX", marginPx);
         } else {
-            return (int) convertDpToPixel(MARGIN_DP, getContext());
+            return marginPx;
         }
     }
 
     private int getRadiusPx() {
+        // Attempt to get the bottom corner radius, otherwise fall back on the generic or top
+        // values. If none are available, use the FALLBACK_RADIUS_DP.
+        int radius = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom);
+        if (radius == 0) {
+            radius = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.rounded_corner_radius);
+        }
+        if (radius == 0) {
+            radius = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.rounded_corner_radius_top);
+        }
+        if (radius == 0) {
+            radius = (int) convertDpToPixel(FALLBACK_RADIUS_DP, mContext);
+        }
         if (ALLOW_TUNING) {
-            return SystemProperties.getInt("CORNER_HANDLE_RADIUS_PX",
-                    (int) convertDpToPixel(RADIUS_DP, getContext()));
+            return SystemProperties.getInt("CORNER_HANDLE_RADIUS_PX", radius);
         } else {
-            return (int) convertDpToPixel(RADIUS_DP, getContext());
+            return radius;
         }
     }
 
