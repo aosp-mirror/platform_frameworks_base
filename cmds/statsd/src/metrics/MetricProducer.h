@@ -132,23 +132,17 @@ public:
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mIsActive) {
-            onMatchedLogEventLocked(matcherIndex, event);
-        }
+        onMatchedLogEventLocked(matcherIndex, event);
     }
 
     void onConditionChanged(const bool condition, const int64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mIsActive) {
-            onConditionChangedLocked(condition, eventTime);
-        }
+        onConditionChangedLocked(condition, eventTime);
     }
 
     void onSlicedConditionMayChange(bool overallCondition, const int64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mIsActive) {
-            onSlicedConditionMayChangeLocked(overallCondition, eventTime);
-        }
+        onSlicedConditionMayChangeLocked(overallCondition, eventTime);
     }
 
     bool isConditionSliced() const {
@@ -304,11 +298,17 @@ protected:
      * bucket's end timestamp, than we flush up to the end of the latest full bucket; otherwise,
      * we assume that we want to flush a partial bucket. The bucket start timestamp and bucket
      * number are not changed by this function. This method should only be called by
-     * flushIfNeededLocked or the app upgrade handler; the caller MUST update the bucket timestamp
-     * and bucket number as needed.
+     * flushIfNeededLocked or flushLocked or the app upgrade handler; the caller MUST update the
+     * bucket timestamp and bucket number as needed.
      */
     virtual void flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                           const int64_t& nextBucketStartTimeNs) {};
+
+    virtual void onActiveStateChangedLocked(const int64_t& eventTimeNs) {
+        if (!mIsActive) {
+            flushLocked(eventTimeNs);
+        }
+    }
 
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.
@@ -411,6 +411,13 @@ protected:
     std::unordered_map<int, std::shared_ptr<Activation>> mEventDeactivationMap;
 
     bool mIsActive;
+
+    FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
+    FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedCondition);
+    FRIEND_TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition);
 
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation);
