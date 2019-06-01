@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona d\'empremta digital"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"gestiona el maquinari de desbloqueig facial"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utilitza el maquinari de desbloqueig facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permet que l\'aplicació faci servir el maquinari de desbloqueig facial per a l\'autenticació"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Per millorar el reconeixement, torna a registrar la cara"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"No es reconeix la teva cara. Torna-ho a provar."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"No es pot verificar la cara. Maquinari no disponible."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Torna a provar el desbloqueig facial."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"No es poden desar dades facials noves. Suprimeix-ne d\'antigues."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"S\'ha cancel·lat el reconeixement facial."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"L\'usuari ha cancel·lat el desbloqueig facial."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Massa intents. Torna-ho a provar més tard."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Massa intents. S\'ha desactivat el desbloqueig facial."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"No es pot verificar la cara. Torna-ho a provar."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"No has configurat el desbloqueig facial"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"El desbloqueig facial no és compatible amb el dispositiu."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Si vols desactivar el mode Agent de prova, restableix les dades de fàbrica."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Hi ha líquid o pols al port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"El port USB es desactiva automàticament. Toca per obtenir més informació."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Ja pots utilitzar el port USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"El telèfon ja no detecta líquids ni pols."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"S\'està creant l\'informe d\'errors…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vols compartir l\'informe d\'errors?"</string>
@@ -1792,7 +1782,7 @@
     <string name="restr_pin_try_later" msgid="973144472490532377">"Torna-ho a provar més tard"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Mode de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"Per sortir, llisca cap avall des de la part superior."</string>
-    <string name="immersive_cling_positive" msgid="5016839404568297683">"D\'acord"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Entesos"</string>
     <string name="done_label" msgid="2093726099505892398">"Fet"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Control circular de les hores"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Control circular dels minuts"</string>
@@ -2014,7 +2004,7 @@
     <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"L\'estalvi de bateria s\'ha desactivat. Les funcions ja no estan restringides."</string>
     <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"L\'estalvi de bateria s\'ha desactivat. Les funcions ja no estan restringides."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"Carpeta"</string>
-    <string name="mime_type_apk" msgid="5518003630972506900">"Aplicació per a Android"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Aplicació d\'Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Fitxer"</string>
     <string name="mime_type_generic_ext" msgid="8450275970061657174">"Fitxer <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="mime_type_audio" msgid="6289777657172050926">"Àudio"</string>

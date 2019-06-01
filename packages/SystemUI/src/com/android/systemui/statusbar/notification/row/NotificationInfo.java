@@ -159,13 +159,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     // used by standard ui
     private OnClickListener mOnDismissSettings = v -> {
         mPressedApply = true;
-        closeControls(v);
+        closeControls(v, true);
     };
 
     // used by blocking helper
     private OnClickListener mOnKeepShowing = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
-        closeControls(v);
+        closeControls(v, true);
         mMetricsLogger.write(getLogMaker().setCategory(
                 MetricsEvent.NOTIFICATION_BLOCKING_HELPER)
                 .setType(MetricsEvent.TYPE_ACTION)
@@ -445,6 +445,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             if (mChannelEditorDialogController != null) {
                 mChannelEditorDialogController.prepareDialogForApp(mAppName, mPackageName, mAppUid,
                         mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
+                mChannelEditorDialogController.setOnFinishListener(
+                        () -> closeControls(this, false));
                 mChannelEditorDialogController.show();
             }
         });
@@ -725,7 +727,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      * {@link #swapContent(boolean, boolean)} for where undo is handled.
      */
     @VisibleForTesting
-    void closeControls(View v) {
+    void closeControls(View v, boolean save) {
         int[] parentLoc = new int[2];
         int[] targetLoc = new int[2];
         mGutsContainer.getLocationOnScreen(parentLoc);
@@ -734,7 +736,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         final int centerY = v.getHeight() / 2;
         final int x = targetLoc[0] - parentLoc[0] + centerX;
         final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
+        mGutsContainer.closeControls(x, y, save, false /* force */);
     }
 
     @Override

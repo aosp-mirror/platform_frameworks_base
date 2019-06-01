@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon för fingeravtryck"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"hantera maskinvara för ansiktslås"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Tillåter att appen anropar metoder för att lägga till och radera ansiktsmallar."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"använd maskinvara för ansiktslås"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Tillåter att appen använder maskinvara för ansiktslås vid autentisering"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Ansiktslås"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Registrera ansiktet på nytt"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Gör om registreringen av ansiktet så att ansiktsigenkänningen ska fungera bättre"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Det gick inte att fånga ansiktsdata. Försök igen."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Försök att använda ansiktslåset igen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Kan inte lagra ny ansiktsdata. Radera först gammal data."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Ansiktsåtgärden har avbrutits."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Ansiktslås avbröts av användaren."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Du har gjort för många försök. Försök igen senare."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"För många försök. Ansiktslås har inaktiverats."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Det gick inte att verifiera ansiktet. Försök igen."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Du har inte konfigurerat ansiktslås."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Ansiktslås stöds inte på den här enheten."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Ansikte <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Inaktivera testverktygsläget genom att göra en återställning till standardinställningarna."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Vätska eller smuts i USB-porten"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-porten har inaktiverats automatiskt. Tryck för att läsa mer."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Nu kan du använda USB-porten"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Mobilen känner inte längre av någon vätska eller smuts."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Felrapporten överförs …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>
@@ -1503,7 +1493,7 @@
     <string name="find_next" msgid="5742124618942193978">"Sök nästa"</string>
     <string name="find_previous" msgid="2196723669388360506">"Sök föregående"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Positionsförfrågan från <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Positionsförfrågan"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Platsförfrågan"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Begärt av <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Ja"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nej"</string>

@@ -14757,7 +14757,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (ps != null) {
                 try {
-                    rm.restoreUserData(packageName, installedUsers, appId, ceDataInode,
+                    rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
                             seInfo, token);
                 } catch (RemoteException re) {
                     // Cannot happen, the RollbackManager is hosted in the same process.
@@ -15032,24 +15032,26 @@ public class PackageManagerService extends IPackageManager.Stub
 
         void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
             mCurrentState.put(args, currentStatus);
-            boolean success = true;
             if (mCurrentState.size() != mChildParams.size()) {
                 return;
             }
+            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
             for (Integer status : mCurrentState.values()) {
                 if (status == PackageManager.INSTALL_UNKNOWN) {
                     return;
                 } else if (status != PackageManager.INSTALL_SUCCEEDED) {
-                    success = false;
+                    completeStatus = status;
                     break;
                 }
             }
             final List<InstallRequest> installRequests = new ArrayList<>(mCurrentState.size());
             for (Map.Entry<InstallArgs, Integer> entry : mCurrentState.entrySet()) {
                 installRequests.add(new InstallRequest(entry.getKey(),
-                        createPackageInstalledInfo(entry.getValue())));
+                        createPackageInstalledInfo(completeStatus)));
             }
-            processInstallRequestsAsync(success, installRequests);
+            processInstallRequestsAsync(
+                    completeStatus == PackageManager.INSTALL_SUCCEEDED,
+                    installRequests);
         }
     }
 
@@ -15563,6 +15565,22 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         void handleReturnCode() {
             if (mVerificationCompleted && mEnableRollbackCompleted) {
+                if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
+                    String packageName = "";
+                    try {
+                        PackageLite packageInfo =
+                                new PackageParser().parsePackageLite(origin.file, 0);
+                        packageName = packageInfo.packageName;
+                    } catch (PackageParserException e) {
+                        Slog.e(TAG, "Can't parse package at " + origin.file.getAbsolutePath(), e);
+                    }
+                    try {
+                        observer.onPackageInstalled(packageName, mRet, "Dry run", new Bundle());
+                    } catch (RemoteException e) {
+                        Slog.i(TAG, "Observer no longer exists.");
+                    }
+                    return;
+                }
                 if (mRet == PackageManager.INSTALL_SUCCEEDED) {
                     mRet = mArgs.copyApk();
                 }

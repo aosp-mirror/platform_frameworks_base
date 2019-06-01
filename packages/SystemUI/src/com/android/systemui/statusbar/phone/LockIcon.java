@@ -90,11 +90,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private int mDensity;
     private boolean mPulsing;
     private boolean mDozing;
-    private boolean mBouncerVisible;
     private boolean mDocked;
     private boolean mLastDozing;
     private boolean mLastPulsing;
-    private boolean mLastBouncerVisible;
     private int mIconColor;
     private float mDozeAmount;
     private int mIconRes;
@@ -252,9 +250,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         int state = getState();
         mIsFaceUnlockState = state == STATE_SCANNING_FACE;
         if (state != mLastState || mLastDozing != mDozing || mLastPulsing != mPulsing
-                || mLastScreenOn != mScreenOn || mLastBouncerVisible != mBouncerVisible || force) {
+                || mLastScreenOn != mScreenOn || force) {
             @LockAnimIndex final int lockAnimIndex = getAnimationIndexForTransition(mLastState,
-                    state, mLastPulsing, mPulsing, mLastDozing, mDozing, mBouncerVisible);
+                    state, mLastPulsing, mPulsing, mLastDozing, mDozing);
             boolean isAnim = lockAnimIndex != -1;
 
             int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(state);
@@ -302,7 +300,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             mLastScreenOn = mScreenOn;
             mLastDozing = mDozing;
             mLastPulsing = mPulsing;
-            mLastBouncerVisible = mBouncerVisible;
         }
 
         boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
@@ -371,8 +368,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     private int getAnimationIndexForTransition(int oldState, int newState,
-            boolean wasPulsing, boolean pulsing, boolean wasDozing, boolean dozing,
-            boolean bouncerVisible) {
+            boolean wasPulsing, boolean pulsing, boolean wasDozing, boolean dozing) {
 
         // Never animate when screen is off
         if (dozing && !pulsing && !mWasPulsingOnThisFrame) {
@@ -391,7 +387,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return UNLOCK;
         } else if (justLocked) {
             return LOCK;
-        } else if (newState == STATE_SCANNING_FACE && bouncerVisible) {
+        } else if (newState == STATE_SCANNING_FACE) {
             return SCANNING;
         } else if ((nowPulsing || turningOn) && newState != STATE_LOCK_OPEN) {
             return LOCK_IN;
@@ -494,17 +490,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private void updateDarkTint() {
         int color = ColorUtils.blendARGB(mIconColor, Color.WHITE, mDozeAmount);
         setImageTintList(ColorStateList.valueOf(color));
-    }
-
-    /**
-     * If bouncer is visible or not.
-     */
-    public void setBouncerVisible(boolean bouncerVisible) {
-        if (mBouncerVisible == bouncerVisible) {
-            return;
-        }
-        mBouncerVisible = bouncerVisible;
-        update();
     }
 
     @Override

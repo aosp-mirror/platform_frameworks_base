@@ -78,7 +78,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String TAG_CHANNEL = "channel";
     private static final String TAG_GROUP = "channelGroup";
     private static final String TAG_DELEGATE = "delegate";
-    private static final String TAG_STATUS_ICONS = "status_icons";
+    private static final String TAG_STATUS_ICONS = "silent_status_icons";
 
     private static final String ATT_VERSION = "version";
     private static final String ATT_NAME = "name";

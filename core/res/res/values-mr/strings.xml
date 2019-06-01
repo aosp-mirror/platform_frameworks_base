@@ -280,7 +280,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे संपर्क अॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डिव्हाइसचे स्थान अॅक्सेस करू द्यायचे?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डिव्हाइसचे स्थान अ‍ॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"तुम्ही अ‍ॅप वापरत असताना अ‍ॅपला फक्त स्थानाचा अॅक्सेस असेल"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला &lt;b&gt;प्रत्येक वेळी&lt;/b&gt; या डिव्हाइसच्या स्थानाचा अ‍ॅक्सेस द्यायचा?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"अ‍ॅप सध्या फक्त तुम्ही अ‍ॅप वापरत असतानाच स्थान अ‍ॅक्सेस करू शकते"</string>
@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिंट आयकन"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"फेस अनलॉक हार्डवेअर व्यवस्थापित करा"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"अॅपला वापरासाठी चेहरा टेम्पलेट जोडण्याच्या आणि हटवण्याच्या पद्धती जारी करू देते."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"फेस अनलॉक हार्डवेअर वापरा"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"अ‍ॅपला ऑथेंटिकेशनसाठी फेस अनलॉक हार्डवेअर वापरण्याची अनुमती देते"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"फेस अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"तुमच्या चेहऱ्याची पुन्हा नोंदणी करा"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ओळखण्यामध्ये सुधारणा करण्यासाठी, कृपया तुमच्या चेहऱ्याची पुन्हा नोंदणी करा"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"अचूक फेस डेटा कॅप्चर करता आला नाही. पुन्हा करा."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा पडताळू शकत नाही. हार्डवेअर उपलब्ध नाही."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"फेस अनलॉकचा पुन्हा प्रयत्न करा."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"नवीन फेस डेटा स्टोअर करू शकत नाही. आधी जुना हटवा."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"चेहरा ऑपरेशन रद्द केले गेले."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"वापरकर्त्याने फेस अनलॉक रद्द केले आहे."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"खूप जास्त प्रयत्न केले. नंतर पुन्हा प्रयत्न करा."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"बरेच प्रयत्न. फेस अनलॉक बंद केले आहे."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"चेहरा पडताळणी करू शकत नाही. पुन्हा प्रयत्न करा."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"तुम्ही फेस अनलॉक सेट केले नाही."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"या डिव्हाइसवर फेस अनलॉकला सपोर्ट नाही."</string>
     <string name="face_name_template" msgid="7004562145809595384">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"टेस्ट हार्नेस मोड बंद करण्यासाठी फॅक्टरी रीसेट करा."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB पोर्ट मध्ये ओलावा किंवा धूळ आहे"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB पोर्ट आपोआप बंद होईल. अधिक जाणून घेण्यासाठी टॅप करा."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB पोर्ट वापरण्यासाठी ठीक आहे"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"फोनला धूळ किंवा ओलावा आढळला नाही."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"बग रीपोर्ट घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल शेअर करायचा?"</string>
@@ -1860,7 +1850,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"आठवड्याची शेवटची रात्र"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"आठवड्याच्या शेवटी"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इव्‍हेंट"</string>
-    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"निष्क्रिय आहे"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"झोपताना"</string>
     <string name="muted_by" msgid="5942954724562097128">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> काही ध्‍वनी म्‍यूट करत आहे"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि तुमचा फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>

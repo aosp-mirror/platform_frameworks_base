@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.net.NetworkStackClient;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -115,6 +116,7 @@ public class PackageWatchdog {
     // File containing the XML data of monitored packages /data/system/package-watchdog.xml
     private final AtomicFile mPolicyFile;
     private final ExplicitHealthCheckController mHealthCheckController;
+    private final NetworkStackClient mNetworkStackClient;
     @GuardedBy("mLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
@@ -135,7 +137,8 @@ public class PackageWatchdog {
                         new File(new File(Environment.getDataDirectory(), "system"),
                                 "package-watchdog.xml")),
                 new Handler(Looper.myLooper()), BackgroundThread.getHandler(),
-                new ExplicitHealthCheckController(context));
+                new ExplicitHealthCheckController(context),
+                NetworkStackClient.getInstance());
     }
 
     /**
@@ -143,12 +146,14 @@ public class PackageWatchdog {
      */
     @VisibleForTesting
     PackageWatchdog(Context context, AtomicFile policyFile, Handler shortTaskHandler,
-            Handler longTaskHandler, ExplicitHealthCheckController controller) {
+            Handler longTaskHandler, ExplicitHealthCheckController controller,
+            NetworkStackClient networkStackClient) {
         mContext = context;
         mPolicyFile = policyFile;
         mShortTaskHandler = shortTaskHandler;
         mLongTaskHandler = longTaskHandler;
         mHealthCheckController = controller;
+        mNetworkStackClient = networkStackClient;
         loadFromFile();
     }
 
@@ -174,6 +179,7 @@ public class PackageWatchdog {
                     () -> syncRequestsAsync());
             setPropertyChangedListenerLocked();
             updateConfigs();
+            registerNetworkStackHealthListener();
         }
     }
 
@@ -630,27 +636,38 @@ public class PackageWatchdog {
             synchronized (mLock) {
                 PackageHealthObserver registeredObserver = observer.mRegisteredObserver;
                 if (registeredObserver != null) {
-                    PackageManager pm = mContext.getPackageManager();
                     Iterator<MonitoredPackage> it = failedPackages.iterator();
                     while (it.hasNext()) {
                         String failedPackage = it.next().getName();
-                        long versionCode = 0;
                         Slog.i(TAG, "Explicit health check failed for package " + failedPackage);
-                        try {
-                            versionCode = pm.getPackageInfo(
-                                    failedPackage, 0 /* flags */).getLongVersionCode();
-                        } catch (PackageManager.NameNotFoundException e) {
+                        VersionedPackage versionedPkg = getVersionedPackage(failedPackage);
+                        if (versionedPkg == null) {
                             Slog.w(TAG, "Explicit health check failed but could not find package "
                                     + failedPackage);
                             // TODO(b/120598832): Skip. We only continue to pass tests for now since
                             // the tests don't install any packages
+                            versionedPkg = new VersionedPackage(failedPackage, 0L);
                         }
-                        registeredObserver.execute(
-                                new VersionedPackage(failedPackage, versionCode));
+                        registeredObserver.execute(versionedPkg);
                     }
                 }
             }
         });
+    }
+
+    @Nullable
+    private VersionedPackage getVersionedPackage(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm == null) {
+            return null;
+        }
+        try {
+            final long versionCode = pm.getPackageInfo(
+                    packageName, 0 /* flags */).getLongVersionCode();
+            return new VersionedPackage(packageName, versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
     }
 
     /**
@@ -724,6 +741,27 @@ public class PackageWatchdog {
                     PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
                     DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED));
         }
+    }
+
+    private void registerNetworkStackHealthListener() {
+        // TODO: have an internal method to trigger a rollback by reporting high severity errors,
+        // and rely on ActivityManager to inform the watchdog of severe network stack crashes
+        // instead of having this listener in parallel.
+        mNetworkStackClient.registerHealthListener(
+                packageName -> {
+                    final VersionedPackage pkg = getVersionedPackage(packageName);
+                    if (pkg == null) {
+                        Slog.wtf(TAG, "NetworkStack failed but could not find its package");
+                        return;
+                    }
+                    // This is a severe failure and recovery should be attempted immediately.
+                    // TODO: have a better way to handle such failures.
+                    final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
+                    final long failureCount = getTriggerFailureCount();
+                    for (int i = 0; i < failureCount; i++) {
+                        onPackageFailure(pkgList);
+                    }
+                });
     }
 
     /**

@@ -23,10 +23,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.net.NetworkStackClient;
+import android.net.NetworkStackClient.NetworkStackHealthListener;
 import android.os.Handler;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
@@ -41,6 +51,10 @@ import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -70,13 +84,29 @@ public class PackageWatchdogTest {
     private static final long SHORT_DURATION = TimeUnit.SECONDS.toMillis(1);
     private static final long LONG_DURATION = TimeUnit.SECONDS.toMillis(5);
     private TestLooper mTestLooper;
+    private Context mSpyContext;
+    @Mock
+    private NetworkStackClient mMockNetworkStackClient;
+    @Mock
+    private PackageManager mMockPackageManager;
+    @Captor
+    private ArgumentCaptor<NetworkStackHealthListener> mNetworkStackCallbackCaptor;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
         adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
+        mSpyContext = spy(InstrumentationRegistry.getContext());
+        when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
+        when(mMockPackageManager.getPackageInfo(anyString(), anyInt())).then(inv -> {
+            final PackageInfo res = new PackageInfo();
+            res.packageName = inv.getArgument(0);
+            res.setLongVersionCode(VERSION_CODE);
+            return res;
+        });
     }
 
     @After
@@ -696,6 +726,26 @@ public class PackageWatchdogTest {
         assertEquals(MonitoredPackage.STATE_PASSED, m4.handleElapsedTimeLocked(LONG_DURATION));
     }
 
+    @Test
+    public void testNetworkStackFailure() {
+        final PackageWatchdog wd = createWatchdog();
+
+        // Start observing with failure handling
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1,
+                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        wd.startObservingHealth(observer, Collections.singletonList(APP_A), SHORT_DURATION);
+
+        // Notify of NetworkStack failure
+        mNetworkStackCallbackCaptor.getValue().onNetworkStackFailure(APP_A);
+
+        // Run handler so package failures are dispatched to observers
+        mTestLooper.dispatchAll();
+
+        // Verify the NetworkStack observer is notified
+        assertEquals(1, observer.mFailedPackages.size());
+        assertEquals(APP_A, observer.mFailedPackages.get(0));
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
@@ -727,18 +777,23 @@ public class PackageWatchdogTest {
     }
 
     private PackageWatchdog createWatchdog(TestController controller, boolean withPackagesReady) {
-        Context context = InstrumentationRegistry.getContext();
         AtomicFile policyFile =
-                new AtomicFile(new File(context.getFilesDir(), "package-watchdog.xml"));
+                new AtomicFile(new File(mSpyContext.getFilesDir(), "package-watchdog.xml"));
         Handler handler = new Handler(mTestLooper.getLooper());
         PackageWatchdog watchdog =
-                new PackageWatchdog(context, policyFile, handler, handler, controller);
+                new PackageWatchdog(mSpyContext, policyFile, handler, handler, controller,
+                        mMockNetworkStackClient);
         // Verify controller is not automatically started
         assertFalse(controller.mIsEnabled);
         if (withPackagesReady) {
+            // Only capture the NetworkStack callback for the latest registered watchdog
+            reset(mMockNetworkStackClient);
             watchdog.onPackagesReady();
             // Verify controller by default is started when packages are ready
             assertTrue(controller.mIsEnabled);
+
+            verify(mMockNetworkStackClient).registerHealthListener(
+                    mNetworkStackCallbackCaptor.capture());
         }
         return watchdog;
     }
