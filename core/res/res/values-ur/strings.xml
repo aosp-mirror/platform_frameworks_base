@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"فنگر پرنٹ آئیکن"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"چہرے کے ذریعے غیر مقفل کرنے والے ہارڈ ویئر کا نظم کریں"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ایپ کو چہرے کی تمثیلات شامل اور حذف کرنے کے طریقوں کو کالعدم قرار دینے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"چہرے کے ذریعے غیر مقفل کرنے والا ہارڈ ویئر استعمال کریں"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ایپ کو تصدیق کے لیے چہرے کے ذریعے غیر مقفل کرنے کا ہارڈ ویئر استعمال کرنے کی اجازت دیتی ہے"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"چہرے کے ذریعے غیر مقفل کریں"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"اپنے چہرے کو دوبارہ مندرج کریں"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"شناخت کو بہتر بنانے کے لیے براہ کرم اپنے چہرے کو دوبارہ مندرج کریں"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"چہرے کا درست ڈيٹا کیپچر نہیں ہو سکا۔ پھر آزمائيں۔"</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"چہرے کی توثیق نہیں کی جا سکی۔ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"چہرے کے ذریعے غیر مقفل کرنے کو دوبارہ آزمائیں۔"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"چہرے کا نیا ڈیٹا اسٹور نہیں کر سکتے۔ پہلے پرانا حذف کریں۔"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"چہرے پر ہونے والی کارروائی منسوخ ہو گئی۔"</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"صارف نے چہرے کے ذریعے غیر مقفل کرنے کو منسوخ کر دیا۔"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"کافی زیادہ کوششیں کی گئیں۔ دوبارہ کوشش کریں۔"</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"کافی زیادہ کوششیں۔ چہرے کے ذریعے غیر مقفل کرنا غیر فعال کر دیا گیا۔"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"چہرے کی توثیق نہیں کی جا سکی۔ پھر آزمائيں۔"</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"آپ نے بذریعہ چہرہ غیر مقفل کرنے کو سیٹ نہیں کیا ہے۔"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"اس آلہ پر چہرے کے ذریعے غیر مقفل کرنا تعاون یافتہ نہیں ہے۔"</string>
     <string name="face_name_template" msgid="7004562145809595384">"چہرہ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ٹیسٹ ہارنیس موڈ غیر فعال کرنے کے لیے فیکٹری ری سیٹ کریں۔"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏USB پورٹ میں سیال یا دھول ہے"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏USB پورٹ خودکار طور پر غیر فعال کر دیا گیا۔ مزید جاننے کیلئے تھپتھپائیں۔"</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"‏USB پورٹ کا استعمال ٹھیک ہے"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"فون مزید سیال یا دھول کا پتہ نہیں لگاتا۔"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"بگ رپورٹ لی جا رہی ہے…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"بگ رپورٹ کا اشتراک کریں؟"</string>

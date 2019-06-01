@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"আঙ্গুলের ছাপ আইকন"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"মুখের সাহায্যে আনলক করার হার্ডওয়্যার ম্যানেজ করা"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ব্যবহার করার জন্য ফেস টেম্পলেট যোগ করা এবং মোছার পদ্ধতি গ্রহণ করতে অ্যাপটিকে অনুমতি দেয়৷"</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"মুখের সাহায্যে আনলক করার হার্ডওয়্যার ব্যবহার করা"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"অ্যাপকে যাচাইকরণের জন্য মুখের সাহায্যে আনলক করার হার্ডওয়্যার ব্যবহার করতে দেয়"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"মুখের সাহায্যে আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"শনাক্তকরণের উন্নতি করতে আপনার ফেস আবার এনরোল করুন"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"মুখের সঠিক ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।"</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ফেস যাচাই করা যায়নি। হার্ডওয়্যার উপলভ্য নেই।"</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"আবার মুখের সাহায্যে আনলক করার চেষ্টা করুন।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"নতুন ফেস ডেটা স্টোর করা যায়নি। প্রথমে পুরনোটি মুছে ফেলুন।"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"ফেস অপারেশন বাতিল করা হয়েছে৷"</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ব্যবহারকারী মুখের সাহায্যে আনলক বাতিল করে দিয়েছেন।"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"অনেকবার চেষ্টা করা হয়েছে। পরে আবার চেষ্টা করুন।"</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"অনেকবার চেষ্টা করেছেন। মুখের সাহায্যে আনলক করার সুবিধা বন্ধ করা হয়েছে।"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"আপনার মুখ যাচাই করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"এখনও মুখের সাহায্যে আনলক করার সুবিধা সেট-আপ করেননি।"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"এই ডিভাইসে মুখের সাহায্যে আনলক করার সুবিধাটি কাজ করে না।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"টেস্ট হারনেস মোড বন্ধ করতে ফ্যাক্টরি রিসেট করুন।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"ইউএসবি পোর্টে তরল পদার্থ অথবা ধুলো কণা"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"ইউএসবি পোর্ট নিজে থেকে বন্ধ করা হবে। আরও জানতে ট্যাপ করুন।"</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"ইউএসবি পোর্ট ব্যবহার করা যেতে পারে"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ফোন আর তরল পদার্থ এবং ধুলো কণা শনাক্ত করবে না।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ত্রুটির প্রতিবেদন নেওয়া হচ্ছে..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ত্রুটির প্রতিবেদন শেয়ার করবেন?"</string>
@@ -1504,7 +1494,7 @@
     <string name="find_next" msgid="5742124618942193978">"পরবর্তীটি খুঁজুন"</string>
     <string name="find_previous" msgid="2196723669388360506">"পূর্ববর্তীটি খুঁজুন"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> এর থেকে অবস্থানের অনুরোধ"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"অবস্থানের অনুরোধ"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"লোকেশন জানার অনুরোধ"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) এর দ্বারা অনুরোধকৃত"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"হ্যাঁ"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"না"</string>

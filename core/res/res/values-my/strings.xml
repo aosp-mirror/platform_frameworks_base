@@ -1494,7 +1494,7 @@
     <string name="find_next" msgid="5742124618942193978">"နောက်တစ်ခု ရှာဖွေရန်"</string>
     <string name="find_previous" msgid="2196723669388360506">"အရင်တစ်ခု ရှာဖွေရန်"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g>မှ တည်နေရာအား တောင်းခံသည်"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"တည်နေရာအား တောင်းခံသည်"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"တည်နေရာ တောင်းခံခြင်း"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)မှတောင်းခံသည်"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Yes"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"No"</string>
@@ -1888,7 +1888,7 @@
     <string name="country_selection_title" msgid="2954859441620215513">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ဘာသာစကားအမည် ထည့်ပါ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"အကြံပြုထားသည်"</string>
-    <string name="language_picker_section_all" msgid="3097279199511617537">"ဘာသာစကားများအားလုံး"</string>
+    <string name="language_picker_section_all" msgid="3097279199511617537">"ဘာသာစကားအားလုံး"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ရှာဖွေရန်"</string>
     <string name="app_suspended_title" msgid="2075071241147969611">"အက်ပ်ကို မရရှိနိုင်ပါ"</string>

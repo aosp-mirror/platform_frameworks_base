@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icône d\'empreinte digitale"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"gérer le matériel de déverrouillage par reconnaissance faciale"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet à l\'appli d\'employer des méthodes d\'aj. et de suppr. de modèles de reconn. visage."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utiliser le matériel de déverrouillage par reconnaissance faciale"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permet à l\'appli d\'utiliser du matériel de déverr. par reconn faciale pour l\'authentific."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Inscrivez votre visage à nouveau"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Imposs. capt. données visage précises. Réessayez."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. de vérif. visage. Matériel non accessible."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Réessayez le déverr. par reconnaissance faciale."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Impossible de stocker de nouveaux visages. Supprimez-en un."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Opération de reconnaissance du visage annulée."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Déverr. par reconn. faciale annulé par l\'utilisateur."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Trop de tentatives. Veuillez réessayer plus tard."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Trop de tentatives. Le déverr. par reconnaissance faciale est désactivé."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Impossible de vérifier le visage. Réessayez."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Vous n\'avez pas config. le déverr. par reconn. faciale."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Cet appar. ne prend pas en charge le déverr. par reconn. faciale."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Visage <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Effectuez une réinitialisation pour désactiver le mode Logiciel de test."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Liquide ou débris dans le port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Le port USB est désactivé automatiquement. Touchez ici pour en savoir plus."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Autorisation d\'utiliser le port USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Le téléphone ne détecte plus les liquides ni les débris."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création d\'un rapport de bogue en cours..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bogue?"</string>
