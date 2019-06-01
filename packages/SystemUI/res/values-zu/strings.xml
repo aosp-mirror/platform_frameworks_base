@@ -647,13 +647,10 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Qhubeka wazise"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Vala izaziso"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Qhubeka nokubonisa izaziso kusuka kulolu hlelo lokusebenza?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Okumnene"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Okwenziwe kwabaluleka"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Ikusiza ukuthi ugxile ngezaziso kuphela kumthunzi wokudonsela phansi. Ihlala ithulile."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Ibonisa izaziso ezibalulekile ezingezansi. Ihlala ithulile."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Ibonisa izaziso ezibalulekile ezingezansi. Ihlala ithulile."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Ibonisa izaziso ezibalulekile ezingezansi. Ihlala ithulile."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Yenza uyinake ngomsindo nesithonjana sebha yesimo. Iboniswa kusikrini sokukhiya."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Kuthulile"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Iyazisa"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Ikusiza ukuthi ugxile ngaphandle komsindo noma ukudlidliza."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Ithola ukunaka kwakho ngomsindo noma ukudlidliza."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Lezi zaziso azikwazi ukushintshwa."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Leli qembu lezaziso alikwazi ukulungiselelwa lapha"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Isaziso sommeli"</string>
@@ -935,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Hambisa inkinobho ngakwesokunxele"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Hambisa inkinobho ngakwesokudla"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Cashisa"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>
