@@ -144,6 +144,10 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mHandler.post(() -> maybeShowHandles(/* ignoreThreshold = */ true));
     }
 
+    boolean areHandlesShowing() {
+        return mHandlesShowing;
+    }
+
     void onAssistantGesturePerformed() {
         mBehaviorMap.get(mCurrentBehavior).onAssistantGesturePerformed();
     }
