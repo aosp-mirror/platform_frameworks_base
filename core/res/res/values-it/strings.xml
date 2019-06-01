@@ -1492,8 +1492,8 @@
     <string name="websearch" msgid="4337157977400211589">"Ricerca Web"</string>
     <string name="find_next" msgid="5742124618942193978">"Trova successivo"</string>
     <string name="find_previous" msgid="2196723669388360506">"Trova precedente"</string>
-    <string name="gpsNotifTicker" msgid="5622683912616496172">"Richiesta posizione da <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Richiesta posizione"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Richiesta di posizione da <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Richiesta di posizione"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Richiesto da <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sì"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"No"</string>

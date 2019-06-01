@@ -122,7 +122,6 @@ public final class NotificationEntry {
     public boolean suspended;
 
     private NotificationEntry parent; // our parent (if we're in a group)
-    private ArrayList<NotificationEntry> children = new ArrayList<NotificationEntry>();
     private ExpandableNotificationRow row; // the outer expanded view
 
     private int mCachedContrastColor = COLOR_INVALID;
@@ -277,8 +276,18 @@ public final class NotificationEntry {
 
     @Nullable
     public List<NotificationEntry> getChildren() {
-        if (children.size() <= 0) {
+        if (row == null) {
             return null;
+        }
+
+        List<ExpandableNotificationRow> rowChildren = row.getNotificationChildren();
+        if (rowChildren == null) {
+            return null;
+        }
+
+        ArrayList<NotificationEntry> children = new ArrayList<>();
+        for (ExpandableNotificationRow child : rowChildren) {
+            children.add(child.getEntry());
         }
 
         return children;
@@ -740,7 +749,9 @@ public final class NotificationEntry {
         if (notification == null || !notification.isClearable()) {
             return false;
         }
-        if (children.size() > 0) {
+
+        List<NotificationEntry> children = getChildren();
+        if (children != null && children.size() > 0) {
             for (int i = 0; i < children.size(); i++) {
                 NotificationEntry child =  children.get(i);
                 if (!child.isClearable()) {

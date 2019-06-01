@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指紋圖示"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"管理臉容解鎖硬件"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允許應用程式調用方法，以加入和刪除可用的臉孔範本。"</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"使用臉容解鎖硬件"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"允許應用程式使用臉容解鎖硬件來驗證"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"臉容解鎖"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"重新註冊臉孔"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"如要提高識別能力，請重新註冊您的臉孔"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"無法擷取準確的臉容資料。請再試一次。"</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"無法驗證臉孔，硬件無法使用。"</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"請再次嘗試「臉容解鎖」。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"無法儲存新的臉容資料，請先刪除舊資料。"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"臉孔操作已取消。"</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"使用者已取消「臉容解鎖」。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"嘗試次數過多，請稍後再試。"</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"嘗試次數過多，「臉容解鎖」已停用。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"無法驗證臉孔。請再試一次。"</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"您尚未設定「臉容解鎖」。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"此裝置不支援「臉容解鎖」。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"臉孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"請將裝置回復原廠設定，以停用測試工具模式。"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 連接埠中有液體或碎片"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB 連接埠已自動停用。輕按即可瞭解詳情。"</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB 連接埠可安全使用"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"手機不再偵測到液體或碎片。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在取得錯誤報告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享錯誤報告嗎？"</string>

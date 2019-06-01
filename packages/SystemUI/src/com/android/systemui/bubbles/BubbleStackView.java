@@ -330,9 +330,7 @@ public class BubbleStackView extends FrameLayout {
         mSurfaceSynchronizer = synchronizer != null ? synchronizer : DEFAULT_SURFACE_SYNCHRONIZER;
 
         mBubbleContainer = new PhysicsAnimationLayout(context);
-        mBubbleContainer.setMaxRenderedChildren(
-                getResources().getInteger(R.integer.bubbles_max_rendered));
-        mBubbleContainer.setController(mStackAnimationController);
+        mBubbleContainer.setActiveController(mStackAnimationController);
         mBubbleContainer.setElevation(elevation);
         mBubbleContainer.setClipChildren(false);
         addView(mBubbleContainer, new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
@@ -728,7 +726,7 @@ public class BubbleStackView extends FrameLayout {
     public void updateBubbleOrder(List<Bubble> bubbles) {
         for (int i = 0; i < bubbles.size(); i++) {
             Bubble bubble = bubbles.get(i);
-            mBubbleContainer.moveViewTo(bubble.iconView, i);
+            mBubbleContainer.reorderView(bubble.iconView, i);
         }
     }
 
@@ -920,19 +918,17 @@ public class BubbleStackView extends FrameLayout {
             };
 
             if (shouldExpand) {
-                mBubbleContainer.setController(mExpandedAnimationController);
-                mExpandedAnimationController.expandFromStack(
-                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
-                        /* collapseTo */,
-                        () -> {
-                            updatePointerPosition();
-                            updateAfter.run();
-                        } /* after */);
+                mBubbleContainer.setActiveController(mExpandedAnimationController);
+                mExpandedAnimationController.expandFromStack(() -> {
+                    updatePointerPosition();
+                    updateAfter.run();
+                } /* after */);
             } else {
                 mBubbleContainer.cancelAllAnimations();
                 mExpandedAnimationController.collapseBackToStack(
+                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
                         () -> {
-                            mBubbleContainer.setController(mStackAnimationController);
+                            mBubbleContainer.setActiveController(mStackAnimationController);
                             updateAfter.run();
                         });
             }
@@ -1021,7 +1017,7 @@ public class BubbleStackView extends FrameLayout {
         }
 
         mStackAnimationController.cancelStackPositionAnimations();
-        mBubbleContainer.setController(mStackAnimationController);
+        mBubbleContainer.setActiveController(mStackAnimationController);
         hideFlyoutImmediate();
 
         mDraggingInDismissTarget = false;
@@ -1119,6 +1115,10 @@ public class BubbleStackView extends FrameLayout {
     /** Called when a gesture is completed or cancelled. */
     void onGestureFinished() {
         mIsGestureInProgress = false;
+
+        if (mIsExpanded) {
+            mExpandedAnimationController.onGestureFinished();
+        }
     }
 
     /** Prepares and starts the desaturate/darken animation on the bubble stack. */
@@ -1209,6 +1209,7 @@ public class BubbleStackView extends FrameLayout {
      */
     void magnetToStackIfNeededThenAnimateDismissal(
             View touchedView, float velX, float velY, Runnable after) {
+        final View draggedOutBubble = mExpandedAnimationController.getDraggedOutBubble();
         final Runnable animateDismissal = () -> {
             mAfterMagnet = null;
 
@@ -1226,7 +1227,7 @@ public class BubbleStackView extends FrameLayout {
                             resetDesaturationAndDarken();
                         });
             } else {
-                mExpandedAnimationController.dismissDraggedOutBubble(() -> {
+                mExpandedAnimationController.dismissDraggedOutBubble(draggedOutBubble, () -> {
                     mAnimatingMagnet = false;
                     mShowingDismiss = false;
                     mDraggingInDismissTarget = false;
@@ -1393,10 +1394,18 @@ public class BubbleStackView extends FrameLayout {
                 };
 
                 // Post in case layout isn't complete and getWidth returns 0.
-                post(() -> mFlyout.showFlyout(
-                        updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
-                        mStackAnimationController.isStackOnLeftSide(),
-                        bubble.iconView.getBadgeColor(), mAfterFlyoutHides));
+                post(() -> {
+                    // An auto-expanding bubble could have been posted during the time it takes to
+                    // layout.
+                    if (isExpanded()) {
+                        return;
+                    }
+
+                    mFlyout.showFlyout(
+                            updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
+                            mStackAnimationController.isStackOnLeftSide(),
+                            bubble.iconView.getBadgeColor(), mAfterFlyoutHides);
+                });
             }
 
             mFlyout.removeCallbacks(mHideFlyout);

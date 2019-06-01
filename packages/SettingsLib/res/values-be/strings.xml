@@ -35,7 +35,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Не ў зоне дасягальнасці"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Не будзе аўтаматычна падключацца"</string>
     <string name="wifi_no_internet" msgid="4663834955626848401">"Няма доступу да інтэрнэту"</string>
-    <string name="saved_network" msgid="4352716707126620811">"Хто захаваў: <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="saved_network" msgid="4352716707126620811">"Захавана праз: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Аўтаматычна падключана праз %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Аўтаматычна падключана праз пастаўшчыка паслугі ацэнкі сеткі"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Падключана праз %1$s"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Сеткі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертыфікацыя бесправаднога экрана"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Уключыць падрабязны журнал Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Рэгуляванне пошуку сетак Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Паказваць прылады Bluetooth без назваў"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не атрымалася падключыцца"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Паказаць опцыі сертыфікацыі бесправаднога экрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Памеры буфера журнала"</string>
@@ -407,7 +409,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ідзе зарадка"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не зараджаецца"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Падключана да сеткі сілкавання, зарадзіць зараз немагчыма"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Поўная"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Акумулятар зараджаны"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Кантралюецца адміністратарам"</string>
     <string name="disabled" msgid="9206776641295849915">"Адключанае"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Дазволена"</string>

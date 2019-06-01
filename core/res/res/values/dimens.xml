@@ -59,9 +59,7 @@
     <!-- Height of the bottom navigation bar frame in landscape -->
     <dimen name="navigation_bar_frame_height_landscape">@dimen/navigation_bar_frame_height</dimen>
 
-    <!-- The height of the navigation gesture area; if the size is larger than the navigation bar
-        frame width/height, then the difference is the spacing from the navigation bar window to
-        the area that detects gestures. -->
+    <!-- The height of the navigation gesture area if the gesture is starting from the bottom. -->
     <dimen name="navigation_bar_gesture_height">@dimen/navigation_bar_frame_height</dimen>
 
     <!-- Height of the bottom navigation / system bar in car mode. -->

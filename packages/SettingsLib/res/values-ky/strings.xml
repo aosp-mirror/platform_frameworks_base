@@ -142,10 +142,10 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Өчүрүлгөн колдонмолор жана колдонуучулар"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"Тутум жаңыртуулары"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB модем"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Ташыма кошулуу чекити"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Wi-Fi байланыш түйүнү"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth модем"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Жалгаштыруу"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Жалгаштыруу жана ташыма чекит"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Модем режими"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Жумуш профилинин колднмлр"</string>
     <string name="user_guest" msgid="8475274842845401871">"Конок"</string>
     <string name="unknown" msgid="1592123443519355854">"Белгисиз"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Тармактар"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Зымсыз мониторлорду тастыктамалоо"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi дайын-даректүү журналы"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi тармактарын издөөнү жөнгө салуу"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилдик Интернет иштей берет"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Модем режиминде аппараттын иштешин тездетүү"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Аталышсыз Bluetooth түзмөктөрү көрсөтүлсүн"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Туташпай койду"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Зымсыз мониторлорду тастыктамалоо параметрлери көрүнүп турат"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi тандалганда ар бир SSID үчүн RSSI көрүнүп турат"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Батареянын коротулушун чектеп, тармактын иштешин жакшыртат"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Трафик ченелет"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Чектелбеген тармак"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Журнал буферинин өлчөмү"</string>

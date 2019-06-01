@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"ไม่อนุญาตให้แก้ไขข้อบกพร่องผ่าน USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ผู้ใช้ที่ลงชื่อเข้าใช้อุปกรณ์อยู่ในขณะนี้ไม่สามารถเปิดการแก้ไขข้อบกพร่องผ่าน USB ได้ หากต้องการใช้ฟีเจอร์นี้ ให้เปลี่ยนไปเป็นผู้ใช้หลัก"</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"พอร์ต USB ถูกปิดใช้"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"พอร์ต USB ปิดใช้อยู่และจะไม่ตรวจหาอุปกรณ์เสริมใดๆ เพื่อปกป้องอุปกรณ์จากของเหลวและฝุ่นละออง \n\nคุณจะได้รับแจ้งเมื่อใช้พอร์ต USB ได้อีกครั้ง"</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"เปิดใช้พอร์ต USB แล้วเพื่อตรวจหาที่ชาร์จและอุปกรณ์เสริม"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"เปิดใช้ USB"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ภาพหน้าจอ"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ล้างทั้งหมด"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"จัดการ"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"การแจ้งเตือนแบบไม่มีเสียง"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"ล้างการแจ้งเตือนแบบไม่มีเสียงทั้งหมด"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"หยุดการแจ้งเตือนชั่วคราวโดย \"ห้ามรบกวน\""</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"เริ่มเลย"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ไม่มีการแจ้งเตือน"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"บล็อก"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"แสดงต่อไป"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ย่อเล็กสุด"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"ปิดเสียง"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"ปิดเสียงไว้"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"แจ้งเตือน"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"แจ้งเตือนต่อไป"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"ปิดการแจ้งเตือน"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"แสดงการแจ้งเตือนจากแอปนี้ต่อไปไหม"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"แจ้งเตือนเบาๆ"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"สำคัญ"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"ช่วยให้คุณโฟกัสกับการแจ้งเตือนในหน้าต่างแบบเลื่อนลงเท่านั้น ปิดเสียงตลอดเวลา"</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"แสดงใต้การแจ้งเตือนเรื่องสำคัญ ปิดเสียงตลอดเวลา"</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"แสดงใต้การแจ้งเตือนเรื่องสำคัญ ปิดเสียงตลอดเวลา"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"แสดงใต้การแจ้งเตือนเรื่องสำคัญ ปิดเสียงตลอดเวลา"</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ดึงความสนใจของคุณด้วยเสียงและไอคอนในแถบสถานะ แสดงในหน้าจอล็อก"</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"เงียบ"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"แจ้งเตือน"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"ช่วยรักษาสมาธิของคุณด้วยการไม่ส่งเสียงหรือสั่น"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"ดึงความสนใจของคุณด้วยเสียงและการสั่น"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"แก้ไขการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"การแจ้งเตือนกลุ่มนี้กำหนดค่าที่นี่ไม่ได้"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"การแจ้งเตือนที่ผ่านพร็อกซี"</string>
@@ -908,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"อนุญาต"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ปฏิเสธ"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"แตะเพื่อตั้งเวลาโหมดประหยัดแบตเตอรี่"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"เปิดเมื่อมีแนวโน้มว่าแบตเตอรี่จะหมด"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"ไม่เป็นไร"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"เปิดใช้กำหนดเวลาโหมดประหยัดแบตเตอรี่อยู่"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"โหมดประหยัดแบตเตอรี่จะเปิดโดยอัตโนมัติเมื่อแบตเตอรี่เหลือไม่ถึง <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
@@ -942,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ย้ายไปด้านซ้ายล่าง"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ย้ายไปด้านขาวล่าง"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"ปิด"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

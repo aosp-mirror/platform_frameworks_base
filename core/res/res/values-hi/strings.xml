@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फ़िंगरप्रिंट आइकॉन"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"\'मालिक का चेहरा पहचानकर अनलॉक\' वाला हार्डवेयर प्रबंधित करें"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ऐप्लिकेशन को चेहरे के टेम्पलेट इस्तेमाल के तरीके जोड़ने और मिटाने की मंज़ूरी मिलती है."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"\'मालिक का चेहरा पहचानकर अनलॉक\' वाला हार्डवेयर इस्तेमाल करें"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ऐप्लिकेशन को \'मालिक का चेहरा पहचानकर अनलॉक\' वाले हार्डवेयर के इस्तेमाल की मंज़ूरी देता है"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"मालिक का चेहरा पहचानकर अनलॉक"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"अपना चेहरा फिर से दर्ज करें"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"कृपया अपना चेहरा फिर से दर्ज करें ताकि आपको बेहतर तरीके से पहचाना जा सके"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"चेहरे से जुड़ा सटीक डेटा कैप्चर नहीं किया जा सका. फिर से कोशिश करें."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"चेहरा नहीं पहचान पा रहे. हार्डवेयर उपलब्ध नहीं है."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"\'मालिक का चेहरा पहचानकर अनलॉक\' फिर से आज़माएं."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"चेहरे का नया डेटा सेव नहीं हो सकता. कोई पुराना डेटा मिटाएं."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"चेहरा पहचानने की कार्रवाई रद्द की गई."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"उपयोगकर्ता ने \'मालिक का चेहरा पहचानकर अनलॉक\' रद्द की."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"कई बार कोशिश की गई. बाद में कोशिश करें."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"कई बार कोशिश की जा चुकी है. \'मालिक का चेहरा पहचानकर अनलॉक\' बंद है."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"चेहरा नहीं पहचान पा रहे. फिर से कोशिश करें."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"आपने \'मालिक का चेहरा पहचानकर अनलॉक\' सेट नहीं की है."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"इस डिवाइस पर \'मालिक का चेहरा पहचानकर अनलॉक\' काम नहीं करती है."</string>
     <string name="face_name_template" msgid="7004562145809595384">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"टेस्ट हार्नेस मोड बंद करने के लिए फ़ैक्ट्री रीसेट करें."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"यूएसबी पोर्ट में तरल चीज़ या कचरा है"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"यूएसबी पोर्ट अपने आप बंद हो गया है. ज़्यादा जानने के लिए टैप करें."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"यूएसबी पोर्ट का इस्तेमाल करना सुरक्षित है"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"फ़ोन अब तरल चीज़ों या कचरे की पहचान नहीं करता."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"गड़बड़ी की रिपोर्ट ली जा रही है…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"गड़बड़ी की रिपोर्ट शेयर करें?"</string>
@@ -1465,7 +1455,7 @@
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वॉलपेपर बदलें"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"सूचना को सुनने की सुविधा"</string>
     <string name="vr_listener_binding_label" msgid="4316591939343607306">"VR श्रोता"</string>
-    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"स्थिति प्रदाता"</string>
+    <string name="condition_provider_service_binding_label" msgid="1321343352906524564">"स्थिति देने वाली"</string>
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"सूचना रैंकर सेवा"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN सक्रिय"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN को <xliff:g id="APP">%s</xliff:g> द्वारा सक्रिय किया गया है"</string>
@@ -1503,7 +1493,7 @@
     <string name="find_next" msgid="5742124618942193978">"आगे ढूंढें"</string>
     <string name="find_previous" msgid="2196723669388360506">"पिछला ढूंढें"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> ने जगह का अनुरोध किया गया है"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"जगह का अनुरोध किया जा रहा है"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"जगह की जानकारी मांगी जा रही है"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) द्वारा अनुरोधित"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"हां"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"नहीं"</string>

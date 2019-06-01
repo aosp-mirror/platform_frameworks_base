@@ -749,10 +749,12 @@ public final class SystemServer {
             if (!disableOtaDexopt) {
                 traceBeginAndSlog("StartOtaDexOptService");
                 try {
+                    Watchdog.getInstance().pauseWatchingCurrentThread("moveab");
                     OtaDexoptService.main(mSystemContext, mPackageManagerService);
                 } catch (Throwable e) {
                     reportWtf("starting OtaDexOptService", e);
                 } finally {
+                    Watchdog.getInstance().resumeWatchingCurrentThread("moveab");
                     traceEnd();
                 }
             }

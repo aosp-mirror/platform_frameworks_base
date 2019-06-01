@@ -446,22 +446,23 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
 
     // Pulling alarm arrives on time and reset the sequential pulling alarm.
     // Event should not be kept.
-    processor->informPullAlarmFired(nextPullTimeNs + 1);
+    processor->informPullAlarmFired(nextPullTimeNs + 1); // 15 mins + 1 ns.
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + 2 * bucketSizeNs, nextPullTimeNs);
     EXPECT_FALSE(processor->mMetricsManagers.begin()->second->mAllMetricProducers[0]->isActive());
 
+    // Activate the metric. A pull occurs upon activation.
     const int64_t activationNs = configAddedTimeNs + bucketSizeNs + (2 * 1000 * 1000); // 2 millis.
     auto batterySaverOnEvent = CreateBatterySaverOnEvent(activationNs);
-    processor->OnLogEvent(batterySaverOnEvent.get());
+    processor->OnLogEvent(batterySaverOnEvent.get()); // 15 mins + 2 ms.
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->mAllMetricProducers[0]->isActive());
 
-    // This event should be kept. 1 total.
-    processor->informPullAlarmFired(nextPullTimeNs + 1);
+    // This event should be kept. 2 total.
+    processor->informPullAlarmFired(nextPullTimeNs + 1); // 20 mins + 1 ns.
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + 3 * bucketSizeNs,
               nextPullTimeNs);
 
-    // This event should be kept. 2 total.
-    processor->informPullAlarmFired(nextPullTimeNs + 2);
+    // This event should be kept. 3 total.
+    processor->informPullAlarmFired(nextPullTimeNs + 2); // 25 mins + 2 ns.
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + 4 * bucketSizeNs, nextPullTimeNs);
 
     // Create random event to deactivate metric.
@@ -469,7 +470,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
     processor->OnLogEvent(deactivationEvent.get());
     EXPECT_FALSE(processor->mMetricsManagers.begin()->second->mAllMetricProducers[0]->isActive());
 
-    // Event should not be kept. 2 total.
+    // Event should not be kept. 3 total.
     processor->informPullAlarmFired(nextPullTimeNs + 3);
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + 5 * bucketSizeNs, nextPullTimeNs);
 
@@ -497,27 +498,39 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation) {
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(3, data.bucket_info_size());
 
-    EXPECT_EQ(1, data.bucket_info(0).atom_size());
-    EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
-    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs + 1, data.bucket_info(0).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(0).wall_clock_timestamp_nanos_size());
-    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
-    EXPECT_TRUE(data.bucket_info(0).atom(0).subsystem_sleep_state().subsystem_name().empty());
-    EXPECT_GT(data.bucket_info(0).atom(0).subsystem_sleep_state().time_millis(), 0);
+    auto bucketInfo = data.bucket_info(0);
+    EXPECT_EQ(1, bucketInfo.atom_size());
+    EXPECT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
+    EXPECT_EQ(activationNs, bucketInfo.elapsed_timestamp_nanos(0));
+    EXPECT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
+    EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, bucketInfo.start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, bucketInfo.end_bucket_elapsed_nanos());
+    EXPECT_TRUE(bucketInfo.atom(0).subsystem_sleep_state().subsystem_name().empty());
+    EXPECT_GT(bucketInfo.atom(0).subsystem_sleep_state().time_millis(), 0);
 
-    EXPECT_EQ(1, data.bucket_info(1).atom_size());
-    EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
-    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs + 2, data.bucket_info(1).elapsed_timestamp_nanos(0));
-    EXPECT_EQ(0, data.bucket_info(1).wall_clock_timestamp_nanos_size());
+    bucketInfo = data.bucket_info(1);
+    EXPECT_EQ(1, bucketInfo.atom_size());
+    EXPECT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
+    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs + 1, bucketInfo.elapsed_timestamp_nanos(0));
+    EXPECT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
+    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, bucketInfo.start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, bucketInfo.end_bucket_elapsed_nanos());
+    EXPECT_TRUE(bucketInfo.atom(0).subsystem_sleep_state().subsystem_name().empty());
+    EXPECT_GT(bucketInfo.atom(0).subsystem_sleep_state().time_millis(), 0);
+
+    bucketInfo = data.bucket_info(2);
+    EXPECT_EQ(1, bucketInfo.atom_size());
+    EXPECT_EQ(1, bucketInfo.elapsed_timestamp_nanos_size());
+    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs + 2, bucketInfo.elapsed_timestamp_nanos(0));
+    EXPECT_EQ(0, bucketInfo.wall_clock_timestamp_nanos_size());
     EXPECT_EQ(MillisToNano(NanoToMillis(baseTimeNs + 5 * bucketSizeNs)),
-            data.bucket_info(1).start_bucket_elapsed_nanos());
+            bucketInfo.start_bucket_elapsed_nanos());
     EXPECT_EQ(MillisToNano(NanoToMillis(activationNs + ttlNs + 1)),
-            data.bucket_info(1).end_bucket_elapsed_nanos());
-    EXPECT_TRUE(data.bucket_info(1).atom(0).subsystem_sleep_state().subsystem_name().empty());
-    EXPECT_GT(data.bucket_info(1).atom(0).subsystem_sleep_state().time_millis(), 0);
+            bucketInfo.end_bucket_elapsed_nanos());
+    EXPECT_TRUE(bucketInfo.atom(0).subsystem_sleep_state().subsystem_name().empty());
+    EXPECT_GT(bucketInfo.atom(0).subsystem_sleep_state().time_millis(), 0);
 }
 
 TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition) {

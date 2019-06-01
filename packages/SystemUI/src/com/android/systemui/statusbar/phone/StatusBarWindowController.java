@@ -80,6 +80,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private float mScreenBrightnessDoze;
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
+    private ForcePluginOpenListener mForcePluginOpenListener;
 
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
@@ -477,6 +478,16 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     public void setForcePluginOpen(boolean forcePluginOpen) {
         mCurrentState.forcePluginOpen = forcePluginOpen;
         apply(mCurrentState);
+        if (mForcePluginOpenListener != null) {
+            mForcePluginOpenListener.onChange(forcePluginOpen);
+        }
+    }
+
+    /**
+     * The forcePluginOpen state for the status bar.
+     */
+    public boolean getForcePluginOpen() {
+        return mCurrentState.forcePluginOpen;
     }
 
     public void setNotTouchable(boolean notTouchable) {
@@ -523,6 +534,10 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
 
     public void setStateListener(OtherwisedCollapsedListener listener) {
         mListener = listener;
+    }
+
+    public void setForcePluginOpenListener(ForcePluginOpenListener listener) {
+        mForcePluginOpenListener = listener;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -636,5 +651,15 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
      */
     public interface OtherwisedCollapsedListener {
         void setWouldOtherwiseCollapse(boolean otherwiseCollapse);
+    }
+
+    /**
+     * Listener to indicate forcePluginOpen has changed
+     */
+    public interface ForcePluginOpenListener {
+        /**
+         * Called when mState.forcePluginOpen is changed
+         */
+        void onChange(boolean forceOpen);
     }
 }

@@ -31,7 +31,10 @@
     <color name="notification_divider_color">#212121</color>
 
     <!-- The background color of the notification shade -->
-    <color name="notification_shade_background_color">#181818</color>
+    <color name="notification_shade_background_color">@color/GM2_grey_900</color>
+
+    <!-- The color of the gear shown behind a notification -->
+    <color name="notification_gear_color">@color/GM2_grey_500</color>
 
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#30ffffff</color>
@@ -43,7 +46,7 @@
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
 
     <color name="notification_guts_link_icon_tint">@color/GM2_grey_500</color>
-    <color name="notification_guts_sub_text_color">@color/GM2_grey_500</color>
+    <color name="notification_guts_sub_text_color">@color/GM2_grey_300</color>
     <color name="notification_guts_header_text_color">@color/GM2_grey_200</color>
     <color name="notification_guts_info_button_color">@color/GM2_blue_300</color>
     <color name="notification_guts_priority_button_content_color">@color/GM2_grey_500</color>
@@ -51,7 +54,7 @@
     <color name="notification_guts_priority_button_bg_fill_color">@color/transparent</color>
     <color name="notification_guts_priority_button_bg_fill_color_selected">@color/GM2_grey_800</color>
     <color name="notification_guts_priority_button_bg_stroke_color">@color/GM2_grey_700</color>
-    <color name="notification_guts_priority_button_bg_stroke_color_selected">@color/GM2_grey_700</color>
+    <color name="notification_guts_priority_button_bg_stroke_color_selected">@color/GM2_blue_300</color>
 
     <color name="notification_section_header_label_color">@color/GM2_grey_200</color>
     <color name="notification_section_clear_all_btn_color">@color/GM2_grey_500</color>

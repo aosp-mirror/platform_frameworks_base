@@ -741,13 +741,5 @@ public class KeyguardIndicationController implements StateListener,
                 updateIndication(false);
             }
         }
-
-        @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            if (mLockIcon == null) {
-                return;
-            }
-            mLockIcon.setBouncerVisible(bouncer);
-        }
-    };
+    }
 }

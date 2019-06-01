@@ -472,8 +472,12 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void initializeInternal(IBinder token, int displayId,
+        public final void initializeInternal(@NonNull IBinder token, int displayId,
                 IInputMethodPrivilegedOperations privilegedOperations) {
+            if (InputMethodPrivilegedOperationsRegistry.isRegistered(token)) {
+                Log.w(TAG, "The token has already registered, ignore this initialization.");
+                return;
+            }
             mPrivOps.set(privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
             updateInputMethodDisplay(displayId);
