@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -359,6 +360,52 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         int user = KeyguardUpdateMonitor.getCurrentUser();
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */);
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
+    }
+
+    @Test
+    public void testAnySimEmergency_allSimsInService() {
+        ServiceState s0 = mock(ServiceState.class);
+        when(s0.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 0, s0);
+        assertThat(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).isTrue();
+    }
+
+    @Test
+    public void testAnySimEmergency_someSimsInServiceOthersNotECC() {
+        ServiceState s0 = mock(ServiceState.class);
+        when(s0.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        ServiceState s1 = mock(ServiceState.class);
+        when(s1.getState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 0, s0);
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 1, s1);
+        assertThat(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).isTrue();
+    }
+
+    @Test
+    public void testAnySimEmergency_someSimsEmergencyCapable() {
+        ServiceState s0 = mock(ServiceState.class);
+        when(s0.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+        ServiceState s1 = mock(ServiceState.class);
+        when(s1.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+        when(s1.isEmergencyOnly()).thenReturn(true);
+
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 0, s0);
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 1, s1);
+        assertThat(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).isTrue();
+    }
+
+    @Test
+    public void testAnySimEmergency_noEmergencyCapable() {
+        ServiceState s0 = mock(ServiceState.class);
+        when(s0.getState()).thenReturn(ServiceState.STATE_POWER_OFF);
+        ServiceState s1 = mock(ServiceState.class);
+        when(s1.getState()).thenReturn(ServiceState.STATE_OUT_OF_SERVICE);
+
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 0, s0);
+        mKeyguardUpdateMonitor.handleServiceStateChange(0, 1, s1);
+        assertThat(mKeyguardUpdateMonitor.isAnySimEmergencyAble()).isFalse();
     }
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
