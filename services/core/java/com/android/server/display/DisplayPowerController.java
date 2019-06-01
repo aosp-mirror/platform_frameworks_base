@@ -309,6 +309,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mAppliedTemporaryAutoBrightnessAdjustment;
     private boolean mAppliedBrightnessBoost;
 
+    // Reason for which the brightness was last changed. See {@link BrightnessReason} for more
+    // information.
+    // At the time of this writing, this value is changed within updatePowerState() only, which is
+    // limited to the thread used by DisplayControllerHandler.
+    private BrightnessReason mBrightnessReason = new BrightnessReason();
+    private BrightnessReason mBrightnessReasonTemp = new BrightnessReason();
+
     // Brightness animation ramp rates in brightness units per second
     private final int mBrightnessRampRateFast;
     private final int mBrightnessRampRateSlow;
@@ -733,6 +740,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean mustNotify;
         final int previousPolicy;
         boolean mustInitialize = false;
+        int brightnessAdjustmentFlags = 0;
+        mBrightnessReasonTemp.set(null);
 
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
@@ -786,6 +795,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
                 if (!mAllowAutoBrightnessWhileDozingConfig) {
                     brightness = mPowerRequest.dozeScreenBrightness;
+                    mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE);
                 }
                 break;
             case DisplayPowerRequest.POLICY_VR:
@@ -839,15 +849,18 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Use zero brightness when screen is off.
         if (state == Display.STATE_OFF) {
             brightness = PowerManager.BRIGHTNESS_OFF;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_SCREEN_OFF);
         }
 
         // Always use the VR brightness when in the VR state.
         if (state == Display.STATE_VR) {
             brightness = mScreenBrightnessForVr;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_VR);
         }
 
         if (brightness < 0 && mPowerRequest.screenBrightnessOverride > 0) {
             brightness = mPowerRequest.screenBrightnessOverride;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_OVERRIDE);
             mAppliedScreenBrightnessOverride = true;
         } else {
             mAppliedScreenBrightnessOverride = false;
@@ -867,6 +880,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mTemporaryScreenBrightness > 0) {
             brightness = mTemporaryScreenBrightness;
             mAppliedTemporaryBrightness = true;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_TEMPORARY);
         } else {
             mAppliedTemporaryBrightness = false;
         }
@@ -880,9 +894,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final float autoBrightnessAdjustment;
         if (!Float.isNaN(mTemporaryAutoBrightnessAdjustment)) {
             autoBrightnessAdjustment = mTemporaryAutoBrightnessAdjustment;
+            brightnessAdjustmentFlags = BrightnessReason.ADJUSTMENT_AUTO_TEMP;
             mAppliedTemporaryAutoBrightnessAdjustment = true;
         } else {
             autoBrightnessAdjustment = mAutoBrightnessAdjustment;
+            brightnessAdjustmentFlags = BrightnessReason.ADJUSTMENT_AUTO;
             mAppliedTemporaryAutoBrightnessAdjustment = false;
         }
 
@@ -893,6 +909,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mPowerRequest.boostScreenBrightness
                 && brightness != PowerManager.BRIGHTNESS_OFF) {
             brightness = PowerManager.BRIGHTNESS_ON;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_BOOST);
             mAppliedBrightnessBoost = true;
         } else {
             mAppliedBrightnessBoost = false;
@@ -936,6 +953,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // it means in absolute terms.
                 putScreenBrightnessSetting(brightness);
                 mAppliedAutoBrightness = true;
+                mBrightnessReasonTemp.setReason(BrightnessReason.REASON_AUTOMATIC);
             } else {
                 mAppliedAutoBrightness = false;
             }
@@ -943,19 +961,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // If the autobrightness controller has decided to change the adjustment value
                 // used, make sure that's reflected in settings.
                 putAutoBrightnessAdjustmentSetting(newAutoBrightnessAdjustment);
+            } else {
+                // Adjustment values resulted in no change
+                brightnessAdjustmentFlags = 0;
             }
         } else {
             mAppliedAutoBrightness = false;
+            brightnessAdjustmentFlags = 0;
         }
 
         // Use default brightness when dozing unless overridden.
         if (brightness < 0 && Display.isDozeState(state)) {
             brightness = mScreenBrightnessDozeConfig;
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
         }
 
         // Apply manual brightness.
         if (brightness < 0) {
             brightness = clampScreenBrightness(mCurrentScreenBrightnessSetting);
+            mBrightnessReasonTemp.setReason(BrightnessReason.REASON_MANUAL);
         }
 
         // Apply dimming by at least some minimum amount when user activity
@@ -964,6 +988,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (brightness > mScreenBrightnessRangeMinimum) {
                 brightness = Math.max(Math.min(brightness - SCREEN_DIM_MINIMUM_REDUCTION,
                         mScreenBrightnessDimConfig), mScreenBrightnessRangeMinimum);
+                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_DIMMED);
             }
             if (!mAppliedDimming) {
                 slowChange = false;
@@ -982,6 +1007,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         Math.min(mPowerRequest.screenLowPowerBrightnessFactor, 1);
                 final int lowPowerBrightness = (int) (brightness * brightnessFactor);
                 brightness = Math.max(lowPowerBrightness, mScreenBrightnessRangeMinimum);
+                mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_LOW_POWER);
             }
             if (!mAppliedLowPower) {
                 slowChange = false;
@@ -1045,6 +1071,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 notifyBrightnessChanged(brightness, userInitiatedChange, hadUserBrightnessPoint);
             }
 
+        }
+
+        // Log any changes to what is currently driving the brightness setting.
+        if (!mBrightnessReasonTemp.equals(mBrightnessReason) || brightnessAdjustmentFlags != 0) {
+            Slog.v(TAG, "Brightness [" + brightness + "] reason changing to: '"
+                    + mBrightnessReasonTemp.toString(brightnessAdjustmentFlags)
+                    + "', previous reason: '" + mBrightnessReason + "'.");
+            mBrightnessReason.set(mBrightnessReasonTemp);
         }
 
         // Update display white-balance.
@@ -1737,6 +1771,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mPendingScreenBrightnessSetting=" + mPendingScreenBrightnessSetting);
         pw.println("  mTemporaryScreenBrightness=" + mTemporaryScreenBrightness);
         pw.println("  mAutoBrightnessAdjustment=" + mAutoBrightnessAdjustment);
+        pw.println("  mBrightnessReason=" + mBrightnessReason);
         pw.println("  mTemporaryAutoBrightnessAdjustment=" + mTemporaryAutoBrightnessAdjustment);
         pw.println("  mPendingAutoBrightnessAdjustment=" + mPendingAutoBrightnessAdjustment);
         pw.println("  mScreenBrightnessForVr=" + mScreenBrightnessForVr);
@@ -1954,6 +1989,123 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // temperature changes or is updated, so it doesn't necessarily change the screen color
             // temperature immediately. So, let's make it!
             sendUpdatePowerState();
+        }
+    }
+
+    /**
+     * Stores data about why the brightness was changed.  Made up of one main
+     * {@code BrightnessReason.REASON_*} reason and various {@code BrightnessReason.MODIFIER_*}
+     * modifiers.
+     */
+    private final class BrightnessReason {
+        static final int REASON_UNKNOWN = 0;
+        static final int REASON_MANUAL = 1;
+        static final int REASON_DOZE = 2;
+        static final int REASON_DOZE_DEFAULT = 3;
+        static final int REASON_AUTOMATIC = 4;
+        static final int REASON_SCREEN_OFF = 5;
+        static final int REASON_VR = 6;
+        static final int REASON_OVERRIDE = 7;
+        static final int REASON_TEMPORARY = 8;
+        static final int REASON_BOOST = 9;
+        static final int REASON_MAX = REASON_BOOST;
+
+        static final int MODIFIER_DIMMED = 0x1;
+        static final int MODIFIER_LOW_POWER = 0x2;
+        static final int MODIFIER_MASK = 0x3;
+
+        // ADJUSTMENT_*
+        // These things can happen at any point, even if the main brightness reason doesn't
+        // fundamentally change, so they're not stored.
+
+        // Auto-brightness adjustment factor changed
+        static final int ADJUSTMENT_AUTO_TEMP = 0x1;
+        // Temporary adjustment to the auto-brightness adjustment factor.
+        static final int ADJUSTMENT_AUTO = 0x2;
+
+        // One of REASON_*
+        public int reason;
+        // Any number of MODIFIER_*
+        public int modifier;
+
+        public void set(BrightnessReason other) {
+            setReason(other == null ? REASON_UNKNOWN : other.reason);
+            setModifier(other == null ? 0 : other.modifier);
+        }
+
+        public void setReason(int reason) {
+            if (reason < REASON_UNKNOWN || reason > REASON_MAX) {
+                Slog.w(TAG, "brightness reason out of bounds: " + reason);
+            } else {
+                this.reason = reason;
+            }
+        }
+
+        public void setModifier(int modifier) {
+            if ((modifier & ~MODIFIER_MASK) != 0) {
+                Slog.w(TAG, "brightness modifier out of bounds: 0x"
+                        + Integer.toHexString(modifier));
+            } else {
+                this.modifier = modifier;
+            }
+        }
+
+        public void addModifier(int modifier) {
+            setModifier(modifier | this.modifier);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null || !(obj instanceof BrightnessReason)) {
+                return false;
+            }
+            BrightnessReason other = (BrightnessReason) obj;
+            return other.reason == reason && other.modifier == modifier;
+        }
+
+        @Override
+        public String toString() {
+            return toString(0);
+        }
+
+        public String toString(int adjustments) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(reasonToString(reason));
+            sb.append(" [");
+            if ((adjustments & ADJUSTMENT_AUTO_TEMP) != 0) {
+                sb.append(" temp_adj");
+            }
+            if ((adjustments & ADJUSTMENT_AUTO) != 0) {
+                sb.append(" auto_adj");
+            }
+            if ((modifier & MODIFIER_LOW_POWER) != 0) {
+                sb.append(" low_pwr");
+            }
+            if ((modifier & MODIFIER_DIMMED) != 0) {
+                sb.append(" dim");
+            }
+            int strlen = sb.length();
+            if (sb.charAt(strlen - 1) == '[') {
+                sb.setLength(strlen - 2);
+            } else {
+                sb.append(" ]");
+            }
+            return sb.toString();
+        }
+
+        private String reasonToString(int reason) {
+            switch (reason) {
+                case REASON_MANUAL: return "manual";
+                case REASON_DOZE: return "doze";
+                case REASON_DOZE_DEFAULT: return "doze_default";
+                case REASON_AUTOMATIC: return "automatic";
+                case REASON_SCREEN_OFF: return "screen_off";
+                case REASON_VR: return "vr";
+                case REASON_OVERRIDE: return "override";
+                case REASON_TEMPORARY: return "temporary";
+                case REASON_BOOST: return "boost";
+                default: return Integer.toString(reason);
+            }
         }
     }
 }

@@ -143,7 +143,7 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
     private fun updateViews() {
         val nc = channel ?: return
 
-        channelName.text = nc.name ?: "(missing)"
+        channelName.text = nc.name ?: ""
 
         nc.group?.let { groupId ->
             channelDescription.text = controller.groupNameForId(groupId)

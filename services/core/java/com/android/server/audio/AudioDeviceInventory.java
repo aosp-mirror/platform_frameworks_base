@@ -146,6 +146,7 @@ public final class AudioDeviceInventory {
         }
     }
 
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void onSetA2dpSinkConnectionState(@NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo,
             @AudioService.BtProfileConnectionState int state) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
@@ -259,6 +260,7 @@ public final class AudioDeviceInventory {
         }
     }
 
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void onBluetoothA2dpActiveDeviceChange(
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btInfo, int event) {
         final BluetoothDevice btDevice = btInfo.getBtDevice();
@@ -532,6 +534,7 @@ public final class AudioDeviceInventory {
         return mCurAudioRoutes;
     }
 
+    @GuardedBy("AudioDeviceBroker.mDeviceStateLock")
     /*package*/ void setBluetoothA2dpDeviceConnectionState(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
             int profile, boolean suppressNoisyIntent, int musicDevice, int a2dpVolume) {
@@ -559,58 +562,19 @@ public final class AudioDeviceInventory {
             final BtHelper.BluetoothA2dpDeviceInfo a2dpDeviceInfo =
                     new BtHelper.BluetoothA2dpDeviceInfo(device, a2dpVolume, a2dpCodec);
             if (profile == BluetoothProfile.A2DP) {
-                mDeviceBroker.postA2dpSinkConnection(state,
-                        a2dpDeviceInfo,
-                        delay);
+                if (delay == 0) {
+                    onSetA2dpSinkConnectionState(a2dpDeviceInfo, state);
+                } else {
+                    mDeviceBroker.postA2dpSinkConnection(state,
+                            a2dpDeviceInfo,
+                            delay);
+                }
             } else { //profile == BluetoothProfile.A2DP_SINK
                 mDeviceBroker.postA2dpSourceConnection(state,
                         a2dpDeviceInfo,
                         delay);
             }
         }
-    }
-
-    /*package*/ void handleBluetoothA2dpActiveDeviceChangeExt(
-            @NonNull BluetoothDevice device,
-            @AudioService.BtProfileConnectionState int state, int profile,
-            boolean suppressNoisyIntent, int a2dpVolume) {
-        if (state == BluetoothProfile.STATE_DISCONNECTED) {
-            mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-                           device, state, profile, suppressNoisyIntent, a2dpVolume);
-            return;
-        }
-        // state == BluetoothProfile.STATE_CONNECTED
-        synchronized (mConnectedDevices) {
-            final String address = device.getAddress();
-            final int a2dpCodec = mDeviceBroker.getA2dpCodec(device);
-            final String deviceKey = DeviceInfo.makeDeviceListKey(
-                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
-            DeviceInfo deviceInfo = mConnectedDevices.get(deviceKey);
-            if (deviceInfo != null) {
-                // Device config change for matching A2DP device
-                mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
-                return;
-            }
-            for (int i = 0; i < mConnectedDevices.size(); i++) {
-                deviceInfo = mConnectedDevices.valueAt(i);
-                if (deviceInfo.mDeviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                    continue;
-                }
-                // A2DP device exists, handle active device change
-                final String existingDevicekey = mConnectedDevices.keyAt(i);
-                mConnectedDevices.remove(existingDevicekey);
-                mConnectedDevices.put(deviceKey, new DeviceInfo(
-                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, BtHelper.getName(device),
-                        address, a2dpCodec));
-                mDeviceBroker.postA2dpActiveDeviceChange(
-                        new BtHelper.BluetoothA2dpDeviceInfo(
-                            device, a2dpVolume, a2dpCodec));
-                return;
-            }
-        }
-        // New A2DP device connection
-        mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
-                           device, state, profile, suppressNoisyIntent, a2dpVolume);
     }
 
     /*package*/ int setWiredDeviceConnectionState(int type, @AudioService.ConnectionState int state,

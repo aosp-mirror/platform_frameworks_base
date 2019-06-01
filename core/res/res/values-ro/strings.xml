@@ -1379,8 +1379,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Reveniți la setările din fabrică pentru a dezactiva modul Set de testare."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lichide sau reziduuri în portul USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Portul USB este dezactivat automat. Atingeți ca să aflați mai multe."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Portul USB poate fi folosit"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonul nu mai detectează lichide sau reziduuri."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Se creează un raport de eroare…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Trimiteți raportul de eroare?"</string>

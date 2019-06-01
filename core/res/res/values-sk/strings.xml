@@ -1401,8 +1401,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Ak chcete zakázať režim správcu testov, obnovte výrobné nastavenia."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Tekutina alebo nečistoty v porte USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Port USB je automaticky deaktivovaný. Ďalšie informácie zobrazíte klepnutím."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Port USB môžete použiť"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefón už nerozpoznáva tekutinu ani nečistoty."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Preberá sa hlásenie chyby…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Chcete zdieľať hlásenie chyby?"</string>
@@ -1540,7 +1539,7 @@
     <string name="find_next" msgid="5742124618942193978">"Nájsť ďalšiu"</string>
     <string name="find_previous" msgid="2196723669388360506">"Nájsť predchádzajúcu"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Žiadosť o informácie o polohe od používateľa <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Žiadosť o informácie o polohe"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Žiadosť o informácie o polohe"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Žiadosť od používateľa <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Áno"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Nie"</string>

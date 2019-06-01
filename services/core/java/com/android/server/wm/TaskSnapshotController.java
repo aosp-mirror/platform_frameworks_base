@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
@@ -241,16 +242,32 @@ class TaskSnapshotController {
         return null;
     }
 
+    @Nullable
+    SurfaceControl.ScreenshotGraphicBuffer createTaskSnapshot(@NonNull Task task,
+            float scaleFraction) {
+        if (task.getSurfaceControl() == null) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
+            }
+            return null;
+        }
+        task.getBounds(mTmpRect);
+        mTmpRect.offsetTo(0, 0);
+        final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
+                SurfaceControl.captureLayers(
+                        task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
+        final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
+                : null;
+        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+            return null;
+        }
+        return screenshotBuffer;
+    }
+
     @Nullable private TaskSnapshot snapshotTask(Task task) {
         if (!mService.mPolicy.isScreenOn()) {
             if (DEBUG_SCREENSHOT) {
                 Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
-            }
-            return null;
-        }
-        if (task.getSurfaceControl() == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
             }
             return null;
         }
@@ -271,8 +288,6 @@ class TaskSnapshotController {
 
         final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
         final float scaleFraction = isLowRamDevice ? mPersister.getReducedScale() : 1f;
-        task.getBounds(mTmpRect);
-        mTmpRect.offsetTo(0, 0);
 
         final WindowState mainWindow = appWindowToken.findMainWindow();
         if (mainWindow == null) {
@@ -280,18 +295,17 @@ class TaskSnapshotController {
             return null;
         }
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                SurfaceControl.captureLayers(
-                        task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
-        final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
-                : null;
-        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+                createTaskSnapshot(task, scaleFraction);
+
+        if (screenshotBuffer == null) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot for " + task);
             }
             return null;
         }
         final boolean isWindowTranslucent = mainWindow.getAttrs().format != PixelFormat.OPAQUE;
-        return new TaskSnapshot(appWindowToken.mActivityComponent, buffer,
+        return new TaskSnapshot(
+                appWindowToken.mActivityComponent, screenshotBuffer.getGraphicBuffer(),
                 screenshotBuffer.getColorSpace(), appWindowToken.getConfiguration().orientation,
                 getInsets(mainWindow), isLowRamDevice /* reduced */, scaleFraction /* scale */,
                 true /* isRealSnapshot */, task.getWindowingMode(), getSystemUiVisibility(task),

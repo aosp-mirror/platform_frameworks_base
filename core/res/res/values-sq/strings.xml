@@ -1358,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lëngje ose papastërti në portën e USB-së"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Porta e USB-së është çaktivizuar automatikisht. Trokit për të mësuar më shumë."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Në rregulloj për përdorimin e portës USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefoni nuk i dallon më lëngjet apo papastërtitë."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>

@@ -1357,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Rétablissez la configuration d\'usine pour désactiver le mode Atelier de test."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Présence de liquide ou de saletés dans le port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Le port USB est désactivé automatiquement. Appuyez sur cette notification pour en savoir plus."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Autoriser l\'utilisation du port USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Le téléphone ne détecte plus les liquides ni les saletés."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création du rapport de bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>

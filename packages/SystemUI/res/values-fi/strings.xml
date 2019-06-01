@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-vianetsintää ei sallita"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Laitteelle tällä hetkellä kirjautunut käyttäjä ei voi ottaa USB-vianetsintää käyttöön. Vaihda käyttäjäksi ensisijainen käyttäjä, jotta voit käyttää tätä ominaisuutta."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"USB-portti poistettu käytöstä"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"Laitteen suojaamiseksi nesteiltä ja lialta USB-portti on poistettu käytöstä, eikä se havaitse lisävarusteita.\n\nSaat ilmoituksen, kun USB-porttia voi taas käyttää."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB-portti on käytössä ja voi havaita latureita sekä lisävarusteita"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"Ota USB käyttöön"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"Lue lisää"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomaa koko näyttöön"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Venytä koko näyttöön"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Kuvakaappaus"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Älä näytä uudelleen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Poista kaikki"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Muuta asetuksia"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"Hiljaiset ilmoitukset"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Tyhjennä kaikki hiljaiset ilmoitukset"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Älä häiritse ‑tila keskeytti ilmoitukset"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Aloita nyt"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ei ilmoituksia"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"Estä"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Jatka näyttämistä"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Pienennä"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"Äänetön"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Jatka äänettömyyttä"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"Hälyttää"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Jatka ilmoituksista hälyttämistä"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Poista ilmoitukset käytöstä"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Jatketaanko ilmoitusten näyttämistä tästä sovelluksesta?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Varovainen"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Priorisoitu"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Keskittyminen on helpompaa, sillä ilmoitukset näkyvät vain alas vedettävällä alueella. Aina äänetön."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Näytetään priorisoitujen ilmoitusten alapuolella. Aina äänetön."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Näytetään priorisoitujen ilmoitusten alapuolella. Aina äänetön."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Näytetään priorisoitujen ilmoitusten alapuolella. Aina äänetön."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Kiinnittää huomion äänellä ja tilapalkin kuvakkeella. Näkyy lukitusnäytöllä."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Äänetön"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Hälyttää"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Keskittyminen on helpompaa ilman ääntä tai värinää."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Kiinnittää huomion ilman ääntä tai värinää."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Näitä ilmoituksia ei voi muokata"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Tätä ilmoitusryhmää ei voi määrittää tässä"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Välitetty ilmoitus"</string>
@@ -908,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Salli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Estä"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Ajoita virransäästö napauttamalla"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"Ota käyttöön, jos akku todennäköisesti loppuu"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ei kiitos"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Virransäästön ajoitus otettu käyttöön"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Virransäästö käynnistyy automaattisesti, kun akun lataustaso on alle <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
@@ -942,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Siirrä vasempaan alareunaan"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Siirrä oikeaan alareunaan"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Ohita"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

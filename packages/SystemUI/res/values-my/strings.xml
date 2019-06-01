@@ -586,7 +586,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"အားမသွင်းနေစဉ်တွင် ဘတ်ထရီအဆင့် ရာခိုင်နှုန်းကို အခြေနေပြဘား အိုင်ကွန်တွင် ပြပါ"</string>
     <string name="quick_settings" msgid="10042998191725428">"အမြန် ဆက်တင်များ"</string>
     <string name="status_bar" msgid="4877645476959324760">"အခြေအနေပြနေရာ"</string>
-    <string name="overview" msgid="4018602013895926956">"ခြုံငုံသုံးသပ်ချက်"</string>
+    <string name="overview" msgid="4018602013895926956">"အကျဉ်း"</string>
     <string name="demo_mode" msgid="2532177350215638026">"စနစ် UI စရုပ်ပြမုဒ်"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"သရုပ်ပြမုဒ်ကို ဖွင့်ရန်"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"သရုပ်ပြမုဒ် ပြရန်"</string>
@@ -647,13 +647,10 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"ဆက်လက် သတိပေးရန်"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"အကြောင်းကြားချက်များ ပိတ်ရန်"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ဤအက်ပ်ထံမှ အကြောင်းကြားချက်များကို ဆက်ပြလိုပါသလား။"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"မသိမသာ"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"ဦးစားပေး"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"အပေါ်မှဆွဲချသည့် နေရာတွင်သာ အကြောင်းကြားချက်များကို အာရုံစိုက်ရန် အထောက်ကူပြုပေးသည်။ အမြဲ အသံတိတ်ရန်။"</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"ဦးစားပေးအကြောင်းကြားချက်များ၏ အောက်တွင်ဖော်ပြသည်။ အမြဲ အသံတိတ်ရန်။"</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"ဦးစားပေးအကြောင်းကြားချက်များ၏ အောက်တွင်ဖော်ပြသည်။ အမြဲ အသံတိတ်ရန်။"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"ဦးစားပေးအကြောင်းကြားချက်များ၏ အောက်တွင်ဖော်ပြသည်။ အမြဲ အသံတိတ်ရန်။"</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"အသံ၊ အခြေအနေပြဘား သင်္ကေတတို့ဖြင့် သတိပေးသည်။ လော့ခ်ချထားချိန်မျက်နှာပြင်တွင် ပြသည်။"</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"အသံတိတ်ရန်"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"သတိပေးခြင်း"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"အသံ သို့မဟုတ် တုန်ခါမှု မပါဘဲ အာရုံစိုက်နိုင်စေရန် ကူညီပေးသည်။"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"အသံ သို့မဟုတ် တုန်ခါမှုဖြင့် အာရုံစိုက်လာအောင် ပြုလုပ်သည်။"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ဤအကြောင်းကြားချက်များကို ပြုပြင်၍ မရပါ။"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ဤအကြောင်းကြားချက်အုပ်စုကို ဤနေရာတွင် စီစဉ်သတ်မှတ်၍ မရပါ"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ပရောက်စီထည့်ထားသော အကြောင်းကြားချက်"</string>
@@ -935,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"ဘယ်အောက်ခြေသို့ ရွှေ့ရန်"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"ညာအောက်ခြေသို့ ရွှေ့ပါ"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"ပယ်ရန်"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

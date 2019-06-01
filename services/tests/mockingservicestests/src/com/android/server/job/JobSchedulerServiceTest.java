@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
@@ -158,6 +159,56 @@ public class JobSchedulerServiceTest {
     private JobStatus createJobStatus(String testTag, JobInfo.Builder jobInfoBuilder) {
         return JobStatus.createFromJobInfo(
                 jobInfoBuilder.build(), 1234, "com.android.test", 0, testTag);
+    }
+
+    /**
+     * Confirm that {@link JobSchedulerService#getRescheduleJobForPeriodic(JobStatus)} returns a job
+     * with the correct delay and deadline constraints if the periodic job is scheduled with the
+     * minimum possible period.
+     */
+    @Test
+    public void testGetRescheduleJobForPeriodic_minPeriod() {
+        final long now = sElapsedRealtimeClock.millis();
+        JobStatus job = createJobStatus("testGetRescheduleJobForPeriodic_insideWindow",
+                createJobInfo().setPeriodic(15 * MINUTE_IN_MILLIS));
+        final long nextWindowStartTime = now + 15 * MINUTE_IN_MILLIS;
+        final long nextWindowEndTime = now + 30 * MINUTE_IN_MILLIS;
+
+        for (int i = 0; i < 25; i++) {
+            JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+            assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+            assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+            advanceElapsedClock(30_000); // 30 seconds
+        }
+
+        for (int i = 0; i < 5; i++) {
+            // Window buffering in last 1/6 of window.
+            JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+            assertEquals(nextWindowStartTime + i * 30_000, rescheduledJob.getEarliestRunTime());
+            assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
+            advanceElapsedClock(30_000); // 30 seconds
+        }
+    }
+
+    /**
+     * Confirm that {@link JobSchedulerService#getRescheduleJobForPeriodic(JobStatus)} returns a job
+     * with the correct delay and deadline constraints if the periodic job is scheduled with a
+     * period that's too large.
+     */
+    @Test
+    public void testGetRescheduleJobForPeriodic_largePeriod() {
+        final long now = sElapsedRealtimeClock.millis();
+        JobStatus job = createJobStatus("testGetRescheduleJobForPeriodic_insideWindow",
+                createJobInfo().setPeriodic(2 * 365 * DAY_IN_MILLIS));
+        assertEquals(now, job.getEarliestRunTime());
+        // Periods are capped at 365 days (1 year).
+        assertEquals(now + 365 * DAY_IN_MILLIS, job.getLatestRunTimeElapsed());
+        final long nextWindowStartTime = now + 365 * DAY_IN_MILLIS;
+        final long nextWindowEndTime = nextWindowStartTime + 365 * DAY_IN_MILLIS;
+
+        JobStatus rescheduledJob = mService.getRescheduleJobForPeriodic(job);
+        assertEquals(nextWindowStartTime, rescheduledJob.getEarliestRunTime());
+        assertEquals(nextWindowEndTime, rescheduledJob.getLatestRunTimeElapsed());
     }
 
     /**

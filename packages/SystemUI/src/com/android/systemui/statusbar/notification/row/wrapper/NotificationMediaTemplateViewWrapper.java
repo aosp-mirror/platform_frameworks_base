@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.row.wrapper;
 
 import static com.android.systemui.Dependency.MAIN_HANDLER;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -28,7 +29,6 @@ import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewStub;
@@ -52,7 +52,6 @@ import java.util.TimerTask;
  */
 public class NotificationMediaTemplateViewWrapper extends NotificationTemplateViewWrapper {
 
-    private static final String TAG = "NotificationMediaTVW";
     private static final long PROGRESS_UPDATE_INTERVAL = 1000; // 1s
     private static final String COMPACT_MEDIA_TAG = "media";
     private final Handler mHandler = Dependency.get(MAIN_HANDLER);
@@ -63,6 +62,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
     private TextView mSeekBarTotalTime;
     private long mDuration = 0;
     private MediaController mMediaController;
+    private MediaMetadata mMediaMetadata;
     private NotificationMediaManager mMediaManager;
     private View mSeekBarView;
     private Context mContext;
@@ -81,7 +81,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            if (mMediaController != null && canSeekMedia()) {
+            if (mMediaController != null) {
                 mMediaController.getTransportControls().seekTo(mSeekBar.getProgress());
                 mMetricsLogger.write(newLog(MetricsEvent.TYPE_UPDATE));
             }
@@ -96,14 +96,26 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         }
 
         @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
+        public void onPlaybackStateChanged(@Nullable PlaybackState state) {
+            if (state == null) {
+                return;
+            }
+
             if (state.getState() != PlaybackState.STATE_PLAYING) {
                 // Update the UI once, in case playback info changed while we were paused
-                mUpdatePlaybackUi.run();
+                updatePlaybackUi(state);
                 clearTimer();
             } else if (mSeekBarTimer == null && mSeekBarView != null
                     && mSeekBarView.getVisibility() != View.GONE) {
                 startTimer();
+            }
+        }
+
+        @Override
+        public void onMetadataChanged(@Nullable MediaMetadata metadata) {
+            if (mMediaMetadata == null || !mMediaMetadata.equals(metadata)) {
+                mMediaMetadata = metadata;
+                updateDuration();
             }
         }
     };
@@ -140,12 +152,11 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             controllerUpdated = true;
         }
 
-        if (mMediaController.getMetadata() != null) {
-            long duration = mMediaController.getMetadata().getLong(
-                    MediaMetadata.METADATA_KEY_DURATION);
+        mMediaMetadata = mMediaController.getMetadata();
+        if (mMediaMetadata != null) {
+            long duration = mMediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
             if (duration <= 0) {
                 // Don't include the seekbar if this is a livestream
-                Log.d(TAG, "removing seekbar");
                 if (mSeekBarView != null && mSeekBarView.getVisibility() != View.GONE) {
                     mSeekBarView.setVisibility(View.GONE);
                     mMetricsLogger.write(newLog(MetricsEvent.TYPE_CLOSE));
@@ -156,12 +167,12 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     mMetricsLogger.write(newLog(MetricsEvent.TYPE_CLOSE));
                 }
                 return;
-            } else {
+            } else if (mSeekBarView != null && mSeekBarView.getVisibility() == View.GONE) {
                 // Otherwise, make sure the seekbar is visible
-                if (mSeekBarView != null && mSeekBarView.getVisibility() == View.GONE) {
-                    mSeekBarView.setVisibility(View.VISIBLE);
-                    mMetricsLogger.write(newLog(MetricsEvent.TYPE_OPEN));
-                }
+                mSeekBarView.setVisibility(View.VISIBLE);
+                mMetricsLogger.write(newLog(MetricsEvent.TYPE_OPEN));
+                updateDuration();
+                startTimer();
             }
         }
 
@@ -181,13 +192,13 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             mSeekBarTotalTime = mSeekBarView.findViewById(R.id.notification_media_total_time);
 
             if (mSeekBarTimer == null) {
-                if (canSeekMedia()) {
+                if (mMediaController != null && canSeekMedia(mMediaController.getPlaybackState())) {
                     // Log initial state, since it will not be updated
                     mMetricsLogger.write(newLog(MetricsEvent.TYPE_DETAIL, 1));
                 } else {
                     setScrubberVisible(false);
                 }
-
+                updateDuration();
                 startTimer();
                 mMediaController.registerCallback(mMediaCallback);
             }
@@ -201,7 +212,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         mSeekBarTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                mHandler.post(mUpdatePlaybackUi);
+                mHandler.post(mOnUpdateTimerTick);
             }
         }, 0, PROGRESS_UPDATE_INTERVAL);
     }
@@ -215,14 +226,12 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         }
     }
 
-    private boolean canSeekMedia() {
-        if (mMediaController == null || mMediaController.getPlaybackState() == null) {
-            Log.d(TAG, "Cannot seek media because the controller is invalid");
+    private boolean canSeekMedia(@Nullable PlaybackState state) {
+        if (state == null) {
             return false;
         }
 
-        long actions = mMediaController.getPlaybackState().getActions();
-        Log.d(TAG, "Playback state actions are " + actions);
+        long actions = state.getActions();
         return ((actions & PlaybackState.ACTION_SEEK_TO) != 0);
     }
 
@@ -236,38 +245,43 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         mMetricsLogger.write(newLog(MetricsEvent.TYPE_DETAIL, isVisible ? 1 : 0));
     }
 
-    protected final Runnable mUpdatePlaybackUi = new Runnable() {
+    private void updateDuration() {
+        if (mMediaMetadata != null && mSeekBar != null) {
+            long duration = mMediaMetadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
+            if (mDuration != duration) {
+                mDuration = duration;
+                mSeekBar.setMax((int) mDuration);
+                mSeekBarTotalTime.setText(millisecondsToTimeString(duration));
+            }
+        }
+    }
+
+    protected final Runnable mOnUpdateTimerTick = new Runnable() {
         @Override
         public void run() {
             if (mMediaController != null && mSeekBar != null) {
-                MediaMetadata metadata = mMediaController.getMetadata();
                 PlaybackState playbackState = mMediaController.getPlaybackState();
 
-                if (metadata != null && playbackState != null) {
-                    long position = playbackState.getPosition();
-                    long duration = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
-
-                    if (mDuration != duration) {
-                        mDuration = duration;
-                        mSeekBar.setMax((int) mDuration);
-                        mSeekBarTotalTime.setText(millisecondsToTimeString(duration));
-                    }
-                    mSeekBar.setProgress((int) position);
-
-                    mSeekBarElapsedTime.setText(millisecondsToTimeString(position));
-
-                    // Update scrubber in case available actions have changed
-                    setScrubberVisible(canSeekMedia());
+                if (playbackState != null) {
+                    updatePlaybackUi(playbackState);
                 } else {
-                    Log.d(TAG, "Controller missing data " + metadata + " " + playbackState);
                     clearTimer();
                 }
             } else {
-                Log.d(TAG, "No longer have a valid media controller");
                 clearTimer();
             }
         }
     };
+
+    private void updatePlaybackUi(PlaybackState state) {
+        long position = state.getPosition();
+        mSeekBar.setProgress((int) position);
+
+        mSeekBarElapsedTime.setText(millisecondsToTimeString(position));
+
+        // Update scrubber in case available actions have changed
+        setScrubberVisible(canSeekMedia(state));
+    }
 
     private String millisecondsToTimeString(long milliseconds) {
         long seconds = milliseconds / 1000;
@@ -295,6 +309,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         int tintColor = getNotificationHeader().getOriginalIconColor();
         mSeekBarElapsedTime.setTextColor(tintColor);
         mSeekBarTotalTime.setTextColor(tintColor);
+        mSeekBarTotalTime.setShadowLayer(1.5f, 1.5f, 1.5f, mBackgroundColor);
 
         ColorStateList tintList = ColorStateList.valueOf(tintColor);
         mSeekBar.setThumbTintList(tintList);

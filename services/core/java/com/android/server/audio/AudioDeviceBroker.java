@@ -241,15 +241,6 @@ import com.android.internal.annotations.GuardedBy;
         sendLMsgNoDelay(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT, SENDMSG_QUEUE, info);
     }
 
-    /*package*/ void postBluetoothA2dpDeviceConfigChangeExt(
-            @NonNull BluetoothDevice device,
-            @AudioService.BtProfileConnectionState int state, int profile,
-            boolean suppressNoisyIntent, int a2dpVolume) {
-        final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
-                suppressNoisyIntent, a2dpVolume);
-        sendLMsgNoDelay(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT, SENDMSG_QUEUE, info);
-    }
-
     private static final class HearingAidDeviceConnectionInfo {
         final @NonNull BluetoothDevice mDevice;
         final @AudioService.BtProfileConnectionState int mState;
@@ -578,9 +569,8 @@ import com.android.internal.annotations.GuardedBy;
         return mBrokerHandler.hasMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
     }
 
-    //###
     // must be called synchronized on mConnectedDevices
-    /*package*/  boolean hasScheduledA2dpSinkConnectionState(BluetoothDevice btDevice) {
+    /*package*/ boolean hasScheduledA2dpSinkConnectionState(BluetoothDevice btDevice) {
         return mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE,
                 new BtHelper.BluetoothA2dpDeviceInfo(btDevice));
     }
@@ -862,22 +852,6 @@ import com.android.internal.annotations.GuardedBy;
                                 info.mDevice, info.mState, info.mSupprNoisy, info.mMusicDevice);
                     }
                 } break;
-                case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT: {
-                    final BtDeviceConnectionInfo info = (BtDeviceConnectionInfo) msg.obj;
-                    AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
-                            "handleBluetoothA2dpActiveDeviceChangeExt "
-                                    + " state=" + info.mState
-                                    // only querying address as this is the only readily available
-                                    // field on the device
-                                    + " addr=" + info.mDevice.getAddress()
-                                    + " prof=" + info.mProfile + " supprNoisy=" + info.mSupprNoisy
-                                    + " vol=" + info.mVolume)).printLog(TAG));
-                    synchronized (mDeviceStateLock) {
-                        mDeviceInventory.handleBluetoothA2dpActiveDeviceChangeExt(
-                                info.mDevice, info.mState, info.mProfile,
-                                info.mSupprNoisy, info.mVolume);
-                    }
-                } break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -925,10 +899,8 @@ import com.android.internal.annotations.GuardedBy;
     private static final int MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT = 27;
     // process external command to (dis)connect a hearing aid device
     private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 28;
-    // process external command to (dis)connect or change active A2DP device
-    private static final int MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT = 29;
     // a ScoClient died in BtHelper
-    private static final int MSG_L_SCOCLIENT_DIED = 30;
+    private static final int MSG_L_SCOCLIENT_DIED = 29;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
@@ -943,7 +915,6 @@ import com.android.internal.annotations.GuardedBy;
             case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT:
             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
-            case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE_EXT:
                 return true;
             default:
                 return false;
