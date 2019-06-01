@@ -263,6 +263,7 @@ cc_test {
         "tests/e2e/Anomaly_duration_sum_e2e_test.cpp",
         "tests/e2e/ConfigTtl_e2e_test.cpp",
         "tests/e2e/PartialBucket_e2e_test.cpp",
+        "tests/e2e/DurationMetric_e2e_test.cpp",
         "tests/shell/ShellSubscriber_test.cpp",
     ],
 
