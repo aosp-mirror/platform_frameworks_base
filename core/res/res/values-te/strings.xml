@@ -280,7 +280,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"మీ పరిచయాలను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"స్థానం"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"ఈ పరికర స్థానాన్ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"మీరు యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానానికి యాప్ యాక్సెస్ కలిగి ఉంటుంది"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"ఈ పరికర స్థానాన్ని &lt;b&gt;అన్ని సమయాలలో&lt;/b&gt; యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"యాప్ ప్రస్తుతం మీరు ఆ యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే స్థానాన్ని యాక్సెస్ చేయగలుగుతుంది"</string>
@@ -1358,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB పోర్ట్‌లో ద్రవ లేదా వ్యర్థ పదార్థాలు ఉన్నాయి"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB పోర్ట్ ఆటోమేటిక్‌గా నిలిపివేయబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB పోర్ట్‌ను ఉపయోగించడం సురక్షితం"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ఫోన్ ఇకపై ద్రవ లేదా వ్యర్థ పదార్థాలను గుర్తించదు."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"బగ్ నివేదికను తీస్తోంది…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"బగ్ నివేదికను భాగస్వామ్యం చేయాలా?"</string>

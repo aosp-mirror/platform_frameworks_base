@@ -1358,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"টেস্ট হারনেস মোড বন্ধ করতে ফ্যাক্টরি রিসেট করুন।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"ইউএসবি পোর্টে তরল পদার্থ অথবা ধুলো কণা"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"ইউএসবি পোর্ট নিজে থেকে বন্ধ করা হবে। আরও জানতে ট্যাপ করুন।"</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"ইউএসবি পোর্ট ব্যবহার করা যেতে পারে"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"ফোন আর তরল পদার্থ এবং ধুলো কণা শনাক্ত করবে না।"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"ত্রুটির প্রতিবেদন নেওয়া হচ্ছে..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ত্রুটির প্রতিবেদন শেয়ার করবেন?"</string>
@@ -1495,7 +1494,7 @@
     <string name="find_next" msgid="5742124618942193978">"পরবর্তীটি খুঁজুন"</string>
     <string name="find_previous" msgid="2196723669388360506">"পূর্ববর্তীটি খুঁজুন"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> এর থেকে অবস্থানের অনুরোধ"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"অবস্থানের অনুরোধ"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"লোকেশন জানার অনুরোধ"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"<xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>) এর দ্বারা অনুরোধকৃত"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"হ্যাঁ"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"না"</string>

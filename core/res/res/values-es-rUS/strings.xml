@@ -1357,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Restablece la configuración de fábrica para inhabilitar el modo de agente de prueba."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Hay líquido o suciedad en el puerto USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"El puerto USB se inhabilitó automáticamente. Presiona para obtener más información."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Se puede usar el puerto USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"El teléfono ya no detecta líquidos o suciedad."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Realizando un informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>

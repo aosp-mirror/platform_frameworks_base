@@ -280,7 +280,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Թույլատրե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել ձեր կոնտակտները"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Տեղորոշում"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"տեղորոշել այս սարքը"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Թույլատրե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-ին օգտագործել այս սարքի տեղադրության տվյալները"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Թույլատրե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին օգտագործել այս սարքի տեղադրության տվյալները"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Տեղադրության տվյալները հասանելի կլինեն հավելվածին, միայն երբ այն օգտագործելիս լինեք"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;Միշտ&lt;/b&gt; հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր սարքի տեղադրությունը"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Տեղադրության տվյալները հասանելի կլինեն հավելվածին, միայն երբ այն օգտագործելիս լինեք"</string>
@@ -1357,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Թեստային ռեժիմն անջատելու համար զրոյացրեք կարգավորումները։"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB միացքում ջուր կամ աղտ է հայտնաբերվել"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB միացքն ավտոմատ անջատվել է: Հպեք՝ ավելին իմանալու համար:"</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB միացքը կարող է օգտագործվել"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Հեռախոսում ջուր կամ աղտ չի հայտնաբերվել:"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Վրիպակի զեկույցի ստեղծում…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Տրամադրե՞լ վրիպակի զեկույցը:"</string>

@@ -1401,8 +1401,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Щоб вимкнути режим автоматизованого тестування, відновіть заводські налаштування."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Рідина або сміття в USB-порту"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB-порт автоматично вимкнено. Торкніться, щоб дізнатися більше."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Можна використовувати USB-порт"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Телефон уже не виявляє рідини або сміття."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Створюється повідомлення про помилку…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Надіслати звіт про помилку?"</string>
