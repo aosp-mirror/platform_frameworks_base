@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona e gjurmës së gishtit"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"menaxho harduerin për shkyçjen me fytyrën"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"përdor harduerin e shkyçjes me fytyrën"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Lejon aplikacionin të përdorë harduerin e shkyçjes me fytyrën për procesin e vërtetimit"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Shkyçja me fytyrë"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Regjistro përsëri fytyrën tënde"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Për të përmirësuar njohjen, regjistro përsëri fytyrën tënde"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"S\'mund të regjistroheshin të dhëna të sakta të fytyrës. Provo përsëri."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Provo përsëri shkyçjen me fytyrën."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"S\'mund të ruhen të dhëna të reja fytyre. Fshi një të vjetër në fillim."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Veprimi me fytyrën u anulua."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Shkyçja me fytyrë u anulua nga përdoruesi."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Shumë përpjekje. Provo sërish më vonë."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Shumë përpjekje. Shkyçja me fytyrë u çaktivizua."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Fytyra nuk mund të verifikohet. Provo përsëri."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Nuk e ke konfiguruar shkyçjen me fytyrë."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Shkyçja me fytyrë nuk mbështetet në këtë pajisje"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1367,8 +1358,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lëngje ose papastërti në portën e USB-së"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Porta e USB-së është çaktivizuar automatikisht. Trokit për të mësuar më shumë."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Në rregulloj për përdorimin e portës USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefoni nuk i dallon më lëngjet apo papastërtitë."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Po merret raporti i defekteve në kod…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Të ndahet raporti i defektit në kod?"</string>

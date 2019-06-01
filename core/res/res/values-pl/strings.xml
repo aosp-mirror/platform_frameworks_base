@@ -555,15 +555,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odcisku palca"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"zarządzanie sprzętem do rozpoznawania twarzy"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Zezwala na aktywowanie przez aplikację metody dodawania i usuwania szablonów twarzy."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"używanie sprzętu do rozpoznawania twarzy"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Zezwala na używanie przez aplikację sprzętu do rozpoznawania twarzy w uwierzytelniania"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Rozpoznanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Zarejestruj swoją twarz ponownie"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Aby poprawić rozpoznawanie, ponownie zarejestruj swoją twarz"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
@@ -589,20 +585,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Spróbuj rozpoznania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Analiza twarzy została anulowana."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Użytkownik anulował rozpoznanie twarzy."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Zbyt wiele prób. Rozpoznanie twarzy zostało wyłączone."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nie można zweryfikować twarzy. Spróbuj ponownie."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Rozpoznanie twarzy nie jest skonfigurowane."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"To urządzenie nie obsługuje rozpoznania twarzy."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Twarz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1410,8 +1401,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Przywróć ustawienia fabryczne, by wyłączyć tryb jarzma testowego."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Wilgoć lub brud w porcie USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Port USB został automatycznie wyłączony. Kliknij, by dowiedzieć się więcej."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Możesz używać portu USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefon nie wykrywa już wilgoci ani zanieczyszczeń."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Zgłaszam błąd…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Udostępnić raport o błędzie?"</string>
