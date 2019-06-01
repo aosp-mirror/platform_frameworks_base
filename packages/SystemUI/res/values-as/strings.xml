@@ -62,12 +62,10 @@
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"ইউএছবি ডিবাগিঙৰ অনুমতি নাই"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"এই ডিভাইচটোত বর্তমান ছাইন ইন হৈ থকা ব্যৱহাৰকাৰীজনে ইউএছবি ডিবাগিং অন কৰিব নোৱাৰে। এই সুবিধাটো ব্যৱহাৰ কৰিবলৈ হ\'লে মুখ্য ব্যৱহাৰকাৰী হিচাপে ছাইন ইন কৰক।"</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"ইউএছবি প’ৰ্ট অক্ষম কৰা হ’ল"</string>
-    <!-- no translation found for usb_contaminant_message (7379089091591609111) -->
-    <skip />
+    <string name="usb_contaminant_message" msgid="7379089091591609111">"আপোনাৰ ডিভাইচটো তৰল বা ধূলি-মাকতিৰ পৰা ৰক্ষা কৰিবলৈ ইউএছবি প’ৰ্টটো অক্ষম কৰি ৰখা হৈছে ফলত ই কোনো আনুষংগিক সামগ্ৰী ধৰা পেলাব নোৱাৰে।\n\nযেতিয়া ইউএছবি প’ৰ্টটো নিৰাপদভাৱে ব্যৱহাৰ কৰিব পৰা হ’ব তেতিয়া আপোনাক জনোৱা হ’ব।"</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"চাৰ্জাৰ আৰু আনুষংগিক সামগ্ৰী চিনাক্ত কৰিবলৈ USB প’ৰ্ট সক্ষম কৰা হ’ল"</string>
     <string name="usb_disable_contaminant_detection" msgid="2103905315747120033">"USB সক্ষম কৰক"</string>
-    <!-- no translation found for learn_more (5000517160980853569) -->
-    <skip />
+    <string name="learn_more" msgid="5000517160980853569">"অধিক জানক"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"স্ক্ৰীণ পূর্ণ কৰিবলৈ জুম কৰক"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"স্ক্ৰীণ পূর্ণ কৰিবলৈ প্ৰসাৰিত কৰক"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"স্ক্ৰীণশ্বট"</string>
@@ -458,10 +456,8 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"পুনৰাই নেদেখুৱাব"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সকলো মচক"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"পৰিচালনা"</string>
-    <!-- no translation found for notification_section_header_gentle (4372438504154095677) -->
-    <skip />
-    <!-- no translation found for accessibility_notification_section_header_gentle_clear_all (4286716295850400959) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="4372438504154095677">"নীৰৱ জাননীসমূহ"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"সকলো নীৰৱ জাননী মচক"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এতিয়াই আৰম্ভ কৰক"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো জাননী নাই"</string>
@@ -645,21 +641,16 @@
     <string name="inline_block_button" msgid="8735843688021655065">"অৱৰোধ কৰক"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখুওৱাই থাকক"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"সৰু কৰক"</string>
-    <!-- no translation found for inline_silent_button_silent (5315879183296940969) -->
-    <skip />
+    <string name="inline_silent_button_silent" msgid="5315879183296940969">"নিৰৱ"</string>
     <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"নীৰৱ হৈ থাকক"</string>
-    <!-- no translation found for inline_silent_button_alert (6008435419895088034) -->
-    <skip />
+    <string name="inline_silent_button_alert" msgid="6008435419895088034">"সতৰ্ক কৰক"</string>
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"সতৰ্ক কৰি থাকক"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"জাননী অফ কৰক"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই এপটোৰ জাননী দেখুওৱাই থাকিব লাগিবনে?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"সাধাৰণ"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"অগ্ৰাধিকাৰপ্ৰাপ্ত"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"আপুনি যাতে অসুবিধা নাপায়, তাৰ বাবে কেৱল পুল-ডাউন শ্বেডত এই জাননী দেখুৱায়। সদায় নিৰৱ।"</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"অগ্ৰাধিকাৰপ্ৰাপ্ত জাননীসমূহৰ তলত দেখুৱায়। সদায় নিৰৱ।"</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"অগ্ৰাধিকাৰপ্ৰাপ্ত জাননীসমূহৰ তলত দেখুৱায়। সদায় নিৰৱ।"</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"অগ্ৰাধিকাৰপ্ৰাপ্ত জাননীসমূহৰ তলত দেখুৱায়। সদায় নিৰৱ।"</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"ধ্বনি আৰু স্থিতি দণ্ডৰ আইকনৰ জৰিয়তে আপোনাৰ মনোযোগ আকৰ্ষণ কৰে। লক স্ক্ৰীণত দেখুৱায়।"</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"নীৰৱ"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"সতৰ্ক কৰক"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"কোনো ধ্বনি অথবা কম্পন অবিহনে আপোনাক মনোযোগ দিয়াত সহায় কৰে।"</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"ধ্বনি অথবা কম্পনৰ জৰিয়তে আপোনাৰ মনোযোগ আকৰ্ষণ কৰে।"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"এই ধৰণৰ জাননীবোৰ ইয়াত কনফিগাৰ কৰিব পৰা নাযায়"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"প্ৰক্সি হিচাপে পঠিওৱা জাননী"</string>
@@ -786,8 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"টাইল যোগ কৰিবলৈ হেঁচি ধৰি টানি আনক"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"টাইলসমূহ পুনৰ সজাবলৈ ধৰি টানক"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"আঁতৰাবৰ বাবে টানি আনি ইয়াত এৰি দিয়ক"</string>
-    <!-- no translation found for drag_to_remove_disabled (4785920129548299268) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"আপোনাক অতিকমেও <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>খন টাইল লাগিব"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা কৰক"</string>
     <string name="tuner_time" msgid="6572217313285536011">"সময়"</string>
   <string-array name="clock_options">
@@ -909,8 +899,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"অনুমতি দিয়ক"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"অস্বীকাৰ কৰক"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"বেটাৰি সঞ্চয়কাৰীৰ সময়সূচী সক্ৰিয় কৰিবলৈ টিপক"</string>
-    <!-- no translation found for auto_saver_text (2563289953551438248) -->
-    <skip />
+    <string name="auto_saver_text" msgid="2563289953551438248">"বেটাৰি শেষ হোৱাৰ সম্ভাৱনা থাকিলে অন কৰক"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"নালাগে, ধন্যবাদ"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"বেটাৰি সঞ্চয়কাৰীৰ সময়সূচী অন কৰা অৱস্থাত আছে"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"বেটাৰি চ্চাৰ্জৰ স্তৰ <xliff:g id="PERCENTAGE">%d</xliff:g>%%তকৈ কম হোৱাৰ লগে লগে বেটাৰি সঞ্চয়কাৰী স্বয়ংক্ৰিয়ভাৱে অন হ’ব।"</string>
@@ -943,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"বুটামটো বাওঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"তলৰ সোঁফালে নিয়ক"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"অগ্ৰাহ্য কৰক"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>

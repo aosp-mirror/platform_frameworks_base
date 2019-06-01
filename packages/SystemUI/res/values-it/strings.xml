@@ -647,13 +647,10 @@
     <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continua ad avvisare"</string>
     <string name="inline_turn_off_notifications" msgid="8635596135532202355">"Disattiva notifiche"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuare a ricevere notifiche da questa app?"</string>
-    <string name="notification_silence_title" msgid="7352089096356977930">"Silenziose"</string>
-    <string name="notification_alert_title" msgid="3966526305405016221">"Con priorità"</string>
-    <string name="notification_channel_summary_low" msgid="1065819618107531284">"Puoi concentrarti perché le notifiche sono visualizzate solo nell\'area a discesa. Sempre silenziose."</string>
-    <string name="notification_channel_summary_low_status" msgid="2702170424808743755">"Vengono mostrate le notifiche con priorità bassa. Sempre silenziose."</string>
-    <string name="notification_channel_summary_low_lock" msgid="7966605244472624458">"Vengono mostrate le notifiche con priorità bassa. Sempre silenziose."</string>
-    <string name="notification_channel_summary_low_status_lock" msgid="7012562768950012739">"Vengono mostrate le notifiche con priorità bassa. Sempre silenziose."</string>
-    <string name="notification_channel_summary_default" msgid="3847289783382316019">"Attirano la tua attenzione con un suono e un\'icona nella barra di stato. Le notifiche sono mostrate nella schermata di blocco."</string>
+    <string name="notification_silence_title" msgid="5763240612242137433">"Modalità silenziosa"</string>
+    <string name="notification_alert_title" msgid="8031196611815490340">"Avvisi"</string>
+    <string name="notification_channel_summary_low" msgid="3387466082089715555">"Favorisce la tua concentrazione grazie all\'assenza di suono o vibrazione."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Richiama la tua attenzione con suono o vibrazione."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Impossibile modificare queste notifiche."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Qui non è possibile configurare questo gruppo di notifiche"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notifica inviata al proxy"</string>
@@ -780,7 +777,7 @@
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Tieni premuto e trascina per aggiungere riquadri"</string>
     <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Tieni premuto e trascina per riordinare i riquadri"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Trascina qui per rimuovere"</string>
-    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Occorrono almeno <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> riquadri"</string>
+    <string name="drag_to_remove_disabled" msgid="4785920129548299268">"Occorrono almeno <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> schede"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Modifica"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Ora"</string>
   <string-array name="clock_options">
@@ -935,4 +932,8 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="206369104473183217">"Sposta in basso a sinistra"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="8705660152384312329">"Sposta in basso a destra"</string>
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Ignora"</string>
+    <!-- no translation found for notification_content_system_nav_changed (7218093915747788444) -->
+    <skip />
+    <!-- no translation found for notification_content_gesture_nav_available (8111130443656460792) -->
+    <skip />
 </resources>
