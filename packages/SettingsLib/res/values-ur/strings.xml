@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"نیٹ ورکنگ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"وائرلیس ڈسپلے سرٹیفیکیشن"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏Wi‑Fi وربوس لاگنگ فعال کریں"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"‏Wi‑Fi اسکین کو زبردستی روکا جا رہا ہے"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"منسلک نہیں ہو سکا"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"بیٹری ڈرین کم کرتا ہے اور نیٹ ورک کارکردگی کو بہتر بناتا ہے"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"میٹرڈ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"غیر میٹر شدہ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"لاگر بفر کے سائز"</string>

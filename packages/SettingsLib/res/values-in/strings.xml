@@ -159,7 +159,7 @@
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tinggi nada"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Memengaruhi nada ucapan yang disintesis"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Bahasa"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"Menggunakan bahasa sistem"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Gunakan bahasa sistem"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Bahasa tidak dipilih"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Menyetel suara spesifik bahasa untuk teks lisan"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Dengarkan contoh"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Jaringan"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktifkan Pencatatan Log Panjang Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Pembatasan pemindaian Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Kuota selalu aktif"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Akselerasi hardware tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Tampilkan perangkat Bluetooth tanpa nama"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Tidak dapat terhubung"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Memperlambat kehabisan baterai &amp; meningkatkan performa jaringan"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Berbayar"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Tidak berbayar"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Ukuran buffer pencatat log"</string>

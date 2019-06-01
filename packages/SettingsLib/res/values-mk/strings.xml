@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Вмрежување"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Приказ на сертификација на безжична мрежа"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Овозможи преопширно пријавување Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Регулирање на скенирањето за Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилниот интернет е секогаш активен"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардверско забрзување за врзување"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Прикажувај уреди со Bluetooth без имиња"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не може да се поврзе"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Покажи ги опциите за безжичен приказ на сертификат"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Го намалува искористувањето на батеријата и ја подобрува изведбата на мрежата"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Со ограничен интернет"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без ограничен интернет"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Величини на меѓумеморија за дневникот"</string>

@@ -83,7 +83,7 @@
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Apeluri telefonice"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfer de fișiere"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispozitiv de intrare"</string>
-    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Acces internet"</string>
+    <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Acces la internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Acces la Agendă"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Utilizați pentru a permite accesul la Agendă"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Distribuirea conexiunii la internet"</string>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Conectare la rețele"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Înregistrare prin Wi-Fi de volume mari de date"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limitare căutare de rețele Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accelerare hardware pentru tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Afișați dispozitivele Bluetooth fără nume"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nu s-a putut conecta"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reduce descărcarea bateriei și îmbunătățește performanța rețelei"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Contorizată"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Necontorizată"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile memoriei temporare a jurnalului"</string>
