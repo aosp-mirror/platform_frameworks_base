@@ -552,15 +552,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Pictograma amprentă"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"să gestioneze hardware de deblocare facială"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite aplicației să invoce metode pentru a adăuga și a șterge șabloane faciale pentru utilizare."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"să folosească hardware de deblocare facială"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permite aplicației să folosească hardware de deblocare facială pentru autentificare"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Deblocare facială"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Reînregistrați-vă chipul"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Pentru a îmbunătăți recunoașterea, reînregistrați-vă chipul"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nu s-a putut fotografia fața cu precizie. Încercați din nou."</string>
@@ -586,20 +582,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nu se poate confirma fața. Hardware-ul nu este disponibil."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"Încercați din nou deblocarea facială."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nu se pot stoca date faciale noi. Ștergeți întâi unele vechi."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operațiunea privind chipul a fost anulată."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Deblocarea facială este anulată de utilizator."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Prea multe încercări. Reîncercați mai târziu."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Prea multe încercări. Deblocarea facială este dezactivată."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nu se poate confirma fața. Încercați din nou."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Nu ați configurat deblocarea facială."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Deblocarea facială nu este acceptată pe dispozitiv."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Chip <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1388,8 +1379,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Reveniți la setările din fabrică pentru a dezactiva modul Set de testare."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lichide sau reziduuri în portul USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Portul USB este dezactivat automat. Atingeți ca să aflați mai multe."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Portul USB poate fi folosit"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Telefonul nu mai detectează lichide sau reziduuri."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Se creează un raport de eroare…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Trimiteți raportul de eroare?"</string>

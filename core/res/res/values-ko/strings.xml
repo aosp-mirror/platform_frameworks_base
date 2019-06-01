@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"지문 아이콘"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"얼굴인식 잠금해제 하드웨어 관리"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"사용할 얼굴 템플릿의 추가 및 삭제 메서드를 앱에서 호출하도록 허용합니다."</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"얼굴인식 잠금해제 하드웨어 사용"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"앱에서 얼굴인식 잠금해제 하드웨어를 인증에 사용하도록 허용합니다."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"얼굴인식 잠금해제"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"얼굴 재등록 필요"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"얼굴인식 잠금해제를 다시 시도해 주세요."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"새 얼굴 데이터를 저장할 수 없습니다. 먼저 기존 얼굴 데이터를 삭제하세요."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"얼굴 인식 작업이 취소되었습니다."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"사용자가 얼굴인식 잠금해제를 취소했습니다."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"시도 횟수가 너무 많습니다. 얼굴인식 잠금해제가 사용 중지되었습니다."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"얼굴을 확인할 수 없습니다. 다시 시도하세요."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"얼굴인식 잠금해제를 설정하지 않았습니다."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"이 기기에서는 얼굴인식 잠금해제가 지원되지 않습니다."</string>
     <string name="face_name_template" msgid="7004562145809595384">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"테스트 하네스 모드를 사용 중지하려면 초기화하세요."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 포트에서 액체 또는 이물질 감지됨"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB 포트가 자동으로 사용 중지되었습니다. 자세한 내용을 보려면 탭하세요."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB 포트를 사용해도 좋음"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"휴대전화에서 액체나 이물질이 더 이상 감지되지 않습니다."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"버그 보고서 가져오는 중..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"버그 보고서를 공유하시겠습니까?"</string>

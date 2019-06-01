@@ -549,15 +549,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指纹图标"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"管理人脸解锁硬件"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允许该应用调用方法来添加和删除可用的人脸模板。"</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"使用人脸解锁硬件"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"允许该应用使用人脸解锁硬件进行身份验证"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"人脸解锁"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"重新注册您的面孔"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"要提升识别精确度，请重新注册您的面孔"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"无法捕获准确的人脸数据，请重试。"</string>
@@ -583,20 +579,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"无法验证人脸。硬件无法使用。"</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"请重新尝试人脸解锁。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"无法存储新的人脸数据。请先删除旧的人脸数据。"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"面孔处理操作已取消。"</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"用户已取消人脸解锁。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"尝试次数过多，请稍后重试。"</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"尝试次数过多，人脸解锁已停用。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"无法验证人脸，请重试。"</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"您尚未设置人脸解锁。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"此设备不支持人脸解锁。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"面孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1366,8 +1357,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"恢复出厂设置以停用自动化测试框架模式。"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 端口中有液体或碎屑"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB 端口已自动停用。点按即可了解详情。"</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"允许使用 USB 端口"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"手机不再检测到液体或碎屑。"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"正在生成错误报告…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享错误报告吗？"</string>
@@ -1503,7 +1493,7 @@
     <string name="find_next" msgid="5742124618942193978">"下一条结果"</string>
     <string name="find_previous" msgid="2196723669388360506">"上一条结果"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"来自<xliff:g id="NAME">%s</xliff:g>的定位请求"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"定位请求"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"位置信息请求"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"请求人：<xliff:g id="NAME">%1$s</xliff:g>（<xliff:g id="SERVICE">%2$s</xliff:g>）"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"是"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"否"</string>

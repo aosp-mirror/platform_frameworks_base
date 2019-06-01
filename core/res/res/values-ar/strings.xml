@@ -561,15 +561,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"رمز بصمة الإصبع"</string>
-    <!-- no translation found for permlab_manageFace (7262837876352591553) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="7262837876352591553">"إدارة أجهزة \"فتح القفل بالوجه\""</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"السماح للتطبيق باستدعاء طرق لإضافة نماذج من الوجوه وحذفها"</string>
-    <!-- no translation found for permlab_useFaceAuthentication (2565716575739037572) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (4712947955047607722) -->
-    <skip />
-    <!-- no translation found for face_recalibrate_notification_name (1913676850645544352) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"استخدام أجهزة \"فتح القفل بالوجه\""</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"السماح للتطبيق باستخدام أجهزة \"فتح القفل بالوجه\" لإجراء المصادقة"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"فتح القفل بالوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"إعادة تسجيل وجهك"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"لتحسين قدرة الجهاز على معرفة وجهك، يُرجى إعادة تسجيل الوجه."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"تعذّر تسجيل بيانات دقيقة للوجه. حاول مرة أخرى."</string>
@@ -595,20 +591,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
-    <!-- no translation found for face_error_timeout (981512090365729465) -->
-    <skip />
+    <string name="face_error_timeout" msgid="981512090365729465">"حاول استخدام \"فتح القفل بالوجه\" مرة أخرى."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"يتعذَّر تخزين بيانات الوجه الجديد. احذف الوجه القديم أولاً."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"تمّ إلغاء عملية مصادقة الوجه."</string>
-    <!-- no translation found for face_error_user_canceled (5317030072349668946) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ألغى المستخدم \"فتح القفل بالوجه\"."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
-    <!-- no translation found for face_error_lockout_permanent (4723594314443097159) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"تم إجراء عدد كبير جدًا من المحاولات. وتم إيقاف \"فتح القفل بالوجه\"."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
-    <!-- no translation found for face_error_not_enrolled (4016937174832839540) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (8302690289757559738) -->
-    <skip />
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"لم يسبق لك إعداد \"فتح القفل بالوجه\"."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"\"فتح القفل بالوجه\" غير متوفر على هذا الجهاز."</string>
     <string name="face_name_template" msgid="7004562145809595384">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -709,7 +700,7 @@
     <item msgid="1103601433382158155">"فاكس العمل"</item>
     <item msgid="1735177144948329370">"فاكس المنزل"</item>
     <item msgid="603878674477207394">"جهاز نداء"</item>
-    <item msgid="1650824275177931637">"آخر"</item>
+    <item msgid="1650824275177931637">"غير ذلك"</item>
     <item msgid="9192514806975898961">"مخصص"</item>
   </string-array>
   <string-array name="emailAddressTypes">
@@ -1210,7 +1201,7 @@
     <string name="no" msgid="5141531044935541497">"إلغاء"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"تنبيه"</string>
     <string name="loading" msgid="7933681260296021180">"جارٍ التحميل…"</string>
-    <string name="capital_on" msgid="1544682755514494298">"تشغيل"</string>
+    <string name="capital_on" msgid="1544682755514494298">"مفعّلة"</string>
     <string name="capital_off" msgid="6815870386972805832">"إيقاف"</string>
     <string name="whichApplication" msgid="4533185947064773386">"إكمال الإجراء باستخدام"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"‏إكمال الإجراء باستخدام %1$s"</string>
@@ -1454,8 +1445,7 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"يمكنك إجراء إعادة ضبط على إعدادات المصنع لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"‏السوائل والشوائب في منفذ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"‏تمّ إيقاف منفذ USB تلقائيًا. انقُر لمعرفة المزيد من المعلومات."</string>
-    <!-- no translation found for usb_contaminant_not_detected_title (7708281124088684821) -->
-    <skip />
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"‏مسموح باستخدام منفذ USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"لم يَعُد الهاتف يكتشف سوائل أو شوائب."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"جارٍ الحصول على تقرير الخطأ…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"هل تريد مشاركة تقرير الخطأ؟"</string>
@@ -1595,7 +1585,7 @@
     <string name="find_next" msgid="5742124618942193978">"بحث عن التطابق التالي"</string>
     <string name="find_previous" msgid="2196723669388360506">"بحث عن التطابق السابق"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"طلب الموقع من <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"طلب الموقع"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"طلب الموقع الجغرافي"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"مطلوب من <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"نعم"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"لا"</string>
