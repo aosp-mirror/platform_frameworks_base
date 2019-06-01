@@ -231,7 +231,7 @@ class Visitor : public ValueVisitor {
       Visitor sub_visitor(pool_, method_);
       if (plural->values[i]) {
         plural->values[i]->Accept(&sub_visitor);
-        if (sub_visitor.value) {
+        if (sub_visitor.item) {
           localized->values[i] = std::move(sub_visitor.item);
         } else {
           localized->values[i] = std::unique_ptr<Item>(plural->values[i]->Clone(pool_));
