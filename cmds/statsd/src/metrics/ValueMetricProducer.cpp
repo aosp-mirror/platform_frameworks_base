@@ -109,7 +109,7 @@ ValueMetricProducer::ValueMetricProducer(
       mMaxPullDelayNs(metric.max_pull_delay_sec() > 0 ? metric.max_pull_delay_sec() * NS_PER_SEC
                                                       : StatsdStats::kPullMaxDelayNs),
       mSplitBucketForAppUpgrade(metric.split_bucket_for_app_upgrade()),
-      mConditionTimer(mCondition == ConditionState::kTrue, timeBaseNs) {
+      mConditionTimer(mIsActive && mCondition == ConditionState::kTrue, timeBaseNs) {
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
         bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());
@@ -364,58 +364,98 @@ void ValueMetricProducer::resetBase() {
     mHasGlobalBase = false;
 }
 
-void ValueMetricProducer::onConditionChangedLocked(const bool condition,
-                                                   const int64_t eventTimeNs) {
+// Handle active state change. Active state change is treated like a condition change:
+// - drop bucket if active state change event arrives too late
+// - if condition is true, pull data on active state changes
+// - ConditionTimer tracks changes based on AND of condition and active state.
+void ValueMetricProducer::onActiveStateChangedLocked(const int64_t& eventTimeNs) {
     bool isEventTooLate  = eventTimeNs < mCurrentBucketStartTimeNs;
-    if (!isEventTooLate) {
-        if (mCondition == ConditionState::kUnknown) {
-            // If the condition was unknown, we mark the bucket as invalid since the bucket will
-            // contain partial data. For instance, the condition change might happen close to the
-            // end of the bucket and we might miss lots of data.
-            //
-            // We still want to pull to set the base.
-            invalidateCurrentBucket();
-        }
-
-        // Pull on condition changes.
-        ConditionState newCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
-        bool conditionChanged =
-                (mCondition == ConditionState::kTrue && newCondition == ConditionState::kFalse)
-                || (mCondition == ConditionState::kFalse && newCondition == ConditionState::kTrue);
-        // We do not need to pull when we go from unknown to false.
-        //
-        // We also pull if the condition was already true in order to be able to flush the bucket at
-        // the end if needed.
-        //
-        // onConditionChangedLocked might happen on bucket boundaries if this is called before
-        // #onDataPulled.
-        if (mIsPulled && (conditionChanged || condition)) {
-            pullAndMatchEventsLocked(eventTimeNs, newCondition);
-        }
-
-        // When condition change from true to false, clear diff base but don't
-        // reset other counters as we may accumulate more value in the bucket.
-        if (mUseDiff && mCondition == ConditionState::kTrue
-                && newCondition == ConditionState::kFalse) {
-            resetBase();
-        }
-        mCondition = newCondition;
-    } else {
-        VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
-             (long long)mCurrentBucketStartTimeNs);
-        StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
+    if (ConditionState::kTrue == mCondition && isEventTooLate) {
+        // Drop bucket because event arrived too late, ie. we are missing data for this bucket.
         invalidateCurrentBucket();
-        // Something weird happened. If we received another event in the future, the condition might
-        // be wrong.
-        mCondition = initialCondition(mConditionTrackerIndex);
     }
 
-    // This part should alway be called.
+    // Call parent method once we've verified the validity of current bucket.
+    MetricProducer::onActiveStateChangedLocked(eventTimeNs);
+
+    if (ConditionState::kTrue != mCondition) {
+        return;
+    }
+
+    // Pull on active state changes.
+    if (!isEventTooLate) {
+        if (mIsPulled) {
+            pullAndMatchEventsLocked(eventTimeNs, mCondition);
+        }
+        // When active state changes from true to false, clear diff base but don't
+        // reset other counters as we may accumulate more value in the bucket.
+        if (mUseDiff && !mIsActive) {
+            resetBase();
+        }
+    }
+
     flushIfNeededLocked(eventTimeNs);
-    mConditionTimer.onConditionChanged(mCondition, eventTimeNs);
+
+    // Let condition timer know of new active state.
+    mConditionTimer.onConditionChanged(mIsActive, eventTimeNs);
 }
 
-void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs, ConditionState condition) {
+void ValueMetricProducer::onConditionChangedLocked(const bool condition,
+                                                   const int64_t eventTimeNs) {
+    ConditionState newCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
+    bool isEventTooLate  = eventTimeNs < mCurrentBucketStartTimeNs;
+
+    if (mIsActive) {
+        if (isEventTooLate) {
+            VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
+                 (long long)mCurrentBucketStartTimeNs);
+            StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
+            invalidateCurrentBucket();
+        } else {
+            if (mCondition == ConditionState::kUnknown) {
+                // If the condition was unknown, we mark the bucket as invalid since the bucket will
+                // contain partial data. For instance, the condition change might happen close to
+                // the end of the bucket and we might miss lots of data.
+                //
+                // We still want to pull to set the base.
+                invalidateCurrentBucket();
+            }
+
+            // Pull on condition changes.
+            bool conditionChanged =
+                    (mCondition == ConditionState::kTrue && newCondition == ConditionState::kFalse)
+                    || (mCondition == ConditionState::kFalse &&
+                            newCondition == ConditionState::kTrue);
+            // We do not need to pull when we go from unknown to false.
+            //
+            // We also pull if the condition was already true in order to be able to flush the
+            // bucket at the end if needed.
+            //
+            // onConditionChangedLocked might happen on bucket boundaries if this is called before
+            // #onDataPulled.
+            if (mIsPulled && (conditionChanged || condition)) {
+                pullAndMatchEventsLocked(eventTimeNs, newCondition);
+            }
+
+            // When condition change from true to false, clear diff base but don't
+            // reset other counters as we may accumulate more value in the bucket.
+            if (mUseDiff && mCondition == ConditionState::kTrue
+                    && newCondition == ConditionState::kFalse) {
+                resetBase();
+            }
+        }
+    }
+
+    mCondition = isEventTooLate ? initialCondition(mConditionTrackerIndex) : newCondition;
+
+    if (mIsActive) {
+        flushIfNeededLocked(eventTimeNs);
+        mConditionTimer.onConditionChanged(mCondition, eventTimeNs);
+    }
+}
+
+void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs,
+        ConditionState condition) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mPullerManager->Pull(mPullTagId, &allData)) {
         ALOGE("Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
