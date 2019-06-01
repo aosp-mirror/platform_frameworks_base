@@ -4068,6 +4068,9 @@
          for higher refresh rates to be automatically used out of the box -->
     <integer name="config_defaultPeakRefreshRate">60</integer>
 
+    <!-- The default brightness threshold that allows to switch to higher refresh rate -->
+    <integer name="config_brightnessThresholdOfPeakRefreshRate">-1</integer>
+
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType" translatable="false" />
