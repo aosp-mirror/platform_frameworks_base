@@ -3685,7 +3685,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 Slog.d(TAG, "addHistoryBufferLocked writeHistoryLocked takes ms:"
                         + (SystemClock.uptimeMillis() - start));
             }
-            mBatteryStatsHistory.createNextFile();
+            mBatteryStatsHistory.startNextFile();
             mHistoryBuffer.setDataSize(0);
             mHistoryBuffer.setDataPosition(0);
             mHistoryBuffer.setDataCapacity(mConstants.MAX_HISTORY_BUFFER / 2);
