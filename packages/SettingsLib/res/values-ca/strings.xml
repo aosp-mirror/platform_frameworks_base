@@ -155,7 +155,7 @@
     <string name="tts_settings" msgid="8186971894801348327">"Configuració de text a parla"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Sortida de text a parla"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Velocitat de parla"</string>
-    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocitat de lectura del text"</string>
+    <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocitat a què s\'enuncia el text"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"To"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Afecta el to de la veu sintetitzada"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Idioma"</string>
@@ -179,7 +179,7 @@
     <string name="tts_engine_preference_section_title" msgid="448294500990971413">"Motor preferent"</string>
     <string name="tts_general_section_title" msgid="4402572014604490502">"General"</string>
     <string name="tts_reset_speech_pitch_title" msgid="5789394019544785915">"Restableix el to de la veu"</string>
-    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Restableix el to predeterminat amb què es llegeix el text."</string>
+    <string name="tts_reset_speech_pitch_summary" msgid="8700539616245004418">"Restableix a predeterminat el to amb què s\'enuncia el text."</string>
   <string-array name="tts_rate_entries">
     <item msgid="6695494874362656215">"Molt lenta"</item>
     <item msgid="4795095314303559268">"Lenta"</item>
@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Xarxes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Activa el registre Wi‑Fi detallat"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Regulació de la cerca de xarxes Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dades mòbils sempre actives"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Acceleració per maquinari per a compartició de xarxa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostra els dispositius Bluetooth sense el nom"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Augmenta nivell de registre Wi‑Fi, mostra\'l per SSID RSSI al selector de Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Mides de la mem. intermèdia del registrador"</string>

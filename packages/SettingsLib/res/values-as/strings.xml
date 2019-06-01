@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটৱৰ্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"বেতাঁৰ ডিছপ্লে’ প্ৰমাণীকৰণ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ৱাই-ফাই ভাৰ্ব\'ছ লগিং সক্ষম কৰক"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"ৱাই-ফাই স্কেনৰ নিয়ন্ত্ৰণ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ম’বাইল ডেটা সদা-সক্ৰিয়"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"টেডাৰিং হাৰ্ডৱেৰ ত্বৰণ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"নামবিহীন ব্লুটুথ ডিভাইচসমূহ দেখুৱাওক"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"সংযোগ কৰিব পৰা নগ\'ল"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"বেতাঁৰ ডিছপ্লে’ প্ৰমাণপত্ৰৰ বাবে বিকল্পসমূহ দেখুৱাওক"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ৱাই-ফাই লগিঙৰ মাত্ৰা বঢ়াওক, Wi‑Fi পিকাৰত প্ৰতি SSID RSSI দেখুৱাওক"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"বেটাৰীৰ খৰচ কমায় আৰু নেটৱৰ্কৰ কাৰ্যক্ষমতা বৃদ্ধি কৰে"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"নিৰিখ-নিৰ্দিষ্ট"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"নিৰিখ অনিৰ্দিষ্ট"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগাৰৰ বাফাৰৰ আকাৰ"</string>

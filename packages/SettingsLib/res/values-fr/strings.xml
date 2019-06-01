@@ -220,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mise en réseau"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certification affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Autoriser l\'enregistrement d\'infos Wi-Fi détaillées"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limiter la recherche Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Données mobiles toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Afficher les appareils Bluetooth sans nom"</string>
@@ -246,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Impossible de se connecter"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options pour la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler les infos Wi-Fi, afficher par RSSI de SSID dans l\'outil de sélection Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Réduit la décharge de la batterie et améliore les performances du réseau"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Non facturé à l\'usage"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tailles des tampons de l\'enregistreur"</string>
