@@ -104,6 +104,11 @@ public class AssistManager implements ConfigurationChangedReceiver {
     public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
     public static final int INVOCATION_HOME_BUTTON_LONG_PRESS = 5;
 
+    public static final int DISMISS_REASON_INVOCATION_CANCELLED = 1;
+    public static final int DISMISS_REASON_TAP = 2;
+    public static final int DISMISS_REASON_BACK = 3;
+    public static final int DISMISS_REASON_TIMEOUT = 4;
+
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
 
@@ -251,13 +256,14 @@ public class AssistManager implements ConfigurationChangedReceiver {
         if (invocationType == INVOCATION_TYPE_GESTURE) {
             mHandleController.onAssistantGesturePerformed();
         }
-        args.putInt(INVOCATION_PHONE_STATE_KEY, mPhoneStateMonitor.getPhoneState());
+        int phoneState = mPhoneStateMonitor.getPhoneState();
+        args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
         // Logs assistant start with invocation type.
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
-                        .setType(MetricsEvent.TYPE_OPEN).setSubtype(
-                        invocationType));
+                        .setType(MetricsEvent.TYPE_OPEN)
+                        .setSubtype(toLoggingSubType(invocationType, phoneState)));
         startAssistInternal(args, assistComponent, isService);
     }
 
@@ -436,5 +442,20 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
     public void onLockscreenShown() {
         mAssistUtils.onLockscreenShown();
+    }
+
+    /** Returns the logging flags for the given Assistant invocation type. */
+    public int toLoggingSubType(int invocationType) {
+        return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
+    }
+
+    private int toLoggingSubType(int invocationType, int phoneState) {
+        // Note that this logic will break if the number of Assistant invocation types exceeds 7.
+        // There are currently 5 invocation types, but we will be migrating to the new logging
+        // framework in the next update.
+        int subType = mHandleController.areHandlesShowing() ? 0 : 1;
+        subType |= invocationType << 1;
+        subType |= phoneState << 4;
+        return subType;
     }
 }
