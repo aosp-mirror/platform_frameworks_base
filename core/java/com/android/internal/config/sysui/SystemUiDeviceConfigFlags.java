@@ -132,6 +132,13 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS =
             "assist_handles_shown_frequency_threshold_ms";
+    // Flag related to clock face
+
+    /**
+     * (String) Contains the clock plugin service names that are not allow to be shown.
+     * Each service name is seperated by a comma(",") in the string.
+     */
+    public static final String CLOCK_FACE_BLACKLIST = "clock_face_blacklist";
 
     /**
      * (long) How long, in milliseconds, for teaching behaviors to wait before considering the user

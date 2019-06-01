@@ -92,28 +92,6 @@ cc_defaults {
     ],
 }
 
-cc_defaults {
-    name: "hwui_debug",
-    cflags: ["-include debug/wrap_gles.h"],
-    srcs: [
-        "debug/wrap_gles.cpp",
-        "debug/DefaultGlesDriver.cpp",
-        "debug/GlesErrorCheckWrapper.cpp",
-        "debug/GlesDriver.cpp",
-        "debug/FatalBaseDriver.cpp",
-        "debug/NullGlesDriver.cpp",
-        "debug/NullSkiaInterface.cpp",
-    ],
-    include_dirs: ["frameworks/native/opengl/libs/GLES2"],
-}
-
-cc_defaults {
-    name: "hwui_enable_opengl_validation",
-    defaults: ["hwui_debug"],
-    cflags: ["-DDEBUG_OPENGL=3"],
-    include_dirs: ["frameworks/native/opengl/libs/GLES2"],
-}
-
 // Build libhwui with PGO by default.
 // Location of PGO profile data is defined in build/soong/cc/pgo.go
 // and is separate from hwui.
@@ -248,27 +226,13 @@ cc_library {
     name: "libhwui",
     defaults: [
         "libhwui_defaults",
-
-        // Enables fine-grained GLES error checking
-        // If enabled, every GLES call is wrapped & error checked
-        // Has moderate overhead
-        //"hwui_enable_opengl_validation",
     ],
 }
 
-// ------------------------
-// static library null gpu
-// ------------------------
-
 cc_library_static {
-    name: "libhwui_static_debug",
+    name: "libhwui_static",
     defaults: [
         "libhwui_defaults",
-        "hwui_debug",
-    ],
-    cflags: ["-DHWUI_NULL_GPU"],
-    srcs: [
-        "debug/nullegl.cpp",
     ],
 }
 
@@ -296,14 +260,10 @@ cc_test {
 
     static_libs: [
         "libgmock",
-        "libhwui_static_debug",
+        "libhwui_static",
     ],
     shared_libs: [
         "libmemunreachable",
-    ],
-    cflags: [
-        "-include debug/wrap_gles.h",
-        "-DHWUI_NULL_GPU",
     ],
 
     srcs: [
@@ -348,8 +308,7 @@ cc_benchmark {
     name: "hwuimacro",
     defaults: ["hwui_test_defaults"],
 
-    // set to libhwui_static_debug to skip actual GL commands
-    whole_static_libs: ["libhwui"],
+    static_libs: ["libhwui"],
     shared_libs: [
         "libmemunreachable",
     ],
@@ -368,12 +327,7 @@ cc_benchmark {
     name: "hwuimicro",
     defaults: ["hwui_test_defaults"],
 
-    cflags: [
-        "-include debug/wrap_gles.h",
-        "-DHWUI_NULL_GPU",
-    ],
-
-    whole_static_libs: ["libhwui_static_debug"],
+    static_libs: ["libhwui_static"],
     shared_libs: [
         "libmemunreachable",
     ],

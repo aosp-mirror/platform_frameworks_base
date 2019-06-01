@@ -2316,7 +2316,7 @@
 
     <!-- If the sensor that wakes up the lock screen is available or not. -->
     <bool name="config_dozeWakeLockScreenSensorAvailable">false</bool>
-    <integer name="config_dozeWakeLockScreenDebounce">1500</integer>
+    <integer name="config_dozeWakeLockScreenDebounce">300</integer>
 
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
@@ -3901,6 +3901,10 @@
          set in AndroidManifest.
          {@see android.view.Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS} -->
     <string name="config_secondaryHomeComponent" translatable="false">com.android.launcher3/com.android.launcher3.SecondaryDisplayLauncher</string>
+
+    <!-- Force secondary home launcher specified in config_secondaryHomeComponent always. If this is
+         not set, secondary home launcher can be replaced by user. -->
+    <bool name ="config_useSystemProvidedLauncherForSecondary">false</bool>
 
     <!-- If device supports corner radius on windows.
          This should be turned off on low-end devices to improve animation performance. -->

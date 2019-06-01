@@ -1275,8 +1275,6 @@ public class AudioService extends IAudioService.Stub
                             System.VOLUME_SETTINGS_INT[a11yStreamAlias];
                     mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setAllIndexes(
                             mStreamStates[a11yStreamAlias], caller);
-                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].refreshRange(
-                            mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY]);
                 }
             }
             if (sIndependentA11yVolume) {
@@ -1577,20 +1575,19 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
-        int max = mStreamStates[srcStream].getMaxIndex();
-        if (max == 0) {
-            Log.e(TAG, "rescaleIndex : Max index should not be zero");
-            return mStreamStates[srcStream].getMinIndex();
-        }
-        final int rescaled =
-                (index * mStreamStates[dstStream].getMaxIndex()
-                        + mStreamStates[srcStream].getMaxIndex() / 2)
-                / mStreamStates[srcStream].getMaxIndex();
-        if (rescaled < mStreamStates[dstStream].getMinIndex()) {
+        int srcRange =
+                mStreamStates[srcStream].getMaxIndex() - mStreamStates[srcStream].getMinIndex();
+        int dstRange =
+                mStreamStates[dstStream].getMaxIndex() - mStreamStates[dstStream].getMinIndex();
+
+        if (srcRange == 0) {
+            Log.e(TAG, "rescaleIndex : index range should not be zero");
             return mStreamStates[dstStream].getMinIndex();
-        } else {
-            return rescaled;
         }
+
+        return mStreamStates[dstStream].getMinIndex()
+                + ((index - mStreamStates[srcStream].getMinIndex()) * dstRange + srcRange / 2)
+                / srcRange;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -4730,24 +4727,6 @@ public class AudioService extends IAudioService.Stub
         }
 
         /**
-         * Updates the min/max index values from another stream. Use this when changing the alias
-         * for the current stream type.
-         * @param sourceStreamType
-         */
-        // must be sync'd on mSettingsLock before VolumeStreamState.class
-        @GuardedBy("VolumeStreamState.class")
-        public void refreshRange(int sourceStreamType) {
-            mIndexMin = MIN_STREAM_VOLUME[sourceStreamType] * 10;
-            mIndexMax = MAX_STREAM_VOLUME[sourceStreamType] * 10;
-            // verify all current volumes are within bounds
-            for (int i = 0 ; i < mIndexMap.size(); i++) {
-                final int device = mIndexMap.keyAt(i);
-                final int index = mIndexMap.valueAt(i);
-                mIndexMap.put(device, getValidIndex(index));
-            }
-        }
-
-        /**
          * Copies all device/index pairs from the given VolumeStreamState after initializing
          * them with the volume for DEVICE_OUT_DEFAULT. No-op if the source VolumeStreamState
          * has the same stream type as this instance.
@@ -5508,6 +5487,8 @@ public class AudioService extends IAudioService.Stub
 
     public void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
+        sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
+                + address + " support=" + support));
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,

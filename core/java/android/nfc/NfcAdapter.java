@@ -151,7 +151,7 @@ public final class NfcAdapter {
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
 
     /**
-     * Broadcast Action: Intent to notify an application that an transaction event has occurred
+     * Broadcast Action: Intent to notify an application that a transaction event has occurred
      * on the Secure Element.
      *
      * <p>This intent will only be sent if the application has requested permission for
